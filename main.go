@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	corev1beta1 "github.com/openstack-k8s-operators/openstack-cluster-operator/apis/core/v1beta1"
-	corecontrollers "github.com/openstack-k8s-operators/openstack-cluster-operator/controllers/core"
+	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	//+kubebuilder:scaffold:imports
 )
 

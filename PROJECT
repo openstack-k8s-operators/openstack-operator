@@ -6,7 +6,7 @@ plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: openstack-operator
-repo: github.com/openstack-k8s-operators/openstack-cluster-operator
+repo: github.com/openstack-k8s-operators/openstack-operator
 resources:
 - api:
     crdVersion: v1
@@ -15,6 +15,6 @@ resources:
   domain: openstack.org
   group: core
   kind: ControlPlane
-  path: github.com/openstack-k8s-operators/openstack-cluster-operator/apis/core/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
   version: v1beta1
 version: "3"

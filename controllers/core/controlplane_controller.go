@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	corev1beta1 "github.com/openstack-k8s-operators/openstack-cluster-operator/apis/core/v1beta1"
+	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 )
 
 // ControlPlaneReconciler reconciles a ControlPlane object
