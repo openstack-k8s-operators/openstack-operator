@@ -1,0 +1,6 @@
+apiVersion: core.openstack.org/v1beta1
+kind: ControlPlane
+metadata:
+  name: controlplane-sample
+spec:
+  # TODO(user): Add fields here
