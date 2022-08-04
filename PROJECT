@@ -1,0 +1,9 @@
+domain: openstack.org
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: openstack-operator
+repo: github.com/openstack-k8s-operators/openstack-cluster-operator
+version: "3"
