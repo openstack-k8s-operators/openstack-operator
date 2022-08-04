@@ -8,6 +8,13 @@ metadata:
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: ControlPlane is the Schema for the controlplanes API
+      displayName: Control Plane
+      kind: ControlPlane
+      name: controlplanes.core.openstack.org
+      version: v1beta1
   description: Install and configure OpenStack
   displayName: OpenStack
   icon:

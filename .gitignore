@@ -8,6 +8,9 @@
 bin
 testbin/*
 
+bundle/*
+bundle.Dockerfile
+
 # Test binary, build with `go test -c`
 *.test
 
