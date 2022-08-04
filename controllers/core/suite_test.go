@@ -16,6 +16,7 @@ limitations under the License.
 
 package core
 
+/*
 import (
 	"path/filepath"
 	"testing"
@@ -80,3 +81,5 @@ var _ = AfterSuite(func() {
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
 })
+
+*/
