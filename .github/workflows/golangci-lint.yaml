@@ -1,0 +1,42 @@
+name: Golang lint, vet and unit test pipeline
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: github (govet, golint and gotest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.x
+      - name: Checkout project code
+        uses: actions/checkout@v2
+      - name: Checkout openstack-k8s-operators-ci project
+        uses: actions/checkout@v2
+        with:
+          repository: openstack-k8s-operators/openstack-k8s-operators-ci
+          path: ./openstack-k8s-operators-ci
+      - name: Run govet.sh
+        run: ./openstack-k8s-operators-ci/test-runner/govet.sh
+      - name: Run golint.sh
+        run: ./openstack-k8s-operators-ci/test-runner/golint.sh
+      - name: Run gotest.sh
+        run: ./openstack-k8s-operators-ci/test-runner/gotest.sh
+
+  golangci:
+    name: github (golangci)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.x
+      - name: Checkout project code
+        uses: actions/checkout@v2
+      - name: Run golangci lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          args: --timeout 5m

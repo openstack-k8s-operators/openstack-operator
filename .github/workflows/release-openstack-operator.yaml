@@ -1,0 +1,48 @@
+name: Release Keystone Operator
+
+on:
+  release:
+    types:
+      - released
+      - prereleased
+
+env:
+  imageregistry: 'quay.io'
+  imagenamespace: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Tag image
+      uses: tinact/docker.image-retag@1.0.2
+      with:
+        image_name: ${{ env.imagenamespace }}/
+        image_old_tag: ${{ github.sha }}
+        image_new_tag: ${{ github.event.release.tag_name }}
+        registry: ${{ env.imageregistry }}
+        registry_username: ${{ secrets.QUAY_USERNAME }}
+        registry_password: ${{ secrets.QUAY_PASSWORD }}
+
+    - name: Tag -bundle image
+      uses: tinact/docker.image-retag@1.0.2
+      with:
+        image_name: ${{ env.imagenamespace }}/-bundle
+        image_old_tag: ${{ github.sha }}
+        image_new_tag: ${{ github.event.release.tag_name }}
+        registry: ${{ env.imageregistry }}
+        registry_username: ${{ secrets.QUAY_USERNAME }}
+        registry_password: ${{ secrets.QUAY_PASSWORD }}
+
+    - name: Tag -index image
+      uses: tinact/docker.image-retag@1.0.2
+      with:
+        image_name: ${{ env.imagenamespace }}/-index
+        image_old_tag: ${{ github.sha }}
+        image_new_tag: ${{ github.event.release.tag_name }}
+        registry: ${{ env.imageregistry }}
+        registry_username: ${{ secrets.QUAY_USERNAME }}
+        registry_password: ${{ secrets.QUAY_PASSWORD }}
