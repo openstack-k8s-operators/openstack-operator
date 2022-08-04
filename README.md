@@ -1,8 +1,13 @@
 # openstack-operator
-// TODO(user): Add simple overview of use/purpose
+
+This is the primary operator for OpenStack. It is a "meta" operator, meaning it
+serves to coordinate the other operators for OpenStack by watching and configuring
+their CustomResources (CRs). Additionally installing this operator will automatically
+install all required operator dependencies for installing/managing OpenStack.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+
+This project is built, modeled, and maintained with [operator-sdk] (https://github.com/operator-framework/operator-sdk).
 
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
