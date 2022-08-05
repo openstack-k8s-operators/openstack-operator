@@ -27,26 +27,26 @@ import (
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 )
 
-// ControlPlaneReconciler reconciles a ControlPlane object
-type ControlPlaneReconciler struct {
+// OpenStackControlPlaneReconciler reconciles a OpenStackControlPlane object
+type OpenStackControlPlaneReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=core.openstack.org,resources=controlplanes,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core.openstack.org,resources=controlplanes/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=core.openstack.org,resources=controlplanes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
-// the ControlPlane object against the actual cluster state, and then
+// the OpenStackControlPlane object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.1/pkg/reconcile
-func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
 	// TODO(user): your logic here
@@ -55,8 +55,8 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1beta1.ControlPlane{}).
+		For(&corev1beta1.OpenStackControlPlane{}).
 		Complete(r)
 }

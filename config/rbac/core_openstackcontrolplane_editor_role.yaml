@@ -1,13 +1,13 @@
-# permissions for end users to edit controlplanes.
+# permissions for end users to edit openstackcontrolplanes.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: controlplane-editor-role
+  name: openstackcontrolplane-editor-role
 rules:
 - apiGroups:
   - core.openstack.org
   resources:
-  - controlplanes
+  - openstackcontrolplanes
   verbs:
   - create
   - delete
@@ -19,6 +19,6 @@ rules:
 - apiGroups:
   - core.openstack.org
   resources:
-  - controlplanes/status
+  - openstackcontrolplanes/status
   verbs:
   - get

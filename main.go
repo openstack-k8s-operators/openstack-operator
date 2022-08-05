@@ -89,11 +89,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&corecontrollers.ControlPlaneReconciler{
+	if err = (&corecontrollers.OpenStackControlPlaneReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "ControlPlane")
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackControlPlane")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

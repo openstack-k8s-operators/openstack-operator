@@ -23,17 +23,17 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ControlPlaneSpec defines the desired state of ControlPlane
-type ControlPlaneSpec struct {
+// OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
+type OpenStackControlPlaneSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of ControlPlane. Edit controlplane_types.go to remove/update
+	// Foo is an example field of OpenStackControlPlane. Edit openstackcontrolplane_types.go to remove/update
 	Foo string `json:"foo,omitempty"`
 }
 
-// ControlPlaneStatus defines the observed state of ControlPlane
-type ControlPlaneStatus struct {
+// OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
+type OpenStackControlPlaneStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -41,24 +41,24 @@ type ControlPlaneStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// ControlPlane is the Schema for the controlplanes API
-type ControlPlane struct {
+// OpenStackControlPlane is the Schema for the openstackcontrolplanes API
+type OpenStackControlPlane struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ControlPlaneSpec   `json:"spec,omitempty"`
-	Status ControlPlaneStatus `json:"status,omitempty"`
+	Spec   OpenStackControlPlaneSpec   `json:"spec,omitempty"`
+	Status OpenStackControlPlaneStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// ControlPlaneList contains a list of ControlPlane
-type ControlPlaneList struct {
+// OpenStackControlPlaneList contains a list of OpenStackControlPlane
+type OpenStackControlPlaneList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ControlPlane `json:"items"`
+	Items           []OpenStackControlPlane `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ControlPlane{}, &ControlPlaneList{})
+	SchemeBuilder.Register(&OpenStackControlPlane{}, &OpenStackControlPlaneList{})
 }

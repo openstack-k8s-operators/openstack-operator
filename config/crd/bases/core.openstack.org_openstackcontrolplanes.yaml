@@ -5,20 +5,21 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: controlplanes.core.openstack.org
+  name: openstackcontrolplanes.core.openstack.org
 spec:
   group: core.openstack.org
   names:
-    kind: ControlPlane
-    listKind: ControlPlaneList
-    plural: controlplanes
-    singular: controlplane
+    kind: OpenStackControlPlane
+    listKind: OpenStackControlPlaneList
+    plural: openstackcontrolplanes
+    singular: openstackcontrolplane
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: ControlPlane is the Schema for the controlplanes API
+        description: OpenStackControlPlane is the Schema for the openstackcontrolplanes
+          API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -33,15 +34,16 @@ spec:
           metadata:
             type: object
           spec:
-            description: ControlPlaneSpec defines the desired state of ControlPlane
+            description: OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
             properties:
               foo:
-                description: Foo is an example field of ControlPlane. Edit controlplane_types.go
-                  to remove/update
+                description: Foo is an example field of OpenStackControlPlane. Edit
+                  openstackcontrolplane_types.go to remove/update
                 type: string
             type: object
           status:
-            description: ControlPlaneStatus defines the observed state of ControlPlane
+            description: OpenStackControlPlaneStatus defines the observed state of
+              OpenStackControlPlane
             type: object
         type: object
     served: true
