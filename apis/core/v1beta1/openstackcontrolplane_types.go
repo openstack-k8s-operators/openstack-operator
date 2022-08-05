@@ -17,19 +17,24 @@ limitations under the License.
 package v1beta1
 
 import (
+	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
 type OpenStackControlPlaneSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of OpenStackControlPlane. Edit openstackcontrolplane_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// +kubebuilder:validation:Required
+	// Secret - FIXME: make this optional
+	Secret string `json:"secret,omitempty"`
+
+	// +kubebuilder:validation:Required
+	// StorageClass -
+	StorageClass string `json:"storageClass,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// KeystoneTemplate - Overrides to use when creating the Keystone API Service
+	KeystoneTemplate keystonev1.KeystoneAPISpec `json:"keystoneTemplate,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
@@ -40,6 +45,8 @@ type OpenStackControlPlaneStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+// +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack ControlPlane"
+// +kubebuilder:resource:shortName=osctlplane;osctlplanes
 
 // OpenStackControlPlane is the Schema for the openstackcontrolplanes API
 type OpenStackControlPlane struct {
