@@ -8,6 +8,7 @@ require (
 	github.com/imdario/mergo v0.3.12
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220804104258-d7357dcfdbd2
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220801090425-5f6ce3845f7d
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20220805000211-a3fd1ad40e64
 	github.com/operator-framework/api v0.15.0
 	k8s.io/apimachinery v0.24.3

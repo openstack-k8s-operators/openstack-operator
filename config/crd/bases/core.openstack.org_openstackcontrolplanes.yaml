@@ -173,6 +173,20 @@ spec:
                       for keystone KeystoneDatabasePassword, AdminPassword
                     type: string
                 type: object
+              mariadbTemplate:
+                description: MariadbTemplate - Overrides to use when creating the
+                  MariaDB API Service
+                properties:
+                  containerImage:
+                    type: string
+                  secret:
+                    description: Secret containing a RootPassword
+                    type: string
+                  storageClass:
+                    type: string
+                  storageRequest:
+                    type: string
+                type: object
               secret:
                 description: 'Secret - FIXME: make this optional'
                 type: string

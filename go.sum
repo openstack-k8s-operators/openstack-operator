@@ -378,6 +378,8 @@ github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220804104258-d
 github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220804104258-d7357dcfdbd2/go.mod h1:pcDxI/k6J2coGlnoKYW2dYpfwU1IJISwXn/mxo9MGmg=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220801090425-5f6ce3845f7d h1:mSPGAPjJ2Zmysf9ou6EO8MEN1mL/MsdCm6mY2ilZPuM=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220801090425-5f6ce3845f7d/go.mod h1:KWqK7l2ej+rIYngoNUrxE2YjKGlRAAgJXXM0uU2R6XY=
+github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb h1:qXzEkVRAt4RrdYJSXWcCGLF2rACcp8Y39MPPkXS2VsE=
+github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb/go.mod h1:+NRN/SUi5vzj/qSAUFTOA0z9alAvFxJka1DpgyJRPVE=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/operator-framework/api v0.15.0 h1:4f9i0drtqHj7ykLoHxv92GR43S7MmQHhmFQkfm5YaGI=
 github.com/operator-framework/api v0.15.0/go.mod h1:scnY9xqSeCsOdtJtNoHIXd7OtHZ14gj1hkDA4+DlgLY=

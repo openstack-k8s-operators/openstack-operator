@@ -43,3 +43,15 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - mariadb.openstack.org
+  resources:
+  - mariadbs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

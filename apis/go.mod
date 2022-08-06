@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220804104258-d7357dcfdbd2
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb
 	k8s.io/apimachinery v0.24.3
 	sigs.k8s.io/controller-runtime v0.12.3
 )

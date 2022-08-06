@@ -365,6 +365,8 @@ github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220804104258-d
 github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220804104258-d7357dcfdbd2/go.mod h1:pcDxI/k6J2coGlnoKYW2dYpfwU1IJISwXn/mxo9MGmg=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220801090425-5f6ce3845f7d h1:mSPGAPjJ2Zmysf9ou6EO8MEN1mL/MsdCm6mY2ilZPuM=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220801090425-5f6ce3845f7d/go.mod h1:KWqK7l2ej+rIYngoNUrxE2YjKGlRAAgJXXM0uU2R6XY=
+github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb h1:qXzEkVRAt4RrdYJSXWcCGLF2rACcp8Y39MPPkXS2VsE=
+github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb/go.mod h1:+NRN/SUi5vzj/qSAUFTOA0z9alAvFxJka1DpgyJRPVE=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
