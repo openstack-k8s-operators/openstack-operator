@@ -1,6 +1,15 @@
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
 metadata:
-  name: openstackcontrolplane-sample
+  name: openstack
 spec:
-  # TODO(user): Add fields here
+  secret: osp-secret
+  storage: local-storage
+  keystoneTemplate:
+    containerImage: quay.io/tripleotraincentos8/centos-binary-keystone:current-tripleo
+    databaseInstance: openstack
+  mariadbTemplate:
+    containerImage: quay.io/tripleotraincentos8/centos-binary-mariadb:current-tripleo
+    storageRequest: 500M
+    secret: osp-secret
+    storageClass: local-storage
