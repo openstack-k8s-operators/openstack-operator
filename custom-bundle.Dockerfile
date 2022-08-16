@@ -23,6 +23,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o csv-merger csv-merger.g
 #ARG KEYSTONE_BUNDLE=quay.io/openstack-k8s-operators/keystone-operator-bundle:latest
 FROM quay.io/openstack-k8s-operators/keystone-operator-bundle:latest as keystone-bundle
 FROM quay.io/openstack-k8s-operators/mariadb-operator-bundle:latest as mariadb-bundle
+FROM quay.io/dprince/rabbitmq-cluster-operator-bundle:latest as rabbitmq-bundle
 
 FROM golang:1.18 as merger
 WORKDIR /workspace
@@ -34,9 +35,11 @@ COPY bundle/manifests /manifests/
 # Custom Manifests
 COPY --from=keystone-bundle /manifests/* /manifests/
 COPY --from=mariadb-bundle /manifests/* /manifests/
+COPY --from=rabbitmq-bundle /manifests/* /manifests/
 
 RUN /workspace/csv-merger \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
+  --rabbitmq-csv=/manifests/cluster-operator.clusterserviceversion.yaml \
   --keystone-csv=/manifests/keystone-operator.clusterserviceversion.yaml \
   --openstack-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 

@@ -22,18 +22,18 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
+	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
-	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GetClient -
@@ -69,6 +69,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/finalizers,verbs=update
 //+kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=mariadb.openstack.org,resources=mariadbs,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=rabbitmq.com,resources=rabbitmqclusters,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -108,58 +109,25 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 
 func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 
-	mariadb := &mariadbv1.MariaDB{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "openstack", //FIXME
-			Namespace: instance.Namespace,
-		},
-	}
-
-	r.Log.Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "mariadb.Name", instance.Name)
-	_, err := controllerutil.CreateOrPatch(ctx, r.Client, mariadb, func() error {
-		instance.Spec.MariadbTemplate.DeepCopyInto(&mariadb.Spec)
-		if mariadb.Spec.Secret == "" {
-			mariadb.Spec.Secret = instance.Spec.Secret
-		}
-		if mariadb.Spec.StorageClass == "" {
-			mariadb.Spec.StorageClass = instance.Spec.StorageClass
-		}
-		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), mariadb, helper.GetScheme())
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
+	ctrlResult, err := openstack.ReconcileRabbitMQ(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
 	}
 
-	keystoneAPI := &keystonev1.KeystoneAPI{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "keystone", //FIXME (keystone doesn't seem to work unless named "keystone")
-			Namespace: instance.Namespace,
-		},
-	}
-
-	r.Log.Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "keystoneAPI.Name", instance.Name)
-	_, err = controllerutil.CreateOrPatch(ctx, r.Client, keystoneAPI, func() error {
-		instance.Spec.KeystoneTemplate.DeepCopyInto(&keystoneAPI.Spec)
-		if keystoneAPI.Spec.Secret == "" {
-			keystoneAPI.Spec.Secret = instance.Spec.Secret
-		}
-		if keystoneAPI.Spec.DatabaseInstance == "" {
-			//keystoneAPI.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
-			keystoneAPI.Spec.DatabaseInstance = "openstack" //FIXME: see above
-		}
-		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), keystoneAPI, helper.GetScheme())
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+	ctrlResult, err = openstack.ReconcileMariaDB(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
+	ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
 	}
 
 	return ctrl.Result{}, nil
@@ -172,5 +140,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		For(&corev1beta1.OpenStackControlPlane{}).
 		Owns(&mariadbv1.MariaDB{}).
 		Owns(&keystonev1.KeystoneAPI{}).
+		Owns(&rabbitmqv1.RabbitmqCluster{}).
 		Complete(r)
 }

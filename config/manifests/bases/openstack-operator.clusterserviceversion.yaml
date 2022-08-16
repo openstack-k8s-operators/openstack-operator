@@ -10,6 +10,12 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: OpenStackControlPlane is the Schema for the openstackcontrolplanes
+        API
+      displayName: OpenStack ControlPlane
+      kind: OpenStackControlPlane
+      name: openstackcontrolplanes.core.openstack.org
+      version: v1beta1
   description: Install and configure OpenStack
   displayName: OpenStack
   icon:
