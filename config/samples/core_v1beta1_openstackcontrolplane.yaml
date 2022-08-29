@@ -13,3 +13,10 @@ spec:
     storageRequest: 500M
   rabbitmqTemplate:
     replicas: 1
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 800m
+        memory: 1Gi

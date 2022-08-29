@@ -45,9 +45,7 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 
 		//FIXME: need to tease out which of the RabbitMQ fields can be updated
-		if rabbitmq.ObjectMeta.CreationTimestamp.IsZero() {
-			instance.Spec.RabbitmqTemplate.DeepCopyInto(&rabbitmq.Spec)
-		}
+		instance.Spec.RabbitmqTemplate.DeepCopyInto(&rabbitmq.Spec)
 
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
 			helper.GetLogger().Info("Setting StorageClassName: " + instance.Spec.StorageClass)
