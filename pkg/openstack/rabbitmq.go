@@ -3,7 +3,6 @@ package openstack
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
@@ -12,7 +11,6 @@ import (
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -44,8 +42,14 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 	}
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 
-		//FIXME: need to tease out which of the RabbitMQ fields can be updated
 		instance.Spec.RabbitmqTemplate.DeepCopyInto(&rabbitmq.Spec)
+
+		//FIXME: We shouldn't have to set this here but not setting it causes the rabbitmq
+		// operator to continuously mutate the CR when setting it:
+		// https://github.com/rabbitmq/cluster-operator/blob/main/controllers/reconcile_operator_defaults.go#L19
+		if rabbitmq.Spec.Image == "" {
+			rabbitmq.Spec.Image = "rabbitmq:3.10.2-management"
+		}
 
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
 			helper.GetLogger().Info("Setting StorageClassName: " + instance.Spec.StorageClass)
@@ -67,10 +71,6 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 	})
 
 	if err != nil {
-		if k8s_errors.IsNotFound(err) {
-			helper.GetLogger().Info("RabbitMQ %s not found, reconcile in 10s")
-			return ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
-		}
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {

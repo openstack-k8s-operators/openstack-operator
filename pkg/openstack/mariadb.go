@@ -3,7 +3,6 @@ package openstack
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -11,7 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -44,10 +42,6 @@ func ReconcileMariaDB(ctx context.Context, instance *corev1beta1.OpenStackContro
 	})
 
 	if err != nil {
-		if k8s_errors.IsNotFound(err) {
-			helper.GetLogger().Info("MariaDB %s not found, reconcile in 10s")
-			return ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
-		}
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
