@@ -17,8 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
-	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -40,6 +41,10 @@ type OpenStackControlPlaneSpec struct {
 	// +kubebuilder:validation:Optional
 	// MariadbTemplate - Overrides to use when creating the MariaDB API Service
 	MariadbTemplate mariadbv1.MariaDBSpec `json:"mariadbTemplate,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// RabbitmqTemplate - Overrides to use when creating the Rabbitmq cluster
+	RabbitmqTemplate rabbitmqv1.RabbitmqClusterSpec `json:"rabbitmqTemplate,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

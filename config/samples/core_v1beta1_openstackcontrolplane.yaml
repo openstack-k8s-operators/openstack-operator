@@ -4,12 +4,19 @@ metadata:
   name: openstack
 spec:
   secret: osp-secret
-  storage: local-storage
+  storageClass: local-storage
   keystoneTemplate:
     containerImage: quay.io/tripleotraincentos8/centos-binary-keystone:current-tripleo
     databaseInstance: openstack
   mariadbTemplate:
     containerImage: quay.io/tripleotraincentos8/centos-binary-mariadb:current-tripleo
     storageRequest: 500M
-    secret: osp-secret
-    storageClass: local-storage
+  rabbitmqTemplate:
+    replicas: 1
+    #resources:
+    #  requests:
+    #    cpu: 500m
+    #    memory: 1Gi
+    #  limits:
+    #    cpu: 800m
+    #    memory: 1Gi
