@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o csv-merger csv-merger.g
 
 FROM quay.io/openstack-k8s-operators/keystone-operator-bundle:latest as keystone-bundle
 FROM quay.io/openstack-k8s-operators/mariadb-operator-bundle:latest as mariadb-bundle
-FROM quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle:master-latest as rabbitmq-bundle
+FROM quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle:latest as rabbitmq-bundle
 
 FROM golang:1.18 as merger
 WORKDIR /workspace
