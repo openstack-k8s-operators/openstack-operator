@@ -1,6 +1,8 @@
 name: OpenStack Operator image builder
 
 on:
+  schedule:
+    - cron:  '55 * * * *'
   push:
     branches:
       - '*'
