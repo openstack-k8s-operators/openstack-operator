@@ -10,7 +10,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220801090425-5f6ce3845f7d
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20220805000211-a3fd1ad40e64
-	github.com/operator-framework/api v0.15.0
+	github.com/operator-framework/api v0.17.1
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/api v0.25.0
 	k8s.io/apimachinery v0.25.0
