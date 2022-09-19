@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.3
-	github.com/imdario/mergo v0.3.12
+	github.com/imdario/mergo v0.3.13
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220804104258-d7357dcfdbd2
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220801090425-5f6ce3845f7d
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220805235246-83412d370fdb
