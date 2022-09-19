@@ -35,6 +35,10 @@ type OpenStackControlPlaneSpec struct {
 	StorageClass string `json:"storageClass,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// NodeSelector to target subset of worker nodes running control plane services
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// KeystoneTemplate - Overrides to use when creating the Keystone API Service
 	KeystoneTemplate keystonev1.KeystoneAPISpec `json:"keystoneTemplate,omitempty"`
 

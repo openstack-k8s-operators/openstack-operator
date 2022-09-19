@@ -29,6 +29,9 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}
+		if keystoneAPI.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
+			keystoneAPI.Spec.NodeSelector = instance.Spec.NodeSelector
+		}
 		if keystoneAPI.Spec.DatabaseInstance == "" {
 			//keystoneAPI.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
 			keystoneAPI.Spec.DatabaseInstance = "openstack" //FIXME: see above
