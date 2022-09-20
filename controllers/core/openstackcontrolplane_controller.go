@@ -24,6 +24,7 @@ import (
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
+	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,6 +69,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/finalizers,verbs=update
 //+kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=placement.openstack.org,resources=placementapis,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=mariadb.openstack.org,resources=mariadbs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rabbitmq.com,resources=rabbitmqclusters,verbs=get;list;watch;create;update;patch;delete
 
@@ -130,6 +132,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcilePlacementAPI(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	return ctrl.Result{}, nil
 
 }
@@ -140,6 +149,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		For(&corev1beta1.OpenStackControlPlane{}).
 		Owns(&mariadbv1.MariaDB{}).
 		Owns(&keystonev1.KeystoneAPI{}).
+		Owns(&placementv1.PlacementAPI{}).
 		Owns(&rabbitmqv1.RabbitmqCluster{}).
 		Complete(r)
 }

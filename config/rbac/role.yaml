@@ -56,6 +56,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - placement.openstack.org
+  resources:
+  - placementapis
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - rabbitmq.com
   resources:
   - rabbitmqclusters

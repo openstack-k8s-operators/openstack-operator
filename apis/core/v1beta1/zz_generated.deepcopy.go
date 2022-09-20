@@ -95,6 +95,7 @@ func (in *OpenStackControlPlaneSpec) DeepCopyInto(out *OpenStackControlPlaneSpec
 		}
 	}
 	in.KeystoneTemplate.DeepCopyInto(&out.KeystoneTemplate)
+	in.PlacementTemplate.DeepCopyInto(&out.PlacementTemplate)
 	out.MariadbTemplate = in.MariadbTemplate
 	in.RabbitmqTemplate.DeepCopyInto(&out.RabbitmqTemplate)
 }
