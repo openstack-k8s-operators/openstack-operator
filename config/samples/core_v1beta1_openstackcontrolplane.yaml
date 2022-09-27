@@ -20,3 +20,5 @@ spec:
     #  limits:
     #    cpu: 800m
     #    memory: 1Gi
+  placementTemplate:
+    containerImage: quay.io/tripleotraincentos8/centos-binary-placement-api:current-tripleo

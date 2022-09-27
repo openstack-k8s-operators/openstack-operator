@@ -19,6 +19,7 @@ package v1beta1
 import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -35,12 +36,16 @@ type OpenStackControlPlaneSpec struct {
 	StorageClass string `json:"storageClass,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI)
+	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// KeystoneTemplate - Overrides to use when creating the Keystone API Service
 	KeystoneTemplate keystonev1.KeystoneAPISpec `json:"keystoneTemplate,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// PlacementTemplate - Overrides to use when creating the Placement API
+	PlacementTemplate placementv1.PlacementAPISpec `json:"placementTemplate,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// MariadbTemplate - Overrides to use when creating the MariaDB API Service
