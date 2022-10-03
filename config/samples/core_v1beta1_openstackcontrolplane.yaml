@@ -22,3 +22,6 @@ spec:
     #    memory: 1Gi
   placementTemplate:
     containerImage: quay.io/tripleotraincentos8/centos-binary-placement-api:current-tripleo
+  glanceTemplate:
+    containerImage: quay.io/tripleotraincentos8/centos-binary-glance-api:current-tripleo
+    storageRequest: 10G

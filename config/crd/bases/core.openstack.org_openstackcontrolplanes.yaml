@@ -39,6 +39,439 @@ spec:
           spec:
             description: OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
             properties:
+              glanceTemplate:
+                description: GlanceTemplate - Overrides to use when creating the Glance
+                  Service
+                properties:
+                  cephBackend:
+                    description: CephBackend - The ceph Backend structure with all
+                      the parameters
+                    properties:
+                      cephClientKey:
+                        description: ClientKey set the Ceph cluster key
+                        type: string
+                      cephFsid:
+                        description: ClusterFSID defines the fsid
+                        type: string
+                      cephMons:
+                        description: ClusterMons defines the commma separated mon
+                          list
+                        type: string
+                      cephPools:
+                        additionalProperties:
+                          description: PoolSpec defines the Ceph pool Spec parameters
+                          properties:
+                            name:
+                              description: PoolName defines the name of the pool
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        description: Pools - Map of chosen names to spec definitions
+                          for the Ceph cluster pools
+                        type: object
+                      cephUser:
+                        default: CephUser
+                        description: User set the Ceph cluster pool
+                        type: string
+                    required:
+                    - cephClientKey
+                    - cephFsid
+                    - cephMons
+                    type: object
+                  containerImage:
+                    description: Glance Container Image URL
+                    type: string
+                  customServiceConfig:
+                    default: '# add your customization here'
+                    description: CustomServiceConfig - customize the service config
+                      using this parameter to change service defaults, or overwrite
+                      rendered information using raw OpenStack config format. The
+                      content gets added to to /etc/<service>/<service>.conf.d directory
+                      as custom.conf file.
+                    type: string
+                  databaseInstance:
+                    description: MariaDB instance name Right now required by the maridb-operator
+                      to get the credentials from the instance to create the DB Might
+                      not be required in future
+                    type: string
+                  databaseUser:
+                    default: glance
+                    description: 'DatabaseUser - optional username used for glance
+                      DB, defaults to glance TODO: -> implement needs work in mariadb-operator,
+                      right now only glance'
+                    type: string
+                  debug:
+                    description: Debug - enable debug for different deploy stages.
+                      If an init container is used, it runs and the actual action
+                      pod gets started with sleep infinity
+                    properties:
+                      dbSync:
+                        default: false
+                        description: DBSync enable debug
+                        type: boolean
+                    type: object
+                  defaultConfigOverwrite:
+                    additionalProperties:
+                      type: string
+                    description: 'ConfigOverwrite - interface to overwrite default
+                      config files like e.g. logging.conf or policy.json. But can
+                      also be used to add additional files. Those get added to the
+                      service config dir in /etc/<service> . TODO: -> implement'
+                    type: object
+                  glanceAPIExternal:
+                    default:
+                      replicas: 1
+                    description: GlanceAPIExternal - Spec definition for the external
+                      API service of this Glance deployment
+                    properties:
+                      apiType:
+                        default: external
+                        enum:
+                        - internal
+                        - external
+                        type: string
+                      cephBackend:
+                        description: CephBackend - The ceph Backend structure with
+                          all the parameters
+                        properties:
+                          cephClientKey:
+                            description: ClientKey set the Ceph cluster key
+                            type: string
+                          cephFsid:
+                            description: ClusterFSID defines the fsid
+                            type: string
+                          cephMons:
+                            description: ClusterMons defines the commma separated
+                              mon list
+                            type: string
+                          cephPools:
+                            additionalProperties:
+                              description: PoolSpec defines the Ceph pool Spec parameters
+                              properties:
+                                name:
+                                  description: PoolName defines the name of the pool
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            description: Pools - Map of chosen names to spec definitions
+                              for the Ceph cluster pools
+                            type: object
+                          cephUser:
+                            default: CephUser
+                            description: User set the Ceph cluster pool
+                            type: string
+                        required:
+                        - cephClientKey
+                        - cephFsid
+                        - cephMons
+                        type: object
+                      containerImage:
+                        description: GlanceAPI Container Image URL
+                        type: string
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        description: CustomServiceConfig - customize the service config
+                          using this parameter to change service defaults, or overwrite
+                          rendered information using raw OpenStack config format.
+                          The content gets added to to /etc/<service>/<service>.conf.d
+                          directory as custom.conf file.
+                        type: string
+                      databaseHostname:
+                        description: DatabaseHostname - Glance Database Hostname
+                        type: string
+                      databaseUser:
+                        default: glance
+                        description: 'DatabaseUser - optional username used for glance
+                          DB, defaults to glance TODO: -> implement needs work in
+                          mariadb-operator, right now only glance'
+                        type: string
+                      debug:
+                        description: Debug - enable debug for different deploy stages.
+                          If an init container is used, it runs and the actual action
+                          pod gets started with sleep infinity
+                        properties:
+                          service:
+                            default: false
+                            description: Service enable debug
+                            type: boolean
+                        type: object
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        description: 'ConfigOverwrite - interface to overwrite default
+                          config files like e.g. logging.conf or policy.json. But
+                          can also be used to add additional files. Those get added
+                          to the service config dir in /etc/<service> . TODO: -> implement'
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector to target subset of worker nodes
+                          running this service
+                        type: object
+                      passwordSelectors:
+                        description: PasswordSelectors - Selectors to identify the
+                          AdminUser password from the Secret
+                        properties:
+                          admin:
+                            default: GlancePassword
+                            description: Database - Selector to get the glance service
+                              password from the Secret
+                            type: string
+                          database:
+                            default: GlanceDatabasePassword
+                            description: 'Database - Selector to get the glance database
+                              user password from the Secret TODO: not used, need change
+                              in mariadb-operator'
+                            type: string
+                        type: object
+                      pvc:
+                        description: Pvc - Storage claim for file-backed Glance
+                        type: string
+                      replicas:
+                        default: 1
+                        description: Replicas of glance API to run
+                        format: int32
+                        maximum: 32
+                        minimum: 0
+                        type: integer
+                      resources:
+                        description: Resources - Compute Resources required by this
+                          service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute
+                              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of
+                              compute resources required. If Requests is omitted for
+                              a container, it defaults to Limits if that is explicitly
+                              specified, otherwise to an implementation-defined value.
+                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                      secret:
+                        description: Secret containing OpenStack password information
+                          for glance AdminPassword
+                        type: string
+                      serviceUser:
+                        default: glance
+                        description: ServiceUser - optional username used for this
+                          service to register in glance
+                        type: string
+                    type: object
+                  glanceAPIInternal:
+                    default:
+                      replicas: 1
+                    description: GlanceAPIInternal - Spec definition for the internal
+                      and admin API service of this Glance deployment
+                    properties:
+                      apiType:
+                        default: external
+                        enum:
+                        - internal
+                        - external
+                        type: string
+                      cephBackend:
+                        description: CephBackend - The ceph Backend structure with
+                          all the parameters
+                        properties:
+                          cephClientKey:
+                            description: ClientKey set the Ceph cluster key
+                            type: string
+                          cephFsid:
+                            description: ClusterFSID defines the fsid
+                            type: string
+                          cephMons:
+                            description: ClusterMons defines the commma separated
+                              mon list
+                            type: string
+                          cephPools:
+                            additionalProperties:
+                              description: PoolSpec defines the Ceph pool Spec parameters
+                              properties:
+                                name:
+                                  description: PoolName defines the name of the pool
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            description: Pools - Map of chosen names to spec definitions
+                              for the Ceph cluster pools
+                            type: object
+                          cephUser:
+                            default: CephUser
+                            description: User set the Ceph cluster pool
+                            type: string
+                        required:
+                        - cephClientKey
+                        - cephFsid
+                        - cephMons
+                        type: object
+                      containerImage:
+                        description: GlanceAPI Container Image URL
+                        type: string
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        description: CustomServiceConfig - customize the service config
+                          using this parameter to change service defaults, or overwrite
+                          rendered information using raw OpenStack config format.
+                          The content gets added to to /etc/<service>/<service>.conf.d
+                          directory as custom.conf file.
+                        type: string
+                      databaseHostname:
+                        description: DatabaseHostname - Glance Database Hostname
+                        type: string
+                      databaseUser:
+                        default: glance
+                        description: 'DatabaseUser - optional username used for glance
+                          DB, defaults to glance TODO: -> implement needs work in
+                          mariadb-operator, right now only glance'
+                        type: string
+                      debug:
+                        description: Debug - enable debug for different deploy stages.
+                          If an init container is used, it runs and the actual action
+                          pod gets started with sleep infinity
+                        properties:
+                          service:
+                            default: false
+                            description: Service enable debug
+                            type: boolean
+                        type: object
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        description: 'ConfigOverwrite - interface to overwrite default
+                          config files like e.g. logging.conf or policy.json. But
+                          can also be used to add additional files. Those get added
+                          to the service config dir in /etc/<service> . TODO: -> implement'
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector to target subset of worker nodes
+                          running this service
+                        type: object
+                      passwordSelectors:
+                        description: PasswordSelectors - Selectors to identify the
+                          AdminUser password from the Secret
+                        properties:
+                          admin:
+                            default: GlancePassword
+                            description: Database - Selector to get the glance service
+                              password from the Secret
+                            type: string
+                          database:
+                            default: GlanceDatabasePassword
+                            description: 'Database - Selector to get the glance database
+                              user password from the Secret TODO: not used, need change
+                              in mariadb-operator'
+                            type: string
+                        type: object
+                      pvc:
+                        description: Pvc - Storage claim for file-backed Glance
+                        type: string
+                      replicas:
+                        default: 1
+                        description: Replicas of glance API to run
+                        format: int32
+                        maximum: 32
+                        minimum: 0
+                        type: integer
+                      resources:
+                        description: Resources - Compute Resources required by this
+                          service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute
+                              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of
+                              compute resources required. If Requests is omitted for
+                              a container, it defaults to Limits if that is explicitly
+                              specified, otherwise to an implementation-defined value.
+                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                      secret:
+                        description: Secret containing OpenStack password information
+                          for glance AdminPassword
+                        type: string
+                      serviceUser:
+                        default: glance
+                        description: ServiceUser - optional username used for this
+                          service to register in glance
+                        type: string
+                    type: object
+                  passwordSelectors:
+                    description: PasswordSelectors - Selectors to identify the DB
+                      password from the Secret
+                    properties:
+                      admin:
+                        default: GlancePassword
+                        description: Database - Selector to get the glance service
+                          password from the Secret
+                        type: string
+                      database:
+                        default: GlanceDatabasePassword
+                        description: 'Database - Selector to get the glance database
+                          user password from the Secret TODO: not used, need change
+                          in mariadb-operator'
+                        type: string
+                    type: object
+                  preserveJobs:
+                    default: false
+                    description: PreserveJobs - do not delete jobs after they finished
+                      e.g. to check logs
+                    type: boolean
+                  secret:
+                    description: Secret containing OpenStack password information
+                      for glance GlanceDatabasePassword
+                    type: string
+                  serviceUser:
+                    default: glance
+                    description: ServiceUser - optional username used for this service
+                      to register in glance
+                    type: string
+                  storageClass:
+                    description: StorageClass
+                    type: string
+                  storageRequest:
+                    description: StorageRequest
+                    type: string
+                required:
+                - glanceAPIExternal
+                - glanceAPIInternal
+                - storageRequest
+                type: object
               keystoneTemplate:
                 description: KeystoneTemplate - Overrides to use when creating the
                   Keystone API Service

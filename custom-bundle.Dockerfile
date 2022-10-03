@@ -26,6 +26,7 @@ FROM quay.io/openstack-k8s-operators/keystone-operator-bundle:latest as keystone
 FROM quay.io/openstack-k8s-operators/mariadb-operator-bundle:latest as mariadb-bundle
 FROM quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle:latest as rabbitmq-bundle
 FROM quay.io/openstack-k8s-operators/placement-operator-bundle:latest as placement-bundle
+FROM quay.io/openstack-k8s-operators/glance-operator-bundle:latest as glance-bundle
 
 FROM golang:1.18 as merger
 WORKDIR /workspace
@@ -39,12 +40,14 @@ COPY --from=keystone-bundle /manifests/* /manifests/
 COPY --from=mariadb-bundle /manifests/* /manifests/
 COPY --from=rabbitmq-bundle /manifests/* /manifests/
 COPY --from=placement-bundle /manifests/* /manifests/
+COPY --from=glance-bundle /manifests/* /manifests/
 
 RUN /workspace/csv-merger \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
   --rabbitmq-csv=/manifests/cluster-operator.clusterserviceversion.yaml \
   --keystone-csv=/manifests/keystone-operator.clusterserviceversion.yaml \
   --placement-csv=/manifests/placement-operator.clusterserviceversion.yaml \
+  --glance-csv=/manifests/glance-operator.clusterserviceversion.yaml \
   --openstack-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's
