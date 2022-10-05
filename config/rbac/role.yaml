@@ -32,6 +32,18 @@ rules:
   - patch
   - update
 - apiGroups:
+  - glance.openstack.org
+  resources:
+  - glances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - keystone.openstack.org
   resources:
   - keystoneapis
