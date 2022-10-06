@@ -1,0 +1,6 @@
+apiVersion: rabbitmq.openstack.org/v1beta1
+kind: TransportURL
+metadata:
+  name: transporturl-sample
+spec:
+  # TODO(user): Add fields here
