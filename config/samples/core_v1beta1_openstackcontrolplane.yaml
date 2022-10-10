@@ -24,4 +24,5 @@ spec:
     containerImage: quay.io/tripleotraincentos8/centos-binary-placement-api:current-tripleo
   glanceTemplate:
     containerImage: quay.io/tripleotraincentos8/centos-binary-glance-api:current-tripleo
+    storageClass: ""
     storageRequest: 10G
