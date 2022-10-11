@@ -38,6 +38,11 @@ BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 # BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
 BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 
+# For podman/docker push and OLM command
+VERIFY_TLS ?= true
+# For OLM command
+USE_HTTP ?= false
+
 # USE_IMAGE_DIGESTS defines if images are resolved via tags or digests
 # You can enable this value if you would like to use SHA Based Digests
 # To enable set flag to true
@@ -123,7 +128,7 @@ docker-build: test ## Build docker image with the manager.
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
-	podman push ${IMG}
+	podman push --tls-verify=${VERIFY_TLS} ${IMG}
 
 ##@ Deployment
 
@@ -222,7 +227,15 @@ CATALOG_IMG ?= $(IMAGE_TAG_BASE)-index:v$(VERSION)
 
 # Set CATALOG_BASE_IMG to an existing catalog image tag to add $BUNDLE_IMGS to that image.
 ifneq ($(origin CATALOG_BASE_IMG), undefined)
-FROM_INDEX_OPT := --from-index $(CATALOG_BASE_IMG)
+OPM_OPTS := --from-index $(CATALOG_BASE_IMG)
+endif
+
+ifeq (${VERIFY_TSL}, false)
+OPM_OPTS := $(OPM_OPTS) --skip-tls-verify
+endif
+
+ifeq (${USE_HTTP}, true)
+OPM_OPTS := $(OPM_OPTS) --use-http
 endif
 
 # Build a catalog image by adding bundle images to an empty catalog using the operator package manager tool, 'opm'.
@@ -230,7 +243,7 @@ endif
 # https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
 .PHONY: catalog-build
 catalog-build: opm ## Build a catalog image.
-	$(OPM) index add --container-tool podman --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
+	$(OPM) index add --container-tool podman --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(OPM_OPTS)
 
 # Push the catalog image.
 .PHONY: catalog-push
