@@ -62,6 +62,7 @@ func init() {
 	utilruntime.Must(glancev1.AddToScheme(scheme))
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1beta1.AddToScheme(scheme))
+	utilruntime.Must(cinderv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
