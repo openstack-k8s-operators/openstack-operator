@@ -6,10 +6,10 @@ spec:
   secret: osp-secret
   storageClass: local-storage
   keystoneTemplate:
-    containerImage: quay.io/tripleotraincentos8/centos-binary-keystone:current-tripleo
+    containerImage: quay.io/tripleowallabycentos9/openstack-keystone:current-tripleo
     databaseInstance: openstack
   mariadbTemplate:
-    containerImage: quay.io/tripleotraincentos8/centos-binary-mariadb:current-tripleo
+    containerImage: quay.io/tripleowallabycentos9/openstack-mariadb:current-tripleo
     storageRequest: 500M
   rabbitmqTemplate:
     replicas: 1
@@ -21,8 +21,8 @@ spec:
     #    cpu: 800m
     #    memory: 1Gi
   placementTemplate:
-    containerImage: quay.io/tripleotraincentos8/centos-binary-placement-api:current-tripleo
+    containerImage: quay.io/tripleowallabycentos9/openstack-placement-api:current-tripleo
   glanceTemplate:
-    containerImage: quay.io/tripleotraincentos8/centos-binary-glance-api:current-tripleo
+    containerImage: quay.io/tripleowallabycentos9/openstack-glance-api:current-tripleo
     storageClass: ""
     storageRequest: 10G
