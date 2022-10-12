@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
@@ -51,6 +52,10 @@ type OpenStackControlPlaneSpec struct {
 	// +kubebuilder:validation:Optional
 	// GlanceTemplate - Overrides to use when creating the Glance Service
 	GlanceTemplate glancev1.GlanceSpec `json:"glanceTemplate,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// CinderTemplate - Overrides to use when creating Cinder Resources
+	CinderTemplate cinderv1.CinderSpec `json:"cinderTemplate,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// MariadbTemplate - Overrides to use when creating the MariaDB API Service
