@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -43,10 +44,26 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	})
 
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneGlanceReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneGlanceReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("glance %s - %s", glance.Name, op))
+	}
+
+	if glance.IsReady() {
+		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneGlanceReadyCondition, corev1beta1.OpenStackControlPlaneGlanceReadyMessage)
+	} else {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneGlanceReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneGlanceReadyRunningMessage))
 	}
 
 	return ctrl.Result{}, nil

@@ -22,7 +22,9 @@ import (
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
@@ -98,6 +100,30 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		// Error reading the object - requeue the request.
 		return ctrl.Result{}, err
 	}
+
+	//
+	// initialize status
+	//
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+		// initialize conditions used later as Status=Unknown
+		cl := condition.CreateList(
+			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneRabbitMQReadyInitMessage),
+			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneMariaDBReadyInitMessage),
+			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneKeystoneAPIReadyInitMessage),
+			condition.UnknownCondition(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlanePlacementAPIReadyInitMessage),
+			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneGlanceReadyInitMessage),
+			// TODO add once rabbitmq transportURL is integrated with Cinder: condition.UnknownCondition(corev1beta1.OpenStackControlPlaneCinderReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneCinderReadyInitMessage),
+		)
+
+		instance.Status.Conditions.Init(&cl)
+
+		// Register overall status immediately to have an early feedback e.g. in the cli
+		if err := r.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	helper, err := helper.NewHelper(
 		instance,
 		r.Client,
@@ -108,6 +134,26 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
+	// Always patch the instance status when exiting this function so we can persist any changes.
+	defer func() {
+		// update the overall status condition if service is ready
+		if instance.IsReady() {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+		}
+
+		if err := helper.SetAfter(instance); err != nil {
+			util.LogErrorForObject(helper, err, "Set after and calc patch/diff", instance)
+		}
+
+		if changed := helper.GetChanges()["status"]; changed {
+			patch := client.MergeFrom(helper.GetBeforeObject())
+
+			if err := r.Status().Patch(ctx, instance, patch); err != nil && !k8s_errors.IsNotFound(err) {
+				util.LogErrorForObject(helper, err, "Update status", instance)
+			}
+		}
+	}()
 
 	return r.reconcileNormal(ctx, instance, helper)
 
@@ -158,7 +204,6 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 	}
 
 	return ctrl.Result{}, nil
-
 }
 
 // SetupWithManager sets up the controller with the Manager.

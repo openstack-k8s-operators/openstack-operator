@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -44,10 +45,26 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	})
 
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("KeystoneAPI %s - %s", keystoneAPI.Name, op))
+	}
+
+	if keystoneAPI.IsReady() {
+		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition, corev1beta1.OpenStackControlPlaneKeystoneAPIReadyMessage)
+	} else {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyRunningMessage))
 	}
 
 	return ctrl.Result{}, nil
