@@ -16,6 +16,11 @@ spec:
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
       version: v1beta1
+    - description: TransportURL is the Schema for the transporturls API
+      displayName: Transport URL
+      kind: TransportURL
+      name: transporturls.rabbitmq.openstack.org
+      version: v1beta1
   description: Install and configure OpenStack
   displayName: OpenStack
   icon:

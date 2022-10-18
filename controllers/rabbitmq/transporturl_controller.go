@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"encoding/base64"
-
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	oko_secret "github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	rabbitmqv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/rabbitmq/v1beta1"
@@ -109,7 +108,7 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		"namespace": instance.Namespace,
 		"name":      instance.Spec.RabbitmqClusterName,
 	}
-	rabbit, err := rabbitmq.GetRabbitmqCluster(ctx, helper, instance.Namespace, labelSelector)
+	rabbit, err := rabbitmq.GetRabbitmqCluster(ctx, helper, instance, labelSelector)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -128,28 +127,49 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	// Obtain the default user password from the secret for the above RabbitmqCluster instance
 	// TODO(dprince): Future we may want to use vhosts for each OpenStackService instead.
 	// vhosts would likely require use of https://github.com/rabbitmq/messaging-topology-operator/ which we do not yet include
-	secretName := rabbit.Status.DefaultUser.SecretReference.Name
-	secretNamespace := rabbit.Status.DefaultUser.SecretReference.Namespace
-	defaultUserSecret, _, err := oko_secret.GetSecret(ctx, helper, secretName, secretNamespace)
+	// secretName := rabbit.Status.DefaultUser.SecretReference.Name
+	// secretNamespace := rabbit.Status.DefaultUser.SecretReference.Namespace
+	// defaultUserSecret, _, err := oko_secret.GetSecret(ctx, helper, secretName, secretNamespace)
+	// if err != nil {
+	// 	return ctrl.Result{}, err
+	// }
+	// // Extract the password from the secret
+	// username, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["username"]))
+	// if err != nil {
+	// 	return ctrl.Result{}, err
+	// }
+	// password, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["password"]))
+	// if err != nil {
+	// 	return ctrl.Result{}, err
+	// }
+	// host, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["host"]))
+	// if err != nil {
+	// 	return ctrl.Result{}, err
+	// }
+
+	username, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, rabbit.Status.DefaultUser.SecretReference.Name, 10, "username")
 	if err != nil {
 		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
 	}
-	// Extract the password from the secret
-	username, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["username"]))
+
+	password, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, rabbit.Status.DefaultUser.SecretReference.Name, 10, "password")
 	if err != nil {
 		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
 	}
-	password, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["password"]))
+
+	host, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, rabbit.Status.DefaultUser.SecretReference.Name, 10, "host")
 	if err != nil {
 		return ctrl.Result{}, err
-	}
-	host, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["host"]))
-	if err != nil {
-		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
 	}
 
 	// Create a new secret with the transport URL for this CR
-	secret := createTransportURLSecret(instance, string(username), string(password), string(host))
+	secret := r.createTransportURLSecret(instance, string(username), string(password), string(host))
 	_, op, err := oko_secret.CreateOrPatchSecret(ctx, helper, instance, secret)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -158,7 +178,7 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{RequeueAfter: time.Second * 5}, util.WrapErrorForObject(
 			fmt.Sprintf("Secret for transport_url %s created or patched", secret.Name),
 			secret,
-			err,
+			nil,
 		)
 	}
 
@@ -172,7 +192,7 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 }
 
 // Create k8s secret with transport URL
-func createTransportURLSecret(instance *rabbitmqv1beta1.TransportURL, username string, password string, host string) *corev1.Secret {
+func (r *TransportURLReconciler) createTransportURLSecret(instance *rabbitmqv1beta1.TransportURL, username string, password string, host string) *corev1.Secret {
 	// Create a new secret with the transport URL for this CR
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -180,7 +200,7 @@ func createTransportURLSecret(instance *rabbitmqv1beta1.TransportURL, username s
 			Namespace: instance.Namespace,
 		},
 		Data: map[string][]byte{
-			"transport_url": []byte(fmt.Sprintf("rabbit://%s:%s@%s:5672/%s", username, password, host, instance.Name)),
+			"transport_url": []byte(fmt.Sprintf("rabbit://%s:%s@%s:5672", username, password, host)),
 		},
 	}
 }
