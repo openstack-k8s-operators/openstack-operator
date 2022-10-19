@@ -124,29 +124,8 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	// Obtain the default user password from the secret for the above RabbitmqCluster instance
 	// TODO(dprince): Future we may want to use vhosts for each OpenStackService instead.
 	// vhosts would likely require use of https://github.com/rabbitmq/messaging-topology-operator/ which we do not yet include
-	// secretName := rabbit.Status.DefaultUser.SecretReference.Name
-	// secretNamespace := rabbit.Status.DefaultUser.SecretReference.Namespace
-	// defaultUserSecret, _, err := oko_secret.GetSecret(ctx, helper, secretName, secretNamespace)
-	// if err != nil {
-	// 	return ctrl.Result{}, err
-	// }
-	// // Extract the password from the secret
-	// username, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["username"]))
-	// if err != nil {
-	// 	return ctrl.Result{}, err
-	// }
-	// password, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["password"]))
-	// if err != nil {
-	// 	return ctrl.Result{}, err
-	// }
-	// host, err := base64.StdEncoding.DecodeString(string(defaultUserSecret.Data["host"]))
-	// if err != nil {
-	// 	return ctrl.Result{}, err
-	// }
-
 	username, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, rabbit.Status.DefaultUser.SecretReference.Name, 10, "username")
 	if err != nil {
 		return ctrl.Result{}, err

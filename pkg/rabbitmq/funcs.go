@@ -33,35 +33,6 @@ func GetRabbitmqCluster(
 	instance *rabbitmqv1beta1.TransportURL,
 	labelSelector map[string]string,
 ) (*rabbitmqv1.RabbitmqCluster, error) {
-	// rabbitmqClusterList := &rabbitmqv1.RabbitmqClusterList{}
-
-	// listOpts := []client.ListOption{
-	// 	client.InNamespace(namespace),
-	// }
-
-	// if len(labelSelector) > 0 {
-	// 	labels := client.MatchingLabels(labelSelector)
-	// 	listOpts = append(listOpts, labels)
-	// }
-
-	// err := h.GetClient().List(ctx, rabbitmqClusterList, listOpts...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if len(rabbitmqClusterList.Items) > 1 {
-	// 	return nil, fmt.Errorf("more then one RabbitmqCluster object found in namespace %s", namespace)
-	// }
-
-	// if len(rabbitmqClusterList.Items) == 0 {
-	// 	return nil, k8s_errors.NewNotFound(
-	// 		appsv1.Resource("RabbitmqCluster"),
-	// 		fmt.Sprintf("No RabbitmqCluster object found in namespace %s", namespace),
-	// 	)
-	// }
-
-	// return &rabbitmqClusterList.Items[0], nil
-
 	rabbitMqCluster := &rabbitmqv1.RabbitmqCluster{}
 
 	err := h.GetClient().Get(ctx, types.NamespacedName{Name: instance.Spec.RabbitmqClusterName, Namespace: instance.Namespace}, rabbitMqCluster)
