@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 
@@ -42,10 +43,26 @@ func ReconcileMariaDB(ctx context.Context, instance *corev1beta1.OpenStackContro
 	})
 
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneMariaDBReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("MariaDB %s - %s", mariadb.Name, op))
+	}
+
+	if mariadb.IsReady() {
+		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition, corev1beta1.OpenStackControlPlaneMariaDBReadyMessage)
+	} else {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneMariaDBReadyRunningMessage))
 	}
 
 	return ctrl.Result{}, nil

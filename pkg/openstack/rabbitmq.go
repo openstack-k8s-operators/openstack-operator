@@ -4,8 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
+	// Cannot use the following import due to linting error:
+	// Error: 	pkg/openstack/rabbitmq.go:10:2: use of internal package github.com/rabbitmq/cluster-operator/internal/status not allowed
+	//rabbitstatus "github.com/rabbitmq/cluster-operator/internal/status"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -71,12 +75,32 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 	})
 
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("RabbitMQ %s - %s", rabbitmq.Name, op))
 	}
 
-	return ctrl.Result{}, nil
+	for _, oldCond := range rabbitmq.Status.Conditions {
+		// Forced to hardcode "ClusterAvailable" here because linter will not allow
+		// us to import "github.com/rabbitmq/cluster-operator/internal/status"
+		if string(oldCond.Type) == "ClusterAvailable" && oldCond.Status == corev1.ConditionTrue {
+			instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition, corev1beta1.OpenStackControlPlaneRabbitMQReadyMessage)
+			return ctrl.Result{}, nil
+		}
+	}
 
+	instance.Status.Conditions.Set(condition.FalseCondition(
+		corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
+		condition.RequestedReason,
+		condition.SeverityInfo,
+		corev1beta1.OpenStackControlPlaneRabbitMQReadyRunningMessage))
+
+	return ctrl.Result{}, nil
 }

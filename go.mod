@@ -9,8 +9,8 @@ require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20221010180347-a9a8efadf3c3
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20221010175629-c342a9cc360d
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220927090553-6b3218c776f7
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20220928054455-66e396fb480e
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20220929123241-597b259525ac
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221014085528-1bd40eedfb90
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221014164348-0a612ae8b391
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20220805000211-a3fd1ad40e64
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573
 	github.com/operator-framework/api v0.17.1

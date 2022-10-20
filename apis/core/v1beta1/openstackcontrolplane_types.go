@@ -17,9 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
@@ -68,14 +69,16 @@ type OpenStackControlPlaneSpec struct {
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
 type OpenStackControlPlaneStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Conditions
+	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 // +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack ControlPlane"
 // +kubebuilder:resource:shortName=osctlplane;osctlplanes
+//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
+//+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackControlPlane is the Schema for the openstackcontrolplanes API
 type OpenStackControlPlane struct {
@@ -97,4 +100,14 @@ type OpenStackControlPlaneList struct {
 
 func init() {
 	SchemeBuilder.Register(&OpenStackControlPlane{}, &OpenStackControlPlaneList{})
+}
+
+// IsReady - returns true if service is ready to serve requests
+func (instance OpenStackControlPlane) IsReady() bool {
+	return instance.Status.Conditions.IsTrue(OpenStackControlPlaneRabbitMQReadyCondition) &&
+		instance.Status.Conditions.IsTrue(OpenStackControlPlaneMariaDBReadyCondition) &&
+		instance.Status.Conditions.IsTrue(OpenStackControlPlaneKeystoneAPIReadyCondition) &&
+		instance.Status.Conditions.IsTrue(OpenStackControlPlanePlacementAPIReadyCondition) &&
+		instance.Status.Conditions.IsTrue(OpenStackControlPlaneGlanceReadyCondition)
+	    // TODO add once rabbitmq transportURL is integrated with Cinder:instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
 }
