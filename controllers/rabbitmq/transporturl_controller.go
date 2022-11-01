@@ -151,6 +151,7 @@ func (r *TransportURLReconciler) reconcileNormal(ctx context.Context, instance *
 		"namespace": instance.Namespace,
 		"name":      instance.Spec.RabbitmqClusterName,
 	}
+	//TODO (implement a watch on the rabbitmq cluster resources to update things if there are changes)
 	rabbit, err := rabbitmq.GetRabbitmqCluster(ctx, helper, instance, labelSelector)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -161,6 +162,7 @@ func (r *TransportURLReconciler) reconcileNormal(ctx context.Context, instance *
 	for _, condition := range rabbit.Status.Conditions {
 		if condition.Reason == "AllPodsAreReady" && condition.Status == "True" {
 			rabbitReady = true
+			break
 		}
 	}
 	if !rabbitReady {
