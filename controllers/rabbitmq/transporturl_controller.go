@@ -231,11 +231,7 @@ func (r *TransportURLReconciler) reconcileNormal(ctx context.Context, instance *
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			rabbitmqv1beta1.TransportURLReadyInitMessage))
-		return ctrl.Result{RequeueAfter: time.Second * 5}, util.WrapErrorForObject(
-			fmt.Sprintf("Secret for transport_url %s created or patched", secret.Name),
-			secret,
-			nil,
-		)
+		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 
 	// Update the CR and return
@@ -243,6 +239,9 @@ func (r *TransportURLReconciler) reconcileNormal(ctx context.Context, instance *
 	if err := r.Client.Status().Update(ctx, instance); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	instance.Status.Conditions.MarkTrue(rabbitmqv1beta1.TransportURLReadyCondition, rabbitmqv1beta1.TransportURLReadyMessage)
+
 	return ctrl.Result{}, nil
 
 }
