@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	oko_secret "github.com/openstack-k8s-operators/lib-common/modules/common/secret"
@@ -92,6 +93,22 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
+	//
+	// initialize status
+	//
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+
+		cl := condition.CreateList(condition.UnknownCondition(rabbitmqv1beta1.TransportURLReadyCondition, condition.InitReason, rabbitmqv1beta1.TransportURLReadyInitMessage))
+
+		instance.Status.Conditions.Init(&cl)
+
+		// Register overall status immediately to have an early feedback e.g. in the cli
+		if err := r.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	helper, err := helper.NewHelper(
 		instance,
 		r.Client,
@@ -102,6 +119,32 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
+	// Always patch the instance status when exiting this function so we can persist any changes.
+	defer func() {
+		// update the overall status condition if service is ready
+		if instance.IsReady() {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+		}
+
+		if err := helper.SetAfter(instance); err != nil {
+			util.LogErrorForObject(helper, err, "Set after and calc patch/diff", instance)
+		}
+
+		if changed := helper.GetChanges()["status"]; changed {
+			patch := client.MergeFrom(helper.GetBeforeObject())
+
+			if err := r.Status().Patch(ctx, instance, patch); err != nil && !k8s_errors.IsNotFound(err) {
+				util.LogErrorForObject(helper, err, "Update status", instance)
+			}
+		}
+	}()
+
+	return r.reconcileNormal(ctx, instance, helper)
+
+}
+
+func (r *TransportURLReconciler) reconcileNormal(ctx context.Context, instance *rabbitmqv1beta1.TransportURL, helper *helper.Helper) (ctrl.Result, error) {
 
 	// Lookup RabbitmqCluster instance by name
 	labelSelector := map[string]string{
@@ -121,6 +164,11 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 	if !rabbitReady {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			rabbitmqv1beta1.TransportURLReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			rabbitmqv1beta1.TransportURLInProgressMessage))
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
@@ -128,6 +176,12 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	// vhosts would likely require use of https://github.com/rabbitmq/messaging-topology-operator/ which we do not yet include
 	username, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, rabbit.Status.DefaultUser.SecretReference.Name, 10, "username")
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			rabbitmqv1beta1.TransportURLReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			rabbitmqv1beta1.TransportURLReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
@@ -135,6 +189,12 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	password, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, rabbit.Status.DefaultUser.SecretReference.Name, 10, "password")
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			rabbitmqv1beta1.TransportURLReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			rabbitmqv1beta1.TransportURLReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
@@ -142,6 +202,12 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	host, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, rabbit.Status.DefaultUser.SecretReference.Name, 10, "host")
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			rabbitmqv1beta1.TransportURLReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			rabbitmqv1beta1.TransportURLReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
@@ -151,9 +217,20 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	secret := r.createTransportURLSecret(instance, string(username), string(password), string(host))
 	_, op, err := oko_secret.CreateOrPatchSecret(ctx, helper, instance, secret)
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			rabbitmqv1beta1.TransportURLReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			rabbitmqv1beta1.TransportURLReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			rabbitmqv1beta1.TransportURLReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			rabbitmqv1beta1.TransportURLReadyInitMessage))
 		return ctrl.Result{RequeueAfter: time.Second * 5}, util.WrapErrorForObject(
 			fmt.Sprintf("Secret for transport_url %s created or patched", secret.Name),
 			secret,

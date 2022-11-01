@@ -43,6 +43,49 @@ spec:
           status:
             description: TransportURLStatus defines the observed state of TransportURL
             properties:
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another. This should be when the underlying condition changed.
+                        If that is not known, then using the time when the API field
+                        changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: Severity provides a classification of Reason code,
+                        so the current situation is immediately understandable and
+                        could act accordingly. It is meant for situations where Status=False
+                        and it should be indicated if it is just informational, warning
+                        (next reconciliation might fix it) or an error (e.g. DB create
+                        issue and no actions to automatically resolve the issue can/should
+                        be done). For conditions where Status=Unknown or Status=True
+                        the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
               secretName:
                 description: SecretName - name of the secret containing the rabbitmq
                   transport URL

@@ -17,11 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // TransportURLSpec defines the desired state of TransportURL
 type TransportURLSpec struct {
@@ -32,6 +30,10 @@ type TransportURLSpec struct {
 
 // TransportURLStatus defines the observed state of TransportURL
 type TransportURLStatus struct {
+
+	// Conditions
+	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
 	// SecretName - name of the secret containing the rabbitmq transport URL
 	SecretName string `json:"secretName,omitempty"`
 }
@@ -59,4 +61,9 @@ type TransportURLList struct {
 
 func init() {
 	SchemeBuilder.Register(&TransportURL{}, &TransportURLList{})
+}
+
+// IsReady - returns true if service is ready to serve requests
+func (instance TransportURL) IsReady() bool {
+	return instance.Status.Conditions.IsTrue(TransportURLReadyCondition)
 }
