@@ -25,7 +25,7 @@ import (
 type TransportURLSpec struct {
 	// +kubebuilder:validation:Required
 	// RabbitmqClusterName the name of the Rabbitmq cluster which to configure the transport URL
-	RabbitmqClusterName string `json:"rabbitmqClusterName,omitempty"`
+	RabbitmqClusterName string `json:"rabbitmqClusterName"`
 }
 
 // TransportURLStatus defines the observed state of TransportURL

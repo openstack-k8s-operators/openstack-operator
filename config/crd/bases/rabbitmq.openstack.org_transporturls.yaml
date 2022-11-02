@@ -48,6 +48,8 @@ spec:
                 description: RabbitmqClusterName the name of the Rabbitmq cluster
                   which to configure the transport URL
                 type: string
+            required:
+            - rabbitmqClusterName
             type: object
           status:
             description: TransportURLStatus defines the observed state of TransportURL

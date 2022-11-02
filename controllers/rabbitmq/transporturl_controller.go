@@ -238,9 +238,6 @@ func (r *TransportURLReconciler) reconcileNormal(ctx context.Context, instance *
 
 	// Update the CR and return
 	instance.Status.SecretName = secret.Name
-	if err := r.Client.Status().Update(ctx, instance); err != nil {
-		return ctrl.Result{}, err
-	}
 
 	instance.Status.Conditions.MarkTrue(rabbitmqv1beta1.TransportURLReadyCondition, rabbitmqv1beta1.TransportURLReadyMessage)
 

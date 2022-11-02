@@ -49,6 +49,6 @@ const (
 	// TransportURLReadyMessage
 	TransportURLReadyMessage = "TransportURL completed"
 
-	// TransportURLReadyRunningMessage
+	// TransportURLInProgressMessage
 	TransportURLInProgressMessage = "TransportURL in progress"
 )
