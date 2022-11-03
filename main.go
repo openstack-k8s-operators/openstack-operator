@@ -43,7 +43,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	rabbitmqv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/rabbitmq/v1beta1"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
+	rabbitmqcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/rabbitmq"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -61,6 +63,7 @@ func init() {
 	utilruntime.Must(placementv1.AddToScheme(scheme))
 	utilruntime.Must(glancev1.AddToScheme(scheme))
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
+	utilruntime.Must(rabbitmqv1beta1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -124,6 +127,15 @@ func main() {
 		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackControlPlane"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackControlPlane")
+		os.Exit(1)
+	}
+	if err = (&rabbitmqcontrollers.TransportURLReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Kclient: kclient,
+		Log:     ctrl.Log.WithName("controllers").WithName("TrasnportURL"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "TransportURL")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

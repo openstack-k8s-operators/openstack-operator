@@ -18,6 +18,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - core.openstack.org
   resources:
   - openstackcontrolplanes
@@ -103,3 +115,29 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - rabbitmq.openstack.org
+  resources:
+  - transporturls
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rabbitmq.openstack.org
+  resources:
+  - transporturls/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - rabbitmq.openstack.org
+  resources:
+  - transporturls/status
+  verbs:
+  - get
+  - patch
+  - update
