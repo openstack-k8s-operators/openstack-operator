@@ -146,13 +146,8 @@ func (r *TransportURLReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 func (r *TransportURLReconciler) reconcileNormal(ctx context.Context, instance *rabbitmqv1beta1.TransportURL, helper *helper.Helper) (ctrl.Result, error) {
 
-	// Lookup RabbitmqCluster instance by name
-	labelSelector := map[string]string{
-		"namespace": instance.Namespace,
-		"name":      instance.Spec.RabbitmqClusterName,
-	}
 	//TODO (implement a watch on the rabbitmq cluster resources to update things if there are changes)
-	rabbit, err := rabbitmq.GetRabbitmqCluster(ctx, helper, instance, labelSelector)
+	rabbit, err := rabbitmq.GetRabbitmqCluster(ctx, helper, instance)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -263,5 +258,6 @@ func (r *TransportURLReconciler) createTransportURLSecret(instance *rabbitmqv1be
 func (r *TransportURLReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&rabbitmqv1beta1.TransportURL{}).
+		Owns(&corev1.Secret{}).
 		Complete(r)
 }

@@ -31,7 +31,6 @@ func GetRabbitmqCluster(
 	ctx context.Context,
 	h *helper.Helper,
 	instance *rabbitmqv1beta1.TransportURL,
-	labelSelector map[string]string,
 ) (*rabbitmqv1.RabbitmqCluster, error) {
 	rabbitMqCluster := &rabbitmqv1.RabbitmqCluster{}
 
