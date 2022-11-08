@@ -15,10 +15,11 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573
 	github.com/operator-framework/api v0.17.1
 	github.com/rabbitmq/cluster-operator v1.14.0
+	go.uber.org/zap v1.21.0
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.3
 	k8s.io/client-go v0.25.3
-	sigs.k8s.io/controller-runtime v0.13.0
+	sigs.k8s.io/controller-runtime v0.13.1
 )
 
 require (
@@ -68,7 +69,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
-	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
