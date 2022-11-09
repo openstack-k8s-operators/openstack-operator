@@ -15,7 +15,7 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573
 	github.com/operator-framework/api v0.17.1
 	github.com/rabbitmq/cluster-operator v1.14.0
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.23.0
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.3
 	k8s.io/client-go v0.25.3
