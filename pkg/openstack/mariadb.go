@@ -17,6 +17,9 @@ import (
 
 // ReconcileMariaDB -
 func ReconcileMariaDB(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	if !instance.Spec.Mariadb.Enabled {
+		return ctrl.Result{}, nil
+	}
 
 	mariadb := &mariadbv1.MariaDB{
 		ObjectMeta: metav1.ObjectMeta{
@@ -27,7 +30,7 @@ func ReconcileMariaDB(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "mariadb.Name", "openstack")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), mariadb, func() error {
-		instance.Spec.MariadbTemplate.DeepCopyInto(&mariadb.Spec)
+		instance.Spec.Mariadb.Template.DeepCopyInto(&mariadb.Spec)
 		if mariadb.Spec.Secret == "" {
 			mariadb.Spec.Secret = instance.Spec.Secret
 		}

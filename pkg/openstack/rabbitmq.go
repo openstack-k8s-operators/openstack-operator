@@ -23,6 +23,9 @@ import (
 
 // ReconcileRabbitMQ -
 func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	if !instance.Spec.Rabbitmq.Enabled {
+		return ctrl.Result{}, nil
+	}
 
 	rabbitmq := &rabbitmqv1.RabbitmqCluster{
 		ObjectMeta: metav1.ObjectMeta{
@@ -72,7 +75,7 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 	}
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 
-		instance.Spec.RabbitmqTemplate.DeepCopyInto(&rabbitmq.Spec)
+		instance.Spec.Rabbitmq.Template.DeepCopyInto(&rabbitmq.Spec)
 
 		//FIXME: We shouldn't have to set this here but not setting it causes the rabbitmq
 		// operator to continuously mutate the CR when setting it:

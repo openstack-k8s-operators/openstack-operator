@@ -17,6 +17,10 @@ import (
 
 // ReconcileKeystoneAPI -
 func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	if !instance.Spec.Keystone.Enabled {
+		return ctrl.Result{}, nil
+	}
+
 	keystoneAPI := &keystonev1.KeystoneAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone", //FIXME (keystone doesn't seem to work unless named "keystone")
@@ -26,7 +30,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 
 	helper.GetLogger().Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "keystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
-		instance.Spec.KeystoneTemplate.DeepCopyInto(&keystoneAPI.Spec)
+		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec)
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}

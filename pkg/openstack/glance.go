@@ -17,6 +17,10 @@ import (
 
 // ReconcileGlance -
 func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	if !instance.Spec.Glance.Enabled {
+		return ctrl.Result{}, nil
+	}
+
 	glance := &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "glance",
@@ -26,7 +30,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	helper.GetLogger().Info("Reconciling glance", "glance.Namespace", instance.Namespace, "glance.Name", "glance")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
-		instance.Spec.GlanceTemplate.DeepCopyInto(&glance.Spec)
+		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec)
 		if glance.Spec.Secret == "" {
 			glance.Spec.Secret = instance.Spec.Secret
 		}
