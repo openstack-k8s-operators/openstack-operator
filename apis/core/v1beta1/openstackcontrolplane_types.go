@@ -109,5 +109,5 @@ func (instance OpenStackControlPlane) IsReady() bool {
 		instance.Status.Conditions.IsTrue(OpenStackControlPlaneKeystoneAPIReadyCondition) &&
 		instance.Status.Conditions.IsTrue(OpenStackControlPlanePlacementAPIReadyCondition) &&
 		instance.Status.Conditions.IsTrue(OpenStackControlPlaneGlanceReadyCondition)
-	    // TODO add once rabbitmq transportURL is integrated with Cinder:instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
+	// TODO add once rabbitmq transportURL is integrated with Cinder:instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
 }
