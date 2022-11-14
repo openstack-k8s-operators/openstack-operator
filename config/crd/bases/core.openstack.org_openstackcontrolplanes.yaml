@@ -12542,6 +12542,9 @@ spec:
               storageClass:
                 description: StorageClass -
                 type: string
+            required:
+            - secret
+            - storageClass
             type: object
           status:
             description: OpenStackControlPlaneStatus defines the observed state of

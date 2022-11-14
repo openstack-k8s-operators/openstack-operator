@@ -32,11 +32,11 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Required
 	// Secret - FIXME: make this optional
-	Secret string `json:"secret,omitempty"`
+	Secret string `json:"secret"`
 
 	// +kubebuilder:validation:Required
 	// StorageClass -
-	StorageClass string `json:"storageClass,omitempty"`
+	StorageClass string `json:"storageClass"`
 
 	// +kubebuilder:validation:Optional
 	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
@@ -109,5 +109,5 @@ func (instance OpenStackControlPlane) IsReady() bool {
 		instance.Status.Conditions.IsTrue(OpenStackControlPlaneKeystoneAPIReadyCondition) &&
 		instance.Status.Conditions.IsTrue(OpenStackControlPlanePlacementAPIReadyCondition) &&
 		instance.Status.Conditions.IsTrue(OpenStackControlPlaneGlanceReadyCondition)
-	    // TODO add once rabbitmq transportURL is integrated with Cinder:instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
+	// TODO add once rabbitmq transportURL is integrated with Cinder:instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
 }

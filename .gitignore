@@ -26,3 +26,10 @@ bundle.Dockerfile
 *.swp
 *.swo
 *~
+
+# Common CI tools repository
+CI_TOOLS_REPO
+
+# generated workspace file
+go.work
+go.work.sum

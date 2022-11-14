@@ -99,12 +99,13 @@ fmt: ## Run go fmt against code.
 	go fmt ./...
 
 .PHONY: vet
-vet: ## Run go vet against code.
+vet: gowork ## Run go vet against code.
 	go vet ./...
+	go vet ./apis/...
 
 .PHONY: test
 test: manifests generate fmt vet envtest ## Run tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... ./apis/... -coverprofile cover.out
 
 ##@ Build
 
@@ -254,20 +255,36 @@ get-ci-tools:
 
 # Run go fmt against code
 gofmt: get-ci-tools
-	$(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh ./apis
 
 # Run go vet against code
 govet: get-ci-tools
-	$(CI_TOOLS_REPO_DIR)/test-runner/govet.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/govet.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/govet.sh  ./apis
 
 # Run go test against code
 gotest: get-ci-tools
-	$(CI_TOOLS_REPO_DIR)/test-runner/gotest.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gotest.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gotest.sh  ./apis
 
 # Run golangci-lint test against code
 golangci: get-ci-tools
-	$(CI_TOOLS_REPO_DIR)/test-runner/golangci.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/golangci.sh
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/golangci.sh  ./apis
 
 # Run go lint against code
 golint: get-ci-tools
-	PATH=$(GOBIN):$(PATH); $(CI_TOOLS_REPO_DIR)/test-runner/golint.sh
+	GOWORK=off PATH=$(GOBIN):$(PATH); $(CI_TOOLS_REPO_DIR)/test-runner/golint.sh
+	GOWORK=off PATH=$(GOBIN):$(PATH); $(CI_TOOLS_REPO_DIR)/test-runner/golint.sh ./apis
+
+.PHONY: gowork
+gowork: ## Generate go.work file to support our multi module repository
+	test -f go.work || go work init
+	go work use .
+	go work use ./apis
+
+.PHONY: operator-lint
+operator-lint: gowork ## Runs operator-lint
+	GOBIN=$(LOCALBIN) go install github.com/gibizer/operator-lint@latest
+	go vet -vettool=$(LOCALBIN)/operator-lint ./... ./apis/...
