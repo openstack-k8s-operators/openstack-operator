@@ -23,9 +23,14 @@ spec:
   placementTemplate:
     containerImage: quay.io/tripleowallabycentos9/openstack-placement-api:current-tripleo
   glanceTemplate:
+    databaseInstance: openstack
     containerImage: quay.io/tripleowallabycentos9/openstack-glance-api:current-tripleo
     storageClass: ""
     storageRequest: 10G
+    glanceAPIInternal:
+      containerImage: quay.io/tripleowallabycentos9/openstack-glance-api:current-tripleo
+    glanceAPIExternal:
+      containerImage: quay.io/tripleowallabycentos9/openstack-glance-api:current-tripleo
   cinderTemplate:
     cinderAPI:
       replicas: 1
