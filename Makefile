@@ -111,7 +111,7 @@ test: manifests generate fmt vet envtest ## Run tests.
 ##@ Build
 
 .PHONY: build
-build: generate fmt vet ## Build manager binary.
+build: verify-go-mod-sync generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 	go build -o bin/csv-merger cmd/csv-merger/csv-merger.go
 
@@ -289,3 +289,7 @@ gowork: ## Generate go.work file to support our multi module repository
 operator-lint: gowork ## Runs operator-lint
 	GOBIN=$(LOCALBIN) go install github.com/gibizer/operator-lint@latest
 	go vet -vettool=$(LOCALBIN)/operator-lint ./... ./apis/...
+
+.PHONY: verify-go-mod-sync
+verify-go-mod-sync: ## Checks if dependencies to other operators are in sync between the main and the ./apis go.mod files
+	./verify-go-mod-sync.sh

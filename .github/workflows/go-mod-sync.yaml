@@ -1,0 +1,13 @@
+name: Golang lint, vet and unit test pipeline
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: go-mod-sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project code
+        uses: actions/checkout@v2
+      - name: run verify-go-mod-sync.sh
+        run: ./verify-go-mod-sync.sh
