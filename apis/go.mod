@@ -10,7 +10,7 @@ require (
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221014164348-0a612ae8b391
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573
 	github.com/rabbitmq/cluster-operator v1.14.0
-	k8s.io/apimachinery v0.25.2
+	k8s.io/apimachinery v0.25.4
 	sigs.k8s.io/controller-runtime v0.13.1
 )
 
