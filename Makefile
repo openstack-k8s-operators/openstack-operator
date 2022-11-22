@@ -188,10 +188,11 @@ bundle: manifests kustomize ## Generate bundle manifests and metadata, then vali
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS)
 	operator-sdk bundle validate ./bundle
+	/bin/bash hack/pin-custom-bundle-dockerfile.sh
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image.
-	podman build -f custom-bundle.Dockerfile -t $(BUNDLE_IMG) .
+	podman build -f custom-bundle.Dockerfile.pinned -t $(BUNDLE_IMG) .
 
 
 .PHONY: bundle-push
