@@ -17,6 +17,10 @@ import (
 
 // ReconcileCinder -
 func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	if !instance.Spec.Cinder.Enabled {
+		return ctrl.Result{}, nil
+	}
+
 	cinder := &cinderv1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "cinder",
@@ -26,7 +30,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	helper.GetLogger().Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), cinder, func() error {
-		instance.Spec.CinderTemplate.DeepCopyInto(&cinder.Spec)
+		instance.Spec.Cinder.Template.DeepCopyInto(&cinder.Spec)
 		if cinder.Spec.Secret == "" {
 			cinder.Spec.Secret = instance.Spec.Secret
 		}

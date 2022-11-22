@@ -43,28 +43,100 @@ type OpenStackControlPlaneSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// KeystoneTemplate - Overrides to use when creating the Keystone API Service
-	KeystoneTemplate keystonev1.KeystoneAPISpec `json:"keystoneTemplate,omitempty"`
+	// Keystone - Parameters related to the Keystone service
+	Keystone KeystoneSection `json:"keystone,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// PlacementTemplate - Overrides to use when creating the Placement API
-	PlacementTemplate placementv1.PlacementAPISpec `json:"placementTemplate,omitempty"`
+	// Placement - Parameters related to the Placement service
+	Placement PlacementSection `json:"placement,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// GlanceTemplate - Overrides to use when creating the Glance Service
-	GlanceTemplate glancev1.GlanceSpec `json:"glanceTemplate,omitempty"`
+	// Glance - Parameters related to the Glance service
+	Glance GlanceSection `json:"glance,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// CinderTemplate - Overrides to use when creating Cinder Resources
-	CinderTemplate cinderv1.CinderSpec `json:"cinderTemplate,omitempty"`
+	// Cinder - Parameters related to the Cinder service
+	Cinder CinderSection `json:"cinder,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// MariadbTemplate - Overrides to use when creating the MariaDB API Service
-	MariadbTemplate mariadbv1.MariaDBSpec `json:"mariadbTemplate,omitempty"`
+	// Mariadb - Parameters related to the Mariadb service
+	Mariadb MariadbSection `json:"mariadb,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// RabbitmqTemplate - Overrides to use when creating the Rabbitmq cluster
-	RabbitmqTemplate rabbitmqv1.RabbitmqClusterSpec `json:"rabbitmqTemplate,omitempty"`
+	// Rabbitmq - Parameters related to the Rabbitmq service
+	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
+}
+
+// KeystoneSection defines the desired state of Keystone service
+type KeystoneSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether Keystone service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Keystone service
+	Template keystonev1.KeystoneAPISpec `json:"template,omitempty"`
+}
+
+// PlacementSection defines the desired state of Placement service
+type PlacementSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether Placement service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Placement API
+	Template placementv1.PlacementAPISpec `json:"template,omitempty"`
+}
+
+// GlanceSection defines the desired state of Glance service
+type GlanceSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether Glance service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Glance Service
+	Template glancev1.GlanceSpec `json:"template,omitempty"`
+}
+
+// CinderSection defines the desired state of Cinder service
+type CinderSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether Cinder service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating Cinder Resources
+	Template cinderv1.CinderSpec `json:"template,omitempty"`
+}
+
+// MariadbSection defines the desired state of MariaDB service
+type MariadbSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether MariaDB service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the MariaDB API Service
+	Template mariadbv1.MariaDBSpec `json:"template,omitempty"`
+}
+
+// RabbitmqSection defines the desired state of RabbitMQ service
+type RabbitmqSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether RabbitMQ service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Rabbitmq cluster
+	Template rabbitmqv1.RabbitmqClusterSpec `json:"template,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

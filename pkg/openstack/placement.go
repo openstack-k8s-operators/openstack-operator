@@ -17,6 +17,10 @@ import (
 
 // ReconcilePlacementAPI -
 func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	if !instance.Spec.Placement.Enabled {
+		return ctrl.Result{}, nil
+	}
+
 	placementAPI := &placementv1.PlacementAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "placement",
@@ -26,7 +30,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 
 	helper.GetLogger().Info("Reconciling placementAPI", "placementAPI.Namespace", instance.Namespace, "placementAPI.Name", "placement")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), placementAPI, func() error {
-		instance.Spec.PlacementTemplate.DeepCopyInto(&placementAPI.Spec)
+		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec)
 		if placementAPI.Spec.Secret == "" {
 			placementAPI.Spec.Secret = instance.Spec.Secret
 		}
