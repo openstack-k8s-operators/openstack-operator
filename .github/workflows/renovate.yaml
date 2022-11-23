@@ -2,7 +2,7 @@ name: Run Renovate Bot
 
 on:
   schedule:
-    - cron:  '0/30 * * * *'
+    - cron:  '45 * * * *'
 
 jobs:
   renovate:
