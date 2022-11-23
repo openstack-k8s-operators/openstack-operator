@@ -10,6 +10,7 @@ testbin/*
 
 bundle/*
 bundle.Dockerfile
+custom-bundle.Dockerfile.pinned
 
 # Test binary, build with `go test -c`
 *.test
