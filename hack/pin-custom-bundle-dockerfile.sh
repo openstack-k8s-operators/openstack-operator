@@ -6,13 +6,9 @@ for X in $(go list -m -json all | jq -r '. | select(.Path | contains("openstack"
   #example: github.com/openstack-k8s-operators/placement-operator/api=v0.0.0-20221007105015-13dce7450573
   BASE=$(echo $X | sed -e 's|github.com/openstack-k8s-operators/\([^-\)]*\).*|\1|')
   REF=$(echo $X | sed -e 's|github.com/[^\=]*=v0.0.0-[0-9]*-\(.*\)$|\1|')
-  #echo "BASE: $BASE REF: $REF"
   if  ! echo "$BASE" | grep -e "lib" -e "openstack" &> /dev/null; then
-      #SHA=$(curl -s -H 'Accept: application/vnd.github+json' -H "Authorization: Bearer <YOUR-TOKEN>" \
-            #https://api.github.com/repos/openstack-k8s-operators/$BASE/commits/$REF | jq -r .sha)
       SHA=$(curl -s https://quay.io/api/v1/repository/openstack-k8s-operators/$BASE-operator-bundle/tag/ \
             | jq -r .tags[].name | grep $REF)
-      #echo "SHA: $SHA"
       sed -i custom-bundle.Dockerfile.pinned -e "s|FROM quay.io/openstack-k8s-operators/${BASE}-operator-bundle.*|FROM quay.io/openstack-k8s-operators/${BASE}-operator-bundle:$SHA as ${BASE}-bundle|"
   fi
 done
