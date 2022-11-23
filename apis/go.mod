@@ -3,10 +3,10 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.18
 
 require (
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20221010180347-a9a8efadf3c3
+	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20221121160856-6240496cc613
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20221117134947-4983070a97f8
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20220927090553-6b3218c776f7
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221019154135-2d172cbff565
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221103175706-2c39582ce513
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221014164348-0a612ae8b391
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573
 	github.com/rabbitmq/cluster-operator v1.14.0
@@ -63,7 +63,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.25.2 // indirect
+	k8s.io/api v0.25.4 // indirect
 	k8s.io/apiextensions-apiserver v0.25.0 // indirect
 	k8s.io/client-go v0.25.0 // indirect
 	k8s.io/component-base v0.25.0 // indirect
