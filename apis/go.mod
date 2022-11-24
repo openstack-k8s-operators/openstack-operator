@@ -6,7 +6,7 @@ require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20221121160856-6240496cc613
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20221122130904-c4e2e4328885
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20221123090515-e2561e258f0a
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221123151902-772291f0b234
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221124101951-b9a5e06aa58c
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb7400f56094
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573
 	github.com/rabbitmq/cluster-operator v1.14.0
@@ -65,7 +65,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.25.4 // indirect
 	k8s.io/apiextensions-apiserver v0.25.0 // indirect
-	k8s.io/client-go v0.25.0 // indirect
+	k8s.io/client-go v0.25.4 // indirect
 	k8s.io/component-base v0.25.0 // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220803164354-a70c9af30aea // indirect

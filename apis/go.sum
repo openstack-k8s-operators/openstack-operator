@@ -242,6 +242,8 @@ github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-202211031757
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221103175706-2c39582ce513/go.mod h1:KWqK7l2ej+rIYngoNUrxE2YjKGlRAAgJXXM0uU2R6XY=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221123151902-772291f0b234 h1:CQ1pJkggMiHmPaV32IdsheZ2l10SaAM37DJwwNpB3os=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221123151902-772291f0b234/go.mod h1:R++PWeaNC9vJlTuxUkILxtBQAR5qDgxfQF1PLGRtWIM=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221124101951-b9a5e06aa58c h1:m6cLYnpE9ThSP0bOGtDnHI0tBZg9U/EYiWojwygdYew=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221124101951-b9a5e06aa58c/go.mod h1:qV9OlokZRpqbHI3lmeN5EOmIKynWphw6GPl3zP9KOGM=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20220915080953-f73a201a1da6 h1:MVNEHyqD0ZdO9jiyUSKw5M2T9Lc4l4Wx1pdC2/BSJ5Y=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20220915080953-f73a201a1da6/go.mod h1:YsqouRH8DoZAjFaxcIErspk59BcwXtVjPxK/yV17Wrc=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20220923094431-9fca0c85a9dc h1:Dud2dr25VhaZF9Av28nqmCeBfNkGWDckZ5TaajEcGFc=
@@ -653,6 +655,8 @@ k8s.io/apimachinery v0.25.4 h1:CtXsuaitMESSu339tfhVXhQrPET+EiWnIY1rcurKnAc=
 k8s.io/apimachinery v0.25.4/go.mod h1:jaF9C/iPNM1FuLl7Zuy5b9v+n35HGSh6AQ4HYRkCqwo=
 k8s.io/client-go v0.25.0 h1:CVWIaCETLMBNiTUta3d5nzRbXvY5Hy9Dpl+VvREpu5E=
 k8s.io/client-go v0.25.0/go.mod h1:lxykvypVfKilxhTklov0wz1FoaUZ8X4EwbhS6rpRfN8=
+k8s.io/client-go v0.25.4 h1:3RNRDffAkNU56M/a7gUfXaEzdhZlYhoW8dgViGy5fn8=
+k8s.io/client-go v0.25.4/go.mod h1:8trHCAC83XKY0wsBIpbirZU4NTUpbuhc2JnI7OruGZw=
 k8s.io/component-base v0.25.0 h1:haVKlLkPCFZhkcqB6WCvpVxftrg6+FK5x1ZuaIDaQ5Y=
 k8s.io/component-base v0.25.0/go.mod h1:F2Sumv9CnbBlqrpdf7rKZTmmd2meJq0HizeyY/yAFxk=
 k8s.io/klog/v2 v2.80.1 h1:atnLQ121W371wYYFawwYx1aEY2eUfs4l3J72wtgAwV4=
