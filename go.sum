@@ -315,6 +315,8 @@ github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb
 github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb7400f56094/go.mod h1:HiEKXmDSJ6Gl+pN7kK5CX1sgOjrxybux4Ob5pdUim1M=
 github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573 h1:ZE1KwLqObs9A88qIkfUCigZcykwEjG/DlZB3KGU/jJ4=
 github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573/go.mod h1:LLpN63YuLHd1oZbYO6pKrMsH07jl4h7jueXjVl7bGsY=
+github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221122143733-c44b1ab0ea53 h1:+E9WSgl5MEnmRRlV9dJfCJc7dIksJGnpssdCAD3FzSs=
+github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221122143733-c44b1ab0ea53/go.mod h1:TCDHEsJXXK7L4U1xfT44dZh5N1YH5LR6AzoVvOS15E4=
 github.com/operator-framework/api v0.17.1 h1:J/6+Xj4IEV8C7hcirqUFwOiZAU3PbnJhWvB0/bB51c4=
 github.com/operator-framework/api v0.17.1/go.mod h1:kk8xJahHJR3bKqrA+A+1VIrhOTmyV76k+ARv+iV+u1Q=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
