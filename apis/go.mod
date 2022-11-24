@@ -8,7 +8,7 @@ require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20221123090515-e2561e258f0a
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221124101951-b9a5e06aa58c
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb7400f56094
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221007105015-13dce7450573
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221122143733-c44b1ab0ea53
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/apimachinery v0.25.4
 	sigs.k8s.io/controller-runtime v0.13.1
