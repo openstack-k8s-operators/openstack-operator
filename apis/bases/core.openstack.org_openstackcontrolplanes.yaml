@@ -152,24 +152,21 @@ spec:
                               for running the API service
                             type: object
                           passwordSelectors:
+                            default:
+                              database: CinderDatabasePassword
+                              service: CinderPassword
                             description: PasswordSelectors - Selectors to identify
-                              the DB and AdminUser password and TransportURL from
-                              the Secret
+                              the DB and ServiceUser password from the Secret
                             properties:
-                              admin:
-                                default: CinderPassword
-                                description: Database - Selector to get the cinder
-                                  service password from the Secret
-                                type: string
                               database:
                                 default: CinderDatabasePassword
                                 description: 'Database - Selector to get the cinder
                                   database user password from the Secret TODO: not
                                   used, need change in mariadb-operator'
                                 type: string
-                              transportUrl:
-                                default: TransportURL
-                                description: Database - Selector to get the cinder
+                              service:
+                                default: CinderPassword
+                                description: Service - Selector to get the cinder
                                   service password from the Secret
                                 type: string
                             type: object
@@ -214,6 +211,9 @@ spec:
                             default: cinder
                             description: ServiceUser - optional username used for
                               this service to register in cinder
+                            type: string
+                          transportURLSecret:
+                            description: Secret containing RabbitMq transport URL
                             type: string
                         type: object
                       cinderBackup:
@@ -272,23 +272,21 @@ spec:
                               for running the Backup service
                             type: object
                           passwordSelectors:
+                            default:
+                              database: CinderDatabasePassword
+                              service: CinderPassword
                             description: PasswordSelectors - Selectors to identify
-                              the DB and TransportURL from the Secret
+                              the DB and ServiceUser password from the Secret
                             properties:
-                              admin:
-                                default: CinderPassword
-                                description: Database - Selector to get the cinder
-                                  service password from the Secret
-                                type: string
                               database:
                                 default: CinderDatabasePassword
                                 description: 'Database - Selector to get the cinder
                                   database user password from the Secret TODO: not
                                   used, need change in mariadb-operator'
                                 type: string
-                              transportUrl:
-                                default: TransportURL
-                                description: Database - Selector to get the cinder
+                              service:
+                                default: CinderPassword
+                                description: Service - Selector to get the cinder
                                   service password from the Secret
                                 type: string
                             type: object
@@ -332,6 +330,9 @@ spec:
                             default: cinder
                             description: ServiceUser - optional username used for
                               this service to register in cinder
+                            type: string
+                          transportURLSecret:
+                            description: Secret containing RabbitMq transport URL
                             type: string
                         type: object
                       cinderScheduler:
@@ -390,23 +391,21 @@ spec:
                               for running the Scheduler service
                             type: object
                           passwordSelectors:
+                            default:
+                              database: CinderDatabasePassword
+                              service: CinderPassword
                             description: PasswordSelectors - Selectors to identify
-                              the DB and TransportURL from the Secret
+                              the DB and ServiceUser password from the Secret
                             properties:
-                              admin:
-                                default: CinderPassword
-                                description: Database - Selector to get the cinder
-                                  service password from the Secret
-                                type: string
                               database:
                                 default: CinderDatabasePassword
                                 description: 'Database - Selector to get the cinder
                                   database user password from the Secret TODO: not
                                   used, need change in mariadb-operator'
                                 type: string
-                              transportUrl:
-                                default: TransportURL
-                                description: Database - Selector to get the cinder
+                              service:
+                                default: CinderPassword
+                                description: Service - Selector to get the cinder
                                   service password from the Secret
                                 type: string
                             type: object
@@ -451,6 +450,9 @@ spec:
                             default: cinder
                             description: ServiceUser - optional username used for
                               this service to register in cinder
+                            type: string
+                          transportURLSecret:
+                            description: Secret containing RabbitMq transport URL
                             type: string
                         type: object
                       cinderVolumes:
@@ -510,23 +512,21 @@ spec:
                                 nodes for running the Volume service
                               type: object
                             passwordSelectors:
+                              default:
+                                database: CinderDatabasePassword
+                                service: CinderPassword
                               description: PasswordSelectors - Selectors to identify
-                                the DB and TransportURL from the Secret
+                                the DB and ServiceUser password from the Secret
                               properties:
-                                admin:
-                                  default: CinderPassword
-                                  description: Database - Selector to get the cinder
-                                    service password from the Secret
-                                  type: string
                                 database:
                                   default: CinderDatabasePassword
                                   description: 'Database - Selector to get the cinder
                                     database user password from the Secret TODO: not
                                     used, need change in mariadb-operator'
                                   type: string
-                                transportUrl:
-                                  default: TransportURL
-                                  description: Database - Selector to get the cinder
+                                service:
+                                  default: CinderPassword
+                                  description: Service - Selector to get the cinder
                                     service password from the Secret
                                   type: string
                               type: object
@@ -572,6 +572,9 @@ spec:
                               default: cinder
                               description: ServiceUser - optional username used for
                                 this service to register in cinder
+                              type: string
+                            transportURLSecret:
+                              description: Secret containing RabbitMq transport URL
                               type: string
                           type: object
                         description: CinderVolumes - Map of chosen names to spec definitions
@@ -620,23 +623,21 @@ spec:
                           config dir in /etc/<service> . TODO: -> implement'
                         type: object
                       passwordSelectors:
+                        default:
+                          database: CinderDatabasePassword
+                          service: CinderPassword
                         description: PasswordSelectors - Selectors to identify the
-                          DB and AdminUser password and TransportURL from the Secret
+                          DB and ServiceUser password from the Secret
                         properties:
-                          admin:
-                            default: CinderPassword
-                            description: Database - Selector to get the cinder service
-                              password from the Secret
-                            type: string
                           database:
                             default: CinderDatabasePassword
                             description: 'Database - Selector to get the cinder database
                               user password from the Secret TODO: not used, need change
                               in mariadb-operator'
                             type: string
-                          transportUrl:
-                            default: TransportURL
-                            description: Database - Selector to get the cinder service
+                          service:
+                            default: CinderPassword
+                            description: Service - Selector to get the cinder service
                               password from the Secret
                             type: string
                         type: object
@@ -645,9 +646,14 @@ spec:
                         description: PreserveJobs - do not delete jobs after they
                           finished e.g. to check logs
                         type: boolean
+                      rabbitMqClusterName:
+                        default: rabbitmq
+                        description: RabbitMQ instance name Needed to request a transportURL
+                          that is created and used in Cinder
+                        type: string
                       secret:
                         description: Secret containing OpenStack password information
-                          for CinderDatabasePassword, AdminPassword
+                          for CinderDatabasePassword, CinderPassword
                         type: string
                       serviceUser:
                         default: cinder
@@ -657,6 +663,7 @@ spec:
                     required:
                     - cinderAPI
                     - cinderScheduler
+                    - rabbitMqClusterName
                     type: object
                 type: object
               glance:
@@ -1197,13 +1204,16 @@ spec:
                           running this service
                         type: object
                       passwordSelectors:
+                        default:
+                          admin: AdminPassword
+                          database: KeystoneDatabasePassword
                         description: PasswordSelectors - Selectors to identify the
                           DB and AdminUser password from the Secret
                         properties:
                           admin:
                             default: AdminPassword
-                            description: Database - Selector to get the keystone Database
-                              user password from the Secret
+                            description: Admin - Selector to get the keystone Admin
+                              password from the Secret
                             type: string
                           database:
                             default: KeystoneDatabasePassword
@@ -1261,6 +1271,10 @@ spec:
                         description: Secret containing OpenStack password information
                           for keystone KeystoneDatabasePassword, AdminPassword
                         type: string
+                    required:
+                    - containerImage
+                    - databaseInstance
+                    - secret
                     type: object
                 type: object
               mariadb:
@@ -1364,6 +1378,9 @@ spec:
                           running this service
                         type: object
                       passwordSelectors:
+                        default:
+                          database: PlacementDatabasePassword
+                          service: PlacementPassword
                         description: PasswordSelectors - Selectors to identify the
                           DB and ServiceUser password from the Secret
                         properties:
@@ -1428,6 +1445,10 @@ spec:
                         description: ServiceUser - optional username used for this
                           service to register in keystone
                         type: string
+                    required:
+                    - containerImage
+                    - databaseInstance
+                    - secret
                     type: object
                 type: object
               rabbitmq:
