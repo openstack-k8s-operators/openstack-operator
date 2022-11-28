@@ -259,8 +259,7 @@ get-ci-tools:
 
 # Run go fmt against code
 gofmt: get-ci-tools
-	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh
-	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh ./apis
+	./pre-commit.sh
 
 # Run go vet against code
 govet: get-ci-tools
