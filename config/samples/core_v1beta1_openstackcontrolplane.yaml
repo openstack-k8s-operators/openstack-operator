@@ -7,12 +7,12 @@ spec:
   storageClass: local-storage
   keystone:
     template:
-      containerImage: quay.io/tripleowallabycentos9/openstack-keystone:current-tripleo
+      containerImage: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
       databaseInstance: openstack
       secret: osp-secret
   mariadb:
     template:
-      containerImage: quay.io/tripleowallabycentos9/openstack-mariadb:current-tripleo
+      containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
       storageRequest: 500M
   rabbitmq:
     template:
@@ -27,30 +27,30 @@ spec:
   placement:
     template:
       databaseInstance: openstack
-      containerImage: quay.io/tripleowallabycentos9/openstack-placement-api:current-tripleo
+      containerImage: quay.io/tripleozedcentos9/openstack-placement-api:current-tripleo
       secret: osp-secret
   glance:
     template:
       databaseInstance: openstack
-      containerImage: quay.io/tripleowallabycentos9/openstack-glance-api:current-tripleo
+      containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
       storageClass: ""
       storageRequest: 10G
       glanceAPIInternal:
-        containerImage: quay.io/tripleowallabycentos9/openstack-glance-api:current-tripleo
+        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
       glanceAPIExternal:
-        containerImage: quay.io/tripleowallabycentos9/openstack-glance-api:current-tripleo
+        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
   cinder:
     template:
       cinderAPI:
         replicas: 1
-        containerImage: quay.io/tripleowallabycentos9/openstack-cinder-api:current-tripleo
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
       cinderScheduler:
         replicas: 1
-        containerImage: quay.io/tripleowallabycentos9/openstack-cinder-scheduler:current-tripleo
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
       cinderBackup:
         replicas: 1
-        containerImage: quay.io/tripleowallabycentos9/openstack-cinder-backup:current-tripleo
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
       cinderVolumes:
         volume1:
-          containerImage: quay.io/tripleowallabycentos9/openstack-cinder-volume:current-tripleo
+          containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
           replicas: 1
