@@ -55,7 +55,7 @@ RUN /workspace/csv-merger \
 
 # remove all individual operator CSV's
 RUN rm /manifests/*clusterserviceversion.yaml
-  
+
 ### Put everything together
 FROM scratch
 
