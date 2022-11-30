@@ -22,6 +22,7 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -65,6 +66,9 @@ type OpenStackControlPlaneSpec struct {
 	// +kubebuilder:validation:Optional
 	// Rabbitmq - Parameters related to the Rabbitmq service
 	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
+
+	// Ovn - Overrides to use when creating the OVN Services
+	Ovn OvnSection `json:"ovn,omitempty"`
 }
 
 // KeystoneSection defines the desired state of Keystone service
@@ -137,6 +141,29 @@ type RabbitmqSection struct {
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Rabbitmq cluster
 	Template rabbitmqv1.RabbitmqClusterSpec `json:"template,omitempty"`
+}
+
+// OvnSection defines the desired state of OVN services
+type OvnSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether OVN services should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the OVN services
+	Template OvnResources `json:"template,omitempty"`
+}
+
+// OvnResources defines the desired state of OVN services
+type OvnResources struct {
+	// +kubebuilder:validation:Optional
+	// OVNDBCluster - Overrides to use when creating the OVNDBCluster services
+	OVNDBCluster map[string]ovnv1.OVNDBClusterSpec `json:"ovnDBCluster,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// OVNNorthd - Overrides to use when creating the OVNNorthd service
+	OVNNorthd ovnv1.OVNNorthdSpec `json:"ovnNorthd,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

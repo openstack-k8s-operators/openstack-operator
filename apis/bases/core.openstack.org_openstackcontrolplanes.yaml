@@ -1313,6 +1313,143 @@ spec:
                   control plane services (currently only applies to KeystoneAPI and
                   PlacementAPI)
                 type: object
+              ovn:
+                description: Ovn - Overrides to use when creating the OVN Services
+                properties:
+                  enabled:
+                    default: true
+                    description: Enabled - Whether OVN services should be deployed
+                      and managed
+                    type: boolean
+                  template:
+                    description: Template - Overrides to use when creating the OVN
+                      services
+                    properties:
+                      ovnDBCluster:
+                        additionalProperties:
+                          description: OVNDBClusterSpec defines the desired state
+                            of OVNDBCluster
+                          properties:
+                            containerImage:
+                              type: string
+                            dbType:
+                              description: DBType - NB or SB
+                              pattern: ^NB|SB$
+                              type: string
+                            logLevel:
+                              default: info
+                              description: LogLevel - Set log level info, dbg, emer
+                                etc
+                              type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: NodeSelector to target subset of worker
+                                nodes running this service
+                              type: object
+                            replicas:
+                              default: 1
+                              description: Replicas of OVN DBCluster to run
+                              format: int32
+                              maximum: 1
+                              minimum: 0
+                              type: integer
+                            resources:
+                              description: Resources - Compute Resources required
+                                by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                              properties:
+                                limits:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Limits describes the maximum amount
+                                    of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                  type: object
+                                requests:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Requests describes the minimum amount
+                                    of compute resources required. If Requests is
+                                    omitted for a container, it defaults to Limits
+                                    if that is explicitly specified, otherwise to
+                                    an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                  type: object
+                              type: object
+                            storageClass:
+                              description: StorageClass
+                              type: string
+                            storageRequest:
+                              description: StorageRequest
+                              type: string
+                          required:
+                          - dbType
+                          - storageRequest
+                          type: object
+                        description: OVNDBCluster - Overrides to use when creating
+                          the OVNDBCluster services
+                        type: object
+                      ovnNorthd:
+                        description: OVNNorthd - Overrides to use when creating the
+                          OVNNorthd service
+                        properties:
+                          containerImage:
+                            type: string
+                          logLevel:
+                            default: info
+                            description: LogLevel - Set log level info, dbg, emer
+                              etc
+                            type: string
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            description: NodeSelector to target subset of worker nodes
+                              running this service
+                            type: object
+                          replicas:
+                            default: 1
+                            description: Replicas of OVN Northd to run
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            description: Resources - Compute Resources required by
+                              this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                description: 'Limits describes the maximum amount
+                                  of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                description: 'Requests describes the minimum amount
+                                  of compute resources required. If Requests is omitted
+                                  for a container, it defaults to Limits if that is
+                                  explicitly specified, otherwise to an implementation-defined
+                                  value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                type: object
+                            type: object
+                        type: object
+                    type: object
+                type: object
               placement:
                 description: Placement - Parameters related to the Placement service
                 properties:

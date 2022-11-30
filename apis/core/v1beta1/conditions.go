@@ -40,6 +40,9 @@ const (
 
 	// OpenStackControlPlaneCinderReadyCondition Status=True condition which indicates if Cinder is configured and operational
 	OpenStackControlPlaneCinderReadyCondition condition.Type = "OpenStackControlPlaneCinderReady"
+
+	// OpenStackControlPlaneOVNReadyCondition Status=True condition which indicates if OVN is configured and operational
+	OpenStackControlPlaneOVNReadyCondition condition.Type = "OpenStackControlPlaneOVNReady"
 )
 
 //
@@ -129,4 +132,16 @@ const (
 
 	// OpenStackControlPlaneCinderReadyErrorMessage
 	OpenStackControlPlaneCinderReadyErrorMessage = "OpenStackControlPlane Cinder error occured %s"
+
+	// OpenStackControlPlaneOVNReadyInitMessage
+	OpenStackControlPlaneOVNReadyInitMessage = "OpenStackControlPlane OVN not started"
+
+	// OpenStackControlPlaneOVNReadyMessage
+	OpenStackControlPlaneOVNReadyMessage = "OpenStackControlPlane OVN completed"
+
+	// OpenStackControlPlaneOVNReadyRunningMessage
+	OpenStackControlPlaneOVNReadyRunningMessage = "OpenStackControlPlane OVN in progress"
+
+	// OpenStackControlPlaneOVNReadyErrorMessage
+	OpenStackControlPlaneOVNReadyErrorMessage = "OpenStackControlPlane OVN error occured %s"
 )
