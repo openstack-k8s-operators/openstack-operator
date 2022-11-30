@@ -43,6 +43,9 @@ const (
 
 	// OpenStackControlPlaneOVNReadyCondition Status=True condition which indicates if OVN is configured and operational
 	OpenStackControlPlaneOVNReadyCondition condition.Type = "OpenStackControlPlaneOVNReady"
+
+	// OpenStackControlPlaneNeutronReadyCondition Status=True condition which indicates if Neutron is configured and operational
+	OpenStackControlPlaneNeutronReadyCondition condition.Type = "OpenStackControlPlaneNeutronReady"
 )
 
 //
@@ -144,4 +147,16 @@ const (
 
 	// OpenStackControlPlaneOVNReadyErrorMessage
 	OpenStackControlPlaneOVNReadyErrorMessage = "OpenStackControlPlane OVN error occured %s"
+
+	// OpenStackControlPlaneNeutronReadyInitMessage
+	OpenStackControlPlaneNeutronReadyInitMessage = "OpenStackControlPlane Neutron not started"
+
+	// OpenStackControlPlaneNeutronReadyMessage
+	OpenStackControlPlaneNeutronReadyMessage = "OpenStackControlPlane Neutron completed"
+
+	// OpenStackControlPlaneNeutronReadyRunningMessage
+	OpenStackControlPlaneNeutronReadyRunningMessage = "OpenStackControlPlane Neutron in progress"
+
+	// OpenStackControlPlaneNeutronReadyErrorMessage
+	OpenStackControlPlaneNeutronReadyErrorMessage = "OpenStackControlPlane Neutron error occured %s"
 )

@@ -30,6 +30,7 @@ import (
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
@@ -66,6 +67,7 @@ func init() {
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1beta1.AddToScheme(scheme))
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
+	utilruntime.Must(neutronv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
