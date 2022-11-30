@@ -92,6 +92,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - neutron.openstack.org
+  resources:
+  - neutronapis
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - ovn.openstack.org
   resources:
   - ovndbclusters

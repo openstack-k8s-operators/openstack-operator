@@ -1306,6 +1306,157 @@ spec:
                         type: string
                     type: object
                 type: object
+              neutron:
+                description: Neutron - Overrides to use when creating the Neutron
+                  Service
+                properties:
+                  enabled:
+                    default: true
+                    description: Enabled - Whether Neutron service should be deployed
+                      and managed
+                    type: boolean
+                  template:
+                    description: Template - Overrides to use when creating the Neutron
+                      service
+                    properties:
+                      containerImage:
+                        default: quay.io/tripleozedcentos9/openstack-neutron-server:current-tripleo
+                        type: string
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        description: CustomServiceConfig - customize the service config
+                          using this parameter to change service defaults, or overwrite
+                          rendered information using raw OpenStack config format.
+                          The content gets added to to /etc/<service>/<service>.conf.d
+                          directory as custom.conf file.
+                        type: string
+                      databaseInstance:
+                        description: MariaDB instance name Right now required by the
+                          maridb-operator to get the credentials from the instance
+                          to create the DB Might not be required in future
+                        type: string
+                      databaseUser:
+                        default: neutron
+                        description: 'DatabaseUser - optional username used for neutron
+                          DB, defaults to neutron TODO: -> implement needs work in
+                          mariadb-operator, right now only neutron'
+                        type: string
+                      debug:
+                        description: Debug - enable debug for different deploy stages.
+                          If an init container is used, it runs and the actual action
+                          pod gets started with sleep infinity
+                        properties:
+                          bootstrap:
+                            default: false
+                            description: Bootstrap enable debug
+                            type: boolean
+                          dbSync:
+                            default: false
+                            description: DBSync enable debug
+                            type: boolean
+                          service:
+                            default: false
+                            description: Service enable debug
+                            type: boolean
+                        type: object
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        description: 'ConfigOverwrite - interface to overwrite default
+                          config files like e.g. logging.conf or policy.json. But
+                          can also be used to add additional files. Those get added
+                          to the service config dir in /etc/<service> . TODO: -> implement'
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector to target subset of worker nodes
+                          running this service
+                        type: object
+                      passwordSelectors:
+                        default:
+                          database: NeutronDatabasePassword
+                          novaservice: NovaPassword
+                          service: NeutronPassword
+                        description: PasswordSelectors - Selectors to identify the
+                          DB and ServiceUser and NoveService User password from the
+                          Secret
+                        properties:
+                          database:
+                            default: NeutronDatabasePassword
+                            description: 'Database - Selector to get the neutron database
+                              user password from the Secret TODO: not used, need change
+                              in mariadb-operator'
+                            type: string
+                          novaservice:
+                            default: NovaPassword
+                            description: Database - Selector to get the nova service
+                              password from the Secret
+                            type: string
+                          service:
+                            default: NeutronPassword
+                            description: Database - Selector to get the neutron service
+                              password from the Secret
+                            type: string
+                        type: object
+                      preserveJobs:
+                        default: false
+                        description: PreserveJobs - do not delete jobs after they
+                          finished e.g. to check logs
+                        type: boolean
+                      rabbitMqClusterName:
+                        default: rabbitmq
+                        description: RabbitMQ instance name Needed to request a transportURL
+                          that is created and used in Neutron
+                        type: string
+                      replicas:
+                        default: 1
+                        description: Replicas of neutron API to run
+                        format: int32
+                        maximum: 32
+                        minimum: 0
+                        type: integer
+                      resources:
+                        description: Resources - Compute Resources required by this
+                          service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute
+                              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of
+                              compute resources required. If Requests is omitted for
+                              a container, it defaults to Limits if that is explicitly
+                              specified, otherwise to an implementation-defined value.
+                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                      secret:
+                        description: Secret containing OpenStack password information
+                          for neutron NeutronPassword NovaPassword
+                        type: string
+                      serviceUser:
+                        default: neutron
+                        description: ServiceUser - optional username used for this
+                          service to register in neutron
+                        type: string
+                    required:
+                    - rabbitMqClusterName
+                    type: object
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string

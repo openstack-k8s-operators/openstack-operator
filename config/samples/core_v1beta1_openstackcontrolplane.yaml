@@ -70,3 +70,8 @@ spec:
       ovnNorthd:
         replicas: 1
         containerImage: quay.io/tripleozedcentos9/openstack-ovn-northd:current-tripleo
+  neutron:
+    template:
+      databaseInstance: openstack
+      containerImage: quay.io/tripleozedcentos9/openstack-neutron-server:current-tripleo
+      secret: osp-secret

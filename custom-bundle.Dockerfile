@@ -29,6 +29,7 @@ FROM quay.io/openstack-k8s-operators/placement-operator-bundle:latest as placeme
 FROM quay.io/openstack-k8s-operators/glance-operator-bundle:latest as glance-bundle
 FROM quay.io/openstack-k8s-operators/cinder-operator-bundle:latest as cinder-bundle
 FROM quay.io/openstack-k8s-operators/ovn-operator-bundle:latest as ovn-bundle
+FROM quay.io/openstack-k8s-operators/neutron-operator-bundle:latest as neutron-bundle
 
 FROM golang:1.18 as merger
 WORKDIR /workspace
@@ -45,6 +46,7 @@ COPY --from=placement-bundle /manifests/* /manifests/
 COPY --from=glance-bundle /manifests/* /manifests/
 COPY --from=cinder-bundle /manifests/* /manifests/
 COPY --from=ovn-bundle /manifests/* /manifests/
+COPY --from=neutron-bundle /manifests/* /manifests/
 
 RUN /workspace/csv-merger \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
@@ -54,6 +56,7 @@ RUN /workspace/csv-merger \
   --glance-csv=/manifests/glance-operator.clusterserviceversion.yaml \
   --cinder-csv=/manifests/cinder-operator.clusterserviceversion.yaml \
   --ovn-csv=/manifests/ovn-operator.clusterserviceversion.yaml \
+  --neutron-csv=/manifests/neutron-operator.clusterserviceversion.yaml \
   --openstack-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's

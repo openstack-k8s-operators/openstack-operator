@@ -22,6 +22,7 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
@@ -69,6 +70,9 @@ type OpenStackControlPlaneSpec struct {
 
 	// Ovn - Overrides to use when creating the OVN Services
 	Ovn OvnSection `json:"ovn,omitempty"`
+
+	// Neutron - Overrides to use when creating the Neutron Service
+	Neutron NeutronSection `json:"neutron,omitempty"`
 }
 
 // KeystoneSection defines the desired state of Keystone service
@@ -164,6 +168,18 @@ type OvnResources struct {
 	// +kubebuilder:validation:Optional
 	// OVNNorthd - Overrides to use when creating the OVNNorthd service
 	OVNNorthd ovnv1.OVNNorthdSpec `json:"ovnNorthd,omitempty"`
+}
+
+// NeutronSection defines the desired state of Neutron service
+type NeutronSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether Neutron service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Neutron service
+	Template neutronv1.NeutronAPISpec `json:"template,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
