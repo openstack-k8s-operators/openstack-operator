@@ -75,3 +75,6 @@ spec:
       databaseInstance: openstack
       containerImage: quay.io/tripleozedcentos9/openstack-neutron-server:current-tripleo
       secret: osp-secret
+  nova:
+    template:
+      secret: osp-secret
