@@ -126,9 +126,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		instance.Status.Conditions.Init(&cl)
 
 		// Register overall status immediately to have an early feedback e.g. in the cli
-		if err := r.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
+		return ctrl.Result{}, r.Status().Update(ctx, instance)
 	}
 
 	helper, err := helper.NewHelper(
