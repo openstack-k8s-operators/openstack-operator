@@ -70,6 +70,14 @@ spec:
       ovnNorthd:
         replicas: 1
         containerImage: quay.io/tripleozedcentos9/openstack-ovn-northd:current-tripleo
+  ovs:
+    template:
+      ovsContainerImage: "quay.io/skaplons/ovs:latest"
+      ovnContainerImage: "quay.io/tripleozedcentos9/openstack-ovn-controller:current-tripleo"
+      external-ids:
+        system-id: "random"
+        ovn-bridge: "br-int"
+        ovn-encap-type: "geneve,vxlan"
   neutron:
     template:
       databaseInstance: openstack

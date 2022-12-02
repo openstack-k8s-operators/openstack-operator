@@ -25,6 +25,7 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
+	ovsv1 "github.com/openstack-k8s-operators/ovs-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,6 +72,9 @@ type OpenStackControlPlaneSpec struct {
 
 	// Ovn - Overrides to use when creating the OVN Services
 	Ovn OvnSection `json:"ovn,omitempty"`
+
+	// Ovs - Overrides to use when creating the OVS Services
+	Ovs OvsSection `json:"ovs,omitempty"`
 
 	// Neutron - Overrides to use when creating the Neutron Service
 	Neutron NeutronSection `json:"neutron,omitempty"`
@@ -173,6 +177,18 @@ type OvnResources struct {
 	// +kubebuilder:validation:Optional
 	// OVNNorthd - Overrides to use when creating the OVNNorthd service
 	OVNNorthd ovnv1.OVNNorthdSpec `json:"ovnNorthd,omitempty"`
+}
+
+// OvsSection defines the desired state of OVS services
+type OvsSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether OVS services should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the OVS services
+	Template ovsv1.OVSSpec `json:"template,omitempty"`
 }
 
 // NeutronSection defines the desired state of Neutron service
