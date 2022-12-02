@@ -1,6 +1,12 @@
 repos:
 - repo: local
   hooks:
+    - id: sleepy-pod
+      name: sleepy-pod
+      language: system
+      entry: sleep
+      args: ['3600']
+      pass_filenames: false
     - id: make-manifests
       name: make-manifests
       language: system
