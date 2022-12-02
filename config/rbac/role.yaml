@@ -104,6 +104,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - nova.openstack.org
+  resources:
+  - nova
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - ovn.openstack.org
   resources:
   - ovndbclusters

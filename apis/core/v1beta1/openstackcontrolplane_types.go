@@ -23,6 +23,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
@@ -73,6 +74,10 @@ type OpenStackControlPlaneSpec struct {
 
 	// Neutron - Overrides to use when creating the Neutron Service
 	Neutron NeutronSection `json:"neutron,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Nova - Parameters related to the Nova services
+	Nova NovaSection `json:"nova,omitempty"`
 }
 
 // KeystoneSection defines the desired state of Keystone service
@@ -180,6 +185,18 @@ type NeutronSection struct {
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Neutron service
 	Template neutronv1.NeutronAPISpec `json:"template,omitempty"`
+}
+
+// NovaSection defines the desired state of Nova services
+type NovaSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether Nova services should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Nova services
+	Template novav1.NovaSpec `json:"template,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

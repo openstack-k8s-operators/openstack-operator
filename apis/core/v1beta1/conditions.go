@@ -46,6 +46,8 @@ const (
 
 	// OpenStackControlPlaneNeutronReadyCondition Status=True condition which indicates if Neutron is configured and operational
 	OpenStackControlPlaneNeutronReadyCondition condition.Type = "OpenStackControlPlaneNeutronReady"
+	// OpenStackControlPlaneNovaReadyCondition Status=True condition which indicates if Nova is configured and operational
+	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
 )
 
 //
@@ -159,4 +161,15 @@ const (
 
 	// OpenStackControlPlaneNeutronReadyErrorMessage
 	OpenStackControlPlaneNeutronReadyErrorMessage = "OpenStackControlPlane Neutron error occured %s"
+	// OpenStackControlPlaneNovaReadyInitMessage
+	OpenStackControlPlaneNovaReadyInitMessage = "OpenStackControlPlane Nova not started"
+
+	// OpenStackControlPlaneNovaReadyMessage
+	OpenStackControlPlaneNovaReadyMessage = "OpenStackControlPlane Nova completed"
+
+	// OpenStackControlPlaneNovaReadyRunningMessage
+	OpenStackControlPlaneNovaReadyRunningMessage = "OpenStackControlPlane Nova in progress"
+
+	// OpenStackControlPlaneNovaReadyErrorMessage
+	OpenStackControlPlaneNovaReadyErrorMessage = "OpenStackControlPlane Nova error occured %s"
 )
