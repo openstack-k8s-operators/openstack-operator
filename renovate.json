@@ -7,6 +7,7 @@
   "includeForks": true,
   "logFileLevel": "trace",
   "enabledManagers": ["gomod"],
+  "postUpdateOptions": ["gomodTidy"],
   "packageRules": [
     {
       "matchPackageNames": ["go"],
