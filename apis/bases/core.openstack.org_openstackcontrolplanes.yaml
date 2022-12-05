@@ -2163,6 +2163,84 @@ spec:
                         type: object
                     type: object
                 type: object
+              ovs:
+                description: Ovs - Overrides to use when creating the OVS Services
+                properties:
+                  enabled:
+                    default: true
+                    description: Enabled - Whether OVS services should be deployed
+                      and managed
+                    type: boolean
+                  template:
+                    description: Template - Overrides to use when creating the OVS
+                      services
+                    properties:
+                      external-ids:
+                        description: OVSExternalIDs is a set of configuration options
+                          for OVS external-ids table
+                        properties:
+                          enable-chassis-as-gateway:
+                            type: boolean
+                          ovn-bridge:
+                            type: string
+                          ovn-encap-type:
+                            type: string
+                          system-id:
+                            type: string
+                        required:
+                        - ovn-bridge
+                        - ovn-encap-type
+                        - system-id
+                        type: object
+                      nic_mappings:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector to target subset of worker nodes
+                          running this service
+                        type: object
+                      ovnContainerImage:
+                        default: quay.io/tripleozedcentos9/openstack-ovn-controller:current-tripleo
+                        description: Image used for the ovn-controller container
+                        type: string
+                      ovsContainerImage:
+                        default: quay.io/skaplons/ovs:latest
+                        description: Image used for the ovsdb-server and ovs-vswitchd
+                          containers
+                        type: string
+                      resources:
+                        description: Resources - Compute Resources required by this
+                          service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute
+                              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of
+                              compute resources required. If Requests is omitted for
+                              a container, it defaults to Limits if that is explicitly
+                              specified, otherwise to an implementation-defined value.
+                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
+                    type: object
+                type: object
               placement:
                 description: Placement - Parameters related to the Placement service
                 properties:

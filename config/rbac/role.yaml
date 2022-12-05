@@ -140,6 +140,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ovs.openstack.org
+  resources:
+  - ovs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - placement.openstack.org
   resources:
   - placementapis
