@@ -11,7 +11,7 @@ require (
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20221130112258-2d20ea7691aa
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20221202102038-d992628c4b3b
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20221130085454-49cd8b9c841c
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221122143733-c44b1ab0ea53
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221202142822-366b98894af3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/apimachinery v0.25.4
 	sigs.k8s.io/controller-runtime v0.13.1
