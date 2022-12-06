@@ -48,7 +48,7 @@ require (
 	github.com/openshift/api v3.9.0+incompatible // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20220915080953-f73a201a1da6 // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20221212162305-ec57ccd85ad5
-	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20221205051819-43257febb7f9
+	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20221205134225-c415d98c0182
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.13.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
