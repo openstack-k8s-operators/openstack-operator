@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20221121160856-6240496cc613
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20221201163027-7730a6baf360
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20221205194136-4ed451107902
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20221123090515-e2561e258f0a
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20221201135101-4ec1006d9216
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb7400f56094
