@@ -66,6 +66,7 @@ var (
 	glanceCsv      = flag.String("glance-csv", "", "Glance CSV filename")
 	placementCsv   = flag.String("placement-csv", "", "Placement CSV filename")
 	ovnCsv         = flag.String("ovn-csv", "", "OVN CSV filename")
+	ovsCsv         = flag.String("ovs-csv", "", "OVS CSV filename")
 	cinderCsv      = flag.String("cinder-csv", "", "Cinder CSV filename")
 	csvOverrides   = flag.String("csv-overrides", "", "CSV like string with punctual changes that will be recursively applied (if possible)")
 	visibleCRDList = flag.String("visible-crds-list", "openstackcontrolplanes.core.openstack.org,openstackclients.core.openstack.org",
@@ -101,6 +102,7 @@ func main() {
 			*glanceCsv,
 			*placementCsv,
 			*ovnCsv,
+			*ovsCsv,
 			*cinderCsv,
 		}
 
