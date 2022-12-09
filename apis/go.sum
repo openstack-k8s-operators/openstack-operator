@@ -238,8 +238,8 @@ github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20220923094
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20220923094431-9fca0c85a9dc/go.mod h1:fhM62I45VF/5WVpOP1h9OpTfFn+lF2XGrT5jUBKEHVc=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb7400f56094 h1:+AeoMzawRf7pHt8bggAAW7uXhYBiWZHR4HA9M42sGDU=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb7400f56094/go.mod h1:HiEKXmDSJ6Gl+pN7kK5CX1sgOjrxybux4Ob5pdUim1M=
-github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20221130112258-2d20ea7691aa h1:FnxmhZiGNe4DI1hCuNkmZRZnREfn+bGLg9gcSkvjkzM=
-github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20221130112258-2d20ea7691aa/go.mod h1:/xWUdBibmicmdVia5K+WsEK6thKB6ql+cUy3xXnZvvQ=
+github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20221209082018-7333ce4b6867 h1:x0VUyAvErND+LytIXFrki2dOvnjLntVHiK17W/jqEUg=
+github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20221209082018-7333ce4b6867/go.mod h1:/xWUdBibmicmdVia5K+WsEK6thKB6ql+cUy3xXnZvvQ=
 github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20221202102038-d992628c4b3b h1:fPyj3sz+7kas+inuJB3zudSujrqC99Cd+gImELWm1cA=
 github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20221202102038-d992628c4b3b/go.mod h1:PL/gVv+jnXLIKezqFRonlDS7vjJrLREqSGhPVHDf+90=
 github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20221130085454-49cd8b9c841c h1:ULUSB+ps6BRCeoZzUTcFFEeYQEKMUlKenhEpRZQ81Lg=
