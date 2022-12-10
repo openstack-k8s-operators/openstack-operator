@@ -1,0 +1,8 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackClient
+metadata:
+  name: test
+spec:
+  containerImage: quay.io/tripleozedcentos9/openstack-tripleoclient:current-tripleo
+  openStackConfigMap: openstack-config
+  openStackConfigSecret: openstack-config-secret

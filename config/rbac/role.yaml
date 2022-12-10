@@ -20,6 +20,30 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - secrets
   verbs:
   - create
@@ -29,6 +53,32 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackclients
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackclients/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackclients/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - core.openstack.org
   resources:
