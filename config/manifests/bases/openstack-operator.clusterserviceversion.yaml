@@ -10,6 +10,11 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: OpenStackClient is the Schema for the openstackclients API
+      displayName: Open Stack Client
+      kind: OpenStackClient
+      name: openstackclients.core.openstack.org
+      version: v1beta1
     - description: OpenStackControlPlane is the Schema for the openstackcontrolplanes
         API
       displayName: OpenStack ControlPlane
@@ -48,4 +53,9 @@ spec:
   provider:
     name: Red Hat Inc.
     url: https://redhat.com/
+  relatedImages:
+  - image: quay.io/tripleozedcentos9/openstack-tripleoclient:current-tripleo
+    name: openstackclient
+  - image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
+    name: kube-rbac-proxy
   version: 0.1.0

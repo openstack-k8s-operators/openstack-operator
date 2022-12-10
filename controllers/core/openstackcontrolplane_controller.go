@@ -70,14 +70,16 @@ func (r *OpenStackControlPlaneReconciler) GetScheme() *runtime.Scheme {
 // OpenStackControlPlaneReconciler reconciles a OpenStackControlPlane object
 type OpenStackControlPlaneReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Kclient kubernetes.Interface
-	Log     logr.Logger
+	Scheme                        *runtime.Scheme
+	Kclient                       kubernetes.Interface
+	Log                           logr.Logger
+	OpenStackClientContainerImage string
 }
 
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackclients,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=placement.openstack.org,resources=placementapis,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=glance.openstack.org,resources=glances,verbs=get;list;watch;create;update;patch;delete
@@ -161,6 +163,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneGlanceReadyInitMessage),
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneCinderReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneCinderReadyInitMessage),
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneNovaReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneNovaReadyInitMessage),
+			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneClientReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneClientReadyInitMessage),
 		)
 
 		instance.Status.Conditions.Init(&cl)
@@ -248,6 +251,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, helper, r.OpenStackClientContainerImage)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -319,5 +329,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&ovsv1.OVS{}).
 		Owns(&neutronv1.NeutronAPI{}).
 		Owns(&novav1.Nova{}).
+		Owns(&corev1beta1.OpenStackClient{}).
 		Complete(r)
 }

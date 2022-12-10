@@ -1,0 +1,24 @@
+# permissions for end users to edit openstackclients.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: openstackclient-editor-role
+rules:
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackclients
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackclients/status
+  verbs:
+  - get

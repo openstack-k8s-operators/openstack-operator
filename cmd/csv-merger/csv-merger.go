@@ -69,7 +69,7 @@ var (
 	ovsCsv         = flag.String("ovs-csv", "", "OVS CSV filename")
 	cinderCsv      = flag.String("cinder-csv", "", "Cinder CSV filename")
 	csvOverrides   = flag.String("csv-overrides", "", "CSV like string with punctual changes that will be recursively applied (if possible)")
-	visibleCRDList = flag.String("visible-crds-list", "openstackcontrolplanes.core.openstack.org,openstackclients.core.openstack.org",
+	visibleCRDList = flag.String("visible-crds-list", "openstackcontrolplanes.core.openstack.org",
 		"Comma separated list of all the CRDs that should be visible in OLM console")
 )
 
