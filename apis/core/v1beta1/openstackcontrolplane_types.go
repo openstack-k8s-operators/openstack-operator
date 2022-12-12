@@ -21,6 +21,7 @@ import (
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
@@ -82,6 +83,16 @@ type OpenStackControlPlaneSpec struct {
 	// +kubebuilder:validation:Optional
 	// Nova - Parameters related to the Nova services
 	Nova NovaSection `json:"nova,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// ExtraMounts containing conf files and credentials that should be provided
+	// to the underlying operators.
+	// This struct can be defined in the top level CR and propagated to the
+	// underlying operators that accept it in their API (e.g., cinder/glance).
+	// However, if extraVolumes are specified within the single operator
+	// template Section, the globally defined ExtraMounts are ignored and
+	// overridden for the operator which has this section already.
+	ExtraMounts []OpenStackExtraVolMounts `json:"extraMounts"`
 }
 
 // KeystoneSection defines the desired state of Keystone service
@@ -244,6 +255,17 @@ type OpenStackControlPlaneList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []OpenStackControlPlane `json:"items"`
+}
+
+// OpenStackExtraVolMounts exposes additional parameters processed by the openstack-operator
+// and defines the common VolMounts structure provided by the main storage module
+type OpenStackExtraVolMounts struct {
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+	// +kubebuilder:validation:Optional
+	Region string `json:"region,omitempty"`
+	// +kubebuilder:validation:Required
+	VolMounts []storage.VolMounts `json:"extraVol"`
 }
 
 func init() {
