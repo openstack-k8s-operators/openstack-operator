@@ -76,15 +76,16 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		helper.GetLogger().Info(fmt.Sprintf("Cinder %s - %s", cinder.Name, op))
 	}
 
-	if cinder.IsReady() {
-		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneCinderReadyCondition, corev1beta1.OpenStackControlPlaneCinderReadyMessage)
-	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneCinderReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneCinderReadyRunningMessage))
-	}
+	// TODO add once rabbitmq transportURL is integrated with Cinder
+	// if cinder.IsReady() {
+	// 	instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneCinderReadyCondition, corev1beta1.OpenStackControlPlaneCinderReadyMessage)
+	// } else {
+	// 	instance.Status.Conditions.Set(condition.FalseCondition(
+	// 		corev1beta1.OpenStackControlPlaneCinderReadyCondition,
+	// 		condition.RequestedReason,
+	// 		condition.SeverityInfo,
+	// 		corev1beta1.OpenStackControlPlaneCinderReadyRunningMessage))
+	// }
 
 	return ctrl.Result{}, nil
 

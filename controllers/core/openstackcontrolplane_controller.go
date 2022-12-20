@@ -148,7 +148,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneKeystoneAPIReadyInitMessage),
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlanePlacementAPIReadyInitMessage),
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneGlanceReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneCinderReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneCinderReadyInitMessage),
+			// TODO add once rabbitmq transportURL is integrated with Cinder: condition.UnknownCondition(corev1beta1.OpenStackControlPlaneCinderReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneCinderReadyInitMessage),
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneNovaReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneNovaReadyInitMessage),
 		)
 

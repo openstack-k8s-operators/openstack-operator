@@ -278,6 +278,6 @@ func (instance OpenStackControlPlane) IsReady() bool {
 		instance.Status.Conditions.IsTrue(OpenStackControlPlaneMariaDBReadyCondition) &&
 		instance.Status.Conditions.IsTrue(OpenStackControlPlaneKeystoneAPIReadyCondition) &&
 		instance.Status.Conditions.IsTrue(OpenStackControlPlanePlacementAPIReadyCondition) &&
-		instance.Status.Conditions.IsTrue(OpenStackControlPlaneGlanceReadyCondition) &&
-		instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
+		instance.Status.Conditions.IsTrue(OpenStackControlPlaneGlanceReadyCondition)
+	// TODO add once rabbitmq transportURL is integrated with Cinder:instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
 }
