@@ -21209,12 +21209,16 @@ spec:
                           ovn-bridge:
                             type: string
                           ovn-encap-type:
+                            default: geneve
+                            description: OvnEncapType - geneve or vxlan
+                            enum:
+                            - geneve
+                            - vxlan
                             type: string
                           system-id:
                             type: string
                         required:
                         - ovn-bridge
-                        - ovn-encap-type
                         - system-id
                         type: object
                       nic_mappings:
