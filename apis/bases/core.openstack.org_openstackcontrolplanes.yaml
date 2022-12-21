@@ -20185,6 +20185,7 @@ spec:
                         description: AdminUser - admin user name
                         type: string
                       containerImage:
+                        default: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
                         description: Keystone Container Image URL
                         type: string
                       customServiceConfig:
@@ -20307,7 +20308,6 @@ spec:
                           for keystone KeystoneDatabasePassword, AdminPassword
                         type: string
                     required:
-                    - containerImage
                     - databaseInstance
                     - secret
                     type: object
