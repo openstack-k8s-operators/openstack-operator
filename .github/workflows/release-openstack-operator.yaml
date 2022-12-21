@@ -1,4 +1,4 @@
-name: Release Keystone Operator
+name: Release OpenStack Operator
 
 on:
   release:
