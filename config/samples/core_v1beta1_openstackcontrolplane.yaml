@@ -77,7 +77,7 @@ spec:
       external-ids:
         system-id: "random"
         ovn-bridge: "br-int"
-        ovn-encap-type: "geneve,vxlan"
+        ovn-encap-type: "geneve"
   neutron:
     template:
       databaseInstance: openstack
