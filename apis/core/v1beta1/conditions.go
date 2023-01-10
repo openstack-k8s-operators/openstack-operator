@@ -49,8 +49,15 @@ const (
 
 	// OpenStackControlPlaneNeutronReadyCondition Status=True condition which indicates if Neutron is configured and operational
 	OpenStackControlPlaneNeutronReadyCondition condition.Type = "OpenStackControlPlaneNeutronReady"
+
 	// OpenStackControlPlaneNovaReadyCondition Status=True condition which indicates if Nova is configured and operational
 	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
+
+	// OpenStackControlPlaneClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
+	OpenStackControlPlaneClientReadyCondition condition.Type = "OpenStackControlPlaneClientReady"
+
+	// OpenStackClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
+	OpenStackClientReadyCondition condition.Type = "OpenStackClientReady"
 )
 
 //
@@ -176,6 +183,7 @@ const (
 
 	// OpenStackControlPlaneNeutronReadyErrorMessage
 	OpenStackControlPlaneNeutronReadyErrorMessage = "OpenStackControlPlane Neutron error occured %s"
+
 	// OpenStackControlPlaneNovaReadyInitMessage
 	OpenStackControlPlaneNovaReadyInitMessage = "OpenStackControlPlane Nova not started"
 
@@ -187,4 +195,37 @@ const (
 
 	// OpenStackControlPlaneNovaReadyErrorMessage
 	OpenStackControlPlaneNovaReadyErrorMessage = "OpenStackControlPlane Nova error occured %s"
+
+	// OpenStackControlPlaneClientReadyInitMessage
+	OpenStackControlPlaneClientReadyInitMessage = "OpenStackControlPlane Client not started"
+
+	// OpenStackControlPlaneClientReadyMessage
+	OpenStackControlPlaneClientReadyMessage = "OpenStackControlPlane Client completed"
+
+	// OpenStackControlPlaneClientReadyRunningMessage
+	OpenStackControlPlaneClientReadyRunningMessage = "OpenStackControlPlane Client in progress"
+
+	// OpenStackControlPlaneClientReadyErrorMessage
+	OpenStackControlPlaneClientReadyErrorMessage = "OpenStackControlPlane Client error occured %s"
+
+	// OpenStackClientReadyInitMessage
+	OpenStackClientReadyInitMessage = "OpenStack Client not started, waiting on keystone API"
+
+	// OpenStackClientKeystoneWaitingMessage
+	OpenStackClientKeystoneWaitingMessage = "OpenStack Client keystone API not yet ready"
+
+	// OpenStackClientConfigMapWaitingMessage
+	OpenStackClientConfigMapWaitingMessage = "OpenStack Client waiting for keystone configmap"
+
+	// OpenStackClientSecretWaitingMessage
+	OpenStackClientSecretWaitingMessage = "OpenStack Client waiting for secret"
+
+	// OpenStackClientInputReady
+	OpenStackClientInputReady = "OpenStack Client input ready"
+
+	// OpenStackClientReadyMessage
+	OpenStackClientReadyMessage = "OpenStack Client created"
+
+	// OpenStackClientReadyErrorMessage
+	OpenStackClientReadyErrorMessage = "OpenStack Client error occured %s"
 )
