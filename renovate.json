@@ -2,7 +2,8 @@
   "timezone": "America/New_York",
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    "group:all"
   ],
   "dependencyDashboard": true,
   "includeForks": true,
@@ -27,8 +28,7 @@
       "excludePackagePatterns": [
         "^github.com/openstack-k8s-operators"
       ],
-      "extends": ["schedule:monthly"],
-      "groupName": "deps"
+      "enabled": false
     }
   ]
 }
