@@ -20532,7 +20532,7 @@ spec:
                         type: string
                       apiServiceTemplate:
                         default:
-                          containerImage: quay.io/tripleozedcentos9/openstack-nova-api:current-tripleo
+                          replicas: 1
                         description: APIServiceTemplate - define the nova-api service
                         properties:
                           containerImage:
@@ -20973,6 +20973,8 @@ spec:
                             type: string
                         type: object
                       schedulerServiceTemplate:
+                        default:
+                          replicas: 1
                         description: SchedulerServiceTemplate- define the nova-scheduler
                           service
                         properties:
