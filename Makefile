@@ -193,7 +193,7 @@ bundle: manifests kustomize ## Generate bundle manifests and metadata, then vali
 	/bin/bash hack/pin-custom-bundle-dockerfile.sh
 
 .PHONY: bundle-build
-bundle-build: ## Build the bundle image.
+bundle-build: bundle ## Build the bundle image.
 	podman build -f custom-bundle.Dockerfile.pinned -t $(BUNDLE_IMG) .
 
 
