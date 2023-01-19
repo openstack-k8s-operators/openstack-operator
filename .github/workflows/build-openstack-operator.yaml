@@ -117,6 +117,7 @@ jobs:
         REGISTRY:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
         GITHUB_SHA: ${{ github.sha }}
         BASE_IMAGE: openstack-operator
+        IMAGENAMESPACE: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
 
     - name: Get branch name
       id: branch-name
@@ -134,9 +135,9 @@ jobs:
         image: openstack-operator-bundle
         tags: ${{ env.latesttag }} ${{ github.sha }}
         containerfiles: |
-          ./custom-bundle.Dockerfile
+          ./custom-bundle.Dockerfile.pinned
 
-    - name: Push openstack-operator To ${{ env.imageregistry }}
+    - name: Push openstack-operator-bundle To ${{ env.imageregistry }}
       uses: redhat-actions/push-to-registry@v2
       with:
         image: ${{ steps.build-openstack-operator-bundle.outputs.image }}

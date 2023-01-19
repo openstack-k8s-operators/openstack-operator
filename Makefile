@@ -29,7 +29,7 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 #
 # For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
 # openstack.org/openstack-operator-bundle:$VERSION and openstack.org/openstack-operator-catalog:$VERSION.
-IMAGE_TAG_BASE ?= openstack.org/openstack-operator
+IMAGE_TAG_BASE ?= quay.io/$(USER)/openstack-operator
 
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
