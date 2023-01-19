@@ -9,7 +9,7 @@
   "enabledManagers": ["gomod"],
   "postUpdateOptions": ["gomodTidy"],
   "constraints": {
-    "go": "1.18"
+    "go": "1.19"
   },
   "schedule":[
     "every weekend"
