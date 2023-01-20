@@ -16,7 +16,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230119191250-f6f88d501bff
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20221130085454-49cd8b9c841c
 	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20221221132409-30464f27d7d5
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20221202142822-366b98894af3
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230110163707-b184c1b7a7ea
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
