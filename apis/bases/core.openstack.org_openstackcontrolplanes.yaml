@@ -2390,7 +2390,8 @@ spec:
                             additionalProperties:
                               type: string
                             description: NodeSelector to target subset of worker nodes
-                              for running the API service
+                              running this service. Setting here overrides any global
+                              NodeSelector settings within the Cinder CR.
                             type: object
                           passwordSelectors:
                             default:
@@ -7229,7 +7230,8 @@ spec:
                             additionalProperties:
                               type: string
                             description: NodeSelector to target subset of worker nodes
-                              for running the Scheduler service
+                              running this service. Setting here overrides any global
+                              NodeSelector settings within the Cinder CR.
                             type: object
                           passwordSelectors:
                             default:
@@ -9747,7 +9749,9 @@ spec:
                               additionalProperties:
                                 type: string
                               description: NodeSelector to target subset of worker
-                                nodes for running the Volume service
+                                nodes running this service. Setting here overrides
+                                any global NodeSelector settings within the Cinder
+                                CR.
                               type: object
                             passwordSelectors:
                               default:
@@ -11977,6 +11981,14 @@ spec:
                           - extraVol
                           type: object
                         type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector to target subset of worker nodes
+                          running this service. Setting NodeSelector here acts as
+                          a default value and can be overridden by service specific
+                          NodeSelector Settings.
+                        type: object
                       passwordSelectors:
                         default:
                           database: CinderDatabasePassword
@@ -21000,6 +21012,12 @@ spec:
                           can also be used to add additional files. Those get added
                           to the service config dir in /etc/<service> . TODO: -> implement'
                         type: object
+                      networkAttachmentDefinitions:
+                        description: NetworkAttachmentDefinitions list of network
+                          attachment definitions the service pod gets attached to
+                        items:
+                          type: string
+                        type: array
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -21122,6 +21140,7 @@ spec:
                             type: string
                         type: object
                       containerImage:
+                        default: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
                         type: string
                       secret:
                         description: Secret containing a RootPassword
@@ -21193,6 +21212,12 @@ spec:
                           can also be used to add additional files. Those get added
                           to the service config dir in /etc/<service> . TODO: -> implement'
                         type: object
+                      networkAttachmentDefinitions:
+                        description: NetworkAttachmentDefinitions list of network
+                          attachment definitions the service pod gets attached to
+                        items:
+                          type: string
+                        type: array
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -21302,7 +21327,9 @@ spec:
                           service to register in neutron
                         type: string
                     required:
+                    - databaseInstance
                     - rabbitMqClusterName
+                    - secret
                     type: object
                 type: object
               nodeSelector:
@@ -22023,11 +22050,19 @@ spec:
                             of OVNDBCluster
                           properties:
                             containerImage:
+                              default: quay.io/tripleozedcentos9/openstack-ovn-nb-db-server:current-tripleo
                               type: string
                             dbType:
+                              default: NB
                               description: DBType - NB or SB
                               pattern: ^NB|SB$
                               type: string
+                            electionTimer:
+                              default: 10000
+                              description: OVN Northbound and Southbound RAFT db election
+                                timer to use on db creation (in milliseconds)
+                              format: int32
+                              type: integer
                             logLevel:
                               default: info
                               description: LogLevel - Set log level info, dbg, emer
@@ -22039,11 +22074,17 @@ spec:
                               description: NodeSelector to target subset of worker
                                 nodes running this service
                               type: object
+                            probeIntervalToActive:
+                              default: 60000
+                              description: Active probe interval from standby to active
+                                ovsdb-server remote
+                              format: int32
+                              type: integer
                             replicas:
                               default: 1
                               description: Replicas of OVN DBCluster to run
                               format: int32
-                              maximum: 1
+                              maximum: 32
                               minimum: 0
                               type: integer
                             resources:
@@ -22115,6 +22156,7 @@ spec:
                           OVNNorthd service
                         properties:
                           containerImage:
+                            default: quay.io/tripleozedcentos9/openstack-ovn-northd:current-tripleo
                             type: string
                           logLevel:
                             default: info
