@@ -20233,6 +20233,12 @@ spec:
                           can also be used to add additional files. Those get added
                           to the service config dir in /etc/<service> . TODO: -> implement'
                         type: object
+                      networkAttachmentDefinitions:
+                        description: NetworkAttachmentDefinitions list of network
+                          attachment definitions the service pod gets attached to
+                        items:
+                          type: string
+                        type: array
                       nodeSelector:
                         additionalProperties:
                           type: string
