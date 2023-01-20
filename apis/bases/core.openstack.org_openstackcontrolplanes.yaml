@@ -2316,7 +2316,8 @@ spec:
                             additionalProperties:
                               type: string
                             description: NodeSelector to target subset of worker nodes
-                              for running the API service
+                              running this service. Setting here overrides any global
+                              NodeSelector settings within the Cinder CR.
                             type: object
                           passwordSelectors:
                             default:
@@ -6961,7 +6962,8 @@ spec:
                             additionalProperties:
                               type: string
                             description: NodeSelector to target subset of worker nodes
-                              for running the Scheduler service
+                              running this service. Setting here overrides any global
+                              NodeSelector settings within the Cinder CR.
                             type: object
                           passwordSelectors:
                             default:
@@ -9379,7 +9381,9 @@ spec:
                               additionalProperties:
                                 type: string
                               description: NodeSelector to target subset of worker
-                                nodes for running the Volume service
+                                nodes running this service. Setting here overrides
+                                any global NodeSelector settings within the Cinder
+                                CR.
                               type: object
                             passwordSelectors:
                               default:
@@ -11522,6 +11526,14 @@ spec:
                           - extraVol
                           type: object
                         type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector to target subset of worker nodes
+                          running this service. Setting NodeSelector here acts as
+                          a default value and can be overridden by service specific
+                          NodeSelector Settings.
+                        type: object
                       passwordSelectors:
                         default:
                           database: CinderDatabasePassword

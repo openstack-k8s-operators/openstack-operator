@@ -3,7 +3,7 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.18
 
 require (
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20221212162508-6a3b8fdf9704
+	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230116172529-ad6adb43ab7f
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230117132931-a7c3745ebcf5
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230120095729-d9c56b54cc8d
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230120104300-c5aa132b34d6
