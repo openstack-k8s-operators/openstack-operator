@@ -9,7 +9,7 @@ require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20221212162508-6a3b8fdf9704
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20221212050058-912edeeb32ee
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20221215165910-80274d6445b1
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230110110231-28368fe6a6a9
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230120104300-c5aa132b34d6
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20221122141723-fb7400f56094
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20221130112258-2d20ea7691aa
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230113165055-b0e3f90e8b15
