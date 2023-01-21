@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -21,20 +22,84 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-// ReconcileRabbitMQ -
-func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+type mqStatus int
+
+const (
+	mqFailed   mqStatus = iota
+	mqCreating mqStatus = iota
+	mqReady    mqStatus = iota
+)
+
+// ReconcileRabbitMQs -
+func ReconcileRabbitMQs(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
 	if !instance.Spec.Rabbitmq.Enabled {
 		return ctrl.Result{}, nil
 	}
 
+	var failures []string = []string{}
+	var inprogress []string = []string{}
+
+	for name, spec := range instance.Spec.Rabbitmq.Templates {
+		status, err := reconcileRabbitMQ(ctx, instance, helper, name, &spec)
+
+		switch status {
+		case mqFailed:
+			failures = append(failures, fmt.Sprintf("%s(%v)", name, err.Error()))
+		case mqCreating:
+			inprogress = append(inprogress, name)
+		case mqReady:
+		default:
+			return ctrl.Result{}, fmt.Errorf("Invalid mqStatus from reconcileRabbitMQ: %d for RAbbitMQ %s", status, name)
+		}
+	}
+
+	if len(failures) > 0 {
+		errors := strings.Join(failures, ",")
+
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyErrorMessage,
+			errors))
+
+		return ctrl.Result{}, fmt.Errorf(errors)
+
+	} else if len(inprogress) > 0 {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyRunningMessage))
+	} else {
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyMessage,
+		)
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func reconcileRabbitMQ(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+	name string,
+	spec *rabbitmqv1.RabbitmqClusterSpec,
+) (mqStatus, error) {
 	rabbitmq := &rabbitmqv1.RabbitmqCluster{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "rabbitmq", //FIXME
+			Name:      name,
 			Namespace: instance.Namespace,
 		},
 	}
 
-	helper.GetLogger().Info("Reconciling Rabbitmq", "RabbitMQ.Namespace", instance.Namespace, "rabbitMQ.Name", "rabbitmq")
+	helper.GetLogger().Info("Reconciling RabbitMQ", "RabbitMQ.Namespace", instance.Namespace, "RabbitMQ.Name", name)
 
 	defaultStatefulSet := rabbitmqv1.StatefulSet{
 		Spec: &rabbitmqv1.StatefulSetSpec{
@@ -43,7 +108,12 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 					SecurityContext: &corev1.PodSecurityContext{},
 					Containers: []corev1.Container{
 						{
+							// NOTE(gibi): if this is set according to the
+							// RabbitMQCluster name the the Pod will crash
 							Name: "rabbitmq",
+							// NOTE(gibi): without this the second RabbitMqCluster
+							// will fail as the Pod will have no image.
+							Image: "registry.redhat.io/rhosp-rhel9/openstack-rabbitmq:17.0",
 							Env: []corev1.EnvVar{
 								{
 									// The upstream rabbitmq image has /var/log/rabbitmq mode 777, so when
@@ -75,7 +145,7 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 	}
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 
-		instance.Spec.Rabbitmq.Template.DeepCopyInto(&rabbitmq.Spec)
+		spec.DeepCopyInto(&rabbitmq.Spec)
 
 		//FIXME: We shouldn't have to set this here but not setting it causes the rabbitmq
 		// operator to continuously mutate the CR when setting it:
@@ -111,13 +181,7 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 	})
 
 	if err != nil {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityWarning,
-			corev1beta1.OpenStackControlPlaneRabbitMQReadyErrorMessage,
-			err.Error()))
-		return ctrl.Result{}, err
+		return mqFailed, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("RabbitMQ %s - %s", rabbitmq.Name, op))
@@ -127,16 +191,9 @@ func ReconcileRabbitMQ(ctx context.Context, instance *corev1beta1.OpenStackContr
 		// Forced to hardcode "ClusterAvailable" here because linter will not allow
 		// us to import "github.com/rabbitmq/cluster-operator/internal/status"
 		if string(oldCond.Type) == "ClusterAvailable" && oldCond.Status == corev1.ConditionTrue {
-			instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition, corev1beta1.OpenStackControlPlaneRabbitMQReadyMessage)
-			return ctrl.Result{}, nil
+			return mqReady, nil
 		}
 	}
 
-	instance.Status.Conditions.Set(condition.FalseCondition(
-		corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
-		condition.RequestedReason,
-		condition.SeverityInfo,
-		corev1beta1.OpenStackControlPlaneRabbitMQReadyRunningMessage))
-
-	return ctrl.Result{}, nil
+	return mqCreating, nil
 }

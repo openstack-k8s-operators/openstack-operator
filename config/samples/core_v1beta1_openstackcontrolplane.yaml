@@ -15,15 +15,16 @@ spec:
       containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
       storageRequest: 500M
   rabbitmq:
-    template:
-      replicas: 1
-      #resources:
-      #  requests:
-      #    cpu: 500m
-      #    memory: 1Gi
-      #  limits:
-      #    cpu: 800m
-      #    memory: 1Gi
+    templates:
+      rabbitmq:
+        replicas: 1
+        #resources:
+        #  requests:
+        #    cpu: 500m
+        #    memory: 1Gi
+        #  limits:
+        #    cpu: 800m
+        #    memory: 1Gi
   placement:
     template:
       databaseInstance: openstack
