@@ -89,11 +89,3 @@ spec:
   nova:
     template:
       secret: osp-secret
-      cellTemplates:
-          cell0:
-            cellDatabaseUser: nova_cell0
-            hasAPIAccess: true
-          cell1:
-            cellDatabaseUser: nova_cell1
-            cellMessageBusInstance: rabbitmq-cell1
-            hasAPIAccess: true
