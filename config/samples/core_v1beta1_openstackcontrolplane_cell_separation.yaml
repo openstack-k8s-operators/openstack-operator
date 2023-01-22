@@ -1,7 +1,7 @@
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
 metadata:
-  name: openstack
+  name: openstack-cell-separation
 spec:
   secret: osp-secret
   storageClass: local-storage
@@ -25,6 +25,8 @@ spec:
         #  limits:
         #    cpu: 800m
         #    memory: 1Gi
+      rabbitmq-cell1:
+        replicas: 1
   placement:
     template:
       databaseInstance: openstack
@@ -87,20 +89,11 @@ spec:
   nova:
     template:
       secret: osp-secret
-      # This creates a collapsed cell deployment same as what OSP17 does by
-      # default. The conductor in cell1 acts as both the cell conductor and the
-      # super conductor hence cell0 conductor is disabled. Also in this
-      # deployment both the top level services and cell1 service will share the
-      # same message bus and database service instance so there is no cell
-      # separation implemented.
       cellTemplates:
           cell0:
             cellDatabaseUser: nova_cell0
-            conductorServiceTemplate:
-              replicas: 0
             hasAPIAccess: true
           cell1:
             cellDatabaseUser: nova_cell1
-            conductorServiceTemplate:
-              replicas: 1
+            cellMessageBusInstance: rabbitmq-cell1
             hasAPIAccess: true
