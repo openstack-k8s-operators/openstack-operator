@@ -6,17 +6,17 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.3
 	github.com/imdario/mergo v0.3.13
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230116172529-ad6adb43ab7f
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230117132931-a7c3745ebcf5
+	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230123114130-9f1a61c289c8
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230120165333-c406efabc4d8
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230120095729-d9c56b54cc8d
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230120104300-c5aa132b34d6
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230118093207-9764a3d19c85
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230118114256-7a31f3b0f8f2
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230120155958-62de786f2c5b
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230120123017-613aadbe3188
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230120162101-0e5b2d46867e
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230119070807-ae18fe5d848f
 	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230111161906-d137b5040c04
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230110163707-b184c1b7a7ea
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230123110426-29cb4eff72b5
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
