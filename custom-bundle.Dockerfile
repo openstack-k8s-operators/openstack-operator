@@ -31,6 +31,7 @@ FROM quay.io/openstack-k8s-operators/cinder-operator-bundle:latest as cinder-bun
 FROM quay.io/openstack-k8s-operators/ovn-operator-bundle:latest as ovn-bundle
 FROM quay.io/openstack-k8s-operators/ovs-operator-bundle:latest as ovs-bundle
 FROM quay.io/openstack-k8s-operators/neutron-operator-bundle:latest as neutron-bundle
+FROM quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:latest as openstack-ansibleee-bundle
 FROM quay.io/openstack-k8s-operators/nova-operator-bundle:latest as nova-bundle
 
 FROM golang:1.18 as merger
@@ -50,6 +51,7 @@ COPY --from=cinder-bundle /manifests/* /manifests/
 COPY --from=ovn-bundle /manifests/* /manifests/
 COPY --from=ovs-bundle /manifests/* /manifests/
 COPY --from=neutron-bundle /manifests/* /manifests/
+COPY --from=openstack-ansibleee-bundle /manifests/* /manifests/
 COPY --from=nova-bundle /manifests/* /manifests/
 
 RUN /workspace/csv-merger \
@@ -62,6 +64,7 @@ RUN /workspace/csv-merger \
   --ovn-csv=/manifests/ovn-operator.clusterserviceversion.yaml \
   --ovs-csv=/manifests/ovs-operator.clusterserviceversion.yaml \
   --neutron-csv=/manifests/neutron-operator.clusterserviceversion.yaml \
+  --ansibleee-csv=/manifests/openstack-ansibleee-operator.clusterserviceversion.yaml \
   --nova-csv=/manifests/nova-operator.clusterserviceversion.yaml \
   --openstack-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
