@@ -149,19 +149,29 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	//
 	if instance.Status.Conditions == nil {
 		instance.Status.Conditions = condition.Conditions{}
-		// initialize conditions used later as Status=Unknown
+		// initialize Core service conditions used later as Status=Unknown
 		cl := condition.CreateList(
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneRabbitMQReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneOVNReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneOVNReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneOVSReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneOVSReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneNeutronReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneNeutronReadyInitMessage),
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneMariaDBReadyInitMessage),
 			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneKeystoneAPIReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlanePlacementAPIReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneGlanceReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneCinderReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneCinderReadyInitMessage),
-			condition.UnknownCondition(corev1beta1.OpenStackControlPlaneNovaReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneNovaReadyInitMessage),
 		)
+
+		// Initialize optional service conditions if enabled
+		if instance.Spec.Cinder.Enabled {
+			cl = append(cl, *condition.UnknownCondition(corev1beta1.OpenStackControlPlaneCinderReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneCinderReadyInitMessage))
+		}
+		if instance.Spec.Nova.Enabled {
+			cl = append(cl, *condition.UnknownCondition(corev1beta1.OpenStackControlPlaneNovaReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneNovaReadyInitMessage),
+				*condition.UnknownCondition(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlanePlacementAPIReadyInitMessage),
+				*condition.UnknownCondition(corev1beta1.OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneGlanceReadyInitMessage))
+		}
+		if instance.Spec.Ovn.Enabled {
+			cl = append(cl, *condition.UnknownCondition(corev1beta1.OpenStackControlPlaneOVNReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneOVNReadyInitMessage),
+				*condition.UnknownCondition(corev1beta1.OpenStackControlPlaneOVSReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneOVSReadyInitMessage))
+		}
+		if instance.Spec.Neutron.Enabled {
+			cl = append(cl, *condition.UnknownCondition(corev1beta1.OpenStackControlPlaneNeutronReadyCondition, condition.InitReason, corev1beta1.OpenStackControlPlaneNeutronReadyInitMessage))
+		}
 
 		instance.Status.Conditions.Init(&cl)
 

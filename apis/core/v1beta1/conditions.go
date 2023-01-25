@@ -19,9 +19,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
-//
 // OpenStackControlPlane Condition Types used by API objects.
-//
 const (
 	// OpenStackControlPlaneRabbitMQReadyCondition Status=True condition which indicates if RabbitMQ is configured and operational
 	OpenStackControlPlaneRabbitMQReadyCondition condition.Type = "OpenStackControlPlaneRabbitMQReady"
@@ -53,14 +51,10 @@ const (
 	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
 )
 
-//
 // OpenStackControlPlane Reasons used by API objects.
-//
 const ()
 
-//
 // Common Messages used by API objects.
-//
 const (
 	//
 	// OpenStackControlPlaneReady condition messages
@@ -176,6 +170,7 @@ const (
 
 	// OpenStackControlPlaneNeutronReadyErrorMessage
 	OpenStackControlPlaneNeutronReadyErrorMessage = "OpenStackControlPlane Neutron error occured %s"
+
 	// OpenStackControlPlaneNovaReadyInitMessage
 	OpenStackControlPlaneNovaReadyInitMessage = "OpenStackControlPlane Nova not started"
 
@@ -187,4 +182,7 @@ const (
 
 	// OpenStackControlPlaneNovaReadyErrorMessage
 	OpenStackControlPlaneNovaReadyErrorMessage = "OpenStackControlPlane Nova error occured %s"
+
+	//OpenStackControlPlaneServiceReadyDisabledMessage
+	OpenStackControlPlaneServiceReadyDisabledMessage = "OpenStackControlPlane %s Service is Disabled"
 )

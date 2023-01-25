@@ -18,6 +18,7 @@ import (
 // ReconcileCinder -
 func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 	if !instance.Spec.Cinder.Enabled {
+		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneCinderReadyCondition, fmt.Sprintf(corev1beta1.OpenStackControlPlaneServiceReadyDisabledMessage, "Cinder"))
 		return ctrl.Result{}, nil
 	}
 
