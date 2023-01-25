@@ -32,6 +32,7 @@ import (
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	ovsv1 "github.com/openstack-k8s-operators/ovs-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
@@ -72,6 +73,7 @@ func init() {
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
 	utilruntime.Must(ovsv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
+	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
