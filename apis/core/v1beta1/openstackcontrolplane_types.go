@@ -159,12 +159,12 @@ type MariadbSection struct {
 type RabbitmqSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
-	// Enabled - Whether RabbitMQ service should be deployed and managed
+	// Enabled - Whether RabbitMQ services should be deployed and managed
 	Enabled bool `json:"enabled,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// Template - Overrides to use when creating the Rabbitmq cluster
-	Template rabbitmqv1.RabbitmqClusterSpec `json:"template,omitempty"`
+	// Templates - Overrides to use when creating the Rabbitmq clusters
+	Templates map[string]rabbitmqv1.RabbitmqClusterSpec `json:"templates"`
 }
 
 // OvnSection defines the desired state of OVN services

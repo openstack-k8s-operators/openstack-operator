@@ -179,7 +179,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 
 func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 
-	ctrlResult, err := openstack.ReconcileRabbitMQ(ctx, instance, helper)
+	ctrlResult, err := openstack.ReconcileRabbitMQs(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
