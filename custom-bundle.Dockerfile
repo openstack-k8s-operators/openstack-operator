@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.18 as builder
+FROM golang:1.19 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -34,7 +34,7 @@ FROM quay.io/openstack-k8s-operators/neutron-operator-bundle:latest as neutron-b
 FROM quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:latest as openstack-ansibleee-bundle
 FROM quay.io/openstack-k8s-operators/nova-operator-bundle:latest as nova-bundle
 
-FROM golang:1.18 as merger
+FROM golang:1.19 as merger
 WORKDIR /workspace
 COPY --from=builder /workspace/csv-merger .
 

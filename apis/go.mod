@@ -1,6 +1,6 @@
 module github.com/openstack-k8s-operators/openstack-operator/apis
 
-go 1.18
+go 1.19
 
 require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230123114130-9f1a61c289c8
