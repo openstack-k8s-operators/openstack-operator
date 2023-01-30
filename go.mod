@@ -7,17 +7,17 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/imdario/mergo v0.3.13
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230123114130-9f1a61c289c8
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230120165333-c406efabc4d8
-	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230120095729-d9c56b54cc8d
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230120104300-c5aa132b34d6
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230125102307-ce93715e9a3d
+	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230127072022-efdd85d844e1
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230130113944-08eaed348cec
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230118093207-9764a3d19c85
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230118114256-7a31f3b0f8f2
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230120155958-62de786f2c5b
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230120093512-773adbebca6b
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230120162101-0e5b2d46867e
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230127170258-ba3b9bd6497e
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230130110300-e4ab6592d141
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230127203437-f2d183dd6292
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230119070807-ae18fe5d848f
-	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230111161906-d137b5040c04
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230123110426-29cb4eff72b5
+	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230127155947-cba27b6ba519
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230127164202-327a89effaad
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
@@ -55,8 +55,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230120104300-c5aa132b34d6 // indirect; indirect // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230120104300-c5aa132b34d6 // indirect; indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230130113944-08eaed348cec // indirect; indirect // indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230130113944-08eaed348cec // indirect; indirect // indirect // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect

@@ -22278,7 +22278,7 @@ spec:
                         description: Image used for the ovn-controller container
                         type: string
                       ovsContainerImage:
-                        default: quay.io/skaplons/ovs:latest
+                        default: quay.io/tripleozedcentos9/openstack-ovn-base:current-tripleo
                         description: Image used for the ovsdb-server and ovs-vswitchd
                           containers
                         type: string
@@ -22347,6 +22347,7 @@ spec:
                       API
                     properties:
                       containerImage:
+                        default: quay.io/tripleozedcentos9/openstack-placement-api:current-tripleo
                         description: PlacementAPI Container Image URL
                         type: string
                       customServiceConfig:
@@ -22487,7 +22488,6 @@ spec:
                           service to register in keystone
                         type: string
                     required:
-                    - containerImage
                     - databaseInstance
                     - secret
                     type: object
