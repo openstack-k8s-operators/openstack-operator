@@ -6,9 +6,9 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - ansibleee.openstack.org
+  - cinder.openstack.org
   resources:
-  - openstackansibleees
+  - cinders
   verbs:
   - create
   - delete
@@ -18,9 +18,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cinder.openstack.org
+  - client.openstack.org
   resources:
-  - cinders
+  - openstackclients
   verbs:
   - create
   - delete

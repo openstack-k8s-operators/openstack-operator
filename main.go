@@ -28,6 +28,8 @@ import (
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	clientv1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -36,6 +38,7 @@ import (
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	ovsv1 "github.com/openstack-k8s-operators/ovs-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	rabbitmqclusterv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -61,6 +64,7 @@ func init() {
 	utilruntime.Must(corev1beta1.AddToScheme(scheme))
 	utilruntime.Must(keystonev1.AddToScheme(scheme))
 	utilruntime.Must(mariadbv1.AddToScheme(scheme))
+	utilruntime.Must(rabbitmqclusterv1.AddToScheme(scheme))
 	utilruntime.Must(placementv1.AddToScheme(scheme))
 	utilruntime.Must(glancev1.AddToScheme(scheme))
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
@@ -69,6 +73,8 @@ func init() {
 	utilruntime.Must(ovsv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
+	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
+	utilruntime.Must(clientv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -126,10 +132,11 @@ func main() {
 	}
 
 	if err = (&corecontrollers.OpenStackControlPlaneReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackControlPlane"),
+		Client:                        mgr.GetClient(),
+		Scheme:                        mgr.GetScheme(),
+		Kclient:                       kclient,
+		Log:                           ctrl.Log.WithName("controllers").WithName("OpenStackControlPlane"),
+		OpenStackClientContainerImage: os.Getenv("OPENSTACKCLIENT_IMAGE_URL_DEFAULT"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackControlPlane")
 		os.Exit(1)

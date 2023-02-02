@@ -53,7 +53,7 @@ func ReconcileRabbitMQs(
 			inprogress = append(inprogress, name)
 		case mqReady:
 		default:
-			return ctrl.Result{}, fmt.Errorf("Invalid mqStatus from reconcileRabbitMQ: %d for RAbbitMQ %s", status, name)
+			return ctrl.Result{}, fmt.Errorf("invalid mqStatus from reconcileRabbitMQ: %d for RAbbitMQ %s", status, name)
 		}
 	}
 

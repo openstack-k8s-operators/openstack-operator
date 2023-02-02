@@ -1,0 +1,17 @@
+# This patch inject custom ENV settings to the manager container
+# Used to set our default image locations
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+        - name: OPENSTACKCLIENT_IMAGE_URL_DEFAULT
+          # TODO: this image causes syslog warning messages, see upstream https://bugs.launchpad.net/tripleo/+bug/1999553
+          # NOTE: registry.redhat.io/rhosp-rhel8/openstack-tripleoclient:16.2 seems to work (no log messages)
+          value: quay.io/tripleozedcentos9/openstack-tripleoclient:current-tripleo
