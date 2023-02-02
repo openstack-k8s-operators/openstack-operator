@@ -2,5 +2,3 @@
 resources:
 - core_v1beta1_openstackcontrolplane.yaml
 - core_v1beta1_openstackcontrolplane_cell_separation.yaml
-- rabbitmq_v1beta1_transporturl.yaml
-#+kubebuilder:scaffold:manifestskustomizesamples

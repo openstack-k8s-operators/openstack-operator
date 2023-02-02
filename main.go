@@ -36,7 +36,6 @@ import (
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	ovsv1 "github.com/openstack-k8s-operators/ovs-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
-	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -48,9 +47,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
-	rabbitmqv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/rabbitmq/v1beta1"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
-	rabbitmqcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/rabbitmq"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -64,12 +61,10 @@ func init() {
 	utilruntime.Must(corev1beta1.AddToScheme(scheme))
 	utilruntime.Must(keystonev1.AddToScheme(scheme))
 	utilruntime.Must(mariadbv1.AddToScheme(scheme))
-	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
 	utilruntime.Must(placementv1.AddToScheme(scheme))
 	utilruntime.Must(glancev1.AddToScheme(scheme))
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
 	utilruntime.Must(novav1.AddToScheme(scheme))
-	utilruntime.Must(rabbitmqv1beta1.AddToScheme(scheme))
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
 	utilruntime.Must(ovsv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
@@ -137,15 +132,6 @@ func main() {
 		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackControlPlane"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackControlPlane")
-		os.Exit(1)
-	}
-	if err = (&rabbitmqcontrollers.TransportURLReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("TransportURL"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "TransportURL")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
