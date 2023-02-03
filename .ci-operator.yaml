@@ -1,0 +1,4 @@
+build_root_image:
+  name: tools
+  namespace: openstack-k8s-operators
+  tag: ci-build-root-golang-1.19-sdk-1.26
