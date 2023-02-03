@@ -23242,8 +23242,7 @@ spec:
                     type: boolean
                   templates:
                     additionalProperties:
-                      description: Spec is the desired state of the RabbitmqCluster
-                        Custom Resource.
+                      description: RabbitmqTemplate definition
                       properties:
                         affinity:
                           description: Affinity scheduling rules to be applied on
@@ -24171,6 +24170,38 @@ spec:
                                     type: object
                                   type: array
                               type: object
+                          type: object
+                        externalEndpoint:
+                          description: ExternalEndpoint, expose a VIP via MetalLB
+                            on the pre-created address pool
+                          properties:
+                            ipAddressPool:
+                              description: IPAddressPool expose VIP via MetalLB on
+                                the IPAddressPool
+                              minLength: 1
+                              type: string
+                            loadBalancerIPs:
+                              description: LoadBalancerIPs, request given IPs from
+                                the pool if available. Using a list to allow dual
+                                stack (IPv4/IPv6) support
+                              items:
+                                type: string
+                              type: array
+                            sharedIP:
+                              default: true
+                              description: SharedIP if true, VIP/VIPs get shared with
+                                multiple services
+                              type: boolean
+                            sharedIPKey:
+                              default: ""
+                              description: SharedIPKey specifies the sharing key which
+                                gets set as the annotation on the LoadBalancer service.
+                                Services which share the same VIP must have the same
+                                SharedIPKey. Defaults to the IPAddressPool if SharedIP
+                                is true, but no SharedIPKey specified.
+                              type: string
+                          required:
+                          - ipAddressPool
                           type: object
                         image:
                           description: Image is the name of the RabbitMQ docker image

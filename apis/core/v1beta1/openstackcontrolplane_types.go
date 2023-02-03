@@ -171,7 +171,42 @@ type RabbitmqSection struct {
 
 	// +kubebuilder:validation:Optional
 	// Templates - Overrides to use when creating the Rabbitmq clusters
-	Templates map[string]rabbitmqv1.RabbitmqClusterSpec `json:"templates"`
+	Templates map[string]RabbitmqTemplate `json:"templates"`
+}
+
+// RabbitmqTemplate definition
+type RabbitmqTemplate struct {
+	// +kubebuilder:validation:Required
+	// Overrides to use when creating the Rabbitmq clusters
+	rabbitmqv1.RabbitmqClusterSpec `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// ExternalEndpoint, expose a VIP via MetalLB on the pre-created address pool
+	ExternalEndpoint *MetalLBConfig `json:"externalEndpoint"`
+}
+
+// MetalLBConfig to configure the MetalLB loadbalancer service
+type MetalLBConfig struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	// IPAddressPool expose VIP via MetalLB on the IPAddressPool
+	IPAddressPool string `json:"ipAddressPool"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// SharedIP if true, VIP/VIPs get shared with multiple services
+	SharedIP bool `json:"sharedIP"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=""
+	// SharedIPKey specifies the sharing key which gets set as the annotation on the LoadBalancer service.
+	// Services which share the same VIP must have the same SharedIPKey. Defaults to the IPAddressPool if
+	// SharedIP is true, but no SharedIPKey specified.
+	SharedIPKey string `json:"sharedIPKey"`
+
+	// +kubebuilder:validation:Optional
+	// LoadBalancerIPs, request given IPs from the pool if available. Using a list to allow dual stack (IPv4/IPv6) support
+	LoadBalancerIPs []string `json:"loadBalancerIPs"`
 }
 
 // OvnSection defines the desired state of OVN services
