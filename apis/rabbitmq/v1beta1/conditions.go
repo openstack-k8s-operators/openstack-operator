@@ -19,22 +19,16 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
-//
 // TransportURL Condition Types used by API objects.
-//
 const (
 	// TransportURLReadyCondition Status=True condition which indicates if TransportURL is configured and operational
 	TransportURLReadyCondition condition.Type = "TransportURLReady"
 )
 
-//
 // TransportURL Reasons used by API objects.
-//
 const ()
 
-//
 // Common Messages used by API objects.
-//
 const (
 	//
 	// TransportURLReady condition messages

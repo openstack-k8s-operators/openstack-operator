@@ -25,7 +25,6 @@ import (
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 )
 
-//
 // GetRabbitmqCluster - get RabbitmqCluster object in namespace
 func GetRabbitmqCluster(
 	ctx context.Context,
