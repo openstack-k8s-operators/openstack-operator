@@ -87,3 +87,9 @@ spec:
   nova:
     template:
       secret: osp-secret
+      apiServiceTemplate:
+        containerImage: quay.io/tripleozedcentos9/openstack-nova-api:current-tripleo
+      schedulerServiceTemplate:
+        containerImage: quay.io/tripleozedcentos9/openstack-nova-scheduler:current-tripleo
+      conductorServiceTemplate:
+        containerImage: quay.io/tripleozedcentos9/openstack-nova-conductor:current-tripleo
