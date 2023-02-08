@@ -158,8 +158,8 @@ type MariadbSection struct {
 	Enabled bool `json:"enabled,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// Template - Overrides to use when creating the MariaDB API Service
-	Template mariadbv1.MariaDBSpec `json:"template,omitempty"`
+	// Templates - Overrides to use when creating the MariaDB databases
+	Templates map[string]mariadbv1.MariaDBSpec `json:"templates,omitempty"`
 }
 
 // RabbitmqSection defines the desired state of RabbitMQ service

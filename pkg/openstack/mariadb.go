@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -15,26 +16,95 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-// ReconcileMariaDB -
-func ReconcileMariaDB(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+type mariadbStatus int
+
+const (
+	mariadbFailed   mariadbStatus = iota
+	mariadbCreating mariadbStatus = iota
+	mariadbReady    mariadbStatus = iota
+)
+
+// ReconcileMariaDBs -
+func ReconcileMariaDBs(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
+	if !instance.Spec.Mariadb.Enabled {
+		return ctrl.Result{}, nil
+	}
+
+	var failures []string = []string{}
+	var inprogress []string = []string{}
+
+	for name, spec := range instance.Spec.Mariadb.Templates {
+		status, err := reconcileMariaDB(ctx, instance, helper, name, &spec)
+
+		switch status {
+		case mariadbFailed:
+			failures = append(failures, fmt.Sprintf("%s(%v)", name, err.Error()))
+		case mariadbCreating:
+			inprogress = append(inprogress, name)
+		case mariadbReady:
+		default:
+			return ctrl.Result{}, fmt.Errorf("Invalid mariadbStatus from reconcileMariaDB: %d for MariaDB %s", status, name)
+		}
+	}
+
+	if len(failures) > 0 {
+		errors := strings.Join(failures, ",")
+
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneMariaDBReadyErrorMessage,
+			errors))
+
+		return ctrl.Result{}, fmt.Errorf(errors)
+
+	} else if len(inprogress) > 0 {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneMariaDBReadyRunningMessage))
+	} else {
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
+			corev1beta1.OpenStackControlPlaneMariaDBReadyMessage,
+		)
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// reconcileMariaDB -
+func reconcileMariaDB(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+	name string,
+	spec *mariadbv1.MariaDBSpec,
+) (mariadbStatus, error) {
 	mariadb := &mariadbv1.MariaDB{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "openstack", //FIXME
+			Name:      name,
 			Namespace: instance.Namespace,
 		},
 	}
 
 	if !instance.Spec.Mariadb.Enabled {
-		if res, err := EnsureDeleted(ctx, helper, mariadb); err != nil {
-			return res, err
+		if _, err := EnsureDeleted(ctx, helper, mariadb); err != nil {
+			return mariadbFailed, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition)
-		return ctrl.Result{}, nil
+		return mariadbReady, nil
 	}
 
-	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "mariadb.Name", "openstack")
+	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "mariadb.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), mariadb, func() error {
-		instance.Spec.Mariadb.Template.DeepCopyInto(&mariadb.Spec)
+		spec.DeepCopyInto(&mariadb.Spec)
 		if mariadb.Spec.Secret == "" {
 			mariadb.Spec.Secret = instance.Spec.Secret
 		}
@@ -50,28 +120,15 @@ func ReconcileMariaDB(ctx context.Context, instance *corev1beta1.OpenStackContro
 	})
 
 	if err != nil {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityWarning,
-			corev1beta1.OpenStackControlPlaneMariaDBReadyErrorMessage,
-			err.Error()))
-		return ctrl.Result{}, err
+		return mariadbFailed, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("MariaDB %s - %s", mariadb.Name, op))
 	}
 
 	if mariadb.IsReady() {
-		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition, corev1beta1.OpenStackControlPlaneMariaDBReadyMessage)
-	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneMariaDBReadyRunningMessage))
+		return mariadbReady, nil
 	}
 
-	return ctrl.Result{}, nil
-
+	return mariadbCreating, nil
 }
