@@ -71,6 +71,10 @@ type OpenStackControlPlaneSpec struct {
 	Mariadb MariadbSection `json:"mariadb,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// Galera - Parameters related to the Galera services
+	Galera GaleraSection `json:"galera,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// Rabbitmq - Parameters related to the Rabbitmq service
 	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
 
@@ -160,6 +164,18 @@ type MariadbSection struct {
 	// +kubebuilder:validation:Optional
 	// Templates - Overrides to use when creating the MariaDB databases
 	Templates map[string]mariadbv1.MariaDBSpec `json:"templates,omitempty"`
+}
+
+// GaleraSection defines the desired state of Galera services
+type GaleraSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether Galera services should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Templates - Overrides to use when creating the Galera databases
+	Templates map[string]mariadbv1.GaleraSpec `json:"templates,omitempty"`
 }
 
 // RabbitmqSection defines the desired state of RabbitMQ service
