@@ -115,9 +115,12 @@ build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 	go build -o bin/csv-merger cmd/csv-merger/csv-merger.go
 
+generate-cert:
+	/bin/bash hack/create_self_signed_cert.sh
+
 .PHONY: run
 run: export OPENSTACKCLIENT_IMAGE_URL_DEFAULT=quay.io/tripleozedcentos9/openstack-tripleoclient:current-tripleo
-run: manifests generate fmt vet ## Run a controller from your host.
+run: manifests generate fmt vet generate-cert ## Run a controller from your host.
 	go run ./main.go
 
 .PHONY: docker-build
