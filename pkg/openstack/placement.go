@@ -17,15 +17,19 @@ import (
 
 // ReconcilePlacementAPI -
 func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Placement.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	placementAPI := &placementv1.PlacementAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "placement",
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Placement.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, placementAPI); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling placementAPI", "placementAPI.Namespace", instance.Namespace, "placementAPI.Name", "placement")

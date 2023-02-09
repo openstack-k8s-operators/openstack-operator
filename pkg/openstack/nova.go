@@ -33,15 +33,19 @@ import (
 
 // ReconcileNova -
 func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Nova.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	nova := &novav1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova",
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Nova.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, nova); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneNovaReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling Nova", "Nova.Namespace", instance.Namespace, "Nova.Name", nova.Name)

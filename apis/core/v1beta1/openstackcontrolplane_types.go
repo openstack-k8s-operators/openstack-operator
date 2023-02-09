@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	corev1 "k8s.io/api/core/v1"
+
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
@@ -274,10 +276,37 @@ func init() {
 
 // IsReady - returns true if service is ready to serve requests
 func (instance OpenStackControlPlane) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(OpenStackControlPlaneRabbitMQReadyCondition) &&
-		instance.Status.Conditions.IsTrue(OpenStackControlPlaneMariaDBReadyCondition) &&
-		instance.Status.Conditions.IsTrue(OpenStackControlPlaneKeystoneAPIReadyCondition) &&
-		instance.Status.Conditions.IsTrue(OpenStackControlPlanePlacementAPIReadyCondition) &&
-		instance.Status.Conditions.IsTrue(OpenStackControlPlaneGlanceReadyCondition) &&
-		instance.Status.Conditions.IsTrue(OpenStackControlPlaneCinderReadyCondition)
+	for _, c := range instance.Status.Conditions {
+		if c.Type == condition.ReadyCondition {
+			continue
+		}
+		if c.Status != corev1.ConditionTrue {
+			return false
+		}
+	}
+	return true
+}
+
+// InitConditions - Initializes Status Conditons
+func (instance OpenStackControlPlane) InitConditions() {
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+	}
+	cl := condition.CreateList(
+		condition.UnknownCondition(OpenStackControlPlaneRabbitMQReadyCondition, condition.InitReason, OpenStackControlPlaneRabbitMQReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneOVNReadyCondition, condition.InitReason, OpenStackControlPlaneOVNReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneOVSReadyCondition, condition.InitReason, OpenStackControlPlaneOVSReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneNeutronReadyCondition, condition.InitReason, OpenStackControlPlaneNeutronReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneMariaDBReadyCondition, condition.InitReason, OpenStackControlPlaneMariaDBReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneKeystoneAPIReadyCondition, condition.InitReason, OpenStackControlPlaneKeystoneAPIReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlanePlacementAPIReadyCondition, condition.InitReason, OpenStackControlPlanePlacementAPIReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, OpenStackControlPlaneGlanceReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneCinderReadyCondition, condition.InitReason, OpenStackControlPlaneCinderReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneNovaReadyCondition, condition.InitReason, OpenStackControlPlaneNovaReadyInitMessage),
+
+		// Also add the overall status condition as Unknown
+		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
+	)
+	// initialize conditions used later as Status=Unknown
+	instance.Status.Conditions.Init(&cl)
 }

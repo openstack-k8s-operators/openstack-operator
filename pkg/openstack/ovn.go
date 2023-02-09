@@ -17,15 +17,20 @@ import (
 
 // ReconcileOVN -
 func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Ovn.Enabled {
-		return ctrl.Result{}, nil
-	}
 	for name, dbcluster := range instance.Spec.Ovn.Template.OVNDBCluster {
 		OVNDBCluster := &ovnv1.OVNDBCluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: instance.Namespace,
 			},
+		}
+
+		if !instance.Spec.Ovn.Enabled {
+			if res, err := EnsureDeleted(ctx, helper, OVNDBCluster); err != nil {
+				return res, err
+			}
+			instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
+			continue
 		}
 
 		helper.GetLogger().Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
@@ -67,6 +72,14 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 			Name:      "ovnnorthd",
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Ovn.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, OVNNorthd); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
