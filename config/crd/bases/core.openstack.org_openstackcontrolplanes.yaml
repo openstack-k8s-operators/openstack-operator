@@ -21227,22 +21227,15 @@ spec:
                       passwordSelectors:
                         default:
                           database: NeutronDatabasePassword
-                          novaservice: NovaPassword
                           service: NeutronPassword
                         description: PasswordSelectors - Selectors to identify the
-                          DB and ServiceUser and NoveService User password from the
-                          Secret
+                          DB and ServiceUser password from the Secret
                         properties:
                           database:
                             default: NeutronDatabasePassword
                             description: 'Database - Selector to get the neutron database
                               user password from the Secret TODO: not used, need change
                               in mariadb-operator'
-                            type: string
-                          novaservice:
-                            default: NovaPassword
-                            description: Database - Selector to get the nova service
-                              password from the Secret
                             type: string
                           service:
                             default: NeutronPassword
@@ -21319,7 +21312,7 @@ spec:
                         type: object
                       secret:
                         description: Secret containing OpenStack password information
-                          for neutron NeutronPassword NovaPassword
+                          for NeutronDatabasePassword, NeutronPassword
                         type: string
                       serviceUser:
                         default: neutron
@@ -21772,11 +21765,11 @@ spec:
                           type: object
                         default:
                           cell0:
-                            cellDatabaseInstance: openstack
                             cellDatabaseUser: nova_cell0
-                            cellMessageBusInstance: unused
-                            conductorServiceTemplate:
-                              containerImage: quay.io/tripleozedcentos9/openstack-nova-conductor:current-tripleo
+                            hasAPIAccess: true
+                          cell1:
+                            cellDatabaseUser: nova_cell1
+                            cellMessageBusInstance: rabbitmq-cell1
                             hasAPIAccess: true
                         description: Cells is a mapping of cell names to NovaCellTemplate
                           objects defining the cells in the deployment. The "cell0"
@@ -22263,7 +22256,7 @@ spec:
                         - ovn-bridge
                         - system-id
                         type: object
-                      nic_mappings:
+                      nicMappings:
                         additionalProperties:
                           type: string
                         type: object
