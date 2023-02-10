@@ -19,12 +19,17 @@ package core
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/env"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/labels"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -44,6 +49,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -96,7 +102,10 @@ type OpenStackControlPlaneReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.1/pkg/reconcile
-func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
+func (r *OpenStackControlPlaneReconciler) Reconcile(
+	ctx context.Context,
+	req ctrl.Request,
+) (result ctrl.Result, _err error) {
 	_ = log.FromContext(ctx)
 
 	// Fetch the OpenStackControlPlane instance
@@ -177,7 +186,50 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	return r.reconcileNormal(ctx, instance, helper)
 }
 
-func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func (r *OpenStackControlPlaneReconciler) ensureDeploymentConfigMap(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) error {
+	cmLabels := labels.GetLabels(instance, labels.GetGroupLabel("openstack"), map[string]string{})
+
+	customData := map[string]string{}
+
+	enabledServices := []string{}
+	// TODO: Add all supported services.
+	if instance.Spec.Nova.Enabled {
+		enabledServices = append(enabledServices, "nova")
+	}
+	if instance.Spec.Cinder.Enabled {
+		enabledServices = append(enabledServices, "cinder")
+	}
+	sort.Strings(enabledServices)
+	customData["enabledServices"] = strings.Join(enabledServices[:], ",")
+
+	cms := []util.Template{
+		{
+			Name:       "openstack-deployment",
+			Namespace:  instance.Namespace,
+			Type:       util.TemplateTypeConfig,
+			CustomData: customData,
+			Labels:     cmLabels,
+		},
+	}
+
+	envVars := make(map[string]env.Setter)
+	return configmap.EnsureConfigMaps(ctx, helper, instance, cms, &envVars)
+}
+
+func (r *OpenStackControlPlaneReconciler) reconcileNormal(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
+
+	cmerr := r.ensureDeploymentConfigMap(ctx, instance, helper)
+	if cmerr != nil {
+		return ctrl.Result{}, cmerr
+	}
 
 	ctrlResult, err := openstack.ReconcileRabbitMQs(ctx, instance, helper)
 	if err != nil {
@@ -320,5 +372,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&ovsv1.OVS{}).
 		Owns(&neutronv1.NeutronAPI{}).
 		Owns(&novav1.Nova{}).
+		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
