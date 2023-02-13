@@ -1,5 +1,17 @@
+ARG GOLANG_CTX=golang:1.19
+ARG KEYSTONE_BUNDLE=quay.io/openstack-k8s-operators/keystone-operator-bundle:latest
+ARG MARIADB_BUNDLE=quay.io/openstack-k8s-operators/mariadb-operator-bundle:latest
+ARG RABBITMQ_BUNDLE=quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle:latest
+ARG PLACEMENT_BUNDLE=quay.io/openstack-k8s-operators/placement-operator-bundle:latest
+ARG GLANCE_BUNDLE=quay.io/openstack-k8s-operators/glance-operator-bundle:latest
+ARG CINDER_BUNDLE=quay.io/openstack-k8s-operators/cinder-operator-bundle:latest
+ARG OVN_BUNDLE=quay.io/openstack-k8s-operators/ovn-operator-bundle:latest
+ARG OVS_BUNDLE=quay.io/openstack-k8s-operators/ovs-operator-bundle:latest
+ARG NEUTRON_BUNDLE=quay.io/openstack-k8s-operators/neutron-operator-bundle:latest
+ARG ANSIBLEEE_BUNDLE=quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:latest
+ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
 # Build the manager binary
-FROM golang:1.19 as builder
+FROM $GOLANG_CTX as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -19,22 +31,19 @@ COPY pkg/ pkg/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o csv-merger csv-merger.go
 
-# FIXME(dprince): ARG doesn't work with FROM with buildah/podman? for each of the services below
-#ARG KEYSTONE_BUNDLE=quay.io/openstack-k8s-operators/keystone-operator-bundle:latest
+FROM $KEYSTONE_BUNDLE as keystone-bundle
+FROM $MARIADB_BUNDLE as mariadb-bundle
+FROM $RABBITMQ_BUNDLE as rabbitmq-bundle
+FROM $PLACEMENT_BUNDLE as placement-bundle
+FROM $GLANCE_BUNDLE as glance-bundle
+FROM $CINDER_BUNDLE as cinder-bundle
+FROM $OVN_BUNDLE as ovn-bundle
+FROM $OVS_BUNDLE as ovs-bundle
+FROM $NEUTRON_BUNDLE as neutron-bundle
+FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
+FROM $NOVA_BUNDLE as nova-bundle
 
-FROM quay.io/openstack-k8s-operators/keystone-operator-bundle:latest as keystone-bundle
-FROM quay.io/openstack-k8s-operators/mariadb-operator-bundle:latest as mariadb-bundle
-FROM quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle:latest as rabbitmq-bundle
-FROM quay.io/openstack-k8s-operators/placement-operator-bundle:latest as placement-bundle
-FROM quay.io/openstack-k8s-operators/glance-operator-bundle:latest as glance-bundle
-FROM quay.io/openstack-k8s-operators/cinder-operator-bundle:latest as cinder-bundle
-FROM quay.io/openstack-k8s-operators/ovn-operator-bundle:latest as ovn-bundle
-FROM quay.io/openstack-k8s-operators/ovs-operator-bundle:latest as ovs-bundle
-FROM quay.io/openstack-k8s-operators/neutron-operator-bundle:latest as neutron-bundle
-FROM quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:latest as openstack-ansibleee-bundle
-FROM quay.io/openstack-k8s-operators/nova-operator-bundle:latest as nova-bundle
-
-FROM golang:1.19 as merger
+FROM $GOLANG_CTX as merger
 WORKDIR /workspace
 COPY --from=builder /workspace/csv-merger .
 
