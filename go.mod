@@ -27,7 +27,10 @@ require (
 	sigs.k8s.io/controller-runtime v0.14.4
 )
 
-require github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230126151500-66ff44f847f6
+require (
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230214163617-0d4f4a6a874f
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230126151500-66ff44f847f6
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

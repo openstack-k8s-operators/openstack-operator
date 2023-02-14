@@ -27,6 +27,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
@@ -72,6 +73,7 @@ func init() {
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
 	utilruntime.Must(ovsv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
+	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
 	utilruntime.Must(clientv1.AddToScheme(scheme))
