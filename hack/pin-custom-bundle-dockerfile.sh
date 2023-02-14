@@ -29,5 +29,5 @@ for MOD_PATH in $(go list -m -json all | jq -r '. | select(.Path | contains("ope
 
   SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/ \
         | jq -r .tags[].name | grep $REF)
-  sed -i custom-bundle.Dockerfile.pinned -e "s|FROM quay.io/openstack-k8s-operators/${BASE}-operator-bundle.*|FROM ${REPO_URL}/${BASE}-operator-bundle:$SHA as ${BASE}-bundle|"
+  sed -i custom-bundle.Dockerfile.pinned -e "s|quay.io/openstack-k8s-operators/${BASE}-operator-bundle.*|${REPO_URL}/${BASE}-operator-bundle:$SHA|"
 done
