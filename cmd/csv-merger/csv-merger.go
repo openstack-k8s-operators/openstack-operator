@@ -121,6 +121,7 @@ func main() {
 			Status:     csvBase.Status}
 
 		installStrategyBase := csvBase.Spec.InstallStrategy.StrategySpec
+		webhookdefinitions := csvBase.Spec.WebhookDefinitions
 
 		for _, csvFile := range csvs {
 			if csvFile != "" {
@@ -139,6 +140,7 @@ func main() {
 				installStrategyBase.DeploymentSpecs = append(installStrategyBase.DeploymentSpecs, csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs...)
 				installStrategyBase.ClusterPermissions = append(installStrategyBase.ClusterPermissions, csvStruct.Spec.InstallStrategy.StrategySpec.ClusterPermissions...)
 				installStrategyBase.Permissions = append(installStrategyBase.Permissions, csvStruct.Spec.InstallStrategy.StrategySpec.Permissions...)
+				webhookdefinitions = append(webhookdefinitions, csvStruct.Spec.WebhookDefinitions...)
 
 				for _, owned := range csvStruct.Spec.CustomResourceDefinitions.Owned {
 					csvExtended.Spec.CustomResourceDefinitions.Owned = append(
@@ -197,6 +199,7 @@ func main() {
 		csvExtended.Annotations["operators.operatorframework.io/internal-objects"] = string(hiddenCrdsJ)
 
 		csvExtended.Spec.InstallStrategy.StrategyName = "deployment"
+		csvExtended.Spec.WebhookDefinitions = webhookdefinitions
 		csvExtended.Spec.InstallStrategy = csvv1alpha1.NamedInstallStrategy{
 			StrategyName: "deployment",
 			StrategySpec: installStrategyBase,
