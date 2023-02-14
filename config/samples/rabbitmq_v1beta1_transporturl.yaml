@@ -1,7 +1,0 @@
-apiVersion: rabbitmq.openstack.org/v1beta1
-kind: TransportURL
-metadata:
-  # the name of this resource is used in the transport URL and to name the k8s secret
-  name: cinder
-spec:
-  rabbitmqClusterName: rabbitmq

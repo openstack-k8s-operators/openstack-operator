@@ -61,6 +61,7 @@ var (
 	keystoneCsv    = flag.String("keystone-csv", "", "Keystone CSV filename")
 	mariadbCsv     = flag.String("mariadb-csv", "", "Mariadb CSV filename")
 	rabbitmqCsv    = flag.String("rabbitmq-csv", "", "RabbitMQ CSV filename")
+	infraCsv       = flag.String("infra-csv", "", "Infra CSV filename")
 	ansibleEECsv   = flag.String("ansibleee-csv", "", "Ansible EE CSV filename")
 	novaCsv        = flag.String("nova-csv", "", "Nova CSV filename")
 	neutronCsv     = flag.String("neutron-csv", "", "Neutron CSV filename")
@@ -98,6 +99,7 @@ func main() {
 			*keystoneCsv,
 			*mariadbCsv,
 			*rabbitmqCsv,
+			*infraCsv,
 			*ansibleEECsv,
 			*novaCsv,
 			*neutronCsv,
