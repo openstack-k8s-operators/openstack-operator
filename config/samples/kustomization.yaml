@@ -1,5 +1,5 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
 - core_v1beta1_openstackcontrolplane.yaml
-- core_v1beta1_openstackcontrolplane_cell_separation.yaml
+- core_v1beta1_openstackcontrolplane_collapsed_cell.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
