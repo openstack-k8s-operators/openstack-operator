@@ -10,6 +10,7 @@ ARG OVN_BUNDLE=quay.io/openstack-k8s-operators/ovn-operator-bundle:latest
 ARG OVS_BUNDLE=quay.io/openstack-k8s-operators/ovs-operator-bundle:latest
 ARG NEUTRON_BUNDLE=quay.io/openstack-k8s-operators/neutron-operator-bundle:latest
 ARG ANSIBLEEE_BUNDLE=quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:latest
+ARG DATAPLANE_BUNDLE=quay.io/openstack-k8s-operators/dataplane-operator-bundle:latest
 ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
 # Build the manager binary
 FROM $GOLANG_CTX as builder
@@ -43,6 +44,7 @@ FROM $OVN_BUNDLE as ovn-bundle
 FROM $OVS_BUNDLE as ovs-bundle
 FROM $NEUTRON_BUNDLE as neutron-bundle
 FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
+FROM $DATAPLANE_BUNDLE as dataplane-bundle
 FROM $NOVA_BUNDLE as nova-bundle
 
 FROM $GOLANG_CTX as merger
@@ -64,6 +66,7 @@ COPY --from=ovn-bundle /manifests/* /manifests/
 COPY --from=ovs-bundle /manifests/* /manifests/
 COPY --from=neutron-bundle /manifests/* /manifests/
 COPY --from=openstack-ansibleee-bundle /manifests/* /manifests/
+COPY --from=dataplane-bundle /manifests/* /manifests/
 COPY --from=nova-bundle /manifests/* /manifests/
 
 RUN /workspace/csv-merger \
@@ -78,6 +81,7 @@ RUN /workspace/csv-merger \
   --ovs-csv=/manifests/ovs-operator.clusterserviceversion.yaml \
   --neutron-csv=/manifests/neutron-operator.clusterserviceversion.yaml \
   --ansibleee-csv=/manifests/openstack-ansibleee-operator.clusterserviceversion.yaml \
+  --dataplane-csv=/manifests/dataplane-operator.clusterserviceversion.yaml \
   --nova-csv=/manifests/nova-operator.clusterserviceversion.yaml \
   --openstack-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
