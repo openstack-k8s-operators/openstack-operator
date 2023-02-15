@@ -17,15 +17,19 @@ import (
 
 // ReconcileGlance -
 func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Glance.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	glance := &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "glance",
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Glance.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, glance); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneGlanceReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling glance", "glance.Namespace", instance.Namespace, "glance.Name", "glance")

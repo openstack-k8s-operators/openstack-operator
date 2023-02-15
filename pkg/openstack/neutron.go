@@ -17,15 +17,19 @@ import (
 
 // ReconcileNeutron -
 func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Neutron.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	neutronAPI := &neutronv1.NeutronAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "neutron",
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Neutron.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, neutronAPI); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneNeutronReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling neutronAPI", "neutronAPI.Namespace", instance.Namespace, "neutronAPI.Name", "neutron")

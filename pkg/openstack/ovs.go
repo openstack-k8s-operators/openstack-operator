@@ -17,15 +17,20 @@ import (
 
 // ReconcileOVS -
 func ReconcileOVS(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Ovs.Enabled {
-		return ctrl.Result{}, nil
-	}
 	name := "ovs"
 	ovs := &ovsv1.OVS{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Ovs.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, ovs); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVSReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling OVS", "OVS.Namespace", instance.Namespace, "OVS.Name", name)

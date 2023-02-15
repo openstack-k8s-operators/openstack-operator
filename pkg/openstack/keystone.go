@@ -17,15 +17,19 @@ import (
 
 // ReconcileKeystoneAPI -
 func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Keystone.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	keystoneAPI := &keystonev1.KeystoneAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone", //FIXME (keystone doesn't seem to work unless named "keystone")
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Keystone.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, keystoneAPI); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "keystoneAPI.Name", "keystone")

@@ -36,10 +36,6 @@ func ReconcileRabbitMQs(
 	instance *corev1beta1.OpenStackControlPlane,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
-	if !instance.Spec.Rabbitmq.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	var failures []string = []string{}
 	var inprogress []string = []string{}
 
@@ -100,6 +96,13 @@ func reconcileRabbitMQ(
 	}
 
 	helper.GetLogger().Info("Reconciling RabbitMQ", "RabbitMQ.Namespace", instance.Namespace, "RabbitMQ.Name", name)
+	if !instance.Spec.Rabbitmq.Enabled {
+		if _, err := EnsureDeleted(ctx, helper, rabbitmq); err != nil {
+			return mqFailed, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition)
+		return mqReady, nil
+	}
 
 	defaultStatefulSet := rabbitmqv1.StatefulSet{
 		Spec: &rabbitmqv1.StatefulSetSpec{

@@ -17,15 +17,19 @@ import (
 
 // ReconcileMariaDB -
 func ReconcileMariaDB(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Mariadb.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	mariadb := &mariadbv1.MariaDB{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "openstack", //FIXME
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Mariadb.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, mariadb); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "mariadb.Name", "openstack")

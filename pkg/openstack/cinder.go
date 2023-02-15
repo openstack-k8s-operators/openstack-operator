@@ -17,15 +17,19 @@ import (
 
 // ReconcileCinder -
 func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Cinder.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	cinder := &cinderv1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "cinder",
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Cinder.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, cinder); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneCinderReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")

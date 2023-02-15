@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"os"
+	"strings"
 
 	"go.uber.org/zap/zapcore"
 
@@ -142,6 +143,13 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackControlPlane")
 		os.Exit(1)
+	}
+
+	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
+		if err = (&corev1beta1.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackControlPlane")
+			os.Exit(1)
+		}
 	}
 	//+kubebuilder:scaffold:builder
 
