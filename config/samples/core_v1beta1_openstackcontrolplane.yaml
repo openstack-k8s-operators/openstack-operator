@@ -89,3 +89,18 @@ spec:
   nova:
     template:
       secret: osp-secret
+  ironic:
+    template:
+      databaseInstance: openstack
+      ironicAPI:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-api:current-tripleo
+      ironicConductor:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-conductor:current-tripleo
+        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
+      ironicInspector:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-inspector:current-tripleo
+        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
+      secret: osp-secret

@@ -21,6 +21,7 @@ import (
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -85,6 +86,10 @@ type OpenStackControlPlaneSpec struct {
 	// +kubebuilder:validation:Optional
 	// Nova - Parameters related to the Nova services
 	Nova NovaSection `json:"nova,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Ironic - Parameters related to the Ironic services
+	Ironic IronicSection `json:"ironic,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// ExtraMounts containing conf files and credentials that should be provided
@@ -228,6 +233,18 @@ type NovaSection struct {
 	Template novav1.NovaSpec `json:"template,omitempty"`
 }
 
+// IronicSection defines the desired state of Ironic services
+type IronicSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Enabled - Whether Ironic services should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Ironic services
+	Template ironicv1.IronicSpec `json:"template,omitempty"`
+}
+
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
 type OpenStackControlPlaneStatus struct {
 	// Conditions
@@ -303,6 +320,7 @@ func (instance OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, OpenStackControlPlaneGlanceReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneCinderReadyCondition, condition.InitReason, OpenStackControlPlaneCinderReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneNovaReadyCondition, condition.InitReason, OpenStackControlPlaneNovaReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneIronicReadyCondition, condition.InitReason, OpenStackControlPlaneIronicReadyInitMessage),
 
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
