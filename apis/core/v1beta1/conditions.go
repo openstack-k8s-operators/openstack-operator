@@ -51,6 +51,9 @@ const (
 	// OpenStackControlPlaneNovaReadyCondition Status=True condition which indicates if Nova is configured and operational
 	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
 
+	// OpenStackControlPlaneIronicReadyCondition Status=True condition which indicates if Ironic is configured and operational
+	OpenStackControlPlaneIronicReadyCondition condition.Type = "OpenStackControlPlaneIronicReady"
+
 	// OpenStackControlPlaneClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackControlPlaneClientReadyCondition condition.Type = "OpenStackControlPlaneClientReady"
 
@@ -189,6 +192,18 @@ const (
 
 	// OpenStackControlPlaneNovaReadyErrorMessage
 	OpenStackControlPlaneNovaReadyErrorMessage = "OpenStackControlPlane Nova error occured %s"
+
+	// OpenStackControlPlaneIronicReadyInitMessage
+	OpenStackControlPlaneIronicReadyInitMessage = "OpenStackControlPlane Ironic not started"
+
+	// OpenStackControlPlaneIronicReadyMessage
+	OpenStackControlPlaneIronicReadyMessage = "OpenStackControlPlane Ironic completed"
+
+	// OpenStackControlPlaneIronicReadyRunningMessage
+	OpenStackControlPlaneIronicReadyRunningMessage = "OpenStackControlPlane Ironic in progress"
+
+	// OpenStackControlPlaneIronicReadyErrorMessage
+	OpenStackControlPlaneIronicReadyErrorMessage = "OpenStackControlPlane Ironic error occured %s"
 
 	// OpenStackControlPlaneClientReadyInitMessage
 	OpenStackControlPlaneClientReadyInitMessage = "OpenStackControlPlane Client not started"

@@ -68,6 +68,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ironic.openstack.org
+  resources:
+  - ironics
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - keystone.openstack.org
   resources:
   - keystoneapis

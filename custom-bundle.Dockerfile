@@ -12,6 +12,7 @@ ARG NEUTRON_BUNDLE=quay.io/openstack-k8s-operators/neutron-operator-bundle:lates
 ARG ANSIBLEEE_BUNDLE=quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:latest
 ARG DATAPLANE_BUNDLE=quay.io/openstack-k8s-operators/dataplane-operator-bundle:latest
 ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
+ARG IRONIC_BUNDLE=quay.io/openstack-k8s-operators/ironic-operator-bundle:latest
 # Build the manager binary
 FROM $GOLANG_CTX as builder
 
@@ -46,6 +47,7 @@ FROM $NEUTRON_BUNDLE as neutron-bundle
 FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
 FROM $DATAPLANE_BUNDLE as dataplane-bundle
 FROM $NOVA_BUNDLE as nova-bundle
+FROM $NOVA_BUNDLE as ironic-bundle
 
 FROM $GOLANG_CTX as merger
 WORKDIR /workspace
@@ -68,6 +70,7 @@ COPY --from=neutron-bundle /manifests/* /manifests/
 COPY --from=openstack-ansibleee-bundle /manifests/* /manifests/
 COPY --from=dataplane-bundle /manifests/* /manifests/
 COPY --from=nova-bundle /manifests/* /manifests/
+COPY --from=ironic-bundle /manifests/* /manifests/
 
 RUN /workspace/csv-merger \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
@@ -83,6 +86,7 @@ RUN /workspace/csv-merger \
   --ansibleee-csv=/manifests/openstack-ansibleee-operator.clusterserviceversion.yaml \
   --dataplane-csv=/manifests/dataplane-operator.clusterserviceversion.yaml \
   --nova-csv=/manifests/nova-operator.clusterserviceversion.yaml \
+  --ironic-csv=/manifests/ironic-operator.clusterserviceversion.yaml \
   --openstack-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's

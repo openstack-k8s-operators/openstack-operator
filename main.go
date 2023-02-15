@@ -32,6 +32,7 @@ import (
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
+	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -71,6 +72,7 @@ func init() {
 	utilruntime.Must(glancev1.AddToScheme(scheme))
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
 	utilruntime.Must(novav1.AddToScheme(scheme))
+	utilruntime.Must(ironicv1.AddToScheme(scheme))
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
 	utilruntime.Must(ovsv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
