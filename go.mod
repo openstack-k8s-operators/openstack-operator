@@ -7,9 +7,9 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/imdario/mergo v0.3.13
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230209105737-9f41a88f24bd
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230209110630-aaed27b1b3ef
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230214140726-81802290096a
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230208150008-87df8c2f32cb
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230208113903-f7b52e2a2ccb
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230213100743-10d19ef192ad
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230209114413-813039ed375c
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230210115638-cd7f78dc2561
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230208181931-e7ed9c92eb21
@@ -61,7 +61,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230208113903-f7b52e2a2ccb // indirect; indirect // indirect // indirect // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb // indirect; indirect // indirect // indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230213100743-10d19ef192ad // indirect; indirect // indirect // indirect // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
