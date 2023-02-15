@@ -48,26 +48,6 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-// GetClient -
-func (r *OpenStackControlPlaneReconciler) GetClient() client.Client {
-	return r.Client
-}
-
-// GetKClient -
-func (r *OpenStackControlPlaneReconciler) GetKClient() kubernetes.Interface {
-	return r.Kclient
-}
-
-// GetLogger -
-func (r *OpenStackControlPlaneReconciler) GetLogger() logr.Logger {
-	return r.Log
-}
-
-// GetScheme -
-func (r *OpenStackControlPlaneReconciler) GetScheme() *runtime.Scheme {
-	return r.Scheme
-}
-
 // OpenStackControlPlaneReconciler reconciles a OpenStackControlPlane object
 type OpenStackControlPlaneReconciler struct {
 	client.Client
