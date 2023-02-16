@@ -17,14 +17,19 @@ import (
 
 // ReconcileIronic -
 func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	if !instance.Spec.Ironic.Enabled {
-		return ctrl.Result{}, nil
-	}
 	ironic := &ironicv1.Ironic{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "ironic",
 			Namespace: instance.Namespace,
 		},
+	}
+
+	if !instance.Spec.Ironic.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, ironic); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneIronicReadyCondition)
+		return ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling ironic", "ironic.Namespace", instance.Namespace, "ironic.Name", "ironic")
