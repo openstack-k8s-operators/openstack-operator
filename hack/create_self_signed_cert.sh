@@ -25,6 +25,6 @@ DNS.2 = ${SERVICE}.${NAMESPACE}.svc.cluster.local
 DNS.2 = ${SERVICE}.${NAMESPACE}.pod.cluster.local
 EOF
 
- openssl req -newkey rsa:4096 -days 3650 -nodes -x509 \
-  -keyout ${TMPDIR}/tls.key \
-  -out ${TMPDIR}/tls.crt -config ${TMPDIR}/tls.conf
+openssl req -newkey rsa:4096 -days 3650 -nodes -x509 \
+    -keyout ${TMPDIR}/tls.key \
+    -out ${TMPDIR}/tls.crt -config ${TMPDIR}/tls.conf
