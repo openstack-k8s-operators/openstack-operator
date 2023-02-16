@@ -4,20 +4,6 @@ on:
   push:
     branches:
       - '*'
-    paths-ignore:
-      - .gitignore
-      - .pull_request_pipeline
-      - changelog.txt
-      - kuttl-test.yaml
-      - LICENSE
-      - Makefile
-      - OWNERS
-      - PROJECT
-      - README.md
-      - .github/
-      - build/
-      - docs/
-      - tests/
 
 env:
   imageregistry: 'quay.io'
