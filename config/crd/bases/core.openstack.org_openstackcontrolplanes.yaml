@@ -21151,237 +21151,244 @@ spec:
                             type: string
                           standalone:
                             default: false
-                            description: Whether to deploy a single node standalone
-                              Ironic.
+                            description: Whether to deploy a standalone Ironic.
                             type: boolean
                           transportURLSecret:
                             description: Secret containing RabbitMq transport URL
                             type: string
                         type: object
-                      ironicConductor:
-                        description: IronicAPI - Spec definition for the conductor
+                      ironicConductors:
+                        description: IronicConductors - Spec definitions for the conductor
                           service of this Ironic deployment
-                        properties:
-                          containerImage:
-                            description: ContainerImage - Ironic Conductor Container
-                              Image URL
-                            type: string
-                          customServiceConfig:
-                            default: '# add your customization here'
-                            description: CustomServiceConfig - customize the service
-                              config using this parameter to change service defaults,
-                              or overwrite rendered information using raw OpenStack
-                              config format. The content gets added to to /etc/<service>/<service>.conf.d
-                              directory as custom.conf file.
-                            type: string
-                          databaseHostname:
-                            description: DatabaseHostname - Ironic Database Hostname
-                            type: string
-                          databaseUser:
-                            default: ironic
-                            description: 'DatabaseUser - optional username used for
-                              ironic DB, defaults to ironic TODO: -> implement needs
-                              work in mariadb-operator, right now only ironic'
-                            type: string
-                          debug:
-                            description: Debug - enable debug for different deploy
-                              stages. If an init container is used, it runs and the
-                              actual action pod gets started with sleep infinity
-                            properties:
-                              bootstrap:
-                                default: false
-                                description: ReadyCount enable debug
-                                type: boolean
-                              dbSync:
-                                default: false
-                                description: DBSync enable debug
-                                type: boolean
-                              service:
-                                default: false
-                                description: Service enable debug
-                                type: boolean
-                            type: object
-                          defaultConfigOverwrite:
-                            additionalProperties:
+                        items:
+                          description: IronicConductorSpec defines the desired state
+                            of IronicConductor
+                          properties:
+                            conductorGroup:
+                              description: ConductorGroup - Ironic Conductor conductor
+                                group.
                               type: string
-                            description: 'ConfigOverwrite - interface to overwrite
-                              default config files like e.g. policy.json. But can
-                              also be used to add additional files. Those get added
-                              to the service config dir in /etc/<service> . TODO:
-                              -> implement'
-                            type: object
-                          dhcpRanges:
-                            description: DHCPRanges - List of DHCP ranges to use for
-                              provisioning
-                            items:
-                              description: DHCPRange to define address range for DHCP
-                                requestes
+                            containerImage:
+                              description: ContainerImage - Ironic Conductor Container
+                                Image URL
+                              type: string
+                            customServiceConfig:
+                              default: '# add your customization here'
+                              description: CustomServiceConfig - customize the service
+                                config using this parameter to change service defaults,
+                                or overwrite rendered information using raw OpenStack
+                                config format. The content gets added to to /etc/<service>/<service>.conf.d
+                                directory as custom.conf file.
+                              type: string
+                            databaseHostname:
+                              description: DatabaseHostname - Ironic Database Hostname
+                              type: string
+                            databaseUser:
+                              default: ironic
+                              description: 'DatabaseUser - optional username used
+                                for ironic DB, defaults to ironic TODO: -> implement
+                                needs work in mariadb-operator, right now only ironic'
+                              type: string
+                            debug:
+                              description: Debug - enable debug for different deploy
+                                stages. If an init container is used, it runs and
+                                the actual action pod gets started with sleep infinity
                               properties:
-                                end:
-                                  description: End - End of DHCP range
+                                bootstrap:
+                                  default: false
+                                  description: ReadyCount enable debug
+                                  type: boolean
+                                dbSync:
+                                  default: false
+                                  description: DBSync enable debug
+                                  type: boolean
+                                service:
+                                  default: false
+                                  description: Service enable debug
+                                  type: boolean
+                              type: object
+                            defaultConfigOverwrite:
+                              additionalProperties:
+                                type: string
+                              description: 'ConfigOverwrite - interface to overwrite
+                                default config files like e.g. policy.json. But can
+                                also be used to add additional files. Those get added
+                                to the service config dir in /etc/<service> . TODO:
+                                -> implement'
+                              type: object
+                            dhcpRanges:
+                              description: DHCPRanges - List of DHCP ranges to use
+                                for provisioning
+                              items:
+                                description: DHCPRange to define address range for
+                                  DHCP requestes
+                                properties:
+                                  end:
+                                    description: End - End of DHCP range
+                                    type: string
+                                  gateway:
+                                    description: Gateway - IP address for the router
+                                    type: string
+                                  mtu:
+                                    description: MTU - Maximum Transmission Unit
+                                    type: integer
+                                  name:
+                                    description: Name - Name of the DHCPRange (used
+                                      for tagging in dnsmasq)
+                                    type: string
+                                  netmask:
+                                    description: Netmask - IP network netmask (network
+                                      mask bits) for IPv4
+                                    type: string
+                                  podIndex:
+                                    description: PodIndex - Maps the DHCPRange to
+                                      a specific statefulset pod index
+                                    type: integer
+                                  prefix:
+                                    description: Prefix - IP network prefix (network
+                                      mask bits) for IPv6
+                                    type: integer
+                                  start:
+                                    description: Start - Start of DHCP range
+                                    type: string
+                                type: object
+                              type: array
+                            networkAttachments:
+                              description: NetworkAttachments list of network attachment
+                                definitions the pods get attached to.
+                              items:
+                                type: string
+                              type: array
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: NodeSelector to target subset of worker
+                                nodes running this service. Setting here overrides
+                                any global NodeSelector settings within the Ironic
+                                CR
+                              type: object
+                            passwordSelectors:
+                              default:
+                                database: IronicDatabasePassword
+                                service: IronicPassword
+                              description: PasswordSelectors - Selectors to identify
+                                the DB and ServiceUser password and TransportURL from
+                                the Secret
+                              properties:
+                                database:
+                                  default: IronicDatabasePassword
+                                  description: 'Database - Selector to get the ironic
+                                    Database user password from the Secret TODO: not
+                                    used, need change in mariadb-operator'
                                   type: string
-                                gateway:
-                                  description: Gateway - IP address for the router
-                                  type: string
-                                mtu:
-                                  description: MTU - Maximum Transmission Unit
-                                  type: integer
-                                name:
-                                  description: Name - Name of the DHCPRange (used
-                                    for tagging in dnsmasq)
-                                  type: string
-                                netmask:
-                                  description: Netmask - IP network netmask (network
-                                    mask bits) for IPv4
-                                  type: string
-                                podIndex:
-                                  description: PodIndex - Maps the DHCPRange to a
-                                    specific statefulset pod index
-                                  type: integer
-                                prefix:
-                                  description: Prefix - IP network prefix (network
-                                    mask bits) for IPv6
-                                  type: integer
-                                start:
-                                  description: Start - Start of DHCP range
+                                service:
+                                  default: IronicPassword
+                                  description: Database - Selector to get the ironic
+                                    service password from the Secret
                                   type: string
                               type: object
-                            type: array
-                          networkAttachments:
-                            description: NetworkAttachments list of network attachment
-                              definitions the pods get attached to.
-                            items:
+                            provisionNetwork:
+                              description: ProvisionNetwork - Additional network to
+                                attach to expose boot DHCP, TFTP, HTTP services.
                               type: string
-                            type: array
-                          nodeSelector:
-                            additionalProperties:
+                            pxeContainerImage:
+                              description: PxeContainerImage - Ironic DHCP/TFTP/HTTP
+                                Container Image URL
                               type: string
-                            description: NodeSelector to target subset of worker nodes
-                              running this service. Setting here overrides any global
-                              NodeSelector settings within the Ironic CR
-                            type: object
-                          passwordSelectors:
-                            default:
-                              database: IronicDatabasePassword
-                              service: IronicPassword
-                            description: PasswordSelectors - Selectors to identify
-                              the DB and ServiceUser password and TransportURL from
-                              the Secret
-                            properties:
-                              database:
-                                default: IronicDatabasePassword
-                                description: 'Database - Selector to get the ironic
-                                  Database user password from the Secret TODO: not
-                                  used, need change in mariadb-operator'
-                                type: string
-                              service:
-                                default: IronicPassword
-                                description: Database - Selector to get the ironic
-                                  service password from the Secret
-                                type: string
-                            type: object
-                          provisionNetwork:
-                            description: ProvisionNetwork - Additional network to
-                              attach to expose boot DHCP, TFTP, HTTP services.
-                            type: string
-                          pxeContainerImage:
-                            description: PxeContainerImage - Ironic DHCP/TFTP/HTTP
-                              Container Image URL
-                            type: string
-                          replicas:
-                            default: 1
-                            description: Replicas - Ironic Conductor Replicas
-                            format: int32
-                            type: integer
-                          resources:
-                            description: Resources - Compute Resources required by
-                              this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-                            properties:
-                              claims:
-                                description: "Claims lists the names of resources,
-                                  defined in spec.resourceClaims, that are used by
-                                  this container. \n This is an alpha field and requires
-                                  enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
-                                items:
-                                  description: ResourceClaim references one entry
-                                    in PodSpec.ResourceClaims.
-                                  properties:
-                                    name:
-                                      description: Name must match the name of one
-                                        entry in pod.spec.resourceClaims of the Pod
-                                        where this field is used. It makes that resource
-                                        available inside a container.
-                                      type: string
-                                  required:
+                            replicas:
+                              default: 1
+                              description: Replicas - Ironic Conductor Replicas
+                              format: int32
+                              type: integer
+                            resources:
+                              description: Resources - Compute Resources required
+                                by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                              properties:
+                                claims:
+                                  description: "Claims lists the names of resources,
+                                    defined in spec.resourceClaims, that are used
+                                    by this container. \n This is an alpha field and
+                                    requires enabling the DynamicResourceAllocation
+                                    feature gate. \n This field is immutable."
+                                  items:
+                                    description: ResourceClaim references one entry
+                                      in PodSpec.ResourceClaims.
+                                    properties:
+                                      name:
+                                        description: Name must match the name of one
+                                          entry in pod.spec.resourceClaims of the
+                                          Pod where this field is used. It makes that
+                                          resource available inside a container.
+                                        type: string
+                                    required:
+                                    - name
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-map-keys:
                                   - name
+                                  x-kubernetes-list-type: map
+                                limits:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Limits describes the maximum amount
+                                    of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                   type: object
-                                type: array
-                                x-kubernetes-list-map-keys:
-                                - name
-                                x-kubernetes-list-type: map
-                              limits:
-                                additionalProperties:
-                                  anyOf:
-                                  - type: integer
-                                  - type: string
-                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                                  x-kubernetes-int-or-string: true
-                                description: 'Limits describes the maximum amount
-                                  of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-                                type: object
-                              requests:
-                                additionalProperties:
-                                  anyOf:
-                                  - type: integer
-                                  - type: string
-                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                                  x-kubernetes-int-or-string: true
-                                description: 'Requests describes the minimum amount
-                                  of compute resources required. If Requests is omitted
-                                  for a container, it defaults to Limits if that is
-                                  explicitly specified, otherwise to an implementation-defined
-                                  value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-                                type: object
-                            type: object
-                          rpcTransport:
-                            default: json-rpc
-                            description: RPC transport type - Which RPC transport
-                              implementation to use between conductor and API services.
-                              'oslo' to use oslo.messaging transport or 'json-rpc'
-                              to use JSON RPC transport. NOTE -> ironic-inspector
-                              requires oslo.messaging transport when not in standalone
-                              mode.
-                            type: string
-                          secret:
-                            description: Secret containing OpenStack password information
-                              for IronicDatabasePassword, AdminPassword
-                            type: string
-                          serviceUser:
-                            default: ironic
-                            description: ServiceUser - optional username used for
-                              this service to register in ironic
-                            type: string
-                          standalone:
-                            default: false
-                            description: Whether to deploy a single node standalone
-                              Ironic.
-                            type: boolean
-                          storageClass:
-                            description: StorageClass
-                            type: string
-                          storageRequest:
-                            description: StorageRequest
-                            type: string
-                          transportURLSecret:
-                            description: TransportURLSecret - Secret containing RabbitMQ
-                              transportURL
-                            type: string
-                        required:
-                        - storageRequest
-                        type: object
+                                requests:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Requests describes the minimum amount
+                                    of compute resources required. If Requests is
+                                    omitted for a container, it defaults to Limits
+                                    if that is explicitly specified, otherwise to
+                                    an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                  type: object
+                              type: object
+                            rpcTransport:
+                              default: json-rpc
+                              description: RPC transport type - Which RPC transport
+                                implementation to use between conductor and API services.
+                                'oslo' to use oslo.messaging transport or 'json-rpc'
+                                to use JSON RPC transport. NOTE -> ironic-inspector
+                                requires oslo.messaging transport when not in standalone
+                                mode.
+                              type: string
+                            secret:
+                              description: Secret containing OpenStack password information
+                                for IronicDatabasePassword, AdminPassword
+                              type: string
+                            serviceUser:
+                              default: ironic
+                              description: ServiceUser - optional username used for
+                                this service to register in ironic
+                              type: string
+                            standalone:
+                              default: false
+                              description: Whether to deploy a standalone Ironic.
+                              type: boolean
+                            storageClass:
+                              description: StorageClass
+                              type: string
+                            storageRequest:
+                              description: StorageRequest
+                              type: string
+                            transportURLSecret:
+                              description: TransportURLSecret - Secret containing
+                                RabbitMQ transportURL
+                              type: string
+                          required:
+                          - storageRequest
+                          type: object
+                        type: array
                       ironicInspector:
-                        description: IronicAPI - Spec definition for the conductor
+                        description: IronicInspector - Spec definition for the conductor
                           service of this Ironic deployment
                         properties:
                           containerImage:
@@ -21602,7 +21609,7 @@ spec:
                             type: string
                           standalone:
                             default: false
-                            description: Whether to deploy a single node standalone
+                            description: Standalone - Whether to deploy a standalone
                               Ironic Inspector.
                             type: boolean
                           storageClass:
@@ -21669,12 +21676,12 @@ spec:
                         type: string
                       standalone:
                         default: false
-                        description: Whether to deploy a single node standalone Ironic.
+                        description: Whether to deploy a standalone Ironic.
                         type: boolean
                     required:
                     - databaseInstance
                     - ironicAPI
-                    - ironicConductor
+                    - ironicConductors
                     - ironicInspector
                     - secret
                     type: object
