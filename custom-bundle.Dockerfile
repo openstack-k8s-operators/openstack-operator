@@ -47,7 +47,7 @@ FROM $NEUTRON_BUNDLE as neutron-bundle
 FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
 FROM $DATAPLANE_BUNDLE as dataplane-bundle
 FROM $NOVA_BUNDLE as nova-bundle
-FROM $NOVA_BUNDLE as ironic-bundle
+FROM $IRONIC_BUNDLE as ironic-bundle
 
 FROM $GOLANG_CTX as merger
 WORKDIR /workspace
