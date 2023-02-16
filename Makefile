@@ -308,6 +308,7 @@ gowork: ## Generate go.work file to support our multi module repository
 	test -f go.work || go work init
 	go work use .
 	go work use ./apis
+	go work sync
 
 .PHONY: operator-lint
 operator-lint: gowork ## Runs operator-lint
