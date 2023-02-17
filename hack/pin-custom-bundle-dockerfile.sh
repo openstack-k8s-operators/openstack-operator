@@ -3,6 +3,7 @@ set -ex
 
 IMAGENAMESPACE=${IMAGENAMESPACE:-"openstack-k8s-operators"}
 IMAGEREGISTRY=${IMAGEREGISTRY:-"quay.io"}
+IMAGEBASE=${IMAGEBASE:-}
 
 
 cp custom-bundle.Dockerfile custom-bundle.Dockerfile.pinned
@@ -17,7 +18,7 @@ for MOD_PATH in $(go list -m -json all | jq -r '. | select(.Path | contains("ope
   GITHUB_USER=$(echo $MOD_PATH | sed -e 's|github.com/\(.*\)/.*-operator/.*$|\1|')
   REPO_CURL_URL="https://quay.io/api/v1/repository/openstack-k8s-operators"
   REPO_URL="quay.io/openstack-k8s-operators"
-  if [[ "$GITHUB_USER" != "openstack-k8s-operators" ]]; then
+  if [[ "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ]]; then
       if [[ "$IMAGENAMESPACE" != "openstack-k8s-operators" || "${IMAGEREGISTRY}" != "quay.io" ]]; then
           REPO_CURL_URL="https://${IMAGEREGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
           REPO_URL="${IMAGEREGISTRY}/${IMAGENAMESPACE}"
