@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -61,9 +63,57 @@ func (r *OpenStackControlPlane) ValidateDelete() error {
 	return nil
 }
 
+func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
+	switch name {
+	case "Keystone":
+		return r.Spec.Mariadb.Enabled
+	case "Glance":
+		return r.Spec.Mariadb.Enabled && r.Spec.Keystone.Enabled
+	case "Cinder":
+		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled)
+	case "Placement":
+		return r.Spec.Mariadb.Enabled && r.Spec.Keystone.Enabled
+	case "Neutron":
+		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled)
+	case "Nova":
+		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled &&
+			r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled)
+	}
+	return true
+}
+
 // ValidateServices implements common function for validating services
 func (r *OpenStackControlPlane) ValidateServices() error {
-	// Add service dependency validations
-	return nil
 
+	// Add service dependency validations
+	errorMsg := "%s service dependencies are not enabled."
+
+	if r.Spec.Keystone.Enabled && !r.checkDepsEnabled("Keystone") {
+		return fmt.Errorf(errorMsg, "Keystone")
+	}
+
+	if r.Spec.Glance.Enabled && !r.checkDepsEnabled("Glance") {
+		return fmt.Errorf(errorMsg, "Glance")
+	}
+
+	if r.Spec.Cinder.Enabled && !r.checkDepsEnabled("Cinder") {
+		return fmt.Errorf(errorMsg, "Cinder")
+	}
+
+	if r.Spec.Placement.Enabled && !r.checkDepsEnabled("Placement") {
+		return fmt.Errorf(errorMsg, "Placement")
+	}
+
+	if r.Spec.Neutron.Enabled && !r.checkDepsEnabled("Neutron") {
+		return fmt.Errorf(errorMsg, "Neutron")
+	}
+
+	if r.Spec.Nova.Enabled && !r.checkDepsEnabled("Nova") {
+		return fmt.Errorf(errorMsg, "Nova")
+	}
+
+	return nil
 }
