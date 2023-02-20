@@ -67,3 +67,22 @@ func (r *OpenStackControlPlane) ValidateServices() error {
 	return nil
 
 }
+
+// +kubebuilder:webhook:path=/mutate-core-openstack-org-v1beta1-openstackcontrolplane,mutating=true,failurePolicy=fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta1,name=mopenstackcontrolplane.kb.io,admissionReviewVersions=v1
+
+var _ webhook.Defaulter = &OpenStackControlPlane{}
+
+// Default implements webhook.Defaulter so a webhook will be registered for the type
+func (r *OpenStackControlPlane) Default() {
+	openstackcontrolplanelog.Info("Before calling webhook")
+	// Default storageClass for ironic
+	if r.Spec.Ironic.Enabled {
+		r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
+		for _, c := range r.Spec.Ironic.Template.IronicConductors {
+			if c.StorageClass == "" {
+				c.StorageClass = r.Spec.StorageClass
+			}
+		}
+	}
+	openstackcontrolplanelog.Info("Webhook Called")
+}
