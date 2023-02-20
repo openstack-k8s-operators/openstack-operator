@@ -41,11 +41,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		if ironic.Spec.DatabaseInstance == "" {
 			ironic.Spec.DatabaseInstance = "openstack"
 		}
-		for _, c := range ironic.Spec.IronicConductors {
-			if c.StorageClass == "" {
-				c.StorageClass = instance.Spec.StorageClass
-			}
+		if ironic.Spec.StorageClass == "" {
+			ironic.Spec.StorageClass = instance.Spec.StorageClass
 		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), ironic, helper.GetScheme())
 		if err != nil {
 			return err

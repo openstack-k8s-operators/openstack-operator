@@ -8,7 +8,7 @@ require (
 	github.com/imdario/mergo v0.3.13
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230214070830-9b5381baab25
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230214191806-f1edf82fe572
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230216062349-97348a6e633f
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230219214236-2a1a80cbb4bf
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230215171658-74caa7814c1d
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230215134634-d31141e5bbba
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230215160901-53e91d5d2374
