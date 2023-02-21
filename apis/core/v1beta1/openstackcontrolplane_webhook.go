@@ -76,7 +76,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
 		return r.Spec.Mariadb.Enabled && r.Spec.Keystone.Enabled
 	case "Neutron":
 		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
-			r.Spec.Keystone.Enabled)
+			r.Spec.Keystone.Enabled && r.Spec.Ovn.Enabled)
 	case "Nova":
 		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled &&
