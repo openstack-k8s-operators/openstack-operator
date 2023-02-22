@@ -27,7 +27,6 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
@@ -42,7 +41,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
@@ -133,13 +131,9 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	// Reset all ReadyConditons to 'Unknown'
 	instance.InitConditions()
 
-	// If we're not deleting this and the service object doesn't have our finalizer, add it.
-	if instance.DeletionTimestamp.IsZero() && controllerutil.AddFinalizer(instance, helper.GetFinalizer()) {
-		return ctrl.Result{}, err
-	}
-
 	if !instance.DeletionTimestamp.IsZero() {
-		return r.reconcileDelete(ctx, instance, helper)
+		r.Log.Info("Reconciled OpenStackControlPlane delete successfully")
+		return ctrl.Result{}, err
 	}
 
 	return r.reconcileNormal(ctx, instance, helper)
@@ -232,59 +226,6 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 	}
 
 	return ctrl.Result{}, nil
-}
-
-func (r *OpenStackControlPlaneReconciler) reconcileDelete(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	var err error
-	overallRes := ctrl.Result{}
-
-	//
-	// Ensure a controlled teardown of the control plane...
-	//
-
-	// Ordered list of resource types to delete
-	// Each outer index of resource groupings must be fully deleted before the next index is considered
-	steps := [][]client.ObjectList{
-		{
-			&cinderv1.CinderList{},
-			&glancev1.GlanceList{},
-			&neutronv1.NeutronAPIList{},
-			&novav1.NovaList{},
-			&ovnv1.OVNDBClusterList{},
-			&ovnv1.OVNNorthdList{},
-			&ovsv1.OVSList{},
-			&placementv1.PlacementAPIList{},
-		},
-		{
-			&rabbitmqv1.RabbitmqClusterList{},
-			&keystonev1.KeystoneAPIList{},
-		},
-		{
-			&mariadbv1.MariaDBList{},
-		},
-	}
-
-	for _, step := range steps {
-		if overallRes, err = openstack.CheckDeleteSubresources(ctx, helper, step); err != nil {
-			return overallRes, err
-		}
-
-		// If we're still waiting for this step's resources to be deleted, stop here
-		if (overallRes != ctrl.Result{}) {
-			util.LogForObject(helper, fmt.Sprintf("OpenStackControlPlane %s deletion is waiting on sub-resource deletion, requeuing...", instance.Name), instance)
-			return overallRes, nil
-		}
-	}
-
-	// Everything is cleared, so remove the finalizer so this OpenStackControlPlane can be fully removed
-	controllerutil.RemoveFinalizer(instance, helper.GetFinalizer())
-	if err := r.Update(ctx, instance); err != nil && !k8s_errors.IsNotFound(err) {
-		return overallRes, err
-	}
-
-	r.Log.Info("Reconciled OpenStackControlPlane delete successfully")
-
-	return overallRes, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
