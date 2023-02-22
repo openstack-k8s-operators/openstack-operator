@@ -1,0 +1,7 @@
+linters:
+  # Enable specific linter
+  # https://golangci-lint.run/usage/linters/#enabled-by-default
+  enable:
+    errorlint
+run:
+  timeout: 5m
