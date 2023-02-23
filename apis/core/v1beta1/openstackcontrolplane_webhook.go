@@ -19,10 +19,14 @@ package v1beta1
 import (
 	"fmt"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
 )
 
 // log is for logging in this package.
@@ -45,8 +49,25 @@ var _ webhook.Validator = &OpenStackControlPlane{}
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *OpenStackControlPlane) ValidateCreate() error {
 	openstackcontrolplanelog.Info("validate create", "name", r.Name)
+	var allErrs field.ErrorList
 
-	return r.ValidateServices()
+	if err := r.ValidateServices(); err != nil {
+		return err
+	}
+
+	basePath := field.NewPath("spec").Child("ironic").Child("template")
+	if err := r.Spec.Ironic.Template.ValidateCreate(basePath); err != nil {
+		allErrs = append(allErrs, err...)
+	}
+
+	if len(allErrs) != 0 {
+		return apierrors.NewInvalid(
+			schema.GroupKind{Group: "openstackcontrolplane.openstack.org", Kind: "OpenstackControlplane"},
+			r.Name, allErrs)
+	}
+
+	return nil
+
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
@@ -54,6 +75,19 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) error {
 	openstackcontrolplanelog.Info("validate update", "name", r.Name)
 
 	return r.ValidateServices()
+
+	basePath := field.NewPath("spec").Child("ironic").Child("template")
+	if err := r.Spec.Ironic.Template.ValidateCreate(basePath); err != nil {
+		allErrs = append(allErrs, err...)
+	}
+
+	if len(allErrs) != 0 {
+		return apierrors.NewInvalid(
+			schema.GroupKind{Group: "openstackcontrolplane.openstack.org", Kind: "OpenstackControlplane"},
+			r.Name, allErrs)
+	}
+
+	return nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
@@ -92,6 +126,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
 
 // ValidateServices implements common function for validating services
 func (r *OpenStackControlPlane) ValidateServices() error {
+	var allErrs field.ErrorList
 
 	// Temporary check until MariaDB is deprecated
 	if r.Spec.Mariadb.Enabled && r.Spec.Galera.Enabled {
