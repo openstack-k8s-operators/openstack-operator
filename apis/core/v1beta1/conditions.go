@@ -57,6 +57,9 @@ const (
 	// OpenStackControlPlaneClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackControlPlaneClientReadyCondition condition.Type = "OpenStackControlPlaneClientReady"
 
+	// OpenStackDataPlaneNodeReadyCondition Status=True condition which indicates if OpenStackDataPlaneNode is configured and operational
+	OpenStackDataPlaneNodeReadyCondition condition.Type = "OpenStackDataPlaneNodeReady"
+
 	// OpenStackClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackClientReadyCondition condition.Type = "OpenStackClientReady"
 )
@@ -216,4 +219,16 @@ const (
 
 	// OpenStackControlPlaneClientReadyErrorMessage
 	OpenStackControlPlaneClientReadyErrorMessage = "OpenStackControlPlane Client error occured %s"
+
+	// OpenStackDataPlaneNodeReadyInitMessage
+	OpenStackDataPlaneNodeReadyInitMessage = "OpenStackDataPlane Node not started"
+
+	// OpenStackDataPlaneNodeReadyMessage
+	OpenStackDataPlaneNodeReadyMessage = "OpenStackDataPlane Node completed"
+
+	// OpenStackDataPlaneNodeReadyRunningMessage
+	OpenStackDataPlaneNodeReadyRunningMessage = "OpenStackDataPlane Node in progress"
+
+	// OpenStackDataPlaneNodeReadyErrorMessage
+	OpenStackDataPlaneNodeReadyErrorMessage = "OpenStackDataPlane Node error occured %s"
 )

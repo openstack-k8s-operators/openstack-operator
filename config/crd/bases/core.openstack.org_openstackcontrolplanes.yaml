@@ -12033,6 +12033,82 @@ spec:
                     - rabbitMqClusterName
                     type: object
                 type: object
+              dataplanenode:
+                description: DataPlaneNode - Parameters related to the DataPlaneNode
+                  service
+                properties:
+                  enabled:
+                    default: true
+                    description: Enabled - Whether DataPlaneNode service should be
+                      deployed and managed
+                    type: boolean
+                  template:
+                    description: Template - Overrides to use when creating the DataPlaneNode
+                      service
+                    properties:
+                      ansibleHost:
+                        description: AnsibleHost SSH host for Ansible connection
+                        type: string
+                      deploy:
+                        default: true
+                        description: Deploy boolean to trigger ansible execution
+                        type: boolean
+                      hostName:
+                        description: HostName - node name
+                        type: string
+                      node:
+                        description: Node - node attributes specific to this node
+                        properties:
+                          ansiblePort:
+                            description: AnsiblePort SSH port for Ansible connection
+                            type: integer
+                          ansibleUser:
+                            description: AnsibleUser SSH user for Ansible connection
+                            type: string
+                          ansibleVars:
+                            description: AnsibleVars for configuring ansible
+                            type: string
+                          managed:
+                            description: Managed - Whether the node is actually provisioned
+                              (True) or should be treated as preprovisioned (False)
+                            type: boolean
+                          managementNetwork:
+                            description: ManagementNetwork - Name of network to use
+                              for management (SSH/Ansible)
+                            type: string
+                          networkConfig:
+                            description: NetworkConfig - Network configuration details.
+                              Contains os-net-config related properties.
+                            properties:
+                              template:
+                                default: templates/net_config_bridge.j2
+                                description: Template - ansible j2 nic config template
+                                  to use when applying node network configuration
+                                type: string
+                            type: object
+                          networks:
+                            description: Networks - Instance networks
+                            items:
+                              description: NetworksSection is a specification of the
+                                network attributes
+                              properties:
+                                fixedIP:
+                                  description: FixedIP - Specific IP address to use
+                                    for this network
+                                  type: string
+                                network:
+                                  description: Network - Network name to configure
+                                  type: string
+                              type: object
+                            type: array
+                        type: object
+                      role:
+                        description: Role - role name for this node
+                        type: string
+                    required:
+                    - deploy
+                    type: object
+                type: object
               extraMounts:
                 description: ExtraMounts containing conf files and credentials that
                   should be provided to the underlying operators. This struct can

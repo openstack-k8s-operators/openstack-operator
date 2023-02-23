@@ -20,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
@@ -82,6 +83,10 @@ type OpenStackControlPlaneSpec struct {
 
 	// Neutron - Overrides to use when creating the Neutron Service
 	Neutron NeutronSection `json:"neutron,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// DataPlaneNode - Parameters related to the DataPlaneNode service
+	DataPlaneNode DataPlaneNodeSection `json:"dataplanenode,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Nova - Parameters related to the Nova services
@@ -254,6 +259,18 @@ type NeutronSection struct {
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Neutron service
 	Template neutronv1.NeutronAPISpec `json:"template,omitempty"`
+}
+
+// DataPlaneNodeSection defines the desired state of DataPlaneNode service
+type DataPlaneNodeSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// Enabled - Whether DataPlaneNode service should be deployed and managed
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the DataPlaneNode service
+	Template dataplanev1beta1.OpenStackDataPlaneNodeSpec `json:"template,omitempty"`
 }
 
 // NovaSection defines the desired state of Nova services

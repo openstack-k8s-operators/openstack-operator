@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	clientv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
@@ -70,6 +71,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=nova.openstack.org,resources=nova,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=mariadb.openstack.org,resources=mariadbs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=neutron.openstack.org,resources=neutronapis,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes;openstackdataplanenodes;openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ovn.openstack.org,resources=ovndbclusters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ovn.openstack.org,resources=ovnnorthds,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ovs.openstack.org,resources=ovs,verbs=get;list;watch;create;update;patch;delete
@@ -224,6 +226,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcileDataplaneNode(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, helper, r.OpenStackClientContainerImage)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -254,6 +263,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileDelete(ctx context.Context, i
 			&ovnv1.OVNNorthdList{},
 			&ovsv1.OVSList{},
 			&placementv1.PlacementAPIList{},
+			&dataplanev1beta1.OpenStackDataPlaneNodeList{},
 		},
 		{
 			&rabbitmqv1.RabbitmqClusterList{},
@@ -303,6 +313,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&neutronv1.NeutronAPI{}).
 		Owns(&novav1.Nova{}).
 		Owns(&ironicv1.Ironic{}).
+		Owns(&dataplanev1beta1.OpenStackDataPlaneNode{}).
 		Owns(&clientv1beta1.OpenStackClient{}).
 		Complete(r)
 }

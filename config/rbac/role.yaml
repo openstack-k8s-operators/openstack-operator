@@ -56,6 +56,20 @@ rules:
   - patch
   - update
 - apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanenodes
+  - openstackdataplaneroles
+  - openstackdataplanes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - glance.openstack.org
   resources:
   - glances
