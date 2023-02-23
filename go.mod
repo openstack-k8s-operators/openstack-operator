@@ -7,10 +7,12 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/imdario/mergo v0.3.13
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230217163450-15fe6899542a
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230217145820-047bcd5cad9e
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230217135314-716bbda108da
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230220105454-15b5585e4e29
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230223000829-9b83b8b2e63b
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230217165024-22a34597a601
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230220103808-bd9bda2ad709
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230221132038-4d837b4ac7d2
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230216151116-2ff4f7be323b
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230216151115-4951d2fe7a91
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230217114953-0e6677ce1beb
@@ -18,7 +20,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230217140237-de65b4d23348
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230216151350-54c3dad3e50f
 	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230216151858-297f616e8dc7
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230220090217-e2618f6c8748
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230223090011-71439754f993
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
@@ -26,11 +28,6 @@ require (
 	k8s.io/apimachinery v0.26.1
 	k8s.io/client-go v0.26.1
 	sigs.k8s.io/controller-runtime v0.14.4
-)
-
-require (
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230217145820-047bcd5cad9e
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230220105454-15b5585e4e29
 )
 
 require (
@@ -72,11 +69,11 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/term v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
