@@ -235,8 +235,8 @@ github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230217135314-716
 github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230217135314-716bbda108da/go.mod h1:Nb9Zb6XqbLc6Jc8hidXsk/tKh20r9ZJko51g2jVTPhs=
 github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230220105454-15b5585e4e29 h1:AxbApPVdUZxGfkJpeX46jYTa/Z2h15yzZ/KKCe7c9Hw=
 github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230220105454-15b5585e4e29/go.mod h1:5kG0Ct412tO3fNkZ5b3/BwwSsV7LkSNfOB/apUlbMJI=
-github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230220115142-c95fe46fe33b h1:kVWTzCkG2AhU9PcCObd0Yi178vZdeHP6GErGm3pZmQY=
-github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230220115142-c95fe46fe33b/go.mod h1:yEfS2nOY2Bt1kMKPi7H8mZsqNNq0HA5aGFi+fYtjBVo=
+github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230223000829-9b83b8b2e63b h1:hjQObormd9XpGuFJDoI6hwJJByeqIoK93UMBbS/bWUg=
+github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230223000829-9b83b8b2e63b/go.mod h1:c54h8tmXTM3TqlzVdfw/aNlMzqikhzGkJJZKHKkh6LE=
 github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230217165024-22a34597a601 h1:6fe+UpBgb6EUtf+9uNUgE26JZLMG1Vv+X2pgZqPoxkQ=
 github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230217165024-22a34597a601/go.mod h1:/0wxx2Q+nlu3hgPMXZRfHwR/rxXaHFJumzhFn26VvJM=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230220103808-bd9bda2ad709 h1:g3sO7qyvAz3ltQG+I81bsM3SwrI8ILYPv+s6bWT3tLU=
