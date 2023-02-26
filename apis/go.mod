@@ -9,6 +9,7 @@ require (
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230321154324-7d3c2fbbe4a7
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230320104825-e625fcd50844
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230317112218-d5812b757909
+	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230312220436-a0becbddd733
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230303135615-979250c54a27
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230310111315-45e66f1c452f
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230321104551-4c13a941394d

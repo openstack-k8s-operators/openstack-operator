@@ -73,6 +73,18 @@ spec:
         volume1:
           containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
           replicas: 1
+  manila:
+    template:
+      manilaAPI:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-manila-api:current-tripleo
+      manilaScheduler:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-manila-scheduler:current-tripleo
+      manilaShares:
+        share1:
+          containerImage: quay.io/tripleozedcentos9/openstack-manila-share:current-tripleo
+          replicas: 1
   ovn:
     template:
       ovnDBCluster:

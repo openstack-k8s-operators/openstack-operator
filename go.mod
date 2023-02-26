@@ -30,6 +30,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.14.5
 )
 
+require github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230312220436-a0becbddd733
+
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
