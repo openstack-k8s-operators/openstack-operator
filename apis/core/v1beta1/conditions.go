@@ -62,6 +62,21 @@ const (
 
 	// OpenStackClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackClientReadyCondition condition.Type = "OpenStackClientReady"
+
+	// OpenStackControlPlaneManilaReadyCondition Status=True condition which indicates if Manila is configured and operational
+	OpenStackControlPlaneManilaReadyCondition condition.Type = "OpenStackControlPlaneManilaReady"
+
+	// OpenStackControlPlaneManilaReadyInitMessage
+	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
+
+	// OpenStackControlPlaneManilaReadyMessage
+	OpenStackControlPlaneManilaReadyMessage = "OpenStackControlPlane Manila completed"
+
+	// OpenStackControlPlaneManilaReadyRunningMessage
+	OpenStackControlPlaneManilaReadyRunningMessage = "OpenStackControlPlane Manila in progress"
+
+	// OpenStackControlPlaneManilaReadyErrorMessage
+	OpenStackControlPlaneManilaReadyErrorMessage = "OpenStackControlPlane Manila error occured %s"
 )
 
 // OpenStackControlPlane Reasons used by API objects.

@@ -28,6 +28,7 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
@@ -66,6 +67,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=placement.openstack.org,resources=placementapis,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=glance.openstack.org,resources=glances,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=cinder.openstack.org,resources=cinders,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=manila.openstack.org,resources=manilas,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=nova.openstack.org,resources=nova,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=mariadb.openstack.org,resources=mariadbs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=mariadb.openstack.org,resources=galeras,verbs=get;list;watch;create;update;patch;delete
@@ -238,6 +240,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcileManila(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -252,6 +261,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&placementv1.PlacementAPI{}).
 		Owns(&glancev1.Glance{}).
 		Owns(&cinderv1.Cinder{}).
+		Owns(&manilav1.Manila{}).
 		Owns(&rabbitmqv1.RabbitmqCluster{}).
 		Owns(&ovnv1.OVNDBCluster{}).
 		Owns(&ovnv1.OVNNorthd{}).
