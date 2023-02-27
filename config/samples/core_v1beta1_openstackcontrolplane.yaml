@@ -11,9 +11,10 @@ spec:
       databaseInstance: openstack
       secret: osp-secret
   mariadb:
-    template:
-      containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
-      storageRequest: 500M
+    templates:
+      openstack:
+        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
+        storageRequest: 500M
   rabbitmq:
     templates:
       rabbitmq:

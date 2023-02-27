@@ -22021,28 +22021,31 @@ spec:
                     description: Enabled - Whether MariaDB service should be deployed
                       and managed
                     type: boolean
-                  template:
-                    description: Template - Overrides to use when creating the MariaDB
-                      API Service
-                    properties:
-                      adoptionRedirect:
-                        description: AdoptionRedirectSpec defines redirection to a
-                          different DB instance during Adoption
-                        properties:
-                          host:
-                            description: MariaDB host to redirect to (IP or name)
-                            type: string
-                        type: object
-                      containerImage:
-                        default: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
-                        type: string
-                      secret:
-                        description: Secret containing a RootPassword
-                        type: string
-                      storageClass:
-                        type: string
-                      storageRequest:
-                        type: string
+                  templates:
+                    additionalProperties:
+                      description: MariaDBSpec defines the desired state of MariaDB
+                      properties:
+                        adoptionRedirect:
+                          description: AdoptionRedirectSpec defines redirection to
+                            a different DB instance during Adoption
+                          properties:
+                            host:
+                              description: MariaDB host to redirect to (IP or name)
+                              type: string
+                          type: object
+                        containerImage:
+                          default: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
+                          type: string
+                        secret:
+                          description: Secret containing a RootPassword
+                          type: string
+                        storageClass:
+                          type: string
+                        storageRequest:
+                          type: string
+                      type: object
+                    description: Templates - Overrides to use when creating the MariaDB
+                      databases
                     type: object
                 type: object
               neutron:

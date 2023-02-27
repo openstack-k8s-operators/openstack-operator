@@ -154,7 +154,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileMariaDB(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileMariaDBs(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
