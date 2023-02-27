@@ -110,6 +110,50 @@ spec:
                               to the service config dir in /etc/<service> . TODO:
                               -> implement'
                             type: object
+                          externalEndpoints:
+                            description: ExternalEndpoints, expose a VIP via MetalLB
+                              on the pre-created address pool
+                            items:
+                              description: MetalLBConfig to configure the MetalLB
+                                loadbalancer service
+                              properties:
+                                endpoint:
+                                  description: Endpoint, OpenStack endpoint this service
+                                    maps to
+                                  enum:
+                                  - internal
+                                  - public
+                                  type: string
+                                ipAddressPool:
+                                  description: IPAddressPool expose VIP via MetalLB
+                                    on the IPAddressPool
+                                  minLength: 1
+                                  type: string
+                                loadBalancerIPs:
+                                  description: LoadBalancerIPs, request given IPs
+                                    from the pool if available. Using a list to allow
+                                    dual stack (IPv4/IPv6) support
+                                  items:
+                                    type: string
+                                  type: array
+                                sharedIP:
+                                  default: true
+                                  description: SharedIP if true, VIP/VIPs get shared
+                                    with multiple services
+                                  type: boolean
+                                sharedIPKey:
+                                  default: ""
+                                  description: SharedIPKey specifies the sharing key
+                                    which gets set as the annotation on the LoadBalancer
+                                    service. Services which share the same VIP must
+                                    have the same SharedIPKey. Defaults to the IPAddressPool
+                                    if SharedIP is true, but no SharedIPKey specified.
+                                  type: string
+                              required:
+                              - endpoint
+                              - ipAddressPool
+                              type: object
+                            type: array
                           extraMounts:
                             description: ExtraMounts containing conf files and credentials
                             items:
@@ -2385,6 +2429,12 @@ spec:
                               required:
                               - extraVol
                               type: object
+                            type: array
+                          networkAttachments:
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
+                            items:
+                              type: string
                             type: array
                           nodeSelector:
                             additionalProperties:
@@ -4807,6 +4857,12 @@ spec:
                               - extraVol
                               type: object
                             type: array
+                          networkAttachments:
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -7225,6 +7281,12 @@ spec:
                               required:
                               - extraVol
                               type: object
+                            type: array
+                          networkAttachments:
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
+                            items:
+                              type: string
                             type: array
                           nodeSelector:
                             additionalProperties:
@@ -9744,6 +9806,13 @@ spec:
                                 required:
                                 - extraVol
                                 type: object
+                              type: array
+                            networkAttachments:
+                              description: NetworkAttachments is a list of NetworkAttachment
+                                resource names to expose the services to the given
+                                network
+                              items:
+                                type: string
                               type: array
                             nodeSelector:
                               additionalProperties:
@@ -16133,6 +16202,7 @@ spec:
                                     if SharedIP is true, but no SharedIPKey specified.
                                   type: string
                               required:
+                              - endpoint
                               - ipAddressPool
                               type: object
                             type: array
@@ -18604,6 +18674,7 @@ spec:
                                     if SharedIP is true, but no SharedIPKey specified.
                                   type: string
                               required:
+                              - endpoint
                               - ipAddressPool
                               type: object
                             type: array
@@ -21859,9 +21930,9 @@ spec:
                         additionalProperties:
                           type: string
                         description: 'ConfigOverwrite - interface to overwrite default
-                          config files like e.g. logging.conf or policy.json. But
-                          can also be used to add additional files. Those get added
-                          to the service config dir in /etc/<service> . TODO: -> implement'
+                          config files like e.g. policy.json. But can also be used
+                          to add additional files. Those get added to the service
+                          config dir in /etc/<service> . TODO: -> implement'
                         type: object
                       externalEndpoints:
                         description: ExternalEndpoints, expose a VIP using a pre-created
@@ -21903,6 +21974,7 @@ spec:
                                 is true, but no SharedIPKey specified.
                               type: string
                           required:
+                          - endpoint
                           - ipAddressPool
                           type: object
                         type: array
@@ -22109,9 +22181,53 @@ spec:
                           can also be used to add additional files. Those get added
                           to the service config dir in /etc/<service> . TODO: -> implement'
                         type: object
-                      networkAttachmentDefinitions:
-                        description: NetworkAttachmentDefinitions list of network
-                          attachment definitions the service pod gets attached to
+                      externalEndpoints:
+                        description: ExternalEndpoints, expose a VIP using a pre-created
+                          IPAddressPool
+                        items:
+                          description: MetalLBConfig to configure the MetalLB loadbalancer
+                            service
+                          properties:
+                            endpoint:
+                              description: Endpoint, OpenStack endpoint this service
+                                maps to
+                              enum:
+                              - internal
+                              - public
+                              type: string
+                            ipAddressPool:
+                              description: IPAddressPool expose VIP via MetalLB on
+                                the IPAddressPool
+                              minLength: 1
+                              type: string
+                            loadBalancerIPs:
+                              description: LoadBalancerIPs, request given IPs from
+                                the pool if available. Using a list to allow dual
+                                stack (IPv4/IPv6) support
+                              items:
+                                type: string
+                              type: array
+                            sharedIP:
+                              default: true
+                              description: SharedIP if true, VIP/VIPs get shared with
+                                multiple services
+                              type: boolean
+                            sharedIPKey:
+                              default: ""
+                              description: SharedIPKey specifies the sharing key which
+                                gets set as the annotation on the LoadBalancer service.
+                                Services which share the same VIP must have the same
+                                SharedIPKey. Defaults to the IPAddressPool if SharedIP
+                                is true, but no SharedIPKey specified.
+                              type: string
+                          required:
+                          - endpoint
+                          - ipAddressPool
+                          type: object
+                        type: array
+                      networkAttachments:
+                        description: NetworkAttachments is a list of NetworkAttachment
+                          resource names to expose the services to the given network
                         items:
                           type: string
                         type: array
@@ -22283,6 +22399,55 @@ spec:
                               also be used to add additional files. Those get added
                               to the service config dir in /etc/<service> .
                             type: object
+                          externalEndpoints:
+                            description: ExternalEndpoints, expose a VIP via MetalLB
+                              on the pre-created address pool
+                            items:
+                              description: MetalLBConfig to configure the MetalLB
+                                loadbalancer service
+                              properties:
+                                endpoint:
+                                  description: Endpoint, OpenStack endpoint this service
+                                    maps to
+                                  enum:
+                                  - internal
+                                  - public
+                                  type: string
+                                ipAddressPool:
+                                  description: IPAddressPool expose VIP via MetalLB
+                                    on the IPAddressPool
+                                  minLength: 1
+                                  type: string
+                                loadBalancerIPs:
+                                  description: LoadBalancerIPs, request given IPs
+                                    from the pool if available. Using a list to allow
+                                    dual stack (IPv4/IPv6) support
+                                  items:
+                                    type: string
+                                  type: array
+                                sharedIP:
+                                  default: true
+                                  description: SharedIP if true, VIP/VIPs get shared
+                                    with multiple services
+                                  type: boolean
+                                sharedIPKey:
+                                  default: ""
+                                  description: SharedIPKey specifies the sharing key
+                                    which gets set as the annotation on the LoadBalancer
+                                    service. Services which share the same VIP must
+                                    have the same SharedIPKey. Defaults to the IPAddressPool
+                                    if SharedIP is true, but no SharedIPKey specified.
+                                  type: string
+                              required:
+                              - ipAddressPool
+                              type: object
+                            type: array
+                          networkAttachments:
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -22399,6 +22564,13 @@ spec:
                                     get added to the service config dir in /etc/<service>
                                     .
                                   type: object
+                                networkAttachments:
+                                  description: NetworkAttachments is a list of NetworkAttachment
+                                    resource names to expose the services to the given
+                                    network
+                                  items:
+                                    type: string
+                                  type: array
                                 nodeSelector:
                                   additionalProperties:
                                     type: string
@@ -22496,6 +22668,13 @@ spec:
                                     get added to the service config dir in /etc/<service>
                                     .
                                   type: object
+                                networkAttachments:
+                                  description: NetworkAttachments is a list of NetworkAttachment
+                                    resource names to expose the services to the given
+                                    network
+                                  items:
+                                    type: string
+                                  type: array
                                 nodeSelector:
                                   additionalProperties:
                                     type: string
@@ -22589,6 +22768,13 @@ spec:
                                     get added to the service config dir in /etc/<service>
                                     .
                                   type: object
+                                networkAttachments:
+                                  description: NetworkAttachments is a list of NetworkAttachment
+                                    resource names to expose the services to the given
+                                    network
+                                  items:
+                                    type: string
+                                  type: array
                                 nodeSelector:
                                   additionalProperties:
                                     type: string
@@ -22731,6 +22917,12 @@ spec:
                               also be used to add additional files. Those get added
                               to the service config dir in /etc/<service> .
                             type: object
+                          networkAttachments:
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -22843,6 +23035,12 @@ spec:
                               also be used to add additional files. Those get added
                               to the service config dir in /etc/<service> .
                             type: object
+                          networkAttachments:
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
