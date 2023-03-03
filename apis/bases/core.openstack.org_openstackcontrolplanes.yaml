@@ -13978,7 +13978,6 @@ spec:
                       Service
                     properties:
                       containerImage:
-                        default: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
                         description: Glance Container Image URL
                         type: string
                       customServiceConfig:
@@ -16123,7 +16122,6 @@ spec:
                             - external
                             type: string
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
                             description: GlanceAPI Container Image URL
                             type: string
                           customServiceConfig:
@@ -18583,6 +18581,8 @@ spec:
                             description: ServiceUser - optional username used for
                               this service to register in glance
                             type: string
+                        required:
+                        - containerImage
                         type: object
                       glanceAPIInternal:
                         description: GlanceAPIInternal - Spec definition for the internal
@@ -18595,7 +18595,6 @@ spec:
                             - external
                             type: string
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
                             description: GlanceAPI Container Image URL
                             type: string
                           customServiceConfig:
@@ -21055,6 +21054,8 @@ spec:
                             description: ServiceUser - optional username used for
                               this service to register in glance
                             type: string
+                        required:
+                        - containerImage
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -21102,6 +21103,7 @@ spec:
                         description: StorageRequest
                         type: string
                     required:
+                    - containerImage
                     - databaseInstance
                     - glanceAPIExternal
                     - glanceAPIInternal
@@ -21705,6 +21707,7 @@ spec:
                             default: 1
                             description: Replicas - Ironic Inspector Replicas
                             format: int32
+                            maximum: 1
                             type: integer
                           resources:
                             description: Resources - Compute Resources required by
@@ -23151,10 +23154,22 @@ spec:
                                 timer to use on db creation (in milliseconds)
                               format: int32
                               type: integer
+                            inactivityProbe:
+                              default: 60000
+                              description: Probe interval for the OVSDB session (in
+                                milliseconds)
+                              format: int32
+                              type: integer
                             logLevel:
                               default: info
                               description: LogLevel - Set log level info, dbg, emer
                                 etc
+                              type: string
+                            networkAttachment:
+                              description: NetworkAttachment is a NetworkAttachment
+                                resource name to expose the service to the given network.
+                                If specified the IP address of this network is used
+                                as the dbAddress connection.
                               type: string
                             nodeSelector:
                               additionalProperties:
@@ -23250,6 +23265,12 @@ spec:
                             default: info
                             description: LogLevel - Set log level info, dbg, emer
                               etc
+                            type: string
+                          networkAttachment:
+                            description: NetworkAttachment is a NetworkAttachment
+                              resource name to expose the service to the given network.
+                              If specified the IP address of this network is used
+                              as the dbAddress connection.
                             type: string
                           nodeSelector:
                             additionalProperties:
@@ -23351,6 +23372,11 @@ spec:
                         - ovn-bridge
                         - system-id
                         type: object
+                      networkAttachment:
+                        description: NetworkAttachment is a NetworkAttachment resource
+                          name to expose the service to the given network. If specified
+                          the IP address of this network is used as the OvnEncapIP.
+                        type: string
                       nicMappings:
                         additionalProperties:
                           type: string
