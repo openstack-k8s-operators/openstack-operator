@@ -1,0 +1,132 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack-network-isolation
+spec:
+  secret: osp-secret
+  storageClass: local-storage
+  cinder:
+    template:
+      cinderAPI:
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+      cinderBackup:
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
+        networkAttachments:
+        - storage
+      cinderScheduler:
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
+      cinderVolumes:
+        volume1:
+          containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
+          networkAttachments:
+          - storage
+          replicas: 0 # backend needs to be configured
+  glance:
+    template:
+      databaseInstance: openstack
+      containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
+      storageClass: ""
+      storageRequest: 10G
+      glanceAPIInternal:
+        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+        networkAttachments:
+        - storage
+      glanceAPIExternal:
+        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
+        networkAttachments:
+        - storage
+  keystone:
+    template:
+      containerImage: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
+      databaseInstance: openstack
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+  mariadb:
+    templates:
+      openstack:
+        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
+        storageRequest: 500M
+  neutron:
+    template:
+      databaseInstance: openstack
+      containerImage: quay.io/tripleozedcentos9/openstack-neutron-server:current-tripleo
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+      networkAttachments:
+      - internalapi
+  nova:
+    template:
+      apiServiceTemplate:
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+      secret: osp-secret
+  ovn:
+    template:
+      ovnDBCluster:
+        ovndbcluster-nb:
+          containerImage: quay.io/tripleozedcentos9/openstack-ovn-nb-db-server:current-tripleo
+          dbType: NB
+          storageRequest: 10G
+          networkAttachment: internalapi
+        ovndbcluster-sb:
+          containerImage: quay.io/tripleozedcentos9/openstack-ovn-sb-db-server:current-tripleo
+          dbType: SB
+          storageRequest: 10G
+          networkAttachment: internalapi
+      ovnNorthd:
+        containerImage: quay.io/tripleozedcentos9/openstack-ovn-northd:current-tripleo
+        networkAttachment: internalapi
+  ovs:
+    template:
+      ovsContainerImage: "quay.io/skaplons/ovs:latest"
+      ovnContainerImage: "quay.io/tripleozedcentos9/openstack-ovn-controller:current-tripleo"
+      external-ids:
+        system-id: "random"
+        ovn-bridge: "br-int"
+        ovn-encap-type: "geneve"
+      networkAttachment: internalapi
+  placement:
+    template:
+      containerImage: quay.io/tripleozedcentos9/openstack-placement-api:current-tripleo
+      databaseInstance: openstack
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+  rabbitmq:
+    templates:
+      rabbitmq:
+        externalEndpoint:
+          loadBalancerIPs:
+          - 172.17.0.85
+          ipAddressPool: internalapi
+          sharedIP: false
+      rabbitmq-cell1:
+        externalEndpoint:
+          loadBalancerIPs:
+          - 172.17.0.86
+          ipAddressPool: internalapi
+          sharedIP: false
