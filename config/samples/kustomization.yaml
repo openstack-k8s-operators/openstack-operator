@@ -3,4 +3,5 @@ resources:
 - core_v1beta1_openstackcontrolplane.yaml
 - core_v1beta1_openstackcontrolplane_collapsed_cell.yaml
 - core_v1beta1_openstackcontrolplane_separate_cell_db.yaml
+- core_v1beta1_openstackcontrolplane_network_isolation.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
