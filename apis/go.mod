@@ -5,14 +5,14 @@ go 1.19
 require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230227105511-fcd97b88b8f0
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230228171749-4f4710f8920c
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230301235511-d8c149b33744
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230303184518-dae80ca64f5a
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230302112213-b4b2a357b4ed
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230301145136-e77d8d19c2ff
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230227100533-e49b65b3e3df
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230303135615-979250c54a27
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230301060003-4240bd6edfe5
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230302171630-d72e3c367af9
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230303151818-673d8c1c9b80
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230302133719-f0aec2a30a89
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230228110006-6f8f26a17b1b
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230303151544-3e5fe92201b3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/apimachinery v0.26.1
 	sigs.k8s.io/controller-runtime v0.14.4
