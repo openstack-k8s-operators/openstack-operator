@@ -94,6 +94,18 @@ rules:
 - apiGroups:
   - mariadb.openstack.org
   resources:
+  - galeras
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mariadb.openstack.org
+  resources:
   - mariadbs
   verbs:
   - create

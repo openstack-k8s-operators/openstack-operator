@@ -13965,6 +13965,58 @@ spec:
                   - extraVol
                   type: object
                 type: array
+              galera:
+                description: Galera - Parameters related to the Galera services
+                properties:
+                  enabled:
+                    default: true
+                    description: Enabled - Whether Galera services should be deployed
+                      and managed
+                    type: boolean
+                  templates:
+                    additionalProperties:
+                      description: GaleraSpec defines the desired state of Galera
+                      properties:
+                        adoptionRedirect:
+                          description: Adoption configuration
+                          properties:
+                            host:
+                              description: MariaDB host to redirect to (IP or name)
+                              type: string
+                          type: object
+                        containerImage:
+                          default: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
+                          description: Name of the galera container image to run
+                          type: string
+                        replicas:
+                          default: 1
+                          description: Size of the galera cluster deployment
+                          enum:
+                          - 1
+                          - 3
+                          format: int32
+                          minimum: 1
+                          type: integer
+                        secret:
+                          description: Name of the secret to look for password keys
+                          type: string
+                        storageClass:
+                          description: Storage class to host the mariadb databases
+                          type: string
+                        storageRequest:
+                          description: Storage size allocated for the mariadb databases
+                          type: string
+                      required:
+                      - containerImage
+                      - replicas
+                      - secret
+                      - storageClass
+                      - storageRequest
+                      type: object
+                    description: Templates - Overrides to use when creating the Galera
+                      databases
+                    type: object
+                type: object
               glance:
                 description: Glance - Parameters related to the Glance service
                 properties:

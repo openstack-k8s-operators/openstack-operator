@@ -66,19 +66,24 @@ func (r *OpenStackControlPlane) ValidateDelete() error {
 func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
 	switch name {
 	case "Keystone":
-		return r.Spec.Mariadb.Enabled
+		return (r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled)
 	case "Glance":
-		return r.Spec.Mariadb.Enabled && r.Spec.Keystone.Enabled
+		return (r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
+			r.Spec.Keystone.Enabled
 	case "Cinder":
-		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
+		return ((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
+			r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled)
 	case "Placement":
-		return r.Spec.Mariadb.Enabled && r.Spec.Keystone.Enabled
+		return (r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
+			r.Spec.Keystone.Enabled
 	case "Neutron":
-		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
+		return ((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
+			r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled)
 	case "Nova":
-		return (r.Spec.Mariadb.Enabled && r.Spec.Rabbitmq.Enabled &&
+		return ((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
+			r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled &&
 			r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled)
 	}
@@ -87,6 +92,11 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
 
 // ValidateServices implements common function for validating services
 func (r *OpenStackControlPlane) ValidateServices() error {
+
+	// Temporary check until MariaDB is deprecated
+	if r.Spec.Mariadb.Enabled && r.Spec.Galera.Enabled {
+		return fmt.Errorf("Mariadb and Galera are mutually exclusive")
+	}
 
 	// Add service dependency validations
 	errorMsg := "%s service dependencies are not enabled."

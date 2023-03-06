@@ -11,12 +11,13 @@ spec:
       databaseInstance: openstack
       secret: osp-secret
   mariadb:
+    enabled: false
     templates:
       openstack:
         containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
   galera:
-    enabled: false
+    enabled: true
     templates:
       openstack:
         containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
