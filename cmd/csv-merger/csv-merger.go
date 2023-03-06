@@ -29,6 +29,7 @@ import (
 
 	csvv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -123,7 +124,6 @@ func main() {
 			Status:     csvBase.Status}
 
 		installStrategyBase := csvBase.Spec.InstallStrategy.StrategySpec
-		webhookdefinitions := csvBase.Spec.WebhookDefinitions
 
 		for _, csvFile := range csvs {
 			if csvFile != "" {
@@ -139,10 +139,64 @@ func main() {
 					panic(err)
 				}
 
+				// 1. We need to add the "env" section from this Service Operator deployment in case there
+				// are default values configured there that are needed for use with defaulting webhooks
+				//
+				// - DeploymentSpecs[0] is always the base deployment for OpenStack Operator
+				// - Container at index 1 in DeploymentSpecs[0].Spec.Template.Spec.Containers list is
+				//   always the OpenStack Operator controller-manager
+				// - We need to find the Service Operator's controller-manager container in
+				//   csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers
+				//
+				// TODO: What about "env" list keys that overlap between Service Operators (i.e. non-unique
+				//       names)?
+				//
+				// 2. We also need to inject "ENABLE_WEBHOOKS=false" into the env vars for the Service Operators'
+				//    deployments, and then remove their webhook server's cert's volume mount
+
+				for index, container := range csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers {
+					// Copy env vars from the Service Operator into the OpenStack Operator
+					if container.Name == "manager" {
+						installStrategyBase.DeploymentSpecs[0].Spec.Template.Spec.Containers[1].Env = append(
+							// OpenStack Operator controller-manager container env vars
+							installStrategyBase.DeploymentSpecs[0].Spec.Template.Spec.Containers[1].Env,
+							// Service Operator controller-manager container env vars
+							container.Env...,
+						)
+
+						// Now we also need to turn off any "internal" webhooks that belong to the service
+						// operator, as we are now using "external" webhooks that live in the OpenStack
+						// operator.  These "external" webhooks will eventually call the mutating/validating
+						// logic that was previously housed within the "internal" Service Operator webhook
+						// logic.
+						container.Env = append(container.Env,
+							v1.EnvVar{
+								Name:  "ENABLE_WEBHOOKS",
+								Value: "false",
+							},
+						)
+
+						// And finally we need to remove the webhook server's cert volume mount
+						for volMountIndex, volMount := range container.VolumeMounts {
+							if volMount.Name == "cert" {
+								container.VolumeMounts[volMountIndex] = container.VolumeMounts[len(container.VolumeMounts)-1]
+								container.VolumeMounts = container.VolumeMounts[:len(container.VolumeMounts)-1]
+								// Found the target mount, so stop iterating
+								break
+							}
+						}
+
+						// Need to replace the container in the Deployment since this local variable is a copy
+						csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers[index] = container
+
+						// We found the controller-manager container, so no need to continue iterating
+						break
+					}
+				}
+
 				installStrategyBase.DeploymentSpecs = append(installStrategyBase.DeploymentSpecs, csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs...)
 				installStrategyBase.ClusterPermissions = append(installStrategyBase.ClusterPermissions, csvStruct.Spec.InstallStrategy.StrategySpec.ClusterPermissions...)
 				installStrategyBase.Permissions = append(installStrategyBase.Permissions, csvStruct.Spec.InstallStrategy.StrategySpec.Permissions...)
-				webhookdefinitions = append(webhookdefinitions, csvStruct.Spec.WebhookDefinitions...)
 
 				for _, owned := range csvStruct.Spec.CustomResourceDefinitions.Owned {
 					csvExtended.Spec.CustomResourceDefinitions.Owned = append(
@@ -201,7 +255,6 @@ func main() {
 		csvExtended.Annotations["operators.operatorframework.io/internal-objects"] = string(hiddenCrdsJ)
 
 		csvExtended.Spec.InstallStrategy.StrategyName = "deployment"
-		csvExtended.Spec.WebhookDefinitions = webhookdefinitions
 		csvExtended.Spec.InstallStrategy = csvv1alpha1.NamedInstallStrategy{
 			StrategyName: "deployment",
 			StrategySpec: installStrategyBase,

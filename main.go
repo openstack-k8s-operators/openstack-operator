@@ -147,6 +147,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Defaults for service operators
+
+	// Acquire environmental defaults and initialize Glance and GlanceAPI defaults with them
+	glanceDefaults := glancev1.GlanceDefaults{
+		ContainerImageURL: os.Getenv("GLANCE_API_IMAGE_URL_DEFAULT"),
+	}
+
+	(&glancev1.Glance{}).Spec.SetupDefaults(glanceDefaults)
+
+	// Webhooks
 	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
 		if err = (&corev1beta1.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackControlPlane")
