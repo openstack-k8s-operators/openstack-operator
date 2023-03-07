@@ -13969,7 +13969,7 @@ spec:
                 description: Galera - Parameters related to the Galera services
                 properties:
                   enabled:
-                    default: true
+                    default: false
                     description: Enabled - Whether Galera services should be deployed
                       and managed
                     type: boolean
