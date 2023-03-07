@@ -169,7 +169,7 @@ type MariadbSection struct {
 // GaleraSection defines the desired state of Galera services
 type GaleraSection struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
+	// +kubebuilder:default=false
 	// Enabled - Whether Galera services should be deployed and managed
 	Enabled bool `json:"enabled,omitempty"`
 
