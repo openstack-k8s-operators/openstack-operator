@@ -31,6 +31,12 @@ spec:
         #    memory: 1Gi
       rabbitmq-cell1:
         replicas: 1
+  memcached:
+    enabled: true
+    templates:
+      memcached:
+        containerImage: quay.io/tripleozedcentos9/openstack-memcached:current-tripleo
+        replicas: 1
   placement:
     template:
       databaseInstance: openstack

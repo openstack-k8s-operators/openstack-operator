@@ -21,6 +21,7 @@ import (
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -87,6 +88,10 @@ type OpenStackControlPlaneSpec struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Rabbitmq - Parameters related to the Rabbitmq service
 	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Memcached - Parameters related to the Memcached service
+	Memcached MemcachedSection `json:"memcached,omitempty"`
 
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Ovn - Overrides to use when creating the OVN Services
@@ -218,6 +223,18 @@ type RabbitmqSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Rabbitmq clusters
 	Templates map[string]RabbitmqTemplate `json:"templates"`
+}
+
+// MemcachedSection defines the desired state of Memcached services
+type MemcachedSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Enabled - Whether Memcached services should be deployed and managed
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	// Templates - Overrides to use when creating the Memcached databases
+	Templates map[string]memcachedv1.MemcachedSpec `json:"templates,omitempty"`
 }
 
 // RabbitmqTemplate definition
@@ -418,6 +435,7 @@ func (instance OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneOVSReadyCondition, condition.InitReason, OpenStackControlPlaneOVSReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneNeutronReadyCondition, condition.InitReason, OpenStackControlPlaneNeutronReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneMariaDBReadyCondition, condition.InitReason, OpenStackControlPlaneMariaDBReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneMemcachedReadyCondition, condition.InitReason, OpenStackControlPlaneMemcachedReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneKeystoneAPIReadyCondition, condition.InitReason, OpenStackControlPlaneKeystoneAPIReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlanePlacementAPIReadyCondition, condition.InitReason, OpenStackControlPlanePlacementAPIReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneGlanceReadyCondition, condition.InitReason, OpenStackControlPlaneGlanceReadyInitMessage),

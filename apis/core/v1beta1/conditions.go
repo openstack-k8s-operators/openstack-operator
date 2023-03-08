@@ -27,6 +27,9 @@ const (
 	// OpenStackControlPlaneMariaDBReadyCondition Status=True condition which indicates if MariaDB is configured and operational
 	OpenStackControlPlaneMariaDBReadyCondition condition.Type = "OpenStackControlPlaneMariaDBReady"
 
+	// OpenStackControlPlaneMemcachedReadyCondition Status=True condition which indicates if Memcached is configured and operational
+	OpenStackControlPlaneMemcachedReadyCondition condition.Type = "OpenStackControlPlaneMemcachedReady"
+
 	// OpenStackControlPlaneKeystoneAPIReadyCondition Status=True condition which indicates if KeystoneAPI is configured and operational
 	OpenStackControlPlaneKeystoneAPIReadyCondition condition.Type = "OpenStackControlPlaneKeystoneAPIReady"
 
@@ -96,6 +99,18 @@ const (
 
 	// OpenStackControlPlaneMariaDBReadyErrorMessage
 	OpenStackControlPlaneMariaDBReadyErrorMessage = "OpenStackControlPlane MariaDB error occured %s"
+
+	// OpenStackControlPlaneMemcachedReadyInitMessage
+	OpenStackControlPlaneMemcachedReadyInitMessage = "OpenStackControlPlane Memcached not started"
+
+	// OpenStackControlPlaneMemcachedReadyMessage
+	OpenStackControlPlaneMemcachedReadyMessage = "OpenStackControlPlane Memcached completed"
+
+	// OpenStackControlPlaneMemcachedReadyRunningMessage
+	OpenStackControlPlaneMemcachedReadyRunningMessage = "OpenStackControlPlane Memcached in progress"
+
+	// OpenStackControlPlaneMemcachedReadyErrorMessage
+	OpenStackControlPlaneMemcachedReadyErrorMessage = "OpenStackControlPlane Memcached error occured %s"
 
 	// OpenStackControlPlaneKeystoneAPIReadyInitMessage
 	OpenStackControlPlaneKeystoneAPIReadyInitMessage = "OpenStackControlPlane KeystoneAPI not started"

@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230315143457-cf28b9aa5fd3
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230315114127-b6fe60836981
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230313171323-3a588eef4569
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230314203009-07dc0313f02a
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230316144108-f5073e746f5b
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230316162802-ec9e5af1b048

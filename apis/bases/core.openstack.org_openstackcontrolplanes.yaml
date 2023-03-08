@@ -22268,6 +22268,32 @@ spec:
                       databases
                     type: object
                 type: object
+              memcached:
+                description: Memcached - Parameters related to the Memcached service
+                properties:
+                  enabled:
+                    default: false
+                    description: Enabled - Whether Memcached services should be deployed
+                      and managed
+                    type: boolean
+                  templates:
+                    additionalProperties:
+                      description: MemcachedSpec defines the desired state of Memcached
+                      properties:
+                        containerImage:
+                          default: quay.io/tripleozedcentos9/openstack-memcached:current-tripleo
+                          description: Name of the memcached container image to run
+                          type: string
+                        replicas:
+                          default: 1
+                          description: Size of the memcached cluster
+                          format: int32
+                          type: integer
+                      type: object
+                    description: Templates - Overrides to use when creating the Memcached
+                      databases
+                    type: object
+                type: object
               neutron:
                 description: Neutron - Overrides to use when creating the Neutron
                   Service
