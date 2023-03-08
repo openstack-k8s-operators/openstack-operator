@@ -111,7 +111,7 @@ type KeystoneSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether Keystone service should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Keystone service
@@ -123,7 +123,7 @@ type PlacementSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether Placement service should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Placement API
@@ -135,7 +135,7 @@ type GlanceSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether Glance service should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Glance Service
@@ -147,7 +147,7 @@ type CinderSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether Cinder service should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating Cinder Resources
@@ -159,7 +159,7 @@ type MariadbSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether MariaDB service should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Templates - Overrides to use when creating the MariaDB databases
@@ -171,7 +171,7 @@ type GaleraSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// Enabled - Whether Galera services should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Templates - Overrides to use when creating the Galera databases
@@ -183,7 +183,7 @@ type RabbitmqSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether RabbitMQ services should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Templates - Overrides to use when creating the Rabbitmq clusters
@@ -230,7 +230,7 @@ type OvnSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether OVN services should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the OVN services
@@ -253,7 +253,7 @@ type OvsSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether OVS services should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the OVS services
@@ -265,7 +265,7 @@ type NeutronSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether Neutron service should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Neutron service
@@ -277,7 +277,7 @@ type NovaSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// Enabled - Whether Nova services should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Nova services
@@ -289,7 +289,7 @@ type IronicSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// Enabled - Whether Ironic services should be deployed and managed
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Ironic services
