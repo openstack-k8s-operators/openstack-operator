@@ -103,7 +103,7 @@ type OpenStackControlPlaneSpec struct {
 	// However, if extraVolumes are specified within the single operator
 	// template Section, the globally defined ExtraMounts are ignored and
 	// overridden for the operator which has this section already.
-	ExtraMounts []OpenStackExtraVolMounts `json:"extraMounts"`
+	ExtraMounts []OpenStackExtraVolMounts `json:"extraMounts,omitempty"`
 }
 
 // KeystoneSection defines the desired state of Keystone service
@@ -198,7 +198,7 @@ type RabbitmqTemplate struct {
 
 	// +kubebuilder:validation:Optional
 	// ExternalEndpoint, expose a VIP via MetalLB on the pre-created address pool
-	ExternalEndpoint *MetalLBConfig `json:"externalEndpoint"`
+	ExternalEndpoint *MetalLBConfig `json:"externalEndpoint,omitempty"`
 }
 
 // MetalLBConfig to configure the MetalLB loadbalancer service

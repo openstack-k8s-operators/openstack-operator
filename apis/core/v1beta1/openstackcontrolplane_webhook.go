@@ -19,7 +19,10 @@ package v1beta1
 import (
 	"fmt"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -35,9 +38,6 @@ func (r *OpenStackControlPlane) SetupWebhookWithManager(mgr ctrl.Manager) error 
 		Complete()
 }
 
-// TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-
-// TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 //+kubebuilder:webhook:path=/validate-core-openstack-org-v1beta1-openstackcontrolplane,mutating=false,failurePolicy=Fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta1,name=vopenstackcontrolplane.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Validator = &OpenStackControlPlane{}
@@ -46,14 +46,38 @@ var _ webhook.Validator = &OpenStackControlPlane{}
 func (r *OpenStackControlPlane) ValidateCreate() error {
 	openstackcontrolplanelog.Info("validate create", "name", r.Name)
 
-	return r.ValidateServices()
+	var allErrs field.ErrorList
+	basePath := field.NewPath("spec")
+	if err := r.ValidateServices(basePath); err != nil {
+		allErrs = append(allErrs, err...)
+	}
+
+	if len(allErrs) != 0 {
+		return apierrors.NewInvalid(
+			schema.GroupKind{Group: "core.openstack.org", Kind: "OpenStackControlPlane"},
+			r.Name, allErrs)
+	}
+
+	return nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) error {
 	openstackcontrolplanelog.Info("validate update", "name", r.Name)
 
-	return r.ValidateServices()
+	var allErrs field.ErrorList
+	basePath := field.NewPath("spec")
+	if err := r.ValidateServices(basePath); err != nil {
+		allErrs = append(allErrs, err...)
+	}
+
+	if len(allErrs) != 0 {
+		return apierrors.NewInvalid(
+			schema.GroupKind{Group: "core.openstack.org", Kind: "OpenStackControlPlane"},
+			r.Name, allErrs)
+	}
+
+	return nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
@@ -91,39 +115,80 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
 }
 
 // ValidateServices implements common function for validating services
-func (r *OpenStackControlPlane) ValidateServices() error {
+func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.ErrorList {
+	var allErrs field.ErrorList
 
 	// Temporary check until MariaDB is deprecated
 	if r.Spec.Mariadb.Enabled && r.Spec.Galera.Enabled {
-		return fmt.Errorf("Mariadb and Galera are mutually exclusive")
+		err := field.Invalid(basePath.Child("mariaDB").Child("enabled"), r.Spec.Mariadb.Enabled, "Mariadb and Galera are mutually exclusive")
+		allErrs = append(allErrs, err)
 	}
 
 	// Add service dependency validations
-	errorMsg := "%s service dependencies are not enabled."
+	depErrorMsg := "%s service dependencies are not enabled."
 
 	if r.Spec.Keystone.Enabled && !r.checkDepsEnabled("Keystone") {
-		return fmt.Errorf(errorMsg, "Keystone")
+		err := field.Invalid(basePath.Child("keystone").Child("enabled"), r.Spec.Keystone.Enabled, fmt.Sprintf(depErrorMsg, "Keystone"))
+		allErrs = append(allErrs, err)
 	}
 
 	if r.Spec.Glance.Enabled && !r.checkDepsEnabled("Glance") {
-		return fmt.Errorf(errorMsg, "Glance")
+		err := field.Invalid(basePath.Child("glance").Child("enabled"), r.Spec.Glance.Enabled, fmt.Sprintf(depErrorMsg, "Glance"))
+		allErrs = append(allErrs, err)
 	}
 
 	if r.Spec.Cinder.Enabled && !r.checkDepsEnabled("Cinder") {
-		return fmt.Errorf(errorMsg, "Cinder")
+		err := field.Invalid(basePath.Child("cinder").Child("enabled"), r.Spec.Cinder.Enabled, fmt.Sprintf(depErrorMsg, "Cinder"))
+		allErrs = append(allErrs, err)
 	}
 
 	if r.Spec.Placement.Enabled && !r.checkDepsEnabled("Placement") {
-		return fmt.Errorf(errorMsg, "Placement")
+		err := field.Invalid(basePath.Child("placement").Child("enabled"), r.Spec.Placement.Enabled, fmt.Sprintf(depErrorMsg, "Placement"))
+		allErrs = append(allErrs, err)
 	}
 
 	if r.Spec.Neutron.Enabled && !r.checkDepsEnabled("Neutron") {
-		return fmt.Errorf(errorMsg, "Neutron")
+		err := field.Invalid(basePath.Child("neutron").Child("enabled"), r.Spec.Neutron.Enabled, fmt.Sprintf(depErrorMsg, "Neutron"))
+		allErrs = append(allErrs, err)
 	}
 
 	if r.Spec.Nova.Enabled && !r.checkDepsEnabled("Nova") {
-		return fmt.Errorf(errorMsg, "Nova")
+		err := field.Invalid(basePath.Child("nova").Child("enabled"), r.Spec.Nova.Enabled, fmt.Sprintf(depErrorMsg, "Nova"))
+		allErrs = append(allErrs, err)
 	}
 
-	return nil
+	// Checks which call internal validation logic for individual service operators
+
+	// Ironic
+	if r.Spec.Ironic.Enabled {
+		if err := r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template")); err != nil {
+			allErrs = append(allErrs, err...)
+		}
+	}
+
+	return allErrs
+}
+
+//+kubebuilder:webhook:path=/mutate-core-openstack-org-v1beta1-openstackcontrolplane,mutating=true,failurePolicy=fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta1,name=mopenstackcontrolplane.kb.io,admissionReviewVersions=v1
+
+var _ webhook.Defaulter = &OpenStackControlPlane{}
+
+// Default implements webhook.Defaulter so a webhook will be registered for the type
+func (r *OpenStackControlPlane) Default() {
+	openstackcontrolplanelog.Info("default", "name", r.Name)
+
+	r.DefaultServices()
+}
+
+// DefaultServices - common function for calling individual services' defaulting functions
+func (r *OpenStackControlPlane) DefaultServices() {
+	// Glance
+	if r.Spec.Glance.Enabled {
+		r.Spec.Glance.Template.Default()
+	}
+
+	// Ironic
+	if r.Spec.Ironic.Enabled {
+		r.Spec.Ironic.Template.Default()
+	}
 }

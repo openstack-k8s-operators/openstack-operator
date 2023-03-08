@@ -56,6 +56,34 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mopenstackcontrolplane.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/mutate-core-openstack-org-v1beta1-openstackcontrolplane
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: mopenstackcontrolplane.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackcontrolplanes
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
 EOF_CAT
 
 oc apply -n openstack -f ${TMPDIR}/patch_webhook_configurations.yaml
