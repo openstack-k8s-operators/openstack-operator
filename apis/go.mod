@@ -3,6 +3,7 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.19
 
 require (
+	github.com/openstack-k8s-operators/ceilometer-operator/api v0.0.0-20230309111239-3481398b7b87
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230324152956-2cf9d6fe36e6
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230321204834-1c4e58f83ac8
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230324141445-d1ac945900ed

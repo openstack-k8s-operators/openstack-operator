@@ -6,6 +6,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.3
 	github.com/imdario/mergo v0.3.14
+	github.com/openstack-k8s-operators/ceilometer-operator/api v0.0.0-20230309111239-3481398b7b87
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230324152956-2cf9d6fe36e6
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230328172346-59d7468efd1b
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230321204834-1c4e58f83ac8

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	ceilometerv1 "github.com/openstack-k8s-operators/ceilometer-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	clientv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
@@ -58,6 +59,8 @@ type OpenStackControlPlaneReconciler struct {
 	OpenStackClientContainerImage string
 }
 
+type reconciler func(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error)
+
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/finalizers,verbs=update
@@ -77,6 +80,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=ovn.openstack.org,resources=ovnnorthds,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ovs.openstack.org,resources=ovs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rabbitmq.com,resources=rabbitmqclusters,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=ceilometer.openstack.org,resources=ceilometers,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -141,106 +145,32 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-
-	ctrlResult, err := openstack.ReconcileRabbitMQs(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
+	for _, reFn := range []reconciler{
+		openstack.ReconcileRabbitMQs,
+		openstack.ReconcileMariaDBs,
+		openstack.ReconcileGaleras,
+		openstack.ReconcileMemcacheds,
+		openstack.ReconcileKeystoneAPI,
+		openstack.ReconcilePlacementAPI,
+		openstack.ReconcileGlance,
+		openstack.ReconcileCinder,
+		openstack.ReconcileOVN,
+		openstack.ReconcileOVS,
+		openstack.ReconcileNeutron,
+		openstack.ReconcileNova,
+		openstack.ReconcileIronic,
+		openstack.ReconcileManila,
+		openstack.ReconcileCeilometer,
+	} {
+		ctrlResult, err := reFn(ctx, instance, helper)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
 	}
 
-	ctrlResult, err = openstack.ReconcileMariaDBs(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileGaleras(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileMemcacheds(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcilePlacementAPI(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileGlance(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileCinder(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileOVN(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileOVS(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileNeutron(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileNova(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileIronic(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, helper, r.OpenStackClientContainerImage)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
-	ctrlResult, err = openstack.ReconcileManila(ctx, instance, helper)
+	ctrlResult, err := openstack.ReconcileOpenStackClient(ctx, instance, helper, r.OpenStackClientContainerImage)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
@@ -270,5 +200,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&novav1.Nova{}).
 		Owns(&ironicv1.Ironic{}).
 		Owns(&clientv1beta1.OpenStackClient{}).
+		Owns(&ceilometerv1.Ceilometer{}).
 		Complete(r)
 }

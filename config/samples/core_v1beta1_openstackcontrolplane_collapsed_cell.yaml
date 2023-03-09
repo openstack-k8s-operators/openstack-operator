@@ -128,3 +128,10 @@ spec:
         containerImage: quay.io/tripleozedcentos9/openstack-ironic-inspector:current-tripleo
         pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
       secret: osp-secret
+  ceilometer:
+    template:
+      centralImage: quay.io/tripleozedcentos9/openstack-ceilometer-central:current-tripleo
+      initImage: quay.io/tripleozedcentos9/openstack-ceilometer-central:current-tripleo
+      notificationImage: quay.io/tripleozedcentos9/openstack-ceilometer-notification:current-tripleo
+      sgCoreImage: quay.io/infrawatch/sg-core:latest
+      secret: osp-secret

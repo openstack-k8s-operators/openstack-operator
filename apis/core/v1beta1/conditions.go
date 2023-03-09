@@ -66,17 +66,8 @@ const (
 	// OpenStackControlPlaneManilaReadyCondition Status=True condition which indicates if Manila is configured and operational
 	OpenStackControlPlaneManilaReadyCondition condition.Type = "OpenStackControlPlaneManilaReady"
 
-	// OpenStackControlPlaneManilaReadyInitMessage
-	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
-
-	// OpenStackControlPlaneManilaReadyMessage
-	OpenStackControlPlaneManilaReadyMessage = "OpenStackControlPlane Manila completed"
-
-	// OpenStackControlPlaneManilaReadyRunningMessage
-	OpenStackControlPlaneManilaReadyRunningMessage = "OpenStackControlPlane Manila in progress"
-
-	// OpenStackControlPlaneManilaReadyErrorMessage
-	OpenStackControlPlaneManilaReadyErrorMessage = "OpenStackControlPlane Manila error occured %s"
+	// OpenStackControlPlaneCeilometerReadyCondition Status=True condition which indicates if Ceilometer is configured and operational
+	OpenStackControlPlaneCeilometerReadyCondition condition.Type = "OpenStackControlPlaneCeilometerReady"
 )
 
 // OpenStackControlPlane Reasons used by API objects.
@@ -246,4 +237,28 @@ const (
 
 	// OpenStackControlPlaneClientReadyErrorMessage
 	OpenStackControlPlaneClientReadyErrorMessage = "OpenStackControlPlane Client error occured %s"
+
+	// OpenStackControlPlaneManilaReadyInitMessage
+	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
+
+	// OpenStackControlPlaneManilaReadyMessage
+	OpenStackControlPlaneManilaReadyMessage = "OpenStackControlPlane Manila completed"
+
+	// OpenStackControlPlaneManilaReadyRunningMessage
+	OpenStackControlPlaneManilaReadyRunningMessage = "OpenStackControlPlane Manila in progress"
+
+	// OpenStackControlPlaneManilaReadyErrorMessage
+	OpenStackControlPlaneManilaReadyErrorMessage = "OpenStackControlPlane Manila error occured %s"
+
+	// OpenStackControlPlaneCeilometerReadyInitMessage
+	OpenStackControlPlaneCeilometerReadyInitMessage = "OpenStackControlPlane Ceilometer not started"
+
+	// OpenStackControlPlaneCeilometerReadyMessage
+	OpenStackControlPlaneCeilometerReadyMessage = "OpenStackControlPlane Ceilometer completed"
+
+	// OpenStackControlPlaneCeilometerReadyRunningMessage
+	OpenStackControlPlaneCeilometerReadyRunningMessage = "OpenStackControlPlane Ceilometer in progress"
+
+	// OpenStackControlPlaneCeilometerReadyErrorMessage
+	OpenStackControlPlaneCeilometerReadyErrorMessage = "OpenStackControlPlane Ceilometer error occured %s"
 )

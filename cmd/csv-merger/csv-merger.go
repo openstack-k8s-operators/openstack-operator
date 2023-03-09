@@ -74,6 +74,7 @@ var (
 	ovnCsv         = flag.String("ovn-csv", "", "OVN CSV filename")
 	ovsCsv         = flag.String("ovs-csv", "", "OVS CSV filename")
 	cinderCsv      = flag.String("cinder-csv", "", "Cinder CSV filename")
+	ceilometerCsv  = flag.String("ceilometer-csv", "", "Ceilometer CSV filename")
 	csvOverrides   = flag.String("csv-overrides", "", "CSV like string with punctual changes that will be recursively applied (if possible)")
 	visibleCRDList = flag.String("visible-crds-list", "openstackcontrolplanes.core.openstack.org,openstackdataplanes.dataplane.openstack.org,openstackdataplaneroles.dataplane.openstack.org,openstackdataplanenodes.dataplane.openstack.org",
 		"Comma separated list of all the CRDs that should be visible in OLM console")
@@ -115,6 +116,7 @@ func main() {
 			*ovnCsv,
 			*ovsCsv,
 			*cinderCsv,
+			*ceilometerCsv,
 		}
 
 		// BaseCSV is built on the bundle/manifests/openstack-operator.clusterserviceversion.yaml from this repo

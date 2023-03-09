@@ -110,6 +110,9 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
 			r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled &&
 			r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled)
+	case "Ceilometer":
+		return ((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
+			r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled)
 	}
 	return true
 }
@@ -154,6 +157,11 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 
 	if r.Spec.Nova.Enabled && !r.checkDepsEnabled("Nova") {
 		err := field.Invalid(basePath.Child("nova").Child("enabled"), r.Spec.Nova.Enabled, fmt.Sprintf(depErrorMsg, "Nova"))
+		allErrs = append(allErrs, err)
+	}
+
+	if r.Spec.Ceilometer.Enabled && !r.checkDepsEnabled("Ceilometer") {
+		err := field.Invalid(basePath.Child("ceilometer").Child("enabled"), r.Spec.Ceilometer.Enabled, fmt.Sprintf(depErrorMsg, "Ceilometer"))
 		allErrs = append(allErrs, err)
 	}
 

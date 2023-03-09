@@ -39,6 +39,68 @@ spec:
             type: object
           spec:
             properties:
+              ceilometer:
+                properties:
+                  enabled:
+                    default: true
+                    type: boolean
+                  template:
+                    properties:
+                      centralImage:
+                        default: quay.io/tripleomastercentos9/openstack-ceilometer-central:current-tripleo
+                        type: string
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        type: string
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description:
+                        default: A ceilometer agent
+                        type: string
+                      initImage:
+                        default: quay.io/tripleomastercentos9/openstack-ceilometer-central:current-tripleo
+                        type: string
+                      networkAttachmentDefinitions:
+                        items:
+                          type: string
+                        type: array
+                      notificationImage:
+                        default: quay.io/tripleomastercentos9/openstack-ceilometer-notification:current-tripleo
+                        type: string
+                      passwordSelector:
+                        default:
+                          password: password
+                          username: username
+                        properties:
+                          host:
+                            default: host
+                            type: string
+                          password:
+                            default: password
+                            type: string
+                          service:
+                            default: CeilometerPassword
+                            type: string
+                          username:
+                            default: username
+                            type: string
+                        type: object
+                      rabbitMQSecret:
+                        default: rabbitmq-default-user
+                        type: string
+                      secret:
+                        default: osp-secret
+                        type: string
+                      serviceUser:
+                        default: ceilometer
+                        type: string
+                      sgCoreImage:
+                        default: quay.io/infrawatch/sg-core:latest
+                        type: string
+                    type: object
+                type: object
               cinder:
                 properties:
                   enabled:
