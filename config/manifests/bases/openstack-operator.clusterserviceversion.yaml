@@ -15,6 +15,202 @@ spec:
       displayName: OpenStack ControlPlane
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
+      specDescriptors:
+      - description: Cinder - Parameters related to the Cinder service
+        displayName: Cinder
+        path: cinder
+      - description: Enabled - Whether Cinder service should be deployed and managed
+        displayName: Enabled
+        path: cinder.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating Cinder Resources
+        displayName: Template
+        path: cinder.template
+      - description: ExtraMounts containing conf files and credentials that should
+          be provided to the underlying operators. This struct can be defined in the
+          top level CR and propagated to the underlying operators that accept it in
+          their API (e.g., cinder/glance). However, if extraVolumes are specified
+          within the single operator template Section, the globally defined ExtraMounts
+          are ignored and overridden for the operator which has this section already.
+        displayName: Extra Mounts
+        path: extraMounts
+      - displayName: Vol Mounts
+        path: extraMounts[0].extraVol
+      - displayName: Name
+        path: extraMounts[0].name
+      - displayName: Region
+        path: extraMounts[0].region
+      - description: Galera - Parameters related to the Galera services
+        displayName: Galera
+        path: galera
+      - description: Enabled - Whether Galera services should be deployed and managed
+        displayName: Enabled
+        path: galera.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Templates - Overrides to use when creating the Galera databases
+        displayName: Templates
+        path: galera.templates
+      - description: Glance - Parameters related to the Glance service
+        displayName: Glance
+        path: glance
+      - description: Enabled - Whether Glance service should be deployed and managed
+        displayName: Enabled
+        path: glance.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Glance Service
+        displayName: Template
+        path: glance.template
+      - description: Ironic - Parameters related to the Ironic services
+        displayName: Ironic
+        path: ironic
+      - description: Enabled - Whether Ironic services should be deployed and managed
+        displayName: Enabled
+        path: ironic.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Ironic services
+        displayName: Template
+        path: ironic.template
+      - description: Keystone - Parameters related to the Keystone service
+        displayName: Keystone
+        path: keystone
+      - description: Enabled - Whether Keystone service should be deployed and managed
+        displayName: Enabled
+        path: keystone.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Keystone service
+        displayName: Template
+        path: keystone.template
+      - description: Mariadb - Parameters related to the Mariadb service
+        displayName: Mariadb
+        path: mariadb
+      - description: Enabled - Whether MariaDB service should be deployed and managed
+        displayName: Enabled
+        path: mariadb.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Templates - Overrides to use when creating the MariaDB databases
+        displayName: Templates
+        path: mariadb.templates
+      - description: Neutron - Overrides to use when creating the Neutron Service
+        displayName: Neutron
+        path: neutron
+      - description: Enabled - Whether Neutron service should be deployed and managed
+        displayName: Enabled
+        path: neutron.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Neutron service
+        displayName: Template
+        path: neutron.template
+      - description: NodeSelector to target subset of worker nodes running control
+          plane services (currently only applies to KeystoneAPI and PlacementAPI)
+        displayName: Node Selector
+        path: nodeSelector
+      - description: Nova - Parameters related to the Nova services
+        displayName: Nova
+        path: nova
+      - description: Enabled - Whether Nova services should be deployed and managed
+        displayName: Enabled
+        path: nova.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Nova services
+        displayName: Template
+        path: nova.template
+      - description: Ovn - Overrides to use when creating the OVN Services
+        displayName: Ovn
+        path: ovn
+      - description: Enabled - Whether OVN services should be deployed and managed
+        displayName: Enabled
+        path: ovn.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the OVN services
+        displayName: Template
+        path: ovn.template
+      - description: OVNDBCluster - Overrides to use when creating the OVNDBCluster
+          services
+        displayName: OVNDBCluster
+        path: ovn.template.ovnDBCluster
+      - description: OVNNorthd - Overrides to use when creating the OVNNorthd service
+        displayName: OVNNorthd
+        path: ovn.template.ovnNorthd
+      - description: Ovs - Overrides to use when creating the OVS Services
+        displayName: Ovs
+        path: ovs
+      - description: Enabled - Whether OVS services should be deployed and managed
+        displayName: Enabled
+        path: ovs.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the OVS services
+        displayName: Template
+        path: ovs.template
+      - description: Placement - Parameters related to the Placement service
+        displayName: Placement
+        path: placement
+      - description: Enabled - Whether Placement service should be deployed and managed
+        displayName: Enabled
+        path: placement.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Placement API
+        displayName: Template
+        path: placement.template
+      - description: Rabbitmq - Parameters related to the Rabbitmq service
+        displayName: Rabbitmq
+        path: rabbitmq
+      - description: Enabled - Whether RabbitMQ services should be deployed and managed
+        displayName: Enabled
+        path: rabbitmq.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Templates - Overrides to use when creating the Rabbitmq clusters
+        displayName: Templates
+        path: rabbitmq.templates
+      - description: ExternalEndpoint, expose a VIP via MetalLB on the pre-created
+          address pool
+        displayName: External Endpoint
+        path: rabbitmq.templates.externalEndpoint
+      - description: IPAddressPool expose VIP via MetalLB on the IPAddressPool
+        displayName: IPAddress Pool
+        path: rabbitmq.templates.externalEndpoint.ipAddressPool
+      - description: LoadBalancerIPs, request given IPs from the pool if available.
+          Using a list to allow dual stack (IPv4/IPv6) support
+        displayName: Load Balancer IPs
+        path: rabbitmq.templates.externalEndpoint.loadBalancerIPs
+      - description: SharedIP if true, VIP/VIPs get shared with multiple services
+        displayName: Shared IP
+        path: rabbitmq.templates.externalEndpoint.sharedIP
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: SharedIPKey specifies the sharing key which gets set as the annotation
+          on the LoadBalancer service. Services which share the same VIP must have
+          the same SharedIPKey. Defaults to the IPAddressPool if SharedIP is true,
+          but no SharedIPKey specified.
+        displayName: Shared IPKey
+        path: rabbitmq.templates.externalEndpoint.sharedIPKey
+      - description: 'Secret - FIXME: make this optional'
+        displayName: Secret
+        path: secret
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes:Secret
+      - description: StorageClass -
+        displayName: Storage Class
+        path: storageClass
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes:StorageClass
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
   description: Install and configure OpenStack
   displayName: OpenStack

@@ -39,63 +39,79 @@ import (
 type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	// Secret - FIXME: make this optional
 	Secret string `json:"secret"`
 
 	// +kubebuilder:validation:Required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:StorageClass"}
 	// StorageClass -
 	StorageClass string `json:"storageClass"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Keystone - Parameters related to the Keystone service
 	Keystone KeystoneSection `json:"keystone,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Placement - Parameters related to the Placement service
 	Placement PlacementSection `json:"placement,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Glance - Parameters related to the Glance service
 	Glance GlanceSection `json:"glance,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Cinder - Parameters related to the Cinder service
 	Cinder CinderSection `json:"cinder,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Mariadb - Parameters related to the Mariadb service
 	Mariadb MariadbSection `json:"mariadb,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Galera - Parameters related to the Galera services
 	Galera GaleraSection `json:"galera,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Rabbitmq - Parameters related to the Rabbitmq service
 	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
 
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Ovn - Overrides to use when creating the OVN Services
 	Ovn OvnSection `json:"ovn,omitempty"`
 
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Ovs - Overrides to use when creating the OVS Services
 	Ovs OvsSection `json:"ovs,omitempty"`
 
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Neutron - Overrides to use when creating the Neutron Service
 	Neutron NeutronSection `json:"neutron,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Nova - Parameters related to the Nova services
 	Nova NovaSection `json:"nova,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Ironic - Parameters related to the Ironic services
 	Ironic IronicSection `json:"ironic,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// ExtraMounts containing conf files and credentials that should be provided
 	// to the underlying operators.
 	// This struct can be defined in the top level CR and propagated to the
@@ -110,10 +126,12 @@ type OpenStackControlPlaneSpec struct {
 type KeystoneSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Keystone service should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Keystone service
 	Template keystonev1.KeystoneAPISpec `json:"template,omitempty"`
 }
@@ -122,10 +140,12 @@ type KeystoneSection struct {
 type PlacementSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Placement service should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Placement API
 	Template placementv1.PlacementAPISpec `json:"template,omitempty"`
 }
@@ -134,10 +154,12 @@ type PlacementSection struct {
 type GlanceSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Glance service should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Glance Service
 	Template glancev1.GlanceSpec `json:"template,omitempty"`
 }
@@ -146,10 +168,12 @@ type GlanceSection struct {
 type CinderSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Cinder service should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Cinder Resources
 	Template cinderv1.CinderSpec `json:"template,omitempty"`
 }
@@ -158,10 +182,12 @@ type CinderSection struct {
 type MariadbSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether MariaDB service should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the MariaDB databases
 	Templates map[string]mariadbv1.MariaDBSpec `json:"templates,omitempty"`
 }
@@ -170,10 +196,12 @@ type MariadbSection struct {
 type GaleraSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Galera services should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Galera databases
 	Templates map[string]mariadbv1.GaleraSpec `json:"templates,omitempty"`
 }
@@ -182,10 +210,12 @@ type GaleraSection struct {
 type RabbitmqSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether RabbitMQ services should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Rabbitmq clusters
 	Templates map[string]RabbitmqTemplate `json:"templates"`
 }
@@ -193,10 +223,12 @@ type RabbitmqSection struct {
 // RabbitmqTemplate definition
 type RabbitmqTemplate struct {
 	// +kubebuilder:validation:Required
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Overrides to use when creating the Rabbitmq clusters
 	rabbitmqv1.RabbitmqClusterSpec `json:",inline"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// ExternalEndpoint, expose a VIP via MetalLB on the pre-created address pool
 	ExternalEndpoint *MetalLBConfig `json:"externalEndpoint,omitempty"`
 }
@@ -205,22 +237,26 @@ type RabbitmqTemplate struct {
 type MetalLBConfig struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// IPAddressPool expose VIP via MetalLB on the IPAddressPool
 	IPAddressPool string `json:"ipAddressPool"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// SharedIP if true, VIP/VIPs get shared with multiple services
 	SharedIP bool `json:"sharedIP"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=""
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// SharedIPKey specifies the sharing key which gets set as the annotation on the LoadBalancer service.
 	// Services which share the same VIP must have the same SharedIPKey. Defaults to the IPAddressPool if
 	// SharedIP is true, but no SharedIPKey specified.
 	SharedIPKey string `json:"sharedIPKey"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// LoadBalancerIPs, request given IPs from the pool if available. Using a list to allow dual stack (IPv4/IPv6) support
 	LoadBalancerIPs []string `json:"loadBalancerIPs"`
 }
@@ -229,10 +265,12 @@ type MetalLBConfig struct {
 type OvnSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether OVN services should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the OVN services
 	Template OvnResources `json:"template,omitempty"`
 }
@@ -240,10 +278,12 @@ type OvnSection struct {
 // OvnResources defines the desired state of OVN services
 type OvnResources struct {
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// OVNDBCluster - Overrides to use when creating the OVNDBCluster services
 	OVNDBCluster map[string]ovnv1.OVNDBClusterSpec `json:"ovnDBCluster,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// OVNNorthd - Overrides to use when creating the OVNNorthd service
 	OVNNorthd ovnv1.OVNNorthdSpec `json:"ovnNorthd,omitempty"`
 }
@@ -252,10 +292,12 @@ type OvnResources struct {
 type OvsSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether OVS services should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the OVS services
 	Template ovsv1.OVSSpec `json:"template,omitempty"`
 }
@@ -264,10 +306,12 @@ type OvsSection struct {
 type NeutronSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Neutron service should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Neutron service
 	Template neutronv1.NeutronAPISpec `json:"template,omitempty"`
 }
@@ -276,10 +320,12 @@ type NeutronSection struct {
 type NovaSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Nova services should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Nova services
 	Template novav1.NovaSpec `json:"template,omitempty"`
 }
@@ -288,16 +334,19 @@ type NovaSection struct {
 type IronicSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Ironic services should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Ironic services
 	Template ironicv1.IronicSpec `json:"template,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
 type OpenStackControlPlaneStatus struct {
+	//+operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 }
@@ -331,10 +380,13 @@ type OpenStackControlPlaneList struct {
 // and defines the common VolMounts structure provided by the main storage module
 type OpenStackExtraVolMounts struct {
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	Name string `json:"name,omitempty"`
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	Region string `json:"region,omitempty"`
 	// +kubebuilder:validation:Required
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	VolMounts []storage.VolMounts `json:"extraVol"`
 }
 
