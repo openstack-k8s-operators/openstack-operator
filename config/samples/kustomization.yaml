@@ -1,4 +1,7 @@
 ## Append samples you want in your CSV to this file as resources ##
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
 - core_v1beta1_openstackcontrolplane.yaml
 - core_v1beta1_openstackcontrolplane_collapsed_cell.yaml
