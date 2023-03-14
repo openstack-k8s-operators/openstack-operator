@@ -130,3 +130,20 @@ spec:
           - 172.17.0.86
           ipAddressPool: internalapi
           sharedIP: false
+  ironic:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      ironicAPI:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-api:current-tripleo
+      ironicConductors:
+      - replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-conductor:current-tripleo
+        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
+        storageRequest: 10G
+      ironicInspector:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-inspector:current-tripleo
+        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
+      secret: osp-secret
