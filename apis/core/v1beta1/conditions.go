@@ -61,10 +61,19 @@ const (
 	OpenStackClientReadyCondition condition.Type = "OpenStackClientReady"
 )
 
+// OpenStackDataPlane Condition Types used by API objects.
+const (
+	// OpenStackDataPlaneNodeReadyCondition Status=True condition which indicates if Node is configured and operational
+	OpenStackDataPlaneNodeReadyCondition condition.Type = "OpenStackDataPlaneNodeReady"
+
+	// OpenStackDataPlaneRoleReadyCondition Status=True condition which indicates if Role is configured and operational
+	OpenStackDataPlaneRoleReadyCondition condition.Type = "OpenStackDataPlaneRoleReady"
+)
+
 // OpenStackControlPlane Reasons used by API objects.
 const ()
 
-// Common Messages used by API objects.
+// Common Messages used by ControlPlane API objects.
 const (
 	//
 	// OpenStackControlPlaneReady condition messages
@@ -216,4 +225,34 @@ const (
 
 	// OpenStackControlPlaneClientReadyErrorMessage
 	OpenStackControlPlaneClientReadyErrorMessage = "OpenStackControlPlane Client error occured %s"
+)
+
+// Common Messages used by DataPlane API objects.
+const (
+	//
+	// OpenStackDataPlaneReady condition messages
+	//
+	// OpenStackDataPlaneNodeReadyInitMessage
+	OpenStackDataPlaneNodeReadyInitMessage = "OpenStackDataPlane Node not started"
+
+	// OpenStackDataPlaneNodeReadyMessage
+	OpenStackDataPlaneNodeReadyMessage = "OpenStackDataPlane Node completed"
+
+	// OpenStackDataPlaneNodeReadyRunningMessage
+	OpenStackDataPlaneNodeReadyRunningMessage = "OpenStackDataPlane Node in progress"
+
+	// OpenStackDataPlaneNodeReadyErrorMessage
+	OpenStackDataPlaneNodeReadyErrorMessage = "OpenStackDataPlane Node error occured %s"
+
+	// OpenStackDataPlaneRoleReadyInitMessage
+	OpenStackDataPlaneRoleReadyInitMessage = "OpenStackDataPlane Role not started"
+
+	// OpenStackDataPlaneRoleReadyMessage
+	OpenStackDataPlaneRoleReadyMessage = "OpenStackDataPlane Role completed"
+
+	// OpenStackDataPlaneRoleReadyRunningMessage
+	OpenStackDataPlaneRoleReadyRunningMessage = "OpenStackDataPlane Role in progress"
+
+	// OpenStackDataPlaneRoleReadyErrorMessage
+	OpenStackDataPlaneRoleReadyErrorMessage = "OpenStackDataPlane Role error occured %s"
 )

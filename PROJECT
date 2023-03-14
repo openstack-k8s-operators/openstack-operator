@@ -20,4 +20,13 @@ resources:
   webhooks:
     validation: true
     webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: openstack.org
+  group: core
+  kind: OpenStackDataPlane
+  path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
+  version: v1beta1
 version: "3"

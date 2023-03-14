@@ -16,6 +16,17 @@ spec:
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
       version: v1beta1
+    - description: OpenStackDataPlane is the Schema for the openstackdataplanes API
+      displayName: OpenStack DataPlane
+      kind: OpenStackDataPlane
+      name: openstackdataplanes.core.openstack.org
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
+      version: v1beta1
   description: Install and configure OpenStack
   displayName: OpenStack
   icon:

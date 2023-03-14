@@ -56,6 +56,45 @@ rules:
   - patch
   - update
 - apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanenodes
+  - openstackdataplaneroles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - glance.openstack.org
   resources:
   - glances

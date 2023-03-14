@@ -1,0 +1,48 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackDataPlane
+metadata:
+  name: openstack-edpm
+spec:
+  nodes:
+    edpm-compute-0:
+      role: edpm-compute
+      hostName: edpm-compute-0
+      ansibleHost: 192.168.122.100
+      node:
+        ansibleVars: |
+          tenant_ip: 192.168.24.100
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+      deployStrategy:
+        deploy: false
+    edpm-compute-1:
+      role: edpm-compute
+      hostName: edpm-compute-1
+      ansibleHost: 192.168.122.101
+      node:
+        ansibleVars: |
+          tenant_ip: 192.168.24.101
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+      deployStrategy:
+        deploy: false
+  roles:
+    edpm-compute:
+      nodeTemplate:
+        managed: false
+        managementNetwork: ctlplane
+        ansibleUser: root
+        ansiblePort: 22
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        ansibleVars: |
+          edpm_network_config_template: templates/net_config_bridge.j2
+          edpm_network_config_hide_sensitive_logs: false
+          neutron_physical_bridge_name: br-ex
+          neutron_public_interface_name: eth0
+          ctlplane_dns_nameservers:
+          - 192.168.122.1
+          dns_search_domains: []
+          edpm_ovn_dbs: 192.168.24.1
+          edpm_chrony_ntp_servers:
+            - clock.redhat.com
+            - clock2.redhat.com
+      deployStrategy:
+        deploy: true

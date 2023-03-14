@@ -26,6 +26,7 @@ custom-bundle.Dockerfile.pinned
 .idea
 *.swp
 *.swo
+.vscode/
 *~
 
 # Common CI tools repository
