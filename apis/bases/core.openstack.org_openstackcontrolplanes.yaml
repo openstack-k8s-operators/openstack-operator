@@ -65,12 +65,10 @@ spec:
                           of this Cinder deployment
                         properties:
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
                             description: ContainerImage - Cinder API Container Image
                               URL
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             description: CustomServiceConfig - customize the service
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
@@ -2530,18 +2528,18 @@ spec:
                           transportURLSecret:
                             description: Secret containing RabbitMq transport URL
                             type: string
+                        required:
+                        - containerImage
                         type: object
                       cinderBackup:
                         description: CinderBackup - Spec definition for the Backup
                           service of this Cinder deployment
                         properties:
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
                             description: ContainerImage - Cinder Backup Container
                               Image URL
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             description: CustomServiceConfig - customize the service
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
@@ -4955,18 +4953,18 @@ spec:
                           transportURLSecret:
                             description: Secret containing RabbitMq transport URL
                             type: string
+                        required:
+                        - containerImage
                         type: object
                       cinderScheduler:
                         description: CinderScheduler - Spec definition for the Scheduler
                           service of this Cinder deployment
                         properties:
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
                             description: ContainerImage - Cinder Scheduler Container
                               Image URL
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             description: CustomServiceConfig - customize the service
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
@@ -7382,6 +7380,8 @@ spec:
                           transportURLSecret:
                             description: Secret containing RabbitMq transport URL
                             type: string
+                        required:
+                        - containerImage
                         type: object
                       cinderVolumes:
                         additionalProperties:
@@ -7389,12 +7389,10 @@ spec:
                             of CinderVolume
                           properties:
                             containerImage:
-                              default: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
                               description: ContainerImage - Cinder Volume Container
                                 Image URL
                               type: string
                             customServiceConfig:
-                              default: '# add your customization here'
                               description: CustomServiceConfig - customize the service
                                 config using this parameter to change service defaults,
                                 or overwrite rendered information using raw OpenStack
@@ -9910,12 +9908,13 @@ spec:
                             transportURLSecret:
                               description: Secret containing RabbitMq transport URL
                               type: string
+                          required:
+                          - containerImage
                           type: object
                         description: CinderVolumes - Map of chosen names to spec definitions
                           for the Volume(s) service(s) of this Cinder deployment
                         type: object
                       customServiceConfig:
-                        default: '# add your customization here'
                         description: CustomServiceConfig - customize the service config
                           for all Cinder services using this parameter to change service
                           defaults, or overwrite rendered information using raw OpenStack
@@ -12099,7 +12098,9 @@ spec:
                     required:
                     - cinderAPI
                     - cinderScheduler
+                    - databaseInstance
                     - rabbitMqClusterName
+                    - secret
                     type: object
                 type: object
               extraMounts:
@@ -14033,7 +14034,6 @@ spec:
                         description: Glance Container Image URL
                         type: string
                       customServiceConfig:
-                        default: '# add your customization here'
                         description: CustomServiceConfig - customize the service config
                           using this parameter to change service defaults, or overwrite
                           rendered information using raw OpenStack config format.
@@ -16177,7 +16177,6 @@ spec:
                             description: GlanceAPI Container Image URL
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             description: CustomServiceConfig - customize the service
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
@@ -18650,7 +18649,6 @@ spec:
                             description: GlanceAPI Container Image URL
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             description: CustomServiceConfig - customize the service
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
@@ -21271,6 +21269,56 @@ spec:
                               to the service config dir in /etc/<service> . TODO:
                               -> implement'
                             type: object
+                          externalEndpoints:
+                            description: ExternalEndpoints, expose a VIP using a pre-created
+                              IPAddressPool
+                            items:
+                              description: MetalLBConfig to configure the MetalLB
+                                loadbalancer service
+                              properties:
+                                endpoint:
+                                  description: Endpoint, OpenStack endpoint this service
+                                    maps to
+                                  enum:
+                                  - internal
+                                  - public
+                                  type: string
+                                ipAddressPool:
+                                  description: IPAddressPool expose VIP via MetalLB
+                                    on the IPAddressPool
+                                  minLength: 1
+                                  type: string
+                                loadBalancerIPs:
+                                  description: LoadBalancerIPs, request given IPs
+                                    from the pool if available. Using a list to allow
+                                    dual stack (IPv4/IPv6) support
+                                  items:
+                                    type: string
+                                  type: array
+                                sharedIP:
+                                  default: true
+                                  description: SharedIP if true, VIP/VIPs get shared
+                                    with multiple services
+                                  type: boolean
+                                sharedIPKey:
+                                  default: ""
+                                  description: SharedIPKey specifies the sharing key
+                                    which gets set as the annotation on the LoadBalancer
+                                    service. Services which share the same VIP must
+                                    have the same SharedIPKey. Defaults to the IPAddressPool
+                                    if SharedIP is true, but no SharedIPKey specified.
+                                  type: string
+                              required:
+                              - endpoint
+                              - ipAddressPool
+                              type: object
+                            type: array
+                          networkAttachments:
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -21477,8 +21525,9 @@ spec:
                                 type: object
                               type: array
                             networkAttachments:
-                              description: NetworkAttachments list of network attachment
-                                definitions the pods get attached to.
+                              description: NetworkAttachments is a list of NetworkAttachment
+                                resource names to expose the services to the given
+                                network
                               items:
                                 type: string
                               type: array
@@ -21704,13 +21753,57 @@ spec:
                               - start
                               type: object
                             type: array
+                          externalEndpoints:
+                            description: ExternalEndpoints, expose a VIP using a pre-created
+                              IPAddressPool
+                            items:
+                              description: MetalLBConfig to configure the MetalLB
+                                loadbalancer service
+                              properties:
+                                endpoint:
+                                  description: Endpoint, OpenStack endpoint this service
+                                    maps to
+                                  enum:
+                                  - internal
+                                  - public
+                                  type: string
+                                ipAddressPool:
+                                  description: IPAddressPool expose VIP via MetalLB
+                                    on the IPAddressPool
+                                  minLength: 1
+                                  type: string
+                                loadBalancerIPs:
+                                  description: LoadBalancerIPs, request given IPs
+                                    from the pool if available. Using a list to allow
+                                    dual stack (IPv4/IPv6) support
+                                  items:
+                                    type: string
+                                  type: array
+                                sharedIP:
+                                  default: true
+                                  description: SharedIP if true, VIP/VIPs get shared
+                                    with multiple services
+                                  type: boolean
+                                sharedIPKey:
+                                  default: ""
+                                  description: SharedIPKey specifies the sharing key
+                                    which gets set as the annotation on the LoadBalancer
+                                    service. Services which share the same VIP must
+                                    have the same SharedIPKey. Defaults to the IPAddressPool
+                                    if SharedIP is true, but no SharedIPKey specified.
+                                  type: string
+                              required:
+                              - endpoint
+                              - ipAddressPool
+                              type: object
+                            type: array
                           inspectionNetwork:
                             description: InspectionNetwork - Additional network to
                               attach to expose boot DHCP, TFTP, HTTP services.
                             type: string
                           networkAttachments:
-                            description: NetworkAttachments list of network attachment
-                              definitions the pods get attached to.
+                            description: NetworkAttachments is a list of NetworkAttachment
+                              resource names to expose the services to the given network
                             items:
                               type: string
                             type: array
@@ -23517,7 +23610,6 @@ spec:
                         description: PlacementAPI Container Image URL
                         type: string
                       customServiceConfig:
-                        default: '# add your customization here'
                         description: CustomServiceConfig - customize the service config
                           using this parameter to change service defaults, or overwrite
                           rendered information using raw OpenStack config format.
