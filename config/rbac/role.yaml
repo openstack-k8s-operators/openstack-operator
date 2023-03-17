@@ -116,6 +116,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - memcached.openstack.org
+  resources:
+  - memcacheds
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - neutron.openstack.org
   resources:
   - neutronapis
