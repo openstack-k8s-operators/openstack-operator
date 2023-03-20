@@ -22038,7 +22038,6 @@ spec:
                         description: Keystone Container Image URL
                         type: string
                       customServiceConfig:
-                        default: '# add your customization here'
                         description: CustomServiceConfig - customize the service config
                           using this parameter to change service defaults, or overwrite
                           rendered information using raw OpenStack config format.
