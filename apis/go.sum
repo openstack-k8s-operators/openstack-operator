@@ -225,8 +225,8 @@ github.com/openshift/api v3.9.0+incompatible h1:fJ/KsefYuZAjmrr3+5U9yZIZbTOpVkDD
 github.com/openshift/api v3.9.0+incompatible/go.mod h1:dh9o4Fs58gpFXGSYfnVxGR9PnV53I8TW84pQaJDdGiY=
 github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230315143457-cf28b9aa5fd3 h1:AfqhsksfrSJrBaF+WFUGPNdz+61pQRKxID8MWduXEPg=
 github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230315143457-cf28b9aa5fd3/go.mod h1:auuZ2u46FUzMsA5odCDsKCDVtuJ7Tz8xWkyX5Qt7UxQ=
-github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230319213233-d3fc2aff5048 h1:YwOv6Dt9EenLHddTbGUkDerrafPFi6PDUwQHNkJrJNo=
-github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230319213233-d3fc2aff5048/go.mod h1:bTVboa+Kb0EbCBAUwnmfeS8gwCItbuZppYREdcbon8M=
+github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230320174421-9ac23378d90a h1:EdQ9RCmHhEtCXZBRwg1qBkbGdDTome/FeB6IBu7myng=
+github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230320174421-9ac23378d90a/go.mod h1:bTVboa+Kb0EbCBAUwnmfeS8gwCItbuZppYREdcbon8M=
 github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230313171323-3a588eef4569 h1:KTFb/Chud/N97NZh7kKjYu33EYr94fi43WUze+/AAcM=
 github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230313171323-3a588eef4569/go.mod h1:5kG0Ct412tO3fNkZ5b3/BwwSsV7LkSNfOB/apUlbMJI=
 github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230314203009-07dc0313f02a h1:P2koKsWnk+GdFzGni+RPRPdoal/j7mIEJu1kkYG73uE=
