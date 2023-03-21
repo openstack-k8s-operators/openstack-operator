@@ -7,17 +7,17 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/imdario/mergo v0.3.14
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230315143457-cf28b9aa5fd3
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230320160346-fd0e5a27338d
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230321140938-dd6cd521fe97
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230320174421-9ac23378d90a
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230313171323-3a588eef4569
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230314203009-07dc0313f02a
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230321154324-7d3c2fbbe4a7
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230320104825-e625fcd50844
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230317112218-d5812b757909
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230303135615-979250c54a27
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230310111315-45e66f1c452f
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230320091827-f81236c6a1a0
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230321104551-4c13a941394d
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230316201531-dda0e9279edb
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230320173757-34c69e98740e
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230321140939-ae70702743bb
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230302133719-f0aec2a30a89
 	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230314161824-87a43b9ce5dd
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230314113446-7a8838841bcd
