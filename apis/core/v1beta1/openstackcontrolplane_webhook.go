@@ -187,6 +187,11 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Glance.Template.Default()
 	}
 
+	// Cinder
+	if r.Spec.Cinder.Enabled {
+		r.Spec.Cinder.Template.Default()
+	}
+
 	// Ironic
 	if r.Spec.Ironic.Enabled {
 		r.Spec.Ironic.Template.Default()

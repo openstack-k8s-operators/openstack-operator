@@ -150,13 +150,7 @@ func main() {
 	}
 
 	// Defaults for service operators
-
-	// Acquire environmental defaults and initialize Glance and GlanceAPI defaults with them
-	glanceDefaults := glancev1.GlanceDefaults{
-		ContainerImageURL: os.Getenv("GLANCE_API_IMAGE_URL_DEFAULT"),
-	}
-
-	(&glancev1.Glance{}).Spec.SetupDefaults(glanceDefaults)
+	setupServiceOperatorDefaults()
 
 	// Webhooks
 	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
@@ -181,4 +175,27 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+// Set up any defaults used by service operator defaulting logic
+func setupServiceOperatorDefaults() {
+	// Acquire environmental defaults and initialize service operators that
+	// require each respective default
+
+	// Glance
+	glanceDefaults := glancev1.GlanceDefaults{
+		ContainerImageURL: os.Getenv("GLANCE_API_IMAGE_URL_DEFAULT"),
+	}
+
+	(&glancev1.Glance{}).Spec.SetupDefaults(glanceDefaults)
+
+	// Cinder
+	cinderDefaults := cinderv1.CinderDefaults{
+		APIContainerImageURL:       os.Getenv("CINDER_API_IMAGE_URL_DEFAULT"),
+		BackupContainerImageURL:    os.Getenv("CINDER_BACKUP_IMAGE_URL_DEFAULT"),
+		SchedulerContainerImageURL: os.Getenv("CINDER_SCHEDULER_IMAGE_URL_DEFAULT"),
+		VolumeContainerImageURL:    os.Getenv("CINDER_VOLUME_IMAGE_URL_DEFAULT"),
+	}
+
+	(&cinderv1.Cinder{}).Spec.SetupDefaults(cinderDefaults)
 }
