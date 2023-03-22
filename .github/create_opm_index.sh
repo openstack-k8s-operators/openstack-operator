@@ -9,7 +9,8 @@ echo "${INDEX_IMAGE_TAG}"
 echo "${BUNDLE_IMAGE}"
 
 echo "opm index add --bundles ${REGISTRY}/${BUNDLE_IMAGE}:${GITHUB_SHA} --tag ${REGISTRY}/${INDEX_IMAGE}:${GITHUB_SHA} -u podman --pull-tool podman"
-opm index add --bundles "${REGISTRY}/${BUNDLE_IMAGE}:${GITHUB_SHA}" --tag "${REGISTRY}/${INDEX_IMAGE}:${GITHUB_SHA}" -u podman --pull-tool podman
+#opm index add --bundles "${REGISTRY}/${BUNDLE_IMAGE}:${GITHUB_SHA}" --tag "${REGISTRY}/${INDEX_IMAGE}:${GITHUB_SHA}" -u podman --pull-tool podman
+opm index add --bundles "${REGISTRY}/${BUNDLE_IMAGE}:${GITHUB_SHA}",quay.io/openstack-k8s-operators/manila-operator-bundle:latest --tag "${REGISTRY}/${INDEX_IMAGE}:${GITHUB_SHA}" -u podman --pull-tool podman
 
 echo "podman tag ${REGISTRY}/${INDEX_IMAGE}:${GITHUB_SHA} ${REGISTRY}/${INDEX_IMAGE}:${INDEX_IMAGE_TAG}"
 podman tag "${REGISTRY}/${INDEX_IMAGE}:${GITHUB_SHA}" "${REGISTRY}/${INDEX_IMAGE}:${INDEX_IMAGE_TAG}"

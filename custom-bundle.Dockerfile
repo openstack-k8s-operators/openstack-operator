@@ -13,7 +13,6 @@ ARG ANSIBLEEE_BUNDLE=quay.io/openstack-k8s-operators/openstack-ansibleee-operato
 ARG DATAPLANE_BUNDLE=quay.io/openstack-k8s-operators/dataplane-operator-bundle:latest
 ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
 ARG IRONIC_BUNDLE=quay.io/openstack-k8s-operators/ironic-operator-bundle:latest
-ARG MANILA_BUNDLE=quay.io/openstack-k8s-operators/manila-operator-bundle:latest
 
 # Build the manager binary
 FROM $GOLANG_CTX as builder
@@ -50,7 +49,6 @@ FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
 FROM $DATAPLANE_BUNDLE as dataplane-bundle
 FROM $NOVA_BUNDLE as nova-bundle
 FROM $IRONIC_BUNDLE as ironic-bundle
-FROM $MANILA_BUNDLE as manila-bundle
 
 FROM $GOLANG_CTX as merger
 WORKDIR /workspace
@@ -74,7 +72,6 @@ COPY --from=openstack-ansibleee-bundle /manifests/* /manifests/
 COPY --from=dataplane-bundle /manifests/* /manifests/
 COPY --from=nova-bundle /manifests/* /manifests/
 COPY --from=ironic-bundle /manifests/* /manifests/
-COPY --from=manila-bundle /manifests/* /manifests/
 
 RUN /workspace/csv-merger \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
@@ -84,7 +81,6 @@ RUN /workspace/csv-merger \
   --placement-csv=/manifests/placement-operator.clusterserviceversion.yaml \
   --glance-csv=/manifests/glance-operator.clusterserviceversion.yaml \
   --cinder-csv=/manifests/cinder-operator.clusterserviceversion.yaml \
-  --manila-csv=/manifests/manila-operator.clusterserviceversion.yaml \
   --ovn-csv=/manifests/ovn-operator.clusterserviceversion.yaml \
   --ovs-csv=/manifests/ovs-operator.clusterserviceversion.yaml \
   --neutron-csv=/manifests/neutron-operator.clusterserviceversion.yaml \

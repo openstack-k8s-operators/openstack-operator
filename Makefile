@@ -208,6 +208,7 @@ bundle: manifests kustomize ## Generate bundle manifests and metadata, then vali
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS)
+	cp dependencies.yaml ./bundle/metadata
 	operator-sdk bundle validate ./bundle
 	/bin/bash hack/pin-custom-bundle-dockerfile.sh
 
@@ -254,7 +255,8 @@ endif
 # https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
 .PHONY: catalog-build
 catalog-build: opm ## Build a catalog image.
-	$(OPM) index add --container-tool podman --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
+	# FIXME: hardcoded bundle below should use go.mod pinned version for manila bundle
+	$(OPM) index add --container-tool podman --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS),quay.io/openstack-k8s-operators/manila-operator-bundle:latest $(FROM_INDEX_OPT)
 
 # Push the catalog image.
 .PHONY: catalog-push

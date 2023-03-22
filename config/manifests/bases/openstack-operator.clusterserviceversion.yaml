@@ -4,6 +4,10 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
+    # FIXME(dprince) switch this to openstack-operators once we auto create service accounts
+    operatorframework.io/suggested-namespace: openstack
+    operators.operatorframework.io/builder: operator-sdk-v1.26.0
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
   name: openstack-operator.v0.0.0
   namespace: placeholder
 spec:
