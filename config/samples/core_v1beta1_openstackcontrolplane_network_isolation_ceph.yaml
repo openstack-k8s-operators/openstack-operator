@@ -1,0 +1,200 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack-network-isolation
+spec:
+  secret: osp-secret
+  storageClass: local-storage
+  extraMounts:
+    - name: v1
+      region: r1
+      extraVol:
+        - propagation:
+          - CinderVolume
+          - CinderBackup
+          - GlanceAPI
+          extraVolType: Ceph
+          volumes:
+          - name: ceph
+            projected:
+              sources:
+              - secret:
+                  name: ceph-conf-files
+          mounts:
+          - name: ceph
+            mountPath: "/etc/ceph"
+            readOnly: true
+  cinder:
+    template:
+      cinderAPI:
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+      cinderBackup:
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
+        customServiceConfig: |
+          [DEFAULT]
+          backup_driver = cinder.backup.drivers.ceph.CephBackupDriver
+          backup_ceph_pool = backups
+          backup_ceph_user = openstack
+        networkAttachments:
+        - storage
+      cinderScheduler:
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
+      cinderVolumes:
+        ceph:
+          containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
+          customServiceConfig: |
+            [DEFAULT]
+            enabled_backends=ceph
+            [ceph]
+            volume_backend_name=ceph
+            volume_driver=cinder.volume.drivers.rbd.RBDDriver
+            rbd_ceph_conf=/etc/ceph/ceph.conf
+            rbd_user=openstack
+            rbd_pool=volumes
+            rbd_flatten_volume_from_snapshot=False
+            rbd_secret_uuid=_FSID_
+          networkAttachments:
+          - storage
+          replicas: 0 # backend needs to be configured
+  glance:
+    template:
+      databaseInstance: openstack
+      containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
+      customServiceConfig: |
+        [DEFAULT]
+        enabled_backends = default_backend:rbd
+        [glance_store]
+        default_backend = default_backend
+        [default_backend]
+        rbd_store_ceph_conf = /etc/ceph/ceph.conf
+        store_description = "RBD backend"
+        rbd_store_pool = images
+        rbd_store_user = openstack
+      storageClass: ""
+      storageRequest: 10G
+      glanceAPIInternal:
+        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+        networkAttachments:
+        - storage
+      glanceAPIExternal:
+        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
+        networkAttachments:
+        - storage
+  keystone:
+    template:
+      containerImage: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
+      databaseInstance: openstack
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+  mariadb:
+    templates:
+      openstack:
+        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
+        storageRequest: 500M
+  memcached:
+    enabled: true
+    templates:
+      memcached:
+        containerImage: quay.io/tripleozedcentos9/openstack-memcached:current-tripleo
+        replicas: 1
+  neutron:
+    template:
+      databaseInstance: openstack
+      containerImage: quay.io/tripleozedcentos9/openstack-neutron-server:current-tripleo
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+      networkAttachments:
+      - internalapi
+  nova:
+    template:
+      apiServiceTemplate:
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+      secret: osp-secret
+  ovn:
+    template:
+      ovnDBCluster:
+        ovndbcluster-nb:
+          containerImage: quay.io/tripleozedcentos9/openstack-ovn-nb-db-server:current-tripleo
+          dbType: NB
+          storageRequest: 10G
+          networkAttachment: internalapi
+        ovndbcluster-sb:
+          containerImage: quay.io/tripleozedcentos9/openstack-ovn-sb-db-server:current-tripleo
+          dbType: SB
+          storageRequest: 10G
+          networkAttachment: internalapi
+      ovnNorthd:
+        containerImage: quay.io/tripleozedcentos9/openstack-ovn-northd:current-tripleo
+        networkAttachment: internalapi
+  ovs:
+    template:
+      ovsContainerImage: "quay.io/skaplons/ovs:latest"
+      ovnContainerImage: "quay.io/tripleozedcentos9/openstack-ovn-controller:current-tripleo"
+      external-ids:
+        system-id: "random"
+        ovn-bridge: "br-int"
+        ovn-encap-type: "geneve"
+      networkAttachment: internalapi
+  placement:
+    template:
+      containerImage: quay.io/tripleozedcentos9/openstack-placement-api:current-tripleo
+      databaseInstance: openstack
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+  rabbitmq:
+    templates:
+      rabbitmq:
+        externalEndpoint:
+          loadBalancerIPs:
+          - 172.17.0.85
+          ipAddressPool: internalapi
+          sharedIP: false
+      rabbitmq-cell1:
+        externalEndpoint:
+          loadBalancerIPs:
+          - 172.17.0.86
+          ipAddressPool: internalapi
+          sharedIP: false
+  ironic:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      ironicAPI:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-api:current-tripleo
+      ironicConductors:
+      - replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-conductor:current-tripleo
+        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
+        storageRequest: 10G
+      ironicInspector:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-ironic-inspector:current-tripleo
+        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
+      secret: osp-secret
