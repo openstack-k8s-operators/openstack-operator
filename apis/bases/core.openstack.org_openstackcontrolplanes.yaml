@@ -73,8 +73,17 @@ spec:
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
                               config format. The content gets added to to /etc/<service>/<service>.conf.d
-                              directory as custom.conf file.
+                              directory as a custom config file.
                             type: string
+                          customServiceConfigSecrets:
+                            description: CustomServiceConfigSecrets - customize the
+                              service config using this parameter to specify Secrets
+                              that contain sensitive service config data. The content
+                              of each Secret gets added to the /etc/<service>/<service>.conf.d
+                              directory as a custom config file.
+                            items:
+                              type: string
+                            type: array
                           databaseHostname:
                             description: DatabaseHostname - Cinder Database Hostname
                             type: string
@@ -1022,7 +1031,9 @@ spec:
                                                                 and requires enabling
                                                                 the DynamicResourceAllocation
                                                                 feature gate. \n This
-                                                                field is immutable."
+                                                                field is immutable.
+                                                                It can only be set
+                                                                for containers."
                                                               items:
                                                                 description: ResourceClaim
                                                                   references one entry
@@ -2474,7 +2485,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -2544,8 +2556,17 @@ spec:
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
                               config format. The content gets added to to /etc/<service>/<service>.conf.d
-                              directory as custom.conf file.
+                              directory as a custom config file.
                             type: string
+                          customServiceConfigSecrets:
+                            description: CustomServiceConfigSecrets - customize the
+                              service config using this parameter to specify Secrets
+                              that contain sensitive service config data. The content
+                              of each Secret gets added to the /etc/<service>/<service>.conf.d
+                              directory as a custom config file.
+                            items:
+                              type: string
+                            type: array
                           databaseHostname:
                             description: DatabaseHostname - Cinder Database Hostname
                             type: string
@@ -3449,7 +3470,9 @@ spec:
                                                                 and requires enabling
                                                                 the DynamicResourceAllocation
                                                                 feature gate. \n This
-                                                                field is immutable."
+                                                                field is immutable.
+                                                                It can only be set
+                                                                for containers."
                                                               items:
                                                                 description: ResourceClaim
                                                                   references one entry
@@ -4899,7 +4922,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -4969,8 +4993,17 @@ spec:
                               config using this parameter to change service defaults,
                               or overwrite rendered information using raw OpenStack
                               config format. The content gets added to to /etc/<service>/<service>.conf.d
-                              directory as custom.conf file.
+                              directory as a custom config file.
                             type: string
+                          customServiceConfigSecrets:
+                            description: CustomServiceConfigSecrets - customize the
+                              service config using this parameter to specify Secrets
+                              that contain sensitive service config data. The content
+                              of each Secret gets added to the /etc/<service>/<service>.conf.d
+                              directory as a custom config file.
+                            items:
+                              type: string
+                            type: array
                           databaseHostname:
                             description: DatabaseHostname - Cinder Database Hostname
                             type: string
@@ -5874,7 +5907,9 @@ spec:
                                                                 and requires enabling
                                                                 the DynamicResourceAllocation
                                                                 feature gate. \n This
-                                                                field is immutable."
+                                                                field is immutable.
+                                                                It can only be set
+                                                                for containers."
                                                               items:
                                                                 description: ResourceClaim
                                                                   references one entry
@@ -7326,7 +7361,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -7397,8 +7433,17 @@ spec:
                                 config using this parameter to change service defaults,
                                 or overwrite rendered information using raw OpenStack
                                 config format. The content gets added to to /etc/<service>/<service>.conf.d
-                                directory as custom.conf file.
+                                directory as a custom config file.
                               type: string
+                            customServiceConfigSecrets:
+                              description: CustomServiceConfigSecrets - customize
+                                the service config using this parameter to specify
+                                Secrets that contain sensitive service config data.
+                                The content of each Secret gets added to the /etc/<service>/<service>.conf.d
+                                directory as a custom config file.
+                              items:
+                                type: string
+                              type: array
                             databaseHostname:
                               description: DatabaseHostname - Cinder Database Hostname
                               type: string
@@ -8345,7 +8390,9 @@ spec:
                                                                   field and requires
                                                                   enabling the DynamicResourceAllocation
                                                                   feature gate. \n
-                                                                  This field is immutable."
+                                                                  This field is immutable.
+                                                                  It can only be set
+                                                                  for containers."
                                                                 items:
                                                                   description: ResourceClaim
                                                                     references one
@@ -9854,7 +9901,8 @@ spec:
                                     defined in spec.resourceClaims, that are used
                                     by this container. \n This is an alpha field and
                                     requires enabling the DynamicResourceAllocation
-                                    feature gate. \n This field is immutable."
+                                    feature gate. \n This field is immutable. It can
+                                    only be set for containers."
                                   items:
                                     description: ResourceClaim references one entry
                                       in PodSpec.ResourceClaims.
@@ -9919,7 +9967,7 @@ spec:
                           for all Cinder services using this parameter to change service
                           defaults, or overwrite rendered information using raw OpenStack
                           config format. The content gets added to to /etc/<service>/<service>.conf.d
-                          directory as custom.conf file.
+                          directory as a custom config file.
                         type: string
                       databaseInstance:
                         description: MariaDB instance name Right now required by the
@@ -10760,7 +10808,8 @@ spec:
                                                             an alpha field and requires
                                                             enabling the DynamicResourceAllocation
                                                             feature gate. \n This
-                                                            field is immutable."
+                                                            field is immutable. It
+                                                            can only be set for containers."
                                                           items:
                                                             description: ResourceClaim
                                                               references one entry
@@ -12827,7 +12876,8 @@ spec:
                                                     \n This is an alpha field and
                                                     requires enabling the DynamicResourceAllocation
                                                     feature gate. \n This field is
-                                                    immutable."
+                                                    immutable. It can only be set
+                                                    for containers."
                                                   items:
                                                     description: ResourceClaim references
                                                       one entry in PodSpec.ResourceClaims.
@@ -14874,7 +14924,8 @@ spec:
                                                             an alpha field and requires
                                                             enabling the DynamicResourceAllocation
                                                             feature gate. \n This
-                                                            field is immutable."
+                                                            field is immutable. It
+                                                            can only be set for containers."
                                                           items:
                                                             description: ResourceClaim
                                                               references one entry
@@ -16305,7 +16356,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -16501,7 +16553,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -16808,7 +16861,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -16875,6 +16929,8 @@ spec:
                           transportURLSecret:
                             description: Secret containing RabbitMq transport URL
                             type: string
+                        required:
+                        - containerImage
                         type: object
                       ironicConductors:
                         description: IronicConductors - Spec definitions for the conductor
@@ -17029,7 +17085,8 @@ spec:
                                     defined in spec.resourceClaims, that are used
                                     by this container. \n This is an alpha field and
                                     requires enabling the DynamicResourceAllocation
-                                    feature gate. \n This field is immutable."
+                                    feature gate. \n This field is immutable. It can
+                                    only be set for containers."
                                   items:
                                     description: ResourceClaim references one entry
                                       in PodSpec.ResourceClaims.
@@ -17105,6 +17162,7 @@ spec:
                                 RabbitMQ transportURL
                               type: string
                           required:
+                          - containerImage
                           - storageClass
                           - storageRequest
                           type: object
@@ -17311,7 +17369,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -17383,6 +17442,8 @@ spec:
                             description: TransportURLSecret - Secret containing RabbitMQ
                               transportURL
                             type: string
+                        required:
+                        - containerImage
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -17630,7 +17691,7 @@ spec:
                               in spec.resourceClaims, that are used by this container.
                               \n This is an alpha field and requires enabling the
                               DynamicResourceAllocation feature gate. \n This field
-                              is immutable."
+                              is immutable. It can only be set for containers."
                             items:
                               description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                               properties:
@@ -17903,7 +17964,7 @@ spec:
                               in spec.resourceClaims, that are used by this container.
                               \n This is an alpha field and requires enabling the
                               DynamicResourceAllocation feature gate. \n This field
-                              is immutable."
+                              is immutable. It can only be set for containers."
                             items:
                               description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                               properties:
@@ -18091,7 +18152,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -18214,7 +18276,8 @@ spec:
                                         defined in spec.resourceClaims, that are used
                                         by this container. \n This is an alpha field
                                         and requires enabling the DynamicResourceAllocation
-                                        feature gate. \n This field is immutable."
+                                        feature gate. \n This field is immutable.
+                                        It can only be set for containers."
                                       items:
                                         description: ResourceClaim references one
                                           entry in PodSpec.ResourceClaims.
@@ -18268,7 +18331,7 @@ spec:
                                 serive dedicated for the cell.
                               properties:
                                 containerImage:
-                                  default: quay.io/tripleozedcentos9/openstack-nova-metadata:current-tripleo
+                                  default: quay.io/tripleozedcentos9/openstack-nova-api:current-tripleo
                                   description: The service specific Container Image
                                     URL
                                   type: string
@@ -18289,6 +18352,50 @@ spec:
                                     get added to the service config dir in /etc/<service>
                                     .
                                   type: object
+                                externalEndpoints:
+                                  description: ExternalEndpoints, expose a VIP via
+                                    MetalLB on the pre-created address pool
+                                  items:
+                                    description: MetalLBConfig to configure the MetalLB
+                                      loadbalancer service
+                                    properties:
+                                      endpoint:
+                                        description: Endpoint, OpenStack endpoint
+                                          this service maps to
+                                        enum:
+                                        - internal
+                                        - public
+                                        type: string
+                                      ipAddressPool:
+                                        description: IPAddressPool expose VIP via
+                                          MetalLB on the IPAddressPool
+                                        minLength: 1
+                                        type: string
+                                      loadBalancerIPs:
+                                        description: LoadBalancerIPs, request given
+                                          IPs from the pool if available. Using a
+                                          list to allow dual stack (IPv4/IPv6) support
+                                        items:
+                                          type: string
+                                        type: array
+                                      sharedIP:
+                                        default: true
+                                        description: SharedIP if true, VIP/VIPs get
+                                          shared with multiple services
+                                        type: boolean
+                                      sharedIPKey:
+                                        default: ""
+                                        description: SharedIPKey specifies the sharing
+                                          key which gets set as the annotation on
+                                          the LoadBalancer service. Services which
+                                          share the same VIP must have the same SharedIPKey.
+                                          Defaults to the IPAddressPool if SharedIP
+                                          is true, but no SharedIPKey specified.
+                                        type: string
+                                    required:
+                                    - ipAddressPool
+                                    type: object
+                                  type: array
                                 networkAttachments:
                                   description: NetworkAttachments is a list of NetworkAttachment
                                     resource names to expose the services to the given
@@ -18318,7 +18425,8 @@ spec:
                                         defined in spec.resourceClaims, that are used
                                         by this container. \n This is an alpha field
                                         and requires enabling the DynamicResourceAllocation
-                                        feature gate. \n This field is immutable."
+                                        feature gate. \n This field is immutable.
+                                        It can only be set for containers."
                                       items:
                                         description: ResourceClaim references one
                                           entry in PodSpec.ResourceClaims.
@@ -18418,7 +18526,8 @@ spec:
                                         defined in spec.resourceClaims, that are used
                                         by this container. \n This is an alpha field
                                         and requires enabling the DynamicResourceAllocation
-                                        feature gate. \n This field is immutable."
+                                        feature gate. \n This field is immutable.
+                                        It can only be set for containers."
                                       items:
                                         description: ResourceClaim references one
                                           entry in PodSpec.ResourceClaims.
@@ -18515,12 +18624,14 @@ spec:
                           to authenticate.
                         type: string
                       metadataServiceTemplate:
+                        default:
+                          replicas: 1
                         description: MetadataServiceTemplate - defines the metadata
                           service that is global for the deployment serving all the
                           cells.
                         properties:
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-nova-metadata:current-tripleo
+                            default: quay.io/tripleozedcentos9/openstack-nova-api:current-tripleo
                             description: The service specific Container Image URL
                             type: string
                           customServiceConfig:
@@ -18538,6 +18649,49 @@ spec:
                               also be used to add additional files. Those get added
                               to the service config dir in /etc/<service> .
                             type: object
+                          externalEndpoints:
+                            description: ExternalEndpoints, expose a VIP via MetalLB
+                              on the pre-created address pool
+                            items:
+                              description: MetalLBConfig to configure the MetalLB
+                                loadbalancer service
+                              properties:
+                                endpoint:
+                                  description: Endpoint, OpenStack endpoint this service
+                                    maps to
+                                  enum:
+                                  - internal
+                                  - public
+                                  type: string
+                                ipAddressPool:
+                                  description: IPAddressPool expose VIP via MetalLB
+                                    on the IPAddressPool
+                                  minLength: 1
+                                  type: string
+                                loadBalancerIPs:
+                                  description: LoadBalancerIPs, request given IPs
+                                    from the pool if available. Using a list to allow
+                                    dual stack (IPv4/IPv6) support
+                                  items:
+                                    type: string
+                                  type: array
+                                sharedIP:
+                                  default: true
+                                  description: SharedIP if true, VIP/VIPs get shared
+                                    with multiple services
+                                  type: boolean
+                                sharedIPKey:
+                                  default: ""
+                                  description: SharedIPKey specifies the sharing key
+                                    which gets set as the annotation on the LoadBalancer
+                                    service. Services which share the same VIP must
+                                    have the same SharedIPKey. Defaults to the IPAddressPool
+                                    if SharedIP is true, but no SharedIPKey specified.
+                                  type: string
+                              required:
+                              - ipAddressPool
+                              type: object
+                            type: array
                           networkAttachments:
                             description: NetworkAttachments is a list of NetworkAttachment
                               resource names to expose the services to the given network
@@ -18566,7 +18720,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -18684,7 +18839,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -18817,7 +18973,8 @@ spec:
                                     defined in spec.resourceClaims, that are used
                                     by this container. \n This is an alpha field and
                                     requires enabling the DynamicResourceAllocation
-                                    feature gate. \n This field is immutable."
+                                    feature gate. \n This field is immutable. It can
+                                    only be set for containers."
                                   items:
                                     description: ResourceClaim references one entry
                                       in PodSpec.ResourceClaims.
@@ -18912,7 +19069,8 @@ spec:
                                   defined in spec.resourceClaims, that are used by
                                   this container. \n This is an alpha field and requires
                                   enabling the DynamicResourceAllocation feature gate.
-                                  \n This field is immutable."
+                                  \n This field is immutable. It can only be set for
+                                  containers."
                                 items:
                                   description: ResourceClaim references one entry
                                     in PodSpec.ResourceClaims.
@@ -19023,7 +19181,7 @@ spec:
                               in spec.resourceClaims, that are used by this container.
                               \n This is an alpha field and requires enabling the
                               DynamicResourceAllocation feature gate. \n This field
-                              is immutable."
+                              is immutable. It can only be set for containers."
                             items:
                               description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                               properties:
@@ -19218,7 +19376,7 @@ spec:
                               in spec.resourceClaims, that are used by this container.
                               \n This is an alpha field and requires enabling the
                               DynamicResourceAllocation feature gate. \n This field
-                              is immutable."
+                              is immutable. It can only be set for containers."
                             items:
                               description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                               properties:
@@ -23572,7 +23730,8 @@ spec:
                                                           and requires enabling the
                                                           DynamicResourceAllocation
                                                           feature gate. \n This field
-                                                          is immutable."
+                                                          is immutable. It can only
+                                                          be set for containers."
                                                         items:
                                                           description: ResourceClaim
                                                             references one entry in
@@ -25501,7 +25660,8 @@ spec:
                                                           and requires enabling the
                                                           DynamicResourceAllocation
                                                           feature gate. \n This field
-                                                          is immutable."
+                                                          is immutable. It can only
+                                                          be set for containers."
                                                         items:
                                                           description: ResourceClaim
                                                             references one entry in
@@ -27478,7 +27638,8 @@ spec:
                                                           and requires enabling the
                                                           DynamicResourceAllocation
                                                           feature gate. \n This field
-                                                          is immutable."
+                                                          is immutable. It can only
+                                                          be set for containers."
                                                         items:
                                                           description: ResourceClaim
                                                             references one entry in
@@ -30067,7 +30228,9 @@ spec:
                                                                       DynamicResourceAllocation
                                                                       feature gate.
                                                                       \n This field
-                                                                      is immutable."
+                                                                      is immutable.
+                                                                      It can only
+                                                                      be set for containers."
                                                                     items:
                                                                       description: ResourceClaim
                                                                         references
@@ -31995,7 +32158,8 @@ spec:
                                                       \n This is an alpha field and
                                                       requires enabling the DynamicResourceAllocation
                                                       feature gate. \n This field
-                                                      is immutable."
+                                                      is immutable. It can only be
+                                                      set for containers."
                                                     items:
                                                       description: ResourceClaim references
                                                         one entry in PodSpec.ResourceClaims.
@@ -32218,7 +32382,7 @@ spec:
                                 in spec.resourceClaims, that are used by this container.
                                 \n This is an alpha field and requires enabling the
                                 DynamicResourceAllocation feature gate. \n This field
-                                is immutable."
+                                is immutable. It can only be set for containers."
                               items:
                                 description: ResourceClaim references one entry in
                                   PodSpec.ResourceClaims.
