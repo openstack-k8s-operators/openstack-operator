@@ -210,23 +210,24 @@ func main() {
 						},
 					)
 				}
-
-				csvBaseAlmString := csvExtended.Annotations["alm-examples"]
-				csvStructAlmString := csvStruct.Annotations["alm-examples"]
-				var baseAlmCrs []interface{}
-				var structAlmCrs []interface{}
-				if err = json.Unmarshal([]byte(csvBaseAlmString), &baseAlmCrs); err != nil {
-					panic(err)
-				}
-				if err = json.Unmarshal([]byte(csvStructAlmString), &structAlmCrs); err == nil {
-					//panic(err)
-					baseAlmCrs = append(baseAlmCrs, structAlmCrs...)
-				}
-				almB, err := json.Marshal(baseAlmCrs)
-				if err != nil {
-					panic(err)
-				}
-				csvExtended.Annotations["alm-examples"] = string(almB)
+				/*
+					csvBaseAlmString := csvExtended.Annotations["alm-examples"]
+					csvStructAlmString := csvStruct.Annotations["alm-examples"]
+					var baseAlmCrs []interface{}
+					var structAlmCrs []interface{}
+					if err = json.Unmarshal([]byte(csvBaseAlmString), &baseAlmCrs); err != nil {
+						panic(err)
+					}
+					if err = json.Unmarshal([]byte(csvStructAlmString), &structAlmCrs); err == nil {
+						//panic(err)
+						baseAlmCrs = append(baseAlmCrs, structAlmCrs...)
+					}
+					almB, err := json.Marshal(baseAlmCrs)
+					if err != nil {
+						panic(err)
+					}
+					csvExtended.Annotations["alm-examples"] = string(almB)
+				*/
 
 			}
 		}
