@@ -92,6 +92,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - manila.openstack.org
+  resources:
+  - manilas
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - mariadb.openstack.org
   resources:
   - galeras
