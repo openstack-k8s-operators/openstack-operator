@@ -53,7 +53,7 @@ func (in *GaleraSection) DeepCopyInto(out *GaleraSection) {
 		in, out := &in.Templates, &out.Templates
 		*out = make(map[string]apiv1beta1.GaleraSpec, len(*in))
 		for key, val := range *in {
-			(*out)[key] = val
+			(*out)[key] = *val.DeepCopy()
 		}
 	}
 }

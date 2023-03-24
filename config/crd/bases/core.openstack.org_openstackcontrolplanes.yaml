@@ -5053,6 +5053,10 @@ spec:
                         containerImage:
                           default: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
                           type: string
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          type: object
                         replicas:
                           default: 1
                           enum:
@@ -11809,7 +11813,6 @@ spec:
                   template:
                     properties:
                       containerImage:
-                        default: quay.io/tripleozedcentos9/openstack-placement-api:current-tripleo
                         type: string
                       customServiceConfig:
                         type: string
@@ -11923,6 +11926,7 @@ spec:
                         default: placement
                         type: string
                     required:
+                    - containerImage
                     - databaseInstance
                     - secret
                     type: object
