@@ -24,6 +24,7 @@ custom-bundle.Dockerfile.pinned
 
 # editor and IDE paraphernalia
 .idea
+.vscode
 *.swp
 *.swo
 *~
