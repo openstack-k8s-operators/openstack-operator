@@ -18,6 +18,7 @@ spec:
         containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
         networkAttachments:
         - storage
+        replicas: 0 # backend needs to be configured
       cinderScheduler:
         containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
       cinderVolumes:
