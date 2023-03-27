@@ -60,6 +60,8 @@ spec:
         containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
   cinder:
     template:
+      databaseInstance: openstack
+      secret: osp-secret
       cinderAPI:
         replicas: 1
         containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo

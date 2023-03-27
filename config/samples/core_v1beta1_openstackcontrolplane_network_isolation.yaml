@@ -7,6 +7,8 @@ spec:
   storageClass: local-storage
   cinder:
     template:
+      databaseInstance: openstack
+      secret: osp-secret
       cinderAPI:
         containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
         externalEndpoints:
