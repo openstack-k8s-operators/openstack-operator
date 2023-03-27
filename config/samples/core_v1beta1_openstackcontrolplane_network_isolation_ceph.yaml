@@ -132,6 +132,12 @@ spec:
           loadBalancerIPs:
           - 172.17.0.80
       secret: osp-secret
+      metadataServiceTemplate:
+        externalEndpoints:
+         - endpoint: internal
+           ipAddressPool: internalapi
+           loadBalancerIPs:
+           - 172.17.0.80
   manila:
     template:
       manilaAPI:
