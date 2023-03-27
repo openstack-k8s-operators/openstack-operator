@@ -6654,7 +6654,6 @@ spec:
                         default: admin
                         type: string
                       containerImage:
-                        default: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
                         type: string
                       customServiceConfig:
                         type: string
@@ -6771,6 +6770,7 @@ spec:
                       secret:
                         type: string
                     required:
+                    - containerImage
                     - databaseInstance
                     - secret
                     type: object
