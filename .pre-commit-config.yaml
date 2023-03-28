@@ -1,6 +1,37 @@
 repos:
 - repo: local
   hooks:
+    - id: golangci-lint
+      name: golangci-lint
+      language: golang
+      types: [go]
+      entry: make
+      args: ["golangci-lint"]
+      pass_filenames: false
+    - id: gofmt
+      name: gofmt
+      language: system
+      entry: make
+      args: ["fmt"]
+      pass_filenames: false
+    - id: golint
+      name: golint
+      language: system
+      entry: make
+      args: ["golint"]
+      pass_filenames: false
+    - id: govet
+      name: govet
+      language: system
+      entry: make
+      args: ["vet"]
+      pass_filenames: false
+    - id: gotidy
+      name: gotidy
+      language: system
+      entry: make
+      args: ["tidy"]
+      pass_filenames: false
     - id: make-manifests
       name: make-manifests
       language: system
@@ -20,17 +51,8 @@ repos:
       args: ['operator-lint']
       pass_filenames: false
 
-- repo: https://github.com/dnephin/pre-commit-golang
-  rev: v0.5.1
-  hooks:
-    - id: go-fmt
-      exclude: ^vendor
-    - id: go-vet
-    - id: go-mod-tidy
-    - id: go-lint
-
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.3.0
+  rev: v4.4.0
   hooks:
     - id: check-added-large-files
     - id: fix-byte-order-marker
@@ -51,3 +73,9 @@ repos:
     - id: no-commit-to-branch
     - id: trailing-whitespace
       exclude: ^vendor
+
+- repo: https://github.com/openstack/bashate.git
+  rev: 2.1.1
+  hooks:
+    - id: bashate
+      entry: bashate --error . --ignore=E006,E040,E011,E020,E012

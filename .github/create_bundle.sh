@@ -34,32 +34,32 @@ cat "${CLUSTER_BUNDLE_FILE}" | grep "image:"
 # error will be reported to the console.
 set +e
 for csv_image in $(cat "${CLUSTER_BUNDLE_FILE}" | grep "image:" | sed -e "s|.*image:||" | sort -u); do
-  digest_image=""
-  echo "CSV line: ${csv_image}"
+    digest_image=""
+    echo "CSV line: ${csv_image}"
 
-  # case where @ is in the csv_image image
-  if [[ "$csv_image" =~ .*"@".* ]]; then
-    delimeter='@'
-  else
-    delimeter=':'
-  fi
-
-  base_image=$(echo $csv_image | cut -f 1 -d${delimeter})
-  tag_image=$(echo $csv_image | cut -f 2 -d${delimeter})
-
-  if [[ "$base_image:$tag_image" == "controller:latest" ]]; then
-    echo "$base_image:$tag_image becomes $OPERATOR_IMG_WITH_DIGEST"
-    sed -e "s|$base_image:$tag_image|$OPERATOR_IMG_WITH_DIGEST|g" -i "${CLUSTER_BUNDLE_FILE}"
-  else
-    digest_image=$(skopeo inspect docker://${base_image}${delimeter}${tag_image} | jq '.Digest' -r)
-    echo "Base image: $base_image"
-    if [ -n "$digest_image" ]; then
-      echo "$base_image${delimeter}$tag_image becomes $base_image@$digest_image"
-      sed -i "s|$base_image$delimeter$tag_image|$base_image@$digest_image|g" "${CLUSTER_BUNDLE_FILE}"
+    # case where @ is in the csv_image image
+    if [[ "$csv_image" =~ .*"@".* ]]; then
+        delimeter='@'
     else
-      echo "$base_image${delimeter}$tag_image not changed"
+        delimeter=':'
     fi
-  fi
+
+    base_image=$(echo $csv_image | cut -f 1 -d${delimeter})
+    tag_image=$(echo $csv_image | cut -f 2 -d${delimeter})
+
+    if [[ "$base_image:$tag_image" == "controller:latest" ]]; then
+        echo "$base_image:$tag_image becomes $OPERATOR_IMG_WITH_DIGEST"
+        sed -e "s|$base_image:$tag_image|$OPERATOR_IMG_WITH_DIGEST|g" -i "${CLUSTER_BUNDLE_FILE}"
+    else
+        digest_image=$(skopeo inspect docker://${base_image}${delimeter}${tag_image} | jq '.Digest' -r)
+        echo "Base image: $base_image"
+        if [ -n "$digest_image" ]; then
+            echo "$base_image${delimeter}$tag_image becomes $base_image@$digest_image"
+            sed -i "s|$base_image$delimeter$tag_image|$base_image@$digest_image|g" "${CLUSTER_BUNDLE_FILE}"
+        else
+            echo "$base_image${delimeter}$tag_image not changed"
+        fi
+    fi
 done
 
 echo "Resulting bundle file images:"

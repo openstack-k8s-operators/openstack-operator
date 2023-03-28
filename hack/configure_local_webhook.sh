@@ -11,16 +11,16 @@ sudo firewall-cmd --runtime-to-permanent
 
 # Generate the certs and the ca bundle
 if [ "$SKIP_CERT" = false ] ; then
-  mkdir -p ${TMPDIR}
-  rm -rf ${TMPDIR}/* || true
+    mkdir -p ${TMPDIR}
+    rm -rf ${TMPDIR}/* || true
 
-  openssl req -newkey rsa:2048 -days 3650 -nodes -x509 \
+    openssl req -newkey rsa:2048 -days 3650 -nodes -x509 \
     -subj "/CN=${HOSTNAME}" \
     -addext "subjectAltName = IP:${CRC_IP}" \
     -keyout ${TMPDIR}/tls.key \
     -out ${TMPDIR}/tls.crt
 
-  cat ${TMPDIR}/tls.crt ${TMPDIR}/tls.key | base64 -w 0 > ${TMPDIR}/bundle.pem
+    cat ${TMPDIR}/tls.crt ${TMPDIR}/tls.key | base64 -w 0 > ${TMPDIR}/bundle.pem
 
 fi
 
