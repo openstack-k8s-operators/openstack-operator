@@ -23,7 +23,10 @@ echo "New Operator Image with Digest: $OPERATOR_IMG_WITH_DIGEST"
 echo "Release Version: $RELEASE_VERSION"
 
 echo "Creating bundle image..."
-VERSION=$RELEASE_VERSION IMG=$OPERATOR_IMG_WITH_DIGEST make bundle
+BUNDLE_STORAGE_IMG=${REGISTRY}/openstack-operator-storage-bundle:${GITHUB_SHA} VERSION=$RELEASE_VERSION IMG=$OPERATOR_IMG_WITH_DIGEST make bundle
+
+# custom storage bundle pinning
+DOCKERFILE=storage-bundle.Dockerfile /bin/bash hack/pin-custom-bundle-dockerfile.sh
 
 echo "Bundle file images:"
 cat "${CLUSTER_BUNDLE_FILE}" | grep "image:"
