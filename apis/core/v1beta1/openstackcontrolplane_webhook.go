@@ -87,31 +87,49 @@ func (r *OpenStackControlPlane) ValidateDelete() error {
 	return nil
 }
 
-func (r *OpenStackControlPlane) checkDepsEnabled(name string) bool {
+// checkDepsEnabled - returns a non-empty string if required services are missing (disabled) for "name" service
+func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
+
+	// "msg" will hold any dependency validation error we might find
+	msg := ""
+	// "reqs" will be set to the required services for "name" service
+	// if any of those required services are improperly disabled/missing
+	reqs := ""
+
 	switch name {
 	case "Keystone":
-		return (r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled)
+		if !(r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) {
+			reqs = "MariaDB or Galera"
+		}
 	case "Glance":
-		return (r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
-			r.Spec.Keystone.Enabled
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Keystone"
+		}
 	case "Cinder":
-		return ((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
-			r.Spec.Rabbitmq.Enabled &&
-			r.Spec.Keystone.Enabled)
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Keystone, RabbitMQ"
+		}
 	case "Placement":
-		return (r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
-			r.Spec.Keystone.Enabled
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Keystone"
+		}
 	case "Neutron":
-		return ((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
-			r.Spec.Rabbitmq.Enabled &&
-			r.Spec.Keystone.Enabled)
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Keystone, RabbitMQ"
+		}
 	case "Nova":
-		return ((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) &&
-			r.Spec.Rabbitmq.Enabled &&
-			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled &&
-			r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled)
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled &&
+			r.Spec.Placement.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled) {
+			reqs = "MariaDB or Galera, Glance, Keystone, Neutron, Placement, RabbitMQ"
+		}
 	}
-	return true
+
+	// If "reqs" is not the empty string, we have missing requirements
+	if reqs != "" {
+		msg = fmt.Sprintf("%s requires these services to be enabled: %s.", name, reqs)
+	}
+
+	return msg
 }
 
 // ValidateServices implements common function for validating services
@@ -125,36 +143,47 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 	}
 
 	// Add service dependency validations
-	depErrorMsg := "%s service dependencies are not enabled."
 
-	if r.Spec.Keystone.Enabled && !r.checkDepsEnabled("Keystone") {
-		err := field.Invalid(basePath.Child("keystone").Child("enabled"), r.Spec.Keystone.Enabled, fmt.Sprintf(depErrorMsg, "Keystone"))
-		allErrs = append(allErrs, err)
+	if r.Spec.Keystone.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Keystone"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("keystone").Child("enabled"), r.Spec.Keystone.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
 	}
 
-	if r.Spec.Glance.Enabled && !r.checkDepsEnabled("Glance") {
-		err := field.Invalid(basePath.Child("glance").Child("enabled"), r.Spec.Glance.Enabled, fmt.Sprintf(depErrorMsg, "Glance"))
-		allErrs = append(allErrs, err)
+	if r.Spec.Glance.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Glance"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("glance").Child("enabled"), r.Spec.Glance.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
 	}
 
-	if r.Spec.Cinder.Enabled && !r.checkDepsEnabled("Cinder") {
-		err := field.Invalid(basePath.Child("cinder").Child("enabled"), r.Spec.Cinder.Enabled, fmt.Sprintf(depErrorMsg, "Cinder"))
-		allErrs = append(allErrs, err)
+	if r.Spec.Cinder.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Cinder"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("cinder").Child("enabled"), r.Spec.Cinder.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
 	}
 
-	if r.Spec.Placement.Enabled && !r.checkDepsEnabled("Placement") {
-		err := field.Invalid(basePath.Child("placement").Child("enabled"), r.Spec.Placement.Enabled, fmt.Sprintf(depErrorMsg, "Placement"))
-		allErrs = append(allErrs, err)
+	if r.Spec.Placement.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Placement"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("placement").Child("enabled"), r.Spec.Placement.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
 	}
 
-	if r.Spec.Neutron.Enabled && !r.checkDepsEnabled("Neutron") {
-		err := field.Invalid(basePath.Child("neutron").Child("enabled"), r.Spec.Neutron.Enabled, fmt.Sprintf(depErrorMsg, "Neutron"))
-		allErrs = append(allErrs, err)
+	if r.Spec.Neutron.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Neutron"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("neutron").Child("enabled"), r.Spec.Neutron.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
 	}
 
-	if r.Spec.Nova.Enabled && !r.checkDepsEnabled("Nova") {
-		err := field.Invalid(basePath.Child("nova").Child("enabled"), r.Spec.Nova.Enabled, fmt.Sprintf(depErrorMsg, "Nova"))
-		allErrs = append(allErrs, err)
+	if r.Spec.Nova.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Nova"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("nova").Child("enabled"), r.Spec.Nova.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
 	}
 
 	// Checks which call internal validation logic for individual service operators
