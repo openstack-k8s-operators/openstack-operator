@@ -7,7 +7,7 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/imdario/mergo v0.3.14
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230324152956-2cf9d6fe36e6
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230324151631-6b0ffb3db541
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230328172346-59d7468efd1b
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230321204834-1c4e58f83ac8
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230324141445-d1ac945900ed
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230322170604-426978d6cdc9
@@ -16,7 +16,7 @@ require (
 	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230312220436-a0becbddd733
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230324124348-01a691f02aa0
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230324121004-10731ebf9a1d
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230324151304-4612c94ba29c
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230328095731-a2fb963a610b
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230323145008-d9f7aa208997
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230324131153-627b55586842
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230324110832-22157b6770f3
