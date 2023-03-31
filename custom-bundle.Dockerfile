@@ -4,8 +4,6 @@ ARG KEYSTONE_BUNDLE=quay.io/openstack-k8s-operators/keystone-operator-bundle:lat
 ARG MARIADB_BUNDLE=quay.io/openstack-k8s-operators/mariadb-operator-bundle:latest
 ARG RABBITMQ_BUNDLE=quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle:latest
 ARG PLACEMENT_BUNDLE=quay.io/openstack-k8s-operators/placement-operator-bundle:latest
-ARG GLANCE_BUNDLE=quay.io/openstack-k8s-operators/glance-operator-bundle:latest
-ARG CINDER_BUNDLE=quay.io/openstack-k8s-operators/cinder-operator-bundle:latest
 ARG OVN_BUNDLE=quay.io/openstack-k8s-operators/ovn-operator-bundle:latest
 ARG OVS_BUNDLE=quay.io/openstack-k8s-operators/ovs-operator-bundle:latest
 ARG NEUTRON_BUNDLE=quay.io/openstack-k8s-operators/neutron-operator-bundle:latest
@@ -13,6 +11,8 @@ ARG ANSIBLEEE_BUNDLE=quay.io/openstack-k8s-operators/openstack-ansibleee-operato
 ARG DATAPLANE_BUNDLE=quay.io/openstack-k8s-operators/dataplane-operator-bundle:latest
 ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
 ARG IRONIC_BUNDLE=quay.io/openstack-k8s-operators/ironic-operator-bundle:latest
+# we obtain the needed ENV vars containing defaults from storage operators
+ARG OPENSTACK_STORAGE_BUNDLE=quay.io/openstack-k8s-operators/openstack-operator-storage-bundle:latest
 
 # Build the manager binary
 FROM $GOLANG_CTX as builder
@@ -40,8 +40,6 @@ FROM $KEYSTONE_BUNDLE as keystone-bundle
 FROM $MARIADB_BUNDLE as mariadb-bundle
 FROM $RABBITMQ_BUNDLE as rabbitmq-bundle
 FROM $PLACEMENT_BUNDLE as placement-bundle
-FROM $GLANCE_BUNDLE as glance-bundle
-FROM $CINDER_BUNDLE as cinder-bundle
 FROM $OVN_BUNDLE as ovn-bundle
 FROM $OVS_BUNDLE as ovs-bundle
 FROM $NEUTRON_BUNDLE as neutron-bundle
@@ -49,6 +47,7 @@ FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
 FROM $DATAPLANE_BUNDLE as dataplane-bundle
 FROM $NOVA_BUNDLE as nova-bundle
 FROM $IRONIC_BUNDLE as ironic-bundle
+FROM $OPENSTACK_STORAGE_BUNDLE as openstack-storage-bundle
 
 FROM $GOLANG_CTX as merger
 WORKDIR /workspace
@@ -63,8 +62,6 @@ COPY --from=mariadb-bundle /manifests/* /manifests/
 COPY --from=rabbitmq-bundle /manifests/* /manifests/
 COPY --from=infra-bundle /manifests/* /manifests/
 COPY --from=placement-bundle /manifests/* /manifests/
-COPY --from=glance-bundle /manifests/* /manifests/
-COPY --from=cinder-bundle /manifests/* /manifests/
 COPY --from=ovn-bundle /manifests/* /manifests/
 COPY --from=ovs-bundle /manifests/* /manifests/
 COPY --from=neutron-bundle /manifests/* /manifests/
@@ -72,15 +69,15 @@ COPY --from=openstack-ansibleee-bundle /manifests/* /manifests/
 COPY --from=dataplane-bundle /manifests/* /manifests/
 COPY --from=nova-bundle /manifests/* /manifests/
 COPY --from=ironic-bundle /manifests/* /manifests/
+COPY --from=openstack-storage-bundle /env-vars.yaml /storage-env-vars.yaml
 
 RUN /workspace/csv-merger \
+  --import-env-files=/storage-env-vars.yaml \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
   --rabbitmq-csv=/manifests/cluster-operator.clusterserviceversion.yaml \
   --infra-csv=/manifests/infra-operator.clusterserviceversion.yaml \
   --keystone-csv=/manifests/keystone-operator.clusterserviceversion.yaml \
   --placement-csv=/manifests/placement-operator.clusterserviceversion.yaml \
-  --glance-csv=/manifests/glance-operator.clusterserviceversion.yaml \
-  --cinder-csv=/manifests/cinder-operator.clusterserviceversion.yaml \
   --ovn-csv=/manifests/ovn-operator.clusterserviceversion.yaml \
   --ovs-csv=/manifests/ovs-operator.clusterserviceversion.yaml \
   --neutron-csv=/manifests/neutron-operator.clusterserviceversion.yaml \
@@ -88,7 +85,7 @@ RUN /workspace/csv-merger \
   --dataplane-csv=/manifests/dataplane-operator.clusterserviceversion.yaml \
   --nova-csv=/manifests/nova-operator.clusterserviceversion.yaml \
   --ironic-csv=/manifests/ironic-operator.clusterserviceversion.yaml \
-  --openstack-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
+  --base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's
 RUN rm /manifests/*clusterserviceversion.yaml

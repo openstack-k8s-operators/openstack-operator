@@ -1,5 +1,5 @@
 dependencies:
   - type: olm.package
     value:
-      packageName: manila-operator
+      packageName: openstack-storage-operators
       version: ">0.0.0"

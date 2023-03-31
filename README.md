@@ -46,6 +46,68 @@ UnDeploy the controller to the cluster:
 make undeploy
 ```
 
+### Building your own bundle, index images
+The OpenStack operator uses multiple bundles to minimize the number of
+deployment artifacts we have in the OLM catalog while also providing enough
+space for our CRs (this is a big project). As such the build order for local
+bundles is a bit different than normal.
+
+1. Run make:bundle. This pins down dependencies to version used in the go.mod and
+ and also string replaces the URL for any dependant bundles (storage, etc) that
+ we will build below. Additionally a dependency.yaml is added to the generated bundle
+ so that we require any dependencies. This sets the stage for everything below.
+
+```sh
+make bundle
+```
+
+2. Run dep-bundle-build-push. This creates any *dependency* bundles required by this project.
+It builds and pushes them to a registry as this is required to be able to build the main
+bundle.
+
+```sh
+make dep-bundle-build-push
+```
+
+3. Run bundle-build. This will execute podman to build the custom-bundle.Dockerfile.pinned.
+
+```sh
+make bundle-build
+```
+
+4. Run bundle-push. This pushes the resulting bundle image to the registry.
+
+```sh
+make bundle-push
+```
+
+5. Run catalog-build.  At this point you can generate your index image so that it contains both of the above bundle images. Because we use dependencies in the openstack-operator's main bundle it will
+ automatically install the CSV contained in the dependant (storage, etc) bundle.
+
+```sh
+make catalog-build
+```
+
+6. Run catalog-push. Push the catalog to your registry.
+
+```sh
+make catalog-push
+```
+
+### Uninstall CRDs
+To delete the CRDs from the cluster:
+
+```sh
+make uninstall
+```
+
+### Undeploy controller
+UnDeploy the controller to the cluster:
+
+```sh
+make undeploy
+```
+
 ## Contributing
 // TODO(user): Add detailed information on how you would like others to contribute to this project
 
