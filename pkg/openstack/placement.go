@@ -32,7 +32,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling placementAPI", "placementAPI.Namespace", instance.Namespace, "placementAPI.Name", "placement")
+	helper.GetLogger().Info("Reconciling PlacementAPI", "PlacementAPI.Namespace", instance.Namespace, "PlacementAPI.Name", "placement")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), placementAPI, func() error {
 		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec)
 		if placementAPI.Spec.Secret == "" {

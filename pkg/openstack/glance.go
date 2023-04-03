@@ -32,7 +32,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling glance", "glance.Namespace", instance.Namespace, "glance.Name", "glance")
+	helper.GetLogger().Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
 		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec)
 		if glance.Spec.Secret == "" {

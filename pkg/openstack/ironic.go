@@ -32,7 +32,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling ironic", "ironic.Namespace", instance.Namespace, "ironic.Name", "ironic")
+	helper.GetLogger().Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ironic, func() error {
 		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec)
 		if ironic.Spec.Secret == "" {
