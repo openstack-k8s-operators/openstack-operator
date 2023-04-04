@@ -187,7 +187,7 @@ spec:
         system-id: "random"
         ovn-bridge: "br-int"
         ovn-encap-type: "geneve"
-      networkAttachment: internalapi
+      networkAttachment: tenant
   placement:
     template:
       containerImage: quay.io/tripleozedcentos9/openstack-placement-api:current-tripleo
