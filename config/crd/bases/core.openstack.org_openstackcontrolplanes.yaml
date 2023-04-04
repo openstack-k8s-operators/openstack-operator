@@ -5053,6 +5053,8 @@ spec:
                         containerImage:
                           default: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
                           type: string
+                        customServiceConfig:
+                          type: string
                         nodeSelector:
                           additionalProperties:
                             type: string
@@ -5874,11 +5876,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          databaseHostname:
-                            type: string
-                          databaseUser:
-                            default: glance
-                            type: string
                           debug:
                             properties:
                               service:
@@ -5923,18 +5920,6 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          passwordSelectors:
-                            default:
-                              database: GlanceDatabasePassword
-                              service: GlancePassword
-                            properties:
-                              database:
-                                default: GlanceDatabasePassword
-                                type: string
-                              service:
-                                default: GlancePassword
-                                type: string
-                            type: object
                           pvc:
                             type: string
                           replicas:
@@ -5974,11 +5959,6 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                          secret:
-                            type: string
-                          serviceUser:
-                            default: glance
-                            type: string
                         required:
                         - containerImage
                         type: object
@@ -5994,11 +5974,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          databaseHostname:
-                            type: string
-                          databaseUser:
-                            default: glance
-                            type: string
                           debug:
                             properties:
                               service:
@@ -6043,18 +6018,6 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          passwordSelectors:
-                            default:
-                              database: GlanceDatabasePassword
-                              service: GlancePassword
-                            properties:
-                              database:
-                                default: GlanceDatabasePassword
-                                type: string
-                              service:
-                                default: GlancePassword
-                                type: string
-                            type: object
                           pvc:
                             type: string
                           replicas:
@@ -6094,11 +6057,6 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                          secret:
-                            type: string
-                          serviceUser:
-                            default: glance
-                            type: string
                         required:
                         - containerImage
                         type: object
@@ -6150,9 +6108,6 @@ spec:
                         type: string
                       databaseInstance:
                         type: string
-                      databaseUser:
-                        default: ironic
-                        type: string
                       debug:
                         properties:
                           bootstrap:
@@ -6177,9 +6132,6 @@ spec:
                             default: '# add your customization here'
                             type: string
                           databaseHostname:
-                            type: string
-                          databaseUser:
-                            default: ironic
                             type: string
                           debug:
                             properties:
@@ -6306,9 +6258,6 @@ spec:
                               type: string
                             databaseHostname:
                               type: string
-                            databaseUser:
-                              default: ironic
-                              type: string
                             debug:
                               properties:
                                 bootstrap:
@@ -6427,6 +6376,7 @@ spec:
                               type: string
                           required:
                           - containerImage
+                          - pxeContainerImage
                           - storageClass
                           - storageRequest
                           type: object
@@ -6439,9 +6389,6 @@ spec:
                             default: '# add your customization here'
                             type: string
                           databaseInstance:
-                            type: string
-                          databaseUser:
-                            default: ironic_inspector
                             type: string
                           debug:
                             properties:
@@ -6591,6 +6538,7 @@ spec:
                             type: string
                         required:
                         - containerImage
+                        - pxeContainerImage
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -6654,7 +6602,6 @@ spec:
                         default: admin
                         type: string
                       containerImage:
-                        default: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
                         type: string
                       customServiceConfig:
                         type: string
@@ -6771,6 +6718,7 @@ spec:
                       secret:
                         type: string
                     required:
+                    - containerImage
                     - databaseInstance
                     - secret
                     type: object
@@ -10203,7 +10151,6 @@ spec:
                   template:
                     properties:
                       containerImage:
-                        default: quay.io/tripleozedcentos9/openstack-neutron-server:current-tripleo
                         type: string
                       customServiceConfig:
                         type: string
@@ -11079,6 +11026,7 @@ spec:
                         default: neutron
                         type: string
                     required:
+                    - containerImage
                     - databaseInstance
                     - rabbitMqClusterName
                     - secret
