@@ -16,10 +16,19 @@ spec:
       openstack:
         containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
+      openstack-cell1:
+        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
+        storageRequest: 500M
   galera:
     enabled: true
     templates:
       openstack:
+        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
+        storageClass: local-storage
+        storageRequest: 500M
+        secret: osp-secret
+        replicas: 1
+      openstack-cell1:
         containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageClass: local-storage
         storageRequest: 500M

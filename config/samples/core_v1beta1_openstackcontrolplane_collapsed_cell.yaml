@@ -109,6 +109,8 @@ spec:
             hasAPIAccess: true
           cell1:
             cellDatabaseUser: nova_cell1
+            cellDatabaseInstance: openstack
+            cellMessageBusInstance: rabbitmq
             conductorServiceTemplate:
               replicas: 1
             hasAPIAccess: true
