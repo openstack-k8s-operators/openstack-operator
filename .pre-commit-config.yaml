@@ -1,31 +1,6 @@
 repos:
 - repo: local
   hooks:
-    - id: golangci-lint
-      name: golangci-lint
-      language: golang
-      types: [go]
-      entry: make
-      args: ["golangci-lint"]
-      pass_filenames: false
-    - id: gofmt
-      name: gofmt
-      language: system
-      entry: make
-      args: ["fmt"]
-      pass_filenames: false
-    - id: golint
-      name: golint
-      language: system
-      entry: make
-      args: ["golint"]
-      pass_filenames: false
-    - id: govet
-      name: govet
-      language: system
-      entry: make
-      args: ["vet"]
-      pass_filenames: false
     - id: gotidy
       name: gotidy
       language: system
@@ -79,3 +54,9 @@ repos:
   hooks:
     - id: bashate
       entry: bashate --error . --ignore=E006,E040,E011,E020,E012
+
+- repo: https://github.com/golangci/golangci-lint
+  rev: v1.52.2
+  hooks:
+    - id: golangci-lint
+      args: ["-v"]
