@@ -32,7 +32,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling neutronAPI", "neutronAPI.Namespace", instance.Namespace, "neutronAPI.Name", "neutron")
+	helper.GetLogger().Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
 		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec)
 		if neutronAPI.Spec.Secret == "" {

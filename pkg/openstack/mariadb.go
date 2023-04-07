@@ -102,7 +102,7 @@ func reconcileMariaDB(
 		return mariadbReady, nil
 	}
 
-	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "mariadb.Name", name)
+	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "Mariadb.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), mariadb, func() error {
 		spec.DeepCopyInto(&mariadb.Spec)
 		if mariadb.Spec.Secret == "" {
