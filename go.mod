@@ -6,22 +6,22 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.15
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230404123906-31a141ed31a7
+	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230411093101-6ebfd7a14c4b
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230405165408-74539cecf355
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230404134424-48d1d0cc1ce8
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230324141445-d1ac945900ed
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230404074453-a45327c3502f
-	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230403180130-0c0446d0c308
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230411083933-53804f0dc763
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230410121803-e3b2e0bd210b
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230411102754-0af3983f6643
+	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230410115409-8188ec403a91
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230404094840-40d9ff1586e1
-	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230403172743-c62cbab42bda
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230331101132-3a320b926e09
-	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230404161401-11f2c91e84b2
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230404133348-7e9aa75b8a51
+	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230406093156-7643ec29ec98
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230407130717-3b0b46bac46c
+	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230411062303-19ae343eb70c
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230411093104-09ca9e663d0f
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230404001911-6094e49b69ef
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230404092750-43ccdbc24d6c
-	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230404065948-c761b84761fa
-	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230404065949-bea95aca292c
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230404093611-4c8cf1203823
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230407181421-1dfd64d753cb
+	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230410090040-f73c0950f609
+	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230411063323-7672617410df
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230405165405-5ae258242b5f
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
