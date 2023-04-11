@@ -68,6 +68,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - heat.openstack.org
+  resources:
+  - heats
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - horizon.openstack.org
   resources:
   - horizons

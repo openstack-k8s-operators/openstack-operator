@@ -58,6 +58,17 @@ spec:
       - description: Template - Overrides to use when creating the Glance Service
         displayName: Template
         path: glance.template
+      - description: Heat - Parameters related to the Heat services
+        displayName: Heat
+        path: heat
+      - description: Enabled - Whether Heat services should be deployed and managed
+        displayName: Enabled
+        path: heat.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Heat services
+        displayName: Template
+        path: heat.template
       - description: Horizon - Parameters related to the Horizon services
         displayName: Horizon
         path: horizon

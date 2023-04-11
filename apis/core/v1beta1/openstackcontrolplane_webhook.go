@@ -293,4 +293,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	if r.Spec.Placement.Enabled {
 		r.Spec.Placement.Template.Default()
 	}
+
+	// Heat
+	if r.Spec.Heat.Enabled {
+		r.Spec.Heat.Template.Default()
+	}
 }

@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230511085421-6c611258035f
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230515091937-7cd192bfd0fc
+	github.com/openstack-k8s-operators/heat-operator/api v0.0.0-20230510074556-e646f768bf6e
 	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230515060023-1023ee6cefde
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230505165400-46c5e7325f0d
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230509224730-a6ec1284c18b
@@ -17,8 +18,14 @@ require (
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230511044837-a37d66dae924
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230505070414-b584b0044ed5
 	github.com/rabbitmq/cluster-operator v1.14.0
-	k8s.io/apimachinery v0.26.3
+	k8s.io/apimachinery v0.27.0
 	sigs.k8s.io/controller-runtime v0.14.6
+)
+
+require (
+	github.com/stretchr/testify v1.8.2 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 )
 
 require (
@@ -39,7 +46,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gophercloud/gophercloud v1.2.0 // indirect
+	github.com/gophercloud/gophercloud v1.3.0 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -53,15 +60,15 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230510145530-3c8e9179fb6e
 	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230511150547-af737c07ef58
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.15.0 // indirect
-	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.42.0 // indirect
+	github.com/prometheus/client_golang v1.15.1 // indirect
+	github.com/prometheus/client_model v0.4.0 // indirect
+	github.com/prometheus/common v0.43.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/oauth2 v0.8.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
@@ -74,9 +81,9 @@ require (
 	k8s.io/apiextensions-apiserver v0.26.3 // indirect; indirect // indirect // indirect
 	k8s.io/client-go v0.26.3 // indirect; indirect // indirect // indirect
 	k8s.io/component-base v0.26.3 // indirect; indirect // indirect // indirect
-	k8s.io/klog/v2 v2.90.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20230327201221-f5883ff37f0c // indirect; indirect // indirect // indirect // indirect // indirect // indirect
-	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect; indirect // indirect // indirect // indirect
+	k8s.io/klog/v2 v2.100.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f // indirect; indirect // indirect // indirect // indirect // indirect // indirect
+	k8s.io/utils v0.0.0-20230505201702-9f6742963106 // indirect; indirect // indirect // indirect // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect; indirect // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect

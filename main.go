@@ -31,6 +31,7 @@ import (
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
@@ -80,6 +81,7 @@ func init() {
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
 	utilruntime.Must(novav1.AddToScheme(scheme))
 	utilruntime.Must(baremetalv1.AddToScheme(scheme))
+	utilruntime.Must(heatv1.AddToScheme(scheme))
 	utilruntime.Must(ironicv1.AddToScheme(scheme))
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
 	utilruntime.Must(ovsv1.AddToScheme(scheme))
@@ -297,6 +299,14 @@ func setupServiceOperatorDefaults() {
 	}
 
 	placementv1.SetupPlacementAPIDefaults(placementAPIDefaults)
+
+	// Heat
+	heatDefaults := heatv1.HeatDefaults{
+		APIContainerImageURL:    os.Getenv("HEAT_API_IMAGE_URL_DEFAULT"),
+		EngineContainerImageURL: os.Getenv("HEAT_ENGINE_IMAGE_URL_DEFAULT"),
+	}
+
+	heatv1.SetupHeatDefaults(heatDefaults)
 
 	// Redis
 	redisDefaults := redisv1.RedisDefaults{
