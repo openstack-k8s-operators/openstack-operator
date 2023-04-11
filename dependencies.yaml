@@ -21,6 +21,10 @@ dependencies:
       version: ">=0.0.0"
   - type: olm.package
     value:
+      packageName: heat-operator
+      version: ">=0.0.0"
+  - type: olm.package
+    value:
       packageName: infra-operator
       version: ">=0.0.0"
   - type: olm.package

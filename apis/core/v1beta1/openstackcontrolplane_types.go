@@ -21,6 +21,7 @@ import (
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
@@ -113,6 +114,11 @@ type OpenStackControlPlaneSpec struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Nova - Parameters related to the Nova services
 	Nova NovaSection `json:"nova,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Heat - Parameters related to the Heat services
+	Heat HeatSection `json:"heat,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
@@ -366,6 +372,20 @@ type NovaSection struct {
 	Template novav1.NovaSpec `json:"template,omitempty"`
 }
 
+// HeatSection defines the desired state of Heat services
+type HeatSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether Heat services should be deployed and managed
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating the Heat services
+	Template heatv1.HeatSpec `json:"template,omitempty"`
+}
+
 // IronicSection defines the desired state of Ironic services
 type IronicSection struct {
 	// +kubebuilder:validation:Optional
@@ -504,6 +524,7 @@ func (instance OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneHorizonReadyCondition, condition.InitReason, OpenStackControlPlaneHorizonReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneDNSReadyCondition, condition.InitReason, OpenStackControlPlaneDNSReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneCeilometerReadyCondition, condition.InitReason, OpenStackControlPlaneCeilometerReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneHeatReadyCondition, condition.InitReason, OpenStackControlPlaneHeatReadyInitMessage),
 
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),

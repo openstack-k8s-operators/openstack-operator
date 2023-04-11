@@ -51,6 +51,9 @@ const (
 	// OpenStackControlPlaneNovaReadyCondition Status=True condition which indicates if Nova is configured and operational
 	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
 
+	// OpenStackControlPlaneHeatReadyCondition Status=True condition which indicates if Heat is configured and operational
+	OpenStackControlPlaneHeatReadyCondition condition.Type = "OpenStackControlPlaneHeatReady"
+
 	// OpenStackControlPlaneIronicReadyCondition Status=True condition which indicates if Ironic is configured and operational
 	OpenStackControlPlaneIronicReadyCondition condition.Type = "OpenStackControlPlaneIronicReady"
 
@@ -216,6 +219,18 @@ const (
 
 	// OpenStackControlPlaneNovaReadyErrorMessage
 	OpenStackControlPlaneNovaReadyErrorMessage = "OpenStackControlPlane Nova error occured %s"
+
+	// OpenStackControlPlaneHeatReadyInitMessage
+	OpenStackControlPlaneHeatReadyInitMessage = "OpenStackControlPlane Heat not started"
+
+	// OpenStackControlPlaneHeatReadyMessage
+	OpenStackControlPlaneHeatReadyMessage = "OpenStackControlPlane Heat completed"
+
+	// OpenStackControlPlaneHeatReadyRunningMessage
+	OpenStackControlPlaneHeatReadyRunningMessage = "OpenStackControlPlane Heat in progress"
+
+	// OpenStackControlPlaneHeatReadyErrorMessage
+	OpenStackControlPlaneHeatReadyErrorMessage = "OpenStackControlPlane Heat error occured %s"
 
 	// OpenStackControlPlaneIronicReadyInitMessage
 	OpenStackControlPlaneIronicReadyInitMessage = "OpenStackControlPlane Ironic not started"

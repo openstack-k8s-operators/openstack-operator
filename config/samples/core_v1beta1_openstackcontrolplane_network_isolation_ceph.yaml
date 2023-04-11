@@ -205,6 +205,51 @@ spec:
           - 172.17.0.86
           ipAddressPool: internalapi
           sharedIP: false
+  heat:
+    enabled: false
+    template:
+      customServiceConfig: "# add your customization here"
+      databaseInstance: openstack
+      databaseUser: "heat"
+      rabbitMqClusterName: rabbitmq
+      debug:
+        bootstrap: false
+        dbSync: false
+        service: false
+      heatAPI:
+        customServiceConfig: "# add your customization here"
+        databaseUser: "heat"
+        debug:
+          bootstrap: false
+          dbSync: false
+          service: false
+        passwordSelectors:
+          service: AdminPassword
+          database: AdminPassword
+        replicas: 1
+        resources: {}
+        secret: "osp-secret"
+        serviceUser: ""
+      heatEngine:
+        customServiceConfig: "# add your customization here"
+        databaseUser: "heat"
+        debug:
+          bootstrap: false
+          dbSync: false
+          service: false
+        passwordSelectors:
+          service: AdminPassword
+          database: AdminPassword
+        replicas: 1
+        resources: {}
+        secret: "osp-secret"
+        serviceUser: ""
+      passwordSelectors:
+        service: AdminPassword
+        database: AdminPassword
+      preserveJobs: false
+      secret: osp-secret
+      serviceUser: "heat"
   ironic:
     enabled: false
     template:

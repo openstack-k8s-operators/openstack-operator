@@ -8,6 +8,7 @@ ARG NEUTRON_BUNDLE=quay.io/openstack-k8s-operators/neutron-operator-bundle:lates
 ARG ANSIBLEEE_BUNDLE=quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:latest
 ARG DATAPLANE_BUNDLE=quay.io/openstack-k8s-operators/dataplane-operator-bundle:latest
 ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
+ARG HEAT_BUNDLE=quay.io/openstack-k8s-operators/heat-operator-bundle:latest
 ARG IRONIC_BUNDLE=quay.io/openstack-k8s-operators/ironic-operator-bundle:latest
 ARG BAREMETAL_BUNDLE=quay.io/openstack-k8s-operators/openstack-baremetal-operator-bundle:latest
 ARG TELEMETRY_BUNDLE=quay.io/openstack-k8s-operators/telemetry-operator-bundle:latest
@@ -46,6 +47,7 @@ FROM $NEUTRON_BUNDLE as neutron-bundle
 FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
 FROM $DATAPLANE_BUNDLE as dataplane-bundle
 FROM $NOVA_BUNDLE as nova-bundle
+FROM $HEAT_BUNDLE as heat-bundle
 FROM $IRONIC_BUNDLE as ironic-bundle
 FROM $BAREMETAL_BUNDLE as baremetal-bundle
 FROM $TELEMETRY_BUNDLE as telemetry-bundle
@@ -71,6 +73,7 @@ COPY --from=neutron-bundle /manifests/* /manifests/
 COPY --from=openstack-ansibleee-bundle /manifests/* /manifests/
 COPY --from=dataplane-bundle /manifests/* /manifests/
 COPY --from=nova-bundle /manifests/* /manifests/
+COPY --from=heat-bundle /manifests/* /manifests/
 COPY --from=ironic-bundle /manifests/* /manifests/
 COPY --from=baremetal-bundle /manifests/* /manifests/
 COPY --from=telemetry-bundle /manifests/* /manifests/
@@ -91,6 +94,7 @@ RUN /workspace/csv-merger \
   --ansibleee-csv=/manifests/openstack-ansibleee-operator.clusterserviceversion.yaml \
   --dataplane-csv=/manifests/dataplane-operator.clusterserviceversion.yaml \
   --nova-csv=/manifests/nova-operator.clusterserviceversion.yaml \
+  --heat-csv=/manifests/heat-operator.clusterserviceversion.yaml \
   --ironic-csv=/manifests/ironic-operator.clusterserviceversion.yaml \
   --baremetal-csv=/manifests/openstack-baremetal-operator.clusterserviceversion.yaml \
   --horizon-csv=/manifests/horizon-operator.clusterserviceversion.yaml \

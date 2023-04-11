@@ -19,6 +19,16 @@ spec:
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
       specDescriptors:
+      - description: Enabled - Whether OpenStack Ceilometer servicesshould be deployed
+          and managed
+        displayName: Enabled
+        path: ceilometer.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the OpenStack Ceilometer
+          service
+        displayName: Template
+        path: ceilometer.template
       - description: Cinder - Parameters related to the Cinder service
         displayName: Cinder
         path: cinder
@@ -30,6 +40,17 @@ spec:
       - description: Template - Overrides to use when creating Cinder Resources
         displayName: Template
         path: cinder.template
+      - description: DNS - Parameters related to the DNSMasq service
+        displayName: DNS
+        path: dns
+      - description: Enabled - Whether DNSMasq service should be deployed and managed
+        displayName: Enabled
+        path: dns.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the DNSMasq service
+        displayName: Template
+        path: dns.template
       - displayName: Vol Mounts
         path: extraMounts[0].extraVol
       - displayName: Name
@@ -58,6 +79,17 @@ spec:
       - description: Template - Overrides to use when creating the Glance Service
         displayName: Template
         path: glance.template
+      - description: Heat - Parameters related to the Heat services
+        displayName: Heat
+        path: heat
+      - description: Enabled - Whether Heat services should be deployed and managed
+        displayName: Enabled
+        path: heat.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Heat services
+        displayName: Template
+        path: heat.template
       - description: Horizon - Parameters related to the Horizon services
         displayName: Horizon
         path: horizon
@@ -136,6 +168,10 @@ spec:
       - description: Template - Overrides to use when creating the OVN services
         displayName: Template
         path: ovn.template
+      - description: OVNController - Overrides to use when creating the OVNController
+          service
+        displayName: OVNController
+        path: ovn.template.ovnController
       - description: OVNDBCluster - Overrides to use when creating the OVNDBCluster
           services
         displayName: OVNDBCluster
@@ -143,17 +179,6 @@ spec:
       - description: OVNNorthd - Overrides to use when creating the OVNNorthd service
         displayName: OVNNorthd
         path: ovn.template.ovnNorthd
-      - description: Ovs - Overrides to use when creating the OVS Services
-        displayName: Ovs
-        path: ovs
-      - description: Enabled - Whether OVS services should be deployed and managed
-        displayName: Enabled
-        path: ovs.enabled
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Template - Overrides to use when creating the OVS services
-        displayName: Template
-        path: ovs.template
       - description: Placement - Parameters related to the Placement service
         displayName: Placement
         path: placement
@@ -208,19 +233,6 @@ spec:
         path: storageClass
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes:StorageClass
-      - description: Telemetry - Parameters related to the OpenStack Telemetry services
-        displayName: Telemetry
-        path: telemetry
-      - description: Enabled - Whether OpenStack Telemetry services should be deployed
-          and managed
-        displayName: Enabled
-        path: telemetry.enabled
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Template - Overrides to use when creating the OpenStack Telemetry
-          services
-        displayName: Template
-        path: telemetry.template
       statusDescriptors:
       - description: Conditions
         displayName: Conditions
