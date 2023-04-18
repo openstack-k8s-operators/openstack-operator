@@ -72,6 +72,9 @@ const (
 	// OpenStackControlPlaneDNSReadyCondition Status=True condition which indicates if DNSMasq is configured and operational
 	OpenStackControlPlaneDNSReadyCondition condition.Type = "OpenStackControlPlaneDNSReadyCondition"
 
+	// OpenStackControlPlaneTelemetryReadyCondition Status=True condition which indicates if OpenStack Telemetry services are configured and operational
+	OpenStackControlPlaneTelemetryReadyCondition condition.Type = "OpenStackControlPlaneTelemetryReady"
+
 	// OpenStackControlPlaneManilaReadyInitMessage
 	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
 
@@ -276,4 +279,16 @@ const (
 
 	// OpenStackControlPlaneDNSReadyErrorMessage
 	OpenStackControlPlaneDNSReadyErrorMessage = "OpenStackControlPlane DNS error occured %s"
+
+	// OpenStackControlPlaneTelemetryReadyInitMessage
+	OpenStackControlPlaneTelemetryReadyInitMessage = "OpenStackControlPlane Telemetry not started"
+
+	// OpenStackControlPlaneTelemetryReadyMessage
+	OpenStackControlPlaneTelemetryReadyMessage = "OpenStackControlPlane Telemetry completed"
+
+	// OpenStackControlPlaneTelemetryReadyRunningMessage
+	OpenStackControlPlaneTelemetryReadyRunningMessage = "OpenStackControlPlane Telemetry in progress"
+
+	// OpenStackControlPlaneTelemetryReadyErrorMessage
+	OpenStackControlPlaneTelemetryReadyErrorMessage = "OpenStackControlPlane Telemetry error occured %s"
 )

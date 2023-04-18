@@ -208,6 +208,19 @@ spec:
         path: storageClass
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes:StorageClass
+      - description: Telemetry - Parameters related to the OpenStack Telemetry services
+        displayName: Telemetry
+        path: telemetry
+      - description: Enabled - Whether OpenStack Telemetry services should be deployed
+          and managed
+        displayName: Enabled
+        path: telemetry.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the OpenStack Telemetry
+          services
+        displayName: Template
+        path: telemetry.template
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

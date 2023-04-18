@@ -310,4 +310,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	if r.Spec.DNS.Enabled {
 		r.Spec.DNS.Template.Default()
 	}
+
+	// Telemetry
+	if r.Spec.Telemetry.Enabled {
+		r.Spec.Telemetry.Template.Default()
+	}
 }
