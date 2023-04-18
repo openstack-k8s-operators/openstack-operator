@@ -21,6 +21,7 @@ import (
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1alpha1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
@@ -121,6 +122,10 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Horizon - Parameters related to the Horizon services
+	Horizon HorizonSection `json:"horizon,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// ExtraMounts containing conf files and credentials that should be provided
 	// to the underlying operators.
 	// This struct can be defined in the top level CR and propagated to the
@@ -378,6 +383,18 @@ type ManilaSection struct {
 	Template manilav1.ManilaSpec `json:"template,omitempty"`
 }
 
+// HorizonSection defines the desired state of Horizon services
+type HorizonSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Enabled - Whether Horizon services should be deployed and managed
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	// Template - Overrides to use when creating the Horizon services
+	Template horizonv1.HorizonSpec `json:"template,omitempty"`
+}
+
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
 type OpenStackControlPlaneStatus struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
@@ -461,7 +478,7 @@ func (instance OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneIronicReadyCondition, condition.InitReason, OpenStackControlPlaneIronicReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneClientReadyCondition, condition.InitReason, OpenStackControlPlaneClientReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneManilaReadyCondition, condition.InitReason, OpenStackControlPlaneManilaReadyInitMessage),
-
+		condition.UnknownCondition(OpenStackControlPlaneHorizonReadyCondition, condition.InitReason, OpenStackControlPlaneHorizonReadyInitMessage),
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
 	)

@@ -109,6 +109,7 @@ var (
 	ovnCsv         = flag.String("ovn-csv", "", "OVN CSV filename")
 	ovsCsv         = flag.String("ovs-csv", "", "OVS CSV filename")
 	cinderCsv      = flag.String("cinder-csv", "", "Cinder CSV filename")
+	horizonCsv     = flag.String("horizon-csv", "", "Horizon CSV filename")
 	csvOverrides   = flag.String("csv-overrides", "", "CSV like string with punctual changes that will be recursively applied (if possible)")
 	importEnvFiles = flag.String("import-env-files", "", "Comma separated list of file names to read default operator ENVs from. Used for inter-bundle ENV merging.")
 	exportEnvFile  = flag.String("export-env-file", "", "Name the external file to write operator ENVs to. Used for inter-bundle ENV merging.")
@@ -150,6 +151,7 @@ func main() {
 		*ovnCsv,
 		*ovsCsv,
 		*cinderCsv,
+		*horizonCsv,
 	}
 
 	csvVersion := os.Getenv("CSV_VERSION")

@@ -128,6 +128,10 @@ spec:
         - 172.17.0.80
       networkAttachments:
       - internalapi
+  horizon:
+    template:
+      replicas: 1
+      secret: osp-secret
   nova:
     template:
       apiServiceTemplate:
