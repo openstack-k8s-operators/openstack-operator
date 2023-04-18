@@ -293,4 +293,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	if r.Spec.Placement.Enabled {
 		r.Spec.Placement.Template.Default()
 	}
+
+	// Telemetry
+	if r.Spec.Telemetry.Enabled {
+		r.Spec.Telemetry.Template.Default()
+	}
 }

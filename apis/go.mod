@@ -16,6 +16,7 @@ require (
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230509101501-212dd0094c9b
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230505052453-23304cdb678c
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230505070414-b584b0044ed5
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230508093211-c0df2e805a50
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/apimachinery v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.6

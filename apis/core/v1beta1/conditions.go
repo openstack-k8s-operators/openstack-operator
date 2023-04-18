@@ -69,6 +69,9 @@ const (
 	// OpenStackControlPlaneManilaReadyCondition Status=True condition which indicates if Manila is configured and operational
 	OpenStackControlPlaneManilaReadyCondition condition.Type = "OpenStackControlPlaneManilaReady"
 
+	// OpenStackControlPlaneTelemetryReadyCondition Status=True condition which indicates if OpenStack Telemetry services are configured and operational
+	OpenStackControlPlaneTelemetryReadyCondition condition.Type = "OpenStackControlPlaneTelemetryReady"
+
 	// OpenStackControlPlaneManilaReadyInitMessage
 	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
 
@@ -261,4 +264,16 @@ const (
 
 	// OpenStackControlPlaneHorizonReadyErrorMessage
 	OpenStackControlPlaneHorizonReadyErrorMessage = "OpenStackControlPlane Horizon error occured %s"
+
+	// OpenStackControlPlaneTelemetryReadyInitMessage
+	OpenStackControlPlaneTelemetryReadyInitMessage = "OpenStackControlPlane Telemetry not started"
+
+	// OpenStackControlPlaneTelemetryReadyMessage
+	OpenStackControlPlaneTelemetryReadyMessage = "OpenStackControlPlane Telemetry completed"
+
+	// OpenStackControlPlaneTelemetryReadyRunningMessage
+	OpenStackControlPlaneTelemetryReadyRunningMessage = "OpenStackControlPlane Telemetry in progress"
+
+	// OpenStackControlPlaneTelemetryReadyErrorMessage
+	OpenStackControlPlaneTelemetryReadyErrorMessage = "OpenStackControlPlane Telemetry error occured %s"
 )
