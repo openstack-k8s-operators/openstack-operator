@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -175,6 +176,7 @@ func reconcileRabbitMQ(
 
 			metalLBSvcAnnotations := map[string]string{
 				service.MetalLBAddressPoolAnnotation: spec.ExternalEndpoint.IPAddressPool,
+				networkv1.AnnotationHostnameKey:      fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
 			}
 			if len(spec.ExternalEndpoint.LoadBalancerIPs) > 0 {
 				metalLBSvcAnnotations[service.MetalLBLoadBalancerIPs] = strings.Join(spec.ExternalEndpoint.LoadBalancerIPs, ",")

@@ -69,6 +69,9 @@ const (
 	// OpenStackControlPlaneManilaReadyCondition Status=True condition which indicates if Manila is configured and operational
 	OpenStackControlPlaneManilaReadyCondition condition.Type = "OpenStackControlPlaneManilaReady"
 
+	// OpenStackControlPlaneDNSReadyCondition Status=True condition which indicates if DNSMasq is configured and operational
+	OpenStackControlPlaneDNSReadyCondition condition.Type = "OpenStackControlPlaneDNSReadyCondition"
+
 	// OpenStackControlPlaneManilaReadyInitMessage
 	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
 
@@ -261,4 +264,16 @@ const (
 
 	// OpenStackControlPlaneHorizonReadyErrorMessage
 	OpenStackControlPlaneHorizonReadyErrorMessage = "OpenStackControlPlane Horizon error occured %s"
+
+	// OpenStackControlPlaneDNSReadyInitMessage
+	OpenStackControlPlaneDNSReadyInitMessage = "OpenStackControlPlane DNS not started"
+
+	// OpenStackControlPlaneDNSReadyMessage
+	OpenStackControlPlaneDNSReadyMessage = "OpenStackControlPlane DNS completed"
+
+	// OpenStackControlPlaneDNSReadyRunningMessage
+	OpenStackControlPlaneDNSReadyRunningMessage = "OpenStackControlPlane DNS in progress"
+
+	// OpenStackControlPlaneDNSReadyErrorMessage
+	OpenStackControlPlaneDNSReadyErrorMessage = "OpenStackControlPlane DNS error occured %s"
 )
