@@ -293,4 +293,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	if r.Spec.Placement.Enabled {
 		r.Spec.Placement.Template.Default()
 	}
+
+	// DNS
+	if r.Spec.DNS.Enabled {
+		r.Spec.DNS.Template.Default()
+	}
 }

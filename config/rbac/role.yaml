@@ -152,6 +152,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsmasqs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - neutron.openstack.org
   resources:
   - neutronapis

@@ -1162,6 +1162,82 @@ spec:
                     - secret
                     type: object
                 type: object
+              dns:
+                properties:
+                  enabled:
+                    default: true
+                    type: boolean
+                  template:
+                    properties:
+                      containerImage:
+                        type: string
+                      debug:
+                        properties:
+                          service:
+                            default: false
+                            type: boolean
+                        type: object
+                      dnsDataLabelSelectorValue:
+                        default: dnsdata
+                        type: string
+                      externalEndpoints:
+                        items:
+                          properties:
+                            ipAddressPool:
+                              minLength: 1
+                              type: string
+                            loadBalancerIPs:
+                              items:
+                                type: string
+                              type: array
+                            sharedIP:
+                              default: true
+                              type: boolean
+                            sharedIPKey:
+                              default: ""
+                              type: string
+                          required:
+                          - ipAddressPool
+                          type: object
+                        type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      options:
+                        items:
+                          properties:
+                            key:
+                              enum:
+                              - server
+                              - rev-server
+                              - srv-host
+                              - txt-record
+                              - ptr-record
+                              - rebind-domain-ok
+                              - naptr-record
+                              - cname
+                              - host-record
+                              - caa-record
+                              - dns-rr
+                              - auth-zone
+                              - synth-domain
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - values
+                          type: object
+                        type: array
+                      replicas:
+                        default: 1
+                        format: int32
+                        type: integer
+                    type: object
+                type: object
               extraMounts:
                 items:
                   properties:

@@ -23,6 +23,7 @@ import (
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1alpha1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -55,6 +56,11 @@ type OpenStackControlPlaneSpec struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// DNS - Parameters related to the DNSMasq service
+	DNS DNSMasqSection `json:"dns,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
@@ -134,6 +140,20 @@ type OpenStackControlPlaneSpec struct {
 	// template Section, the globally defined ExtraMounts are ignored and
 	// overridden for the operator which has this section already.
 	ExtraMounts []OpenStackExtraVolMounts `json:"extraMounts,omitempty"`
+}
+
+// DNSMasqSection defines the desired state of DNSMasq service
+type DNSMasqSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether DNSMasq service should be deployed and managed
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating the DNSMasq service
+	Template networkv1.DNSMasqSpec `json:"template,omitempty"`
 }
 
 // KeystoneSection defines the desired state of Keystone service
@@ -479,6 +499,7 @@ func (instance OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneClientReadyCondition, condition.InitReason, OpenStackControlPlaneClientReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneManilaReadyCondition, condition.InitReason, OpenStackControlPlaneManilaReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneHorizonReadyCondition, condition.InitReason, OpenStackControlPlaneHorizonReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneDNSReadyCondition, condition.InitReason, OpenStackControlPlaneDNSReadyInitMessage),
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
 	)

@@ -9,7 +9,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230427061808-1c6403dc94b9
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230504230606-f624f8788a3d
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230503142030-4d9a9bccf284
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230504132716-fcffbcec69db
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230505072021-2a086c90371a
 	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230504085625-b4ae56713234
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230428102546-5d2d648e367e
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230502111845-76d9097cbc12
@@ -81,3 +81,11 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace github.com/openstack-k8s-operators/infra-operator/apis => github.com/stuggi/infra-operator/apis v0.0.0-20230508152849-3659c2b7f653
+
+replace github.com/openstack-k8s-operators/lib-common/modules/common => github.com/stuggi/lib-common/modules/common v0.0.0-20230505081554-2b17efa57fa4
+
+replace github.com/openstack-k8s-operators/keystone-operator/api => github.com/stuggi/keystone-operator/api v0.0.0-20230505095659-c70ed2993581
+
+replace github.com/openstack-k8s-operators/placement-operator/api => github.com/stuggi/placement-operator/api v0.0.0-20230505095514-94a58062aa87
