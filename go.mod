@@ -6,23 +6,23 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.15
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230411093101-6ebfd7a14c4b
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230405165408-74539cecf355
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230411083933-53804f0dc763
-	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230312232024-591e818ffc42
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230410121803-e3b2e0bd210b
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230411102754-0af3983f6643
-	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230410115409-8188ec403a91
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230404094840-40d9ff1586e1
-	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230406093156-7643ec29ec98
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230407130717-3b0b46bac46c
-	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230411062303-19ae343eb70c
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230411093104-09ca9e663d0f
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230404001911-6094e49b69ef
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230407181421-1dfd64d753cb
-	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230410090040-f73c0950f609
-	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230411063323-7672617410df
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230405165405-5ae258242b5f
+	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230419224217-9e63691bfd16
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230419205023-0e74533d248a
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230419142133-43d6273e70b8
+	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230417094427-f42a6b8befe2
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230419174536-e0b37b0de21d
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230420053221-4de782f46606
+	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230412125711-203185e59d89
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230418201159-a014eb746eae
+	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230420070323-e1baa06c42d8
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230419054705-912229102d02
+	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230420054927-873b9789f6dd
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230417105650-be429a49aa8b
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230419203517-e2dc6bc77bae
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230419173714-d54ddb6dde0d
+	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230420084451-21021a6116ed
+	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230418072940-283149a068cb
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230418123453-476287bc7c4a
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
@@ -60,10 +60,10 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230404094840-40d9ff1586e1 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230404094840-40d9ff1586e1 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230418201159-a014eb746eae // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230418201159-a014eb746eae // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.14.0 // indirect
+	github.com/prometheus/client_golang v1.15.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
@@ -71,23 +71,23 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/oauth2 v0.6.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/oauth2 v0.7.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.29.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.26.3 // indirect; indirect // indirect // indirect
 	k8s.io/component-base v0.26.3 // indirect; indirect // indirect // indirect
-	k8s.io/klog/v2 v2.80.1 // indirect
+	k8s.io/klog/v2 v2.90.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230327201221-f5883ff37f0c // indirect; indirect // indirect // indirect // indirect // indirect // indirect
-	k8s.io/utils v0.0.0-20230313181309-38a27ef9d749 // indirect; indirect // indirect // indirect // indirect
+	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect; indirect // indirect // indirect // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect; indirect // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
