@@ -4,6 +4,7 @@ linters:
   enable:
     - errorlint
     - revive
+    - ginkgolinter
     - gofmt
     - govet
 linters-settings:
