@@ -27,13 +27,13 @@ spec:
         storageClass: local-storage
         storageRequest: 500M
         secret: osp-secret
-        replicas: 1
+        replicas: 3
       openstack-cell1:
         containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageClass: local-storage
         storageRequest: 500M
         secret: osp-secret
-        replicas: 1
+        replicas: 3
   rabbitmq:
     templates:
       rabbitmq:
