@@ -2,7 +2,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: openstack-controller-manager
+    control-plane: controller-manager
+    openstack.org/operator-name: openstack
   name: system
 ---
 apiVersion: apps/v1
@@ -11,18 +12,20 @@ metadata:
   name: controller-manager
   namespace: system
   labels:
-    control-plane: openstack-controller-manager
+    control-plane: controller-manager
+    openstack.org/operator-name: openstack
 spec:
   selector:
     matchLabels:
-      control-plane: openstack-controller-manager
+      openstack.org/operator-name: openstack
   replicas: 1
   template:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
       labels:
-        control-plane: openstack-controller-manager
+        control-plane: controller-manager
+        openstack.org/operator-name: openstack
     spec:
       securityContext:
         runAsNonRoot: true

@@ -4,7 +4,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    control-plane: openstack-controller-manager
+    control-plane: controller-manager
   name: controller-manager-metrics-monitor
   namespace: system
 spec:
@@ -17,4 +17,4 @@ spec:
         insecureSkipVerify: true
   selector:
     matchLabels:
-      control-plane: openstack-controller-manager
+      openstack.org/operator-name: openstack
