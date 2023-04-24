@@ -211,6 +211,29 @@ func (r *OpenStackControlPlane) Default() {
 
 // DefaultServices - common function for calling individual services' defaulting functions
 func (r *OpenStackControlPlane) DefaultServices() {
+	// MariaDB
+	if r.Spec.Mariadb.Enabled {
+		for index, template := range r.Spec.Mariadb.Templates {
+			template.Default()
+			// By-value copy, need to update
+			r.Spec.Mariadb.Templates[index] = template
+		}
+	}
+
+	// Galera
+	if r.Spec.Galera.Enabled {
+		for index, template := range r.Spec.Galera.Templates {
+			template.Default()
+			// By-value copy, need to update
+			r.Spec.Galera.Templates[index] = template
+		}
+	}
+
+	// Keystone
+	if r.Spec.Keystone.Enabled {
+		r.Spec.Keystone.Template.Default()
+	}
+
 	// Glance
 	if r.Spec.Glance.Enabled {
 		r.Spec.Glance.Template.Default()

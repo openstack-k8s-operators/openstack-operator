@@ -191,6 +191,20 @@ func setupServiceOperatorDefaults() {
 	// Acquire environmental defaults and initialize service operators that
 	// require each respective default
 
+	// Keystone
+	keystoneDefaults := keystonev1.KeystoneAPIDefaults{
+		ContainerImageURL: os.Getenv("KEYSTONE_API_IMAGE_URL_DEFAULT"),
+	}
+
+	keystonev1.SetupKeystoneAPIDefaults(keystoneDefaults)
+
+	// MariaDB
+	mariadbDefaults := mariadbv1.MariaDBDefaults{
+		ContainerImageURL: os.Getenv("MARIADB_IMAGE_URL_DEFAULT"),
+	}
+
+	mariadbv1.SetupMariaDBDefaults(mariadbDefaults)
+
 	// Glance
 	glanceDefaults := glancev1.GlanceDefaults{
 		ContainerImageURL: os.Getenv("GLANCE_API_IMAGE_URL_DEFAULT"),
