@@ -29,14 +29,12 @@ spec:
       databaseInstance: openstack
       secret: osp-secret
       cinderAPI:
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
         externalEndpoints:
         - endpoint: internal
           ipAddressPool: internalapi
           loadBalancerIPs:
           - 172.17.0.80
       cinderBackup:
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
         customServiceConfig: |
           [DEFAULT]
           backup_driver = cinder.backup.drivers.ceph.CephBackupDriver
@@ -45,10 +43,8 @@ spec:
         networkAttachments:
         - storage
       cinderScheduler:
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
       cinderVolumes:
         ceph:
-          containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
           customServiceConfig: |
             [DEFAULT]
             enabled_backends=ceph
@@ -66,7 +62,6 @@ spec:
   glance:
     template:
       databaseInstance: openstack
-      containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
       customServiceConfig: |
         [DEFAULT]
         enabled_backends = default_backend:rbd
@@ -80,7 +75,6 @@ spec:
       storageClass: ""
       storageRequest: 10G
       glanceAPIInternal:
-        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
         externalEndpoints:
         - endpoint: internal
           ipAddressPool: internalapi
@@ -89,12 +83,10 @@ spec:
         networkAttachments:
         - storage
       glanceAPIExternal:
-        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
         networkAttachments:
         - storage
   keystone:
     template:
-      containerImage: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
       databaseInstance: openstack
       secret: osp-secret
       externalEndpoints:
@@ -105,10 +97,8 @@ spec:
   mariadb:
     templates:
       openstack:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
       openstack-cell1:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
   memcached:
     enabled: true
