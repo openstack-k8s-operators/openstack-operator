@@ -1973,6 +1973,10 @@ spec:
                         type: string
                       customServiceConfig:
                         type: string
+                      customServiceConfigSecrets:
+                        items:
+                          type: string
+                        type: array
                       databaseInstance:
                         type: string
                       databaseUser:
@@ -2756,6 +2760,10 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
                           debug:
                             properties:
                               service:
@@ -2854,6 +2862,10 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
                           debug:
                             properties:
                               service:
@@ -5694,7 +5706,7 @@ spec:
                           replicas: 1
                         properties:
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-nova-api:current-tripleo
+                            default: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
                             type: string
                           customServiceConfig:
                             type: string
@@ -5786,10 +5798,10 @@ spec:
                               type: string
                             conductorServiceTemplate:
                               default:
-                                containerImage: quay.io/tripleozedcentos9/openstack-nova-conductor:current-tripleo
+                                containerImage: quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
                               properties:
                                 containerImage:
-                                  default: quay.io/tripleozedcentos9/openstack-nova-conductor:current-tripleo
+                                  default: quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
                                   type: string
                                 customServiceConfig:
                                   type: string
@@ -5848,7 +5860,7 @@ spec:
                             metadataServiceTemplate:
                               properties:
                                 containerImage:
-                                  default: quay.io/tripleozedcentos9/openstack-nova-api:current-tripleo
+                                  default: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
                                   type: string
                                 customServiceConfig:
                                   type: string
@@ -5930,7 +5942,7 @@ spec:
                             noVNCProxyServiceTemplate:
                               properties:
                                 containerImage:
-                                  default: quay.io/tripleozedcentos9/openstack-nova-novncproxy:current-tripleo
+                                  default: quay.io/podified-antelope-centos9/openstack-nova-novncproxy:current-podified
                                   type: string
                                 customServiceConfig:
                                   type: string
@@ -6022,7 +6034,7 @@ spec:
                           replicas: 1
                         properties:
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-nova-api:current-tripleo
+                            default: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
                             type: string
                           customServiceConfig:
                             type: string
@@ -6127,7 +6139,7 @@ spec:
                           replicas: 1
                         properties:
                           containerImage:
-                            default: quay.io/tripleozedcentos9/openstack-nova-scheduler:current-tripleo
+                            default: quay.io/podified-antelope-centos9/openstack-nova-scheduler:current-podified
                             type: string
                           customServiceConfig:
                             type: string
