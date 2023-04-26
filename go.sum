@@ -117,6 +117,10 @@ github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=
 github.com/matttproud/golang_protobuf_extensions v1.0.4/go.mod h1:BSXmuO+STAnVfrANrmjBb36TMTDstsz7MSK+HVaYKv4=
+github.com/metal3-io/baremetal-operator/apis v0.2.0 h1:JdkLP6zCp3KzWvycrUFbAH2geEJjxgpXoZ6TjMNZKQk=
+github.com/metal3-io/baremetal-operator/apis v0.2.0/go.mod h1:B5/1J/S2eXK8Fn9Aho/zgCeie7A8Nq5+dJvAbyzrS/c=
+github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.1.2 h1:9fbzEAanq4zO2quDVDb9Bg3dWjkKy8tUihZJsWGmxGs=
+github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.1.2/go.mod h1:dfWv/o1IDK2hrz2xJG2y1++GzYWxkRx0l/qjtpV6H7k=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
@@ -158,6 +162,8 @@ github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230424084746-ecac2
 github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230424084746-ecac2ab4efa0/go.mod h1:Ws7TMN4T1M0k//i61E06yLdi2TFDS6Pm1bG7Xbd9wp4=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230419203517-e2dc6bc77bae h1:CFfeXmE8IHiGZ8Nnw2ifKTk3FvH2saMPce+nGIvH2WA=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230419203517-e2dc6bc77bae/go.mod h1:l1GKO3RXfyQ5Z+c8d2ntEUCKZ1hEq2OVd8nNTPgDwkQ=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230425095503-b6eeffe5c3c7 h1:9qz+ddbgxtVf5plzigUyCveWbBPF1iY5P52Iep8N5Gw=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230425095503-b6eeffe5c3c7/go.mod h1:FOwZQb1fb5Wzfo2O+PD4zXc9qIZ0co3Dqu40xkzmd8Q=
 github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230424055933-51638f9e729f h1:jbsDOXlUVxHt7Ic/JHbMWMWF0Cj49O4lpxWiMgLQjhI=
 github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230424055933-51638f9e729f/go.mod h1:u/uz3GflMJBMXKOO/Xl/dE11DtJR0Tlb0sEePxJrHY0=
 github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230424062457-1dd1d6c5611c h1:xgv4XmTbXQMtlg8U3gKpcFVw3gQQ0LwLnTHU3eZ2H9c=

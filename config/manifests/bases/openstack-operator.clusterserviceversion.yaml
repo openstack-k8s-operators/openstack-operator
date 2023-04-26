@@ -30,14 +30,6 @@ spec:
       - description: Template - Overrides to use when creating Cinder Resources
         displayName: Template
         path: cinder.template
-      - description: ExtraMounts containing conf files and credentials that should
-          be provided to the underlying operators. This struct can be defined in the
-          top level CR and propagated to the underlying operators that accept it in
-          their API (e.g., cinder/glance). However, if extraVolumes are specified
-          within the single operator template Section, the globally defined ExtraMounts
-          are ignored and overridden for the operator which has this section already.
-        displayName: Extra Mounts
-        path: extraMounts
       - displayName: Vol Mounts
         path: extraMounts[0].extraVol
       - displayName: Name
@@ -66,6 +58,9 @@ spec:
       - description: Template - Overrides to use when creating the Glance Service
         displayName: Template
         path: glance.template
+      - description: Horizon - Parameters related to the Horizon services
+        displayName: Horizon
+        path: horizon
       - description: Ironic - Parameters related to the Ironic services
         displayName: Ironic
         path: ironic
