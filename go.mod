@@ -10,7 +10,7 @@ require (
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230425155236-2fe16b6a71c1
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230424192007-7854f5990f89
 	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230424121737-2c6369c29687
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230425101137-d24a9dd4bbf1
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230427061808-1c6403dc94b9
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230425130954-b1a4d35c793a
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230425142156-fd2765263c55
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230425053514-21f91c966010
@@ -21,7 +21,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230419203517-e2dc6bc77bae
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230425095503-b6eeffe5c3c7
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230424185627-72bfb0120cd1
-	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230424055933-51638f9e729f
+	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230427114211-d419b3d2c275
 	github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230424062457-1dd1d6c5611c
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230425053731-55504068a524
 	github.com/operator-framework/api v0.17.3

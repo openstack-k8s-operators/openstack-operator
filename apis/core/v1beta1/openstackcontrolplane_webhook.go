@@ -211,27 +211,18 @@ func (r *OpenStackControlPlane) Default() {
 
 // DefaultServices - common function for calling individual services' defaulting functions
 func (r *OpenStackControlPlane) DefaultServices() {
-	// MariaDB
-	if r.Spec.Mariadb.Enabled {
-		for index, template := range r.Spec.Mariadb.Templates {
-			template.Default()
-			// By-value copy, need to update
-			r.Spec.Mariadb.Templates[index] = template
-		}
+	// Cinder
+	if r.Spec.Cinder.Enabled {
+		r.Spec.Cinder.Template.Default()
 	}
 
 	// Galera
 	if r.Spec.Galera.Enabled {
-		for index, template := range r.Spec.Galera.Templates {
+		for key, template := range r.Spec.Galera.Templates {
 			template.Default()
 			// By-value copy, need to update
-			r.Spec.Galera.Templates[index] = template
+			r.Spec.Galera.Templates[key] = template
 		}
-	}
-
-	// Keystone
-	if r.Spec.Keystone.Enabled {
-		r.Spec.Keystone.Template.Default()
 	}
 
 	// Glance
@@ -239,13 +230,62 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Glance.Template.Default()
 	}
 
-	// Cinder
-	if r.Spec.Cinder.Enabled {
-		r.Spec.Cinder.Template.Default()
-	}
-
 	// Ironic
 	if r.Spec.Ironic.Enabled {
 		r.Spec.Ironic.Template.Default()
+	}
+
+	// Keystone
+	if r.Spec.Keystone.Enabled {
+		r.Spec.Keystone.Template.Default()
+	}
+
+	// Manila
+	if r.Spec.Manila.Enabled {
+		r.Spec.Manila.Template.Default()
+	}
+
+	// MariaDB
+	if r.Spec.Mariadb.Enabled {
+		for key, template := range r.Spec.Mariadb.Templates {
+			template.Default()
+			// By-value copy, need to update
+			r.Spec.Mariadb.Templates[key] = template
+		}
+	}
+
+	// Memcached
+	if r.Spec.Memcached.Enabled {
+		for key, template := range r.Spec.Memcached.Templates {
+			template.Default()
+			// By-value copy, need to update
+			r.Spec.Memcached.Templates[key] = template
+		}
+	}
+
+	// Neutron
+	if r.Spec.Neutron.Enabled {
+		r.Spec.Neutron.Template.Default()
+	}
+
+	// OVN
+	if r.Spec.Ovn.Enabled {
+		for key, template := range r.Spec.Ovn.Template.OVNDBCluster {
+			template.Default()
+			// By-value copy, need to update
+			r.Spec.Ovn.Template.OVNDBCluster[key] = template
+		}
+
+		r.Spec.Ovn.Template.OVNNorthd.Default()
+	}
+
+	// OVS
+	if r.Spec.Ovs.Enabled {
+		r.Spec.Ovs.Template.Default()
+	}
+
+	// Placement
+	if r.Spec.Placement.Enabled {
+		r.Spec.Placement.Template.Default()
 	}
 }
