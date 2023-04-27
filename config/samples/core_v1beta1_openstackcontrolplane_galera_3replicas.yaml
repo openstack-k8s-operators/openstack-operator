@@ -7,29 +7,24 @@ spec:
   storageClass: local-storage
   keystone:
     template:
-      containerImage: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
       databaseInstance: openstack
       secret: osp-secret
   mariadb:
     enabled: false
     templates:
       openstack:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
       openstack-cell1:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
   galera:
     enabled: true
     templates:
       openstack:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageClass: local-storage
         storageRequest: 500M
         secret: osp-secret
         replicas: 3
       openstack-cell1:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageClass: local-storage
         storageRequest: 500M
         secret: osp-secret
@@ -61,29 +56,20 @@ spec:
   glance:
     template:
       databaseInstance: openstack
-      containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
       storageClass: ""
       storageRequest: 10G
-      glanceAPIInternal:
-        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
-      glanceAPIExternal:
-        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
   cinder:
     template:
       databaseInstance: openstack
       secret: osp-secret
       cinderAPI:
         replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
       cinderScheduler:
         replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
       cinderBackup:
         replicas: 0 # backend needs to be configured
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
       cinderVolumes:
         volume1:
-          containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
           replicas: 0 # backend needs to be configured
   manila:
     template:

@@ -10,33 +10,26 @@ spec:
       databaseInstance: openstack
       secret: osp-secret
       cinderAPI:
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
         externalEndpoints:
         - endpoint: internal
           ipAddressPool: internalapi
           loadBalancerIPs:
           - 172.17.0.80
       cinderBackup:
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
         networkAttachments:
         - storage
         replicas: 0 # backend needs to be configured
-      cinderScheduler:
-        containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
       cinderVolumes:
         volume1:
-          containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
           networkAttachments:
           - storage
           replicas: 0 # backend needs to be configured
   glance:
     template:
       databaseInstance: openstack
-      containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
       storageClass: ""
       storageRequest: 10G
       glanceAPIInternal:
-        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
         externalEndpoints:
         - endpoint: internal
           ipAddressPool: internalapi
@@ -45,12 +38,10 @@ spec:
         networkAttachments:
         - storage
       glanceAPIExternal:
-        containerImage: quay.io/tripleozedcentos9/openstack-glance-api:current-tripleo
         networkAttachments:
         - storage
   keystone:
     template:
-      containerImage: quay.io/tripleozedcentos9/openstack-keystone:current-tripleo
       databaseInstance: openstack
       secret: osp-secret
       externalEndpoints:
@@ -61,10 +52,8 @@ spec:
   mariadb:
     templates:
       openstack:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
       openstack-cell1:
-        containerImage: quay.io/tripleozedcentos9/openstack-mariadb:current-tripleo
         storageRequest: 500M
   memcached:
     enabled: true
