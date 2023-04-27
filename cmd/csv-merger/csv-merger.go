@@ -104,6 +104,7 @@ var (
 	neutronCsv     = flag.String("neutron-csv", "", "Neutron CSV filename")
 	glanceCsv      = flag.String("glance-csv", "", "Glance CSV filename")
 	ironicCsv      = flag.String("ironic-csv", "", "Ironic CSV filename")
+	baremetalCsv   = flag.String("baremetal-csv", "", "Baremetal CSV filename")
 	manilaCsv      = flag.String("manila-csv", "", "Manila CSV filename")
 	placementCsv   = flag.String("placement-csv", "", "Placement CSV filename")
 	ovnCsv         = flag.String("ovn-csv", "", "OVN CSV filename")
@@ -147,6 +148,7 @@ func main() {
 		*manilaCsv,
 		*glanceCsv,
 		*ironicCsv,
+		*baremetalCsv,
 		*placementCsv,
 		*ovnCsv,
 		*ovsCsv,

@@ -11,6 +11,7 @@ ARG ANSIBLEEE_BUNDLE=quay.io/openstack-k8s-operators/openstack-ansibleee-operato
 ARG DATAPLANE_BUNDLE=quay.io/openstack-k8s-operators/dataplane-operator-bundle:latest
 ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
 ARG IRONIC_BUNDLE=quay.io/openstack-k8s-operators/ironic-operator-bundle:latest
+ARG BAREMETAL_BUNDLE=quay.io/openstack-k8s-operators/openstack-baremetal-operator-bundle:latest
 # we obtain the needed ENV vars containing defaults from storage operators
 ARG OPENSTACK_STORAGE_BUNDLE=quay.io/openstack-k8s-operators/openstack-operator-storage-bundle:latest
 ARG HORIZON_BUNDLE=quay.io/openstack-k8s-operators/horizon-operator-bundle:latest
@@ -48,6 +49,7 @@ FROM $ANSIBLEEE_BUNDLE as openstack-ansibleee-bundle
 FROM $DATAPLANE_BUNDLE as dataplane-bundle
 FROM $NOVA_BUNDLE as nova-bundle
 FROM $IRONIC_BUNDLE as ironic-bundle
+FROM $BAREMETAL_BUNDLE as baremetal-bundle
 FROM $OPENSTACK_STORAGE_BUNDLE as openstack-storage-bundle
 FROM $HORIZON_BUNDLE as horizon-bundle
 
@@ -71,6 +73,7 @@ COPY --from=openstack-ansibleee-bundle /manifests/* /manifests/
 COPY --from=dataplane-bundle /manifests/* /manifests/
 COPY --from=nova-bundle /manifests/* /manifests/
 COPY --from=ironic-bundle /manifests/* /manifests/
+COPY --from=baremetal-bundle /manifests/* /manifests/
 COPY --from=openstack-storage-bundle /env-vars.yaml /storage-env-vars.yaml
 COPY --from=horizon-bundle /manifests/* /manifests/
 
@@ -88,6 +91,7 @@ RUN /workspace/csv-merger \
   --dataplane-csv=/manifests/dataplane-operator.clusterserviceversion.yaml \
   --nova-csv=/manifests/nova-operator.clusterserviceversion.yaml \
   --ironic-csv=/manifests/ironic-operator.clusterserviceversion.yaml \
+  --baremetal-csv=/manifests/openstack-baremetal-operator.clusterserviceversion.yaml \
   --horizon-csv=/manifests/horizon-operator.clusterserviceversion.yaml \
   --base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
