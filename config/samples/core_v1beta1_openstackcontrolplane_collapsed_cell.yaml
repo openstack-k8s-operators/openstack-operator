@@ -25,10 +25,6 @@ spec:
         #    memory: 1Gi
   memcached:
     enabled: true
-    templates:
-      memcached:
-        containerImage: quay.io/tripleozedcentos9/openstack-memcached:current-tripleo
-        replicas: 1
   placement:
     template:
       databaseInstance: openstack
