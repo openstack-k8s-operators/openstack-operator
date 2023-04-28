@@ -35,6 +35,7 @@ import (
 	clientv1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
@@ -193,27 +194,6 @@ func setupServiceOperatorDefaults() {
 	// Acquire environmental defaults and initialize service operators that
 	// require each respective default
 
-	// Keystone
-	keystoneDefaults := keystonev1.KeystoneAPIDefaults{
-		ContainerImageURL: os.Getenv("KEYSTONE_API_IMAGE_URL_DEFAULT"),
-	}
-
-	keystonev1.SetupKeystoneAPIDefaults(keystoneDefaults)
-
-	// MariaDB
-	mariadbDefaults := mariadbv1.MariaDBDefaults{
-		ContainerImageURL: os.Getenv("MARIADB_IMAGE_URL_DEFAULT"),
-	}
-
-	mariadbv1.SetupMariaDBDefaults(mariadbDefaults)
-
-	// Glance
-	glanceDefaults := glancev1.GlanceDefaults{
-		ContainerImageURL: os.Getenv("GLANCE_API_IMAGE_URL_DEFAULT"),
-	}
-
-	(&glancev1.Glance{}).Spec.SetupDefaults(glanceDefaults)
-
 	// Cinder
 	cinderDefaults := cinderv1.CinderDefaults{
 		APIContainerImageURL:       os.Getenv("CINDER_API_IMAGE_URL_DEFAULT"),
@@ -222,5 +202,102 @@ func setupServiceOperatorDefaults() {
 		VolumeContainerImageURL:    os.Getenv("CINDER_VOLUME_IMAGE_URL_DEFAULT"),
 	}
 
-	(&cinderv1.Cinder{}).Spec.SetupDefaults(cinderDefaults)
+	cinderv1.SetupCinderDefaults(cinderDefaults)
+
+	// Glance
+	glanceDefaults := glancev1.GlanceDefaults{
+		ContainerImageURL: os.Getenv("GLANCE_API_IMAGE_URL_DEFAULT"),
+	}
+
+	glancev1.SetupGlanceDefaults(glanceDefaults)
+
+	// Ironic
+	ironicDefaults := ironicv1.IronicDefaults{
+		APIContainerImageURL:       os.Getenv("IRONIC_API_IMAGE_URL_DEFAULT"),
+		ConductorContainerImageURL: os.Getenv("IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT"),
+		InspectorContainerImageURL: os.Getenv("IRONIC_INSPECTOR_IMAGE_URL_DEFAULT"),
+		PXEContainerImageURL:       os.Getenv("IRONIC_PXE_IMAGE_URL_DEFAULT"),
+	}
+
+	ironicv1.SetupIronicDefaults(ironicDefaults)
+
+	// Keystone
+	keystoneDefaults := keystonev1.KeystoneAPIDefaults{
+		ContainerImageURL: os.Getenv("KEYSTONE_API_IMAGE_URL_DEFAULT"),
+	}
+
+	keystonev1.SetupKeystoneAPIDefaults(keystoneDefaults)
+
+	// Manila
+	manilaDefaults := manilav1.ManilaDefaults{
+		APIContainerImageURL:       os.Getenv("MANILA_API_IMAGE_URL_DEFAULT"),
+		SchedulerContainerImageURL: os.Getenv("MANILA_SCHEDULER_IMAGE_URL_DEFAULT"),
+		ShareContainerImageURL:     os.Getenv("MANILA_SHARE_IMAGE_URL_DEFAULT"),
+	}
+
+	manilav1.SetupManilaDefaults(manilaDefaults)
+
+	// MariaDB
+	mariadbDefaults := mariadbv1.MariaDBDefaults{
+		ContainerImageURL: os.Getenv("MARIADB_IMAGE_URL_DEFAULT"),
+	}
+
+	mariadbv1.SetupMariaDBDefaults(mariadbDefaults)
+
+	// Memcached
+	memcachedDefaults := memcachedv1.MemcachedDefaults{
+		ContainerImageURL: os.Getenv("INFRA_MEMCACHED_IMAGE_URL_DEFAULT"),
+	}
+
+	memcachedv1.SetupMemcachedDefaults(memcachedDefaults)
+
+	// Neutron
+	neutronAPIDefaults := neutronv1.NeutronAPIDefaults{
+		ContainerImageURL: os.Getenv("NEUTRON_API_IMAGE_URL_DEFAULT"),
+	}
+
+	neutronv1.SetupNeutronAPIDefaults(neutronAPIDefaults)
+
+	// OpenStackClient
+	openStackClientDefaults := clientv1.OpenStackClientDefaults{
+		ContainerImageURL: os.Getenv("INFRA_CLIENT_IMAGE_URL_DEFAULT"),
+	}
+
+	clientv1.SetupOpenStackClientDefaults(openStackClientDefaults)
+
+	// OVN
+	ovnDbClusterDefaults := ovnv1.OVNDBClusterDefaults{
+		NBContainerImageURL: os.Getenv("OVN_NB_DBCLUSTER_IMAGE_URL_DEFAULT"),
+		SBContainerImageURL: os.Getenv("OVN_SB_DBCLUSTER_IMAGE_URL_DEFAULT"),
+	}
+
+	ovnv1.SetupOVNDBClusterDefaults(ovnDbClusterDefaults)
+
+	ovnNorthdDefaults := ovnv1.OVNNorthdDefaults{
+		ContainerImageURL: os.Getenv("OVN_NORTHD_IMAGE_URL_DEFAULT"),
+	}
+
+	ovnv1.SetupOVNNorthdDefaults(ovnNorthdDefaults)
+
+	// OVS
+	ovsDefaults := ovsv1.OvsDefaults{
+		OvsContainerImageURL: os.Getenv("OVS_IMAGE_URL_DEFAULT"),
+		OvnContainerImageURL: os.Getenv("OVN_IMAGE_URL_DEFAULT"),
+	}
+
+	ovsv1.SetupOvsDefaults(ovsDefaults)
+
+	// Placement
+	placementAPIDefaults := placementv1.PlacementAPIDefaults{
+		ContainerImageURL: os.Getenv("PLACEMENT_API_IMAGE_URL_DEFAULT"),
+	}
+
+	placementv1.SetupPlacementAPIDefaults(placementAPIDefaults)
+
+	// Redis
+	redisDefaults := redisv1.RedisDefaults{
+		ContainerImageURL: os.Getenv("INFRA_REDIS_IMAGE_URL_DEFAULT"),
+	}
+
+	redisv1.SetupRedisDefaults(redisDefaults)
 }

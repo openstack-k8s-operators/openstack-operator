@@ -6,7 +6,7 @@ require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230420221136-70f15274c154
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230424192007-7854f5990f89
 	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230424121737-2c6369c29687
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230425101137-d24a9dd4bbf1
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230427061808-1c6403dc94b9
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230425130954-b1a4d35c793a
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230425142156-fd2765263c55
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230425053514-21f91c966010
@@ -14,7 +14,7 @@ require (
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230421100625-87c509d03c93
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230424090041-47807452e814
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230424084746-ecac2ab4efa0
-	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230424055933-51638f9e729f
+	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230427114211-d419b3d2c275
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230425053731-55504068a524
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/apimachinery v0.26.3
