@@ -102,10 +102,6 @@ spec:
         storageRequest: 500M
   memcached:
     enabled: true
-    templates:
-      memcached:
-        containerImage: quay.io/tripleozedcentos9/openstack-memcached:current-tripleo
-        replicas: 1
   neutron:
     template:
       databaseInstance: openstack
