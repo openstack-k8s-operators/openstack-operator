@@ -3570,6 +3570,7 @@ spec:
                             default: ironic
                             type: string
                         required:
+                        - containerImage
                         - secret
                         type: object
                       nodeSelector:
