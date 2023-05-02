@@ -217,6 +217,7 @@ func setupServiceOperatorDefaults() {
 		ConductorContainerImageURL: os.Getenv("IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT"),
 		InspectorContainerImageURL: os.Getenv("IRONIC_INSPECTOR_IMAGE_URL_DEFAULT"),
 		PXEContainerImageURL:       os.Getenv("IRONIC_PXE_IMAGE_URL_DEFAULT"),
+		INAContainerImageURL:       os.Getenv("IRONIC_NEUTRON_AGENT_IMAGE_URL_DEFAULT"),
 	}
 
 	ironicv1.SetupIronicDefaults(ironicDefaults)
