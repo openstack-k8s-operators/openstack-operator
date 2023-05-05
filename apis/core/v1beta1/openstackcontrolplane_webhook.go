@@ -268,6 +268,11 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Neutron.Template.Default()
 	}
 
+	// Nova
+	if r.Spec.Nova.Enabled {
+		r.Spec.Nova.Template.Default()
+	}
+
 	// OVN
 	if r.Spec.Ovn.Enabled {
 		for key, template := range r.Spec.Ovn.Template.OVNDBCluster {

@@ -17,7 +17,7 @@ require (
 	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230504085625-b4ae56713234
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230428102546-5d2d648e367e
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230502111845-76d9097cbc12
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230504105725-3cab0716d32f
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230505084654-a131e8aaf276
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230504164220-3d9fbf7aefaf
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230504093947-70f13b0497f6
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230503194252-dbdea79c20b0

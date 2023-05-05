@@ -259,6 +259,9 @@ func setupServiceOperatorDefaults() {
 
 	neutronv1.SetupNeutronAPIDefaults(neutronAPIDefaults)
 
+	// Nova
+	novav1.SetupDefaults()
+
 	// OpenStackClient
 	openStackClientDefaults := clientv1.OpenStackClientDefaults{
 		ContainerImageURL: os.Getenv("INFRA_CLIENT_IMAGE_URL_DEFAULT"),
