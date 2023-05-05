@@ -3198,6 +3198,8 @@ spec:
                             type: string
                           secret:
                             type: string
+                          serviceAccount:
+                            type: string
                           serviceUser:
                             default: ironic
                             type: string
@@ -3208,6 +3210,7 @@ spec:
                             type: string
                         required:
                         - containerImage
+                        - serviceAccount
                         type: object
                       ironicConductors:
                         items:
@@ -3325,6 +3328,8 @@ spec:
                               type: string
                             secret:
                               type: string
+                            serviceAccount:
+                              type: string
                             serviceUser:
                               default: ironic
                               type: string
@@ -3341,6 +3346,7 @@ spec:
                           required:
                           - containerImage
                           - pxeContainerImage
+                          - serviceAccount
                           - storageClass
                           - storageRequest
                           type: object
@@ -3487,6 +3493,8 @@ spec:
                             type: string
                           secret:
                             type: string
+                          serviceAccount:
+                            type: string
                           serviceUser:
                             default: ironic-inspector
                             type: string
@@ -3500,6 +3508,7 @@ spec:
                         required:
                         - containerImage
                         - pxeContainerImage
+                        - serviceAccount
                         type: object
                       ironicNeutronAgent:
                         properties:
@@ -3566,12 +3575,15 @@ spec:
                             type: object
                           secret:
                             type: string
+                          serviceAccount:
+                            type: string
                           serviceUser:
                             default: ironic
                             type: string
                         required:
                         - containerImage
                         - secret
+                        - serviceAccount
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -4557,6 +4569,10 @@ spec:
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
                           debug:
                             properties:
                               initContainer:
@@ -4648,6 +4664,10 @@ spec:
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
                           debug:
                             properties:
                               initContainer:
@@ -4715,6 +4735,10 @@ spec:
                             customServiceConfig:
                               default: '# add your customization here'
                               type: string
+                            customServiceConfigSecrets:
+                              items:
+                                type: string
+                              type: array
                             debug:
                               properties:
                                 initContainer:
