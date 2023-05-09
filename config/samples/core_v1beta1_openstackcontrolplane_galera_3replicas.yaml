@@ -47,7 +47,6 @@ spec:
   placement:
     template:
       databaseInstance: openstack
-      containerImage: quay.io/tripleozedcentos9/openstack-placement-api:current-tripleo
       secret: osp-secret
   glance:
     template:
@@ -71,34 +70,26 @@ spec:
     template:
       manilaAPI:
         replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-manila-api:current-tripleo
       manilaScheduler:
         replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-manila-scheduler:current-tripleo
       manilaShares:
         share1:
-          containerImage: quay.io/tripleozedcentos9/openstack-manila-share:current-tripleo
           replicas: 1
   ovn:
     template:
       ovnDBCluster:
         ovndbcluster-nb:
           replicas: 1
-          containerImage: quay.io/tripleozedcentos9/openstack-ovn-nb-db-server:current-tripleo
           dbType: NB
           storageRequest: 10G
         ovndbcluster-sb:
           replicas: 1
-          containerImage: quay.io/tripleozedcentos9/openstack-ovn-sb-db-server:current-tripleo
           dbType: SB
           storageRequest: 10G
       ovnNorthd:
         replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-ovn-northd:current-tripleo
   ovs:
     template:
-      ovsContainerImage: "quay.io/skaplons/ovs:latest"
-      ovnContainerImage: "quay.io/tripleozedcentos9/openstack-ovn-controller:current-tripleo"
       external-ids:
         system-id: "random"
         ovn-bridge: "br-int"
@@ -106,7 +97,6 @@ spec:
   neutron:
     template:
       databaseInstance: openstack
-      containerImage: quay.io/tripleozedcentos9/openstack-neutron-server:current-tripleo
       secret: osp-secret
   horizon:
     template:
@@ -120,15 +110,10 @@ spec:
       databaseInstance: openstack
       ironicAPI:
         replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-ironic-api:current-tripleo
       ironicConductors:
       - replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-ironic-conductor:current-tripleo
-        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
         storageRequest: 10G
         storageClass: local-storage
       ironicInspector:
         replicas: 1
-        containerImage: quay.io/tripleozedcentos9/openstack-ironic-inspector:current-tripleo
-        pxeContainerImage: quay.io/tripleozedcentos9/openstack-ironic-pxe:current-tripleo
       secret: osp-secret
