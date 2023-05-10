@@ -113,7 +113,8 @@ spec:
       ironicConductors:
       - replicas: 1
         storageRequest: 10G
-        storageClass: local-storage
       ironicInspector:
+        replicas: 1
+      ironicNeutronAgent:
         replicas: 1
       secret: osp-secret
