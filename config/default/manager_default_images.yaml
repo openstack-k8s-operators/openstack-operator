@@ -12,6 +12,4 @@ spec:
       - name: manager
         env:
         - name: OPENSTACKCLIENT_IMAGE_URL_DEFAULT
-          # TODO: this image causes syslog warning messages, see upstream https://bugs.launchpad.net/tripleo/+bug/1999553
-          # NOTE: registry.redhat.io/rhosp-rhel8/openstack-tripleoclient:16.2 seems to work (no log messages)
-          value: quay.io/tripleozedcentos9/openstack-tripleoclient:current-tripleo
+          value: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
