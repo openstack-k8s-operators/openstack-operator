@@ -2984,7 +2984,6 @@ spec:
                   template:
                     properties:
                       containerImage:
-                        default: quay.io/podified-antelope-centos9/openstack-horizon:current-podified
                         type: string
                       customServiceConfig:
                         default: '# add your customization here'
@@ -3062,6 +3061,7 @@ spec:
                       sharedMemcached:
                         type: string
                     required:
+                    - containerImage
                     - secret
                     type: object
                 type: object
