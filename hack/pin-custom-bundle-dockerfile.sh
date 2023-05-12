@@ -36,13 +36,14 @@ for MOD_PATH in $(go list -m -json all | jq -r '. | select(.Path | contains("ope
             REPO_CURL_URL="https://quay.io/api/v1/repository/${GITHUB_USER}"
             REPO_URL="quay.io/${GITHUB_USER}"
         fi
+        if [[ ${LOCAL_REGISTRY} -eq 1 ]]; then
+            SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
+        else
+            SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/ | jq -r .tags[].name | sort -u | grep $REF)
+        fi
     fi
 
-    if [[ ${LOCAL_REGISTRY} -eq 1 && "$BASE" == "$IMAGEBASE" ]]; then
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
-    else
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/ | jq -r .tags[].name | sort -u | grep $REF)
-    fi
+    
 
     sed -i "${DOCKERFILE}.pinned" -e "s|quay.io/openstack-k8s-operators/${BASE}-operator-bundle.*|${REPO_URL}/${BASE}-operator-bundle:$SHA|"
 done
