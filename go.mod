@@ -7,7 +7,7 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.15
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230503135759-feac84f5479a
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230509105748-90bdb364c0ea
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230512115211-ed0bd8f9e9be
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230509104211-270c0b77e1d8
 	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230511025710-20ef2232badc
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230505165400-46c5e7325f0d
