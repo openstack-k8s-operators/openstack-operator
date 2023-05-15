@@ -3090,6 +3090,19 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      images:
+                        properties:
+                          api:
+                            type: string
+                          conductor:
+                            type: string
+                          inspector:
+                            type: string
+                          neutronAgent:
+                            type: string
+                          pxe:
+                            type: string
+                        type: object
                       ironicAPI:
                         properties:
                           containerImage:
@@ -3209,7 +3222,6 @@ spec:
                           transportURLSecret:
                             type: string
                         required:
-                        - containerImage
                         - serviceAccount
                         type: object
                       ironicConductors:
@@ -3344,8 +3356,6 @@ spec:
                             transportURLSecret:
                               type: string
                           required:
-                          - containerImage
-                          - pxeContainerImage
                           - serviceAccount
                           - storageClass
                           - storageRequest
@@ -3506,8 +3516,6 @@ spec:
                           transportURLSecret:
                             type: string
                         required:
-                        - containerImage
-                        - pxeContainerImage
                         - serviceAccount
                         type: object
                       ironicNeutronAgent:
@@ -3581,7 +3589,6 @@ spec:
                             default: ironic
                             type: string
                         required:
-                        - containerImage
                         - secret
                         - serviceAccount
                         type: object
