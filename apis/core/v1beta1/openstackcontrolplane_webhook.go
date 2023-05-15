@@ -232,6 +232,18 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Ironic
 	if r.Spec.Ironic.Enabled {
+		// Default Secret
+		if r.Spec.Ironic.Template.Secret == "" {
+			r.Spec.Ironic.Template.Secret = r.Spec.Secret
+		}
+		// Default DatabaseInstance
+		if r.Spec.Ironic.Template.DatabaseInstance == "" {
+			r.Spec.Ironic.Template.DatabaseInstance = "openstack"
+		}
+		// Default StorageClass
+		if r.Spec.Ironic.Template.StorageClass == "" {
+			r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
+		}
 		r.Spec.Ironic.Template.Default()
 	}
 
