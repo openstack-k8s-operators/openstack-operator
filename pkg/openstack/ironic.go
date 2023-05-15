@@ -35,15 +35,6 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	helper.GetLogger().Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ironic, func() error {
 		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec)
-		if ironic.Spec.Secret == "" {
-			ironic.Spec.Secret = instance.Spec.Secret
-		}
-		if ironic.Spec.DatabaseInstance == "" {
-			ironic.Spec.DatabaseInstance = "openstack"
-		}
-		if ironic.Spec.StorageClass == "" {
-			ironic.Spec.StorageClass = instance.Spec.StorageClass
-		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), ironic, helper.GetScheme())
 		if err != nil {
 			return err
