@@ -208,30 +208,34 @@ func main() {
 				if container.Name == "manager" {
 					envVarList = append(envVarList, container.Env...)
 
-					// Now we also need to turn off any "internal" webhooks that belong to the service
-					// operator, as we are now using "external" webhooks that live in the OpenStack
-					// operator.  These "external" webhooks will eventually call the mutating/validating
-					// logic that was previously housed within the "internal" Service Operator webhook
-					// logic.
-					container.Env = append(container.Env,
-						v1.EnvVar{
-							Name:  "ENABLE_WEBHOOKS",
-							Value: "false",
-						},
-					)
+					// FIXME: HACK: Allow NovaExternalCompute CRs that are created from the DataPlane operator
+					//              to be properly defaulted via Nova webhooks
+					if !strings.Contains(csvFile, "nova-operator.clusterserviceversion") {
+						// Now we also need to turn off any "internal" webhooks that belong to the service
+						// operator, as we are now using "external" webhooks that live in the OpenStack
+						// operator.  These "external" webhooks will eventually call the mutating/validating
+						// logic that was previously housed within the "internal" Service Operator webhook
+						// logic.
+						container.Env = append(container.Env,
+							v1.EnvVar{
+								Name:  "ENABLE_WEBHOOKS",
+								Value: "false",
+							},
+						)
 
-					// And finally we need to remove the webhook server's cert volume mount
-					for volMountIndex, volMount := range container.VolumeMounts {
-						if volMount.Name == "cert" {
-							container.VolumeMounts[volMountIndex] = container.VolumeMounts[len(container.VolumeMounts)-1]
-							container.VolumeMounts = container.VolumeMounts[:len(container.VolumeMounts)-1]
-							// Found the target mount, so stop iterating
-							break
+						// And finally we need to remove the webhook server's cert volume mount,
+						for volMountIndex, volMount := range container.VolumeMounts {
+							if volMount.Name == "cert" {
+								container.VolumeMounts[volMountIndex] = container.VolumeMounts[len(container.VolumeMounts)-1]
+								container.VolumeMounts = container.VolumeMounts[:len(container.VolumeMounts)-1]
+								// Found the target mount, so stop iterating
+								break
+							}
 						}
-					}
 
-					// Need to replace the container in the Deployment since this local variable is a copy
-					csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers[index] = container
+						// Need to replace the container in the Deployment since this local variable is a copy
+						csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers[index] = container
+					}
 
 					// We found the controller-manager container, so no need to continue iterating
 					break
@@ -275,6 +279,22 @@ func main() {
 				csvExtended.Annotations["alm-examples"] = string(almB)
 			}
 
+			//
+			// FIXME: HACK...
+			//
+			// BEGIN: Handle any webhook imports that are required
+			//
+			// 1. Nova - needed for NovaExternalCompute CRs created via DataPlane operator
+			//
+
+			// Nova
+			if strings.Contains(csvFile, "nova-operator.clusterserviceversion") {
+				csvExtended.Spec.WebhookDefinitions = append(csvExtended.Spec.WebhookDefinitions, csvStruct.Spec.WebhookDefinitions...)
+			}
+
+			//
+			// END: Handle any webhook imports that are required
+			//
 		}
 	}
 	if len(*exportEnvFile) > 0 {
