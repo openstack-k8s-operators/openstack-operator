@@ -5798,7 +5798,6 @@ spec:
                           replicas: 1
                         properties:
                           containerImage:
-                            default: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
                             type: string
                           customServiceConfig:
                             type: string
@@ -5893,7 +5892,6 @@ spec:
                                 containerImage: quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
                               properties:
                                 containerImage:
-                                  default: quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
                                   type: string
                                 customServiceConfig:
                                   type: string
@@ -5950,9 +5948,10 @@ spec:
                             hasAPIAccess:
                               type: boolean
                             metadataServiceTemplate:
+                              default:
+                                replicas: 0
                               properties:
                                 containerImage:
-                                  default: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
                                   type: string
                                 customServiceConfig:
                                   type: string
@@ -6034,7 +6033,6 @@ spec:
                             noVNCProxyServiceTemplate:
                               properties:
                                 containerImage:
-                                  default: quay.io/podified-antelope-centos9/openstack-nova-novncproxy:current-podified
                                   type: string
                                 customServiceConfig:
                                   type: string
@@ -6126,7 +6124,6 @@ spec:
                           replicas: 1
                         properties:
                           containerImage:
-                            default: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
                             type: string
                           customServiceConfig:
                             type: string
@@ -6231,7 +6228,6 @@ spec:
                           replicas: 1
                         properties:
                           containerImage:
-                            default: quay.io/podified-antelope-centos9/openstack-nova-scheduler:current-podified
                             type: string
                           customServiceConfig:
                             type: string
