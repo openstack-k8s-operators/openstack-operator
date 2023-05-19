@@ -17,6 +17,7 @@ import (
 
 // ReconcileOVN -
 func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	OVNDBClustersReady := len(instance.Spec.Ovn.Template.OVNDBCluster) != 0
 	for name, dbcluster := range instance.Spec.Ovn.Template.OVNDBCluster {
 		OVNDBCluster := &ovnv1.OVNDBCluster{
 			ObjectMeta: metav1.ObjectMeta{
@@ -64,7 +65,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		if op != controllerutil.OperationResultNone {
 			helper.GetLogger().Info(fmt.Sprintf("OVNDBCluster %s - %s", OVNDBCluster.Name, op))
 		}
-
+		OVNDBClustersReady = OVNDBClustersReady && OVNDBCluster.IsReady()
 	}
 
 	OVNNorthd := &ovnv1.OVNNorthd{
@@ -111,7 +112,52 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		helper.GetLogger().Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
 	}
 
-	if OVNNorthd.IsReady() {
+	OVNController := &ovnv1.OVNController{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ovncontroller",
+			Namespace: instance.Namespace,
+		},
+	}
+
+	if !instance.Spec.Ovn.Enabled {
+		if res, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
+			return res, err
+		}
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
+		return ctrl.Result{}, nil
+	}
+
+	helper.GetLogger().Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")
+	op, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {
+
+		instance.Spec.Ovn.Template.OVNController.DeepCopyInto(&OVNController.Spec)
+
+		if OVNController.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
+			OVNController.Spec.NodeSelector = instance.Spec.NodeSelector
+		}
+
+		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), OVNController, helper.GetScheme())
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
+			err.Error()))
+		return ctrl.Result{}, err
+	}
+	if op != controllerutil.OperationResultNone {
+		helper.GetLogger().Info(fmt.Sprintf("OVNController %s - %s", OVNController.Name, op))
+	}
+
+	// Expect all services (dbclusters, northd, ovn-controller) ready
+	if OVNDBClustersReady && OVNNorthd.IsReady() && OVNController.IsReady() {
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

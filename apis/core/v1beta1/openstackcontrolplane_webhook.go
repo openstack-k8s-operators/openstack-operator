@@ -294,11 +294,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		}
 
 		r.Spec.Ovn.Template.OVNNorthd.Default()
-	}
-
-	// OVS
-	if r.Spec.Ovs.Enabled {
-		r.Spec.Ovs.Template.Default()
+		r.Spec.Ovn.Template.OVNController.Default()
 	}
 
 	// Placement

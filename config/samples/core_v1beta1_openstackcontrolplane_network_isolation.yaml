@@ -131,13 +131,12 @@ spec:
           networkAttachment: internalapi
       ovnNorthd:
         networkAttachment: internalapi
-  ovs:
-    template:
-      external-ids:
-        system-id: "random"
-        ovn-bridge: "br-int"
-        ovn-encap-type: "geneve"
-      networkAttachment: tenant
+      ovnController:
+        external-ids:
+          system-id: "random"
+          ovn-bridge: "br-int"
+          ovn-encap-type: "geneve"
+        networkAttachment: tenant
   placement:
     template:
       databaseInstance: openstack

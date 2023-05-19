@@ -190,6 +190,18 @@ rules:
 - apiGroups:
   - ovn.openstack.org
   resources:
+  - ovncontrollers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ovn.openstack.org
+  resources:
   - ovndbclusters
   verbs:
   - create
@@ -203,18 +215,6 @@ rules:
   - ovn.openstack.org
   resources:
   - ovnnorthds
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ovs.openstack.org
-  resources:
-  - ovs
   verbs:
   - create
   - delete
