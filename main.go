@@ -34,6 +34,7 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
@@ -90,6 +91,7 @@ func init() {
 	utilruntime.Must(clientv1.AddToScheme(scheme))
 	utilruntime.Must(manilav1.AddToScheme(scheme))
 	utilruntime.Must(horizonv1.AddToScheme(scheme))
+	utilruntime.Must(networkv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -304,4 +306,11 @@ func setupServiceOperatorDefaults() {
 	}
 
 	redisv1.SetupRedisDefaults(redisDefaults)
+
+	// DNS
+	dnsDefaults := networkv1.DNSMasqDefaults{
+		ContainerImageURL: os.Getenv("INFRA_DNSMASQ_IMAGE_URL_DEFAULT"),
+	}
+
+	networkv1.SetupDNSMasqDefaults(dnsDefaults)
 }
