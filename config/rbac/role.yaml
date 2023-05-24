@@ -247,3 +247,15 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - telemetry.openstack.org
+  resources:
+  - telemetries
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
