@@ -210,9 +210,10 @@ func main() {
 				if container.Name == "manager" {
 					envVarList = append(envVarList, container.Env...)
 
-					// FIXME: HACK: Allow NovaExternalCompute CRs that are created from the DataPlane operator
-					//              to be properly defaulted via Nova webhooks
-					if !strings.Contains(csvFile, "nova-operator.clusterserviceversion") {
+					// FIXME: HACK: Allow NovaExternalCompute/OpneStackBaremetalSet CRs that are created from the DataPlane operator
+					//              to be properly defaulted via webhooks
+					if !(strings.Contains(csvFile, "nova-operator.clusterserviceversion") ||
+						strings.Contains(csvFile, "openstack-baremetal-operator.clusterserviceversion")) {
 						// Now we also need to turn off any "internal" webhooks that belong to the service
 						// operator, as we are now using "external" webhooks that live in the OpenStack
 						// operator.  These "external" webhooks will eventually call the mutating/validating
@@ -286,11 +287,13 @@ func main() {
 			//
 			// BEGIN: Handle any webhook imports that are required
 			//
-			// 1. Nova - needed for NovaExternalCompute CRs created via DataPlane operator
+			// 1. nova-operator - Needed for NovaExternalCompute CRs created via DataPlane operator
+			// 2. openstack-baremetal-operator - Needed for OpenStackProvisionServer CRs via DataPlane operator
 			//
 
-			// Nova
-			if strings.Contains(csvFile, "nova-operator.clusterserviceversion") {
+			// nova-operator and openstack-baremetal-operator
+			if strings.Contains(csvFile, "nova-operator.clusterserviceversion") ||
+				strings.Contains(csvFile, "openstack-baremetal-operator.clusterserviceversion") {
 				csvExtended.Spec.WebhookDefinitions = append(csvExtended.Spec.WebhookDefinitions, csvStruct.Spec.WebhookDefinitions...)
 			}
 
