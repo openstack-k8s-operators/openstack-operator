@@ -3,3 +3,7 @@ dependencies:
     value:
       packageName: openstack-storage-operators
       version: ">0.0.0"
+  - type: olm.package
+    value:
+      packageName: cluster-operator
+      version: ">=0.0.0"

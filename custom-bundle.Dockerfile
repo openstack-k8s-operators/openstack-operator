@@ -2,7 +2,6 @@ ARG GOLANG_CTX=golang:1.19
 ARG INFRA_BUNDLE=quay.io/openstack-k8s-operators/infra-operator-bundle:latest
 ARG KEYSTONE_BUNDLE=quay.io/openstack-k8s-operators/keystone-operator-bundle:latest
 ARG MARIADB_BUNDLE=quay.io/openstack-k8s-operators/mariadb-operator-bundle:latest
-ARG RABBITMQ_BUNDLE=quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle:latest
 ARG PLACEMENT_BUNDLE=quay.io/openstack-k8s-operators/placement-operator-bundle:latest
 ARG OVN_BUNDLE=quay.io/openstack-k8s-operators/ovn-operator-bundle:latest
 ARG OVS_BUNDLE=quay.io/openstack-k8s-operators/ovs-operator-bundle:latest
@@ -41,7 +40,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o csv-merger csv-merger.g
 FROM $INFRA_BUNDLE as infra-bundle
 FROM $KEYSTONE_BUNDLE as keystone-bundle
 FROM $MARIADB_BUNDLE as mariadb-bundle
-FROM $RABBITMQ_BUNDLE as rabbitmq-bundle
 FROM $PLACEMENT_BUNDLE as placement-bundle
 FROM $OVN_BUNDLE as ovn-bundle
 FROM $OVS_BUNDLE as ovs-bundle
@@ -65,7 +63,6 @@ COPY bundle/manifests /manifests/
 # Custom Manifests
 COPY --from=keystone-bundle /manifests/* /manifests/
 COPY --from=mariadb-bundle /manifests/* /manifests/
-COPY --from=rabbitmq-bundle /manifests/* /manifests/
 COPY --from=infra-bundle /manifests/* /manifests/
 COPY --from=placement-bundle /manifests/* /manifests/
 COPY --from=ovn-bundle /manifests/* /manifests/
@@ -83,7 +80,6 @@ COPY --from=horizon-bundle /manifests/* /manifests/
 RUN /workspace/csv-merger \
   --import-env-files=/storage-env-vars.yaml \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
-  --rabbitmq-csv=/manifests/cluster-operator.clusterserviceversion.yaml \
   --infra-csv=/manifests/infra-operator.clusterserviceversion.yaml \
   --keystone-csv=/manifests/keystone-operator.clusterserviceversion.yaml \
   --placement-csv=/manifests/placement-operator.clusterserviceversion.yaml \
