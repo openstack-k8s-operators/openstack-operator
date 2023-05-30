@@ -1,0 +1,199 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack-network-isolation
+spec:
+  secret: osp-secret
+  storageClass: local-storage
+  dns:
+    template:
+      externalEndpoints:
+      - ipAddressPool: ctlplane
+        loadBalancerIPs:
+        - 192.168.122.80
+      options:
+      - key: server
+        values:
+        - 192.168.122.1
+      replicas: 1
+  cinder:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      cinderAPI:
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+      cinderBackup:
+        networkAttachments:
+        - storage
+        replicas: 0 # backend needs to be configured
+      cinderVolumes:
+        volume1:
+          networkAttachments:
+          - storage
+          replicas: 0 # backend needs to be configured
+  glance:
+    template:
+      databaseInstance: openstack
+      storageClass: ""
+      storageRequest: 10G
+      glanceAPIInternal:
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+        networkAttachments:
+        - storage
+      glanceAPIExternal:
+        networkAttachments:
+        - storage
+  keystone:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+  mariadb:
+    enabled: false
+    templates:
+      openstack:
+        storageRequest: 500M
+      openstack-cell1:
+        storageRequest: 500M
+  galera:
+    enabled: true
+    templates:
+      openstack:
+        storageClass: local-storage
+        storageRequest: 500M
+        secret: osp-secret
+        replicas: 1
+      openstack-cell1:
+        storageClass: local-storage
+        storageRequest: 500M
+        secret: osp-secret
+        replicas: 1
+  memcached:
+    enabled: true
+  neutron:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+      networkAttachments:
+      - internalapi
+  horizon:
+    template:
+      replicas: 1
+      secret: osp-secret
+  nova:
+    template:
+      apiServiceTemplate:
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+      secret: osp-secret
+      metadataServiceTemplate:
+        externalEndpoints:
+         - endpoint: internal
+           ipAddressPool: internalapi
+           loadBalancerIPs:
+           - 172.17.0.80
+  manila:
+    template:
+      manilaAPI:
+        replicas: 1
+        externalEndpoints:
+        - endpoint: internal
+          ipAddressPool: internalapi
+          loadBalancerIPs:
+          - 172.17.0.80
+        networkAttachments:
+        - internalapi
+      manilaScheduler:
+        replicas: 1
+        networkAttachments:
+        - internalapi
+      manilaShares:
+        share1:
+          replicas: 1
+          networkAttachments:
+          - internalapi
+  ovn:
+    template:
+      ovnDBCluster:
+        ovndbcluster-nb:
+          dbType: NB
+          storageRequest: 10G
+          networkAttachment: internalapi
+        ovndbcluster-sb:
+          dbType: SB
+          storageRequest: 10G
+          networkAttachment: internalapi
+      ovnNorthd:
+        networkAttachment: internalapi
+  ovs:
+    template:
+      external-ids:
+        system-id: "random"
+        ovn-bridge: "br-int"
+        ovn-encap-type: "geneve"
+      networkAttachment: tenant
+  placement:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+  rabbitmq:
+    templates:
+      rabbitmq:
+        externalEndpoint:
+          loadBalancerIPs:
+          - 172.17.0.85
+          ipAddressPool: internalapi
+          sharedIP: false
+      rabbitmq-cell1:
+        externalEndpoint:
+          loadBalancerIPs:
+          - 172.17.0.86
+          ipAddressPool: internalapi
+          sharedIP: false
+  ironic:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      ironicAPI:
+        replicas: 1
+      ironicConductors:
+      - replicas: 1
+        storageRequest: 10G
+      ironicInspector:
+        replicas: 1
+      ironicNeutronAgent:
+        replicas: 1
+      secret: osp-secret
+  telemetry:
+    template:
+      ceilometerCentral:
+        passwordSelector:
+          service: CeilometerPassword
+        secret: osp-secret
+        serviceUser: ceilometer
+      rabbitMqClusterName: rabbitmq
