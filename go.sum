@@ -166,8 +166,6 @@ github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230524141327-a53b273227de/go.mod h1:FOwZQb1fb5Wzfo2O+PD4zXc9qIZ0co3Dqu40xkzmd8Q=
 github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230524055534-9020071934dc h1:UGfswy8Dr+ML/Cztd+rfb+xZtmZysSwfwMMwQJYP/mQ=
 github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230524055534-9020071934dc/go.mod h1:XSpANDkM9CN5Z6n9k3JnolUAo5tEs8gQFgVDju7Xgng=
-github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230517053110-2821a8dc05fd h1:cVv2MxGNFSD7wSe5qx7e7lHO0Kc9+I0v17MHc8XYMKI=
-github.com/openstack-k8s-operators/ovs-operator/api v0.0.0-20230517053110-2821a8dc05fd/go.mod h1:KiYMGv1D3BcCS6RGrJ69uzsRLz0/b12VL8JGxbwNrgM=
 github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230523122943-3d3a8681e8fe h1:ltNuph6mQk+nmZ+C9LQ+hWI2mm/02ZaUNhYm4kb1IUs=
 github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230523122943-3d3a8681e8fe/go.mod h1:NP2b8W2ftRYTsCGzBRxSn5hE/xASSmIUs03UoYH+rvA=
 github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230518150301-7e9c6a99c4e8 h1:5ysH++xPJKmKWnyLrIx7XOO0QSCkzJaJ66o6kqPX138=

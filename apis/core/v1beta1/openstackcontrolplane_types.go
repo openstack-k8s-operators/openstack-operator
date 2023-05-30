@@ -33,7 +33,6 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
-	ovsv1 "github.com/openstack-k8s-operators/ovs-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
@@ -105,10 +104,6 @@ type OpenStackControlPlaneSpec struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Ovn - Overrides to use when creating the OVN Services
 	Ovn OvnSection `json:"ovn,omitempty"`
-
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// Ovs - Overrides to use when creating the OVS Services
-	Ovs OvsSection `json:"ovs,omitempty"`
 
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Neutron - Overrides to use when creating the Neutron Service
@@ -336,20 +331,11 @@ type OvnResources struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// OVNNorthd - Overrides to use when creating the OVNNorthd service
 	OVNNorthd ovnv1.OVNNorthdSpec `json:"ovnNorthd,omitempty"`
-}
-
-// OvsSection defines the desired state of OVS services
-type OvsSection struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Enabled - Whether OVS services should be deployed and managed
-	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// Template - Overrides to use when creating the OVS services
-	Template ovsv1.OVSSpec `json:"template,omitempty"`
+	// OVNController - Overrides to use when creating the OVNController service
+	OVNController ovnv1.OVNControllerSpec `json:"ovnController,omitempty"`
 }
 
 // NeutronSection defines the desired state of Neutron service
@@ -504,7 +490,6 @@ func (instance OpenStackControlPlane) InitConditions() {
 	cl := condition.CreateList(
 		condition.UnknownCondition(OpenStackControlPlaneRabbitMQReadyCondition, condition.InitReason, OpenStackControlPlaneRabbitMQReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOVNReadyCondition, condition.InitReason, OpenStackControlPlaneOVNReadyInitMessage),
-		condition.UnknownCondition(OpenStackControlPlaneOVSReadyCondition, condition.InitReason, OpenStackControlPlaneOVSReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneNeutronReadyCondition, condition.InitReason, OpenStackControlPlaneNeutronReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneMariaDBReadyCondition, condition.InitReason, OpenStackControlPlaneMariaDBReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneMemcachedReadyCondition, condition.InitReason, OpenStackControlPlaneMemcachedReadyInitMessage),

@@ -46,7 +46,6 @@ import (
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
-	ovsv1 "github.com/openstack-k8s-operators/ovs-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqclusterv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
@@ -84,7 +83,6 @@ func init() {
 	utilruntime.Must(baremetalv1.AddToScheme(scheme))
 	utilruntime.Must(ironicv1.AddToScheme(scheme))
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
-	utilruntime.Must(ovsv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
 	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
@@ -287,13 +285,12 @@ func setupServiceOperatorDefaults() {
 
 	ovnv1.SetupOVNNorthdDefaults(ovnNorthdDefaults)
 
-	// OVS
-	ovsDefaults := ovsv1.OvsDefaults{
-		OvsContainerImageURL: os.Getenv("OVS_IMAGE_URL_DEFAULT"),
-		OvnContainerImageURL: os.Getenv("OVN_IMAGE_URL_DEFAULT"),
+	ovnControllerDefaults := ovnv1.OvnControllerDefaults{
+		OvsContainerImageURL:           os.Getenv("OVN_CONTROLLER_OVS_IMAGE_URL_DEFAULT"),
+		OvnControllerContainerImageURL: os.Getenv("OVN_CONTROLLER_IMAGE_URL_DEFAULT"),
 	}
 
-	ovsv1.SetupOvsDefaults(ovsDefaults)
+	ovnv1.SetupOVNControllerDefaults(ovnControllerDefaults)
 
 	// Placement
 	placementAPIDefaults := placementv1.PlacementAPIDefaults{

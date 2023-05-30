@@ -6379,6 +6379,75 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      ovnController:
+                        properties:
+                          external-ids:
+                            properties:
+                              enable-chassis-as-gateway:
+                                type: boolean
+                              ovn-bridge:
+                                type: string
+                              ovn-encap-type:
+                                default: geneve
+                                enum:
+                                - geneve
+                                - vxlan
+                                type: string
+                              system-id:
+                                type: string
+                            required:
+                            - ovn-bridge
+                            - system-id
+                            type: object
+                          networkAttachment:
+                            type: string
+                          nicMappings:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          ovnContainerImage:
+                            type: string
+                          ovsContainerImage:
+                            type: string
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                        required:
+                        - ovnContainerImage
+                        - ovsContainerImage
+                        type: object
                       ovnDBCluster:
                         additionalProperties:
                           properties:
@@ -6509,81 +6578,6 @@ spec:
                         required:
                         - containerImage
                         type: object
-                    type: object
-                type: object
-              ovs:
-                properties:
-                  enabled:
-                    default: true
-                    type: boolean
-                  template:
-                    properties:
-                      external-ids:
-                        properties:
-                          enable-chassis-as-gateway:
-                            type: boolean
-                          ovn-bridge:
-                            type: string
-                          ovn-encap-type:
-                            default: geneve
-                            enum:
-                            - geneve
-                            - vxlan
-                            type: string
-                          system-id:
-                            type: string
-                        required:
-                        - ovn-bridge
-                        - system-id
-                        type: object
-                      networkAttachment:
-                        type: string
-                      nicMappings:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      nodeSelector:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      ovnContainerImage:
-                        type: string
-                      ovsContainerImage:
-                        type: string
-                      resources:
-                        properties:
-                          claims:
-                            items:
-                              properties:
-                                name:
-                                  type: string
-                              required:
-                              - name
-                              type: object
-                            type: array
-                            x-kubernetes-list-map-keys:
-                            - name
-                            x-kubernetes-list-type: map
-                          limits:
-                            additionalProperties:
-                              anyOf:
-                              - type: integer
-                              - type: string
-                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                              x-kubernetes-int-or-string: true
-                            type: object
-                          requests:
-                            additionalProperties:
-                              anyOf:
-                              - type: integer
-                              - type: string
-                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                              x-kubernetes-int-or-string: true
-                            type: object
-                        type: object
-                    required:
-                    - ovnContainerImage
-                    - ovsContainerImage
                     type: object
                 type: object
               placement:
