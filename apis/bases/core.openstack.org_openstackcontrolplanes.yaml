@@ -10792,6 +10792,8 @@ spec:
                           secret:
                             default: osp-secret
                             type: string
+                          serviceAccount:
+                            type: string
                           serviceUser:
                             default: ceilometer
                             type: string
@@ -10803,6 +10805,7 @@ spec:
                         - centralImage
                         - initImage
                         - notificationImage
+                        - serviceAccount
                         - sgCoreImage
                         type: object
                       ceilometerCompute:
@@ -10841,11 +10844,15 @@ spec:
                           secret:
                             default: osp-secret
                             type: string
+                          serviceAccount:
+                            type: string
                           serviceUser:
                             default: ceilometer
                             type: string
                           transportURLSecret:
                             type: string
+                        required:
+                        - serviceAccount
                         type: object
                       description:
                         default: A ceilometer agent
