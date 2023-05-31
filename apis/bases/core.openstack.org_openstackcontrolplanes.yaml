@@ -10852,18 +10852,45 @@ spec:
                           transportURLSecret:
                             type: string
                         required:
+                        - computeImage
+                        - initImage
                         - serviceAccount
                         type: object
                       description:
                         default: A ceilometer agent
                         type: string
+                      infraCompute:
+                        properties:
+                          dataplaneInventoryConfigMap:
+                            default: dataplanerole-edpm-compute
+                            type: string
+                          dataplaneSSHSecret:
+                            default: dataplane-ansible-ssh-private-key-secret
+                            type: string
+                          description:
+                            default: An infra compute agent
+                            type: string
+                          extravarsConfigMap:
+                            default: telemetry-infracompute-extravars
+                            type: string
+                          nodeExporterImage:
+                            type: string
+                          playbook:
+                            default: deploy-infra.yaml
+                            type: string
+                          serviceAccount:
+                            type: string
+                        required:
+                        - nodeExporterImage
+                        - serviceAccount
+                        type: object
                       rabbitMqClusterName:
                         default: rabbitmq
                         type: string
                     required:
                     - ceilometerCentral
                     - ceilometerCompute
-                    - rabbitMqClusterName
+                    - infraCompute
                     type: object
                 type: object
             required:
