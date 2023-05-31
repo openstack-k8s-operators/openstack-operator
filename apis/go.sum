@@ -116,7 +116,7 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/onsi/ginkgo/v2 v2.9.5 h1:+6Hr4uxzP4XIUyAkg61dWBw8lb/gc4/X5luuxN/EC+Q=
+github.com/onsi/ginkgo/v2 v2.9.7 h1:06xGQy5www2oN160RtEZoTvnP2sPhEfePYmCDc2szss=
 github.com/onsi/gomega v1.27.7 h1:fVih9JD6ogIiHUN6ePK7HJidyEDpWGVB5mzM7cWNXoU=
 github.com/openshift/api v3.9.0+incompatible h1:fJ/KsefYuZAjmrr3+5U9yZIZbTOpVkDDLDLFresAeYs=
 github.com/openshift/api v3.9.0+incompatible/go.mod h1:dh9o4Fs58gpFXGSYfnVxGR9PnV53I8TW84pQaJDdGiY=
@@ -146,8 +146,8 @@ github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230530043145-5d
 github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230530043145-5ddcfcff15e5/go.mod h1:1LNwRed6Fc8a8IyoD5CbyGclETGOaEZK2iU4XVBP7xo=
 github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230530075145-122c78de03fc h1:wSWdDazM8Sn1KnvjzTaELLYpfbYfZZOXCKNmWlU5RfE=
 github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230530075145-122c78de03fc/go.mod h1:ACActQWcZs9LW/hXnA7LO9GxlMDWt3cnJxc6zoGMOGw=
-github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230530113221-8ea7b8515d5a h1:vNFx5QEhKI19YViiSuHG/7gPGdNPSGGQgX7UEquj3/M=
-github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230530113221-8ea7b8515d5a/go.mod h1:D1a8y0RXjCdohnh5rDHYrRh9vyaxSp2+JoGOUJbXTDc=
+github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230531135741-735c6d0225a9 h1:YHp8t3LnWffoOwK7J+RHjwyLE0VMGDj3VJuKTrNm3Rk=
+github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230531135741-735c6d0225a9/go.mod h1:xxFGyA9cJpE0LPjKcM07cGiUT1NWFK4uGOXtExYtaU4=
 github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230530114039-8ed00f45bf59 h1:PSo7yhe9eNqcaH/9TWAvBtA0eOCIWe0cPDAr/Llo5e4=
 github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230530114039-8ed00f45bf59/go.mod h1:WzC+lpJz+bwU+J6N18Y2OgVnwMsi4sWSQRIiHKLobOU=
 github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230530132410-4eab9ab38328 h1:GB4n4/8/5QpToRfbc0sqNZCFoFk/H7dEEx5/aJYDIAU=

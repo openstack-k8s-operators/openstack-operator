@@ -14,7 +14,7 @@ require (
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230523102317-8b60f83b1d1f
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230530043145-5ddcfcff15e5
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230530075145-122c78de03fc
-	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230530113221-8ea7b8515d5a
+	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230531135741-735c6d0225a9
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230530114039-8ed00f45bf59
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230530132410-4eab9ab38328
 	github.com/rabbitmq/cluster-operator v1.14.0
