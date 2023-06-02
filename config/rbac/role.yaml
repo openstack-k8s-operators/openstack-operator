@@ -250,7 +250,7 @@ rules:
 - apiGroups:
   - telemetry.openstack.org
   resources:
-  - telemetries
+  - ceilometercentrals
   verbs:
   - create
   - delete

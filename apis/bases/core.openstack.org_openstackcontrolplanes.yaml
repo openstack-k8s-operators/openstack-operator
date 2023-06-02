@@ -39,6 +39,61 @@ spec:
             type: object
           spec:
             properties:
+              ceilometer:
+                properties:
+                  enabled:
+                    default: true
+                    type: boolean
+                  template:
+                    properties:
+                      centralImage:
+                        type: string
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        type: string
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description:
+                        default: A ceilometer agent
+                        type: string
+                      initImage:
+                        type: string
+                      networkAttachmentDefinitions:
+                        items:
+                          type: string
+                        type: array
+                      notificationImage:
+                        type: string
+                      passwordSelector:
+                        default:
+                          service: CeilometerPassword
+                        properties:
+                          service:
+                            default: CeilometerPassword
+                            type: string
+                        type: object
+                      secret:
+                        default: osp-secret
+                        type: string
+                      serviceAccount:
+                        type: string
+                      serviceUser:
+                        default: ceilometer
+                        type: string
+                      sgCoreImage:
+                        type: string
+                      transportURLSecret:
+                        type: string
+                    required:
+                    - centralImage
+                    - initImage
+                    - notificationImage
+                    - serviceAccount
+                    - sgCoreImage
+                    type: object
+                type: object
               cinder:
                 properties:
                   enabled:
@@ -10752,147 +10807,6 @@ spec:
                 type: string
               storageClass:
                 type: string
-              telemetry:
-                properties:
-                  enabled:
-                    default: true
-                    type: boolean
-                  template:
-                    properties:
-                      ceilometerCentral:
-                        properties:
-                          centralImage:
-                            type: string
-                          customServiceConfig:
-                            default: '# add your customization here'
-                            type: string
-                          defaultConfigOverwrite:
-                            additionalProperties:
-                              type: string
-                            type: object
-                          description:
-                            default: A ceilometer agent
-                            type: string
-                          initImage:
-                            type: string
-                          networkAttachmentDefinitions:
-                            items:
-                              type: string
-                            type: array
-                          notificationImage:
-                            type: string
-                          passwordSelector:
-                            default:
-                              service: CeilometerPassword
-                            properties:
-                              service:
-                                default: CeilometerPassword
-                                type: string
-                            type: object
-                          secret:
-                            default: osp-secret
-                            type: string
-                          serviceAccount:
-                            type: string
-                          serviceUser:
-                            default: ceilometer
-                            type: string
-                          sgCoreImage:
-                            type: string
-                          transportURLSecret:
-                            type: string
-                        required:
-                        - centralImage
-                        - initImage
-                        - notificationImage
-                        - serviceAccount
-                        - sgCoreImage
-                        type: object
-                      ceilometerCompute:
-                        properties:
-                          computeImage:
-                            type: string
-                          customServiceConfig:
-                            default: '# add your customization here'
-                            type: string
-                          dataplaneInventoryConfigMap:
-                            default: dataplanerole-edpm-compute
-                            type: string
-                          dataplaneSSHSecret:
-                            default: dataplane-ansible-ssh-private-key-secret
-                            type: string
-                          defaultConfigOverwrite:
-                            additionalProperties:
-                              type: string
-                            type: object
-                          description:
-                            default: A ceilometer compute agent
-                            type: string
-                          initImage:
-                            type: string
-                          passwordSelector:
-                            default:
-                              service: CeilometerPassword
-                            properties:
-                              service:
-                                default: CeilometerPassword
-                                type: string
-                            type: object
-                          playbook:
-                            default: deploy-ceilometer.yaml
-                            type: string
-                          secret:
-                            default: osp-secret
-                            type: string
-                          serviceAccount:
-                            type: string
-                          serviceUser:
-                            default: ceilometer
-                            type: string
-                          transportURLSecret:
-                            type: string
-                        required:
-                        - computeImage
-                        - initImage
-                        - serviceAccount
-                        type: object
-                      description:
-                        default: A ceilometer agent
-                        type: string
-                      infraCompute:
-                        properties:
-                          dataplaneInventoryConfigMap:
-                            default: dataplanerole-edpm-compute
-                            type: string
-                          dataplaneSSHSecret:
-                            default: dataplane-ansible-ssh-private-key-secret
-                            type: string
-                          description:
-                            default: An infra compute agent
-                            type: string
-                          extravarsConfigMap:
-                            default: telemetry-infracompute-extravars
-                            type: string
-                          nodeExporterImage:
-                            type: string
-                          playbook:
-                            default: deploy-infra.yaml
-                            type: string
-                          serviceAccount:
-                            type: string
-                        required:
-                        - nodeExporterImage
-                        - serviceAccount
-                        type: object
-                      rabbitMqClusterName:
-                        default: rabbitmq
-                        type: string
-                    required:
-                    - ceilometerCentral
-                    - ceilometerCompute
-                    - infraCompute
-                    type: object
-                type: object
             required:
             - secret
             - storageClass

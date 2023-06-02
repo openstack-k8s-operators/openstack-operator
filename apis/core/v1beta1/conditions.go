@@ -69,8 +69,8 @@ const (
 	// OpenStackControlPlaneDNSReadyCondition Status=True condition which indicates if DNSMasq is configured and operational
 	OpenStackControlPlaneDNSReadyCondition condition.Type = "OpenStackControlPlaneDNSReadyCondition"
 
-	// OpenStackControlPlaneTelemetryReadyCondition Status=True condition which indicates if OpenStack Telemetry services are configured and operational
-	OpenStackControlPlaneTelemetryReadyCondition condition.Type = "OpenStackControlPlaneTelemetryReady"
+	// OpenStackControlPlaneCeilometerReadyCondition Status=True condition which indicates if OpenStack Ceilometer service is configured and operational
+	OpenStackControlPlaneCeilometerReadyCondition condition.Type = "OpenStackControlPlaneCeilometerReady"
 
 	// OpenStackControlPlaneManilaReadyInitMessage
 	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
@@ -265,15 +265,15 @@ const (
 	// OpenStackControlPlaneDNSReadyErrorMessage
 	OpenStackControlPlaneDNSReadyErrorMessage = "OpenStackControlPlane DNS error occured %s"
 
-	// OpenStackControlPlaneTelemetryReadyInitMessage
-	OpenStackControlPlaneTelemetryReadyInitMessage = "OpenStackControlPlane Telemetry not started"
+	// OpenStackControlPlaneCeilometerReadyInitMessage
+	OpenStackControlPlaneCeilometerReadyInitMessage = "OpenStackControlPlane Ceilometer not started"
 
-	// OpenStackControlPlaneTelemetryReadyMessage
-	OpenStackControlPlaneTelemetryReadyMessage = "OpenStackControlPlane Telemetry completed"
+	// OpenStackControlPlaneCeilometerReadyMessage
+	OpenStackControlPlaneCeilometerReadyMessage = "OpenStackControlPlane Ceilometer completed"
 
-	// OpenStackControlPlaneTelemetryReadyRunningMessage
-	OpenStackControlPlaneTelemetryReadyRunningMessage = "OpenStackControlPlane Telemetry in progress"
+	// OpenStackControlPlaneCeilometerReadyRunningMessage
+	OpenStackControlPlaneCeilometerReadyRunningMessage = "OpenStackControlPlane Ceilometer in progress"
 
-	// OpenStackControlPlaneTelemetryReadyErrorMessage
-	OpenStackControlPlaneTelemetryReadyErrorMessage = "OpenStackControlPlane Telemetry error occured %s"
+	// OpenStackControlPlaneCeilometerReadyErrorMessage
+	OpenStackControlPlaneCeilometerReadyErrorMessage = "OpenStackControlPlane Ceilometer error occured %s"
 )
