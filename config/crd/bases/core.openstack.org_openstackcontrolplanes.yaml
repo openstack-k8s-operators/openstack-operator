@@ -3724,9 +3724,6 @@ spec:
                       adminProject:
                         default: admin
                         type: string
-                      adminRole:
-                        default: admin
-                        type: string
                       adminUser:
                         default: admin
                         type: string

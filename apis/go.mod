@@ -3,20 +3,20 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.19
 
 require (
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230525165456-36eb9d704c58
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230523103335-9c8998bbc8e7
+	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230531173852-699a87ea2741
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230602114137-8e017b8ee5d2
 	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230531025659-cac21147bd83
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230525130454-a7f0f8afe772
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230530224040-a07073d247ca
-	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230531092248-01ef75f57f85
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230530112722-aca578f65ec9
+	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230602104114-29d472a62f87
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230601090817-30a4a761a756
 	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230531112752-020ab5f5c9c6
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230523102317-8b60f83b1d1f
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230602100742-579cb85d242d
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230531060543-57aee75577c3
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230531135512-ebaeca670b17
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230602131002-b1987e78ae9b
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230531135741-735c6d0225a9
-	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230530114039-8ed00f45bf59
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230531135830-6ee1b2f73696
+	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230602092913-53f380989946
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230601123048-5a4b48b54f6c
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/apimachinery v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.6
@@ -40,7 +40,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gophercloud/gophercloud v1.2.0 // indirect
+	github.com/gophercloud/gophercloud v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -50,8 +50,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230530112722-aca578f65ec9 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230530112722-aca578f65ec9
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230601090817-30a4a761a756 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230601090817-30a4a761a756
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.15.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
