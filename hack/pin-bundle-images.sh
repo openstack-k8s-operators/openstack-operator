@@ -1,13 +1,19 @@
 #!/bin/bash
-set -ex
+set -e
 
-DOCKERFILE=${DOCKERFILE:-"custom-bundle.Dockerfile"}
+# This script can be executed in 2 modes. If DOCKERFILE is set then we replace the image locations there with pinned SHA version.
+# If no DOCKERFILE is set the script just echo's a list of bundle dependencies to stout as a single common separated line. This
+# is suitable for use with OPM catalog/index creation
+DOCKERFILE=${DOCKERFILE:-""}
 IMAGENAMESPACE=${IMAGENAMESPACE:-"openstack-k8s-operators"}
 IMAGEREGISTRY=${IMAGEREGISTRY:-"quay.io"}
 IMAGEBASE=${IMAGEBASE:-}
 LOCAL_REGISTRY=${LOCAL_REGISTRY:-0}
 
-cp "$DOCKERFILE" "${DOCKERFILE}.pinned"
+if [ -n "$DOCKERFILE" ]; then
+    cp "$DOCKERFILE" "${DOCKERFILE}.pinned"
+    set -ex #in DOCKERFILE mode we like extra logging
+fi
 
 #loop over each openstack-k8s-operators go.mod entry
 for MOD_PATH in $(go list -m -json all | jq -r '. | select(.Path | contains("openstack")) | .Replace // . |.Path' | grep -v openstack-operator | grep -v lib-common); do
@@ -44,5 +50,13 @@ for MOD_PATH in $(go list -m -json all | jq -r '. | select(.Path | contains("ope
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/ | jq -r .tags[].name | sort -u | grep $REF)
     fi
 
-    sed -i "${DOCKERFILE}.pinned" -e "s|quay.io/openstack-k8s-operators/${BASE}-operator-bundle.*|${REPO_URL}/${BASE}-operator-bundle:$SHA|"
+    if [ -n "$DOCKERFILE" ]; then
+        sed -i "${DOCKERFILE}.pinned" -e "s|quay.io/openstack-k8s-operators/${BASE}-operator-bundle.*|${REPO_URL}/${BASE}-operator-bundle:$SHA|"
+    else
+        echo -n ",${REPO_URL}/${BASE}-operator-bundle:$SHA"
+    fi
 done
+# append the rabbitmq URL only if we aren't in Dockerfile mode
+if [ -z "$DOCKERFILE" ]; then
+    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:9ff91ad3c9ef1797b232fce2f9adf6ede5c3421163bff5b8a2a462c6a2b3a68b"
+fi

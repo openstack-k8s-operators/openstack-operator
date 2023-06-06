@@ -115,24 +115,6 @@ jobs:
       run: |
         echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
 
-    - name: Build openstack-operator-storage-bundle using buildah
-      id: build-openstack-operator-storage-bundle
-      uses: redhat-actions/buildah-build@v2
-      with:
-        image: openstack-operator-storage-bundle
-        tags: ${{ env.latesttag }} ${{ github.sha }}
-        containerfiles: |
-          ./storage-bundle.Dockerfile.pinned
-
-    - name: Push openstack-operator-storage-bundle To ${{ env.imageregistry }}
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: ${{ steps.build-openstack-operator-storage-bundle.outputs.image }}
-        tags: ${{ steps.build-openstack-operator-storage-bundle.outputs.tags }}
-        registry:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
-
     - name: Build openstack-operator-bundle using buildah
       id: build-openstack-operator-bundle
       uses: redhat-actions/buildah-build@v2
@@ -193,7 +175,6 @@ jobs:
         REGISTRY:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
         GITHUB_SHA: ${{ github.sha }}
         BUNDLE_IMAGE: openstack-operator-bundle
-        STORAGE_BUNDLE_IMAGE: openstack-operator-storage-bundle
         INDEX_IMAGE_TAG: ${{ env.latesttag }}
         INDEX_IMAGE: openstack-operator-index
 
