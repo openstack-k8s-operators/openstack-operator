@@ -11,9 +11,10 @@ ARG NOVA_BUNDLE=quay.io/openstack-k8s-operators/nova-operator-bundle:latest
 ARG IRONIC_BUNDLE=quay.io/openstack-k8s-operators/ironic-operator-bundle:latest
 ARG BAREMETAL_BUNDLE=quay.io/openstack-k8s-operators/openstack-baremetal-operator-bundle:latest
 ARG TELEMETRY_BUNDLE=quay.io/openstack-k8s-operators/telemetry-operator-bundle:latest
-# we obtain the needed ENV vars containing defaults from storage operators
-ARG OPENSTACK_STORAGE_BUNDLE=quay.io/openstack-k8s-operators/openstack-operator-storage-bundle:latest
 ARG HORIZON_BUNDLE=quay.io/openstack-k8s-operators/horizon-operator-bundle:latest
+ARG GLANCE_BUNDLE=quay.io/openstack-k8s-operators/glance-operator-bundle:latest
+ARG CINDER_BUNDLE=quay.io/openstack-k8s-operators/cinder-operator-bundle:latest
+ARG MANILA_BUNDLE=quay.io/openstack-k8s-operators/manila-operator-bundle:latest
 
 # Build the manager binary
 FROM $GOLANG_CTX as builder
@@ -48,8 +49,10 @@ FROM $NOVA_BUNDLE as nova-bundle
 FROM $IRONIC_BUNDLE as ironic-bundle
 FROM $BAREMETAL_BUNDLE as baremetal-bundle
 FROM $TELEMETRY_BUNDLE as telemetry-bundle
-FROM $OPENSTACK_STORAGE_BUNDLE as openstack-storage-bundle
 FROM $HORIZON_BUNDLE as horizon-bundle
+FROM $GLANCE_BUNDLE as glance-bundle
+FROM $CINDER_BUNDLE as cinder-bundle
+FROM $MANILA_BUNDLE as manila-bundle
 
 FROM $GOLANG_CTX as merger
 WORKDIR /workspace
@@ -71,11 +74,14 @@ COPY --from=nova-bundle /manifests/* /manifests/
 COPY --from=ironic-bundle /manifests/* /manifests/
 COPY --from=baremetal-bundle /manifests/* /manifests/
 COPY --from=telemetry-bundle /manifests/* /manifests/
-COPY --from=openstack-storage-bundle /env-vars.yaml /storage-env-vars.yaml
 COPY --from=horizon-bundle /manifests/* /manifests/
+COPY --from=glance-bundle /manifests/* /manifests/
+COPY --from=cinder-bundle /manifests/* /manifests/
+COPY --from=manila-bundle /manifests/* /manifests/
 
+# extract all the env vars (NOTE/FIXME: base-csv is unused below to be refactored)
 RUN /workspace/csv-merger \
-  --import-env-files=/storage-env-vars.yaml \
+  --export-env-file=/env-vars.yaml \
   --mariadb-csv=/manifests/mariadb-operator.clusterserviceversion.yaml \
   --infra-csv=/manifests/infra-operator.clusterserviceversion.yaml \
   --keystone-csv=/manifests/keystone-operator.clusterserviceversion.yaml \
@@ -89,6 +95,14 @@ RUN /workspace/csv-merger \
   --baremetal-csv=/manifests/openstack-baremetal-operator.clusterserviceversion.yaml \
   --horizon-csv=/manifests/horizon-operator.clusterserviceversion.yaml \
   --telemetry-csv=/manifests/telemetry-operator.clusterserviceversion.yaml \
+  --glance-csv=/manifests/glance-operator.clusterserviceversion.yaml \
+  --cinder-csv=/manifests/cinder-operator.clusterserviceversion.yaml \
+  --manila-csv=/manifests/manila-operator.clusterserviceversion.yaml \
+  --base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /fixme-required-for-now-but-will-can-made-optional.yaml
+
+# apply all the ENV vars to the actual base-csv
+RUN /workspace/csv-merger \
+  --import-env-files=/env-vars.yaml \
   --base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's
@@ -116,7 +130,7 @@ COPY bundle/metadata /metadata/
 COPY bundle/tests/scorecard /tests/scorecard/
 
 # copy in manifests from operators
-COPY --from=merger /manifests /manifests/
+COPY bundle/manifests /manifests/
 
 # overwrite with the final merged CSV
 COPY --from=merger /openstack-operator.clusterserviceversion.yaml.new /manifests/openstack-operator.clusterserviceversion.yaml
