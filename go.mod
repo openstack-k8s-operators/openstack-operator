@@ -18,12 +18,12 @@ require (
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230602100742-579cb85d242d
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230531060543-57aee75577c3
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230602160508-608af8fcbb9b
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230602163853-caf143e55ca3
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230607204311-ef5f0ccf77e7
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230524141327-a53b273227de
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230602145141-cba71686cb63
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230531135741-735c6d0225a9
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230602092913-53f380989946
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230601123048-5a4b48b54f6c
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230609100008-b2d4fc55966a
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
