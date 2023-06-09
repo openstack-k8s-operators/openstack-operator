@@ -6381,6 +6381,7 @@ spec:
                           external-ids:
                             properties:
                               enable-chassis-as-gateway:
+                                default: true
                                 type: boolean
                               ovn-bridge:
                                 type: string
