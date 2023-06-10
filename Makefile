@@ -249,12 +249,14 @@ OPM = $(shell which opm)
 endif
 endif
 
-# A comma-separated list of bundle images (e.g. make catalog-build BUNDLE_IMGS=example.com/operator-bundle:v0.1.0,example.com/operator-bundle:v0.2.0).
-# These images MUST exist in a registry and be pull-able.
-BUNDLE_IMGS ?= $(BUNDLE_IMG)
+# Build make variables to export for shell
+MAKE_ENV := $(shell echo '$(.VARIABLES)' | awk -v RS=' ' '/^(IMAGE)|.*?(REGISTRY)$$/')
+SHELL_EXPORT = $(foreach v,$(MAKE_ENV),$(v)='$($(v))')
+
 .PHONY: catalog-prep
 catalog-prep:
-BUNDLE_IMGS = "$(BUNDLE_IMG)$(shell /bin/bash hack/pin-bundle-images.sh)"
+# These images MUST exist in a registry and be pull-able.
+BUNDLE_IMGS = "$(BUNDLE_IMG)$(shell $(SHELL_EXPORT) /bin/bash hack/pin-bundle-images.sh)"
 
 # The image tag given to the resulting catalog image (e.g. make catalog-build CATALOG_IMG=example.com/operator-catalog:v0.2.0).
 CATALOG_IMG ?= $(IMAGE_TAG_BASE)-index:v$(VERSION)
