@@ -74,6 +74,9 @@ spec:
                             default: CeilometerPassword
                             type: string
                         type: object
+                      rabbitMqClusterName:
+                        default: rabbitmq
+                        type: string
                       secret:
                         default: osp-secret
                         type: string
@@ -3779,9 +3782,6 @@ spec:
                       adminProject:
                         default: admin
                         type: string
-                      adminRole:
-                        default: admin
-                        type: string
                       adminUser:
                         default: admin
                         type: string
@@ -6439,6 +6439,7 @@ spec:
                           external-ids:
                             properties:
                               enable-chassis-as-gateway:
+                                default: true
                                 type: boolean
                               ovn-bridge:
                                 type: string

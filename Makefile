@@ -34,7 +34,6 @@ IMAGE_TAG_BASE ?= quay.io/$(USER)/openstack-operator
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
 BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
-BUNDLE_STORAGE_IMG ?= $(IMAGE_TAG_BASE)-storage-bundle:v$(VERSION)
 
 # BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
 BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
@@ -132,6 +131,7 @@ build: generate fmt vet ## Build manager binary.
 run: export ENABLE_WEBHOOKS?=false
 run: export OPENSTACKCLIENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
 run: manifests generate fmt vet ## Run a controller from your host.
+	/bin/bash hack/clean_local_webhook.sh
 	go run ./main.go
 
 .PHONY: docker-build
@@ -221,8 +221,7 @@ bundle: manifests kustomize ## Generate bundle manifests and metadata, then vali
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS)
 	cp dependencies.yaml ./bundle/metadata
 	operator-sdk bundle validate ./bundle
-	/bin/bash hack/pin-custom-bundle-dockerfile.sh
-	sed -i custom-bundle.Dockerfile.pinned -e "s|quay.io/openstack-k8s-operators/openstack-operator-storage-bundle.*|$(BUNDLE_STORAGE_IMG)|"
+	DOCKERFILE=custom-bundle.Dockerfile /bin/bash hack/pin-bundle-images.sh
 
 
 .PHONY: bundle-build
@@ -232,13 +231,6 @@ bundle-build: bundle ## Build the bundle image.
 .PHONY: bundle-push
 bundle-push: ## Push the bundle image.
 	$(MAKE) docker-push IMG=$(BUNDLE_IMG)
-
-.PHONY: dep-bundle-build-push
-dep-bundle-build-push: bundle ## Build and push dependency bundle images (storage, etc). When building bundles locally correct make order is: bundle, dep-bundle-build-push, bundle-build, bundle-push
-	DOCKERFILE=storage-bundle.Dockerfile /bin/bash hack/pin-custom-bundle-dockerfile.sh
-	podman build -f storage-bundle.Dockerfile.pinned -t $(BUNDLE_STORAGE_IMG) --env CSV_VERSION=$(VERSION) .
-	$(MAKE) docker-push IMG=$(BUNDLE_STORAGE_IMG)
-	#TODO in the future add new operator builds here
 
 .PHONY: opm
 OPM = ./bin/opm
@@ -257,9 +249,14 @@ OPM = $(shell which opm)
 endif
 endif
 
-# A comma-separated list of bundle images (e.g. make catalog-build BUNDLE_IMGS=example.com/operator-bundle:v0.1.0,example.com/operator-bundle:v0.2.0).
+# Build make variables to export for shell
+MAKE_ENV := $(shell echo '$(.VARIABLES)' | awk -v RS=' ' '/^(IMAGE)|.*?(REGISTRY)$$/')
+SHELL_EXPORT = $(foreach v,$(MAKE_ENV),$(v)='$($(v))')
+
+.PHONY: catalog-prep
+catalog-prep:
 # These images MUST exist in a registry and be pull-able.
-BUNDLE_IMGS ?= $(BUNDLE_IMG),$(BUNDLE_STORAGE_IMG)
+BUNDLE_IMGS = "$(BUNDLE_IMG)$(shell $(SHELL_EXPORT) /bin/bash hack/pin-bundle-images.sh)"
 
 # The image tag given to the resulting catalog image (e.g. make catalog-build CATALOG_IMG=example.com/operator-catalog:v0.2.0).
 CATALOG_IMG ?= $(IMAGE_TAG_BASE)-index:v$(VERSION)
@@ -273,7 +270,7 @@ endif
 # This recipe invokes 'opm' in 'semver' bundle add mode. For more information on add modes, see:
 # https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
 .PHONY: catalog-build
-catalog-build: opm ## Build a catalog image.
+catalog-build: opm catalog-prep ## Build a catalog image.
 	# FIXME: hardcoded bundle below should use go.mod pinned version for manila bundle
 	$(OPM) index add --container-tool podman --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
 
@@ -340,6 +337,7 @@ operator-lint: gowork ## Runs operator-lint
 # this. Also, cleanup the webhook configuration for local testing
 # before deplying with olm again.
 # $oc delete -n openstack validatingwebhookconfiguration/vopenstackcontrolplane.kb.io
+# $oc delete -n openstack mutatingwebhookconfiguration/mopenstackcontrolplane.kb.io
 SKIP_CERT ?=false
 .PHONY: run-with-webhook
 run-with-webhook: export OPENSTACKCLIENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified

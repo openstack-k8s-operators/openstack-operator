@@ -197,129 +197,47 @@ func setupServiceOperatorDefaults() {
 	// require each respective default
 
 	// Cinder
-	cinderDefaults := cinderv1.CinderDefaults{
-		APIContainerImageURL:       os.Getenv("CINDER_API_IMAGE_URL_DEFAULT"),
-		BackupContainerImageURL:    os.Getenv("CINDER_BACKUP_IMAGE_URL_DEFAULT"),
-		SchedulerContainerImageURL: os.Getenv("CINDER_SCHEDULER_IMAGE_URL_DEFAULT"),
-		VolumeContainerImageURL:    os.Getenv("CINDER_VOLUME_IMAGE_URL_DEFAULT"),
-	}
-
-	cinderv1.SetupCinderDefaults(cinderDefaults)
+	cinderv1.SetupDefaults()
 
 	// Glance
-	glanceDefaults := glancev1.GlanceDefaults{
-		ContainerImageURL: os.Getenv("GLANCE_API_IMAGE_URL_DEFAULT"),
-	}
-
-	glancev1.SetupGlanceDefaults(glanceDefaults)
+	glancev1.SetupDefaults()
 
 	// Ironic
-	ironicDefaults := ironicv1.IronicDefaults{
-		APIContainerImageURL:       os.Getenv("IRONIC_API_IMAGE_URL_DEFAULT"),
-		ConductorContainerImageURL: os.Getenv("IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT"),
-		InspectorContainerImageURL: os.Getenv("IRONIC_INSPECTOR_IMAGE_URL_DEFAULT"),
-		PXEContainerImageURL:       os.Getenv("IRONIC_PXE_IMAGE_URL_DEFAULT"),
-		INAContainerImageURL:       os.Getenv("IRONIC_NEUTRON_AGENT_IMAGE_URL_DEFAULT"),
-	}
-
-	ironicv1.SetupIronicDefaults(ironicDefaults)
+	ironicv1.SetupDefaults()
 
 	// Keystone
-	keystoneDefaults := keystonev1.KeystoneAPIDefaults{
-		ContainerImageURL: os.Getenv("KEYSTONE_API_IMAGE_URL_DEFAULT"),
-	}
-
-	keystonev1.SetupKeystoneAPIDefaults(keystoneDefaults)
+	keystonev1.SetupDefaults()
 
 	// Manila
-	manilaDefaults := manilav1.ManilaDefaults{
-		APIContainerImageURL:       os.Getenv("MANILA_API_IMAGE_URL_DEFAULT"),
-		SchedulerContainerImageURL: os.Getenv("MANILA_SCHEDULER_IMAGE_URL_DEFAULT"),
-		ShareContainerImageURL:     os.Getenv("MANILA_SHARE_IMAGE_URL_DEFAULT"),
-	}
-
-	manilav1.SetupManilaDefaults(manilaDefaults)
+	manilav1.SetupDefaults()
 
 	// MariaDB
-	mariadbDefaults := mariadbv1.MariaDBDefaults{
-		ContainerImageURL: os.Getenv("MARIADB_IMAGE_URL_DEFAULT"),
-	}
-
-	mariadbv1.SetupMariaDBDefaults(mariadbDefaults)
+	mariadbv1.SetupDefaults()
 
 	// Memcached
-	memcachedDefaults := memcachedv1.MemcachedDefaults{
-		ContainerImageURL: os.Getenv("INFRA_MEMCACHED_IMAGE_URL_DEFAULT"),
-	}
-
-	memcachedv1.SetupMemcachedDefaults(memcachedDefaults)
+	memcachedv1.SetupDefaults()
 
 	// Neutron
-	neutronAPIDefaults := neutronv1.NeutronAPIDefaults{
-		ContainerImageURL: os.Getenv("NEUTRON_API_IMAGE_URL_DEFAULT"),
-	}
-
-	neutronv1.SetupNeutronAPIDefaults(neutronAPIDefaults)
+	neutronv1.SetupDefaults()
 
 	// Nova
 	novav1.SetupDefaults()
 
 	// OpenStackClient
-	openStackClientDefaults := clientv1.OpenStackClientDefaults{
-		ContainerImageURL: os.Getenv("INFRA_CLIENT_IMAGE_URL_DEFAULT"),
-	}
-
-	clientv1.SetupOpenStackClientDefaults(openStackClientDefaults)
+	clientv1.SetupDefaults()
 
 	// OVN
-	ovnDbClusterDefaults := ovnv1.OVNDBClusterDefaults{
-		NBContainerImageURL: os.Getenv("OVN_NB_DBCLUSTER_IMAGE_URL_DEFAULT"),
-		SBContainerImageURL: os.Getenv("OVN_SB_DBCLUSTER_IMAGE_URL_DEFAULT"),
-	}
-
-	ovnv1.SetupOVNDBClusterDefaults(ovnDbClusterDefaults)
-
-	ovnNorthdDefaults := ovnv1.OVNNorthdDefaults{
-		ContainerImageURL: os.Getenv("OVN_NORTHD_IMAGE_URL_DEFAULT"),
-	}
-
-	ovnv1.SetupOVNNorthdDefaults(ovnNorthdDefaults)
-
-	ovnControllerDefaults := ovnv1.OvnControllerDefaults{
-		OvsContainerImageURL:           os.Getenv("OVN_CONTROLLER_OVS_IMAGE_URL_DEFAULT"),
-		OvnControllerContainerImageURL: os.Getenv("OVN_CONTROLLER_IMAGE_URL_DEFAULT"),
-	}
-
-	ovnv1.SetupOVNControllerDefaults(ovnControllerDefaults)
+	ovnv1.SetupDefaults()
 
 	// Placement
-	placementAPIDefaults := placementv1.PlacementAPIDefaults{
-		ContainerImageURL: os.Getenv("PLACEMENT_API_IMAGE_URL_DEFAULT"),
-	}
-
-	placementv1.SetupPlacementAPIDefaults(placementAPIDefaults)
+	placementv1.SetupDefaults()
 
 	// Redis
-	redisDefaults := redisv1.RedisDefaults{
-		ContainerImageURL: os.Getenv("INFRA_REDIS_IMAGE_URL_DEFAULT"),
-	}
-
-	redisv1.SetupRedisDefaults(redisDefaults)
+	redisv1.SetupDefaults()
 
 	// DNS
-	dnsDefaults := networkv1.DNSMasqDefaults{
-		ContainerImageURL: os.Getenv("INFRA_DNSMASQ_IMAGE_URL_DEFAULT"),
-	}
-
-	networkv1.SetupDNSMasqDefaults(dnsDefaults)
+	networkv1.SetupDefaults()
 
 	// Ceilometer
-	ceilometerDefaults := telemetryv1.CeilometerCentralDefaults{
-		CentralContainerImageURL:      os.Getenv("CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT"),
-		CentralInitContainerImageURL:  os.Getenv("CEILOMETER_CENTRAL_INIT_IMAGE_URL_DEFAULT"),
-		NotificationContainerImageURL: os.Getenv("CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT"),
-		SgCoreContainerImageURL:       os.Getenv("CEILOMETER_SGCORE_IMAGE_URL_DEFAULT"),
-	}
-
-	telemetryv1.SetupCeilometerCentralDefaults(ceilometerDefaults)
+	telemetryv1.SetupDefaultsCeilometerCentral()
 }
