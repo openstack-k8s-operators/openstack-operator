@@ -176,7 +176,6 @@ spec:
       secret: osp-secret
   ceilometer:
     template:
-      serviceAccount: telemetry-operator-telemetry
       passwordSelector:
         service: CeilometerPassword
       secret: osp-secret
