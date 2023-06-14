@@ -238,16 +238,6 @@ func setupServiceOperatorDefaults() {
 	// DNS
 	networkv1.SetupDefaults()
 
-	// Telemetry
-	// TODO: Telemetry operator is undergoing refactoring, so this will be addressed later
-	telemetryDefaults := telemetryv1.TelemetryDefaults{
-		CentralContainerImageURL:      os.Getenv("CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT"),
-		CentralInitContainerImageURL:  os.Getenv("CEILOMETER_CENTRAL_INIT_IMAGE_URL_DEFAULT"),
-		ComputeContainerImageURL:      os.Getenv("CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT"),
-		ComputeInitContainerImageURL:  os.Getenv("CEILOMETER_COMPUTE_INIT_IMAGE_URL_DEFAULT"),
-		NotificationContainerImageURL: os.Getenv("CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT"),
-		SgCoreContainerImageURL:       os.Getenv("CEILOMETER_SGCORE_IMAGE_URL_DEFAULT"),
-	}
-
-	telemetryv1.SetupTelemetryDefaults(telemetryDefaults)
+	// Ceilometer
+	telemetryv1.SetupDefaultsCeilometerCentral()
 }

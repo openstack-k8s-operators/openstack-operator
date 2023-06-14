@@ -307,8 +307,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.DNS.Template.Default()
 	}
 
-	// Telemetry
-	if r.Spec.Telemetry.Enabled {
-		r.Spec.Telemetry.Template.Default()
+	// Ceilometer
+	if r.Spec.Ceilometer.Enabled {
+		r.Spec.Ceilometer.Template.Default()
 	}
 }

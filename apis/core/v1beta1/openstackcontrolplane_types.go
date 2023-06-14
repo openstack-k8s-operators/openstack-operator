@@ -128,8 +128,8 @@ type OpenStackControlPlaneSpec struct {
 	Horizon HorizonSection `json:"horizon,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// Telemetry - Parameters related to the OpenStack Telemetry services
-	Telemetry TelemetrySection `json:"telemetry,omitempty"`
+	// Ceilometer - Parameters related to the OpenStack Ceilometer service
+	Ceilometer CeilometerSection `json:"ceilometer,omitempty"`
 
 	// ExtraMounts containing conf files and credentials that should be provided
 	// to the underlying operators.
@@ -405,18 +405,18 @@ type HorizonSection struct {
 	Template horizonv1.HorizonSpec `json:"template,omitempty"`
 }
 
-// TelemetrySection defines the desired state of OpenStack Telemetry services
-type TelemetrySection struct {
+// CeilometerSection defines the desired state of OpenStack Telemetry services
+type CeilometerSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Enabled - Whether OpenStack Telemetry services should be deployed and managed
+	// Enabled - Whether OpenStack Ceilometer servicesshould be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// Template - Overrides to use when creating the OpenStack Telemetry services
-	Template telemetryv1.TelemetrySpec `json:"template,omitempty"`
+	// Template - Overrides to use when creating the OpenStack Ceilometer service
+	Template telemetryv1.CeilometerCentralSpec `json:"template,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
@@ -503,7 +503,7 @@ func (instance OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneManilaReadyCondition, condition.InitReason, OpenStackControlPlaneManilaReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneHorizonReadyCondition, condition.InitReason, OpenStackControlPlaneHorizonReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneDNSReadyCondition, condition.InitReason, OpenStackControlPlaneDNSReadyInitMessage),
-		condition.UnknownCondition(OpenStackControlPlaneTelemetryReadyCondition, condition.InitReason, OpenStackControlPlaneTelemetryReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneCeilometerReadyCondition, condition.InitReason, OpenStackControlPlaneCeilometerReadyInitMessage),
 
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
