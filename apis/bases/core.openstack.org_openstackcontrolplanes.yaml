@@ -3093,6 +3093,26 @@ spec:
                       preserveJobs:
                         default: false
                         type: boolean
+                      quotas:
+                        properties:
+                          imageCountTotal:
+                            default: 0
+                            type: integer
+                          imageCountUpload:
+                            default: 0
+                            type: integer
+                          imageSizeTotal:
+                            default: 0
+                            type: integer
+                          imageStageTotal:
+                            default: 0
+                            type: integer
+                        required:
+                        - imageCountTotal
+                        - imageCountUpload
+                        - imageSizeTotal
+                        - imageStageTotal
+                        type: object
                       secret:
                         type: string
                       serviceUser:
