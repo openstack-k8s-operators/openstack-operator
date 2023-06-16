@@ -113,11 +113,9 @@ spec:
       ironicNeutronAgent:
         replicas: 1
       secret: osp-secret
-  telemetry:
+  ceilometer:
     template:
-      ceilometerCentral:
-        passwordSelector:
-          service: CeilometerPassword
-        secret: osp-secret
-        serviceUser: ceilometer
-      rabbitMqClusterName: rabbitmq
+      passwordSelector:
+        service: CeilometerPassword
+      secret: osp-secret
+      serviceUser: ceilometer
