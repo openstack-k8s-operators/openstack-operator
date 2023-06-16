@@ -8,7 +8,7 @@
         - name: "openstack-operator"
           src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
           image_base: openstack
-    irrelevant-files:
+    irrelevant-files: &openstack_if
       - tests/kuttl
       - containers/ci
       - .github/workflows
@@ -27,7 +27,9 @@
 - job:
     name: openstack-operator-crc-podified-edpm-deployment
     parent: cifmw-crc-podified-edpm-deployment
+    irrelevant-files: *openstack_if
 
 - job:
     name: openstack-operator-crc-podified-edpm-baremetal
     parent: cifmw-crc-podified-edpm-baremetal
+    irrelevant-files: *openstack_if
