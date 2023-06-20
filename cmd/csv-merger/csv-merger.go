@@ -101,6 +101,7 @@ var (
 	ansibleEECsv   = flag.String("ansibleee-csv", "", "Ansible EE CSV filename")
 	dataplaneCsv   = flag.String("dataplane-csv", "", "Data plane CSV filename")
 	novaCsv        = flag.String("nova-csv", "", "Nova CSV filename")
+	heatCsv        = flag.String("heat-csv", "", "Heat CSV filename")
 	neutronCsv     = flag.String("neutron-csv", "", "Neutron CSV filename")
 	glanceCsv      = flag.String("glance-csv", "", "Glance CSV filename")
 	ironicCsv      = flag.String("ironic-csv", "", "Ironic CSV filename")
@@ -154,6 +155,7 @@ func main() {
 		*ovnCsv,
 		*cinderCsv,
 		*horizonCsv,
+		*heatCsv,
 	}
 
 	csvVersion := os.Getenv("CSV_VERSION")

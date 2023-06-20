@@ -3130,6 +3130,256 @@ spec:
                     - storageRequest
                     type: object
                 type: object
+              heat:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  template:
+                    properties:
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        type: string
+                      databaseHostname:
+                        type: string
+                      databaseInstance:
+                        type: string
+                      databaseUser:
+                        default: heat
+                        type: string
+                      debug:
+                        properties:
+                          dbSync:
+                            default: false
+                            type: boolean
+                        type: object
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      heatAPI:
+                        properties:
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            default: '# add your customization here'
+                            type: string
+                          debug:
+                            properties:
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                        required:
+                        - containerImage
+                        type: object
+                      heatCfnAPI:
+                        properties:
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            default: '# add your customization here'
+                            type: string
+                          debug:
+                            properties:
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                        required:
+                        - containerImage
+                        type: object
+                      heatEngine:
+                        properties:
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            default: '# add your customization here'
+                            type: string
+                          debug:
+                            properties:
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                        required:
+                        - containerImage
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      passwordSelectors:
+                        default:
+                          authEncryptionKey: HeatAuthEncryptionKey
+                          database: HeatDatabasePassword
+                          service: HeatPassword
+                        properties:
+                          authEncryptionKey:
+                            default: HeatAuthEncryptionKey
+                            type: string
+                          database:
+                            default: HeatDatabasePassword
+                            type: string
+                          service:
+                            default: HeatPassword
+                            type: string
+                        type: object
+                      preserveJobs:
+                        default: false
+                        type: boolean
+                      rabbitMqClusterName:
+                        default: rabbitmq
+                        type: string
+                      secret:
+                        type: string
+                      serviceUser:
+                        default: heat
+                        type: string
+                    required:
+                    - databaseInstance
+                    - heatAPI
+                    - heatCfnAPI
+                    - heatEngine
+                    - rabbitMqClusterName
+                    - secret
+                    type: object
+                type: object
               horizon:
                 properties:
                   enabled:

@@ -311,4 +311,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	if r.Spec.Ceilometer.Enabled {
 		r.Spec.Ceilometer.Template.Default()
 	}
+
+	// Heat
+	if r.Spec.Heat.Enabled {
+		r.Spec.Heat.Template.Default()
+	}
 }
