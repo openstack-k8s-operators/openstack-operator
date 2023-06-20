@@ -69,5 +69,9 @@ dependencies:
       version: ">=0.0.0"
   - type: olm.package
     value:
+      packageName: swift-operator
+      version: ">=0.0.0"
+  - type: olm.package
+    value:
       packageName: telemetry-operator
       version: ">=0.0.0"

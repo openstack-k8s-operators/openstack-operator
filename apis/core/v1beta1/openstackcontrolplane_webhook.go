@@ -135,6 +135,10 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			r.Spec.Placement.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled) {
 			reqs = "MariaDB or Galera, Glance, Keystone, Neutron, Placement, RabbitMQ"
 		}
+	case "Swift":
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Keystone"
+		}
 	}
 
 	// If "reqs" is not the empty string, we have missing requirements
@@ -195,6 +199,13 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 	if r.Spec.Nova.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Nova"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("nova").Child("enabled"), r.Spec.Nova.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+
+	if r.Spec.Swift.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Swift"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("swift").Child("enabled"), r.Spec.Swift.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -340,5 +351,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// Heat
 	if r.Spec.Heat.Enabled {
 		r.Spec.Heat.Template.Default()
+	}
+
+	// Swift
+	if r.Spec.Swift.Enabled {
+		r.Spec.Swift.Template.Default()
 	}
 }
