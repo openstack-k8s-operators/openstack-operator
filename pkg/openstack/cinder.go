@@ -38,9 +38,9 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		if cinder.Spec.Secret == "" {
 			cinder.Spec.Secret = instance.Spec.Secret
 		}
-		//if cinder.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-		//cinder.Spec.NodeSelector = instance.Spec.NodeSelector
-		//}
+		if cinder.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
+			cinder.Spec.NodeSelector = instance.Spec.NodeSelector
+		}
 		if cinder.Spec.DatabaseInstance == "" {
 			//cinder.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
 			cinder.Spec.DatabaseInstance = "openstack" //FIXME: see above
