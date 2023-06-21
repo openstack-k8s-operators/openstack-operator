@@ -28,6 +28,7 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -38,6 +39,13 @@ import (
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	// Container image fall-back defaults
+
+	// RabbitMqContainerImage is the fall-back container image for RabbitMQ
+	RabbitMqContainerImage = "quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified"
 )
 
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
@@ -531,4 +539,14 @@ func (instance OpenStackControlPlane) InitConditions() {
 	)
 	// initialize conditions used later as Status=Unknown
 	instance.Status.Conditions.Init(&cl)
+}
+
+// SetupDefaults - initializes any CRD field defaults based on environment variables (the defaulting mechanism itself is implemented via webhooks)
+func SetupDefaults() {
+	// Acquire environmental defaults and initialize OpenStackControlPlane defaults with them
+	openstackControlPlaneDefaults := OpenStackControlPlaneDefaults{
+		RabbitMqImageURL: util.GetEnvVar("RABBITMQ_IMAGE_URL_DEFAULT", RabbitMqContainerImage),
+	}
+
+	SetupOpenStackControlPlaneDefaults(openstackControlPlaneDefaults)
 }

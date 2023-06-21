@@ -168,6 +168,9 @@ func main() {
 	// Defaults for service operators
 	setupServiceOperatorDefaults()
 
+	// Defaults for anything else that was not covered by service operator defaults
+	corev1beta1.SetupDefaults()
+
 	// Webhooks
 	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
 		if err = (&corev1beta1.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
