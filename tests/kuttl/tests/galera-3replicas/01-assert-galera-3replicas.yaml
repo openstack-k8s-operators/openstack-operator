@@ -40,7 +40,9 @@ spec:
       rabbitmq-cell1:
         replicas: 1
   memcached:
-    enabled: true
+    templates:
+      memcached:
+        replicas: 1
   placement:
     template:
       databaseInstance: openstack

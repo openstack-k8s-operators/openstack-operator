@@ -81,7 +81,9 @@ spec:
         secret: osp-secret
         replicas: 1
   memcached:
-    enabled: true
+    templates:
+      memcached:
+        replicas: 1
   neutron:
     template:
       databaseInstance: openstack
