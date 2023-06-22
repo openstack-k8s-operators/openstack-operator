@@ -28,8 +28,21 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
+// OpenStackControlPlaneDefaults -
+type OpenStackControlPlaneDefaults struct {
+	RabbitMqImageURL string
+}
+
+var openstackControlPlaneDefaults OpenStackControlPlaneDefaults
+
 // log is for logging in this package.
 var openstackcontrolplanelog = logf.Log.WithName("openstackcontrolplane-resource")
+
+// SetupOpenStackControlPlaneDefaults - initialize OpenStackControlPlane spec defaults for use with internal webhooks
+func SetupOpenStackControlPlaneDefaults(defaults OpenStackControlPlaneDefaults) {
+	openstackControlPlaneDefaults = defaults
+	openstackcontrolplanelog.Info("OpenStackControlPlane defaults initialized", "defaults", defaults)
+}
 
 // SetupWebhookWithManager sets up the Webhook with the Manager.
 func (r *OpenStackControlPlane) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -211,6 +224,18 @@ func (r *OpenStackControlPlane) Default() {
 
 // DefaultServices - common function for calling individual services' defaulting functions
 func (r *OpenStackControlPlane) DefaultServices() {
+	// RabbitMQ
+	// This is a special case in that we don't own the RabbitMQ operator,
+	// so we aren't able to add and call a Default function on its spec.
+	// Instead we just directly set the defaults we need.
+	if r.Spec.Rabbitmq.Enabled {
+		for key, template := range r.Spec.Rabbitmq.Templates {
+			template.Image = openstackControlPlaneDefaults.RabbitMqImageURL
+			// By-value copy, need to update
+			r.Spec.Rabbitmq.Templates[key] = template
+		}
+	}
+
 	// Cinder
 	if r.Spec.Cinder.Enabled {
 		r.Spec.Cinder.Template.Default()

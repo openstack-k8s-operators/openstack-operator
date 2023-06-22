@@ -119,7 +119,7 @@ func reconcileRabbitMQ(
 							Name: "rabbitmq",
 							// NOTE(gibi): without this the second RabbitMqCluster
 							// will fail as the Pod will have no image.
-							Image: "registry.redhat.io/rhosp-rhel9/openstack-rabbitmq:17.0",
+							Image: spec.Image,
 							Env: []corev1.EnvVar{
 								{
 									// The upstream rabbitmq image has /var/log/rabbitmq mode 777, so when
