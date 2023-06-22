@@ -38,9 +38,9 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		if manila.Spec.Secret == "" {
 			manila.Spec.Secret = instance.Spec.Secret
 		}
-		//if manila.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-		//manila.Spec.NodeSelector = instance.Spec.NodeSelector
-		//}
+		if manila.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
+			manila.Spec.NodeSelector = instance.Spec.NodeSelector
+		}
 		if manila.Spec.DatabaseInstance == "" {
 			//manila.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
 			manila.Spec.DatabaseInstance = "openstack" //FIXME: see above
