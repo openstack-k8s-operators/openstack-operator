@@ -55,10 +55,9 @@ import (
 // OpenStackControlPlaneReconciler reconciles a OpenStackControlPlane object
 type OpenStackControlPlaneReconciler struct {
 	client.Client
-	Scheme                        *runtime.Scheme
-	Kclient                       kubernetes.Interface
-	Log                           logr.Logger
-	OpenStackClientContainerImage string
+	Scheme  *runtime.Scheme
+	Kclient kubernetes.Interface
+	Log     logr.Logger
 }
 
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;create;update;patch;delete
@@ -248,7 +247,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, helper, r.OpenStackClientContainerImage)
+	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {

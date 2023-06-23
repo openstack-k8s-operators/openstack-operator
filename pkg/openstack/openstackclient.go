@@ -35,7 +35,7 @@ const (
 )
 
 // ReconcileOpenStackClient -
-func ReconcileOpenStackClient(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper, openstackClientImage string) (ctrl.Result, error) {
+func ReconcileOpenStackClient(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 
 	openstackclient := &clientv1beta1.OpenStackClient{
 		ObjectMeta: metav1.ObjectMeta{
@@ -46,8 +46,6 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1beta1.OpenSta
 
 	helper.GetLogger().Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
-		openstackclient.Spec.ContainerImage = openstackClientImage
-
 		// the following are created/owned by keystoneclient
 		openstackclient.Spec.OpenStackConfigMap = "openstack-config"
 		openstackclient.Spec.OpenStackConfigSecret = "openstack-config-secret"
