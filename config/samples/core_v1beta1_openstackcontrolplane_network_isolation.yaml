@@ -189,3 +189,12 @@ spec:
         service: CeilometerPassword
       secret: osp-secret
       serviceUser: ceilometer
+  swift:
+    enabled: true
+    template:
+      swiftRing:
+        ringReplicas: 1
+      swiftStorage:
+        replicas: 1
+      swiftProxy:
+        replicas: 1

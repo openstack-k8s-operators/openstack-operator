@@ -260,6 +260,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - swift.openstack.org
+  resources:
+  - swifts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - telemetry.openstack.org
   resources:
   - ceilometercentrals

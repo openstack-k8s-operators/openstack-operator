@@ -48,6 +48,7 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqclusterv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -94,6 +95,7 @@ func init() {
 	utilruntime.Must(horizonv1.AddToScheme(scheme))
 	utilruntime.Must(networkv1.AddToScheme(scheme))
 	utilruntime.Must(telemetryv1.AddToScheme(scheme))
+	utilruntime.Must(swiftv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -253,4 +255,7 @@ func setupServiceOperatorDefaults() {
 
 	// Ceilometer
 	telemetryv1.SetupDefaultsCeilometerCentral()
+
+	// Swift
+	swiftv1.SetupDefaults()
 }

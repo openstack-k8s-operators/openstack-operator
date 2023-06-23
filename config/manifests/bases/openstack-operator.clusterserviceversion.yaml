@@ -233,6 +233,14 @@ spec:
         path: storageClass
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes:StorageClass
+      - description: Enabled - Whether Swift service should be deployed and managed
+        displayName: Enabled
+        path: swift.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating Swift Resources
+        displayName: Template
+        path: swift.template
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

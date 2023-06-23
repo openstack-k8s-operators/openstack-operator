@@ -11078,6 +11078,104 @@ spec:
                 type: string
               storageClass:
                 type: string
+              swift:
+                properties:
+                  enabled:
+                    default: true
+                    type: boolean
+                  template:
+                    properties:
+                      swiftConfSecret:
+                        default: swift-conf
+                        type: string
+                      swiftProxy:
+                        properties:
+                          containerImageMemcached:
+                            type: string
+                          containerImageProxy:
+                            type: string
+                          passwordSelectors:
+                            properties:
+                              admin:
+                                default: SwiftPassword
+                                type: string
+                              transportUrl:
+                                default: TransportURL
+                                type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            type: integer
+                          secret:
+                            default: osp-secret
+                            type: string
+                          serviceUser:
+                            default: swift
+                            type: string
+                          swiftConfSecret:
+                            default: swift-conf
+                            type: string
+                        required:
+                        - containerImageMemcached
+                        - containerImageProxy
+                        - replicas
+                        - serviceUser
+                        type: object
+                      swiftRing:
+                        properties:
+                          containerImage:
+                            type: string
+                          ringReplicas:
+                            default: 1
+                            format: int64
+                            type: integer
+                          swiftConfSecret:
+                            default: swift-conf
+                            type: string
+                        required:
+                        - containerImage
+                        - ringReplicas
+                        type: object
+                      swiftStorage:
+                        properties:
+                          containerImageAccount:
+                            type: string
+                          containerImageContainer:
+                            type: string
+                          containerImageMemcached:
+                            type: string
+                          containerImageObject:
+                            type: string
+                          containerImageProxy:
+                            type: string
+                          replicas:
+                            format: int32
+                            type: integer
+                          storageClass:
+                            default: local-storage
+                            type: string
+                          storageRequest:
+                            default: 10Gi
+                            type: string
+                          swiftConfSecret:
+                            default: swift-conf
+                            type: string
+                        required:
+                        - containerImageAccount
+                        - containerImageContainer
+                        - containerImageMemcached
+                        - containerImageObject
+                        - containerImageProxy
+                        - replicas
+                        - storageRequest
+                        type: object
+                    required:
+                    - swiftProxy
+                    - swiftRing
+                    - swiftStorage
+                    type: object
+                type: object
             required:
             - secret
             - storageClass

@@ -86,6 +86,21 @@ const (
 
 	// OpenStackControlPlaneManilaReadyErrorMessage
 	OpenStackControlPlaneManilaReadyErrorMessage = "OpenStackControlPlane Manila error occured %s"
+
+	// OpenStackControlPlaneSwiftReadyCondition Status=True condition which indicates if Swift is configured and operational
+	OpenStackControlPlaneSwiftReadyCondition condition.Type = "OpenStackControlPlaneSwiftReady"
+
+	// OpenStackControlPlaneSwiftReadyInitMessage
+	OpenStackControlPlaneSwiftReadyInitMessage = "OpenStackControlPlane Swift not started"
+
+	// OpenStackControlPlaneSwiftReadyMessage
+	OpenStackControlPlaneSwiftReadyMessage = "OpenStackControlPlane Swift completed"
+
+	// OpenStackControlPlaneSwiftReadyRunningMessage
+	OpenStackControlPlaneSwiftReadyRunningMessage = "OpenStackControlPlane Swift in progress"
+
+	// OpenStackControlPlaneSwiftReadyErrorMessage
+	OpenStackControlPlaneSwiftReadyErrorMessage = "OpenStackControlPlane Swift error occured %s"
 )
 
 // OpenStackControlPlane Reasons used by API objects.
