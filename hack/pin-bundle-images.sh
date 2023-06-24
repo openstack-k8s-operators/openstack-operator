@@ -47,7 +47,12 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
     if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
     else
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/ | jq -r .tags[].name | sort -u | grep $REF)
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?filter_tag_name=like:$REF | jq -r .tags[].name)
+    fi
+
+    if [ -z "$SHA" ]; then
+        echo "Error: SHA is empty, Could not find container with tag $REF in $REPO_CURL_URL"
+        exit 1
     fi
 
     if [ -n "$DOCKERFILE" ]; then
