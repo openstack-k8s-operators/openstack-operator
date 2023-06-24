@@ -29,6 +29,8 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		},
 	}
 
+	Log := GetLogger(ctx)
+
 	if !instance.Spec.Swift.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, swift); err != nil {
 			return res, err
@@ -86,6 +88,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 	}
 
 	helper.GetLogger().Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")
+	Log.Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), swift, func() error {
 		instance.Spec.Swift.Template.DeepCopyInto(&swift.Spec)
 
@@ -106,7 +109,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("Swift %s - %s", swift.Name, op))
+		Log.Info(fmt.Sprintf("Swift %s - %s", swift.Name, op))
 	}
 
 	if swift.IsReady() {

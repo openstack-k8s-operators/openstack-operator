@@ -94,6 +94,8 @@ func reconcileMariaDB(
 		},
 	}
 
+	Log := GetLogger(ctx)
+
 	if !instance.Spec.Mariadb.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, mariadb); err != nil {
 			return mariadbFailed, err
@@ -102,7 +104,7 @@ func reconcileMariaDB(
 		return mariadbReady, nil
 	}
 
-	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "Mariadb.Name", name)
+	Log.Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "Mariadb.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), mariadb, func() error {
 		spec.DeepCopyInto(&mariadb.Spec)
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), mariadb, helper.GetScheme())
@@ -117,7 +119,7 @@ func reconcileMariaDB(
 		return mariadbFailed, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("MariaDB %s - %s", mariadb.Name, op))
+		Log.Info(fmt.Sprintf("MariaDB %s - %s", mariadb.Name, op))
 	}
 
 	if mariadb.IsReady() {

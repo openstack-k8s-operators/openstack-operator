@@ -28,6 +28,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
 	if !instance.Spec.Neutron.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, neutronAPI); err != nil {
@@ -85,7 +86,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
-	helper.GetLogger().Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
+	Log.Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
 		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec)
 
@@ -131,7 +132,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("neutronAPI %s - %s", neutronAPI.Name, op))
+		Log.Info(fmt.Sprintf("neutronAPI %s - %s", neutronAPI.Name, op))
 	}
 
 	if neutronAPI.IsReady() {

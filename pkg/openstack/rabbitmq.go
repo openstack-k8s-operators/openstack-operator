@@ -96,8 +96,9 @@ func reconcileRabbitMQ(
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
-	helper.GetLogger().Info("Reconciling RabbitMQ", "RabbitMQ.Namespace", instance.Namespace, "RabbitMQ.Name", name)
+	Log.Info("Reconciling RabbitMQ", "RabbitMQ.Namespace", instance.Namespace, "RabbitMQ.Name", name)
 	if !instance.Spec.Rabbitmq.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, rabbitmq); err != nil {
 			return mqFailed, err
@@ -177,12 +178,12 @@ func reconcileRabbitMQ(
 		}
 
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
-			helper.GetLogger().Info("Setting StorageClassName: " + instance.Spec.StorageClass)
+			Log.Info(fmt.Sprintf("Setting StorageClassName: " + instance.Spec.StorageClass))
 			rabbitmq.Spec.Persistence.StorageClassName = &instance.Spec.StorageClass
 		}
 
 		if rabbitmq.Spec.Override.StatefulSet == nil {
-			helper.GetLogger().Info("Setting StatefulSet")
+			Log.Info("Setting StatefulSet")
 			rabbitmq.Spec.Override.StatefulSet = &defaultStatefulSet
 		}
 
@@ -194,7 +195,7 @@ func reconcileRabbitMQ(
 		}
 
 		if rabbitmq.Spec.Rabbitmq.AdditionalConfig == "" {
-			helper.GetLogger().Info("Setting AdditionalConfig")
+			Log.Info("Setting AdditionalConfig")
 			// This is the same situation as RABBITMQ_UPGRADE_LOG above,
 			// except for the "main" rabbitmq log we can just force it to use the console.
 			rabbitmq.Spec.Rabbitmq.AdditionalConfig = "log.console = true"
@@ -213,7 +214,7 @@ func reconcileRabbitMQ(
 		return mqFailed, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("RabbitMQ %s - %s", rabbitmq.Name, op))
+		Log.Info(fmt.Sprintf("RabbitMQ %s - %s", rabbitmq.Name, op))
 	}
 
 	for _, oldCond := range rabbitmq.Status.Conditions {

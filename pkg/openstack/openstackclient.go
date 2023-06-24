@@ -40,8 +40,9 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
-	helper.GetLogger().Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
+	Log.Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
 		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec)
 
@@ -69,14 +70,14 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("OpenStackClient %s - %s", openstackclient.Name, op))
+		Log.Info(fmt.Sprintf("OpenStackClient %s - %s", openstackclient.Name, op))
 	}
 
 	if openstackclient.Status.Conditions.IsTrue(clientv1.OpenStackClientReadyCondition) {
-		helper.GetLogger().Info("OpenStackClient ready condition is true")
+		Log.Info("OpenStackClient ready condition is true")
 		instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneClientReadyCondition, corev1.OpenStackControlPlaneClientReadyMessage)
 	} else {
-		helper.GetLogger().Info("OpenStackClient ready condition is false")
+		Log.Info("OpenStackClient ready condition is false")
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1.OpenStackControlPlaneClientReadyCondition,
 			condition.RequestedReason,

@@ -33,7 +33,9 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling DNSMasq", "DNSMasq.Namespace", instance.Namespace, "DNSMasq.Name", "dnsmasq")
+	Log := GetLogger(ctx)
+
+	Log.Info("Reconciling DNSMasq", "DNSMasq.Namespace", instance.Namespace, "DNSMasq.Name", "dnsmasq")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), dnsmasq, func() error {
 		instance.Spec.DNS.Template.DeepCopyInto(&dnsmasq.Spec)
 		if dnsmasq.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
@@ -56,7 +58,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("dnsmasq %s - %s", dnsmasq.Name, op))
+		Log.Info(fmt.Sprintf("dnsmasq %s - %s", dnsmasq.Name, op))
 	}
 
 	if dnsmasq.IsReady() {

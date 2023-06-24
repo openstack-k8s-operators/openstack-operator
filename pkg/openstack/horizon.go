@@ -29,6 +29,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
 	if !instance.Spec.Horizon.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, horizon); err != nil {
@@ -96,7 +97,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
-	helper.GetLogger().Info("Reconcile Horizon", "horizon.Namespace", instance.Namespace, "horizon.Name", "horizon")
+	Log.Info("Reconcile Horizon", "horizon.Namespace", instance.Namespace, "horizon.Name", "horizon")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), horizon, func() error {
 		instance.Spec.Horizon.Template.DeepCopyInto(&horizon.Spec)
 		horizon.Spec.Override.Service = ptr.To(serviceOverrides[service.EndpointPublic])
@@ -118,7 +119,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("Horizon %s - %s", horizon.Name, op))
+		Log.Info(fmt.Sprintf("Horizon %s - %s", horizon.Name, op))
 	}
 
 	if horizon.IsReady() {

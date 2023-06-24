@@ -28,6 +28,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
 	if !instance.Spec.Ironic.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, ironic); err != nil {
@@ -124,7 +125,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
-	helper.GetLogger().Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
+	Log.Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ironic, func() error {
 		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec)
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), ironic, helper.GetScheme())
@@ -144,7 +145,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("ironic %s - %s", ironic.Name, op))
+		Log.Info(fmt.Sprintf("ironic %s - %s", ironic.Name, op))
 	}
 
 	if ironic.IsReady() {

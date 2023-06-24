@@ -37,6 +37,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeCinderReadyCondition)
 		return ctrl.Result{}, nil
 	}
+	Log := GetLogger(ctx)
 
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
@@ -85,7 +86,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
-	helper.GetLogger().Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")
+	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), cinder, func() error {
 		instance.Spec.Cinder.Template.DeepCopyInto(&cinder.Spec)
 
@@ -131,7 +132,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("Cinder %s - %s", cinder.Name, op))
+		Log.Info(fmt.Sprintf("Cinder %s - %s", cinder.Name, op))
 	}
 
 	if cinder.IsReady() {

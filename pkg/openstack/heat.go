@@ -124,7 +124,9 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 	}
 
-	helper.GetLogger().Info("Reconcile heat", "heat.Namespace", instance.Namespace, "heat.Name", "heat")
+	Log := GetLogger(ctx)
+
+	Log.Info("Reconcile heat", "heat.Namespace", instance.Namespace, "heat.Name", "heat")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), heat, func() error {
 		instance.Spec.Heat.Template.DeepCopyInto(&heat.Spec)
 
@@ -145,7 +147,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("heat %s - %s", heat.Name, op))
+		Log.Info(fmt.Sprintf("heat %s - %s", heat.Name, op))
 	}
 
 	if heat.IsReady() {

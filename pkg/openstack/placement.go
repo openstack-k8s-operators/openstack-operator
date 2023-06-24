@@ -28,6 +28,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
 	if !instance.Spec.Placement.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, placementAPI); err != nil {
@@ -84,7 +85,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		}
 	}
 
-	helper.GetLogger().Info("Reconciling PlacementAPI", "PlacementAPI.Namespace", instance.Namespace, "PlacementAPI.Name", "placement")
+	Log.Info("Reconciling PlacementAPI", "PlacementAPI.Namespace", instance.Namespace, "PlacementAPI.Name", "placement")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), placementAPI, func() error {
 		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec)
 
@@ -114,7 +115,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("placementAPI %s - %s", placementAPI.Name, op))
+		Log.Info(fmt.Sprintf("placementAPI %s - %s", placementAPI.Name, op))
 	}
 
 	if placementAPI.IsReady() {

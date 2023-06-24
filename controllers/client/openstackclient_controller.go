@@ -33,6 +33,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
@@ -53,7 +54,11 @@ type OpenStackClientReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
 	Kclient kubernetes.Interface
-	Log     logr.Logger
+}
+
+// GetLog returns a logger object with a prefix of "conroller.name" and aditional controller context fields
+func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
+	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackClient")
 }
 
 //+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients,verbs=get;list;watch;create;update;patch;delete
@@ -72,17 +77,19 @@ type OpenStackClientReconciler struct {
 
 // Reconcile -
 func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-	_ = r.Log.WithValues("openstackclient", req.NamespacedName)
+
+	Log := r.GetLogger(ctx)
 
 	instance := &clientv1.OpenStackClient{}
 	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
+			Log.Info("OpenStackClient CR not found")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
 	}
-	r.Log.Info("OpenStackClient CR values", "Name", instance.Name, "Namespace", instance.Namespace, "Secret", instance.Spec.OpenStackConfigSecret, "Image", instance.Spec.ContainerImage)
+	Log.Info("OpenStackClient CR values", "Name", instance.Name, "Namespace", instance.Namespace, "Secret", instance.Spec.OpenStackConfigSecret, "Image", instance.Spec.ContainerImage)
 
 	instance.Status.Conditions = condition.Conditions{}
 	cl := condition.CreateList(
@@ -99,7 +106,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		r.Log,
+		Log,
 	)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -158,7 +165,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				condition.RequestedReason,
 				condition.SeverityInfo,
 				clientv1.OpenStackClientKeystoneWaitingMessage))
-			r.Log.Info("KeystoneAPI not found!")
+			Log.Info("KeystoneAPI not found!")
 			return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 		}
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -175,7 +182,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			clientv1.OpenStackClientKeystoneWaitingMessage))
-		r.Log.Info("KeystoneAPI not yet ready")
+		Log.Info("KeystoneAPI not yet ready")
 		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 	}
 
@@ -325,7 +332,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				// Error deleting the object
 				return ctrl.Result{}, fmt.Errorf("Error deleting OpenStackClient pod %s: %w", osclient.Name, err)
 			}
-			r.Log.Info(fmt.Sprintf("OpenStackClient pod deleted due to change %s", err.Error()))
+			Log.Info(fmt.Sprintf("OpenStackClient pod deleted due to change %s", err.Error()))
 
 			return ctrl.Result{}, nil
 		}
