@@ -61,7 +61,7 @@ func (r *OpenStackControlPlane) ValidateCreate() error {
 
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
-	if err := r.ValidateServices(basePath); err != nil {
+	if err := r.ValidateServices(basePath, false); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 
@@ -80,7 +80,7 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) error {
 
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
-	if err := r.ValidateServices(basePath); err != nil {
+	if err := r.ValidateServices(basePath, true); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 
@@ -150,7 +150,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 }
 
 // ValidateServices implements common function for validating services
-func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.ErrorList {
+func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path, isUpdate bool) field.ErrorList {
 	var allErrs field.ErrorList
 
 	// Temporary check until MariaDB is deprecated
@@ -166,12 +166,32 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 			err := field.Invalid(basePath.Child("keystone").Child("enabled"), r.Spec.Keystone.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
+
+		if isUpdate {
+			if err := r.Spec.Keystone.Template.ValidateUpdate(basePath.Child("keystone").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		}
 	}
 
 	if r.Spec.Glance.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Glance"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("glance").Child("enabled"), r.Spec.Glance.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
+		}
+
+		if isUpdate {
+			if err := r.Spec.Glance.Template.ValidateUpdate(basePath.Child("glance").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
 		}
 	}
 
@@ -180,12 +200,32 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 			err := field.Invalid(basePath.Child("cinder").Child("enabled"), r.Spec.Cinder.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
+
+		if isUpdate {
+			if err := r.Spec.Cinder.Template.ValidateUpdate(basePath.Child("cinder").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		}
 	}
 
 	if r.Spec.Placement.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Placement"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("placement").Child("enabled"), r.Spec.Placement.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
+		}
+
+		if isUpdate {
+			if err := r.Spec.Placement.Template.ValidateUpdate(basePath.Child("placement").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Placement.Template.ValidateCreate(basePath.Child("placement").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
 		}
 	}
 
@@ -194,12 +234,32 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 			err := field.Invalid(basePath.Child("neutron").Child("enabled"), r.Spec.Neutron.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
+
+		if isUpdate {
+			if err := r.Spec.Neutron.Template.ValidateUpdate(basePath.Child("neutron").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		}
 	}
 
 	if r.Spec.Nova.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Nova"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("nova").Child("enabled"), r.Spec.Nova.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
+		}
+
+		if isUpdate {
+			if err := r.Spec.Nova.Template.ValidateUpdate(basePath.Child("nova").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
 		}
 	}
 
@@ -208,14 +268,27 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 			err := field.Invalid(basePath.Child("swift").Child("enabled"), r.Spec.Swift.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
+
+		if isUpdate {
+			if err := r.Spec.Swift.Template.ValidateUpdate(basePath.Child("swift").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Swift.Template.ValidateCreate(basePath.Child("swift").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		}
 	}
 
-	// Checks which call internal validation logic for individual service operators
-
-	// Ironic
 	if r.Spec.Ironic.Enabled {
-		if err := r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template")); err != nil {
-			allErrs = append(allErrs, err...)
+		if isUpdate {
+			if err := r.Spec.Ironic.Template.ValidateUpdate(basePath.Child("ironic").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
+		} else {
+			if err := r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template")); err != nil {
+				allErrs = append(allErrs, err...)
+			}
 		}
 	}
 
