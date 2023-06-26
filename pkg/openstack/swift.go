@@ -35,9 +35,6 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 	helper.GetLogger().Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), swift, func() error {
 		instance.Spec.Swift.Template.DeepCopyInto(&swift.Spec)
-		if swift.Spec.SwiftStorage.StorageClass == "" {
-			swift.Spec.SwiftStorage.StorageClass = instance.Spec.StorageClass
-		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), swift, helper.GetScheme())
 		if err != nil {
 			return err

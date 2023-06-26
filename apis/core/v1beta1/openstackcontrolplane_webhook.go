@@ -355,6 +355,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Swift
 	if r.Spec.Swift.Enabled {
+		if r.Spec.Swift.Template.SwiftStorage.StorageClass == "" {
+			r.Spec.Swift.Template.SwiftStorage.StorageClass = r.Spec.StorageClass
+		}
+
 		r.Spec.Swift.Template.Default()
 	}
 }
