@@ -219,6 +219,14 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 		}
 	}
 
+	// Nova
+	if r.Spec.Nova.Enabled {
+		// NOTE(gibi): as soon as NovaSpec.ValidateCreate starts diverging
+		// from NovaSpec.ValidateUpdate we need to split ValidateServices to
+		// ValidateCreateServicesCreate and ValidateUpdateServices
+		allErrs = append(allErrs, r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"))...)
+	}
+
 	return allErrs
 }
 
