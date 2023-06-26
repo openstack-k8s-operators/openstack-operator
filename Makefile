@@ -129,7 +129,6 @@ build: generate fmt vet ## Build manager binary.
 
 .PHONY: run
 run: export ENABLE_WEBHOOKS?=false
-run: export OPENSTACKCLIENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
 run: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/clean_local_webhook.sh
 	go run ./main.go
@@ -340,7 +339,6 @@ operator-lint: gowork ## Runs operator-lint
 # $oc delete -n openstack mutatingwebhookconfiguration/mopenstackcontrolplane.kb.io
 SKIP_CERT ?=false
 .PHONY: run-with-webhook
-run-with-webhook: export OPENSTACKCLIENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
 run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/configure_local_webhook.sh
 	go run ./main.go
