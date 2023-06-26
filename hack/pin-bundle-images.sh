@@ -63,5 +63,5 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
 done
 # append the rabbitmq URL only if we aren't in Dockerfile mode
 if [ -z "$DOCKERFILE" ]; then
-    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:9ff91ad3c9ef1797b232fce2f9adf6ede5c3421163bff5b8a2a462c6a2b3a68b"
+    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:49044ebeb92a5bfc3b597b3042d057b63f7c1cddfc5555f2d49780afe228ece0"
 fi
