@@ -1256,6 +1256,7 @@ spec:
                               type: string
                           required:
                           - ipAddressPool
+                          - loadBalancerIPs
                           type: object
                         type: array
                       nodeSelector:
@@ -11085,6 +11086,9 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      storageClass:
+                        default: ""
+                        type: string
                       swiftConfSecret:
                         default: swift-conf
                         type: string
@@ -11136,6 +11140,7 @@ spec:
                         required:
                         - containerImage
                         - ringReplicas
+                        - swiftConfSecret
                         type: object
                       swiftStorage:
                         properties:
@@ -11153,7 +11158,7 @@ spec:
                             format: int32
                             type: integer
                           storageClass:
-                            default: local-storage
+                            default: ""
                             type: string
                           storageRequest:
                             default: 10Gi
@@ -11168,9 +11173,13 @@ spec:
                         - containerImageObject
                         - containerImageProxy
                         - replicas
+                        - storageClass
                         - storageRequest
+                        - swiftConfSecret
                         type: object
                     required:
+                    - storageClass
+                    - swiftConfSecret
                     - swiftProxy
                     - swiftRing
                     - swiftStorage
