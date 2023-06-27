@@ -391,4 +391,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 		r.Spec.Swift.Template.Default()
 	}
+
+	// Horizon
+	if r.Spec.Horizon.Enabled {
+		r.Spec.Horizon.Template.Default()
+	}
+
 }
