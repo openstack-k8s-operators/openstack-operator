@@ -30,10 +30,6 @@ func ReconcileGaleras(
 	instance *corev1beta1.OpenStackControlPlane,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
-	if !instance.Spec.Galera.Enabled {
-		return ctrl.Result{}, nil
-	}
-
 	var failures []string = []string{}
 	var inprogress []string = []string{}
 
