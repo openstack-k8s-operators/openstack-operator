@@ -149,6 +149,21 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 	return msg
 }
 
+// checkDatabaseInstanceExists - returns whether the requested database instance exists or not
+func (r *OpenStackControlPlane) checkDatabaseInstanceExists(instanceName string) bool {
+	if r.Spec.Mariadb.Enabled {
+		_, ok := r.Spec.Mariadb.Templates[instanceName]
+		return ok
+	}
+
+	if r.Spec.Galera.Enabled {
+		_, ok := r.Spec.Galera.Templates[instanceName]
+		return ok
+	}
+
+	return false
+}
+
 // ValidateServices implements common function for validating services
 func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.ErrorList {
 	var allErrs field.ErrorList
@@ -165,12 +180,26 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 		if depErrorMsg := r.checkDepsEnabled("Keystone"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("keystone").Child("enabled"), r.Spec.Keystone.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
+		} else if ! r.checkDatabaseInstanceExists(r.Spec.Keystone.Template.DatabaseInstance) {
+			err := field.Invalid(
+				basePath.Child("keystone").Child("template").Child("databaseInstance"),
+				r.Spec.Keystone.Template.DatabaseInstance,
+				fmt.Sprintf("Database %s does not exist", r.Spec.Keystone.Template.DatabaseInstance),
+			)
+			allErrs = append(allErrs, err)
 		}
 	}
 
 	if r.Spec.Glance.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Glance"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("glance").Child("enabled"), r.Spec.Glance.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		} else if ! r.checkDatabaseInstanceExists(r.Spec.Glance.Template.DatabaseInstance) {
+			err := field.Invalid(
+				basePath.Child("glance").Child("template").Child("databaseInstance"),
+				r.Spec.Glance.Template.DatabaseInstance,
+				fmt.Sprintf("Database %s does not exist", r.Spec.Glance.Template.DatabaseInstance),
+			)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -179,6 +208,13 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 		if depErrorMsg := r.checkDepsEnabled("Cinder"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("cinder").Child("enabled"), r.Spec.Cinder.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
+		} else if ! r.checkDatabaseInstanceExists(r.Spec.Cinder.Template.DatabaseInstance) {
+			err := field.Invalid(
+				basePath.Child("cinder").Child("template").Child("databaseInstance"),
+				r.Spec.Cinder.Template.DatabaseInstance,
+				fmt.Sprintf("Database %s does not exist", r.Spec.Cinder.Template.DatabaseInstance),
+			)
+			allErrs = append(allErrs, err)
 		}
 	}
 
@@ -186,12 +222,26 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 		if depErrorMsg := r.checkDepsEnabled("Placement"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("placement").Child("enabled"), r.Spec.Placement.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
+		} else if ! r.checkDatabaseInstanceExists(r.Spec.Placement.Template.DatabaseInstance) {
+			err := field.Invalid(
+				basePath.Child("placement").Child("template").Child("databaseInstance"),
+				r.Spec.Placement.Template.DatabaseInstance,
+				fmt.Sprintf("Database %s does not exist", r.Spec.Placement.Template.DatabaseInstance),
+			)
+			allErrs = append(allErrs, err)
 		}
 	}
 
 	if r.Spec.Neutron.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Neutron"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("neutron").Child("enabled"), r.Spec.Neutron.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		} else if ! r.checkDatabaseInstanceExists(r.Spec.Neutron.Template.DatabaseInstance) {
+			err := field.Invalid(
+				basePath.Child("neutron").Child("template").Child("databaseInstance"),
+				r.Spec.Neutron.Template.DatabaseInstance,
+				fmt.Sprintf("Database %s does not exist", r.Spec.Neutron.Template.DatabaseInstance),
+			)
 			allErrs = append(allErrs, err)
 		}
 	}
