@@ -140,8 +140,8 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			reqs = "MariaDB or Galera, Keystone, RabbitMQ"
 		}
 	case "Swift":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone"
+		if !(r.Spec.Keystone.Enabled) {
+			reqs = "Keystone"
 		}
 	case "Horizon":
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
