@@ -108,6 +108,7 @@ type OpenStackControlPlaneSpec struct {
 	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Memcached - Parameters related to the Memcached service
 	Memcached MemcachedSection `json:"memcached,omitempty"`
 
@@ -274,11 +275,13 @@ type RabbitmqSection struct {
 // MemcachedSection defines the desired state of Memcached services
 type MemcachedSection struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Memcached services should be deployed and managed
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Memcached databases
 	Templates map[string]memcachedv1.MemcachedSpec `json:"templates,omitempty"`
 }

@@ -67,7 +67,9 @@ spec:
       openstack-cell1:
         storageRequest: 500M
   memcached:
-    enabled: true
+    templates:
+      memcached:
+        replicas: 1
   neutron:
     template:
       databaseInstance: openstack

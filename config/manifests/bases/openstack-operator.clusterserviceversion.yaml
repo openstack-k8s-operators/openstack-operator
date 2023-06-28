@@ -131,6 +131,17 @@ spec:
       - description: Templates - Overrides to use when creating the MariaDB databases
         displayName: Templates
         path: mariadb.templates
+      - description: Memcached - Parameters related to the Memcached service
+        displayName: Memcached
+        path: memcached
+      - description: Enabled - Whether Memcached services should be deployed and managed
+        displayName: Enabled
+        path: memcached.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Templates - Overrides to use when creating the Memcached databases
+        displayName: Templates
+        path: memcached.templates
       - description: Neutron - Overrides to use when creating the Neutron Service
         displayName: Neutron
         path: neutron

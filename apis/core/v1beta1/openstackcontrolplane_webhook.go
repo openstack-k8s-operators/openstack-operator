@@ -111,41 +111,44 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 
 	switch name {
 	case "Keystone":
-		if !(r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) {
-			reqs = "MariaDB or Galera"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled) {
+			reqs = "MariaDB or Galera, Memcached"
 		}
 	case "Glance":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, Keystone"
 		}
 	case "Cinder":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone, RabbitMQ"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone"
 		}
 	case "Placement":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, Keystone"
 		}
 	case "Neutron":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone, RabbitMQ"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, RabbitMQ, Keystone"
 		}
 	case "Nova":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled &&
-			r.Spec.Placement.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled) {
-			reqs = "MariaDB or Galera, Glance, Keystone, Neutron, Placement, RabbitMQ"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone, Glance Neutron, Placement"
 		}
 	case "Heat":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone, RabbitMQ"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone"
 		}
 	case "Swift":
-		if !(r.Spec.Keystone.Enabled) {
-			reqs = "Keystone"
+		if !(r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "Memcached, Keystone"
 		}
 	case "Horizon":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone"
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, Keystone"
 		}
 	}
 
