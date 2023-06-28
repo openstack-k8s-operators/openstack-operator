@@ -20,12 +20,10 @@ spec:
     enabled: true
     templates:
       openstack:
-        storageClass: local-storage
         storageRequest: 500M
         secret: osp-secret
         replicas: 1
       openstack-cell1:
-        storageClass: local-storage
         storageRequest: 500M
         secret: osp-secret
         replicas: 1
