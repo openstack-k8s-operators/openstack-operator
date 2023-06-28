@@ -135,7 +135,15 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			r.Spec.Placement.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled) {
 			reqs = "MariaDB or Galera, Glance, Keystone, Neutron, Placement, RabbitMQ"
 		}
+	case "Heat":
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Keystone, RabbitMQ"
+		}
 	case "Swift":
+		if !(r.Spec.Keystone.Enabled) {
+			reqs = "Keystone"
+		}
+	case "Horizon":
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
 			reqs = "MariaDB or Galera, Keystone"
 		}
@@ -203,9 +211,23 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 		}
 	}
 
+	if r.Spec.Heat.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Heat"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("heat").Child("enabled"), r.Spec.Heat.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+
 	if r.Spec.Swift.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Swift"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("swift").Child("enabled"), r.Spec.Swift.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+
+	if r.Spec.Horizon.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Horizon"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("horizon").Child("enabled"), r.Spec.Horizon.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -369,4 +391,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 		r.Spec.Swift.Template.Default()
 	}
+
+	// Horizon
+	if r.Spec.Horizon.Enabled {
+		r.Spec.Horizon.Template.Default()
+	}
+
 }
