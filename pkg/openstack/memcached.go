@@ -91,7 +91,7 @@ func ReconcileMemcacheds(
 			inprogress = append(inprogress, name)
 		case memcachedReady:
 		default:
-			return ctrl.Result{}, fmt.Errorf("Invalid memcachedStatus from reconcileMemcached: %d for Memcached %s", status, name)
+			failures = append(failures, fmt.Sprintf("Invalid memcachedStatus from reconcileMemcached: %d for Memcached %s", status, name))
 		}
 	}
 
