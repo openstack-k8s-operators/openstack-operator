@@ -6,25 +6,25 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.16
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230622154402-4aa26ed745b4
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230623103040-9ad7d7a385f1
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230622154403-47cfa04752ab
-	github.com/openstack-k8s-operators/heat-operator/api v0.0.0-20230626040739-a7985c1c308b
-	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230626040457-307ee0295117
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230623104334-20f123263119
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230623114008-f8685eb15919
+	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230627090001-1a796805ec77
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230628103017-9e6cf4391456
+	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230628073827-6eb29c5ed4ce
+	github.com/openstack-k8s-operators/heat-operator/api v0.0.0-20230628042818-8b0db84e95b3
+	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230628103019-847470ceefd2
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230628130307-16734cb02944
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230628115737-ebf64025f436
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230622141005-e9220a4b3dfe
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230619102827-49e72f626a11
-	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230622231132-d933ef24a6d4
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230627132558-cd98c8b86310
+	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230627094520-8916cd79b366
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230622153114-756aead1d819
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230623073736-9899c3186493
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230627071330-769bb7a67de3
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230620085730-fddf65f65f88
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230621154304-57314e65f29a
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230623085000-286a16917df2
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230628022350-7fb9cc9405de
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230628110414-dd1ae5ab824f
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230623204101-50b69509ddc2
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230623155804-42d1493fb794
-	github.com/openstack-k8s-operators/swift-operator/api v0.0.0-20230626050357-c71d9bfd310d
+	github.com/openstack-k8s-operators/swift-operator/api v0.0.0-20230627160703-af7196b30b24
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230622122946-ec89feb57977
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
@@ -37,8 +37,8 @@ require (
 
 require (
 	github.com/go-logr/zapr v1.2.4 // indirect
-	github.com/metal3-io/baremetal-operator/apis v0.2.0 // indirect
-	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.1.2 // indirect
+	github.com/metal3-io/baremetal-operator/apis v0.3.1 // indirect
+	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.2.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 )
 
@@ -60,7 +60,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gophercloud/gophercloud v1.4.0 // indirect
+	github.com/gophercloud/gophercloud v1.5.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -69,8 +69,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230619102827-49e72f626a11 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230619102827-49e72f626a11 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230627132558-cd98c8b86310 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230627132558-cd98c8b86310 // indirect; indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
