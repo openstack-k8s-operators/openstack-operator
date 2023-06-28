@@ -54,6 +54,7 @@ spec:
         networkAttachments:
         - storage
       cinderScheduler:
+        replicas: 1
       cinderVolumes:
         ceph:
           customServiceConfig: |
