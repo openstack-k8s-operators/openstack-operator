@@ -26,6 +26,8 @@ spec:
           ipAddressPool: internalapi
           loadBalancerIPs:
           - 172.17.0.80
+      cinderScheduler:
+        replicas: 1
       cinderBackup:
         networkAttachments:
         - storage
