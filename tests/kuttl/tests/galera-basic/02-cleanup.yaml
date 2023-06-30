@@ -3,13 +3,10 @@ kind: TestStep
 delete:
 - apiVersion: core.openstack.org/v1beta1
   kind: OpenStackControlPlane
-  name: openstack-galera-3replicas
+  name: openstack-galera
 commands:
 - script: |
     oc delete --ignore-not-found=true -n $NAMESPACE pvc \
     mysql-db-openstack-galera-0 \
-    mysql-db-openstack-galera-1 \
-    mysql-db-openstack-galera-2 \
     mysql-db-openstack-cell1-galera-0 \
-    mysql-db-openstack-cell1-galera-1 \
-    mysql-db-openstack-cell1-galera-2
+    srv-swift-storage-0

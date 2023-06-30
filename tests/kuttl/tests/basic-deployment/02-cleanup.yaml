@@ -6,6 +6,5 @@ delete:
   name: openstack-basic
 commands:
 - script: |
-    sleep 60
     oc delete --ignore-not-found=true -n $NAMESPACE pvc \
     srv-swift-storage-0
