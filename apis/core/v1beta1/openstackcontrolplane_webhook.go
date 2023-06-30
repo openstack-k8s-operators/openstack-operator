@@ -61,7 +61,7 @@ func (r *OpenStackControlPlane) ValidateCreate() error {
 
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
-	if err := r.ValidateServices(basePath); err != nil {
+	if err := r.ValidateCreateServices(basePath); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 
@@ -78,9 +78,14 @@ func (r *OpenStackControlPlane) ValidateCreate() error {
 func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) error {
 	openstackcontrolplanelog.Info("validate update", "name", r.Name)
 
+	oldControlPlane, ok := old.(*OpenStackControlPlane)
+	if !ok || oldControlPlane == nil {
+		return apierrors.NewInternalError(fmt.Errorf("unable to convert existing object"))
+	}
+
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
-	if err := r.ValidateServices(basePath); err != nil {
+	if err := r.ValidateUpdateServices(oldControlPlane.Spec, basePath); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 
@@ -160,8 +165,45 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 	return msg
 }
 
-// ValidateServices implements common function for validating services
-func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.ErrorList {
+// ValidateCreateServices validating service definitions during the OpenstackControlPlane CR creation
+func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) field.ErrorList {
+	var errors field.ErrorList
+
+	errors = append(errors, r.ValidateServiceDependencies(basePath)...)
+
+	// Call internal validation logic for individual service operators
+	if r.Spec.Ironic.Enabled {
+		errors = append(errors, r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"))...)
+	}
+
+	if r.Spec.Nova.Enabled {
+		errors = append(errors, r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"))...)
+	}
+
+	return errors
+}
+
+// ValidateUpdateServices validating service definitions during the OpenstackControlPlane CR update
+func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlaneSpec, basePath *field.Path) field.ErrorList {
+	var errors field.ErrorList
+
+	errors = append(errors, r.ValidateServiceDependencies(basePath)...)
+
+	// Call internal validation logic for individual service operators
+	if r.Spec.Ironic.Enabled {
+		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(old.Ironic.Template, basePath.Child("ironic").Child("template"))...)
+	}
+
+	if r.Spec.Nova.Enabled {
+		errors = append(errors, r.Spec.Nova.Template.ValidateUpdate(old.Nova.Template, basePath.Child("nova").Child("template"))...)
+	}
+
+	return errors
+}
+
+// ValidateServiceDependencies ensures that when a service is enabled then all the services it depends on are also
+// enabled
+func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path) field.ErrorList {
 	var allErrs field.ErrorList
 
 	// Temporary check until MariaDB is deprecated
@@ -233,23 +275,6 @@ func (r *OpenStackControlPlane) ValidateServices(basePath *field.Path) field.Err
 			err := field.Invalid(basePath.Child("horizon").Child("enabled"), r.Spec.Horizon.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
-	}
-
-	// Checks which call internal validation logic for individual service operators
-
-	// Ironic
-	if r.Spec.Ironic.Enabled {
-		if err := r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template")); err != nil {
-			allErrs = append(allErrs, err...)
-		}
-	}
-
-	// Nova
-	if r.Spec.Nova.Enabled {
-		// NOTE(gibi): as soon as NovaSpec.ValidateCreate starts diverging
-		// from NovaSpec.ValidateUpdate we need to split ValidateServices to
-		// ValidateCreateServicesCreate and ValidateUpdateServices
-		allErrs = append(allErrs, r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"))...)
 	}
 
 	return allErrs
