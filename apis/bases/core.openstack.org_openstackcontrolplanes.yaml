@@ -3857,10 +3857,10 @@ spec:
                               service: IronicInspectorPassword
                             properties:
                               database:
-                                default: IronicDatabasePassword
+                                default: IronicInspectorDatabasePassword
                                 type: string
                               service:
-                                default: IronicPassword
+                                default: IronicInspectorPassword
                                 type: string
                             type: object
                           preserveJobs:
@@ -3921,8 +3921,6 @@ spec:
                             default: false
                             type: boolean
                           storageClass:
-                            type: string
-                          transportURLSecret:
                             type: string
                         required:
                         - serviceAccount
@@ -6451,6 +6449,31 @@ spec:
                                   additionalProperties:
                                     type: string
                                   type: object
+                                externalEndpoints:
+                                  items:
+                                    properties:
+                                      endpoint:
+                                        enum:
+                                        - internal
+                                        - public
+                                        type: string
+                                      ipAddressPool:
+                                        minLength: 1
+                                        type: string
+                                      loadBalancerIPs:
+                                        items:
+                                          type: string
+                                        type: array
+                                      sharedIP:
+                                        default: true
+                                        type: boolean
+                                      sharedIPKey:
+                                        default: ""
+                                        type: string
+                                    required:
+                                    - ipAddressPool
+                                    type: object
+                                  type: array
                                 networkAttachments:
                                   items:
                                     type: string
@@ -6500,6 +6523,14 @@ spec:
                             nodeSelector:
                               additionalProperties:
                                 type: string
+                              type: object
+                            passwordSelectors:
+                              default:
+                                database: NovaCell0DatabasePassword
+                              properties:
+                                database:
+                                  default: NovaCell0DatabasePassword
+                                  type: string
                               type: object
                           required:
                           - cellDatabaseUser
@@ -6623,9 +6654,6 @@ spec:
                         properties:
                           apiDatabase:
                             default: NovaAPIDatabasePassword
-                            type: string
-                          cellDatabase:
-                            default: NovaCell0DatabasePassword
                             type: string
                           metadataSecret:
                             default: MetadataSecret
