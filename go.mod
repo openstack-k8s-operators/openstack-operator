@@ -7,25 +7,25 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.16
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230629135923-57f2c18e8600
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230630132539-52668d936e6d
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230703122900-8aae89e2573f
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230628073827-6eb29c5ed4ce
-	github.com/openstack-k8s-operators/heat-operator/api v0.0.0-20230629104125-aeee118735ff
-	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230630084144-0db686a5d2a4
+	github.com/openstack-k8s-operators/heat-operator/api v0.0.0-20230703093858-28cb345b852f
+	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230703021149-93a99f2680e8
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230628130307-16734cb02944
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230629121727-cfaaffc597db
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230703092322-f5cde9d10339
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230630065703-4371f9602724
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230627132558-cd98c8b86310
 	github.com/openstack-k8s-operators/manila-operator/api v0.0.0-20230627094520-8916cd79b366
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230622153114-756aead1d819
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230703125502-37e9f97e0185
 	github.com/openstack-k8s-operators/neutron-operator/api v0.0.0-20230623073736-9899c3186493
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230630161935-e43995668618
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230629133004-c405d130fda9
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230628022350-7fb9cc9405de
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230630190558-54593d18e137
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230703102858-87737b736377
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230703104412-d4214e4a967c
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230701113805-bd7a30194abd
 	github.com/openstack-k8s-operators/ovn-operator/api v0.0.0-20230629214942-7a30c60d8624
 	github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230629080103-d956585e210c
-	github.com/openstack-k8s-operators/swift-operator/api v0.0.0-20230627160703-af7196b30b24
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230630092114-5bfb13005e26
+	github.com/openstack-k8s-operators/swift-operator/api v0.0.0-20230703062034-9c2f01bb201d
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230703115219-3695de84a3df
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
