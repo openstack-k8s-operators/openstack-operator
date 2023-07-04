@@ -155,8 +155,8 @@ github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230629080103-
 github.com/openstack-k8s-operators/placement-operator/api v0.0.0-20230629080103-d956585e210c/go.mod h1:ZvVyvbnWQNndCY6U9lxMOOazCmY2oZiC3rtHDyyn7vM=
 github.com/openstack-k8s-operators/swift-operator/api v0.0.0-20230703062034-9c2f01bb201d h1:eB+1lNlJCi3CoWLAh2kTglDv5grGhnNy1LiMENQ9EnY=
 github.com/openstack-k8s-operators/swift-operator/api v0.0.0-20230703062034-9c2f01bb201d/go.mod h1:Fpb/IaSfIFKCtl3pD1m7exX6vXpWX7vIc9t8EAYTXNY=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230703115219-3695de84a3df h1:N71/QrBh+tr+iN2Y0cmP5r5dMSAg7eTWj12WEMFEVSs=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230703115219-3695de84a3df/go.mod h1:vDzflKZS7xvzPTooz8G0vMuxb5lATefPqwPhbLBUgS4=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230704080629-dfd7bfe0c341 h1:0skB3PNHr31XzYAsiPOYZ040ih9SSc7VL0yX+1dzwFg=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230704080629-dfd7bfe0c341/go.mod h1:vDzflKZS7xvzPTooz8G0vMuxb5lATefPqwPhbLBUgS4=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
