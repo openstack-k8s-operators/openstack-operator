@@ -11,7 +11,8 @@ spec:
       secret: osp-secret
   mariadb:
     template:
-      storageRequest: 500M
+      openstack:
+        storageRequest: 500M
   rabbitmq:
     templates:
       rabbitmq:
