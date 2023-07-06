@@ -104,7 +104,17 @@ spec:
   nova:
     template:
       secret: osp-secret
+  heat:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      heatAPI:
+        replicas: 1
+      heatEngine:
+        replicas: 1
+      secret: osp-secret
   ironic:
+    enabled: false
     template:
       databaseInstance: openstack
       ironicAPI:
@@ -123,3 +133,12 @@ spec:
         service: CeilometerPassword
       secret: osp-secret
       serviceUser: ceilometer
+  swift:
+    enabled: true
+    template:
+      swiftRing:
+        ringReplicas: 1
+      swiftStorage:
+        replicas: 1
+      swiftProxy:
+        replicas: 1

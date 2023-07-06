@@ -75,11 +75,11 @@ spec:
       openstack:
         storageRequest: 500M
         secret: osp-secret
-        replicas: 1
+        replicas: 3
       openstack-cell1:
         storageRequest: 500M
         secret: osp-secret
-        replicas: 1
+        replicas: 3
   memcached:
     templates:
       memcached:
