@@ -9,7 +9,7 @@ spec:
       databaseInstance: openstack
       secret: osp-secret
   mariadb:
-    template:
+    templates:
       openstack:
         storageRequest: 500M
   rabbitmq:
