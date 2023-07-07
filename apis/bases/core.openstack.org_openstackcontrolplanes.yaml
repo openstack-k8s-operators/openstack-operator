@@ -116,9 +116,6 @@ spec:
                             type: array
                           debug:
                             properties:
-                              initContainer:
-                                default: false
-                                type: boolean
                               service:
                                 default: false
                                 type: boolean
@@ -211,9 +208,6 @@ spec:
                             type: array
                           debug:
                             properties:
-                              initContainer:
-                                default: false
-                                type: boolean
                               service:
                                 default: false
                                 type: boolean
@@ -280,9 +274,6 @@ spec:
                             type: array
                           debug:
                             properties:
-                              initContainer:
-                                default: false
-                                type: boolean
                               service:
                                 default: false
                                 type: boolean
@@ -350,9 +341,6 @@ spec:
                               type: array
                             debug:
                               properties:
-                                initContainer:
-                                  default: false
-                                  type: boolean
                                 service:
                                   default: false
                                   type: boolean
@@ -418,9 +406,6 @@ spec:
                         type: string
                       debug:
                         properties:
-                          dbInitContainer:
-                            default: false
-                            type: boolean
                           dbSync:
                             default: false
                             type: boolean
@@ -3401,6 +3386,9 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      memcachedInstance:
+                        default: memcached
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -3461,10 +3449,9 @@ spec:
                         type: object
                       secret:
                         type: string
-                      sharedMemcached:
-                        type: string
                     required:
                     - containerImage
+                    - memcachedInstance
                     - secret
                     type: object
                 type: object
@@ -3483,9 +3470,6 @@ spec:
                       debug:
                         properties:
                           dbSync:
-                            default: false
-                            type: boolean
-                          service:
                             default: false
                             type: boolean
                         type: object
@@ -3510,18 +3494,11 @@ spec:
                         type: object
                       ironicAPI:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
-                          databaseHostname:
-                            type: string
                           debug:
                             properties:
-                              dbSync:
-                                default: false
-                                type: boolean
                               service:
                                 default: false
                                 type: boolean
@@ -3564,18 +3541,6 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          passwordSelectors:
-                            default:
-                              database: IronicDatabasePassword
-                              service: IronicPassword
-                            properties:
-                              database:
-                                default: IronicDatabasePassword
-                                type: string
-                              service:
-                                default: IronicPassword
-                                type: string
-                            type: object
                           replicas:
                             default: 1
                             format: int32
@@ -3611,41 +3576,17 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                          rpcTransport:
-                            default: json-rpc
-                            type: string
-                          secret:
-                            type: string
-                          serviceAccount:
-                            type: string
-                          serviceUser:
-                            default: ironic
-                            type: string
-                          standalone:
-                            default: false
-                            type: boolean
-                          transportURLSecret:
-                            type: string
-                        required:
-                        - serviceAccount
                         type: object
                       ironicConductors:
                         items:
                           properties:
                             conductorGroup:
                               type: string
-                            containerImage:
-                              type: string
                             customServiceConfig:
                               default: '# add your customization here'
                               type: string
-                            databaseHostname:
-                              type: string
                             debug:
                               properties:
-                                dbSync:
-                                  default: false
-                                  type: boolean
                                 service:
                                   default: false
                                   type: boolean
@@ -3677,12 +3618,6 @@ spec:
                                 - start
                                 type: object
                               type: array
-                            ironicPythonAgentImage:
-                              type: string
-                            keystoneVars:
-                              additionalProperties:
-                                type: string
-                              type: object
                             networkAttachments:
                               items:
                                 type: string
@@ -3691,21 +3626,7 @@ spec:
                               additionalProperties:
                                 type: string
                               type: object
-                            passwordSelectors:
-                              default:
-                                database: IronicDatabasePassword
-                                service: IronicPassword
-                              properties:
-                                database:
-                                  default: IronicDatabasePassword
-                                  type: string
-                                service:
-                                  default: IronicPassword
-                                  type: string
-                              type: object
                             provisionNetwork:
-                              type: string
-                            pxeContainerImage:
                               type: string
                             replicas:
                               default: 1
@@ -3742,40 +3663,20 @@ spec:
                                     x-kubernetes-int-or-string: true
                                   type: object
                               type: object
-                            rpcTransport:
-                              default: json-rpc
-                              type: string
-                            secret:
-                              type: string
-                            serviceAccount:
-                              type: string
-                            serviceUser:
-                              default: ironic
-                              type: string
-                            standalone:
-                              default: false
-                              type: boolean
                             storageClass:
                               default: ""
                               type: string
                             storageRequest:
                               type: string
-                            transportURLSecret:
-                              type: string
                           required:
-                          - serviceAccount
                           - storageClass
                           - storageRequest
                           type: object
                         type: array
                       ironicInspector:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
-                            type: string
-                          databaseInstance:
                             type: string
                           debug:
                             properties:
@@ -3841,8 +3742,6 @@ spec:
                             type: array
                           inspectionNetwork:
                             type: string
-                          ironicPythonAgentImage:
-                            type: string
                           networkAttachments:
                             items:
                               type: string
@@ -3866,11 +3765,6 @@ spec:
                           preserveJobs:
                             default: true
                             type: boolean
-                          pxeContainerImage:
-                            type: string
-                          rabbitMqClusterName:
-                            default: rabbitmq
-                            type: string
                           replicas:
                             default: 1
                             format: int32
@@ -3907,28 +3801,14 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                          rpcTransport:
-                            default: json-rpc
-                            type: string
-                          secret:
-                            type: string
-                          serviceAccount:
-                            type: string
                           serviceUser:
                             default: ironic-inspector
                             type: string
-                          standalone:
-                            default: false
-                            type: boolean
                           storageClass:
                             type: string
-                        required:
-                        - serviceAccount
                         type: object
                       ironicNeutronAgent:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -3938,17 +3818,13 @@ spec:
                                 default: false
                                 type: boolean
                             type: object
-                          nodeSelector:
+                          defaultConfigOverwrite:
                             additionalProperties:
                               type: string
                             type: object
-                          passwordSelectors:
-                            default:
-                              service: IronicPassword
-                            properties:
-                              service:
-                                default: IronicPassword
-                                type: string
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
                             type: object
                           rabbitMqClusterName:
                             default: rabbitmq
@@ -3988,15 +3864,6 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                          secret:
-                            type: string
-                          serviceAccount:
-                            type: string
-                          serviceUser:
-                            default: ironic
-                            type: string
-                        required:
-                        - serviceAccount
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -4108,6 +3975,9 @@ spec:
                           - ipAddressPool
                           type: object
                         type: array
+                      memcachedInstance:
+                        default: memcached
+                        type: string
                       networkAttachments:
                         items:
                           type: string
@@ -4185,6 +4055,7 @@ spec:
                     required:
                     - containerImage
                     - databaseInstance
+                    - memcachedInstance
                     - secret
                     type: object
                 type: object
