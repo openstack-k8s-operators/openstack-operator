@@ -532,7 +532,7 @@ func (instance OpenStackControlPlane) IsReady() bool {
 }
 
 // InitConditions - Initializes Status Conditons
-func (instance OpenStackControlPlane) InitConditions() {
+func (instance *OpenStackControlPlane) InitConditions() {
 	if instance.Status.Conditions == nil {
 		instance.Status.Conditions = condition.Conditions{}
 	}
