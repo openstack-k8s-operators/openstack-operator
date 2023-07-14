@@ -33,3 +33,7 @@
     name: openstack-operator-crc-podified-edpm-baremetal
     parent: cifmw-crc-podified-edpm-baremetal
     irrelevant-files: *openstack_if
+
+- job:
+    name: openstack-operator-crc-extended-podified-deployment
+    parent: cifmw-crc-podified-galera-deployment

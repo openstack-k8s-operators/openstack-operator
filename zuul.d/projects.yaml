@@ -4,7 +4,6 @@
     github-check:
       jobs:
         - openstack-operator-content-provider
-        - openstack-operator-crc-podified-edpm-baremetal: &content_provider
+        - openstack-operator-crc-extended-podified-deployment: &content_provider
             dependencies:
               - openstack-operator-content-provider
-        - openstack-operator-crc-podified-edpm-deployment: *content_provider
