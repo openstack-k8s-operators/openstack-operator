@@ -24,7 +24,6 @@ import (
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
-	clientv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
@@ -63,7 +62,6 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/finalizers,verbs=update
-//+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ironic.openstack.org,resources=ironics,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=horizon.openstack.org,resources=horizons,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch;create;update;patch;delete
@@ -247,13 +245,6 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-
 	ctrlResult, err = openstack.ReconcileManila(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -306,7 +297,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&novav1.Nova{}).
 		Owns(&heatv1.Heat{}).
 		Owns(&ironicv1.Ironic{}).
-		Owns(&clientv1beta1.OpenStackClient{}).
 		Owns(&horizonv1.Horizon{}).
 		Owns(&telemetryv1.CeilometerCentral{}).
 		Complete(r)
