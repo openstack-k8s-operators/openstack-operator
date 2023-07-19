@@ -33,6 +33,7 @@ import (
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
+	clientv1 "github.com/openstack-k8s-operators/infra-operator/apis/client/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
@@ -89,6 +90,7 @@ func init() {
 	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
+	utilruntime.Must(clientv1.AddToScheme(scheme))
 	utilruntime.Must(manilav1.AddToScheme(scheme))
 	utilruntime.Must(horizonv1.AddToScheme(scheme))
 	utilruntime.Must(networkv1.AddToScheme(scheme))
@@ -226,6 +228,9 @@ func setupServiceOperatorDefaults() {
 
 	// Nova
 	novav1.SetupDefaults()
+
+	// OpenStackClient
+	clientv1.SetupDefaults()
 
 	// OVN
 	ovnv1.SetupDefaults()
