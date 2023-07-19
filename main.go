@@ -60,7 +60,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
+	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	//+kubebuilder:scaffold:imports
 )
@@ -72,7 +74,7 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(corev1beta1.AddToScheme(scheme))
+	utilruntime.Must(corev1.AddToScheme(scheme))
 	utilruntime.Must(keystonev1.AddToScheme(scheme))
 	utilruntime.Must(mariadbv1.AddToScheme(scheme))
 	utilruntime.Must(memcachedv1.AddToScheme(scheme))
@@ -94,6 +96,7 @@ func init() {
 	utilruntime.Must(networkv1.AddToScheme(scheme))
 	utilruntime.Must(telemetryv1.AddToScheme(scheme))
 	utilruntime.Must(swiftv1.AddToScheme(scheme))
+	utilruntime.Must(clientv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -164,19 +167,35 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&clientcontrollers.OpenStackClientReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackClient")
+		os.Exit(1)
+	}
+
 	// Defaults for service operators
 	setupServiceOperatorDefaults()
 
-	// Defaults for anything else that was not covered by service operator defaults
-	corev1beta1.SetupDefaults()
+	// Defaults for OpenStackClient
+	clientv1.SetupDefaults()
+
+	// Defaults for anything else that was not covered by OpenStackClient nor service operator defaults
+	corev1.SetupDefaults()
 
 	// Webhooks
 	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
-		if err = (&corev1beta1.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
+		if err = (&corev1.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackControlPlane")
 			os.Exit(1)
 		}
+		if err = (&clientv1.OpenStackClient{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackClient")
+			os.Exit(1)
+		}
 	}
+
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

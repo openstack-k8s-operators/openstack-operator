@@ -11,6 +11,26 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: mopenstackclient.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-core-openstack-org-v1beta1-openstackcontrolplane
   failurePolicy: Fail
   name: mopenstackcontrolplane.kb.io
@@ -32,6 +52,26 @@ metadata:
   creationTimestamp: null
   name: validating-webhook-configuration
 webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: vopenstackclient.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
+  sideEffects: None
 - admissionReviewVersions:
   - v1
   clientConfig:

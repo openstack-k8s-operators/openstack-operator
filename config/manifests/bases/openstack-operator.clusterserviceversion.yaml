@@ -13,6 +13,11 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: OpenStackClient is the Schema for the openstackclients API
+      displayName: Open Stack Client
+      kind: OpenStackClient
+      name: openstackclients.client.openstack.org
+      version: v1beta1
     - description: OpenStackControlPlane is the Schema for the openstackcontrolplanes
         API
       displayName: OpenStack ControlPlane

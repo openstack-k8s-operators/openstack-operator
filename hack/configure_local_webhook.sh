@@ -58,6 +58,34 @@ webhooks:
   timeoutSeconds: 10
 ---
 apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: vopenstackclient.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/validate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: vopenstackclient.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: mopenstackcontrolplane.kb.io
@@ -81,6 +109,34 @@ webhooks:
     - UPDATE
     resources:
     - openstackcontrolplanes
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mopenstackclient.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/mutate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: mopenstackclient.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10

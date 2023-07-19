@@ -6,12 +6,14 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.16
+	github.com/onsi/ginkgo/v2 v2.11.0
+	github.com/onsi/gomega v1.27.8
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230707161104-1e2896501829
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230712115735-223957c43c35
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230711055526-23fa929a7137
 	github.com/openstack-k8s-operators/heat-operator/api v0.0.0-20230712115458-fd0d803afb13
 	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230712085223-1b3b980cd5cf
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230710115018-c110ec665f47
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230719113354-16a509ecb1f6
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230711233820-0116582ccb42
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230712131157-1c2b04a11102
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230712082535-db7193b646f2
@@ -37,9 +39,12 @@ require (
 
 require (
 	github.com/go-logr/zapr v1.2.4 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
 	github.com/metal3-io/baremetal-operator/apis v0.3.1 // indirect
 	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.2.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 )
 
 require (
