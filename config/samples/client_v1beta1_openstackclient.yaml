@@ -1,0 +1,12 @@
+apiVersion: client.openstack.org/v1beta1
+kind: OpenStackClient
+metadata:
+  labels:
+    app.kubernetes.io/name: openstackclient
+    app.kubernetes.io/instance: openstackclient-sample
+    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: openstack-operator
+  name: openstackclient-sample
+spec:
+  # TODO(user): Add fields here

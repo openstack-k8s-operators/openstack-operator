@@ -60,6 +60,12 @@ const (
 	// OpenStackControlPlaneHorizonReadyCondition Status=True condition which indicates if Horizon is configured and operational
 	OpenStackControlPlaneHorizonReadyCondition condition.Type = "OpenStackControlPlaneHorizonReady"
 
+	// OpenStackControlPlaneClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
+	OpenStackControlPlaneClientReadyCondition condition.Type = "OpenStackControlPlaneClientReady"
+
+	// OpenStackClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
+	OpenStackClientReadyCondition condition.Type = "OpenStackClientReady"
+
 	// OpenStackControlPlaneManilaReadyCondition Status=True condition which indicates if Manila is configured and operational
 	OpenStackControlPlaneManilaReadyCondition condition.Type = "OpenStackControlPlaneManilaReady"
 
@@ -252,6 +258,18 @@ const (
 
 	// OpenStackControlPlaneIronicReadyErrorMessage
 	OpenStackControlPlaneIronicReadyErrorMessage = "OpenStackControlPlane Ironic error occured %s"
+
+	// OpenStackControlPlaneClientReadyInitMessage
+	OpenStackControlPlaneClientReadyInitMessage = "OpenStackControlPlane Client not started"
+
+	// OpenStackControlPlaneClientReadyMessage
+	OpenStackControlPlaneClientReadyMessage = "OpenStackControlPlane Client completed"
+
+	// OpenStackControlPlaneClientReadyRunningMessage
+	OpenStackControlPlaneClientReadyRunningMessage = "OpenStackControlPlane Client in progress"
+
+	// OpenStackControlPlaneClientReadyErrorMessage
+	OpenStackControlPlaneClientReadyErrorMessage = "OpenStackControlPlane Client error occured %s"
 
 	// OpenStackControlPlaneHorizonReadyInitMessage
 	OpenStackControlPlaneHorizonReadyInitMessage = "OpenStackControlPlane Horizon not started"

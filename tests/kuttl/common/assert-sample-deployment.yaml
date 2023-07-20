@@ -146,6 +146,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneCinderReady
+  - message: OpenStackControlPlane Client completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneClientReady
   - message: OpenStackControlPlane Glance completed
     reason: Ready
     status: "True"

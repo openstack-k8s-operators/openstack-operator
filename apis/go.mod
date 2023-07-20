@@ -3,11 +3,13 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.19
 
 require (
+	github.com/onsi/ginkgo/v2 v2.11.0
+	github.com/onsi/gomega v1.27.8
 	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230707161104-1e2896501829
 	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230711055526-23fa929a7137
 	github.com/openstack-k8s-operators/heat-operator/api v0.0.0-20230712115458-fd0d803afb13
 	github.com/openstack-k8s-operators/horizon-operator/api v0.0.0-20230712085223-1b3b980cd5cf
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230710115018-c110ec665f47
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230719113354-16a509ecb1f6
 	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230711233820-0116582ccb42
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230712131157-1c2b04a11102
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230712082535-db7193b646f2
@@ -26,7 +28,13 @@ require (
 
 require (
 	github.com/go-logr/zapr v1.2.4 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 )
 
 require (
@@ -79,7 +87,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.26.6 // indirect // indirect // indirect
 	k8s.io/apiextensions-apiserver v0.26.6 //indirect
-	k8s.io/client-go v0.26.6 //indirect
+	k8s.io/client-go v0.26.6
 	k8s.io/component-base v0.26.6 //indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230515203736-54b630e78af5 //indirect

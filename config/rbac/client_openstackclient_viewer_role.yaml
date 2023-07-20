@@ -1,0 +1,27 @@
+# permissions for end users to view openstackclients.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: openstackclient-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: openstackclient-viewer-role
+rules:
+- apiGroups:
+  - client.openstack.org
+  resources:
+  - openstackclients
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - client.openstack.org
+  resources:
+  - openstackclients/status
+  verbs:
+  - get

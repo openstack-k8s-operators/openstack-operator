@@ -548,6 +548,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneCinderReadyCondition, condition.InitReason, OpenStackControlPlaneCinderReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneNovaReadyCondition, condition.InitReason, OpenStackControlPlaneNovaReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneIronicReadyCondition, condition.InitReason, OpenStackControlPlaneIronicReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneClientReadyCondition, condition.InitReason, OpenStackControlPlaneClientReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneManilaReadyCondition, condition.InitReason, OpenStackControlPlaneManilaReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneHorizonReadyCondition, condition.InitReason, OpenStackControlPlaneHorizonReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneDNSReadyCondition, condition.InitReason, OpenStackControlPlaneDNSReadyInitMessage),
