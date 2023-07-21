@@ -252,6 +252,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - octavia.openstack.org
+  resources:
+  - octavias
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - ovn.openstack.org
   resources:
   - ovncontrollers

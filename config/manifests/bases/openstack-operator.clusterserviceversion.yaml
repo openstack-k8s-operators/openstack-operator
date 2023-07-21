@@ -173,6 +173,15 @@ spec:
       - description: Template - Overrides to use when creating the Nova services
         displayName: Template
         path: nova.template
+      - description: Enabled - Whether the Octavia service should be deployed and
+          managed
+        displayName: Enabled
+        path: octavia.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating Octavia Resources
+        displayName: Template
+        path: octavia.template
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn

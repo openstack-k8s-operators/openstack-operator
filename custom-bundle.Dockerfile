@@ -17,6 +17,7 @@ ARG GLANCE_BUNDLE=quay.io/openstack-k8s-operators/glance-operator-bundle:latest
 ARG CINDER_BUNDLE=quay.io/openstack-k8s-operators/cinder-operator-bundle:latest
 ARG MANILA_BUNDLE=quay.io/openstack-k8s-operators/manila-operator-bundle:latest
 ARG SWIFT_BUNDLE=quay.io/openstack-k8s-operators/swift-operator-bundle:latest
+ARG OCTAVIA_BUNDLE=quay.io/openstack-k8s-operators/octavia-operator-bundle:latest
 
 # Build the manager binary
 FROM $GOLANG_CTX as builder
@@ -57,6 +58,7 @@ FROM $GLANCE_BUNDLE as glance-bundle
 FROM $CINDER_BUNDLE as cinder-bundle
 FROM $MANILA_BUNDLE as manila-bundle
 FROM $SWIFT_BUNDLE as swift-bundle
+FROM $OCTAVIA_BUNDLE as octavia-bundle
 
 FROM $GOLANG_CTX as merger
 WORKDIR /workspace
@@ -84,6 +86,7 @@ COPY --from=glance-bundle /manifests/* /manifests/
 COPY --from=cinder-bundle /manifests/* /manifests/
 COPY --from=manila-bundle /manifests/* /manifests/
 COPY --from=swift-bundle /manifests/* /manifests/
+COPY --from=octavia-bundle /manifests/* /manifests/
 
 # extract all the env vars (NOTE/FIXME: base-csv is unused below to be refactored)
 RUN /workspace/csv-merger \
@@ -106,6 +109,7 @@ RUN /workspace/csv-merger \
   --cinder-csv=/manifests/cinder-operator.clusterserviceversion.yaml \
   --manila-csv=/manifests/manila-operator.clusterserviceversion.yaml \
   --swift-csv=/manifests/swift-operator.clusterserviceversion.yaml \
+  --octavia-csv=/manifests/octavia-operator.clusterserviceversion.yaml \
   --base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /fixme-required-for-now-but-will-can-made-optional.yaml
 
 # apply all the ENV vars to the actual base-csv

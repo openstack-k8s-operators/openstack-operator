@@ -155,6 +155,12 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
 			reqs = "MariaDB or Galera, Memcached, Keystone"
 		}
+	case "Octavia":
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled &&
+		    r.Spec.Ovn.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
+		}
 	}
 
 	// If "reqs" is not the empty string, we have missing requirements
@@ -273,6 +279,13 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 	if r.Spec.Horizon.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Horizon"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("horizon").Child("enabled"), r.Spec.Horizon.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+
+	if r.Spec.Octavia.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Octavia"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("octavia").Child("enabled"), r.Spec.Octavia.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -425,4 +438,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Horizon.Template.Default()
 	}
 
+	// Octavia
+	if r.Spec.Octavia.Enabled {
+		r.Spec.Octavia.Template.Default()
+	}
 }

@@ -6613,6 +6613,160 @@ spec:
                     - secret
                     type: object
                 type: object
+              octavia:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  template:
+                    properties:
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        type: string
+                      databaseInstance:
+                        type: string
+                      databaseUser:
+                        default: octavia
+                        type: string
+                      debug:
+                        properties:
+                          dbSync:
+                            default: false
+                            type: boolean
+                          service:
+                            default: false
+                            type: boolean
+                        type: object
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      octaviaAPI:
+                        properties:
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            default: '# add your customization here'
+                            type: string
+                          databaseHostname:
+                            type: string
+                          databaseInstance:
+                            type: string
+                          databaseUser:
+                            default: octavia
+                            type: string
+                          debug:
+                            properties:
+                              dbSync:
+                                default: false
+                                type: boolean
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          passwordSelectors:
+                            default:
+                              database: OctaviaDatabasePassword
+                              service: OctaviaPassword
+                            properties:
+                              database:
+                                default: OctaviaDatabasePassword
+                                type: string
+                              service:
+                                default: OctaviaPassword
+                                type: string
+                            type: object
+                          preserveJobs:
+                            default: false
+                            type: boolean
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          secret:
+                            type: string
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: octavia
+                            type: string
+                        required:
+                        - containerImage
+                        - databaseInstance
+                        - secret
+                        - serviceAccount
+                        type: object
+                      passwordSelectors:
+                        default:
+                          database: OctaviaDatabasePassword
+                          service: OctaviaPassword
+                        properties:
+                          database:
+                            default: OctaviaDatabasePassword
+                            type: string
+                          service:
+                            default: OctaviaPassword
+                            type: string
+                        type: object
+                      preserveJobs:
+                        default: false
+                        type: boolean
+                      secret:
+                        type: string
+                      serviceUser:
+                        default: octavia
+                        type: string
+                    required:
+                    - databaseInstance
+                    - octaviaAPI
+                    - secret
+                    type: object
+                type: object
               ovn:
                 properties:
                   enabled:

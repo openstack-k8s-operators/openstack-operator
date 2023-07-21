@@ -33,6 +33,7 @@ import (
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
@@ -83,6 +84,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=telemetry.openstack.org,resources=ceilometercentrals,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=swift.openstack.org,resources=swifts,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=octavia.openstack.org,resources=octavias,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -287,6 +289,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcileOctavia(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -313,5 +322,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&ironicv1.Ironic{}).
 		Owns(&horizonv1.Horizon{}).
 		Owns(&telemetryv1.CeilometerCentral{}).
+		Owns(&octaviav1.Octavia{}).
 		Complete(r)
 }

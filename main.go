@@ -43,6 +43,7 @@ import (
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
@@ -88,6 +89,7 @@ func init() {
 	utilruntime.Must(ironicv1.AddToScheme(scheme))
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
+	utilruntime.Must(octaviav1.AddToScheme(scheme))
 	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
@@ -271,4 +273,7 @@ func setupServiceOperatorDefaults() {
 
 	// Swift
 	swiftv1.SetupDefaults()
+
+	// Octavia
+	octaviav1.SetupDefaults()
 }

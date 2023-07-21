@@ -21,6 +21,7 @@ require (
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.0
 	github.com/openstack-k8s-operators/neutron-operator/api v0.1.0
 	github.com/openstack-k8s-operators/nova-operator/api v0.1.1
+	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230727150602-36db9ee622c1
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.0
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230725141229-4ce90d0120fd

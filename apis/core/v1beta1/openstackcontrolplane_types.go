@@ -39,6 +39,8 @@ import (
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -149,6 +151,9 @@ type OpenStackControlPlaneSpec struct {
 
 	// Swift - Parameters related to the Swift service
 	Swift SwiftSection `json:"swift,omitempty"`
+
+	// Octavia - Parameters related to the Octavia service
+	Octavia OctaviaSection `json:"octavia,omitempty"`
 
 	// ExtraMounts containing conf files and credentials that should be provided
 	// to the underlying operators.
@@ -468,6 +473,20 @@ type SwiftSection struct {
 	Template swiftv1.SwiftSpec `json:"template,omitempty"`
 }
 
+// OctaviaSection defines the desired state of the Octavia service
+type OctaviaSection struct {
+	// +kubebuilder:validation:Optional
+	// Enabled - Whether the Octavia service should be deployed and managed
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:valdiation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating Octavia Resources
+	Template octaviav1.OctaviaSpec `json:"template,omitempty"`
+}
+
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
 type OpenStackControlPlaneStatus struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
@@ -555,6 +574,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneCeilometerReadyCondition, condition.InitReason, OpenStackControlPlaneCeilometerReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneHeatReadyCondition, condition.InitReason, OpenStackControlPlaneHeatReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneSwiftReadyCondition, condition.InitReason, OpenStackControlPlaneSwiftReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneOctaviaReadyCondition, condition.InitReason, OpenStackControlPlaneOctaviaReadyInitMessage),
 
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
