@@ -1,56 +1,13 @@
 {
-  "timezone": "America/New_York",
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "github>openstack-k8s-operators/renovate-config"
   ],
-  "dependencyDashboard": true,
-  "logFileLevel": "trace",
-  "enabledManagers": ["gomod"],
-  "postUpdateOptions": ["gomodTidy"],
   "constraints": {
     "go": "1.19"
   },
-  "schedule":[
-    "every weekend"
-  ],
-  "packageRules": [
-    {
-      "matchPackageNames": ["go"],
-      "enabled": false
-    },
-    {
-      "groupName": "openstack-k8s-operators",
-      "matchPackagePatterns": ["^github.com/openstack-k8s-operators"],
-      "enabled": true
-    },
-    {
-      "groupName": "k8s.io",
-      "matchPackagePatterns": ["^k8s.io"],
-      "excludePackagePatterns": ["^k8s.io/kube-openapi"],
-      "allowedVersions": "< 0.27.0",
-      "enabled": true
-    },
-    {
-      "groupName": "sigs.k8s.io/controller-runtime",
-      "matchPackagePatterns": ["^sigs.k8s.io/controller-runtime"],
-      "allowedVersions": "< 0.15.0",
-      "enabled": true
-    },
-    {
-      "groupName": "misc",
-      "matchPackagePatterns": ["^github.com/operator-framework/api", "^github.com/ghodss", "^github.com/go-logr/logr", "^github.com/imdario/mergo", "^go.uber.org/zap"],
-      "enabled": true
-    },
-    {
-      "groupName": "rabbitmq",
-      "matchPackagePatterns": ["^github.com/rabbitmq/cluster-operator"],
-      "enabled": false
-    }
-  ],
   "postUpgradeTasks": {
-    "commands": ["go mod tidy", "make manifests generate"],
-    "fileFilters": ["go.mod", "go.sum", "**/*.go", "**/*.yaml"],
+    "commands": ["make gowork", "make tidy", "make manifests generate"],
+    "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml"],
     "executionMode": "update"
   }
 }
