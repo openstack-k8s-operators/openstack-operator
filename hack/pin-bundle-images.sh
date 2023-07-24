@@ -26,7 +26,7 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
 
     GIT_REPO=${MOD_PATH%"/apis"}
     GIT_REPO=${GIT_REPO%"/api"}
-    REF=$(echo $MOD_VERSION | sed -e 's|v0.0.0-[0-9]*-\(.*\)$|\1|')
+    REF=$(echo $MOD_VERSION | sed -e 's|v[0-9]*.[0-9]*.[0-9]*-.*[0-9]*-\(.*\)$|\1|')
     if [[ "$REF" == v* ]]; then
         REF=$(git ls-remote https://${GIT_REPO} | grep ${REF} | awk 'NR==1{print $1}')
     fi
