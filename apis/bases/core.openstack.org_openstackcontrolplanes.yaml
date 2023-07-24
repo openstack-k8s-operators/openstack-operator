@@ -163,6 +163,7 @@ spec:
                           replicas:
                             default: 1
                             format: int32
+                            minimum: 0
                             type: integer
                           resources:
                             properties:
@@ -229,6 +230,7 @@ spec:
                           replicas:
                             default: 1
                             format: int32
+                            minimum: 0
                             type: integer
                           resources:
                             properties:
@@ -295,6 +297,7 @@ spec:
                           replicas:
                             default: 1
                             format: int32
+                            minimum: 0
                             type: integer
                           resources:
                             properties:
@@ -363,6 +366,7 @@ spec:
                               default: 1
                               format: int32
                               maximum: 1
+                              minimum: 0
                               type: integer
                             resources:
                               properties:
@@ -6618,6 +6622,12 @@ spec:
                     properties:
                       ovnController:
                         properties:
+                          debug:
+                            properties:
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
                           external-ids:
                             properties:
                               enable-chassis-as-gateway:
@@ -6695,6 +6705,12 @@ spec:
                               default: NB
                               pattern: ^NB|SB$
                               type: string
+                            debug:
+                              properties:
+                                service:
+                                  default: false
+                                  type: boolean
+                              type: object
                             electionTimer:
                               default: 10000
                               format: int32
@@ -6767,6 +6783,12 @@ spec:
                         properties:
                           containerImage:
                             type: string
+                          debug:
+                            properties:
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
                           logLevel:
                             default: info
                             type: string

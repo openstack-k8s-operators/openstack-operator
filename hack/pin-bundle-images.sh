@@ -24,7 +24,12 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
 
     BASE=$(echo $MOD_PATH | sed -e 's|github.com/.*/\(.*\)-operator/.*|\1|')
 
+    GIT_REPO=${MOD_PATH%"/apis"}
+    GIT_REPO=${GIT_REPO%"/api"}
     REF=$(echo $MOD_VERSION | sed -e 's|v0.0.0-[0-9]*-\(.*\)$|\1|')
+    if [[ "$REF" == v* ]]; then
+        REF=$(git ls-remote https://${GIT_REPO} | grep ${REF} | awk 'NR==1{print $1}')
+    fi
     GITHUB_USER=$(echo $MOD_PATH | sed -e 's|github.com/\(.*\)/.*-operator/.*$|\1|')
     REPO_CURL_URL="https://quay.io/api/v1/repository/openstack-k8s-operators"
     REPO_URL="quay.io/openstack-k8s-operators"

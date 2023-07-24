@@ -225,7 +225,7 @@ func (in *MemcachedSection) DeepCopyInto(out *MemcachedSection) {
 		in, out := &in.Templates, &out.Templates
 		*out = make(map[string]memcachedv1beta1.MemcachedSpec, len(*in))
 		for key, val := range *in {
-			(*out)[key] = val
+			(*out)[key] = *val.DeepCopy()
 		}
 	}
 }
