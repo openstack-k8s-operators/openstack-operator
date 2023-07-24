@@ -1,4 +1,1 @@
-apiVersion: core.openstack.org/v1beta1
-kind: OpenStackControlPlane
-metadata:
-  name: openstack
+../../common/errors_cleanup_openstack.yaml
