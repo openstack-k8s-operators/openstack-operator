@@ -5,6 +5,12 @@
   "constraints": {
     "go": "1.19"
   },
+  "packageRules": [
+    {
+      "matchPackageNames": ["github.com/openstack-k8s-operators/openstack-operator/apis"],
+      "enabled": false
+    }
+  ],
   "postUpgradeTasks": {
     "commands": ["make gowork", "make tidy", "make manifests generate"],
     "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml"],
