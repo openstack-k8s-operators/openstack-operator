@@ -4,23 +4,23 @@ go 1.19
 
 require (
 	github.com/onsi/ginkgo/v2 v2.11.0
-	github.com/onsi/gomega v1.27.8
-	github.com/openstack-k8s-operators/cinder-operator/api v0.0.0-20230721205634-2570d0e4f30f
-	github.com/openstack-k8s-operators/glance-operator/api v0.0.0-20230721204339-8fbfb852d052
+	github.com/onsi/gomega v1.27.10
+	github.com/openstack-k8s-operators/cinder-operator/api v0.1.0
+	github.com/openstack-k8s-operators/glance-operator/api v0.1.0
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.0
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.0
 	github.com/openstack-k8s-operators/infra-operator/apis v0.1.0
-	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230722140433-eba71851e2ff
+	github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230726045853-4f3138a78f06
 	github.com/openstack-k8s-operators/keystone-operator/api v0.1.0
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0
 	github.com/openstack-k8s-operators/manila-operator/api v0.1.0
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.0
 	github.com/openstack-k8s-operators/neutron-operator/api v0.1.0
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230722143430-9a823874b413
+	github.com/openstack-k8s-operators/nova-operator/api v0.1.0
 	github.com/openstack-k8s-operators/ovn-operator/api v0.1.0
 	github.com/openstack-k8s-operators/placement-operator/api v0.1.0
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.0
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230722143613-c8fb5ea957c3
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.0
 	github.com/rabbitmq/cluster-operator v1.14.0
 	k8s.io/apimachinery v0.26.7
 	sigs.k8s.io/controller-runtime v0.14.6
@@ -73,11 +73,11 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.9.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/term v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/term v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
