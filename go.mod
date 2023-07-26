@@ -31,8 +31,8 @@ require (
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
 	go.uber.org/zap v1.24.0
-	k8s.io/api v0.26.7
-	k8s.io/apimachinery v0.26.7
+	k8s.io/api v0.27.1
+	k8s.io/apimachinery v0.27.1
 	k8s.io/client-go v0.26.7
 	sigs.k8s.io/controller-runtime v0.14.6
 )
@@ -111,4 +111,4 @@ replace github.com/openstack-k8s-operators/openstack-operator/apis => ./apis
 
 // mschuppert: map to latest commit from release-4.13 tag
 // must consistent within modules and service operators
-replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7 //allow-merging
+replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230726162818-81f778f3b3ec //allow-merging

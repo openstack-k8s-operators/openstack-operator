@@ -22,7 +22,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.0
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.0
 	github.com/rabbitmq/cluster-operator v1.14.0
-	k8s.io/apimachinery v0.26.7
+	k8s.io/apimachinery v0.27.1
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
@@ -85,7 +85,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.26.7
+	k8s.io/api v0.27.1
 	k8s.io/apiextensions-apiserver v0.26.7 //indirect
 	k8s.io/client-go v0.26.7
 	k8s.io/component-base v0.26.7 //indirect
@@ -99,4 +99,4 @@ require (
 
 // mschuppert: map to latest commit from release-4.13 tag
 // must consistent within modules and service operators
-replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7 //allow-merging
+replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230726162818-81f778f3b3ec //allow-merging
