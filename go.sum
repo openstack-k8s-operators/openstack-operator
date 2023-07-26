@@ -145,8 +145,8 @@ github.com/openstack-k8s-operators/horizon-operator/api v0.1.0 h1:pwMfL2bZu8/pQ2
 github.com/openstack-k8s-operators/horizon-operator/api v0.1.0/go.mod h1:nip30uyFgmEcrssNcOFs8Ye3t8gE1JihnbBJJIVb47A=
 github.com/openstack-k8s-operators/infra-operator/apis v0.1.0 h1:cavVlTrKeW2xcyt78UPsj1uGxgjfKfzULLZNJEa5wgI=
 github.com/openstack-k8s-operators/infra-operator/apis v0.1.0/go.mod h1:t1xmsiZDqM3wXcLMqgHp7/iilK8ozuOkydV4Vi2Qibk=
-github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230726045853-4f3138a78f06 h1:3CYrkwUcAgrS02v3V/harLV1H1bevyRyaExeBlQWprI=
-github.com/openstack-k8s-operators/ironic-operator/api v0.0.0-20230726045853-4f3138a78f06/go.mod h1:slFWxIEbjO2tkyPR6GoKI0pIDgctKsPVB+Wg6D+CbQ0=
+github.com/openstack-k8s-operators/ironic-operator/api v0.1.0 h1:Bm0mo2iRT16CG/WNj3stuheDGQDDZY3CGVv52AFDH1w=
+github.com/openstack-k8s-operators/ironic-operator/api v0.1.0/go.mod h1:slFWxIEbjO2tkyPR6GoKI0pIDgctKsPVB+Wg6D+CbQ0=
 github.com/openstack-k8s-operators/keystone-operator/api v0.1.0 h1:p98vKnS4KzdgU/+vrVKFY3y9n9v1Z6cpo4JvbTNRxlM=
 github.com/openstack-k8s-operators/keystone-operator/api v0.1.0/go.mod h1:LNJJdteQG4E2fhWDerE+f8S2/ephEJg8yBkH1eqYYOo=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0 h1:F1iYRBwa0cZ2VHw8Zs4frqSWQ1B/tiCuSwH/DuHb8VM=
