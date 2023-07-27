@@ -117,6 +117,24 @@ spec:
         path: keystone.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: IPAddressPool expose VIP via MetalLB on the IPAddressPool
+        displayName: IPAddress Pool
+        path: keystone.externalEndpoints[0].ipAddressPool
+      - description: LoadBalancerIPs, request given IPs from the pool if available.
+          Using a list to allow dual stack (IPv4/IPv6) support
+        displayName: Load Balancer IPs
+        path: keystone.externalEndpoints[0].loadBalancerIPs
+      - description: SharedIP if true, VIP/VIPs get shared with multiple services
+        displayName: Shared IP
+        path: keystone.externalEndpoints[0].sharedIP
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: SharedIPKey specifies the sharing key which gets set as the annotation
+          on the LoadBalancer service. Services which share the same VIP must have
+          the same SharedIPKey. Defaults to the IPAddressPool if SharedIP is true,
+          but no SharedIPKey specified.
+        displayName: Shared IPKey
+        path: keystone.externalEndpoints[0].sharedIPKey
       - description: Template - Overrides to use when creating the Keystone service
         displayName: Template
         path: keystone.template

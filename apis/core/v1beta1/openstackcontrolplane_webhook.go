@@ -158,7 +158,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 	case "Octavia":
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled &&
-		    r.Spec.Ovn.Enabled) {
+			r.Spec.Ovn.Enabled) {
 			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
 		}
 	}

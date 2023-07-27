@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	routev1 "github.com/openshift/api/route/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
@@ -85,6 +86,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=telemetry.openstack.org,resources=ceilometercentrals,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=swift.openstack.org,resources=swifts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=octavia.openstack.org,resources=octavias,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=route.openshift.io,resources=routes,verbs=get;list;watch;create;update;patch;delete;
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -323,5 +325,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&horizonv1.Horizon{}).
 		Owns(&telemetryv1.CeilometerCentral{}).
 		Owns(&octaviav1.Octavia{}).
+		Owns(&routev1.Route{}).
 		Complete(r)
 }

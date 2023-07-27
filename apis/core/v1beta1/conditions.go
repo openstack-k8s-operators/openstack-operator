@@ -75,6 +75,9 @@ const (
 	// OpenStackControlPlaneCeilometerReadyCondition Status=True condition which indicates if OpenStack Ceilometer service is configured and operational
 	OpenStackControlPlaneCeilometerReadyCondition condition.Type = "OpenStackControlPlaneCeilometerReady"
 
+	// OpenStackControlPlaneServiceOverrideReadyCondition Status=True condition which indicates if OpenStack service override has created ok
+	OpenStackControlPlaneServiceOverrideReadyCondition condition.Type = "OpenStackControlPlaneServiceOverrideReady"
+
 	// OpenStackControlPlaneManilaReadyInitMessage
 	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
 
@@ -321,4 +324,13 @@ const (
 
 	// OpenStackControlPlaneCeilometerReadyErrorMessage
 	OpenStackControlPlaneCeilometerReadyErrorMessage = "OpenStackControlPlane Ceilometer error occured %s"
+
+	// OpenStackControlPlaneServiceOverrideReadyInitMessage
+	OpenStackControlPlaneServiceOverrideReadyInitMessage = "OpenStackControlPlane service override not started"
+
+	// OpenStackControlPlaneServiceOverrideReadyMessage
+	OpenStackControlPlaneServiceOverrideReadyMessage = "OpenStackControlPlane service override completed"
+
+	// OpenStackControlPlaneServiceOverrideReadyErrorMessage
+	OpenStackControlPlaneServiceOverrideReadyErrorMessage = "OpenStackControlPlane %s %s service override error occured %s"
 )

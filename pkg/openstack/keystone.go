@@ -13,10 +13,13 @@ import (
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 )
 
 // ReconcileKeystoneAPI -
 func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+
 	keystoneAPI := &keystonev1.KeystoneAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone", //FIXME (keystone doesn't seem to work unless named "keystone")
@@ -32,9 +35,41 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		return ctrl.Result{}, nil
 	}
 
+	// Create service overrides to pass into the service CR
+	// and expose the public endpoint using a route per default.
+	// Any trailing path will be added on the service-operator level.
+	serviceOverrides := map[string]service.OverrideSpec{}
+	serviceDetails := []ServiceDetails{}
+
+	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
+		sd := ServiceDetails{
+			ServiceName:         keystoneAPI.Name,
+			Namespace:           instance.Namespace,
+			Endpoint:            endpointType,
+			ServiceOverrideSpec: instance.Spec.Keystone.Template.Override.Service,
+			RouteOverrideSpec:   instance.Spec.Keystone.APIOverride.Route,
+		}
+
+		svcOverride, ctrlResult, err := sd.CreateRouteAndServiceOverride(ctx, instance, helper)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		serviceDetails = append(
+			serviceDetails,
+			sd,
+		)
+
+		serviceOverrides[string(endpointType)] = *svcOverride
+	}
+	instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneServiceOverrideReadyCondition, corev1beta1.OpenStackControlPlaneServiceOverrideReadyMessage)
+
 	helper.GetLogger().Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec)
+		keystoneAPI.Spec.Override.Service = serviceOverrides
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -73,6 +108,18 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyRunningMessage))
+	}
+
+	for _, sd := range serviceDetails {
+		// Add the service CR to the ownerRef list of the route to prevent the route being deleted
+		// before the service is deleted. Otherwise this can result cleanup issues which require
+		// the endpoint to be reachable.
+		// If ALL objects in the list have been deleted, this object will be garbage collected.
+		// https://github.com/kubernetes/apimachinery/blob/15d95c0b2af3f4fcf46dce24105e5fbb9379af5a/pkg/apis/meta/v1/types.go#L240-L247
+		err = sd.AddOwnerRef(ctx, helper, keystoneAPI)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	return ctrl.Result{}, nil

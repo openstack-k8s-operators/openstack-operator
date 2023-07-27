@@ -28,18 +28,20 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
-	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -188,9 +190,21 @@ type KeystoneSection struct {
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Keystone service
 	Template keystonev1.KeystoneAPISpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+}
+
+// Override to override the generated manifest of several child resources.
+type Override struct {
+	// +kubebuilder:validation:Optional
+	// Route overrides to use when creating the public service endpoint
+	Route *route.OverrideSpec `json:"route,omitempty"`
 }
 
 // PlacementSection defines the desired state of Placement service
@@ -306,6 +320,12 @@ type RabbitmqTemplate struct {
 
 // MetalLBConfig to configure the MetalLB loadbalancer service
 type MetalLBConfig struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=internal;public
+	// +kubebuilder:default=internal
+	// Endpoint, OpenStack endpoint this service maps to
+	Endpoint service.Endpoint `json:"endpoint"`
+
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
@@ -556,6 +576,8 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		instance.Status.Conditions = condition.Conditions{}
 	}
 	cl := condition.CreateList(
+		condition.UnknownCondition(OpenStackControlPlaneServiceOverrideReadyCondition, condition.InitReason, OpenStackControlPlaneServiceOverrideReadyInitMessage),
+		condition.UnknownCondition(condition.ExposeServiceReadyCondition, condition.InitReason, condition.ExposeServiceReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneRabbitMQReadyCondition, condition.InitReason, OpenStackControlPlaneRabbitMQReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOVNReadyCondition, condition.InitReason, OpenStackControlPlaneOVNReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneNeutronReadyCondition, condition.InitReason, OpenStackControlPlaneNeutronReadyInitMessage),
