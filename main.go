@@ -61,6 +61,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	routev1 "github.com/openshift/api/route/v1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
@@ -100,6 +101,7 @@ func init() {
 	utilruntime.Must(swiftv1.AddToScheme(scheme))
 	utilruntime.Must(clientv1.AddToScheme(scheme))
 	utilruntime.Must(redisv1.AddToScheme(scheme))
+	utilruntime.Must(routev1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

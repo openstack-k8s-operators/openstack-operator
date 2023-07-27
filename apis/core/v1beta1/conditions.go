@@ -33,6 +33,9 @@ const (
 	// OpenStackControlPlaneKeystoneAPIReadyCondition Status=True condition which indicates if KeystoneAPI is configured and operational
 	OpenStackControlPlaneKeystoneAPIReadyCondition condition.Type = "OpenStackControlPlaneKeystoneAPIReady"
 
+	// OpenStackControlPlaneExposeKeystoneAPIReadyCondition Status=True condition which indicates if KeystoneAPI is exposed via a route
+	OpenStackControlPlaneExposeKeystoneAPIReadyCondition condition.Type = "OpenStackControlPlaneExposeKeystoneAPIReady"
+
 	// OpenStackControlPlanePlacementAPIReadyCondition Status=True condition which indicates if PlacementAPI is configured and operational
 	OpenStackControlPlanePlacementAPIReadyCondition condition.Type = "OpenStackControlPlanePlacementAPIReady"
 
@@ -75,6 +78,9 @@ const (
 	// OpenStackControlPlaneCeilometerReadyCondition Status=True condition which indicates if OpenStack Ceilometer service is configured and operational
 	OpenStackControlPlaneCeilometerReadyCondition condition.Type = "OpenStackControlPlaneCeilometerReady"
 
+	// OpenStackControlPlaneServiceOverrideReadyCondition Status=True condition which indicates if OpenStack service override has created ok
+	OpenStackControlPlaneServiceOverrideReadyCondition condition.Type = "OpenStackControlPlaneServiceOverrideReady"
+
 	// OpenStackControlPlaneManilaReadyInitMessage
 	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
 
@@ -107,7 +113,6 @@ const (
 
 	// OpenStackControlPlaneRedisReadyCondition Status=True condition which indicates if Redis is configured and operational
 	OpenStackControlPlaneRedisReadyCondition condition.Type = "OpenStackControlPlaneRedisReady"
-
 )
 
 // OpenStackControlPlane Reasons used by API objects.
@@ -338,4 +343,12 @@ const (
 	// OpenStackControlPlaneRedisReadyErrorMessage
 	OpenStackControlPlaneRedisReadyErrorMessage = "OpenStackControlPlane Redis error occured %s"
 
+	// OpenStackControlPlaneExposeServiceReadyInitMessage
+	OpenStackControlPlaneExposeServiceReadyInitMessage = "OpenStackControlPlane %s exposing service %s not started"
+
+	// OpenStackControlPlaneExposeServiceReadyErrorMessage
+	OpenStackControlPlaneExposeServiceReadyErrorMessage = "OpenStackControlPlane %s exposing service via route %s error occured %s"
+
+	// OpenStackControlPlaneExposeServiceReadyMessage
+	OpenStackControlPlaneExposeServiceReadyMessage = "OpenStackControlPlane %s service exposed"
 )

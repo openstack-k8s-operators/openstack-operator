@@ -82,6 +82,13 @@ rules:
   - list
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+- apiGroups:
   - core.openstack.org
   resources:
   - openstackcontrolplanes
@@ -355,6 +362,26 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes/custom-host
+  verbs:
+  - create
+  - patch
+  - update
 - apiGroups:
   - security.openshift.io
   resourceNames:
