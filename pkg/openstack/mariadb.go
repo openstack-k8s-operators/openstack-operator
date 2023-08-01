@@ -105,12 +105,6 @@ func reconcileMariaDB(
 	helper.GetLogger().Info("Reconciling MariaDB", "MariaDB.Namespace", instance.Namespace, "Mariadb.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), mariadb, func() error {
 		spec.DeepCopyInto(&mariadb.Spec)
-		if mariadb.Spec.Secret == "" {
-			mariadb.Spec.Secret = instance.Spec.Secret
-		}
-		if mariadb.Spec.StorageClass == "" {
-			mariadb.Spec.StorageClass = instance.Spec.StorageClass
-		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), mariadb, helper.GetScheme())
 		if err != nil {
 			return err

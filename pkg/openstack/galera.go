@@ -105,12 +105,6 @@ func reconcileGalera(
 	helper.GetLogger().Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
 		spec.DeepCopyInto(&galera.Spec)
-		if galera.Spec.Secret == "" {
-			galera.Spec.Secret = instance.Spec.Secret
-		}
-		if galera.Spec.StorageClass == "" {
-			galera.Spec.StorageClass = instance.Spec.StorageClass
-		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), galera, helper.GetScheme())
 		if err != nil {
 			return err
