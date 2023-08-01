@@ -108,7 +108,13 @@ vet: gowork ## Run go vet against code.
 
 .PHONY: tidy
 tidy: ## Run go mod tidy on every mod file in the repo
+	for dep in $$(cat go.mod | grep  openstack-k8s-operators | grep "api v" | awk '{print $$1}'); do \
+		go get $$dep@main ; \
+	done
 	go mod tidy
+	for dep in $$(cat apis/go.mod | grep  openstack-k8s-operators | grep "api v" | awk '{print $$1}'); do \
+		cd ./apis && go get $$dep@main && cd .. ; \
+	done
 	cd ./apis && go mod tidy
 
 .PHONY: golangci-lint
