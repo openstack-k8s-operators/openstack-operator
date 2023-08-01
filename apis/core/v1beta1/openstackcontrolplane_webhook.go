@@ -313,6 +313,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// Galera
 	if r.Spec.Galera.Enabled {
 		for key, template := range r.Spec.Galera.Templates {
+			if template.StorageClass == "" {
+				template.StorageClass = r.Spec.StorageClass
+			}
+			if template.Secret == "" {
+				template.Secret = r.Spec.Secret
+			}
 			template.Default()
 			// By-value copy, need to update
 			r.Spec.Galera.Templates[key] = template
@@ -354,6 +360,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// MariaDB
 	if r.Spec.Mariadb.Enabled {
 		for key, template := range r.Spec.Mariadb.Templates {
+			if template.StorageClass == "" {
+				template.StorageClass = r.Spec.StorageClass
+			}
+			if template.Secret == "" {
+				template.Secret = r.Spec.Secret
+			}
 			template.Default()
 			// By-value copy, need to update
 			r.Spec.Mariadb.Templates[key] = template
