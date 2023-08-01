@@ -42,6 +42,9 @@ const (
 	// OpenStackControlPlaneGlanceReadyCondition Status=True condition which indicates if Glance is configured and operational
 	OpenStackControlPlaneGlanceReadyCondition condition.Type = "OpenStackControlPlaneGlanceReady"
 
+	// OpenStackControlPlaneExposeGlanceReadyCondition Status=True condition which indicates if Glance is exposed via a route
+	OpenStackControlPlaneExposeGlanceReadyCondition condition.Type = "OpenStackControlPlaneExposeGlanceReady"
+
 	// OpenStackControlPlaneCinderReadyCondition Status=True condition which indicates if Cinder is configured and operational
 	OpenStackControlPlaneCinderReadyCondition condition.Type = "OpenStackControlPlaneCinderReady"
 

@@ -92,6 +92,8 @@ spec:
           - storage
           replicas: 0 # backend needs to be configured
   glance:
+    apiOverride:
+      route: {}
     template:
       databaseInstance: openstack
       customServiceConfig: |
@@ -107,11 +109,6 @@ spec:
       storageClass: ""
       storageRequest: 10G
       glanceAPIInternal:
-        externalEndpoints:
-        - endpoint: internal
-          ipAddressPool: internalapi
-          loadBalancerIPs:
-          - 172.17.0.80
         override:
           service:
             metadata:
