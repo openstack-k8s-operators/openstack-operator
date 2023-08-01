@@ -38,16 +38,22 @@ spec:
           - storage
           replicas: 0 # backend needs to be configured
   glance:
+    apiOverride:
+      route: {}
     template:
       databaseInstance: openstack
       storageClass: ""
       storageRequest: 10G
       glanceAPIInternal:
-        externalEndpoints:
-        - endpoint: internal
-          ipAddressPool: internalapi
-          loadBalancerIPs:
-          - 172.17.0.80
+        override:
+          service:
+            metadata:
+              annotations:
+                metallb.universe.tf/address-pool: internalapi
+                metallb.universe.tf/allow-shared-ip: internalapi
+                metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+            spec:
+              type: LoadBalancer
         networkAttachments:
         - storage
       glanceAPIExternal:
