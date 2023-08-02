@@ -4,7 +4,6 @@ metadata:
   name: openstack-galera
 spec:
   secret: osp-secret
-  storageClass: local-storage
   keystone:
     template:
       databaseInstance: openstack
@@ -31,13 +30,6 @@ spec:
     templates:
       rabbitmq:
         replicas: 1
-        #resources:
-        #  requests:
-        #    cpu: 500m
-        #    memory: 1Gi
-        #  limits:
-        #    cpu: 800m
-        #    memory: 1Gi
       rabbitmq-cell1:
         replicas: 1
   memcached:
@@ -51,7 +43,6 @@ spec:
   glance:
     template:
       databaseInstance: openstack
-      storageClass: ""
       storageRequest: 10G
   cinder:
     template:
@@ -142,10 +133,61 @@ spec:
         replicas: 1
       swiftProxy:
         replicas: 1
-  octavia:
-    enabled: false
-    template:
-      databaseInstance: openstack
-      octaviaAPI:
-        replicas: 1
-      secret: osp-secret
+status:
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: OpenStackControlPlane Ceilometer completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCeilometerReady
+  - message: OpenStackControlPlane Cinder completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCinderReady
+  - message: OpenStackControlPlane Client completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneClientReady
+  - message: OpenStackControlPlane Glance completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneGlanceReady
+  - message: OpenStackControlPlane KeystoneAPI completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneKeystoneAPIReady
+  - message: OpenStackControlPlane MariaDB completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneMariaDBReady
+  - message: OpenStackControlPlane Memcached completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneMemcachedReady
+  - message: OpenStackControlPlane Neutron completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneNeutronReady
+  - message: OpenStackControlPlane Nova completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneNovaReady
+  - message: OpenStackControlPlane OVN completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneOVNReady
+  - message: OpenStackControlPlane PlacementAPI completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlanePlacementAPIReady
+  - message: OpenStackControlPlane RabbitMQ completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneRabbitMQReady
+  - message: OpenStackControlPlane Swift completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneSwiftReady

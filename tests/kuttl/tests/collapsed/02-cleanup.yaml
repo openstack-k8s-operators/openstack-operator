@@ -4,6 +4,3 @@ delete:
 - apiVersion: core.openstack.org/v1beta1
   kind: OpenStackControlPlane
   name: openstack-collapsed-cell
-commands:
-- script: |
-    sleep 60
