@@ -101,6 +101,21 @@ const (
 
 	// OpenStackControlPlaneSwiftReadyErrorMessage
 	OpenStackControlPlaneSwiftReadyErrorMessage = "OpenStackControlPlane Swift error occured %s"
+
+	// OpenStackControlPlaneOctaviaReadyCondition Status=True condition which indicates if Octavia is configured and operational
+	OpenStackControlPlaneOctaviaReadyCondition condition.Type = "OpenStackControlPlaneOctaviaReady"
+
+	// OpenStackControlPlaneOctaviaReadyInitMessage
+	OpenStackControlPlaneOctaviaReadyInitMessage = "OpenStackControlPlane Octavia not started"
+
+	// OpenStackControlPlaneOctaviaReadyMessage
+	OpenStackControlPlaneOctaviaReadyMessage = "OpenStackControlPlane Octavia completed"
+
+	// OpenStackControlPlaneOctaviaReadyRunningMessage
+	OpenStackControlPlaneOctaviaReadyRunningMessage = "OpenStackControlPlane Octavia in progress"
+
+	// OpenStackControlPlaneOctaviaReadyErrorMessage
+	OpenStackControlPlaneOctaviaReadyErrorMessage = "OpenStackControlPlane Octavia error occured %s"
 )
 
 // OpenStackControlPlane Reasons used by API objects.

@@ -123,3 +123,10 @@ spec:
         service: CeilometerPassword
       secret: osp-secret
       serviceUser: ceilometer
+  octavia:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      octaviaAPI:
+        replicas: 1
+      secret: osp-secret

@@ -202,3 +202,10 @@ spec:
         replicas: 1
       swiftProxy:
         replicas: 1
+  octavia:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      octaviaAPI:
+        replicas: 1
+      secret: osp-secret
