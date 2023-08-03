@@ -136,6 +136,21 @@ func reconcileRabbitMQ(
 									Name:  "HOME",
 									Value: "/var/lib/rabbitmq",
 								},
+								{
+									// The various /usr/sbin/rabbitmq* scripts are really all the same
+									// wrapper shell-script that performs some "sanity checks" and then
+									// invokes the corresponding "real" program in
+									// /usr/lib/rabbitmq/bin.  The main "sanity check" is to ensure that
+									// the user running the command is either root or rabbitmq.  Inside
+									// of an openshift pod, however, the user is neither of these, so
+									// the wrapper script will always fail.
+
+									// By putting the real programs ahead of the wrapper in PATH we can
+									// avoid the unnecessary check and just run things directly as
+									// whatever user the pod has graciously generated for us.
+									Name:  "PATH",
+									Value: "/usr/lib/rabbitmq/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+								},
 							},
 							Args: []string{
 								// OSP17 runs kolla_start here, instead just run rabbitmq-server directly
