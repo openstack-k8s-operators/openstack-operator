@@ -39,6 +39,9 @@ const (
 	// OpenStackControlPlanePlacementAPIReadyCondition Status=True condition which indicates if PlacementAPI is configured and operational
 	OpenStackControlPlanePlacementAPIReadyCondition condition.Type = "OpenStackControlPlanePlacementAPIReady"
 
+	// OpenStackControlPlaneExposePlacementAPIReadyCondition Status=True condition which indicates if PlacementAPI is exposed via a route
+	OpenStackControlPlaneExposePlacementAPIReadyCondition condition.Type = "OpenStackControlPlaneExposePlacementAPIReady"
+
 	// OpenStackControlPlaneGlanceReadyCondition Status=True condition which indicates if Glance is configured and operational
 	OpenStackControlPlaneGlanceReadyCondition condition.Type = "OpenStackControlPlaneGlanceReady"
 

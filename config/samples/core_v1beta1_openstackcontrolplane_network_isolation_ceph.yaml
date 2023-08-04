@@ -269,14 +269,9 @@ spec:
           ovn-encap-type: "geneve"
         networkAttachment: tenant
   placement:
+    apiOverride:
+      route: {}
     template:
-      databaseInstance: openstack
-      secret: osp-secret
-      externalEndpoints:
-      - endpoint: internal
-        ipAddressPool: internalapi
-        loadBalancerIPs:
-        - 172.17.0.80
       override:
         service:
           internal:
@@ -287,6 +282,8 @@ spec:
                 metallb.universe.tf/loadBalancerIPs: 172.17.0.80
             spec:
               type: LoadBalancer
+      databaseInstance: openstack
+      secret: osp-secret
   rabbitmq:
     templates:
       rabbitmq:
