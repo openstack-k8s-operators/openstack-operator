@@ -26,15 +26,12 @@ spec:
         - 192.168.122.1
       replicas: 1
   cinder:
+    apiOverride:
+      route: {}
     template:
       databaseInstance: openstack
       secret: osp-secret
       cinderAPI:
-        externalEndpoints:
-        - endpoint: internal
-          ipAddressPool: internalapi
-          loadBalancerIPs:
-          - 172.17.0.80
         override:
           service:
             internal:

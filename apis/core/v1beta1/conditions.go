@@ -51,6 +51,9 @@ const (
 	// OpenStackControlPlaneCinderReadyCondition Status=True condition which indicates if Cinder is configured and operational
 	OpenStackControlPlaneCinderReadyCondition condition.Type = "OpenStackControlPlaneCinderReady"
 
+	// OpenStackControlPlaneExposeCinderReadyCondition Status=True condition which indicates if Cinder is exposed via a route
+	OpenStackControlPlaneExposeCinderReadyCondition condition.Type = "OpenStackControlPlaneExposeCinderReady"
+
 	// OpenStackControlPlaneOVNReadyCondition Status=True condition which indicates if OVN is configured and operational
 	OpenStackControlPlaneOVNReadyCondition condition.Type = "OpenStackControlPlaneOVNReady"
 
