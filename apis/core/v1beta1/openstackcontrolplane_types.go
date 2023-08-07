@@ -430,6 +430,23 @@ type NovaSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Nova services
 	Template novav1.NovaSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// CellOverride, provides the ability to override the generated manifest of several child resources
+	// for a nova cell.
+	CellOverride map[string]NovaCellOverrideSpec `json:"cellOverride,omitempty"`
+}
+
+// NovaCellOverrideSpec to override the generated manifest of several child resources.
+type NovaCellOverrideSpec struct {
+	// +kubebuilder:validation:Optional
+	NoVNCProxy Override `json:"noVNCProxy,omitempty"`
 }
 
 // HeatSection defines the desired state of Heat services
