@@ -66,6 +66,9 @@ const (
 	// OpenStackControlPlaneNovaReadyCondition Status=True condition which indicates if Nova is configured and operational
 	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
 
+	// OpenStackControlPlaneExposeNovaReadyCondition Status=True condition which indicates if Nova is exposed via a route
+	OpenStackControlPlaneExposeNovaReadyCondition condition.Type = "OpenStackControlPlaneExposeNovaReady"
+
 	// OpenStackControlPlaneHeatReadyCondition Status=True condition which indicates if Heat is configured and operational
 	OpenStackControlPlaneHeatReadyCondition condition.Type = "OpenStackControlPlaneHeatReady"
 

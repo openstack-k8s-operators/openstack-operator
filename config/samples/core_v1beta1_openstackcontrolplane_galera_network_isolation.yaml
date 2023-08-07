@@ -136,13 +136,10 @@ spec:
       replicas: 1
       secret: osp-secret
   nova:
+    apiOverride:
+      route: {}
     template:
       apiServiceTemplate:
-        externalEndpoints:
-        - endpoint: internal
-          ipAddressPool: internalapi
-          loadBalancerIPs:
-          - 172.17.0.80
         override:
           service:
             internal:
@@ -153,13 +150,7 @@ spec:
                   metallb.universe.tf/loadBalancerIPs: 172.17.0.80
               spec:
                 type: LoadBalancer
-      secret: osp-secret
       metadataServiceTemplate:
-        externalEndpoints:
-         - endpoint: internal
-           ipAddressPool: internalapi
-           loadBalancerIPs:
-           - 172.17.0.80
         override:
           service:
             metadata:
@@ -169,6 +160,7 @@ spec:
                 metallb.universe.tf/loadBalancerIPs: 172.17.0.80
             spec:
               type: LoadBalancer
+      secret: osp-secret
   manila:
     template:
       manilaAPI:
