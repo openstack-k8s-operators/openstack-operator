@@ -60,6 +60,9 @@ const (
 	// OpenStackControlPlaneNeutronReadyCondition Status=True condition which indicates if Neutron is configured and operational
 	OpenStackControlPlaneNeutronReadyCondition condition.Type = "OpenStackControlPlaneNeutronReady"
 
+	// OpenStackControlPlaneExposeNeutronReadyCondition Status=True condition which indicates if Neutron is exposed via a route
+	OpenStackControlPlaneExposeNeutronReadyCondition condition.Type = "OpenStackControlPlaneExposeNeutronReady"
+
 	// OpenStackControlPlaneNovaReadyCondition Status=True condition which indicates if Nova is configured and operational
 	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
 

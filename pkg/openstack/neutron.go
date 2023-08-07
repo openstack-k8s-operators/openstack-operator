@@ -4,14 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -29,12 +34,61 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			return res, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneNeutronReadyCondition)
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeNeutronReadyCondition)
 		return ctrl.Result{}, nil
+	}
+
+	// add selector to service overrides
+	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
+		if instance.Spec.Neutron.Template.Override.Service == nil {
+			instance.Spec.Neutron.Template.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
+		}
+		instance.Spec.Neutron.Template.Override.Service[endpointType] =
+			AddServiceComponentLabel(
+				instance.Spec.Neutron.Template.Override.Service[endpointType],
+				neutronAPI.Name)
+	}
+
+	// When component services got created check if there is the need to create a route
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "neutron", Namespace: instance.Namespace}, neutronAPI); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if neutronAPI.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
+		svcs, err := service.GetServicesListWithLabel(
+			ctx,
+			helper,
+			instance.Namespace,
+			map[string]string{common.AppSelector: neutronAPI.Name},
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		var ctrlResult reconcile.Result
+		instance.Spec.Neutron.Template.Override.Service, ctrlResult, err = EnsureRoute(
+			ctx,
+			instance,
+			helper,
+			neutronAPI,
+			svcs,
+			instance.Spec.Neutron.Template.Override.Service,
+			instance.Spec.Neutron.APIOverride.Route,
+			corev1beta1.OpenStackControlPlaneExposeNeutronReadyCondition,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
 	}
 
 	helper.GetLogger().Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
 		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec)
+
 		if neutronAPI.Spec.Secret == "" {
 			neutronAPI.Spec.Secret = instance.Spec.Secret
 		}

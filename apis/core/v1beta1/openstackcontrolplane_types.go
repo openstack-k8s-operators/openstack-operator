@@ -411,8 +411,13 @@ type NeutronSection struct {
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// Template - Overrides to use when creating the Neutron service
+	// Template - Overrides to use when creating the Neutron Service
 	Template neutronv1.NeutronAPISpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // NovaSection defines the desired state of Nova services

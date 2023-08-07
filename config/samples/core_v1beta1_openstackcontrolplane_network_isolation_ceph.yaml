@@ -147,14 +147,9 @@ spec:
       memcached:
         replicas: 1
   neutron:
+    apiOverride:
+      route: {}
     template:
-      databaseInstance: openstack
-      secret: osp-secret
-      externalEndpoints:
-      - endpoint: internal
-        ipAddressPool: internalapi
-        loadBalancerIPs:
-        - 172.17.0.80
       override:
         service:
           internal:
@@ -165,6 +160,8 @@ spec:
                 metallb.universe.tf/loadBalancerIPs: 172.17.0.80
             spec:
               type: LoadBalancer
+      databaseInstance: openstack
+      secret: osp-secret
       networkAttachments:
       - internalapi
   horizon:
