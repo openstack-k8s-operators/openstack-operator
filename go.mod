@@ -9,11 +9,11 @@ require (
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.10
 	github.com/openstack-k8s-operators/cinder-operator/api v0.1.0
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230802115729-0efa4a48fc8a
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230807191505-cb7dc383f871
 	github.com/openstack-k8s-operators/glance-operator/api v0.1.0
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.0
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.0
-	github.com/openstack-k8s-operators/infra-operator/apis v0.1.0
+	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230807091437-ba548589f8e8
 	github.com/openstack-k8s-operators/ironic-operator/api v0.1.0
 	github.com/openstack-k8s-operators/keystone-operator/api v0.1.0
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0
@@ -31,7 +31,7 @@ require (
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.0
 	github.com/operator-framework/api v0.17.3
 	github.com/rabbitmq/cluster-operator v1.14.0
-	go.uber.org/zap v1.24.0
+	go.uber.org/zap v1.25.0
 	k8s.io/api v0.26.7
 	k8s.io/apimachinery v0.26.7
 	k8s.io/client-go v0.26.7
@@ -84,7 +84,6 @@ require (
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.9.0 // indirect

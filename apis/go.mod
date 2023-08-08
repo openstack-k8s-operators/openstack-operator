@@ -9,7 +9,7 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.1.0
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.0
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.0
-	github.com/openstack-k8s-operators/infra-operator/apis v0.1.0
+	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230807091437-ba548589f8e8
 	github.com/openstack-k8s-operators/ironic-operator/api v0.1.0
 	github.com/openstack-k8s-operators/keystone-operator/api v0.1.0
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0
@@ -31,9 +31,8 @@ require (
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
+	go.uber.org/zap v1.25.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 )
