@@ -5,6 +5,8 @@
   "constraints": {
     "go": "1.19"
   },
+  "baseBranches": ["main","dev-preview"],
+  "useBaseBranchConfig": "merge",
   "packageRules": [
     {
       "matchPackageNames": ["github.com/openstack-k8s-operators/openstack-operator/apis"],
