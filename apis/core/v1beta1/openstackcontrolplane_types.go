@@ -510,6 +510,18 @@ type HorizonSection struct {
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Horizon services
 	Template horizonv1.HorizonSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride HorizonOverride `json:"apiOverride,omitempty"`
+}
+
+// HorizonOverride to override the generated manifest of several child resources.
+type HorizonOverride struct {
+	// +kubebuilder:validation:Optional
+	// Route overrides to use when creating the public service endpoint
+	Route *route.OverrideSpec `json:"route,omitempty"`
 }
 
 // CeilometerSection defines the desired state of OpenStack Telemetry services
