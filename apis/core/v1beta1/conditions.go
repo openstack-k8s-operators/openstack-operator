@@ -81,6 +81,9 @@ const (
 	// OpenStackControlPlaneHorizonReadyCondition Status=True condition which indicates if Horizon is configured and operational
 	OpenStackControlPlaneHorizonReadyCondition condition.Type = "OpenStackControlPlaneHorizonReady"
 
+	// OpenStackControlPlaneExposeHorizonReadyCondition Status=True condition which indicates if Horizon is exposed via a route
+	OpenStackControlPlaneExposeHorizonReadyCondition condition.Type = "OpenStackControlPlaneExposeHorizonReady"
+
 	// OpenStackControlPlaneClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackControlPlaneClientReadyCondition condition.Type = "OpenStackControlPlaneClientReady"
 

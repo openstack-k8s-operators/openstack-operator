@@ -132,6 +132,8 @@ spec:
       networkAttachments:
       - internalapi
   horizon:
+    apiOverride:
+      route: {}
     template:
       replicas: 1
       secret: osp-secret
