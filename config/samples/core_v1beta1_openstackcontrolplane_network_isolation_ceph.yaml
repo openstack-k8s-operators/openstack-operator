@@ -285,12 +285,36 @@ spec:
           ipAddressPool: internalapi
           sharedIP: false
   heat:
+    apiOverride:
+      route: {}
+    cnfAPIOverride:
+      route: {}
     enabled: false
     template:
       databaseInstance: openstack
       heatAPI:
+        override:
+          service:
+            internal:
+              metadata:
+                annotations:
+                  metallb.universe.tf/address-pool: internalapi
+                  metallb.universe.tf/allow-shared-ip: internalapi
+                  metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+              spec:
+                type: LoadBalancer
         replicas: 1
       heatEngine:
+        override:
+          service:
+            internal:
+              metadata:
+                annotations:
+                  metallb.universe.tf/address-pool: internalapi
+                  metallb.universe.tf/allow-shared-ip: internalapi
+                  metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+              spec:
+                type: LoadBalancer
         replicas: 1
       secret: osp-secret
   ironic:

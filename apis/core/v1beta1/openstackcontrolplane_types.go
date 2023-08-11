@@ -464,6 +464,16 @@ type HeatSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Heat services
 	Template heatv1.HeatSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// CnfAPIOverride, provides the ability to override the generated manifest of several child resources.
+	CnfAPIOverride Override `json:"cnfAPIOverride,omitempty"`
 }
 
 // IronicSection defines the desired state of Ironic services

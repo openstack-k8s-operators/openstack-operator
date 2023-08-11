@@ -72,6 +72,9 @@ const (
 	// OpenStackControlPlaneHeatReadyCondition Status=True condition which indicates if Heat is configured and operational
 	OpenStackControlPlaneHeatReadyCondition condition.Type = "OpenStackControlPlaneHeatReady"
 
+	// OpenStackControlPlaneExposeHeatReadyCondition Status=True condition which indicates if Heat is exposed via a route
+	OpenStackControlPlaneExposeHeatReadyCondition condition.Type = "OpenStackControlPlaneExposeHeatReady"
+
 	// OpenStackControlPlaneIronicReadyCondition Status=True condition which indicates if Ironic is configured and operational
 	OpenStackControlPlaneIronicReadyCondition condition.Type = "OpenStackControlPlaneIronicReady"
 
