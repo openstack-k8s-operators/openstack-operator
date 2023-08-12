@@ -106,6 +106,15 @@ vet: gowork ## Run go vet against code.
 	go vet ./...
 	go vet ./apis/...
 
+.PHONY: force-bump
+force-bump: ## Force bump after tagging
+	for dep in $$(cat go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator' | awk '{print $$1}'); do \
+		go get $$dep@main ; \
+	done
+	for dep in $$(cat apis/go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator' | awk '{print $$1}'); do \
+		cd ./apis && go get $$dep@main && cd .. ; \
+	done
+
 .PHONY: tidy
 tidy: ## Run go mod tidy on every mod file in the repo
 	go mod tidy

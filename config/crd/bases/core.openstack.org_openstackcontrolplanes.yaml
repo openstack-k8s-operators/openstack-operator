@@ -57,9 +57,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                      description:
-                        default: A ceilometer agent
-                        type: string
                       initImage:
                         type: string
                       networkAttachmentDefinitions:
@@ -80,22 +77,17 @@ spec:
                         default: rabbitmq
                         type: string
                       secret:
-                        default: osp-secret
-                        type: string
-                      serviceAccount:
                         type: string
                       serviceUser:
                         default: ceilometer
                         type: string
                       sgCoreImage:
                         type: string
-                      transportURLSecret:
-                        type: string
                     required:
                     - centralImage
                     - initImage
                     - notificationImage
-                    - serviceAccount
+                    - secret
                     - sgCoreImage
                     type: object
                 type: object
@@ -3130,7 +3122,6 @@ spec:
                   template:
                     properties:
                       customServiceConfig:
-                        default: '# add your customization here'
                         type: string
                       databaseInstance:
                         type: string
@@ -3152,7 +3143,6 @@ spec:
                           containerImage:
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             type: string
                           debug:
                             properties:
@@ -3213,7 +3203,6 @@ spec:
                           containerImage:
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             type: string
                           debug:
                             properties:
@@ -3274,7 +3263,6 @@ spec:
                           containerImage:
                             type: string
                           customServiceConfig:
-                            default: '# add your customization here'
                             type: string
                           debug:
                             properties:
@@ -3902,6 +3890,9 @@ spec:
                         type: string
                       rpcTransport:
                         default: json-rpc
+                        enum:
+                        - oslo
+                        - json-rpc
                         type: string
                       secret:
                         type: string
@@ -5155,6 +5146,9 @@ spec:
                           type: string
                       required:
                       - containerImage
+                      - secret
+                      - storageClass
+                      - storageRequest
                       type: object
                     type: object
                 type: object
@@ -11196,6 +11190,7 @@ spec:
                           replicas:
                             default: 1
                             format: int32
+                            minimum: 0
                             type: integer
                           secret:
                             default: osp-secret
@@ -11210,7 +11205,9 @@ spec:
                         - containerImageMemcached
                         - containerImageProxy
                         - replicas
+                        - secret
                         - serviceUser
+                        - swiftConfSecret
                         type: object
                       swiftRing:
                         properties:
@@ -11219,6 +11216,7 @@ spec:
                           ringReplicas:
                             default: 1
                             format: int64
+                            minimum: 1
                             type: integer
                           swiftConfSecret:
                             default: swift-conf
@@ -11241,7 +11239,9 @@ spec:
                           containerImageProxy:
                             type: string
                           replicas:
+                            default: 1
                             format: int32
+                            minimum: 0
                             type: integer
                           storageClass:
                             default: ""
