@@ -555,6 +555,11 @@ type SwiftSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Swift Resources
 	Template swiftv1.SwiftSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// ProxyOverride, provides the ability to override the generated manifest of several child resources.
+	ProxyOverride Override `json:"proxyOverride,omitempty"`
 }
 
 // OctaviaSection defines the desired state of the Octavia service
