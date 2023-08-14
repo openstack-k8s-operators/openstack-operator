@@ -197,14 +197,13 @@ spec:
               type: LoadBalancer
       secret: osp-secret
   manila:
+    apiOverride:
+      route: {}
     template:
       manilaAPI:
         replicas: 1
-        externalEndpoints:
-        - endpoint: internal
-          ipAddressPool: internalapi
-          loadBalancerIPs:
-          - 172.17.0.80
+        networkAttachments:
+        - internalapi
         override:
           service:
             internal:
@@ -215,8 +214,6 @@ spec:
                   metallb.universe.tf/loadBalancerIPs: 172.17.0.80
               spec:
                 type: LoadBalancer
-        networkAttachments:
-        - internalapi
       manilaScheduler:
         replicas: 1
       manilaShares:

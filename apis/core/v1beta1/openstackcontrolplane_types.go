@@ -501,6 +501,11 @@ type ManilaSection struct {
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating Manila Resources
 	Template manilav1.ManilaSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // HorizonSection defines the desired state of Horizon services

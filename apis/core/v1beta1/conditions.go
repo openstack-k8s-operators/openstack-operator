@@ -93,6 +93,9 @@ const (
 	// OpenStackControlPlaneManilaReadyCondition Status=True condition which indicates if Manila is configured and operational
 	OpenStackControlPlaneManilaReadyCondition condition.Type = "OpenStackControlPlaneManilaReady"
 
+	// OpenStackControlPlaneExposeManilaReadyCondition Status=True condition which indicates if Manila is exposed via a route
+	OpenStackControlPlaneExposeManilaReadyCondition condition.Type = "OpenStackControlPlaneExposeManilaReady"
+
 	// OpenStackControlPlaneDNSReadyCondition Status=True condition which indicates if DNSMasq is configured and operational
 	OpenStackControlPlaneDNSReadyCondition condition.Type = "OpenStackControlPlaneDNSReadyCondition"
 
