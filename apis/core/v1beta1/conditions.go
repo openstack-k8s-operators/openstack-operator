@@ -120,6 +120,9 @@ const (
 	// OpenStackControlPlaneSwiftReadyCondition Status=True condition which indicates if Swift is configured and operational
 	OpenStackControlPlaneSwiftReadyCondition condition.Type = "OpenStackControlPlaneSwiftReady"
 
+	// OpenStackControlPlaneExposeSwiftReadyCondition Status=True condition which indicates if Swift is exposed via a route
+	OpenStackControlPlaneExposeSwiftReadyCondition condition.Type = "OpenStackControlPlaneExposeSwiftReady"
+
 	// OpenStackControlPlaneSwiftReadyInitMessage
 	OpenStackControlPlaneSwiftReadyInitMessage = "OpenStackControlPlane Swift not started"
 
