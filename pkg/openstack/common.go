@@ -41,20 +41,6 @@ func EnsureDeleted(ctx context.Context, helper *helper.Helper, obj client.Object
 
 }
 
-// GetExternalEnpointDetailsForEndpoint - returns the MetalLBData for the endpoint, if not specified nil.
-func GetExternalEnpointDetailsForEndpoint(
-	externalEndpoints []corev1.MetalLBConfig,
-	endpt service.Endpoint,
-) *corev1.MetalLBConfig {
-	for _, metallbcfg := range externalEndpoints {
-		if metallbcfg.Endpoint == endpt {
-			return metallbcfg.DeepCopy()
-		}
-	}
-
-	return nil
-}
-
 // ServiceDetails - service details to create service.Service with overrides
 type ServiceDetails struct {
 	ServiceName         string

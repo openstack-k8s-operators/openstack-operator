@@ -9018,30 +9018,6 @@ spec:
                                   type: array
                               type: object
                           type: object
-                        externalEndpoint:
-                          properties:
-                            endpoint:
-                              default: internal
-                              enum:
-                              - internal
-                              - public
-                              type: string
-                            ipAddressPool:
-                              minLength: 1
-                              type: string
-                            loadBalancerIPs:
-                              items:
-                                type: string
-                              type: array
-                            sharedIP:
-                              default: true
-                              type: boolean
-                            sharedIPKey:
-                              default: ""
-                              type: string
-                          required:
-                          - ipAddressPool
-                          type: object
                         image:
                           type: string
                         imagePullSecrets:

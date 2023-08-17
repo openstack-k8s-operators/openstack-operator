@@ -29,7 +29,6 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
@@ -326,45 +325,6 @@ type RabbitmqTemplate struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Overrides to use when creating the Rabbitmq clusters
 	rabbitmqv1.RabbitmqClusterSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// ExternalEndpoint, expose a VIP via MetalLB on the pre-created address pool
-	ExternalEndpoint *MetalLBConfig `json:"externalEndpoint,omitempty"`
-}
-
-// MetalLBConfig to configure the MetalLB loadbalancer service
-type MetalLBConfig struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum=internal;public
-	// +kubebuilder:default=internal
-	// Endpoint, OpenStack endpoint this service maps to
-	Endpoint service.Endpoint `json:"endpoint"`
-
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// IPAddressPool expose VIP via MetalLB on the IPAddressPool
-	IPAddressPool string `json:"ipAddressPool"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// SharedIP if true, VIP/VIPs get shared with multiple services
-	SharedIP bool `json:"sharedIP"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=""
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// SharedIPKey specifies the sharing key which gets set as the annotation on the LoadBalancer service.
-	// Services which share the same VIP must have the same SharedIPKey. Defaults to the IPAddressPool if
-	// SharedIP is true, but no SharedIPKey specified.
-	SharedIPKey string `json:"sharedIPKey"`
-
-	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// LoadBalancerIPs, request given IPs from the pool if available. Using a list to allow dual stack (IPv4/IPv6) support
-	LoadBalancerIPs []string `json:"loadBalancerIPs"`
 }
 
 // OvnSection defines the desired state of OVN services
