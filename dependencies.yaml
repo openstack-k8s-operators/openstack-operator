@@ -9,10 +9,6 @@ dependencies:
       version: ">=0.0.0"
   - type: olm.package
     value:
-      packageName: dataplane-operator
-      version: ">=0.0.0"
-  - type: olm.package
-    value:
       packageName: glance-operator
       version: ">=0.0.0"
   - type: olm.package

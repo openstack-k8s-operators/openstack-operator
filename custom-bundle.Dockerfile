@@ -115,6 +115,7 @@ RUN /workspace/csv-merger \
 # apply all the ENV vars to the actual base-csv
 RUN /workspace/csv-merger \
   --import-env-files=/env-vars.yaml \
+  --dataplane-csv=/manifests/dataplane-operator.clusterserviceversion.yaml \
   --base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's
@@ -143,6 +144,7 @@ COPY bundle/tests/scorecard /tests/scorecard/
 
 # copy in manifests from operators
 COPY bundle/manifests /manifests/
+COPY --from=merger /manifests/dataplane.openstack.* /manifests/
 
 # overwrite with the final merged CSV
 COPY --from=merger /openstack-operator.clusterserviceversion.yaml.new /manifests/openstack-operator.clusterserviceversion.yaml
