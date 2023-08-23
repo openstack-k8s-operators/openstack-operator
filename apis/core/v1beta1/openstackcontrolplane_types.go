@@ -17,8 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	corev1 "k8s.io/api/core/v1"
-
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
@@ -539,15 +537,7 @@ func init() {
 
 // IsReady - returns true if service is ready to serve requests
 func (instance OpenStackControlPlane) IsReady() bool {
-	for _, c := range instance.Status.Conditions {
-		if c.Type == condition.ReadyCondition {
-			continue
-		}
-		if c.Status != corev1.ConditionTrue {
-			return false
-		}
-	}
-	return true
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }
 
 // InitConditions - Initializes Status Conditons
