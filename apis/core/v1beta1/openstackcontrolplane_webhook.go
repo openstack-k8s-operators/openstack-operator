@@ -158,7 +158,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 	case "Octavia":
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled &&
-		    r.Spec.Ovn.Enabled) {
+			r.Spec.Ovn.Enabled) {
 			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
 		}
 	}
@@ -310,148 +310,110 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// This is a special case in that we don't own the RabbitMQ operator,
 	// so we aren't able to add and call a Default function on its spec.
 	// Instead we just directly set the defaults we need.
-	if r.Spec.Rabbitmq.Enabled {
-		for key, template := range r.Spec.Rabbitmq.Templates {
-			template.Image = openstackControlPlaneDefaults.RabbitMqImageURL
-			// By-value copy, need to update
-			r.Spec.Rabbitmq.Templates[key] = template
-		}
+	for key, template := range r.Spec.Rabbitmq.Templates {
+		template.Image = openstackControlPlaneDefaults.RabbitMqImageURL
+		// By-value copy, need to update
+		r.Spec.Rabbitmq.Templates[key] = template
 	}
 
 	// Cinder
-	if r.Spec.Cinder.Enabled {
-		r.Spec.Cinder.Template.Default()
-	}
+	r.Spec.Cinder.Template.Default()
 
 	// Galera
-	if r.Spec.Galera.Enabled {
-		for key, template := range r.Spec.Galera.Templates {
-			if template.StorageClass == "" {
-				template.StorageClass = r.Spec.StorageClass
-			}
-			if template.Secret == "" {
-				template.Secret = r.Spec.Secret
-			}
-			template.Default()
-			// By-value copy, need to update
-			r.Spec.Galera.Templates[key] = template
+	for key, template := range r.Spec.Galera.Templates {
+		if template.StorageClass == "" {
+			template.StorageClass = r.Spec.StorageClass
 		}
+		if template.Secret == "" {
+			template.Secret = r.Spec.Secret
+		}
+		template.Default()
+		// By-value copy, need to update
+		r.Spec.Galera.Templates[key] = template
 	}
 
 	// Glance
-	if r.Spec.Glance.Enabled {
-		r.Spec.Glance.Template.Default()
-	}
+	r.Spec.Glance.Template.Default()
 
 	// Ironic
-	if r.Spec.Ironic.Enabled {
-		// Default Secret
-		if r.Spec.Ironic.Template.Secret == "" {
-			r.Spec.Ironic.Template.Secret = r.Spec.Secret
-		}
-		// Default DatabaseInstance
-		if r.Spec.Ironic.Template.DatabaseInstance == "" {
-			r.Spec.Ironic.Template.DatabaseInstance = "openstack"
-		}
-		// Default StorageClass
-		if r.Spec.Ironic.Template.StorageClass == "" {
-			r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
-		}
-		r.Spec.Ironic.Template.Default()
+	// Default Secret
+	if r.Spec.Ironic.Template.Secret == "" {
+		r.Spec.Ironic.Template.Secret = r.Spec.Secret
 	}
+	// Default DatabaseInstance
+	if r.Spec.Ironic.Template.DatabaseInstance == "" {
+		r.Spec.Ironic.Template.DatabaseInstance = "openstack"
+	}
+	// Default StorageClass
+	if r.Spec.Ironic.Template.StorageClass == "" {
+		r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
+	}
+	r.Spec.Ironic.Template.Default()
 
 	// Keystone
-	if r.Spec.Keystone.Enabled {
-		r.Spec.Keystone.Template.Default()
-	}
+	r.Spec.Keystone.Template.Default()
 
 	// Manila
-	if r.Spec.Manila.Enabled {
-		r.Spec.Manila.Template.Default()
-	}
+	r.Spec.Manila.Template.Default()
 
 	// MariaDB
-	if r.Spec.Mariadb.Enabled {
-		for key, template := range r.Spec.Mariadb.Templates {
-			if template.StorageClass == "" {
-				template.StorageClass = r.Spec.StorageClass
-			}
-			if template.Secret == "" {
-				template.Secret = r.Spec.Secret
-			}
-			template.Default()
-			// By-value copy, need to update
-			r.Spec.Mariadb.Templates[key] = template
+	for key, template := range r.Spec.Mariadb.Templates {
+		if template.StorageClass == "" {
+			template.StorageClass = r.Spec.StorageClass
 		}
+		if template.Secret == "" {
+			template.Secret = r.Spec.Secret
+		}
+		template.Default()
+		// By-value copy, need to update
+		r.Spec.Mariadb.Templates[key] = template
 	}
 
 	// Memcached
-	if r.Spec.Memcached.Enabled {
-		for key, template := range r.Spec.Memcached.Templates {
-			template.Default()
-			// By-value copy, need to update
-			r.Spec.Memcached.Templates[key] = template
-		}
+	for key, template := range r.Spec.Memcached.Templates {
+		template.Default()
+		// By-value copy, need to update
+		r.Spec.Memcached.Templates[key] = template
 	}
 
 	// Neutron
-	if r.Spec.Neutron.Enabled {
-		r.Spec.Neutron.Template.Default()
-	}
+	r.Spec.Neutron.Template.Default()
 
 	// Nova
-	if r.Spec.Nova.Enabled {
-		r.Spec.Nova.Template.Default()
-	}
+	r.Spec.Nova.Template.Default()
 
 	// OVN
-	if r.Spec.Ovn.Enabled {
-		for key, template := range r.Spec.Ovn.Template.OVNDBCluster {
-			template.Default()
-			// By-value copy, need to update
-			r.Spec.Ovn.Template.OVNDBCluster[key] = template
-		}
-
-		r.Spec.Ovn.Template.OVNNorthd.Default()
-		r.Spec.Ovn.Template.OVNController.Default()
+	for key, template := range r.Spec.Ovn.Template.OVNDBCluster {
+		template.Default()
+		// By-value copy, need to update
+		r.Spec.Ovn.Template.OVNDBCluster[key] = template
 	}
+
+	r.Spec.Ovn.Template.OVNNorthd.Default()
+	r.Spec.Ovn.Template.OVNController.Default()
 
 	// Placement
-	if r.Spec.Placement.Enabled {
-		r.Spec.Placement.Template.Default()
-	}
+	r.Spec.Placement.Template.Default()
 
 	// DNS
-	if r.Spec.DNS.Enabled {
-		r.Spec.DNS.Template.Default()
-	}
+	r.Spec.DNS.Template.Default()
 
 	// Ceilometer
-	if r.Spec.Ceilometer.Enabled {
-		r.Spec.Ceilometer.Template.Default()
-	}
+	r.Spec.Ceilometer.Template.Default()
 
 	// Heat
-	if r.Spec.Heat.Enabled {
-		r.Spec.Heat.Template.Default()
-	}
+	r.Spec.Heat.Template.Default()
 
 	// Swift
-	if r.Spec.Swift.Enabled {
-		if r.Spec.Swift.Template.SwiftStorage.StorageClass == "" {
-			r.Spec.Swift.Template.SwiftStorage.StorageClass = r.Spec.StorageClass
-		}
-
-		r.Spec.Swift.Template.Default()
+	if r.Spec.Swift.Template.SwiftStorage.StorageClass == "" {
+		r.Spec.Swift.Template.SwiftStorage.StorageClass = r.Spec.StorageClass
 	}
+
+	r.Spec.Swift.Template.Default()
 
 	// Horizon
-	if r.Spec.Horizon.Enabled {
-		r.Spec.Horizon.Template.Default()
-	}
+	r.Spec.Horizon.Template.Default()
 
 	// Octavia
-	if r.Spec.Octavia.Enabled {
-		r.Spec.Octavia.Template.Default()
-	}
+	r.Spec.Octavia.Template.Default()
 }
