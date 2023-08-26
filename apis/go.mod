@@ -6,7 +6,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.10
 	github.com/openstack-k8s-operators/cinder-operator/api v0.1.1-0.20230822085155-98a680937115
-	github.com/openstack-k8s-operators/glance-operator/api v0.1.1-0.20230824110847-185891d3bd93
+	github.com/openstack-k8s-operators/glance-operator/api v0.1.1-0.20230825190451-abe7ae754366
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.1-0.20230825065303-b3dea6371258
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.1-0.20230825070317-198bd0e95225
 	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230823163208-3b334fc8de14
@@ -16,9 +16,9 @@ require (
 	github.com/openstack-k8s-operators/manila-operator/api v0.1.1-0.20230817135608-41dee07f5847
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.1-0.20230823144333-b9363c5be8d2
 	github.com/openstack-k8s-operators/neutron-operator/api v0.1.1-0.20230824160722-048e30e1d426
-	github.com/openstack-k8s-operators/nova-operator/api v0.1.2-0.20230823235418-7a7ada5cbe12
-	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230823132856-c26435ca29ef
-	github.com/openstack-k8s-operators/ovn-operator/api v0.1.1-0.20230823063733-cf3fc1f38263
+	github.com/openstack-k8s-operators/nova-operator/api v0.1.2-0.20230825130046-4916306c1c99
+	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230825164400-086bc6962fa6
+	github.com/openstack-k8s-operators/ovn-operator/api v0.1.1-0.20230825114232-c3f91544c28f
 	github.com/openstack-k8s-operators/placement-operator/api v0.1.1-0.20230822085939-3d8a4e7c6caf
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.1-0.20230824202713-d98dfa78a348
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.1-0.20230824075008-ac5d892e6e75
