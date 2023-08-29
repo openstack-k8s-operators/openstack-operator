@@ -127,13 +127,11 @@ spec:
         - internalapi
       manilaScheduler:
         replicas: 1
-        networkAttachments:
-        - internalapi
       manilaShares:
         share1:
           replicas: 1
           networkAttachments:
-          - internalapi
+          - storage
   ovn:
     template:
       ovnDBCluster:
