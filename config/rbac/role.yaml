@@ -344,6 +344,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - redis.openstack.org
+  resources:
+  - redises
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - security.openshift.io
   resourceNames:
   - anyuid
