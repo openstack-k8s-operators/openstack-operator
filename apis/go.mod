@@ -21,7 +21,7 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.1.0
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.0
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.0
-	github.com/rabbitmq/cluster-operator v1.14.0
+	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	k8s.io/apimachinery v0.26.7
 	sigs.k8s.io/controller-runtime v0.14.6
 )
