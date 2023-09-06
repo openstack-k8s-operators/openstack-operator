@@ -135,8 +135,8 @@ github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7 h1:rncLxJBpFGqBztyxC
 github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7/go.mod h1:ctXNyWanKEjGj8sss1KjjHQ3ENKFm33FFnS5BKaIPh4=
 github.com/openstack-k8s-operators/cinder-operator/api v0.1.1-0.20230822085155-98a680937115 h1:7O/YnKJEUnn1bh3eEH4Yuqx0GzTe4HXd4zyzOD+NWxc=
 github.com/openstack-k8s-operators/cinder-operator/api v0.1.1-0.20230822085155-98a680937115/go.mod h1:GEZ6VarA74XXRa4SagCymoRrxQQVWvxZ2K7O4/YSxK4=
-github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230829012108-d1bde177e5a4 h1:1nLv/JrcNbW82xa26RcI6FGRs4tuVt512qttDA8No8s=
-github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230829012108-d1bde177e5a4/go.mod h1:xwL2kjh+IdDB5LCaU39VxtQN8L70cmYUzofkq1PV0Vw=
+github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230906145103-e071f2c2dc01 h1:ZPexOHJk6dwoVPtDNaGT1KCHPM/Rsr2rwOmvATt9ZM4=
+github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230906145103-e071f2c2dc01/go.mod h1:LnOxN8FwbHtDf6/9U5VYgZggkMXcKfKbywtuKHFvx9Q=
 github.com/openstack-k8s-operators/glance-operator/api v0.1.1-0.20230827173355-391b0669d71f h1:dIDdStKBEtE5p3YvAwXIePNw7N/X6WMk2dRxcHTBHE4=
 github.com/openstack-k8s-operators/glance-operator/api v0.1.1-0.20230827173355-391b0669d71f/go.mod h1:4mRCop53FgDo19PnkFDqQHhsKMaJd/vJe+zvdOEl9oQ=
 github.com/openstack-k8s-operators/heat-operator/api v0.1.1-0.20230828054057-36837cde8504 h1:Aj5Dwb/xLrfb0HqbbtWZ6HroCtK8VaYM72V513UZ+Us=
