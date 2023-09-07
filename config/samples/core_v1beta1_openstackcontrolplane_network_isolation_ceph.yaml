@@ -13,6 +13,7 @@ spec:
           - CinderVolume
           - CinderBackup
           - GlanceAPI
+          - ManilaShare
           extraVolType: Ceph
           volumes:
           - name: ceph
@@ -159,8 +160,6 @@ spec:
         - internalapi
       manilaScheduler:
         replicas: 1
-        networkAttachments:
-        - internalapi
       manilaShares:
         share1:
           customServiceConfig: |
@@ -178,7 +177,7 @@ spec:
             cephfs_protocol_helper_type=CEPHFS
           replicas: 1
           networkAttachments:
-          - internalapi
+          - storage
   ovn:
     template:
       ovnDBCluster:
