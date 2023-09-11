@@ -194,58 +194,12 @@ func main() {
 				exitWithError(err.Error())
 			}
 
-			// 1. We need to add the "env" section from this Service Operator deployment in case there
-			// are default values configured there that are needed for use with defaulting webhooks
-			//
-			// - DeploymentSpecs[0] is always the base deployment for OpenStack Operator
-			// - Container at index 1 in DeploymentSpecs[0].Spec.Template.Spec.Containers list is
-			//   always the OpenStack Operator controller-manager
-			// - We need to find the Service Operator's controller-manager container in
-			//   csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers
-			//
-			// TODO: What about "env" list keys that overlap between Service Operators (i.e. non-unique
-			//       names)?
-			//
-			// 2. We also need to inject "ENABLE_WEBHOOKS=false" into the env vars for the Service Operators'
-			//    deployments, and then remove their webhook server's cert's volume mount
-
-			for index, container := range csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers {
+			// 1. We need to add the "env" section from the operator deployment in case there
+			// are default values configured.
+			for _, container := range csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers {
 				// Copy env vars from the Service Operator into the OpenStack Operator
 				if container.Name == "manager" {
 					envVarList = append(envVarList, container.Env...)
-
-					// FIXME: HACK: Allow NovaExternalCompute/OpneStackBaremetalSet CRs that are created from the DataPlane operator
-					//              to be properly defaulted via webhooks
-					if !(strings.Contains(csvFile, "nova-operator.clusterserviceversion") ||
-						strings.Contains(csvFile, "openstack-baremetal-operator.clusterserviceversion")) {
-						// Now we also need to turn off any "internal" webhooks that belong to the service
-						// operator, as we are now using "external" webhooks that live in the OpenStack
-						// operator.  These "external" webhooks will eventually call the mutating/validating
-						// logic that was previously housed within the "internal" Service Operator webhook
-						// logic.
-						container.Env = append(container.Env,
-							v1.EnvVar{
-								Name:  "ENABLE_WEBHOOKS",
-								Value: "false",
-							},
-						)
-
-						// And finally we need to remove the webhook server's cert volume mount,
-						for volMountIndex, volMount := range container.VolumeMounts {
-							if volMount.Name == "cert" {
-								container.VolumeMounts[volMountIndex] = container.VolumeMounts[len(container.VolumeMounts)-1]
-								container.VolumeMounts = container.VolumeMounts[:len(container.VolumeMounts)-1]
-								// Found the target mount, so stop iterating
-								break
-							}
-						}
-
-						// Need to replace the container in the Deployment since this local variable is a copy
-						csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers[index] = container
-					}
-
-					// We found the controller-manager container, so no need to continue iterating
-					break
 				}
 			}
 
@@ -285,26 +239,9 @@ func main() {
 				}
 				csvExtended.Annotations["alm-examples"] = string(almB)
 			}
-
-			//
-			// FIXME: HACK...
-			//
-			// BEGIN: Handle any webhook imports that are required
-			//
-			// 1. nova-operator - Needed for NovaExternalCompute CRs created via DataPlane operator
-			// 2. openstack-baremetal-operator - Needed for OpenStackProvisionServer CRs via DataPlane operator
-			//
-
-			// nova-operator and openstack-baremetal-operator
-			if strings.Contains(csvFile, "nova-operator.clusterserviceversion") ||
-				strings.Contains(csvFile, "openstack-baremetal-operator.clusterserviceversion") {
-				csvExtended.Spec.WebhookDefinitions = append(csvExtended.Spec.WebhookDefinitions, csvStruct.Spec.WebhookDefinitions...)
-			}
-
-			//
-			// END: Handle any webhook imports that are required
-			//
+			csvExtended.Spec.WebhookDefinitions = append(csvExtended.Spec.WebhookDefinitions, csvStruct.Spec.WebhookDefinitions...)
 		}
+
 	}
 	if len(*exportEnvFile) > 0 {
 		writeEnvToYaml(*exportEnvFile, envVarList)
