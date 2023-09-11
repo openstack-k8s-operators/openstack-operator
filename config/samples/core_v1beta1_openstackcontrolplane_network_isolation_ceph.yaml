@@ -27,10 +27,6 @@ spec:
             readOnly: true
   dns:
     template:
-      externalEndpoints:
-      - ipAddressPool: ctlplane
-        loadBalancerIPs:
-        - 192.168.122.80
       override:
         service:
           metadata:
