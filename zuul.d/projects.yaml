@@ -1,10 +1,5 @@
 ---
 - project:
     name: openstack-k8s-operators/openstack-operator
-    github-check:
-      jobs:
-        - openstack-operator-content-provider
-        - openstack-operator-crc-podified-edpm-baremetal: &content_provider
-            dependencies:
-              - openstack-operator-content-provider
-        - openstack-operator-podified-multinode-edpm-deployment-crc: *content_provider
+    templates:
+      - podified-multinode-edpm-baremetal-pipeline
