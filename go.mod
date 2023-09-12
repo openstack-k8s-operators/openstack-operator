@@ -6,7 +6,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.16
-	github.com/onsi/ginkgo/v2 v2.12.0
+	github.com/onsi/ginkgo/v2 v2.12.1
 	github.com/onsi/gomega v1.27.10
 	github.com/openstack-k8s-operators/cinder-operator/api v0.1.2-0.20230921082510-1b9a7de3d088
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230919085012-e89d5ef2fafd
@@ -14,14 +14,14 @@ require (
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.1-0.20230920142821-e84784bede25
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.1-0.20230920143411-511d89a0e6cc
 	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230920125017-2c76cd203b44
-	github.com/openstack-k8s-operators/ironic-operator/api v0.1.1-0.20230915140049-df437872b34f
+	github.com/openstack-k8s-operators/ironic-operator/api v0.1.1-0.20230926121739-27e75237b3c8
 	github.com/openstack-k8s-operators/keystone-operator/api v0.1.1-0.20230920085319-92ae0260bbf3
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.1-0.20230919113507-d74c2f31d216
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.1-0.20230925103424-7dcb605ea0bb
 	github.com/openstack-k8s-operators/manila-operator/api v0.1.1-0.20230921081246-996d4e390998
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.1-0.20230918111825-8999b3b2dc3c
 	github.com/openstack-k8s-operators/neutron-operator/api v0.1.1-0.20230920145429-537b5afebd07
 	github.com/openstack-k8s-operators/nova-operator/api v0.1.2-0.20230921152245-4a535c8f3e9a
-	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230915083637-79fc51fd4dcf
+	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230926130236-dece63badbab
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.1-0.20230918170038-6c1275780727
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.1-0.20230915055858-ecb378f804c9
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230725141229-4ce90d0120fd

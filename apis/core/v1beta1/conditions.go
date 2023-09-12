@@ -78,6 +78,9 @@ const (
 	// OpenStackControlPlaneIronicReadyCondition Status=True condition which indicates if Ironic is configured and operational
 	OpenStackControlPlaneIronicReadyCondition condition.Type = "OpenStackControlPlaneIronicReady"
 
+	// OpenStackControlPlaneExposeIronicReadyCondition Status=True condition which indicates if Ironic is exposed via a route
+	OpenStackControlPlaneExposeIronicReadyCondition condition.Type = "OpenStackControlPlaneExposeIronicReady"
+
 	// OpenStackControlPlaneHorizonReadyCondition Status=True condition which indicates if Horizon is configured and operational
 	OpenStackControlPlaneHorizonReadyCondition condition.Type = "OpenStackControlPlaneHorizonReady"
 

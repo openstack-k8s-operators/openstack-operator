@@ -38,29 +38,15 @@ spec:
       - description: Cinder - Parameters related to the Cinder service
         displayName: Cinder
         path: cinder
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: cinder.apiOverride
       - description: Enabled - Whether Cinder service should be deployed and managed
         displayName: Enabled
         path: cinder.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: IPAddressPool expose VIP via MetalLB on the IPAddressPool
-        displayName: IPAddress Pool
-        path: cinder.externalEndpoints[0].ipAddressPool
-      - description: LoadBalancerIPs, request given IPs from the pool if available.
-          Using a list to allow dual stack (IPv4/IPv6) support
-        displayName: Load Balancer IPs
-        path: cinder.externalEndpoints[0].loadBalancerIPs
-      - description: SharedIP if true, VIP/VIPs get shared with multiple services
-        displayName: Shared IP
-        path: cinder.externalEndpoints[0].sharedIP
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: SharedIPKey specifies the sharing key which gets set as the annotation
-          on the LoadBalancer service. Services which share the same VIP must have
-          the same SharedIPKey. Defaults to the IPAddressPool if SharedIP is true,
-          but no SharedIPKey specified.
-        displayName: Shared IPKey
-        path: cinder.externalEndpoints[0].sharedIPKey
       - description: Template - Overrides to use when creating Cinder Resources
         displayName: Template
         path: cinder.template
@@ -95,35 +81,29 @@ spec:
       - description: Glance - Parameters related to the Glance service
         displayName: Glance
         path: glance
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: glance.apiOverride
       - description: Enabled - Whether Glance service should be deployed and managed
         displayName: Enabled
         path: glance.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: IPAddressPool expose VIP via MetalLB on the IPAddressPool
-        displayName: IPAddress Pool
-        path: glance.externalEndpoints[0].ipAddressPool
-      - description: LoadBalancerIPs, request given IPs from the pool if available.
-          Using a list to allow dual stack (IPv4/IPv6) support
-        displayName: Load Balancer IPs
-        path: glance.externalEndpoints[0].loadBalancerIPs
-      - description: SharedIP if true, VIP/VIPs get shared with multiple services
-        displayName: Shared IP
-        path: glance.externalEndpoints[0].sharedIP
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: SharedIPKey specifies the sharing key which gets set as the annotation
-          on the LoadBalancer service. Services which share the same VIP must have
-          the same SharedIPKey. Defaults to the IPAddressPool if SharedIP is true,
-          but no SharedIPKey specified.
-        displayName: Shared IPKey
-        path: glance.externalEndpoints[0].sharedIPKey
       - description: Template - Overrides to use when creating the Glance Service
         displayName: Template
         path: glance.template
       - description: Heat - Parameters related to the Heat services
         displayName: Heat
         path: heat
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: heat.apiOverride
+      - description: CnfAPIOverride, provides the ability to override the generated
+          manifest of several child resources.
+        displayName: Cnf APIOverride
+        path: heat.cnfAPIOverride
       - description: Enabled - Whether Heat services should be deployed and managed
         displayName: Enabled
         path: heat.enabled
@@ -135,46 +115,48 @@ spec:
       - description: Horizon - Parameters related to the Horizon services
         displayName: Horizon
         path: horizon
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: horizon.apiOverride
       - description: Ironic - Parameters related to the Ironic services
         displayName: Ironic
         path: ironic
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: ironic.apiOverride
       - description: Enabled - Whether Ironic services should be deployed and managed
         displayName: Enabled
         path: ironic.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: InspectorOverride, provides the ability to override the generated
+          manifest of several child resources.
+        displayName: Inspector Override
+        path: ironic.inspectorOverride
       - description: Template - Overrides to use when creating the Ironic services
         displayName: Template
         path: ironic.template
       - description: Keystone - Parameters related to the Keystone service
         displayName: Keystone
         path: keystone
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: keystone.apiOverride
       - description: Enabled - Whether Keystone service should be deployed and managed
         displayName: Enabled
         path: keystone.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: IPAddressPool expose VIP via MetalLB on the IPAddressPool
-        displayName: IPAddress Pool
-        path: keystone.externalEndpoints[0].ipAddressPool
-      - description: LoadBalancerIPs, request given IPs from the pool if available.
-          Using a list to allow dual stack (IPv4/IPv6) support
-        displayName: Load Balancer IPs
-        path: keystone.externalEndpoints[0].loadBalancerIPs
-      - description: SharedIP if true, VIP/VIPs get shared with multiple services
-        displayName: Shared IP
-        path: keystone.externalEndpoints[0].sharedIP
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: SharedIPKey specifies the sharing key which gets set as the annotation
-          on the LoadBalancer service. Services which share the same VIP must have
-          the same SharedIPKey. Defaults to the IPAddressPool if SharedIP is true,
-          but no SharedIPKey specified.
-        displayName: Shared IPKey
-        path: keystone.externalEndpoints[0].sharedIPKey
       - description: Template - Overrides to use when creating the Keystone service
         displayName: Template
         path: keystone.template
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: manila.apiOverride
       - description: Enabled - Whether Manila service should be deployed and managed
         displayName: Enabled
         path: manila.enabled
@@ -205,12 +187,16 @@ spec:
       - description: Neutron - Overrides to use when creating the Neutron Service
         displayName: Neutron
         path: neutron
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: neutron.apiOverride
       - description: Enabled - Whether Neutron service should be deployed and managed
         displayName: Enabled
         path: neutron.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Template - Overrides to use when creating the Neutron service
+      - description: Template - Overrides to use when creating the Neutron Service
         displayName: Template
         path: neutron.template
       - description: NodeSelector to target subset of worker nodes running control
@@ -220,6 +206,16 @@ spec:
       - description: Nova - Parameters related to the Nova services
         displayName: Nova
         path: nova
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: nova.apiOverride
+      - description: CellOverride, provides the ability to override the generated
+          manifest of several child resources for a nova cell. cell0 never have compute
+          nodes and therefore it won't have a noVNCProxy deployed. Providing an override
+          for cell0 noVNCProxy does not have an effect.
+        displayName: Cell Override
+        path: nova.cellOverride
       - description: Enabled - Whether Nova services should be deployed and managed
         displayName: Enabled
         path: nova.enabled
@@ -262,29 +258,15 @@ spec:
       - description: Placement - Parameters related to the Placement service
         displayName: Placement
         path: placement
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: placement.apiOverride
       - description: Enabled - Whether Placement service should be deployed and managed
         displayName: Enabled
         path: placement.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: IPAddressPool expose VIP via MetalLB on the IPAddressPool
-        displayName: IPAddress Pool
-        path: placement.externalEndpoints[0].ipAddressPool
-      - description: LoadBalancerIPs, request given IPs from the pool if available.
-          Using a list to allow dual stack (IPv4/IPv6) support
-        displayName: Load Balancer IPs
-        path: placement.externalEndpoints[0].loadBalancerIPs
-      - description: SharedIP if true, VIP/VIPs get shared with multiple services
-        displayName: Shared IP
-        path: placement.externalEndpoints[0].sharedIP
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: SharedIPKey specifies the sharing key which gets set as the annotation
-          on the LoadBalancer service. Services which share the same VIP must have
-          the same SharedIPKey. Defaults to the IPAddressPool if SharedIP is true,
-          but no SharedIPKey specified.
-        displayName: Shared IPKey
-        path: placement.externalEndpoints[0].sharedIPKey
       - description: Template - Overrides to use when creating the Placement API
         displayName: Template
         path: placement.template
@@ -299,28 +281,6 @@ spec:
       - description: Templates - Overrides to use when creating the Rabbitmq clusters
         displayName: Templates
         path: rabbitmq.templates
-      - description: ExternalEndpoint, expose a VIP via MetalLB on the pre-created
-          address pool
-        displayName: External Endpoint
-        path: rabbitmq.templates.externalEndpoint
-      - description: IPAddressPool expose VIP via MetalLB on the IPAddressPool
-        displayName: IPAddress Pool
-        path: rabbitmq.templates.externalEndpoint.ipAddressPool
-      - description: LoadBalancerIPs, request given IPs from the pool if available.
-          Using a list to allow dual stack (IPv4/IPv6) support
-        displayName: Load Balancer IPs
-        path: rabbitmq.templates.externalEndpoint.loadBalancerIPs
-      - description: SharedIP if true, VIP/VIPs get shared with multiple services
-        displayName: Shared IP
-        path: rabbitmq.templates.externalEndpoint.sharedIP
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: SharedIPKey specifies the sharing key which gets set as the annotation
-          on the LoadBalancer service. Services which share the same VIP must have
-          the same SharedIPKey. Defaults to the IPAddressPool if SharedIP is true,
-          but no SharedIPKey specified.
-        displayName: Shared IPKey
-        path: rabbitmq.templates.externalEndpoint.sharedIPKey
       - description: Enabled - Whether the Redis service should be deployed and managed
         displayName: Enabled
         path: redis.enabled
@@ -344,6 +304,10 @@ spec:
         path: swift.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: ProxyOverride, provides the ability to override the generated
+          manifest of several child resources.
+        displayName: Proxy Override
+        path: swift.proxyOverride
       - description: Template - Overrides to use when creating Swift Resources
         displayName: Template
         path: swift.template

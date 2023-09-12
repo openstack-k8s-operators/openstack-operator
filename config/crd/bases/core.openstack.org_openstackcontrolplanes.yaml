@@ -4202,9 +4202,211 @@ spec:
                 type: object
               ironic:
                 properties:
+                  apiOverride:
+                    properties:
+                      route:
+                        properties:
+                          metadata:
+                            properties:
+                              annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          spec:
+                            properties:
+                              alternateBackends:
+                                items:
+                                  properties:
+                                    kind:
+                                      enum:
+                                      - Service
+                                      - ""
+                                      type: string
+                                    name:
+                                      type: string
+                                    weight:
+                                      format: int32
+                                      maximum: 256
+                                      minimum: 0
+                                      type: integer
+                                  type: object
+                                maxItems: 3
+                                type: array
+                              host:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              path:
+                                pattern: ^/
+                                type: string
+                              port:
+                                properties:
+                                  targetPort:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                required:
+                                - targetPort
+                                type: object
+                              subdomain:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              tls:
+                                properties:
+                                  caCertificate:
+                                    type: string
+                                  certificate:
+                                    type: string
+                                  destinationCACertificate:
+                                    type: string
+                                  insecureEdgeTerminationPolicy:
+                                    type: string
+                                  key:
+                                    type: string
+                                  termination:
+                                    enum:
+                                    - edge
+                                    - reencrypt
+                                    - passthrough
+                                    type: string
+                                required:
+                                - termination
+                                type: object
+                              to:
+                                properties:
+                                  kind:
+                                    enum:
+                                    - Service
+                                    - ""
+                                    type: string
+                                  name:
+                                    type: string
+                                  weight:
+                                    format: int32
+                                    maximum: 256
+                                    minimum: 0
+                                    type: integer
+                                type: object
+                              wildcardPolicy:
+                                enum:
+                                - None
+                                - Subdomain
+                                - ""
+                                type: string
+                            type: object
+                        type: object
+                    type: object
                   enabled:
                     default: false
                     type: boolean
+                  inspectorOverride:
+                    properties:
+                      route:
+                        properties:
+                          metadata:
+                            properties:
+                              annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          spec:
+                            properties:
+                              alternateBackends:
+                                items:
+                                  properties:
+                                    kind:
+                                      enum:
+                                      - Service
+                                      - ""
+                                      type: string
+                                    name:
+                                      type: string
+                                    weight:
+                                      format: int32
+                                      maximum: 256
+                                      minimum: 0
+                                      type: integer
+                                  type: object
+                                maxItems: 3
+                                type: array
+                              host:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              path:
+                                pattern: ^/
+                                type: string
+                              port:
+                                properties:
+                                  targetPort:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                required:
+                                - targetPort
+                                type: object
+                              subdomain:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              tls:
+                                properties:
+                                  caCertificate:
+                                    type: string
+                                  certificate:
+                                    type: string
+                                  destinationCACertificate:
+                                    type: string
+                                  insecureEdgeTerminationPolicy:
+                                    type: string
+                                  key:
+                                    type: string
+                                  termination:
+                                    enum:
+                                    - edge
+                                    - reencrypt
+                                    - passthrough
+                                    type: string
+                                required:
+                                - termination
+                                type: object
+                              to:
+                                properties:
+                                  kind:
+                                    enum:
+                                    - Service
+                                    - ""
+                                    type: string
+                                  name:
+                                    type: string
+                                  weight:
+                                    format: int32
+                                    maximum: 256
+                                    minimum: 0
+                                    type: integer
+                                type: object
+                              wildcardPolicy:
+                                enum:
+                                - None
+                                - Subdomain
+                                - ""
+                                type: string
+                            type: object
+                        type: object
+                    type: object
                   template:
                     properties:
                       customServiceConfig:
@@ -4252,32 +4454,6 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          externalEndpoints:
-                            items:
-                              properties:
-                                endpoint:
-                                  enum:
-                                  - internal
-                                  - public
-                                  type: string
-                                ipAddressPool:
-                                  minLength: 1
-                                  type: string
-                                loadBalancerIPs:
-                                  items:
-                                    type: string
-                                  type: array
-                                sharedIP:
-                                  default: true
-                                  type: boolean
-                                sharedIPKey:
-                                  default: ""
-                                  type: string
-                              required:
-                              - endpoint
-                              - ipAddressPool
-                              type: object
-                            type: array
                           networkAttachments:
                             items:
                               type: string
@@ -4285,6 +4461,57 @@ spec:
                           nodeSelector:
                             additionalProperties:
                               type: string
+                            type: object
+                          override:
+                            properties:
+                              service:
+                                additionalProperties:
+                                  properties:
+                                    endpointURL:
+                                      type: string
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                                type: object
                             type: object
                           replicas:
                             default: 1
@@ -4463,32 +4690,6 @@ spec:
                               - start
                               type: object
                             type: array
-                          externalEndpoints:
-                            items:
-                              properties:
-                                endpoint:
-                                  enum:
-                                  - internal
-                                  - public
-                                  type: string
-                                ipAddressPool:
-                                  minLength: 1
-                                  type: string
-                                loadBalancerIPs:
-                                  items:
-                                    type: string
-                                  type: array
-                                sharedIP:
-                                  default: true
-                                  type: boolean
-                                sharedIPKey:
-                                  default: ""
-                                  type: string
-                              required:
-                              - endpoint
-                              - ipAddressPool
-                              type: object
-                            type: array
                           inspectionNetwork:
                             type: string
                           networkAttachments:
@@ -4498,6 +4699,57 @@ spec:
                           nodeSelector:
                             additionalProperties:
                               type: string
+                            type: object
+                          override:
+                            properties:
+                              service:
+                                additionalProperties:
+                                  properties:
+                                    endpointURL:
+                                      type: string
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                                type: object
                             type: object
                           passwordSelectors:
                             default:

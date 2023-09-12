@@ -448,6 +448,16 @@ type IronicSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Ironic services
 	Template ironicv1.IronicSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// InspectorOverride, provides the ability to override the generated manifest of several child resources.
+	InspectorOverride Override `json:"inspectorOverride,omitempty"`
 }
 
 // ManilaSection defines the desired state of Manila service
