@@ -4086,9 +4086,6 @@ spec:
                         type: string
                       debug:
                         properties:
-                          dbInitContainer:
-                            default: false
-                            type: boolean
                           dbSync:
                             default: false
                             type: boolean
@@ -4866,9 +4863,6 @@ spec:
                             type: array
                           debug:
                             properties:
-                              initContainer:
-                                default: false
-                                type: boolean
                               service:
                                 default: false
                                 type: boolean
@@ -4963,9 +4957,6 @@ spec:
                             type: array
                           debug:
                             properties:
-                              initContainer:
-                                default: false
-                                type: boolean
                               service:
                                 default: false
                                 type: boolean
@@ -5036,9 +5027,6 @@ spec:
                               type: array
                             debug:
                               properties:
-                                initContainer:
-                                  default: false
-                                  type: boolean
                                 service:
                                   default: false
                                   type: boolean
@@ -6241,8 +6229,6 @@ spec:
                             hasAPIAccess:
                               type: boolean
                             metadataServiceTemplate:
-                              default:
-                                replicas: 0
                               properties:
                                 containerImage:
                                   type: string
@@ -6252,6 +6238,8 @@ spec:
                                   additionalProperties:
                                     type: string
                                   type: object
+                                enabled:
+                                  type: boolean
                                 externalEndpoints:
                                   items:
                                     properties:
@@ -6333,6 +6321,8 @@ spec:
                                   additionalProperties:
                                     type: string
                                   type: object
+                                enabled:
+                                  type: boolean
                                 externalEndpoints:
                                   items:
                                     properties:
@@ -6447,7 +6437,7 @@ spec:
                         type: string
                       metadataServiceTemplate:
                         default:
-                          replicas: 1
+                          enabled: true
                         properties:
                           containerImage:
                             type: string
@@ -6457,6 +6447,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          enabled:
+                            type: boolean
                           externalEndpoints:
                             items:
                               properties:
