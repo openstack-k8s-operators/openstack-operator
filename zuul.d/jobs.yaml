@@ -25,8 +25,8 @@
       - renovate.json
 
 - job:
-    name: openstack-operator-crc-podified-edpm-deployment
-    parent: cifmw-crc-podified-edpm-deployment
+    name: openstack-operator-podified-multinode-edpm-deployment-crc
+    parent: podified-multinode-edpm-deployment-crc
     irrelevant-files: *openstack_if
 
 - job:

@@ -7,4 +7,4 @@
         - openstack-operator-crc-podified-edpm-baremetal: &content_provider
             dependencies:
               - openstack-operator-content-provider
-        - openstack-operator-crc-podified-edpm-deployment: *content_provider
+        - openstack-operator-podified-multinode-edpm-deployment-crc: *content_provider
