@@ -29,9 +29,9 @@ spec:
   rabbitmq:
     templates:
       rabbitmq:
-        replicas: 1
+        replicas: 3
       rabbitmq-cell1:
-        replicas: 1
+        replicas: 3
   memcached:
     templates:
       memcached:
