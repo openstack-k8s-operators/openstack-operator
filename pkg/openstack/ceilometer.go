@@ -16,14 +16,14 @@ import (
 )
 
 const (
-	ceilometerNamespaceLabel = "CeilometerCentral.Namespace"
-	ceilometerNameLabel      = "CeilometerCentral.Name"
-	ceilometerName           = "ceilometercentral"
+	ceilometerNamespaceLabel = "Ceilometer.Namespace"
+	ceilometerNameLabel      = "Ceilometer.Name"
+	ceilometerName           = "ceilometer"
 )
 
 // ReconcileCeilometer ...
 func ReconcileCeilometer(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-	ceilometer := &telemetryv1.CeilometerCentral{
+	ceilometer := &telemetryv1.Ceilometer{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ceilometerName,
 			Namespace: instance.Namespace,

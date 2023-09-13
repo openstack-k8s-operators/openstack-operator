@@ -271,7 +271,7 @@ func setupServiceOperatorDefaults() {
 	networkv1.SetupDefaults()
 
 	// Ceilometer
-	telemetryv1.SetupDefaultsCeilometerCentral()
+	telemetryv1.SetupDefaultsCeilometer()
 
 	// Swift
 	swiftv1.SetupDefaults()

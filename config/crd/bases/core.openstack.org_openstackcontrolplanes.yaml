@@ -50,6 +50,8 @@ spec:
                     properties:
                       centralImage:
                         type: string
+                      computeImage:
+                        type: string
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -57,12 +59,14 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                      initImage:
+                      ipmiImage:
                         type: string
                       networkAttachmentDefinitions:
                         items:
                           type: string
                         type: array
+                      nodeExporterImage:
+                        type: string
                       notificationImage:
                         type: string
                       passwordSelector:
@@ -85,7 +89,9 @@ spec:
                         type: string
                     required:
                     - centralImage
-                    - initImage
+                    - computeImage
+                    - ipmiImage
+                    - nodeExporterImage
                     - notificationImage
                     - secret
                     - sgCoreImage
