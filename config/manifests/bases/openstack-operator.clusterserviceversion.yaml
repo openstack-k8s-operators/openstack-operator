@@ -237,6 +237,13 @@ spec:
       - description: Template - Overrides to use when creating Octavia Resources
         displayName: Template
         path: octavia.template
+      - description: OpenStackClient - Parameters related to the OpenStackClient
+        displayName: Open Stack Client
+        path: openstackclient
+      - description: Template - Overrides to use when creating the OpenStackClient
+          Resource
+        displayName: Template
+        path: openstackclient.template
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn
@@ -315,6 +322,29 @@ spec:
       - description: Template - Overrides to use when creating Swift Resources
         displayName: Template
         path: swift.template
+      - description: TLS - Parameters related to the TLS
+        displayName: TLS
+        path: tls
+      - description: InternalEndpoints tls configuration
+        displayName: Internal Endpoints
+        path: tls.internalEndpoints
+      - description: Enabled - Whether TLS should be enabled for endpoint type
+        displayName: Enabled
+        path: tls.internalEndpoints.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: PublicEndpoints tls configuration
+        displayName: Public Endpoints
+        path: tls.publicEndpoints
+      - description: Enabled - Whether TLS should be enabled for endpoint type
+        displayName: Enabled
+        path: tls.publicEndpoints.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Issuer - cert-manager issuer to be used for the endpoint type.
+          If not specified a self signed will be created.
+        displayName: Issuer
+        path: tls.publicEndpoints.issuer
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

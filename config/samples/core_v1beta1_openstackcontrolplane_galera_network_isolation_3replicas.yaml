@@ -5,6 +5,14 @@ metadata:
 spec:
   secret: osp-secret
   storageClass: local-storage
+  tls:
+    internalEndpoints:
+      enabled: false
+    publicEndpoints:
+      enabled: true
+  openstackclient:
+    template:
+      containerImage: quay.io/mschuppe/openstack-openstackclient:current-podified
   dns:
     template:
       override:

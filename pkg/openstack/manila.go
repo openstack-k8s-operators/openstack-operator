@@ -69,7 +69,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Manila.Template.ManilaAPI.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Manila.Template.ManilaAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,

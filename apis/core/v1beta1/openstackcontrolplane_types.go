@@ -23,10 +23,12 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
@@ -34,12 +36,12 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
-	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -68,6 +70,11 @@ type OpenStackControlPlaneSpec struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// TLS - Parameters related to the TLS
+	TLS TLSSection `json:"tls,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
@@ -158,6 +165,11 @@ type OpenStackControlPlaneSpec struct {
 	// Redis - Parameters related to the Redis service
 	Redis RedisSection `json:"redis,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// OpenStackClient - Parameters related to the OpenStackClient
+	OpenStackClient OpenStackClientSection `json:"openstackclient,omitempty"`
+
 	// ExtraMounts containing conf files and credentials that should be provided
 	// to the underlying operators.
 	// This struct can be defined in the top level CR and propagated to the
@@ -166,6 +178,47 @@ type OpenStackControlPlaneSpec struct {
 	// template Section, the globally defined ExtraMounts are ignored and
 	// overridden for the operator which has this section already.
 	ExtraMounts []OpenStackExtraVolMounts `json:"extraMounts,omitempty"`
+}
+
+// TLSSection defines the desired state of TLS configuration
+type TLSSection struct {
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// PublicEndpoints tls configuration
+	PublicEndpoints TLSPublicEndpointSection `json:"publicEndpoints,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// InternalEndpoints tls configuration
+	InternalEndpoints TLSInternalEndpointSection `json:"internalEndpoints,omitempty"`
+
+	// +kubebuilder:validation:optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Secret containing any additional CA certificates, which should be added to deployment pods
+	tls.Ca `json:",inline"`
+}
+
+// TLSPublicEndpointSection defines the desired state of public TLSEndpoint configuration
+type TLSPublicEndpointSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether TLS should be enabled for endpoint type
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Issuer - cert-manager issuer to be used for the endpoint type. If not specified a self signed will be created.
+	Issuer *string `json:"issuer,omitempty"`
+}
+
+// TLSInternalEndpointSection defines the desired state of internal TLSEndpoint configuration
+type TLSInternalEndpointSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether TLS should be enabled for endpoint type
+	Enabled bool `json:"enabled"`
 }
 
 // DNSMasqSection defines the desired state of DNSMasq service
@@ -561,6 +614,14 @@ type RedisSection struct {
 	Templates map[string]redisv1.RedisSpec `json:"templates,omitempty"`
 }
 
+// OpenStackClientSection defines the desired state of the OpenStackClient
+type OpenStackClientSection struct {
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating the OpenStackClient Resource
+	Template v1beta1.OpenStackClientSpec `json:"template,omitempty"`
+}
+
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
 type OpenStackControlPlaneStatus struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
@@ -642,6 +703,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneSwiftReadyCondition, condition.InitReason, OpenStackControlPlaneSwiftReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOctaviaReadyCondition, condition.InitReason, OpenStackControlPlaneOctaviaReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneRedisReadyCondition, condition.InitReason, OpenStackControlPlaneRedisReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
 
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),

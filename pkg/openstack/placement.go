@@ -67,7 +67,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Placement.Template.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Placement.Template.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,

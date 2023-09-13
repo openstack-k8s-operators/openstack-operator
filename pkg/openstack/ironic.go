@@ -77,7 +77,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Ironic.Template.IronicAPI.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Ironic.Template.IronicAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -107,7 +107,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Ironic.Template.IronicInspector.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Ironic.Template.IronicInspector.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,

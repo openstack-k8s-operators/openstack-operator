@@ -36,6 +36,8 @@ spec:
             type: object
           spec:
             properties:
+              caSecretName:
+                type: string
               containerImage:
                 type: string
               nodeSelector:
@@ -43,8 +45,10 @@ spec:
                   type: string
                 type: object
               openStackConfigMap:
+                default: openstack-config
                 type: string
               openStackConfigSecret:
+                default: openstack-config-secret
                 type: string
             required:
             - containerImage

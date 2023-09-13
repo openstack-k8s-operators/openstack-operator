@@ -10,6 +10,8 @@ github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
+github.com/cert-manager/cert-manager v1.11.5 h1:K2LurvwIE4hIhODQZnkOW6ljYe3lVMAliS/to+gI05o=
+github.com/cert-manager/cert-manager v1.11.5/go.mod h1:zNOyoTEwdn9Rtj5Or2pjBY1Bqwtw4vBElP2fKSP8/g8=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/cespare/xxhash/v2 v2.2.0 h1:DC2CZ1Ep5Y4k3ZQ899DldepgrayRUGE6BBZ/cd9Cj44=
 github.com/cespare/xxhash/v2 v2.2.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
@@ -151,6 +153,8 @@ github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231019064410-5
 github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231019064410-5c72e6381cbc/go.mod h1:QJA4yh2B6lgZzrOOb0iW8JyDmB7uRT/Mokiwalca3Cw=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231017110713-7b1a1e54bd46 h1:EgglSFb+05sWY5Z2JivMnXT7XSdGEOqpPfnlsc0oqvE=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231017110713-7b1a1e54bd46/go.mod h1:sDYtAWryP7mF2v4XfmKdAoFquVAMts2J5PuYFV9VBQU=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231006072650-7fe7fe16bcd1 h1:sE/qio/WNUEng0VBmefSr46e/cq4R83payEzge/Y48U=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231006072650-7fe7fe16bcd1/go.mod h1:u1pqzqGNLcof95aqhLfU6xHVTD6ZTc5gWy2FE03UrZQ=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231019091705-f3aa3d057b0f h1:GhwRUVLRKKCEkK06uUXTMmT/waLJQPP5kMGpN6ozbc0=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231019091705-f3aa3d057b0f/go.mod h1:xXAuy7HtWN4p7LF5Q+NHLkwAsKVh0KrzpnuPYIG3XaA=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231019091705-f3aa3d057b0f h1:UItXdH97OtXMhW+gLa/xeCTDlm/9wMy3hiGoOLlY01I=
@@ -383,6 +387,8 @@ k8s.io/utils v0.0.0-20230726121419-3b25d923346b h1:sgn3ZU783SCgtaSJjpcVVlRqd6GSn
 k8s.io/utils v0.0.0-20230726121419-3b25d923346b/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 sigs.k8s.io/controller-runtime v0.14.6 h1:oxstGVvXGNnMvY7TAESYk+lzr6S3V5VFxQ6d92KcwQA=
 sigs.k8s.io/controller-runtime v0.14.6/go.mod h1:WqIdsAY6JBsjfc/CqO0CORmNtoCtE4S6qbPc9s68h+0=
+sigs.k8s.io/gateway-api v0.6.0 h1:v2FqrN2ROWZLrSnI2o91taHR8Sj3s+Eh3QU7gLNWIqA=
+sigs.k8s.io/gateway-api v0.6.0/go.mod h1:EYJT+jlPWTeNskjV0JTki/03WX1cyAnBhwBJfYHpV/0=
 sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd h1:EDPBXCAspyGV4jQlpZSudPeMmr1bNJefnuqLsRAsHZo=
 sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd/go.mod h1:B8JuhiUyNFVKdsE8h686QcCxMaH6HrOAZj4vswFpcB0=
 sigs.k8s.io/structured-merge-diff/v4 v4.3.0 h1:UZbZAZfX0wV2zr7YZorDz6GXROfDFj6LvqCRm4VUVKk=

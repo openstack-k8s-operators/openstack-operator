@@ -68,7 +68,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Neutron.Template.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Neutron.Template.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,

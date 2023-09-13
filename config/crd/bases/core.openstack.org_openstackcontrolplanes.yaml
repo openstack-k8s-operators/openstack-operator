@@ -8969,6 +8969,30 @@ spec:
                     - secret
                     type: object
                 type: object
+              openstackclient:
+                properties:
+                  template:
+                    properties:
+                      caSecretName:
+                        type: string
+                      containerImage:
+                        type: string
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      openStackConfigMap:
+                        default: openstack-config
+                        type: string
+                      openStackConfigSecret:
+                        default: openstack-config-secret
+                        type: string
+                    required:
+                    - containerImage
+                    - openStackConfigMap
+                    - openStackConfigSecret
+                    type: object
+                type: object
               ovn:
                 properties:
                   enabled:
@@ -13776,6 +13800,25 @@ spec:
                     - swiftProxy
                     - swiftRing
                     - swiftStorage
+                    type: object
+                type: object
+              tls:
+                properties:
+                  caSecretName:
+                    type: string
+                  internalEndpoints:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                    type: object
+                  publicEndpoints:
+                    properties:
+                      enabled:
+                        default: true
+                        type: boolean
+                      issuer:
+                        type: string
                     type: object
                 type: object
             required:

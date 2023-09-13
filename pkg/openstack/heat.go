@@ -77,7 +77,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Heat.Template.HeatAPI.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Heat.Template.HeatAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -107,7 +107,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,

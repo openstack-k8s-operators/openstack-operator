@@ -13,19 +13,26 @@ limitations under the License.
 package openstackclient
 
 import (
+	"context"
+
+	env "github.com/openstack-k8s-operators/lib-common/modules/common/env"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 // ClientPod func
 func ClientPod(
+	ctx context.Context,
 	instance *clientv1.OpenStackClient,
+	helper *helper.Helper,
 	labels map[string]string,
 	configHash string,
-	secretHash string,
-) *corev1.Pod {
+) (*corev1.Pod, error) {
 
 	clientPod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -34,76 +41,83 @@ func ClientPod(
 		},
 	}
 
-	var terminationGracePeriodSeconds int64 = 0
-	runAsUser := int64(42401)
-	runAsGroup := int64(42401)
+	envVars := map[string]env.Setter{}
+	envVars["OS_CLOUD"] = env.SetValue("default")
+	envVars["CONFIG_HASH"] = env.SetValue(configHash)
+
 	clientPod.ObjectMeta = metav1.ObjectMeta{
 		Name:      instance.Name,
 		Namespace: instance.Namespace,
 		Labels:    labels,
 	}
-	clientPod.Spec.TerminationGracePeriodSeconds = &terminationGracePeriodSeconds
+	clientPod.Spec.TerminationGracePeriodSeconds = ptr.To[int64](0)
 	clientPod.Spec.ServiceAccountName = instance.RbacResourceName()
-	clientPod.Spec.Containers = []corev1.Container{
-		{
-			Name:    "openstackclient",
-			Image:   instance.Spec.ContainerImage,
-			Command: []string{"/bin/sleep"},
-			Args:    []string{"infinity"},
-			SecurityContext: &corev1.SecurityContext{
-				RunAsUser:  &runAsUser,
-				RunAsGroup: &runAsGroup,
-			},
-			Env: []corev1.EnvVar{
-				{
-					Name:  "OS_CLOUD",
-					Value: "default",
-				},
-				{
-					Name:  "CONFIG_HASH",
-					Value: configHash,
-				},
-				{
-					Name:  "SECRET_HASH",
-					Value: secretHash,
-				},
-			},
-			VolumeMounts: []corev1.VolumeMount{
-				{
-					Name:      "openstack-config",
-					MountPath: "/etc/openstack/clouds.yaml",
-					SubPath:   "clouds.yaml",
-				},
-				{
-					Name:      "openstack-config-secret",
-					MountPath: "/etc/openstack/secure.yaml",
-					SubPath:   "secure.yaml",
+	clientContainer := corev1.Container{
+		Name:    "openstackclient",
+		Image:   instance.Spec.ContainerImage,
+		Command: []string{"/bin/sleep"},
+		Args:    []string{"infinity"},
+		SecurityContext: &corev1.SecurityContext{
+			RunAsUser:                ptr.To[int64](42401),
+			RunAsGroup:               ptr.To[int64](42401),
+			RunAsNonRoot:             ptr.To(true),
+			AllowPrivilegeEscalation: ptr.To(false),
+			Capabilities: &corev1.Capabilities{
+				Drop: []corev1.Capability{
+					"ALL",
 				},
 			},
 		},
+		Env: env.MergeEnvs([]corev1.EnvVar{}, envVars),
 	}
-	clientPod.Spec.Volumes = clientPodVolumes(instance, labels, configHash, secretHash)
+
+	tlsConfig, err := tls.NewTLS(ctx, helper, instance.Namespace, nil, &instance.Spec.Ca)
+	if err != nil {
+		return nil, err
+	}
+	clientContainer.VolumeMounts = clientPodVolumeMounts(tlsConfig)
+
+	clientPod.Spec.Containers = []corev1.Container{clientContainer}
+
+	clientPod.Spec.Volumes = clientPodVolumes(instance, tlsConfig)
 	if instance.Spec.NodeSelector != nil && len(instance.Spec.NodeSelector) > 0 {
 		clientPod.Spec.NodeSelector = instance.Spec.NodeSelector
 	}
 
-	return clientPod
+	return clientPod, nil
+}
+
+func clientPodVolumeMounts(
+	tlsConfig *tls.TLS,
+) []corev1.VolumeMount {
+	volumeMounts := []corev1.VolumeMount{
+		{
+			Name:      "openstack-config",
+			MountPath: "/home/cloud-admin/.config/openstack/clouds.yaml",
+			SubPath:   "clouds.yaml",
+		},
+		{
+			Name:      "openstack-config-secret",
+			MountPath: "/home/cloud-admin/.config/openstack/secure.yaml",
+			SubPath:   "secure.yaml",
+		},
+	}
+	volumeMounts = append(volumeMounts, tlsConfig.CreateVolumeMounts()...)
+
+	return volumeMounts
 }
 
 func clientPodVolumes(
 	instance *clientv1.OpenStackClient,
-	labels map[string]string,
-	configHash string,
-	secretHash string,
+	tlsConfig *tls.TLS,
 ) []corev1.Volume {
-
-	return []corev1.Volume{
+	volumes := []corev1.Volume{
 		{
 			Name: "openstack-config",
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: instance.Spec.OpenStackConfigMap,
+						Name: *instance.Spec.OpenStackConfigMap,
 					},
 				},
 			},
@@ -112,10 +126,12 @@ func clientPodVolumes(
 			Name: "openstack-config-secret",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: instance.Spec.OpenStackConfigSecret,
+					SecretName: *instance.Spec.OpenStackConfigSecret,
 				},
 			},
 		},
 	}
+	volumes = append(volumes, tlsConfig.CreateVolumes()...)
 
+	return volumes
 }

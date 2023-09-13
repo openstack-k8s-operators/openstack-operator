@@ -105,7 +105,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Nova.Template.APIServiceTemplate.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Nova.Template.APIServiceTemplate.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -147,7 +147,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			}
 
 			var ctrlResult reconcile.Result
-			routedOverrideSpec, ctrlResult, err := EnsureRoute(
+			routedOverrideSpec, ctrlResult, err := EnsureEndpointConfig(
 				ctx,
 				instance,
 				helper,
