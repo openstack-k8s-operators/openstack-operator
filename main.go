@@ -28,6 +28,7 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
@@ -102,6 +103,7 @@ func init() {
 	utilruntime.Must(clientv1.AddToScheme(scheme))
 	utilruntime.Must(redisv1.AddToScheme(scheme))
 	utilruntime.Must(routev1.AddToScheme(scheme))
+	utilruntime.Must(certmgrv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

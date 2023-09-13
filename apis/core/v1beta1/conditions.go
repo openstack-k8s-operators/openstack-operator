@@ -102,6 +102,9 @@ const (
 	// OpenStackControlPlaneDNSReadyCondition Status=True condition which indicates if DNSMasq is configured and operational
 	OpenStackControlPlaneDNSReadyCondition condition.Type = "OpenStackControlPlaneDNSReadyCondition"
 
+	// OpenStackControlPlaneCAReadyCondition Status=True condition which indicates if the CAs are configured and operational
+	OpenStackControlPlaneCAReadyCondition condition.Type = "OpenStackControlPlaneCAReadyCondition"
+
 	// OpenStackControlPlaneCeilometerReadyCondition Status=True condition which indicates if OpenStack Ceilometer service is configured and operational
 	OpenStackControlPlaneCeilometerReadyCondition condition.Type = "OpenStackControlPlaneCeilometerReady"
 
@@ -384,4 +387,16 @@ const (
 
 	// OpenStackControlPlaneExposeServiceReadyMessage
 	OpenStackControlPlaneExposeServiceReadyMessage = "OpenStackControlPlane %s service exposed"
+
+	// OpenStackControlPlaneCAReadyInitMessage
+	OpenStackControlPlaneCAReadyInitMessage = "OpenStackControlPlane CAs not started"
+
+	// OpenStackControlPlaneCAReadyMessage
+	OpenStackControlPlaneCAReadyMessage = "OpenStackControlPlane CAs completed"
+
+	// OpenStackControlPlaneCAReadyRunningMessage
+	OpenStackControlPlaneCAReadyRunningMessage = "OpenStackControlPlane CAs in progress"
+
+	// OpenStackControlPlaneCAReadyErrorMessage
+	OpenStackControlPlaneCAReadyErrorMessage = "OpenStackControlPlane CAs %s %s error occured %s"
 )

@@ -43,10 +43,14 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 
 	helper.GetLogger().Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
-		// the following are created/owned by keystoneclient
-		openstackclient.Spec.OpenStackConfigMap = "openstack-config"
-		openstackclient.Spec.OpenStackConfigSecret = "openstack-config-secret"
-		openstackclient.Spec.NodeSelector = instance.Spec.NodeSelector
+		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec)
+
+		for _, config := range instance.Spec.TLS.Endpoint {
+			if config.Enabled {
+				openstackclient.Spec.Ca.CaSecretName = CombinedCASecret
+				break
+			}
+		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), openstackclient, helper.GetScheme())
 		if err != nil {

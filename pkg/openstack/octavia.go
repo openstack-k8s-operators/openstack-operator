@@ -84,14 +84,14 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			octavia,
 			svcs,
 			instance.Spec.Octavia.Template.OctaviaAPI.Override.Service,
-			instance.Spec.Octavia.APIOverride.Route,
+			instance.Spec.Octavia.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeOctaviaReadyCondition,
 		)
 		if err != nil {

@@ -205,6 +205,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   enabled:
                     default: true
@@ -2348,6 +2353,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   enabled:
                     default: true
@@ -3537,6 +3547,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   cnfAPIOverride:
                     properties:
@@ -3637,6 +3652,11 @@ spec:
                                 - ""
                                 type: string
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
                         type: object
                     type: object
                   enabled:
@@ -4089,6 +4109,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   enabled:
                     default: false
@@ -4316,6 +4341,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   enabled:
                     default: false
@@ -4419,6 +4449,11 @@ spec:
                                 - ""
                                 type: string
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
                         type: object
                     type: object
                   template:
@@ -5034,6 +5069,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   enabled:
                     default: true
@@ -5307,6 +5347,11 @@ spec:
                                 - ""
                                 type: string
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
                         type: object
                     type: object
                   enabled:
@@ -6534,6 +6579,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   enabled:
                     default: true
@@ -7557,6 +7607,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   cellOverride:
                     additionalProperties:
@@ -7660,6 +7715,11 @@ spec:
                                       - ""
                                       type: string
                                   type: object
+                              type: object
+                            tls:
+                              properties:
+                                secretName:
+                                  type: string
                               type: object
                           type: object
                       type: object
@@ -8470,6 +8530,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   enabled:
                     default: false
@@ -8969,6 +9034,30 @@ spec:
                     - secret
                     type: object
                 type: object
+              openstackclient:
+                properties:
+                  template:
+                    properties:
+                      caSecretName:
+                        type: string
+                      containerImage:
+                        type: string
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      openStackConfigMap:
+                        default: openstack-config
+                        type: string
+                      openStackConfigSecret:
+                        default: openstack-config-secret
+                        type: string
+                    required:
+                    - containerImage
+                    - openStackConfigMap
+                    - openStackConfigSecret
+                    type: object
+                type: object
               ovn:
                 properties:
                   enabled:
@@ -9296,6 +9385,11 @@ spec:
                                 - ""
                                 type: string
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
                         type: object
                     type: object
                   enabled:
@@ -13620,6 +13714,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
                     type: object
                   template:
                     properties:
@@ -13776,6 +13875,24 @@ spec:
                     - swiftProxy
                     - swiftRing
                     - swiftStorage
+                    type: object
+                type: object
+              tls:
+                default:
+                  endpoint:
+                    internal:
+                      enabled: false
+                    public:
+                      enabled: true
+                properties:
+                  caSecretName:
+                    type: string
+                  endpoint:
+                    additionalProperties:
+                      properties:
+                        enabled:
+                          type: boolean
+                      type: object
                     type: object
                 type: object
             required:
