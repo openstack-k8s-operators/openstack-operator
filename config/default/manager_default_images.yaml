@@ -11,7 +11,7 @@ spec:
       containers:
       - name: manager
         env:
-        - name: RABBITMQ_IMAGE_URL_DEFAULT
+        - name: RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
-        - name: OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
+        - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
