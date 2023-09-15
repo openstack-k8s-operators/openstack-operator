@@ -82,7 +82,7 @@ type OpenStackControlPlaneReconciler struct {
 //+kubebuilder:rbac:groups=ovn.openstack.org,resources=ovncontrollers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rabbitmq.com,resources=rabbitmqclusters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=telemetry.openstack.org,resources=ceilometercentrals,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=telemetry.openstack.org,resources=ceilometers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=swift.openstack.org,resources=swifts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=octavia.openstack.org,resources=octavias,verbs=get;list;watch;create;update;patch;delete
 
@@ -323,7 +323,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&heatv1.Heat{}).
 		Owns(&ironicv1.Ironic{}).
 		Owns(&horizonv1.Horizon{}).
-		Owns(&telemetryv1.CeilometerCentral{}).
+		Owns(&telemetryv1.Ceilometer{}).
 		Owns(&octaviav1.Octavia{}).
 		Complete(r)
 }

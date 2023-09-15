@@ -454,7 +454,7 @@ type CeilometerSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the OpenStack Ceilometer service
-	Template telemetryv1.CeilometerCentralSpec `json:"template,omitempty"`
+	Template telemetryv1.CeilometerSpec `json:"template,omitempty"`
 }
 
 // SwiftSection defines the desired state of Swift service

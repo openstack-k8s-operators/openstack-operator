@@ -366,7 +366,7 @@ rules:
 - apiGroups:
   - telemetry.openstack.org
   resources:
-  - ceilometercentrals
+  - ceilometers
   verbs:
   - create
   - delete
