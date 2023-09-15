@@ -577,7 +577,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 func SetupDefaults() {
 	// Acquire environmental defaults and initialize OpenStackControlPlane defaults with them
 	openstackControlPlaneDefaults := OpenStackControlPlaneDefaults{
-		RabbitMqImageURL: util.GetEnvVar("RABBITMQ_IMAGE_URL_DEFAULT", RabbitMqContainerImage),
+		RabbitMqImageURL: util.GetEnvVar("RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT", RabbitMqContainerImage),
 	}
 
 	SetupOpenStackControlPlaneDefaults(openstackControlPlaneDefaults)

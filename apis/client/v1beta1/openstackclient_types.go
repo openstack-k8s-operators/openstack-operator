@@ -98,7 +98,7 @@ func (instance OpenStackClient) RbacResourceName() string {
 func SetupDefaults() {
 	// Acquire environmental defaults and initialize OpenStackClient defaults with them
 	openStackClientDefaults := OpenStackClientDefaults{
-		ContainerImageURL: util.GetEnvVar("OPENSTACK_CLIENT_IMAGE_URL_DEFAULT", OpenStackClientContainerImage),
+		ContainerImageURL: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT", OpenStackClientContainerImage),
 	}
 
 	SetupOpenStackClientDefaults(openStackClientDefaults)
