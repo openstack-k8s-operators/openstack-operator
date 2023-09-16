@@ -5,25 +5,25 @@ go 1.19
 require (
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
-	github.com/openstack-k8s-operators/cinder-operator/api v0.1.2-0.20230912143019-2ce9f1cea12b
-	github.com/openstack-k8s-operators/glance-operator/api v0.1.2-0.20230912090835-5ccb2647d10e
+	github.com/openstack-k8s-operators/cinder-operator/api v0.1.2-0.20230915101724-27ac1650268d
+	github.com/openstack-k8s-operators/glance-operator/api v0.1.2-0.20230915164554-574694172527
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.1-0.20230911073135-583b418e2e11
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.1-0.20230911061705-4eae31871623
-	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230913075242-b99f5f160494
-	github.com/openstack-k8s-operators/ironic-operator/api v0.1.1-0.20230905103647-804dc6fa8609
-	github.com/openstack-k8s-operators/keystone-operator/api v0.1.1-0.20230830083045-d73d07cca617
+	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230914145253-116f307c7875
+	github.com/openstack-k8s-operators/ironic-operator/api v0.1.1-0.20230915140049-df437872b34f
+	github.com/openstack-k8s-operators/keystone-operator/api v0.1.1-0.20230914163026-da9aa9de960a
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.1-0.20230913075424-2680ce4b6ad2
-	github.com/openstack-k8s-operators/manila-operator/api v0.1.1-0.20230912125045-4da11a09ebf2
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.1-0.20230912174650-9fb4c4a76e55
-	github.com/openstack-k8s-operators/neutron-operator/api v0.1.1-0.20230913071115-4ade0257c3ae
-	github.com/openstack-k8s-operators/nova-operator/api v0.1.2-0.20230913074219-532bc7f74c7f
-	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230911154103-78b1322efc54
-	github.com/openstack-k8s-operators/ovn-operator/api v0.1.1-0.20230912211243-092fb4240e96
-	github.com/openstack-k8s-operators/placement-operator/api v0.1.1-0.20230911081408-0f9d8374b397
-	github.com/openstack-k8s-operators/swift-operator/api v0.1.1-0.20230906065118-40fc718651fe
+	github.com/openstack-k8s-operators/manila-operator/api v0.1.1-0.20230916214930-2c2b11448ca0
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.1-0.20230913081601-9e4fc8aadad5
+	github.com/openstack-k8s-operators/neutron-operator/api v0.1.1-0.20230915073010-f8b3632fbca5
+	github.com/openstack-k8s-operators/nova-operator/api v0.1.2-0.20230916064227-4f9e9b1d4071
+	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230915083637-79fc51fd4dcf
+	github.com/openstack-k8s-operators/ovn-operator/api v0.1.1-0.20230913151226-aab30786ed97
+	github.com/openstack-k8s-operators/placement-operator/api v0.1.1-0.20230916072356-d672204a54ac
+	github.com/openstack-k8s-operators/swift-operator/api v0.1.1-0.20230915130355-e5c2b0ff0af1
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.1-0.20230914155337-2540bab64b80
 	github.com/rabbitmq/cluster-operator v1.14.0
-	k8s.io/apimachinery v0.26.8
+	k8s.io/apimachinery v0.26.9
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
@@ -32,8 +32,8 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.25.0 // indirect
-	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
+	go.uber.org/zap v1.26.0 // indirect
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 )
 
@@ -85,10 +85,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.26.8
-	k8s.io/apiextensions-apiserver v0.26.8 //indirect
-	k8s.io/client-go v0.26.8
-	k8s.io/component-base v0.26.8 //indirect
+	k8s.io/api v0.26.9
+	k8s.io/apiextensions-apiserver v0.26.9 //indirect
+	k8s.io/client-go v0.26.9
+	k8s.io/component-base v0.26.9 //indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230525220651-2546d827e515 //indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b //indirect
