@@ -30,12 +30,12 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.1-0.20230920144258-a37c476a2829
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.1-0.20230922102555-fe2794ad1e8c
 	github.com/operator-framework/api v0.17.3
-	github.com/rabbitmq/cluster-operator v1.14.0
+	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	go.uber.org/zap v1.26.0
-	k8s.io/api v0.26.9
-	k8s.io/apimachinery v0.26.9
-	k8s.io/client-go v0.26.9
-	sigs.k8s.io/controller-runtime v0.14.6
+	k8s.io/api v0.27.2
+	k8s.io/apimachinery v0.27.4
+	k8s.io/client-go v0.27.2
+	sigs.k8s.io/controller-runtime v0.15.1
 )
 
 require (
@@ -97,14 +97,23 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.26.9 //indirect
-	k8s.io/component-base v0.26.9 //indirect
+	k8s.io/apiextensions-apiserver v0.27.2 //indirect
+	k8s.io/component-base v0.27.2 //indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230525220651-2546d827e515 //indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd //indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
+)
+
+replace (
+	// pin to k8s 0.26.x for now
+	k8s.io/api => k8s.io/api v0.26.9
+	k8s.io/apimachinery => k8s.io/apimachinery v0.26.9
+	k8s.io/client-go => k8s.io/client-go v0.26.9
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.14.6
+
 )
 
 replace github.com/openstack-k8s-operators/openstack-operator/apis => ./apis

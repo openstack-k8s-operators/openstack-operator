@@ -23,7 +23,6 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
-	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -39,7 +38,8 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
-	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
+	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -326,7 +326,7 @@ type RabbitmqTemplate struct {
 	// +kubebuilder:validation:Required
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Overrides to use when creating the Rabbitmq clusters
-	rabbitmqv1.RabbitmqClusterSpec `json:",inline"`
+	rabbitmqv2.RabbitmqClusterSpec `json:",inline"`
 }
 
 // OvnSection defines the desired state of OVN services
