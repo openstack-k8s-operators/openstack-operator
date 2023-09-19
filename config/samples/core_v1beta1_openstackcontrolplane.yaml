@@ -150,3 +150,5 @@ spec:
       octaviaAPI:
         replicas: 1
       secret: osp-secret
+  redis:
+    enabled: false

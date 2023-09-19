@@ -105,17 +105,9 @@ const (
 	// OpenStackControlPlaneOctaviaReadyCondition Status=True condition which indicates if Octavia is configured and operational
 	OpenStackControlPlaneOctaviaReadyCondition condition.Type = "OpenStackControlPlaneOctaviaReady"
 
-	// OpenStackControlPlaneOctaviaReadyInitMessage
-	OpenStackControlPlaneOctaviaReadyInitMessage = "OpenStackControlPlane Octavia not started"
+	// OpenStackControlPlaneRedisReadyCondition Status=True condition which indicates if Redis is configured and operational
+	OpenStackControlPlaneRedisReadyCondition condition.Type = "OpenStackControlPlaneRedisReady"
 
-	// OpenStackControlPlaneOctaviaReadyMessage
-	OpenStackControlPlaneOctaviaReadyMessage = "OpenStackControlPlane Octavia completed"
-
-	// OpenStackControlPlaneOctaviaReadyRunningMessage
-	OpenStackControlPlaneOctaviaReadyRunningMessage = "OpenStackControlPlane Octavia in progress"
-
-	// OpenStackControlPlaneOctaviaReadyErrorMessage
-	OpenStackControlPlaneOctaviaReadyErrorMessage = "OpenStackControlPlane Octavia error occured %s"
 )
 
 // OpenStackControlPlane Reasons used by API objects.
@@ -321,4 +313,29 @@ const (
 
 	// OpenStackControlPlaneCeilometerReadyErrorMessage
 	OpenStackControlPlaneCeilometerReadyErrorMessage = "OpenStackControlPlane Ceilometer error occured %s"
+
+	// OpenStackControlPlaneOctaviaReadyInitMessage
+	OpenStackControlPlaneOctaviaReadyInitMessage = "OpenStackControlPlane Octavia not started"
+
+	// OpenStackControlPlaneOctaviaReadyMessage
+	OpenStackControlPlaneOctaviaReadyMessage = "OpenStackControlPlane Octavia completed"
+
+	// OpenStackControlPlaneOctaviaReadyRunningMessage
+	OpenStackControlPlaneOctaviaReadyRunningMessage = "OpenStackControlPlane Octavia in progress"
+
+	// OpenStackControlPlaneOctaviaReadyErrorMessage
+	OpenStackControlPlaneOctaviaReadyErrorMessage = "OpenStackControlPlane Octavia error occured %s"
+
+	// OpenStackControlPlaneRedisReadyInitMessage
+	OpenStackControlPlaneRedisReadyInitMessage = "OpenStackControlPlane Redis not started"
+
+	// OpenStackControlPlaneRedisReadyMessage
+	OpenStackControlPlaneRedisReadyMessage = "OpenStackControlPlane Redis completed"
+
+	// OpenStackControlPlaneRedisReadyRunningMessage
+	OpenStackControlPlaneRedisReadyRunningMessage = "OpenStackControlPlane Redis in progress"
+
+	// OpenStackControlPlaneRedisReadyErrorMessage
+	OpenStackControlPlaneRedisReadyErrorMessage = "OpenStackControlPlane Redis error occured %s"
+
 )

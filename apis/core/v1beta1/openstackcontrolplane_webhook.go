@@ -156,6 +156,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			reqs = "MariaDB or Galera, Memcached, Keystone"
 		}
 	case "Octavia":
+		// TODO(beagles): So far we haven't declared Redis as dependency for Octavia, but we might.
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled &&
 			r.Spec.Ovn.Enabled) {
@@ -416,4 +417,11 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Octavia
 	r.Spec.Octavia.Template.Default()
+
+	// Redis
+	for key, template := range r.Spec.Redis.Templates {
+		template.Default()
+		// By-value copy, need to update
+		r.Spec.Redis.Templates[key] = template
+	}
 }

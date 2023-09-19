@@ -11160,6 +11160,25 @@ spec:
                       type: object
                     type: object
                 type: object
+              redis:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  templates:
+                    additionalProperties:
+                      properties:
+                        containerImage:
+                          type: string
+                        replicas:
+                          default: 1
+                          format: int32
+                          type: integer
+                      required:
+                      - containerImage
+                      type: object
+                    type: object
+                type: object
               secret:
                 type: string
               storageClass:

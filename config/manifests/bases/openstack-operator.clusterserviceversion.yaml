@@ -249,6 +249,14 @@ spec:
           but no SharedIPKey specified.
         displayName: Shared IPKey
         path: rabbitmq.templates.externalEndpoint.sharedIPKey
+      - description: Enabled - Whether the Redis service should be deployed and managed
+        displayName: Enabled
+        path: redis.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Templates - Overrides to use when creating the Redis Resources
+        displayName: Templates
+        path: redis.templates
       - description: 'Secret - FIXME: make this optional'
         displayName: Secret
         path: secret

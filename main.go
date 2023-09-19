@@ -99,6 +99,7 @@ func init() {
 	utilruntime.Must(telemetryv1.AddToScheme(scheme))
 	utilruntime.Must(swiftv1.AddToScheme(scheme))
 	utilruntime.Must(clientv1.AddToScheme(scheme))
+	utilruntime.Must(redisv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
