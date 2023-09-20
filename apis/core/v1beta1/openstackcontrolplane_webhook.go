@@ -312,9 +312,11 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// so we aren't able to add and call a Default function on its spec.
 	// Instead we just directly set the defaults we need.
 	for key, template := range r.Spec.Rabbitmq.Templates {
-		template.Image = openstackControlPlaneDefaults.RabbitMqImageURL
-		// By-value copy, need to update
-		r.Spec.Rabbitmq.Templates[key] = template
+		if template.Image == "" {
+			template.Image = openstackControlPlaneDefaults.RabbitMqImageURL
+			// By-value copy, need to update
+			r.Spec.Rabbitmq.Templates[key] = template
+		}
 	}
 
 	// Cinder
