@@ -98,7 +98,6 @@ RUN /workspace/csv-merger \
   --ovn-csv=/manifests/ovn-operator.clusterserviceversion.yaml \
   --neutron-csv=/manifests/neutron-operator.clusterserviceversion.yaml \
   --ansibleee-csv=/manifests/openstack-ansibleee-operator.clusterserviceversion.yaml \
-  --dataplane-csv=/manifests/dataplane-operator.clusterserviceversion.yaml \
   --nova-csv=/manifests/nova-operator.clusterserviceversion.yaml \
   --heat-csv=/manifests/heat-operator.clusterserviceversion.yaml \
   --ironic-csv=/manifests/ironic-operator.clusterserviceversion.yaml \
