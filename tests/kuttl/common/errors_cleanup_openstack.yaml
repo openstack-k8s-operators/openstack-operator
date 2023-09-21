@@ -182,3 +182,43 @@ metadata:
     openshift.io/scc: anyuid
   labels:
     service: neutron
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: cinder-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: glance-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: keystone-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: neutron-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nova-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nova-novncproxy-cell1-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: placement-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: swift-public
