@@ -43,6 +43,67 @@ spec:
         - --leader-elect
         image: controller:latest
         name: manager
+        env:
+          - name: test1
+            value: test1
+          - name: test2
+            value: test2
+          - name: test3
+            value: test3
+          - name: test4
+            value: test4
+          - name: test5
+            value: test5
+          - name: test6
+            value: test6
+          - name: test7
+            value: test7
+          - name: test8
+            value: test8
+          - name: test9
+            value: test9
+          - name: test10
+            value: test10
+          - name: test11
+            value: test11
+          - name: test12
+            value: test12
+          - name: test13
+            value: test13
+          - name: test14
+            value: test14
+          - name: test15
+            value: test15
+          - name: test16
+            value: test16
+          - name: test17
+            value: test17
+          - name: test18
+            value: test18
+          - name: test19
+            value: test19
+          - name: test20
+            value: test20
+          - name: test21
+            value: test21
+          - name: test22
+            value: test22
+          - name: test23
+            value: test23
+          - name: test24
+            value: test24
+          - name: test25
+            value: test25
+          - name: test26
+            value: test26
+          - name: test27
+            value: test27
+          - name: test28
+            value: test28
+          - name: test29
+            value: test29
+          - name: test30
+            value: test30
         securityContext:
           allowPrivilegeEscalation: false
         # TODO(user): uncomment for common cases that do not require escalating privileges
