@@ -54,7 +54,7 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
     elif [[ "${IMAGEREGISTRY}" != "quay.io" ]]; then
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/ | jq -r .tags[].name | sort -u | grep $REF)
     else
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?filter_tag_name=like:$REF | jq -r .tags[].name)
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r .tags[].name)
     fi
 
     if [ -z "$SHA" ]; then
