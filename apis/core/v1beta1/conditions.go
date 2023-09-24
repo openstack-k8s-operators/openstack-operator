@@ -33,14 +33,26 @@ const (
 	// OpenStackControlPlaneKeystoneAPIReadyCondition Status=True condition which indicates if KeystoneAPI is configured and operational
 	OpenStackControlPlaneKeystoneAPIReadyCondition condition.Type = "OpenStackControlPlaneKeystoneAPIReady"
 
+	// OpenStackControlPlaneExposeKeystoneAPIReadyCondition Status=True condition which indicates if KeystoneAPI is exposed via a route
+	OpenStackControlPlaneExposeKeystoneAPIReadyCondition condition.Type = "OpenStackControlPlaneExposeKeystoneAPIReady"
+
 	// OpenStackControlPlanePlacementAPIReadyCondition Status=True condition which indicates if PlacementAPI is configured and operational
 	OpenStackControlPlanePlacementAPIReadyCondition condition.Type = "OpenStackControlPlanePlacementAPIReady"
+
+	// OpenStackControlPlaneExposePlacementAPIReadyCondition Status=True condition which indicates if PlacementAPI is exposed via a route
+	OpenStackControlPlaneExposePlacementAPIReadyCondition condition.Type = "OpenStackControlPlaneExposePlacementAPIReady"
 
 	// OpenStackControlPlaneGlanceReadyCondition Status=True condition which indicates if Glance is configured and operational
 	OpenStackControlPlaneGlanceReadyCondition condition.Type = "OpenStackControlPlaneGlanceReady"
 
+	// OpenStackControlPlaneExposeGlanceReadyCondition Status=True condition which indicates if Glance is exposed via a route
+	OpenStackControlPlaneExposeGlanceReadyCondition condition.Type = "OpenStackControlPlaneExposeGlanceReady"
+
 	// OpenStackControlPlaneCinderReadyCondition Status=True condition which indicates if Cinder is configured and operational
 	OpenStackControlPlaneCinderReadyCondition condition.Type = "OpenStackControlPlaneCinderReady"
+
+	// OpenStackControlPlaneExposeCinderReadyCondition Status=True condition which indicates if Cinder is exposed via a route
+	OpenStackControlPlaneExposeCinderReadyCondition condition.Type = "OpenStackControlPlaneExposeCinderReady"
 
 	// OpenStackControlPlaneOVNReadyCondition Status=True condition which indicates if OVN is configured and operational
 	OpenStackControlPlaneOVNReadyCondition condition.Type = "OpenStackControlPlaneOVNReady"
@@ -48,17 +60,29 @@ const (
 	// OpenStackControlPlaneNeutronReadyCondition Status=True condition which indicates if Neutron is configured and operational
 	OpenStackControlPlaneNeutronReadyCondition condition.Type = "OpenStackControlPlaneNeutronReady"
 
+	// OpenStackControlPlaneExposeNeutronReadyCondition Status=True condition which indicates if Neutron is exposed via a route
+	OpenStackControlPlaneExposeNeutronReadyCondition condition.Type = "OpenStackControlPlaneExposeNeutronReady"
+
 	// OpenStackControlPlaneNovaReadyCondition Status=True condition which indicates if Nova is configured and operational
 	OpenStackControlPlaneNovaReadyCondition condition.Type = "OpenStackControlPlaneNovaReady"
 
+	// OpenStackControlPlaneExposeNovaReadyCondition Status=True condition which indicates if Nova is exposed via a route
+	OpenStackControlPlaneExposeNovaReadyCondition condition.Type = "OpenStackControlPlaneExposeNovaReady"
+
 	// OpenStackControlPlaneHeatReadyCondition Status=True condition which indicates if Heat is configured and operational
 	OpenStackControlPlaneHeatReadyCondition condition.Type = "OpenStackControlPlaneHeatReady"
+
+	// OpenStackControlPlaneExposeHeatReadyCondition Status=True condition which indicates if Heat is exposed via a route
+	OpenStackControlPlaneExposeHeatReadyCondition condition.Type = "OpenStackControlPlaneExposeHeatReady"
 
 	// OpenStackControlPlaneIronicReadyCondition Status=True condition which indicates if Ironic is configured and operational
 	OpenStackControlPlaneIronicReadyCondition condition.Type = "OpenStackControlPlaneIronicReady"
 
 	// OpenStackControlPlaneHorizonReadyCondition Status=True condition which indicates if Horizon is configured and operational
 	OpenStackControlPlaneHorizonReadyCondition condition.Type = "OpenStackControlPlaneHorizonReady"
+
+	// OpenStackControlPlaneExposeHorizonReadyCondition Status=True condition which indicates if Horizon is exposed via a route
+	OpenStackControlPlaneExposeHorizonReadyCondition condition.Type = "OpenStackControlPlaneExposeHorizonReady"
 
 	// OpenStackControlPlaneClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackControlPlaneClientReadyCondition condition.Type = "OpenStackControlPlaneClientReady"
@@ -69,11 +93,17 @@ const (
 	// OpenStackControlPlaneManilaReadyCondition Status=True condition which indicates if Manila is configured and operational
 	OpenStackControlPlaneManilaReadyCondition condition.Type = "OpenStackControlPlaneManilaReady"
 
+	// OpenStackControlPlaneExposeManilaReadyCondition Status=True condition which indicates if Manila is exposed via a route
+	OpenStackControlPlaneExposeManilaReadyCondition condition.Type = "OpenStackControlPlaneExposeManilaReady"
+
 	// OpenStackControlPlaneDNSReadyCondition Status=True condition which indicates if DNSMasq is configured and operational
 	OpenStackControlPlaneDNSReadyCondition condition.Type = "OpenStackControlPlaneDNSReadyCondition"
 
 	// OpenStackControlPlaneCeilometerReadyCondition Status=True condition which indicates if OpenStack Ceilometer service is configured and operational
 	OpenStackControlPlaneCeilometerReadyCondition condition.Type = "OpenStackControlPlaneCeilometerReady"
+
+	// OpenStackControlPlaneServiceOverrideReadyCondition Status=True condition which indicates if OpenStack service override has created ok
+	OpenStackControlPlaneServiceOverrideReadyCondition condition.Type = "OpenStackControlPlaneServiceOverrideReady"
 
 	// OpenStackControlPlaneManilaReadyInitMessage
 	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
@@ -89,6 +119,9 @@ const (
 
 	// OpenStackControlPlaneSwiftReadyCondition Status=True condition which indicates if Swift is configured and operational
 	OpenStackControlPlaneSwiftReadyCondition condition.Type = "OpenStackControlPlaneSwiftReady"
+
+	// OpenStackControlPlaneExposeSwiftReadyCondition Status=True condition which indicates if Swift is exposed via a route
+	OpenStackControlPlaneExposeSwiftReadyCondition condition.Type = "OpenStackControlPlaneExposeSwiftReady"
 
 	// OpenStackControlPlaneSwiftReadyInitMessage
 	OpenStackControlPlaneSwiftReadyInitMessage = "OpenStackControlPlane Swift not started"
@@ -107,7 +140,6 @@ const (
 
 	// OpenStackControlPlaneRedisReadyCondition Status=True condition which indicates if Redis is configured and operational
 	OpenStackControlPlaneRedisReadyCondition condition.Type = "OpenStackControlPlaneRedisReady"
-
 )
 
 // OpenStackControlPlane Reasons used by API objects.
@@ -338,4 +370,12 @@ const (
 	// OpenStackControlPlaneRedisReadyErrorMessage
 	OpenStackControlPlaneRedisReadyErrorMessage = "OpenStackControlPlane Redis error occured %s"
 
+	// OpenStackControlPlaneExposeServiceReadyInitMessage
+	OpenStackControlPlaneExposeServiceReadyInitMessage = "OpenStackControlPlane %s exposing service %s not started"
+
+	// OpenStackControlPlaneExposeServiceReadyErrorMessage
+	OpenStackControlPlaneExposeServiceReadyErrorMessage = "OpenStackControlPlane %s exposing service via route %s error occured %s"
+
+	// OpenStackControlPlaneExposeServiceReadyMessage
+	OpenStackControlPlaneExposeServiceReadyMessage = "OpenStackControlPlane %s service exposed"
 )

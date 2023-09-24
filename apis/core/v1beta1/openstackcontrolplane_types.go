@@ -23,22 +23,23 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
-	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
-	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -190,9 +191,21 @@ type KeystoneSection struct {
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Keystone service
 	Template keystonev1.KeystoneAPISpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+}
+
+// Override to override the generated manifest of several child resources.
+type Override struct {
+	// +kubebuilder:validation:Optional
+	// Route overrides to use when creating the public service endpoint
+	Route *route.OverrideSpec `json:"route,omitempty"`
 }
 
 // PlacementSection defines the desired state of Placement service
@@ -207,6 +220,11 @@ type PlacementSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Placement API
 	Template placementv1.PlacementAPISpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // GlanceSection defines the desired state of Glance service
@@ -221,6 +239,11 @@ type GlanceSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Glance Service
 	Template glancev1.GlanceSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // CinderSection defines the desired state of Cinder service
@@ -235,6 +258,11 @@ type CinderSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Cinder Resources
 	Template cinderv1.CinderSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // MariadbSection defines the desired state of MariaDB service
@@ -299,39 +327,6 @@ type RabbitmqTemplate struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Overrides to use when creating the Rabbitmq clusters
 	rabbitmqv1.RabbitmqClusterSpec `json:",inline"`
-
-	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// ExternalEndpoint, expose a VIP via MetalLB on the pre-created address pool
-	ExternalEndpoint *MetalLBConfig `json:"externalEndpoint,omitempty"`
-}
-
-// MetalLBConfig to configure the MetalLB loadbalancer service
-type MetalLBConfig struct {
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinLength=1
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// IPAddressPool expose VIP via MetalLB on the IPAddressPool
-	IPAddressPool string `json:"ipAddressPool"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// SharedIP if true, VIP/VIPs get shared with multiple services
-	SharedIP bool `json:"sharedIP"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=""
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// SharedIPKey specifies the sharing key which gets set as the annotation on the LoadBalancer service.
-	// Services which share the same VIP must have the same SharedIPKey. Defaults to the IPAddressPool if
-	// SharedIP is true, but no SharedIPKey specified.
-	SharedIPKey string `json:"sharedIPKey"`
-
-	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// LoadBalancerIPs, request given IPs from the pool if available. Using a list to allow dual stack (IPv4/IPv6) support
-	LoadBalancerIPs []string `json:"loadBalancerIPs"`
 }
 
 // OvnSection defines the desired state of OVN services
@@ -376,8 +371,13 @@ type NeutronSection struct {
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// Template - Overrides to use when creating the Neutron service
+	// Template - Overrides to use when creating the Neutron Service
 	Template neutronv1.NeutronAPISpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // NovaSection defines the desired state of Nova services
@@ -392,6 +392,24 @@ type NovaSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Nova services
 	Template novav1.NovaSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// CellOverride, provides the ability to override the generated manifest of several child resources
+	// for a nova cell. cell0 never have compute nodes and therefore it won't have a noVNCProxy deployed.
+	// Providing an override for cell0 noVNCProxy does not have an effect.
+	CellOverride map[string]NovaCellOverrideSpec `json:"cellOverride,omitempty"`
+}
+
+// NovaCellOverrideSpec to override the generated manifest of several child resources.
+type NovaCellOverrideSpec struct {
+	// +kubebuilder:validation:Optional
+	NoVNCProxy Override `json:"noVNCProxy,omitempty"`
 }
 
 // HeatSection defines the desired state of Heat services
@@ -406,6 +424,16 @@ type HeatSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Heat services
 	Template heatv1.HeatSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// CnfAPIOverride, provides the ability to override the generated manifest of several child resources.
+	CnfAPIOverride Override `json:"cnfAPIOverride,omitempty"`
 }
 
 // IronicSection defines the desired state of Ironic services
@@ -433,6 +461,11 @@ type ManilaSection struct {
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating Manila Resources
 	Template manilav1.ManilaSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // HorizonSection defines the desired state of Horizon services
@@ -445,6 +478,11 @@ type HorizonSection struct {
 	// +kubebuilder:validation:Optional
 	// Template - Overrides to use when creating the Horizon services
 	Template horizonv1.HorizonSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
 // CeilometerSection defines the desired state of OpenStack Telemetry services
@@ -473,6 +511,11 @@ type SwiftSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Swift Resources
 	Template swiftv1.SwiftSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// ProxyOverride, provides the ability to override the generated manifest of several child resources.
+	ProxyOverride Override `json:"proxyOverride,omitempty"`
 }
 
 // OctaviaSection defines the desired state of the Octavia service
@@ -501,7 +544,6 @@ type RedisSection struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Redis Resources
 	Templates map[string]redisv1.RedisSpec `json:"templates,omitempty"`
-
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

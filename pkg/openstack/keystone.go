@@ -4,14 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -29,12 +34,61 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 			return res, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition)
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeKeystoneAPIReadyCondition)
 		return ctrl.Result{}, nil
+	}
+
+	// add selector to service overrides
+	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
+		if instance.Spec.Keystone.Template.Override.Service == nil {
+			instance.Spec.Keystone.Template.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
+		}
+		instance.Spec.Keystone.Template.Override.Service[endpointType] =
+			AddServiceComponentLabel(
+				instance.Spec.Keystone.Template.Override.Service[endpointType],
+				keystoneAPI.Name)
+	}
+
+	// When component services got created check if there is the need to create a route
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "keystone", Namespace: instance.Namespace}, keystoneAPI); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if keystoneAPI.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
+		svcs, err := service.GetServicesListWithLabel(
+			ctx,
+			helper,
+			instance.Namespace,
+			map[string]string{common.AppSelector: keystoneAPI.Name},
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		var ctrlResult reconcile.Result
+		instance.Spec.Keystone.Template.Override.Service, ctrlResult, err = EnsureRoute(
+			ctx,
+			instance,
+			helper,
+			keystoneAPI,
+			svcs,
+			instance.Spec.Keystone.Template.Override.Service,
+			instance.Spec.Keystone.APIOverride.Route,
+			corev1beta1.OpenStackControlPlaneExposeKeystoneAPIReadyCondition,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
 	}
 
 	helper.GetLogger().Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec)
+
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -76,5 +130,4 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	}
 
 	return ctrl.Result{}, nil
-
 }
