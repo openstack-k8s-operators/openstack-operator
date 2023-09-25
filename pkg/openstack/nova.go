@@ -154,7 +154,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				nova,
 				svcs,
 				map[service.Endpoint]service.RoutedOverrideSpec{
-					service.EndpointInternal: *cellTemplate.NoVNCProxyServiceTemplate.Override.Service,
+					service.EndpointPublic: *cellTemplate.NoVNCProxyServiceTemplate.Override.Service,
 				},
 				instance.Spec.Nova.CellOverride[cellName].NoVNCProxy.Route,
 				corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
@@ -165,7 +165,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				return ctrlResult, nil
 			}
 
-			cellTemplate.NoVNCProxyServiceTemplate.Override.Service = ptr.To(routedOverrideSpec[service.EndpointInternal])
+			cellTemplate.NoVNCProxyServiceTemplate.Override.Service = ptr.To(routedOverrideSpec[service.EndpointPublic])
 
 			instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
 
