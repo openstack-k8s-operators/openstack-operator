@@ -14,7 +14,9 @@ import (
 
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -45,6 +47,13 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			AddServiceComponentLabel(
 				instance.Spec.Manila.Template.ManilaAPI.Override.Service[endpointType],
 				manila.Name)
+	}
+
+	// When component services got created check if there is the need to create a route
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "manila", Namespace: instance.Namespace}, manila); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
 	}
 
 	// When component services got created check if there is the need to create a route
