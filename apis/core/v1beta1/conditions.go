@@ -78,6 +78,9 @@ const (
 	// OpenStackControlPlaneIronicReadyCondition Status=True condition which indicates if Ironic is configured and operational
 	OpenStackControlPlaneIronicReadyCondition condition.Type = "OpenStackControlPlaneIronicReady"
 
+	// OpenStackControlPlaneExposeIronicReadyCondition Status=True condition which indicates if Ironic is exposed via a route
+	OpenStackControlPlaneExposeIronicReadyCondition condition.Type = "OpenStackControlPlaneExposeIronicReady"
+
 	// OpenStackControlPlaneHorizonReadyCondition Status=True condition which indicates if Horizon is configured and operational
 	OpenStackControlPlaneHorizonReadyCondition condition.Type = "OpenStackControlPlaneHorizonReady"
 
@@ -140,6 +143,9 @@ const (
 
 	// OpenStackControlPlaneRedisReadyCondition Status=True condition which indicates if Redis is configured and operational
 	OpenStackControlPlaneRedisReadyCondition condition.Type = "OpenStackControlPlaneRedisReady"
+
+	// OpenStackControlPlaneExposeOctaviaReadyCondition Status=True condition which indicates if Octavia is exposed via a route
+	OpenStackControlPlaneExposeOctaviaReadyCondition condition.Type = "OpenStackControlPlaneExposeOctaviaReady"
 )
 
 // OpenStackControlPlane Reasons used by API objects.

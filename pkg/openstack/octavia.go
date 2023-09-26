@@ -20,14 +20,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -45,7 +50,55 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			return res, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOctaviaReadyCondition)
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeOctaviaReadyCondition)
 		return ctrl.Result{}, nil
+	}
+
+	// add selector to service overrides
+	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
+		if instance.Spec.Octavia.Template.OctaviaAPI.Override.Service == nil {
+			instance.Spec.Octavia.Template.OctaviaAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
+		}
+		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service[endpointType] =
+			AddServiceComponentLabel(
+				instance.Spec.Octavia.Template.OctaviaAPI.Override.Service[endpointType],
+				octavia.Name)
+	}
+
+	// When component services got created check if there is the need to create a route
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "octavia", Namespace: instance.Namespace}, octavia); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if octavia.Status.Conditions.IsTrue(condition.ReadyCondition) {
+		svcs, err := service.GetServicesListWithLabel(
+			ctx,
+			helper,
+			instance.Namespace,
+			map[string]string{common.AppSelector: octavia.Name},
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		var ctrlResult reconcile.Result
+		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service, ctrlResult, err = EnsureRoute(
+			ctx,
+			instance,
+			helper,
+			octavia,
+			svcs,
+			instance.Spec.Octavia.Template.OctaviaAPI.Override.Service,
+			instance.Spec.Octavia.APIOverride.Route,
+			corev1beta1.OpenStackControlPlaneExposeOctaviaReadyCondition,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
 	}
 
 	helper.GetLogger().Info("Reconciling Octavia", "Octavia.Namespace", instance.Namespace, "Octavia.Name", octavia.Name)
