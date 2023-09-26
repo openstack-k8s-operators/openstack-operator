@@ -29,7 +29,7 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.1.1-0.20230927115929-d73f6b7ba241
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.1-0.20230928061421-52a9feee12c9
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.1-0.20230927140521-cf7134b9d873
-	github.com/operator-framework/api v0.17.3
+	github.com/operator-framework/api v0.17.6
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	go.uber.org/zap v1.26.0
 	k8s.io/api v0.27.2
