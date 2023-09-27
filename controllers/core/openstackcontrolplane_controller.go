@@ -45,7 +45,7 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
-	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
+	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -327,7 +327,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&cinderv1.Cinder{}).
 		Owns(&manilav1.Manila{}).
 		Owns(&swiftv1.Swift{}).
-		Owns(&rabbitmqv1.RabbitmqCluster{}).
+		Owns(&rabbitmqv2.RabbitmqCluster{}).
 		Owns(&ovnv1.OVNDBCluster{}).
 		Owns(&ovnv1.OVNNorthd{}).
 		Owns(&ovnv1.OVNController{}).

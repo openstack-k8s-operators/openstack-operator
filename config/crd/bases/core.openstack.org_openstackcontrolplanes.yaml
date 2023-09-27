@@ -9717,6 +9717,11 @@ spec:
                                   type: array
                               type: object
                           type: object
+                        delayStartSeconds:
+                          default: 30
+                          format: int32
+                          minimum: 0
+                          type: integer
                         image:
                           type: string
                         imagePullSecrets:
@@ -9847,6 +9852,16 @@ spec:
                                   type: object
                                 spec:
                                   properties:
+                                    minReadySeconds:
+                                      format: int32
+                                      type: integer
+                                    persistentVolumeClaimRetentionPolicy:
+                                      properties:
+                                        whenDeleted:
+                                          type: string
+                                        whenScaled:
+                                          type: string
+                                      type: object
                                     podManagementPolicy:
                                       type: string
                                     replicas:
@@ -13292,6 +13307,12 @@ spec:
                           type: object
                         secretBackend:
                           properties:
+                            externalSecret:
+                              properties:
+                                name:
+                                  type: string
+                              type: object
+                              x-kubernetes-map-type: atomic
                             vault:
                               properties:
                                 annotations:

@@ -9,7 +9,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	rabbitmqv1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
+	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
 	// Cannot use the following import due to linting error:
 	// Error: 	pkg/openstack/rabbitmq.go:10:2: use of internal package github.com/rabbitmq/cluster-operator/internal/status not allowed
@@ -90,7 +90,7 @@ func reconcileRabbitMQ(
 	name string,
 	spec corev1beta1.RabbitmqTemplate,
 ) (mqStatus, error) {
-	rabbitmq := &rabbitmqv1.RabbitmqCluster{
+	rabbitmq := &rabbitmqv2.RabbitmqCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: instance.Namespace,
@@ -106,10 +106,10 @@ func reconcileRabbitMQ(
 		return mqReady, nil
 	}
 
-	defaultStatefulSet := rabbitmqv1.StatefulSet{
-		Spec: &rabbitmqv1.StatefulSetSpec{
-			Template: &rabbitmqv1.PodTemplateSpec{
-				EmbeddedObjectMeta: &rabbitmqv1.EmbeddedObjectMeta{},
+	defaultStatefulSet := rabbitmqv2.StatefulSet{
+		Spec: &rabbitmqv2.StatefulSetSpec{
+			Template: &rabbitmqv2.PodTemplateSpec{
+				EmbeddedObjectMeta: &rabbitmqv2.EmbeddedObjectMeta{},
 				Spec: &corev1.PodSpec{
 					SecurityContext: &corev1.PodSecurityContext{},
 					Containers: []corev1.Container{
