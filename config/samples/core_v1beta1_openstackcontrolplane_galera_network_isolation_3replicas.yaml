@@ -222,6 +222,7 @@ spec:
   rabbitmq:
     templates:
       rabbitmq:
+        replicas: 3
         override:
           service:
             metadata:
@@ -231,6 +232,7 @@ spec:
             spec:
               type: LoadBalancer
       rabbitmq-cell1:
+        replicas: 3
         override:
           service:
             metadata:

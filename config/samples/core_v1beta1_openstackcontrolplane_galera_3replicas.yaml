@@ -30,7 +30,7 @@ spec:
   rabbitmq:
     templates:
       rabbitmq:
-        replicas: 1
+        replicas: 3
         #resources:
         #  requests:
         #    cpu: 500m
@@ -39,7 +39,7 @@ spec:
         #    cpu: 800m
         #    memory: 1Gi
       rabbitmq-cell1:
-        replicas: 1
+        replicas: 3
   memcached:
     templates:
       memcached:
