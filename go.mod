@@ -9,7 +9,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.12.1
 	github.com/onsi/gomega v1.27.10
 	github.com/openstack-k8s-operators/cinder-operator/api v0.1.2-0.20230921082510-1b9a7de3d088
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230919085012-e89d5ef2fafd
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.1.1-0.20230928164440-a955424c43ef
 	github.com/openstack-k8s-operators/glance-operator/api v0.1.2-0.20230921081203-89164087dac9
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.1-0.20230920142821-e84784bede25
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.1-0.20230920143411-511d89a0e6cc
@@ -23,7 +23,7 @@ require (
 	github.com/openstack-k8s-operators/nova-operator/api v0.1.2-0.20230921152245-4a535c8f3e9a
 	github.com/openstack-k8s-operators/octavia-operator/api v0.0.0-20230926130236-dece63badbab
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.1-0.20230918170038-6c1275780727
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.1-0.20230915055858-ecb378f804c9
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.1-0.20230920132522-40a9ce5c4bf0
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230725141229-4ce90d0120fd
 	github.com/openstack-k8s-operators/ovn-operator/api v0.1.1-0.20230913151226-aab30786ed97
 	github.com/openstack-k8s-operators/placement-operator/api v0.1.1-0.20230920125340-3c99d09c7033
