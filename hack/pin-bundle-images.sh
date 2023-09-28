@@ -31,28 +31,31 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
         REF=$(git ls-remote https://${GIT_REPO} | grep ${REF} | awk 'NR==1{print $1}')
     fi
     GITHUB_USER=$(echo $MOD_PATH | sed -e 's|github.com/\(.*\)/.*-operator/.*$|\1|')
-    REPO_CURL_URL="https://quay.io/api/v1/repository/openstack-k8s-operators"
-    REPO_URL="quay.io/openstack-k8s-operators"
+    CURL_REGISTRY="quay.io"
+    REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/openstack-k8s-operators"
+    REPO_URL="${CURL_REGISTRY}/openstack-k8s-operators"
     if [[ "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ]]; then
         if [[ "$IMAGENAMESPACE" != "openstack-k8s-operators" || "${IMAGEREGISTRY}" != "quay.io" ]]; then
             REPO_URL="${IMAGEREGISTRY}/${IMAGENAMESPACE}"
+            CURL_REGISTRY="${IMAGEREGISTRY}"
             # Quay registry v2 api does not return all the tags that's why keeping v1 for quay and v2
             # for local registry
             if [[ ${LOCAL_REGISTRY} -eq 1 ]]; then
-                REPO_CURL_URL="${IMAGEREGISTRY}/v2/${IMAGENAMESPACE}"
+                REPO_CURL_URL="${CURL_REGISTRY}/v2/${IMAGENAMESPACE}"
             else
-                REPO_CURL_URL="https://${IMAGEREGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
+                REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
             fi
         else
-            REPO_CURL_URL="https://quay.io/api/v1/repository/${GITHUB_USER}"
-            REPO_URL="quay.io/${GITHUB_USER}"
+            REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${GITHUB_USER}"
+            REPO_URL="${CURL_REGISTRY}/${GITHUB_USER}"
         fi
     fi
 
     if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
-    elif [[ "${IMAGEREGISTRY}" != "quay.io" ]]; then
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/ | jq -r .tags[].name | sort -u | grep $REF)
+    elif [[ "${CURL_REGISTRY}" != "quay.io" ]]; then
+        # quay.rdoproject.io doesn't support filter_tag_name, so increase limit to 100
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?limit=100 | jq -r .tags[].name | sort -u | grep $REF)
     else
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r .tags[].name)
     fi
