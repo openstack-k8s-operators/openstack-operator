@@ -197,6 +197,9 @@ spec:
       route: {}
     template:
       manilaAPI:
+        customServiceConfig: |
+          [DEFAULT]
+          enabled_share_protocols=nfs,cephfs
         replicas: 1
         networkAttachments:
         - internalapi
