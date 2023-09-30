@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/onsi/ginkgo/v2 v2.12.1
-	github.com/onsi/gomega v1.27.10
+	github.com/onsi/gomega v1.28.0
 	github.com/openstack-k8s-operators/cinder-operator/api v0.1.2-0.20230927112537-42169dd3965b
 	github.com/openstack-k8s-operators/glance-operator/api v0.1.2-0.20230928094722-adaea00db401
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.1-0.20230928022009-63f4c93693b8
