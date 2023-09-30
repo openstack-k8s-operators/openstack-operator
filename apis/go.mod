@@ -5,8 +5,8 @@ go 1.19
 require (
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.10
-	github.com/openstack-k8s-operators/cinder-operator/api v0.1.0
-	github.com/openstack-k8s-operators/glance-operator/api v0.1.0
+	github.com/openstack-k8s-operators/cinder-operator/api v0.1.1
+	github.com/openstack-k8s-operators/glance-operator/api v0.1.1
 	github.com/openstack-k8s-operators/heat-operator/api v0.1.0
 	github.com/openstack-k8s-operators/horizon-operator/api v0.1.0
 	github.com/openstack-k8s-operators/infra-operator/apis v0.1.0
@@ -16,13 +16,13 @@ require (
 	github.com/openstack-k8s-operators/manila-operator/api v0.1.0
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.0
 	github.com/openstack-k8s-operators/neutron-operator/api v0.1.0
-	github.com/openstack-k8s-operators/nova-operator/api v0.1.0
+	github.com/openstack-k8s-operators/nova-operator/api v0.1.1
 	github.com/openstack-k8s-operators/ovn-operator/api v0.1.0
 	github.com/openstack-k8s-operators/placement-operator/api v0.1.0
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.0
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.0
 	github.com/rabbitmq/cluster-operator v1.14.0
-	k8s.io/apimachinery v0.26.7
+	k8s.io/apimachinery v0.26.8
 	sigs.k8s.io/controller-runtime v0.14.6
 )
 
@@ -30,9 +30,8 @@ require (
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
+	go.uber.org/zap v1.25.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 )
@@ -85,13 +84,13 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.26.7
-	k8s.io/apiextensions-apiserver v0.26.7 //indirect
-	k8s.io/client-go v0.26.7
-	k8s.io/component-base v0.26.7 //indirect
+	k8s.io/api v0.26.8
+	k8s.io/apiextensions-apiserver v0.26.8 //indirect
+	k8s.io/client-go v0.26.8
+	k8s.io/component-base v0.26.8 //indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230515203736-54b630e78af5 //indirect
-	k8s.io/utils v0.0.0-20230711102312-30195339c3c7 //indirect
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b //indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd //indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
