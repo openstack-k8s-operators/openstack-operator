@@ -33,27 +33,7 @@ import (
 	csvv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// TODO: get rid of this if/when RelatedImages officially appears in github.com/operator-framework/api/pkg/operators/v1alpha1/
-type relatedImage struct {
-	Name string `json:"name"`
-	Ref  string `json:"image"`
-}
-
-type clusterServiceVersionSpecExtended struct {
-	csvv1alpha1.ClusterServiceVersionSpec
-	RelatedImages []relatedImage `json:"relatedImages,omitempty"`
-}
-
-type clusterServiceVersionExtended struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata"`
-
-	Spec   clusterServiceVersionSpecExtended       `json:"spec"`
-	Status csvv1alpha1.ClusterServiceVersionStatus `json:"status"`
-}
 
 func getEnvsFromFile(filename string) []v1.EnvVar {
 	csvBytes, err := os.ReadFile(filename)
@@ -166,13 +146,14 @@ func main() {
 
 	// BaseCSV is built on the bundle/manifests/openstack-operator.clusterserviceversion.yaml from this repo
 	csvBase := getCSVBase(*baseCsv)
-	csvExtended := clusterServiceVersionExtended{
+	csvNew := csvv1alpha1.ClusterServiceVersion{
 		TypeMeta:   csvBase.TypeMeta,
 		ObjectMeta: csvBase.ObjectMeta,
-		Spec:       clusterServiceVersionSpecExtended{ClusterServiceVersionSpec: csvBase.Spec},
+		Spec:       csvBase.Spec,
 		Status:     csvBase.Status}
 
 	installStrategyBase := csvBase.Spec.InstallStrategy.StrategySpec
+	csvNew.Spec.RelatedImages = csvBase.Spec.RelatedImages
 
 	envVarList := []v1.EnvVar{}
 	if len(*importEnvFiles) > 0 {
@@ -206,10 +187,11 @@ func main() {
 			installStrategyBase.DeploymentSpecs = append(installStrategyBase.DeploymentSpecs, csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs...)
 			installStrategyBase.ClusterPermissions = append(installStrategyBase.ClusterPermissions, csvStruct.Spec.InstallStrategy.StrategySpec.ClusterPermissions...)
 			installStrategyBase.Permissions = append(installStrategyBase.Permissions, csvStruct.Spec.InstallStrategy.StrategySpec.Permissions...)
+			csvNew.Spec.RelatedImages = append(csvNew.Spec.RelatedImages, csvStruct.Spec.RelatedImages...)
 
 			for _, owned := range csvStruct.Spec.CustomResourceDefinitions.Owned {
-				csvExtended.Spec.CustomResourceDefinitions.Owned = append(
-					csvExtended.Spec.CustomResourceDefinitions.Owned,
+				csvNew.Spec.CustomResourceDefinitions.Owned = append(
+					csvNew.Spec.CustomResourceDefinitions.Owned,
 					csvv1alpha1.CRDDescription{
 						Name:        owned.Name,
 						Version:     owned.Version,
@@ -221,7 +203,7 @@ func main() {
 			}
 
 			if *almExamples {
-				csvBaseAlmString := csvExtended.Annotations["alm-examples"]
+				csvBaseAlmString := csvNew.Annotations["alm-examples"]
 				csvStructAlmString := csvStruct.Annotations["alm-examples"]
 				var baseAlmCrs []interface{}
 				var structAlmCrs []interface{}
@@ -237,9 +219,9 @@ func main() {
 				if err != nil {
 					exitWithError(err.Error())
 				}
-				csvExtended.Annotations["alm-examples"] = string(almB)
+				csvNew.Annotations["alm-examples"] = string(almB)
 			}
-			csvExtended.Spec.WebhookDefinitions = append(csvExtended.Spec.WebhookDefinitions, csvStruct.Spec.WebhookDefinitions...)
+			csvNew.Spec.WebhookDefinitions = append(csvNew.Spec.WebhookDefinitions, csvStruct.Spec.WebhookDefinitions...)
 		}
 
 	}
@@ -257,7 +239,7 @@ func main() {
 	// by default we hide all CRDs in the Console
 	hiddenCrds := []string{}
 	visibleCrds := strings.Split(*visibleCRDList, ",")
-	for _, owned := range csvExtended.Spec.CustomResourceDefinitions.Owned {
+	for _, owned := range csvNew.Spec.CustomResourceDefinitions.Owned {
 		found := false
 		for _, name := range visibleCrds {
 			if owned.Name == name {
@@ -275,39 +257,39 @@ func main() {
 	if err != nil {
 		exitWithError(err.Error())
 	}
-	csvExtended.Annotations["operators.operatorframework.io/internal-objects"] = string(hiddenCrdsJ)
+	csvNew.Annotations["operators.operatorframework.io/internal-objects"] = string(hiddenCrdsJ)
 
-	csvExtended.Spec.InstallStrategy.StrategyName = "deployment"
-	csvExtended.Spec.InstallStrategy = csvv1alpha1.NamedInstallStrategy{
+	csvNew.Spec.InstallStrategy.StrategyName = "deployment"
+	csvNew.Spec.InstallStrategy = csvv1alpha1.NamedInstallStrategy{
 		StrategyName: "deployment",
 		StrategySpec: installStrategyBase,
 	}
 
 	if csvVersion != "" {
-		csvExtended.Spec.Version = version.OperatorVersion{
+		csvNew.Spec.Version = version.OperatorVersion{
 			Version: semver.MustParse(csvVersion),
 		}
-		csvExtended.Name = strings.Replace(csvExtended.Name, "0.0.1", csvVersion, 1)
+		csvNew.Name = strings.Replace(csvNew.Name, "0.0.1", csvVersion, 1)
 	}
 
 	if *csvOverrides != "" {
 		csvOBytes := []byte(*csvOverrides)
 
-		csvO := &clusterServiceVersionExtended{}
+		csvO := &csvv1alpha1.ClusterServiceVersion{}
 
 		err := yaml.Unmarshal(csvOBytes, csvO)
 		if err != nil {
 			exitWithError(err.Error())
 		}
 
-		err = mergo.Merge(&csvExtended, csvO, mergo.WithOverride)
+		err = mergo.Merge(&csvNew, csvO, mergo.WithOverride)
 		if err != nil {
 			exitWithError(err.Error())
 		}
 
 	}
 
-	err = util.MarshallObject(csvExtended, os.Stdout)
+	err = util.MarshallObject(csvNew, os.Stdout)
 	if err != nil {
 		exitWithError(err.Error())
 	}
