@@ -34,7 +34,7 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
     CURL_REGISTRY="quay.io"
     REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/openstack-k8s-operators"
     REPO_URL="${CURL_REGISTRY}/openstack-k8s-operators"
-    if [[ "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ]]; then
+    if [[ "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == *"$IMAGEBASE"* ]]; then
         if [[ "$IMAGENAMESPACE" != "openstack-k8s-operators" || "${IMAGEREGISTRY}" != "quay.io" ]]; then
             REPO_URL="${IMAGEREGISTRY}/${IMAGENAMESPACE}"
             CURL_REGISTRY="${IMAGEREGISTRY}"
@@ -51,7 +51,7 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
         fi
     fi
 
-    if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
+    if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == *"$IMAGEBASE"* ) ]]; then
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
     elif [[ "${CURL_REGISTRY}" != "quay.io" ]]; then
         # quay.rdoproject.io doesn't support filter_tag_name, so increase limit to 100
