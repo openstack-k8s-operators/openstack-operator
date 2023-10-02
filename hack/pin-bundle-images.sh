@@ -22,7 +22,7 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
     fi
     MOD_VERSION=$(go list -mod=readonly -m -json all | jq -r ". | select(.Path | contains(\"openstack\")) | .Replace // . | select( .Path == \"$MOD_PATH\") | .Version")
 
-    BASE=$(echo $MOD_PATH | sed -e 's|github.com/.*/\(.*\)-operator/.*|\1|')
+    BASE=$(echo $MOD_PATH | awk -F'/' '{ sub( "-operator", "", $3 ); print $3 }')
 
     GIT_REPO=${MOD_PATH%"/apis"}
     GIT_REPO=${GIT_REPO%"/api"}
