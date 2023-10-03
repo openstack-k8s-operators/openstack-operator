@@ -2362,6 +2362,9 @@ spec:
                         type: string
                       debug:
                         properties:
+                          dbPurge:
+                            default: false
+                            type: boolean
                           dbSync:
                             default: false
                             type: boolean
@@ -8510,6 +8513,10 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -8650,6 +8657,10 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -8741,6 +8752,10 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -8832,6 +8847,10 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           nodeSelector:
                             additionalProperties:
                               type: string
