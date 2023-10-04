@@ -193,6 +193,7 @@ spec:
               type: LoadBalancer
       secret: osp-secret
   manila:
+    enabled: false
     apiOverride:
       route: {}
     template:
