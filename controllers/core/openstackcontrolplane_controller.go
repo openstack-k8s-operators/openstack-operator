@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
@@ -354,5 +355,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&redisv1.Redis{}).
 		Owns(&octaviav1.Octavia{}).
 		Owns(&routev1.Route{}).
+		Owns(&certmgrv1.Issuer{}).
+		Owns(&certmgrv1.Certificate{}).
 		Complete(r)
 }

@@ -14,7 +14,7 @@ require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231017110713-7b1a1e54bd46
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231024141124-a219eee17f6c
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20231017114157-49522e78f991
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.0
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20231020162407-336d5231e505
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20231019125621-7c2a5a4a5186
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20231019131906-d371f09abbc6
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20231012052157-e3ff0e9c016d
@@ -97,13 +97,12 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace (
+replace ( //allow-merging
 	// pin to k8s 0.26.x for now
 	k8s.io/api => k8s.io/api v0.26.9
 	k8s.io/apimachinery => k8s.io/apimachinery v0.26.9
 	k8s.io/client-go => k8s.io/client-go v0.26.9
 	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.14.6
-
 )
 
 // mschuppert: map to latest commit from release-4.13 tag
