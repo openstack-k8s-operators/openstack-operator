@@ -17,8 +17,9 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231018060345-8518a89de1be
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231019064410-5c72e6381cbc
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231017110713-7b1a1e54bd46
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231006072650-7fe7fe16bcd1
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231011150636-e8a0540a3c32
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231019091705-f3aa3d057b0f
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231011150636-e8a0540a3c32
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20231017114157-49522e78f991
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.0
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20231019125621-7c2a5a4a5186
@@ -45,8 +46,10 @@ require (
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
+	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0 // indirect
 	github.com/metal3-io/baremetal-operator/apis v0.3.1 // indirect
 	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.2.0 // indirect
+	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	sigs.k8s.io/gateway-api v0.6.0 // indirect
 )
@@ -68,7 +71,7 @@ require (
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.3.1 // indirect
+	github.com/google/uuid v1.3.1
 	github.com/gophercloud/gophercloud v1.7.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -124,3 +127,5 @@ replace github.com/openstack-k8s-operators/openstack-operator/apis => ./apis
 // mschuppert: map to latest commit from release-4.13 tag
 // must consistent within modules and service operators
 replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7 //allow-merging
+
+replace github.com/openstack-k8s-operators/mariadb-operator/api => github.com/stuggi/mariadb-operator/api v0.0.0-20231020124743-f4336ffd2b7e
