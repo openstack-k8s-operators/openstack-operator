@@ -73,6 +73,12 @@ spec:
                         default:
                           service: CeilometerPassword
                         properties:
+                          aodhService:
+                            default: AodhPassword
+                            type: string
+                          database:
+                            default: AodhDatabasePassword
+                            type: string
                           service:
                             default: CeilometerPassword
                             type: string
