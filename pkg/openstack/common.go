@@ -220,6 +220,10 @@ func (rd *RouteDetails) CreateRoute(
 	owner metav1.Object,
 ) (ctrl.Result, error) {
 	// TODO TLS
+	routeOverrides := []route.OverrideSpec{}
+	if rd.RouteOverrideSpec != nil {
+		routeOverrides = append(routeOverrides, *rd.RouteOverrideSpec)
+	}
 	route, err := route.NewRoute(
 		route.GenericRoute(&route.GenericRouteDetails{
 			Name:           rd.RouteName,
@@ -229,7 +233,7 @@ func (rd *RouteDetails) CreateRoute(
 			TargetPortName: rd.ServiceSpec.Name,
 		}),
 		time.Duration(5)*time.Second,
-		rd.RouteOverrideSpec,
+		routeOverrides,
 	)
 	if err != nil {
 		return ctrl.Result{}, err
