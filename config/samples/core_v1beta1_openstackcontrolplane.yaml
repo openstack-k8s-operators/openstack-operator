@@ -10,9 +10,6 @@ spec:
       enabled: false
     publicEndpoints:
       enabled: true
-  openstackclient:
-    template:
-      containerImage: quay.io/mschuppe/openstack-openstackclient:current-podified
   keystone:
     template:
       databaseInstance: openstack

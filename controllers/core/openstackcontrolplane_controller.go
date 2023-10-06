@@ -31,6 +31,7 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	corev1 "k8s.io/api/core/v1"
 
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -328,6 +329,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1beta1.OpenStackControlPlane{}).
+		Owns(&corev1.Secret{}).
 		Owns(&mariadbv1.MariaDB{}).
 		Owns(&mariadbv1.Galera{}).
 		Owns(&memcachedv1.Memcached{}).
