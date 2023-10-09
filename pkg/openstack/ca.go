@@ -20,6 +20,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 
@@ -120,7 +121,45 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 				return ctrlResult, nil
 			}
 		} else {
-			// TODO get secret name from issuer and get ca.crt
+			customIssuerName := *instance.Spec.TLS.PublicEndpoints.Issuer
+			caSecretName, err := getCASecretFromIssuer(
+				ctx,
+				instance,
+				helper,
+				customIssuerName,
+			)
+			if err != nil {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					corev1.OpenStackControlPlaneCAReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					corev1.OpenStackControlPlaneCAReadyErrorMessage,
+					issuerReq.Kind,
+					customIssuerName,
+					err.Error()))
+
+				return ctrl.Result{}, err
+			}
+			caCert, ctrlResult, err = getCAFromSecret(
+				ctx,
+				instance,
+				helper,
+				caSecretName,
+			)
+			if err != nil {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					corev1.OpenStackControlPlaneCAReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					corev1.OpenStackControlPlaneCAReadyErrorMessage,
+					issuerReq.Kind,
+					customIssuerName,
+					err.Error()))
+
+				return ctrlResult, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
 		}
 
 		err = bundle.getCertsFromPEM(caCert)
@@ -322,13 +361,29 @@ func createRootCACertAndIssuer(
 	return caCert, ctrl.Result{}, nil
 }
 
+func getCASecretFromIssuer(
+	ctx context.Context,
+	instance *corev1.OpenStackControlPlane,
+	helper *helper.Helper,
+	issuerName string,
+) (string, error) {
+	issuer := &certmgrv1.Issuer{}
+
+	err := helper.GetClient().Get(ctx, types.NamespacedName{Name: issuerName, Namespace: instance.Namespace}, issuer)
+	if err != nil && !k8s_errors.IsNotFound(err) {
+		return "", err
+	}
+
+	return issuer.Spec.CA.SecretName, nil
+}
+
 func getCAFromSecret(
 	ctx context.Context,
 	instance *corev1.OpenStackControlPlane,
 	helper *helper.Helper,
-	caName string,
+	secretName string,
 ) ([]byte, ctrl.Result, error) {
-	caSecret, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, caName, time.Duration(5), "ca.crt")
+	caSecret, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, secretName, time.Duration(5), "ca.crt")
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1.OpenStackControlPlaneCAReadyCondition,
@@ -336,7 +391,7 @@ func getCAFromSecret(
 			condition.SeverityWarning,
 			corev1.OpenStackControlPlaneCAReadyErrorMessage,
 			"secret",
-			caName,
+			secretName,
 			err.Error()))
 
 		return nil, ctrlResult, err
