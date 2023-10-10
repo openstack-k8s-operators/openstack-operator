@@ -21,10 +21,19 @@ spec:
               sources:
               - secret:
                   name: ceph-conf-files
+          # Assumes the following PVC was created from glance-operator git repo
+          # config/samples/import_plugins/image_conversion/image_conversion_pvc.yaml
+          - name: image-import-staging-workspace
+            persistentVolumeClaim:
+              claimName: image-import-staging-workspace
+              readOnly: false
           mounts:
           - name: ceph
             mountPath: "/etc/ceph"
             readOnly: true
+          - name: image-import-staging-workspace
+            mountPath: /var/lib/glance/os_glance_staging_store/
+            readOnly: false
   dns:
     template:
       override:
@@ -92,6 +101,7 @@ spec:
       customServiceConfig: |
         [DEFAULT]
         enabled_backends = default_backend:rbd
+        enabled_import_methods=[web-download,glance-direct]
         [glance_store]
         default_backend = default_backend
         [default_backend]
@@ -99,6 +109,10 @@ spec:
         store_description = "RBD backend"
         rbd_store_pool = images
         rbd_store_user = openstack
+        [image_import_opts]
+        image_import_plugins = ['image_conversion']
+        [image_conversion]
+        output_format = raw
       storageClass: ""
       storageRequest: 10G
       glanceAPIInternal:
