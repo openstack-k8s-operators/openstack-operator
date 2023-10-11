@@ -1,9 +1,9 @@
 # openstack-operator
 
-This is the primary operator for OpenStack. It is a "meta" operator, meaning it
-serves to coordinate the other operators for OpenStack by watching and configuring
-their CustomResources (CRs). Additionally installing this operator will automatically
-install all required operator dependencies for installing/managing OpenStack.
+This is the primary operator for OpenStack's DNSaaS operator Designate. It is a "meta"
+operator, meaning it serves to coordinate the other operators for OpenStack by watching
+and configuring their CustomResources (CRs). Additionally installing this operator will
+ automatically install all required operator dependencies for installing/managing OpenStack.
 
 ## Description
 

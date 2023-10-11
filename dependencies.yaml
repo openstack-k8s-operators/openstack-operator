@@ -75,3 +75,7 @@ dependencies:
     value:
       packageName: octavia-operator
       version: ">=0.0.0"
+  - type: olm.package
+    value:
+      packageName: designate-operator
+      version: ">=0.0.0"
