@@ -1346,6 +1346,780 @@ spec:
                     - secret
                     type: object
                 type: object
+              designate:
+                properties:
+                  apiOverride:
+                    properties:
+                      route:
+                        properties:
+                          metadata:
+                            properties:
+                              annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          spec:
+                            properties:
+                              alternateBackends:
+                                items:
+                                  properties:
+                                    kind:
+                                      enum:
+                                      - Service
+                                      - ""
+                                      type: string
+                                    name:
+                                      type: string
+                                    weight:
+                                      format: int32
+                                      maximum: 256
+                                      minimum: 0
+                                      type: integer
+                                  type: object
+                                maxItems: 3
+                                type: array
+                              host:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              path:
+                                pattern: ^/
+                                type: string
+                              port:
+                                properties:
+                                  targetPort:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                required:
+                                - targetPort
+                                type: object
+                              subdomain:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              tls:
+                                properties:
+                                  caCertificate:
+                                    type: string
+                                  certificate:
+                                    type: string
+                                  destinationCACertificate:
+                                    type: string
+                                  insecureEdgeTerminationPolicy:
+                                    type: string
+                                  key:
+                                    type: string
+                                  termination:
+                                    enum:
+                                    - edge
+                                    - reencrypt
+                                    - passthrough
+                                    type: string
+                                required:
+                                - termination
+                                type: object
+                              to:
+                                properties:
+                                  kind:
+                                    enum:
+                                    - Service
+                                    - ""
+                                    type: string
+                                  name:
+                                    type: string
+                                  weight:
+                                    format: int32
+                                    maximum: 256
+                                    minimum: 0
+                                    type: integer
+                                type: object
+                              wildcardPolicy:
+                                enum:
+                                - None
+                                - Subdomain
+                                - ""
+                                type: string
+                            type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
+                    type: object
+                  enabled:
+                    default: false
+                    type: boolean
+                  template:
+                    properties:
+                      None:
+                        type: string
+                      backendMdnsServerProtocol:
+                        type: string
+                      backendWorkerServerProtocol:
+                        type: string
+                      customServiceConfig:
+                        default: '# add your customization here'
+                        type: string
+                      databaseInstance:
+                        type: string
+                      databaseUser:
+                        default: designate
+                        type: string
+                      debug:
+                        properties:
+                          dbInitContainer:
+                            default: false
+                            type: boolean
+                          dbSync:
+                            default: false
+                            type: boolean
+                        type: object
+                      defaultConfigOverwrite:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      designateAPI:
+                        properties:
+                          None:
+                            type: string
+                          backendMdnsServerProtocol:
+                            type: string
+                          backendWorkerServerProtocol:
+                            type: string
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
+                          databaseHostname:
+                            type: string
+                          databaseUser:
+                            default: designate
+                            type: string
+                          debug:
+                            properties:
+                              initContainer:
+                                default: false
+                                type: boolean
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          override:
+                            properties:
+                              service:
+                                additionalProperties:
+                                  properties:
+                                    endpointURL:
+                                      type: string
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                                type: object
+                            type: object
+                          passwordSelectors:
+                            default:
+                              database: DesignateDatabasePassword
+                              service: DesignatePassword
+                            properties:
+                              database:
+                                default: DesignateDatabasePassword
+                                type: string
+                              service:
+                                default: DesignatePassword
+                                type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          secret:
+                            type: string
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: designate
+                            type: string
+                          transportURLSecret:
+                            type: string
+                        required:
+                        - containerImage
+                        type: object
+                      designateCentral:
+                        properties:
+                          None:
+                            type: string
+                          backendMdnsServerProtocol:
+                            type: string
+                          backendWorkerServerProtocol:
+                            type: string
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
+                          databaseHostname:
+                            type: string
+                          databaseUser:
+                            default: designate
+                            type: string
+                          debug:
+                            properties:
+                              initContainer:
+                                default: false
+                                type: boolean
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          passwordSelectors:
+                            default:
+                              database: DesignateDatabasePassword
+                              service: DesignatePassword
+                            properties:
+                              database:
+                                default: DesignateDatabasePassword
+                                type: string
+                              service:
+                                default: DesignatePassword
+                                type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          secret:
+                            type: string
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: designate
+                            type: string
+                          transportURLSecret:
+                            type: string
+                        required:
+                        - containerImage
+                        type: object
+                      designateMdns:
+                        properties:
+                          None:
+                            type: string
+                          backendMdnsServerProtocol:
+                            type: string
+                          backendWorkerServerProtocol:
+                            type: string
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
+                          databaseHostname:
+                            type: string
+                          databaseUser:
+                            default: designate
+                            type: string
+                          debug:
+                            properties:
+                              initContainer:
+                                default: false
+                                type: boolean
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          passwordSelectors:
+                            default:
+                              database: DesignateDatabasePassword
+                              service: DesignatePassword
+                            properties:
+                              database:
+                                default: DesignateDatabasePassword
+                                type: string
+                              service:
+                                default: DesignatePassword
+                                type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          secret:
+                            type: string
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: designate
+                            type: string
+                          transportURLSecret:
+                            type: string
+                        required:
+                        - containerImage
+                        type: object
+                      designateProducer:
+                        properties:
+                          None:
+                            type: string
+                          backendMdnsServerProtocol:
+                            type: string
+                          backendWorkerServerProtocol:
+                            type: string
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
+                          databaseHostname:
+                            type: string
+                          databaseUser:
+                            default: designate
+                            type: string
+                          debug:
+                            properties:
+                              initContainer:
+                                default: false
+                                type: boolean
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          passwordSelectors:
+                            default:
+                              database: DesignateDatabasePassword
+                              service: DesignatePassword
+                            properties:
+                              database:
+                                default: DesignateDatabasePassword
+                                type: string
+                              service:
+                                default: DesignatePassword
+                                type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          secret:
+                            type: string
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: designate
+                            type: string
+                          transportURLSecret:
+                            type: string
+                        required:
+                        - containerImage
+                        type: object
+                      designateWorker:
+                        properties:
+                          None:
+                            type: string
+                          backendMdnsServerProtocol:
+                            type: string
+                          backendWorkerServerProtocol:
+                            type: string
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
+                          databaseHostname:
+                            type: string
+                          databaseUser:
+                            default: designate
+                            type: string
+                          debug:
+                            properties:
+                              initContainer:
+                                default: false
+                                type: boolean
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          passwordSelectors:
+                            default:
+                              database: DesignateDatabasePassword
+                              service: DesignatePassword
+                            properties:
+                              database:
+                                default: DesignateDatabasePassword
+                                type: string
+                              service:
+                                default: DesignatePassword
+                                type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          secret:
+                            type: string
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: designate
+                            type: string
+                          transportURLSecret:
+                            type: string
+                        required:
+                        - containerImage
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      passwordSelectors:
+                        default:
+                          database: DesignateDatabasePassword
+                          service: DesignatePassword
+                        properties:
+                          database:
+                            default: DesignateDatabasePassword
+                            type: string
+                          service:
+                            default: DesignatePassword
+                            type: string
+                        type: object
+                      preserveJobs:
+                        default: false
+                        type: boolean
+                      rabbitMqClusterName:
+                        default: rabbitmq
+                        type: string
+                      resources:
+                        properties:
+                          claims:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            type: array
+                            x-kubernetes-list-map-keys:
+                            - name
+                            x-kubernetes-list-type: map
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            type: object
+                        type: object
+                      secret:
+                        type: string
+                      serviceUser:
+                        default: designate
+                        type: string
+                    required:
+                    - designateAPI
+                    - designateCentral
+                    - designateMdns
+                    - designateProducer
+                    - designateWorker
+                    - rabbitMqClusterName
+                    - secret
+                    type: object
+                type: object
               dns:
                 properties:
                   enabled:

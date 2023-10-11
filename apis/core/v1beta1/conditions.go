@@ -144,11 +144,17 @@ const (
 	// OpenStackControlPlaneOctaviaReadyCondition Status=True condition which indicates if Octavia is configured and operational
 	OpenStackControlPlaneOctaviaReadyCondition condition.Type = "OpenStackControlPlaneOctaviaReady"
 
+	// OpenStackControlPlaneDesignateReadyCondition Status=True condition which indicates if Designate is configured and operational
+	OpenStackControlPlaneDesignateReadyCondition condition.Type = "OpenStackControlPlaneDesignateReady"
+
 	// OpenStackControlPlaneRedisReadyCondition Status=True condition which indicates if Redis is configured and operational
 	OpenStackControlPlaneRedisReadyCondition condition.Type = "OpenStackControlPlaneRedisReady"
 
 	// OpenStackControlPlaneExposeOctaviaReadyCondition Status=True condition which indicates if Octavia is exposed via a route
 	OpenStackControlPlaneExposeOctaviaReadyCondition condition.Type = "OpenStackControlPlaneExposeOctaviaReady"
+
+	// OpenStackControlPlaneExposeDesignateReadyCondition Status=True condition which indicates if Designate is exposed via a route
+	OpenStackControlPlaneExposeDesignateReadyCondition condition.Type = "OpenStackControlPlaneExposeDesignateReady"
 )
 
 // OpenStackControlPlane Reasons used by API objects.
@@ -366,6 +372,18 @@ const (
 
 	// OpenStackControlPlaneOctaviaReadyErrorMessage
 	OpenStackControlPlaneOctaviaReadyErrorMessage = "OpenStackControlPlane Octavia error occured %s"
+
+	// OpenStackControlPlaneDesignateReadyInitMessage
+	OpenStackControlPlaneDesignateReadyInitMessage = "OpenStackControlPlane Designate not started"
+
+	// OpenStackControlPlaneDesignateReadyMessage
+	OpenStackControlPlaneDesignateReadyMessage = "OpenStackControlPlane Designate completed"
+
+	// OpenStackControlPlaneDesignateReadyRunningMessage
+	OpenStackControlPlaneDesignateReadyRunningMessage = "OpenStackControlPlane Designate in progress"
+
+	// OpenStackControlPlaneDesignateReadyErrorMessage
+	OpenStackControlPlaneDesignateReadyErrorMessage = "OpenStackControlPlane Designate error occured %s"
 
 	// OpenStackControlPlaneRedisReadyInitMessage
 	OpenStackControlPlaneRedisReadyInitMessage = "OpenStackControlPlane Redis not started"

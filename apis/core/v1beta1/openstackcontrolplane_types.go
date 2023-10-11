@@ -38,6 +38,7 @@ import (
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
+	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -163,6 +164,9 @@ type OpenStackControlPlaneSpec struct {
 
 	// Octavia - Parameters related to the Octavia service
 	Octavia OctaviaSection `json:"octavia,omitempty"`
+
+	// Designate - Parameters related to the Designate service
+	Designate DesignateSection `json:"designate,omitempty"`
 
 	// Redis - Parameters related to the Redis service
 	Redis RedisSection `json:"redis,omitempty"`
@@ -598,6 +602,25 @@ type OctaviaSection struct {
 	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
+// DesignateSection defines the desired state of the Designate service
+type DesignateSection struct {
+	// +kubebuilder:validation:Optional
+	// Enabled - Whether the Designate service should be deployed and managed
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:valdiation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating Designate Resources
+	Template designatev1.DesignateSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+}
+
 // RedisSection defines the desired state of the Redis service
 type RedisSection struct {
 	// +kubebuilder:validation:Optional
@@ -700,6 +723,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneHeatReadyCondition, condition.InitReason, OpenStackControlPlaneHeatReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneSwiftReadyCondition, condition.InitReason, OpenStackControlPlaneSwiftReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOctaviaReadyCondition, condition.InitReason, OpenStackControlPlaneOctaviaReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneDesignateReadyCondition, condition.InitReason, OpenStackControlPlaneDesignateReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneRedisReadyCondition, condition.InitReason, OpenStackControlPlaneRedisReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
 

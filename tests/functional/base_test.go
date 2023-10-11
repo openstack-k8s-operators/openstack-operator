@@ -222,6 +222,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"enabled":  false,
 			"template": ironicTemplate,
 		},
+		"designate": map[string]interface{}{
+			"enabled": false,
+		},
 	}
 }
 
