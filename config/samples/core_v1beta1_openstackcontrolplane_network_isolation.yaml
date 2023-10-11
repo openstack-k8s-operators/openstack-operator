@@ -310,3 +310,33 @@ spec:
       secret: osp-secret
   redis:
     enabled: false
+  cinder:
+    enabled: false
+    apiOverride:
+      route: {}
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      desiganteAPI:
+        override:
+          service:
+            internal:
+              metadata:
+                annotations:
+                  metallb.universe.tf/address-pool: internalapi
+                  metallb.universe.tf/allow-shared-ip: internalapi
+                  metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+              spec:
+                type: LoadBalancer
+      designateCentral:
+        replicas: 1
+      designateWorker:
+        replicas: 0
+        networkAttachements:
+          - designate
+      designateProducer:
+        replicas: 0
+      designateMdn:
+        replicas: 0
+        networkAttachements:
+          - designate

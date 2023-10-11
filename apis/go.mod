@@ -7,6 +7,7 @@ require (
 	github.com/onsi/gomega v1.28.0
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20231006133827-ce89e0fd01f2
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20231010130554-ab1baca2edc1
+	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20231005181456-cbf92d9662db
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20231009062722-38938dcb2b5b
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20231009062721-cda11ea96e2b
 	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20231001103054-f74a88ed4971

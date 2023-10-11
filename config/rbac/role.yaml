@@ -115,6 +115,18 @@ rules:
   - patch
   - update
 - apiGroups:
+  - designate.openstack.org
+  resources:
+  - designates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - glance.openstack.org
   resources:
   - glances

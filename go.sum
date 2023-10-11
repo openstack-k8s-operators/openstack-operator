@@ -145,6 +145,8 @@ github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20231009062722-389
 github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20231009062722-38938dcb2b5b/go.mod h1:WPQCwaFKWwIEgqXjZRvJ7+bRUXF5Y/eAqKpBiCEe/Q4=
 github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20231009062721-cda11ea96e2b h1:nA/cI+2fPqcBvM0jCo/WsrngfQQEd8RSGBY7xdFMC+o=
 github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20231009062721-cda11ea96e2b/go.mod h1:fzzPZamjlU4RmXNBkTdV3zmuXQhRhzebC45OakaOZA0=
+github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20231005181456-cbf92d9662db h1:p30j9aOE336NfA/cTvyd+d0t1B/PTzcyghwtVCKN3OQ=
+github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20231005181456-cbf92d9662db/go.mod h1:fNgVy3LvqYF2jTelcaJKaWT0agEwBtJ++MXSdPT/BF4=
 github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20231001103054-f74a88ed4971 h1:5kNS+gseixkgRhYPukQVJyewPTM0lfUOmKP0A03wFFY=
 github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20231001103054-f74a88ed4971/go.mod h1:zqFs5MrBKeaE4HQroUgMWwIkBwmmcygg6sghcidSdCA=
 github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231006045519-4d73854cb09a h1:22mc3Inf0bn4RYy6lnx4rT/wb21KVF8O6bFwyf+sTU8=
