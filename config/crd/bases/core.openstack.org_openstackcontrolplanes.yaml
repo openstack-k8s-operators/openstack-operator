@@ -3373,6 +3373,9 @@ spec:
                         required:
                         - containerImage
                         type: object
+                      imageCacheSize:
+                        default: ""
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -3426,6 +3429,7 @@ spec:
                     - databaseInstance
                     - glanceAPIExternal
                     - glanceAPIInternal
+                    - imageCacheSize
                     - secret
                     - storageRequest
                     type: object
@@ -8636,6 +8640,8 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          transportURLSecret:
                             type: string
                         required:
                         - containerImage
