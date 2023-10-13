@@ -43,6 +43,9 @@ spec:
     template:
       databaseInstance: openstack
       storageRequest: 10G
+      secret: osp-secret
+      glanceAPI:
+        replicas: 1
   cinder:
     template:
       databaseInstance: openstack

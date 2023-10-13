@@ -1311,6 +1311,9 @@ spec:
                           - extraVol
                           type: object
                         type: array
+                      memcachedInstance:
+                        default: memcached
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -1342,6 +1345,7 @@ spec:
                     - cinderAPI
                     - cinderScheduler
                     - databaseInstance
+                    - memcachedInstance
                     - rabbitMqClusterName
                     - secret
                     type: object
@@ -4024,7 +4028,7 @@ spec:
                           - extraVol
                           type: object
                         type: array
-                      glanceAPIExternal:
+                      glanceAPI:
                         properties:
                           containerImage:
                             type: string
@@ -4055,50 +4059,52 @@ spec:
                           override:
                             properties:
                               service:
-                                properties:
-                                  endpointURL:
-                                    type: string
-                                  metadata:
-                                    properties:
-                                      annotations:
-                                        additionalProperties:
+                                additionalProperties:
+                                  properties:
+                                    endpointURL:
+                                      type: string
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
                                           type: string
-                                        type: object
-                                      labels:
-                                        additionalProperties:
+                                        externalTrafficPolicy:
                                           type: string
-                                        type: object
-                                    type: object
-                                  spec:
-                                    properties:
-                                      externalName:
-                                        type: string
-                                      externalTrafficPolicy:
-                                        type: string
-                                      internalTrafficPolicy:
-                                        type: string
-                                      ipFamilyPolicy:
-                                        type: string
-                                      loadBalancerClass:
-                                        type: string
-                                      loadBalancerSourceRanges:
-                                        items:
+                                        internalTrafficPolicy:
                                           type: string
-                                        type: array
-                                      sessionAffinity:
-                                        type: string
-                                      sessionAffinityConfig:
-                                        properties:
-                                          clientIP:
-                                            properties:
-                                              timeoutSeconds:
-                                                format: int32
-                                                type: integer
-                                            type: object
-                                        type: object
-                                      type:
-                                        type: string
-                                    type: object
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
                                 type: object
                             type: object
                           pvc:
@@ -4140,127 +4146,19 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          storageClass:
+                            type: string
+                          storageRequest:
+                            type: string
+                          type:
+                            default: split
+                            enum:
+                            - split
+                            - single
+                            type: string
                         required:
                         - containerImage
-                        type: object
-                      glanceAPIInternal:
-                        properties:
-                          containerImage:
-                            type: string
-                          customServiceConfig:
-                            type: string
-                          customServiceConfigSecrets:
-                            items:
-                              type: string
-                            type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
-                          defaultConfigOverwrite:
-                            additionalProperties:
-                              type: string
-                            type: object
-                          networkAttachments:
-                            items:
-                              type: string
-                            type: array
-                          nodeSelector:
-                            additionalProperties:
-                              type: string
-                            type: object
-                          override:
-                            properties:
-                              service:
-                                properties:
-                                  endpointURL:
-                                    type: string
-                                  metadata:
-                                    properties:
-                                      annotations:
-                                        additionalProperties:
-                                          type: string
-                                        type: object
-                                      labels:
-                                        additionalProperties:
-                                          type: string
-                                        type: object
-                                    type: object
-                                  spec:
-                                    properties:
-                                      externalName:
-                                        type: string
-                                      externalTrafficPolicy:
-                                        type: string
-                                      internalTrafficPolicy:
-                                        type: string
-                                      ipFamilyPolicy:
-                                        type: string
-                                      loadBalancerClass:
-                                        type: string
-                                      loadBalancerSourceRanges:
-                                        items:
-                                          type: string
-                                        type: array
-                                      sessionAffinity:
-                                        type: string
-                                      sessionAffinityConfig:
-                                        properties:
-                                          clientIP:
-                                            properties:
-                                              timeoutSeconds:
-                                                format: int32
-                                                type: integer
-                                            type: object
-                                        type: object
-                                      type:
-                                        type: string
-                                    type: object
-                                type: object
-                            type: object
-                          pvc:
-                            type: string
-                          replicas:
-                            default: 1
-                            format: int32
-                            maximum: 32
-                            minimum: 0
-                            type: integer
-                          resources:
-                            properties:
-                              claims:
-                                items:
-                                  properties:
-                                    name:
-                                      type: string
-                                  required:
-                                  - name
-                                  type: object
-                                type: array
-                                x-kubernetes-list-map-keys:
-                                - name
-                                x-kubernetes-list-type: map
-                              limits:
-                                additionalProperties:
-                                  anyOf:
-                                  - type: integer
-                                  - type: string
-                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                                  x-kubernetes-int-or-string: true
-                                type: object
-                              requests:
-                                additionalProperties:
-                                  anyOf:
-                                  - type: integer
-                                  - type: string
-                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                                  x-kubernetes-int-or-string: true
-                                type: object
-                            type: object
-                        required:
-                        - containerImage
+                        - storageRequest
                         type: object
                       imageCacheSize:
                         default: ""
@@ -4316,8 +4214,7 @@ spec:
                     required:
                     - containerImage
                     - databaseInstance
-                    - glanceAPIExternal
-                    - glanceAPIInternal
+                    - glanceAPI
                     - imageCacheSize
                     - secret
                     - storageRequest
@@ -7274,6 +7171,9 @@ spec:
                           - containerImage
                           type: object
                         type: object
+                      memcachedInstance:
+                        default: memcached
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -7304,6 +7204,7 @@ spec:
                     required:
                     - manilaAPI
                     - manilaScheduler
+                    - memcachedInstance
                     - rabbitMqClusterName
                     type: object
                 type: object

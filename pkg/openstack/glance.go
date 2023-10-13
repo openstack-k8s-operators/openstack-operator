@@ -17,7 +17,6 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -39,18 +38,15 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
-	serviceOverrides := map[service.Endpoint]service.RoutedOverrideSpec{}
-	if instance.Spec.Glance.Template.GlanceAPIExternal.Override.Service != nil {
-		serviceOverrides[service.EndpointPublic] = *instance.Spec.Glance.Template.GlanceAPIExternal.Override.Service
-	}
-	if instance.Spec.Glance.Template.GlanceAPIInternal.Override.Service != nil {
-		serviceOverrides[service.EndpointInternal] = *instance.Spec.Glance.Template.GlanceAPIInternal.Override.Service
-	}
-
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
-		svcOverride := serviceOverrides[endpointType]
-		serviceOverrides[endpointType] = AddServiceComponentLabel(svcOverride, glance.Name)
+		if instance.Spec.Glance.Template.GlanceAPI.Override.Service == nil {
+			instance.Spec.Glance.Template.GlanceAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
+		}
+		instance.Spec.Glance.Template.GlanceAPI.Override.Service[endpointType] =
+			AddServiceComponentLabel(
+				instance.Spec.Manila.Template.ManilaAPI.Override.Service[endpointType],
+				glance.Name)
 	}
 
 	// When component services got created check if there is the need to create a route
@@ -72,13 +68,13 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		serviceOverrides, ctrlResult, err = EnsureEndpointConfig(
+		instance.Spec.Glance.Template.GlanceAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			glance,
 			svcs,
-			serviceOverrides,
+			instance.Spec.Glance.Template.GlanceAPI.Override.Service,
 			instance.Spec.Glance.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition,
 		)
@@ -92,8 +88,6 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	helper.GetLogger().Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
 		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec)
-		glance.Spec.GlanceAPIExternal.Override.Service = ptr.To(serviceOverrides[service.EndpointPublic])
-		glance.Spec.GlanceAPIInternal.Override.Service = ptr.To(serviceOverrides[service.EndpointInternal])
 
 		if glance.Spec.Secret == "" {
 			glance.Spec.Secret = instance.Spec.Secret
