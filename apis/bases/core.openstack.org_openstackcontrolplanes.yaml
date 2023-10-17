@@ -2368,7 +2368,7 @@ spec:
                         type: string
                       debug:
                         properties:
-                          dbPurge:
+                          cronJob:
                             default: false
                             type: boolean
                           dbSync:
