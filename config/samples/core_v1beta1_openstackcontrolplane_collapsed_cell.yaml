@@ -37,6 +37,16 @@ spec:
       databaseInstance: openstack
       storageClass: ""
       storageRequest: 10G
+  barbican:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      barbicanAPI:
+        replicas: 1
+      barbicanWorker:
+        replicas: 1
+      barbicanKeystoneListener:
+        replicas: 1
   cinder:
     template:
       databaseInstance: openstack

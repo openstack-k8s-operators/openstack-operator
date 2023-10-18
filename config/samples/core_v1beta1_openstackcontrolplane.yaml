@@ -73,6 +73,16 @@ spec:
       cinderVolumes:
         volume1:
           replicas: 0 # backend needs to be configured
+  barbican:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      barbicanAPI:
+        replicas: 1
+      barbicanWorker:
+        replicas: 1
+      barbicanKeystoneListener:
+        replicas: 1
   manila:
     template:
       manilaAPI:

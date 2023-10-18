@@ -29,6 +29,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
@@ -84,6 +85,7 @@ func init() {
 	utilruntime.Must(rabbitmqclusterv2.AddToScheme(scheme))
 	utilruntime.Must(placementv1.AddToScheme(scheme))
 	utilruntime.Must(glancev1.AddToScheme(scheme))
+	utilruntime.Must(barbicanv1.AddToScheme(scheme))
 	utilruntime.Must(cinderv1.AddToScheme(scheme))
 	utilruntime.Must(novav1.AddToScheme(scheme))
 	utilruntime.Must(baremetalv1.AddToScheme(scheme))
@@ -283,4 +285,7 @@ func setupServiceOperatorDefaults() {
 
 	// Octavia
 	octaviav1.SetupDefaults()
+
+	// Barbican
+	barbicanv1.SetupDefaults()
 }

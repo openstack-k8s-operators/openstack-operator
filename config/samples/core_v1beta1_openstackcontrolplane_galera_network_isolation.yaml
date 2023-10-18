@@ -77,6 +77,28 @@ spec:
       glanceAPIExternal:
         networkAttachments:
         - storage
+  barbican:
+    apiOverride:
+      route: {}
+    template:
+      override:
+        service:
+          internal:
+            metadata:
+              annotations:
+                metallb.universe.tf/address-pool: internalapi
+                metallb.universe.tf/allow-shared-ip: internalapi
+                metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+            spec:
+              type: LoadBalancer
+      databaseInstance: openstack
+      secret: osp-secret
+      barbicanAPI:
+        replicas: 1
+      barbicanWorker:
+        replicas: 1
+      barbicanKeystoneListener:
+        replicas: 1
   keystone:
     apiOverride:
       route: {}

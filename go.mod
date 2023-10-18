@@ -9,6 +9,7 @@ require (
 	github.com/imdario/mergo v0.3.16
 	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/onsi/gomega v1.29.0
+	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20231031213448-ba238375c877
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20231020183900-9e910befd6b1
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20231029224549-c73b9e5eddac
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20231029084849-1626f1b5fd75

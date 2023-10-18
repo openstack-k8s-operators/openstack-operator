@@ -162,6 +162,10 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			r.Spec.Ovn.Enabled) {
 			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
 		}
+	case "Barbican":
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Memcached, Keystone"
+		}
 	}
 
 	// If "reqs" is not the empty string, we have missing requirements
@@ -291,6 +295,12 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 		}
 	}
 
+	if r.Spec.Barbican.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Barbican"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("barbican").Child("enabled"), r.Spec.Barbican.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
 	return allErrs
 }
 
@@ -426,4 +436,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		// By-value copy, need to update
 		r.Spec.Redis.Templates[key] = template
 	}
+
+	// Barbican
+	r.Spec.Barbican.Template.Default()
 }

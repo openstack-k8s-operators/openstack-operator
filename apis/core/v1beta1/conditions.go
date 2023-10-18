@@ -149,6 +149,12 @@ const (
 
 	// OpenStackControlPlaneExposeOctaviaReadyCondition Status=True condition which indicates if Octavia is exposed via a route
 	OpenStackControlPlaneExposeOctaviaReadyCondition condition.Type = "OpenStackControlPlaneExposeOctaviaReady"
+
+	// OpenStackControlPlaneBarbicanReadyCondition Status=True condition which indicates if Barbican is configured and operational
+	OpenStackControlPlaneBarbicanReadyCondition condition.Type = "OpenStackControlPlaneBarbicanReady"
+
+	// OpenStackControlPlaneExposeBarbicanReadyCondition Status=True condition which indicates if Barbican is exposed via a route
+	OpenStackControlPlaneExposeBarbicanReadyCondition condition.Type = "OpenStackControlPlaneExposeBarbicanReady"
 )
 
 // OpenStackControlPlane Reasons used by API objects.
@@ -399,4 +405,16 @@ const (
 
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCAReadyErrorMessage = "OpenStackControlPlane CAs %s %s error occured %s"
+
+	// OpenStackControlPlaneBarbicanReadyInitMessage
+	OpenStackControlPlaneBarbicanReadyInitMessage = "OpenStackControlPlane Barbican not started"
+
+	// OpenStackControlPlaneBarbicanReadyMessage
+	OpenStackControlPlaneBarbicanReadyMessage = "OpenStackControlPlane Barbican completed"
+
+	// OpenStackControlPlaneBarbicanReadyRunningMessage
+	OpenStackControlPlaneBarbicanReadyRunningMessage = "OpenStackControlPlane Barbican in progress"
+
+	// OpenStackControlPlaneBarbicanReadyErrorMessage
+	OpenStackControlPlaneBarbicanReadyErrorMessage = "OpenStackControlPlane Barbican error occured %s"
 )

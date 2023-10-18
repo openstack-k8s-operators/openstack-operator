@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
@@ -171,6 +172,10 @@ type OpenStackControlPlaneSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// OpenStackClient - Parameters related to the OpenStackClient
 	OpenStackClient OpenStackClientSection `json:"openstackclient,omitempty"`
+
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Barbican - Parameters related to the Barbican service
+	Barbican BarbicanSection `json:"barbican,omitempty"`
 
 	// ExtraMounts containing conf files and credentials that should be provided
 	// to the underlying operators.
@@ -620,6 +625,25 @@ type OpenStackClientSection struct {
 	Template v1beta1.OpenStackClientSpec `json:"template,omitempty"`
 }
 
+// BarbicanSection defines the desired state of Barbican service
+type BarbicanSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether Barbican service should be deployed and managed
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating the Barbican Service
+	Template barbicanv1.BarbicanSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+}
+
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane
 type OpenStackControlPlaneStatus struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
@@ -700,6 +724,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneHeatReadyCondition, condition.InitReason, OpenStackControlPlaneHeatReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneSwiftReadyCondition, condition.InitReason, OpenStackControlPlaneSwiftReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOctaviaReadyCondition, condition.InitReason, OpenStackControlPlaneOctaviaReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneBarbicanReadyCondition, condition.InitReason, OpenStackControlPlaneBarbicanReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneRedisReadyCondition, condition.InitReason, OpenStackControlPlaneRedisReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
 
