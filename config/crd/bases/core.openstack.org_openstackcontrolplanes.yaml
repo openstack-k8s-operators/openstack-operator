@@ -1382,6 +1382,7 @@ spec:
                               - auth-zone
                               - synth-domain
                               - no-negcache
+                              - local
                               type: string
                             values:
                               items:
@@ -7320,6 +7321,9 @@ spec:
                           - extraVol
                           type: object
                         type: array
+                      memcachedInstance:
+                        default: memcached
+                        type: string
                       networkAttachments:
                         items:
                           type: string
@@ -7442,6 +7446,7 @@ spec:
                     required:
                     - containerImage
                     - databaseInstance
+                    - memcachedInstance
                     - rabbitMqClusterName
                     - secret
                     type: object
@@ -8161,7 +8166,7 @@ spec:
                           preserveJobs:
                             default: false
                             type: boolean
-                          stopDBSync:
+                          stopJob:
                             default: false
                             type: boolean
                           stopService:
