@@ -10,6 +10,7 @@ testbin/*
 
 bundle/*
 bundle.Dockerfile
+bundle_extra_data
 custom-bundle.Dockerfile.pinned
 storage-bundle.Dockerfile.pinned
 
