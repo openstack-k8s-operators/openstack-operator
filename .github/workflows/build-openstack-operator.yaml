@@ -1,4 +1,4 @@
-name: OpenStack Operator image builder
+name: openstack operator image builder
 
 on:
   push:
@@ -11,178 +11,17 @@ env:
   latesttag: latest
 
 jobs:
-
-  check-secrets:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check secrets are set
-        id: have-secrets
-        if: "${{ env.imagenamespace != '' }}"
-        run: echo "::set-output name=ok::true"
-    outputs:
-      have-secrets: ${{ steps.have-secrets.outputs.ok }}
-
-  build-openstack-operator:
-    name: Build openstack-operator image using buildah
-    runs-on: ubuntu-latest
-    needs: [check-secrets]
-    if: needs.check-secrets.outputs.have-secrets == 'true'
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Get branch name
-      id: branch-name
-      uses: tj-actions/branch-names@v5
-
-    - name: Set latest tag for non main branch
-      if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
-      run: |
-        echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
-
-    - name: Buildah Action
-      id: build-openstack-operator
-      uses: redhat-actions/buildah-build@v2
-      with:
-        image: openstack-operator
-        tags: ${{ env.latesttag }} ${{ github.sha }}
-        containerfiles: |
-          ./Dockerfile
-
-    - name: Push openstack-operator To ${{ env.imageregistry }}
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: ${{ steps.build-openstack-operator.outputs.image }}
-        tags: ${{ steps.build-openstack-operator.outputs.tags }}
-        registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
-
-  build-openstack-operator-bundle:
-    needs: [ check-secrets, build-openstack-operator ]
-    name: openstack-operator-bundle
-    runs-on: ubuntu-latest
-    if: needs.check-secrets.outputs.have-secrets == 'true'
-
-    steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.19.x
-
-    - name: Checkout openstack-operator repository
-      uses: actions/checkout@v2
-
-    - name: Install operator-sdk
-      uses: redhat-actions/openshift-tools-installer@v1
-      with:
-        source: github
-        operator-sdk: '1.26.0'
-
-    - name: Log in to Quay Registry
-      uses: redhat-actions/podman-login@v1
-      with:
-        registry: ${{ env.imageregistry }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
-
-    - name: Log in to Red Hat Registry
-      uses: redhat-actions/podman-login@v1
-      with:
-        registry: registry.redhat.io
-        username: ${{ secrets.REDHATIO_USERNAME }}
-        password: ${{ secrets.REDHATIO_PASSWORD }}
-
-    - name: Create bundle image
-      run: |
-        pushd "${GITHUB_WORKSPACE}"/.github/
-        chmod +x "create_bundle.sh"
-        "./create_bundle.sh"
-        popd
-      env:
-        REGISTRY:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        GITHUB_SHA: ${{ github.sha }}
-        BASE_IMAGE: openstack-operator
-        IMAGENAMESPACE: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Get branch name
-      id: branch-name
-      uses: tj-actions/branch-names@v5
-
-    - name: Set latest tag for non main branch
-      if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
-      run: |
-        echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
-
-    - name: Build openstack-operator-bundle using buildah
-      id: build-openstack-operator-bundle
-      uses: redhat-actions/buildah-build@v2
-      with:
-        image: openstack-operator-bundle
-        tags: ${{ env.latesttag }} ${{ github.sha }}
-        containerfiles: |
-          ./custom-bundle.Dockerfile.pinned
-
-    - name: Push openstack-operator-bundle To ${{ env.imageregistry }}
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: ${{ steps.build-openstack-operator-bundle.outputs.image }}
-        tags: ${{ steps.build-openstack-operator-bundle.outputs.tags }}
-        registry:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
-
-  build-openstack-operator-index:
-    needs: [ check-secrets, build-openstack-operator-bundle ]
-    name: openstack-operator-index
-    runs-on: ubuntu-latest
-    if: needs.check-secrets.outputs.have-secrets == 'true'
-
-    steps:
-    - name: Checkout openstack-operator repository
-      uses: actions/checkout@v2
-
-    - name: Get branch name
-      id: branch-name
-      uses: tj-actions/branch-names@v5
-
-    - name: Set latest tag for non main branch
-      if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
-      run: |
-        echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
-
-    - name: Install opm
-      uses: redhat-actions/openshift-tools-installer@v1
-      with:
-        source: github
-        opm: 'latest'
-
-    - name: Log in to Red Hat Registry
-      uses: redhat-actions/podman-login@v1
-      with:
-        registry: ${{ env.imageregistry }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
-
-    - name: Create index image
-      run: |
-        pushd "${GITHUB_WORKSPACE}"/.github/
-        chmod +x "create_opm_index.sh"
-        "./create_opm_index.sh"
-        popd
-      env:
-        REGISTRY:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        GITHUB_SHA: ${{ github.sha }}
-        BUNDLE_IMAGE: openstack-operator-bundle
-        INDEX_IMAGE_TAG: ${{ env.latesttag }}
-        INDEX_IMAGE: openstack-operator-index
-
-    - name: Push openstack-operator-index To ${{ env.imageregistry }}
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: openstack-operator-index
-        tags: ${{ env.latesttag }} ${{ github.sha }}
-        registry:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
+  call-build-workflow:
+    uses: openstack-k8s-operators/openstack-k8s-operators-ci/.github/workflows/reusable-build-operator.yaml@main
+    with:
+      operator_name: openstack
+      go_version: 1.19.x
+      operator_sdk_version: 1.31.0
+      bundle_dockerfile: ./custom-bundle.Dockerfile.pinned
+      catalog_extra_bundles_script: ./hack/pin-bundle-images.sh
+    secrets:
+      IMAGENAMESPACE: ${{ secrets.IMAGENAMESPACE }}
+      QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+      QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+      REDHATIO_USERNAME: ${{ secrets.REDHATIO_USERNAME }}
+      REDHATIO_PASSWORD: ${{ secrets.REDHATIO_PASSWORD }}
