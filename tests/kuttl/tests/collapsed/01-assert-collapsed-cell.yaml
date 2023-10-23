@@ -104,12 +104,22 @@ spec:
         service: CeilometerPassword
       secret: osp-secret
       serviceUser: ceilometer
+  tls:
+    endpoint:
+      internal:
+        enabled: false
+      public:
+        enabled: true
 status:
   conditions:
   - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
+  - message: OpenStackControlPlane CAs completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCAReadyCondition
   - message: OpenStackControlPlane Ceilometer completed
     reason: Ready
     status: "True"
