@@ -38,6 +38,12 @@ BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 # BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
 BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 
+# USE_PODMAN_BUILD_CACHE defines if we should use podman build cache while building images
+USE_PODMAN_BUILD_CACHE ?= false
+ifeq ($(USE_PODMAN_BUILD_CACHE), false)
+	PODMAN_BUILD_CACHE ?= --no-cache
+endif
+
 # USE_IMAGE_DIGESTS defines if images are resolved via tags or digests
 # You can enable this value if you would like to use SHA Based Digests
 # To enable set flag to true
@@ -145,7 +151,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 
 .PHONY: docker-build
 docker-build: test ## Build docker image with the manager.
-	podman build -t ${IMG} .
+	podman build $(PODMAN_BUILD_CACHE) -t ${IMG} .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
@@ -235,7 +241,7 @@ bundle: manifests kustomize ## Generate bundle manifests and metadata, then vali
 
 .PHONY: bundle-build
 bundle-build: bundle ## Build the bundle image.
-	podman build -f custom-bundle.Dockerfile.pinned -t $(BUNDLE_IMG) .
+	podman build $(PODMAN_BUILD_CACHE) -f custom-bundle.Dockerfile.pinned -t $(BUNDLE_IMG) .
 
 .PHONY: bundle-push
 bundle-push: ## Push the bundle image.
