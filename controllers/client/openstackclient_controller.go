@@ -15,14 +15,19 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
+	"golang.org/x/exp/slices"
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,6 +41,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/env"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	common_rbac "github.com/openstack-k8s-operators/lib-common/modules/common/rbac"
+
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
@@ -72,7 +78,6 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
-			r.Log.Info("OpenStackClient CR not found", "Name", instance.Name, "Namespace", instance.Namespace)
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
@@ -221,7 +226,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	configVars[*instance.Spec.OpenStackConfigSecret] = env.SetValue(secretHash)
 
 	if instance.Spec.CaSecretName != "" {
-		_, secretHash, err = secret.GetSecret(ctx, helper, instance.Spec.CaSecretName, instance.Namespace)
+		_, secretHash, err := secret.GetSecret(ctx, helper, instance.Spec.CaSecretName, instance.Namespace)
 		if err != nil {
 			if k8s_errors.IsNotFound(err) {
 				instance.Status.Conditions.Set(condition.FalseCondition(
@@ -247,19 +252,86 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	pod, err := openstackclient.ClientPod(ctx, instance, helper, clientLabels, configVarsHash)
-	if err != nil {
-		return ctrl.Result{}, err
+	osclient := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Name,
+			Namespace: instance.Namespace,
+		},
 	}
 
-	op, err := controllerutil.CreateOrPatch(ctx, r.Client, pod, func() error {
-		pod.Spec.Containers[0].Image = instance.Spec.ContainerImage
-		err := controllerutil.SetControllerReference(instance, pod, r.Scheme)
+	op, err := controllerutil.CreateOrPatch(ctx, r.Client, osclient, func() error {
+		isPodUpdate := !osclient.ObjectMeta.CreationTimestamp.IsZero()
+		if !isPodUpdate {
+			spec, err := openstackclient.ClientPodSpec(ctx, instance, helper, clientLabels, configVarsHash)
+			if err != nil {
+				return err
+			}
+
+			osclient.Spec = *spec
+		} else {
+			hashupdate := false
+
+			f := func(e corev1.EnvVar) bool {
+				return e.Name == "CONFIG_HASH"
+			}
+			idx := slices.IndexFunc(osclient.Spec.Containers[0].Env, f)
+
+			if idx >= 0 && osclient.Spec.Containers[0].Env[idx].Value != configVarsHash {
+				hashupdate = true
+			}
+
+			switch {
+			case osclient.Spec.Containers[0].Image != instance.Spec.ContainerImage:
+				// if container image change force re-create by triggering NewForbidden
+				return k8s_errors.NewForbidden(
+					schema.GroupResource{Group: "", Resource: "pods"}, // Specify the group and resource type
+					osclient.Name,
+					errors.New("Cannot update Pod spec field - Spec.Containers[0].Image"), // Specify the error message
+				)
+			case hashupdate:
+				// if config hash changed, recreate the pod to use new config
+				return k8s_errors.NewForbidden(
+					schema.GroupResource{Group: "", Resource: "pods"}, // Specify the group and resource type
+					osclient.Name,
+					errors.New("Config changed recreate pod"), // Specify the error message
+				)
+			}
+
+		}
+
+		osclient.Labels = util.MergeStringMaps(osclient.Labels, clientLabels)
+
+		err = controllerutil.SetControllerReference(instance, osclient, r.Scheme)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
+	if err != nil {
+		var forbiddenPodSpecChangeErr *k8s_errors.StatusError
+
+		forbiddenPodSpec := false
+		if errors.As(err, &forbiddenPodSpecChangeErr) {
+			if forbiddenPodSpecChangeErr.ErrStatus.Reason == metav1.StatusReasonForbidden {
+				forbiddenPodSpec = true
+			}
+		}
+
+		if forbiddenPodSpec || k8s_errors.IsInvalid(err) {
+			// Delete pod when its config changed. In this case we just re-create the
+			// openstackclient pod
+			if err := r.Delete(ctx, osclient); err != nil && !k8s_errors.IsNotFound(err) {
+
+				// Error deleting the object
+				return ctrl.Result{}, fmt.Errorf("Error deleting OpenStackClient pod %s: %w", osclient.Name, err)
+			}
+			r.Log.Info(fmt.Sprintf("OpenStackClient pod deleted due to change %s", err.Error()))
+
+			return ctrl.Result{}, nil
+		}
+
+		return ctrl.Result{}, fmt.Errorf("Failed to create or update pod %s: %w", osclient.Name, err)
+	}
 
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -274,7 +346,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if op != controllerutil.OperationResultNone {
 		util.LogForObject(
 			helper,
-			fmt.Sprintf("Pod %s successfully reconciled - operation: %s", pod.Name, string(op)),
+			fmt.Sprintf("Pod %s successfully reconciled - operation: %s", osclient.Name, string(op)),
 			instance,
 		)
 	}

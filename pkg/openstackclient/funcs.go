@@ -21,37 +21,25 @@ import (
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
 
-// ClientPod func
-func ClientPod(
+// ClientPodSpec func
+func ClientPodSpec(
 	ctx context.Context,
 	instance *clientv1.OpenStackClient,
 	helper *helper.Helper,
 	labels map[string]string,
 	configHash string,
-) (*corev1.Pod, error) {
-
-	clientPod := &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
-		},
-	}
-
+) (*corev1.PodSpec, error) {
 	envVars := map[string]env.Setter{}
 	envVars["OS_CLOUD"] = env.SetValue("default")
 	envVars["CONFIG_HASH"] = env.SetValue(configHash)
 
-	clientPod.ObjectMeta = metav1.ObjectMeta{
-		Name:      instance.Name,
-		Namespace: instance.Namespace,
-		Labels:    labels,
-	}
-	clientPod.Spec.TerminationGracePeriodSeconds = ptr.To[int64](0)
-	clientPod.Spec.ServiceAccountName = instance.RbacResourceName()
+	podSpec := &corev1.PodSpec{}
+
+	podSpec.TerminationGracePeriodSeconds = ptr.To[int64](0)
+	podSpec.ServiceAccountName = instance.RbacResourceName()
 	clientContainer := corev1.Container{
 		Name:    "openstackclient",
 		Image:   instance.Spec.ContainerImage,
@@ -77,14 +65,14 @@ func ClientPod(
 	}
 	clientContainer.VolumeMounts = clientPodVolumeMounts(tlsConfig)
 
-	clientPod.Spec.Containers = []corev1.Container{clientContainer}
+	podSpec.Containers = []corev1.Container{clientContainer}
 
-	clientPod.Spec.Volumes = clientPodVolumes(instance, tlsConfig)
+	podSpec.Volumes = clientPodVolumes(instance, tlsConfig)
 	if instance.Spec.NodeSelector != nil && len(instance.Spec.NodeSelector) > 0 {
-		clientPod.Spec.NodeSelector = instance.Spec.NodeSelector
+		podSpec.NodeSelector = instance.Spec.NodeSelector
 	}
 
-	return clientPod, nil
+	return podSpec, nil
 }
 
 func clientPodVolumeMounts(
