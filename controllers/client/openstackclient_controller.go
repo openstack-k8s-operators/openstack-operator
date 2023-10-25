@@ -33,6 +33,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
@@ -40,6 +42,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/env"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	object "github.com/openstack-k8s-operators/lib-common/modules/common/object"
 	common_rbac "github.com/openstack-k8s-operators/lib-common/modules/common/rbac"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
@@ -226,7 +229,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	configVars[*instance.Spec.OpenStackConfigSecret] = env.SetValue(secretHash)
 
 	if instance.Spec.CaSecretName != "" {
-		_, secretHash, err := secret.GetSecret(ctx, helper, instance.Spec.CaSecretName, instance.Namespace)
+		caSecret, secretHash, err := secret.GetSecret(ctx, helper, instance.Spec.CaSecretName, instance.Namespace)
 		if err != nil {
 			if k8s_errors.IsNotFound(err) {
 				instance.Status.Conditions.Set(condition.FalseCondition(
@@ -245,6 +248,11 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			return ctrl.Result{}, err
 		}
 		configVars[instance.Spec.CaSecretName] = env.SetValue(secretHash)
+
+		err = object.EnsureOwnerRef(ctx, helper, instance, caSecret)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	configVarsHash, err := util.HashOfInputHashes(configVars)
@@ -369,5 +377,8 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
+		Watches( // watch for secrets we added ourselves as additional owners, NOT as controller
+			&source.Kind{Type: &corev1.Secret{}},
+			&handler.EnqueueRequestForOwner{OwnerType: &clientv1.OpenStackClient{}, IsController: false}).
 		Complete(r)
 }
