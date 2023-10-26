@@ -133,12 +133,22 @@ spec:
         replicas: 1
       swiftProxy:
         replicas: 1
+  tls:
+    endpoint:
+      internal:
+        enabled: false
+      public:
+        enabled: true
 status:
   conditions:
   - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
+  - message: OpenStackControlPlane CAs completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCAReadyCondition
   - message: OpenStackControlPlane Ceilometer completed
     reason: Ready
     status: "True"

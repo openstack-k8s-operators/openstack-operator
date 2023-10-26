@@ -3,11 +3,12 @@ module github.com/openstack-k8s-operators/openstack-operator
 go 1.19
 
 require (
+	github.com/cert-manager/cert-manager v1.11.5
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.4
 	github.com/imdario/mergo v0.3.16
 	github.com/onsi/ginkgo/v2 v2.13.0
-	github.com/onsi/gomega v1.28.0
+	github.com/onsi/gomega v1.28.1
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20231018031823-48a662e6dcfe
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20231019162005-1acbd3e775f1
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20231013112543-a07d8273b82d
@@ -16,9 +17,11 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231018060345-8518a89de1be
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231019064410-5c72e6381cbc
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231017110713-7b1a1e54bd46
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231019091705-f3aa3d057b0f
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231023090155-357f2fa52453
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231024141124-a219eee17f6c
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231011150636-e8a0540a3c32
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20231017114157-49522e78f991
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.0
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20231020162407-336d5231e505
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20231019125621-7c2a5a4a5186
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20231019131906-d371f09abbc6
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20231012052157-e3ff0e9c016d
@@ -32,6 +35,7 @@ require (
 	github.com/operator-framework/api v0.17.6
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	go.uber.org/zap v1.26.0
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.4
 	k8s.io/client-go v0.27.2
@@ -42,10 +46,12 @@ require (
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
+	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0 // indirect
 	github.com/metal3-io/baremetal-operator/apis v0.3.1 // indirect
 	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.2.0 // indirect
-	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
+	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
+	sigs.k8s.io/gateway-api v0.6.0 // indirect
 )
 
 require (
@@ -63,9 +69,9 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.3.1 // indirect
+	github.com/google/uuid v1.3.1
 	github.com/gophercloud/gophercloud v1.7.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -85,7 +91,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
@@ -107,13 +113,12 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace (
+replace ( //allow-merging
 	// pin to k8s 0.26.x for now
 	k8s.io/api => k8s.io/api v0.26.9
 	k8s.io/apimachinery => k8s.io/apimachinery v0.26.9
 	k8s.io/client-go => k8s.io/client-go v0.26.9
 	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.14.6
-
 )
 
 replace github.com/openstack-k8s-operators/openstack-operator/apis => ./apis

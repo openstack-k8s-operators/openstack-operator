@@ -42,6 +42,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: cinder.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: cinder.apiOverride.tls
       - description: Enabled - Whether Cinder service should be deployed and managed
         displayName: Enabled
         path: cinder.enabled
@@ -85,6 +88,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: glance.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: glance.apiOverride.tls
       - description: Enabled - Whether Glance service should be deployed and managed
         displayName: Enabled
         path: glance.enabled
@@ -100,10 +106,16 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: heat.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: heat.apiOverride.tls
       - description: CnfAPIOverride, provides the ability to override the generated
           manifest of several child resources.
         displayName: Cnf APIOverride
         path: heat.cnfAPIOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: heat.cnfAPIOverride.tls
       - description: Enabled - Whether Heat services should be deployed and managed
         displayName: Enabled
         path: heat.enabled
@@ -119,6 +131,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: horizon.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: horizon.apiOverride.tls
       - description: Ironic - Parameters related to the Ironic services
         displayName: Ironic
         path: ironic
@@ -126,6 +141,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: ironic.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: ironic.apiOverride.tls
       - description: Enabled - Whether Ironic services should be deployed and managed
         displayName: Enabled
         path: ironic.enabled
@@ -135,6 +153,9 @@ spec:
           manifest of several child resources.
         displayName: Inspector Override
         path: ironic.inspectorOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: ironic.inspectorOverride.tls
       - description: Template - Overrides to use when creating the Ironic services
         displayName: Template
         path: ironic.template
@@ -145,6 +166,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: keystone.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: keystone.apiOverride.tls
       - description: Enabled - Whether Keystone service should be deployed and managed
         displayName: Enabled
         path: keystone.enabled
@@ -157,6 +181,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: manila.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: manila.apiOverride.tls
       - description: Enabled - Whether Manila service should be deployed and managed
         displayName: Enabled
         path: manila.enabled
@@ -191,6 +218,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: neutron.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: neutron.apiOverride.tls
       - description: Enabled - Whether Neutron service should be deployed and managed
         displayName: Enabled
         path: neutron.enabled
@@ -210,12 +240,18 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: nova.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: nova.apiOverride.tls
       - description: CellOverride, provides the ability to override the generated
           manifest of several child resources for a nova cell. cell0 never have compute
           nodes and therefore it won't have a noVNCProxy deployed. Providing an override
           for cell0 noVNCProxy does not have an effect.
         displayName: Cell Override
         path: nova.cellOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: nova.cellOverride.noVNCProxy.tls
       - description: Enabled - Whether Nova services should be deployed and managed
         displayName: Enabled
         path: nova.enabled
@@ -228,6 +264,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: octavia.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: octavia.apiOverride.tls
       - description: Enabled - Whether the Octavia service should be deployed and
           managed
         displayName: Enabled
@@ -237,6 +276,13 @@ spec:
       - description: Template - Overrides to use when creating Octavia Resources
         displayName: Template
         path: octavia.template
+      - description: OpenStackClient - Parameters related to the OpenStackClient
+        displayName: Open Stack Client
+        path: openstackclient
+      - description: Template - Overrides to use when creating the OpenStackClient
+          Resource
+        displayName: Template
+        path: openstackclient.template
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn
@@ -266,6 +312,9 @@ spec:
           of several child resources.
         displayName: APIOverride
         path: placement.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: placement.apiOverride.tls
       - description: Enabled - Whether Placement service should be deployed and managed
         displayName: Enabled
         path: placement.enabled
@@ -312,9 +361,23 @@ spec:
           manifest of several child resources.
         displayName: Proxy Override
         path: swift.proxyOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: swift.proxyOverride.tls
       - description: Template - Overrides to use when creating Swift Resources
         displayName: Template
         path: swift.template
+      - description: TLS - Parameters related to the TLS
+        displayName: TLS
+        path: tls
+      - description: The key must be the endpoint type (public, internal)
+        displayName: Endpoint
+        path: tls.endpoint
+      - description: Enabled - Whether TLS should be enabled for endpoint type
+        displayName: Enabled
+        path: tls.endpoint.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

@@ -79,14 +79,14 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 
 		var ctrlResult reconcile.Result
-		serviceOverrides, ctrlResult, err = EnsureRoute(
+		serviceOverrides, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			horizon,
 			svcs,
 			serviceOverrides,
-			instance.Spec.Horizon.APIOverride.Route,
+			instance.Spec.Horizon.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHorizonReadyCondition,
 		)
 		if err != nil {

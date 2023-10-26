@@ -105,14 +105,14 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Nova.Template.APIServiceTemplate.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Nova.Template.APIServiceTemplate.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			nova,
 			svcs,
 			instance.Spec.Nova.Template.APIServiceTemplate.Override.Service,
-			instance.Spec.Nova.APIOverride.Route,
+			instance.Spec.Nova.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
 		)
 		if err != nil {
@@ -147,7 +147,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			}
 
 			var ctrlResult reconcile.Result
-			routedOverrideSpec, ctrlResult, err := EnsureRoute(
+			routedOverrideSpec, ctrlResult, err := EnsureEndpointConfig(
 				ctx,
 				instance,
 				helper,
@@ -156,7 +156,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				map[service.Endpoint]service.RoutedOverrideSpec{
 					service.EndpointPublic: *cellTemplate.NoVNCProxyServiceTemplate.Override.Service,
 				},
-				instance.Spec.Nova.CellOverride[cellName].NoVNCProxy.Route,
+				instance.Spec.Nova.CellOverride[cellName].NoVNCProxy,
 				corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
 			)
 			if err != nil {

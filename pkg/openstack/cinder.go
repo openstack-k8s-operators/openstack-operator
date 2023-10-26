@@ -68,14 +68,14 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Cinder.Template.CinderAPI.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Cinder.Template.CinderAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			cinder,
 			svcs,
 			instance.Spec.Cinder.Template.CinderAPI.Override.Service,
-			instance.Spec.Cinder.APIOverride.Route,
+			instance.Spec.Cinder.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeCinderReadyCondition,
 		)
 		if err != nil {

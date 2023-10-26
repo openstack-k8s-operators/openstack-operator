@@ -5,6 +5,12 @@ metadata:
 spec:
   secret: osp-secret
   storageClass: local-storage
+  #tls:
+  #  endpoint:
+  #    internal:
+  #      enabled: false
+  #    public:
+  #      enabled: true
   keystone:
     template:
       databaseInstance: openstack

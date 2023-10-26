@@ -77,14 +77,14 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Ironic.Template.IronicAPI.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Ironic.Template.IronicAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			ironic,
 			svcs,
 			instance.Spec.Ironic.Template.IronicAPI.Override.Service,
-			instance.Spec.Ironic.APIOverride.Route,
+			instance.Spec.Ironic.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
 		)
 		if err != nil {
@@ -107,14 +107,14 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Ironic.Template.IronicInspector.Override.Service, ctrlResult, err = EnsureRoute(
+		instance.Spec.Ironic.Template.IronicInspector.Override.Service, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			ironic,
 			svcs,
 			instance.Spec.Ironic.Template.IronicInspector.Override.Service,
-			instance.Spec.Ironic.InspectorOverride.Route,
+			instance.Spec.Ironic.InspectorOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
 		)
 		if err != nil {

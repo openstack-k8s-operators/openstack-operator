@@ -15,6 +15,7 @@ package v1beta1
 
 import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -31,16 +32,25 @@ type OpenStackClientSpec struct {
 	// +kubebuilder:validation:Required
 	// ContainerImage for the the OpenstackClient container (will be set to environmental default if empty)
 	ContainerImage string `json:"containerImage"`
+
 	// +kubebuilder:validation:Required
+	// +kubebuilder:default=openstack-config
 	// OpenStackConfigMap is the name of the ConfigMap containing the clouds.yaml
-	OpenStackConfigMap string `json:"openStackConfigMap"`
+	OpenStackConfigMap *string `json:"openStackConfigMap"`
+
 	// +kubebuilder:validation:Required
+	// +kubebuilder:default=openstack-config-secret
 	// OpenStackConfigSecret is the name of the Secret containing the secure.yaml
-	OpenStackConfigSecret string `json:"openStackConfigSecret"`
+	OpenStackConfigSecret *string `json:"openStackConfigSecret"`
 
 	// +kubebuilder:validation:Optional
 	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Secret containing any CA certificates which should be added to deployment pods
+	tls.Ca `json:",inline"`
 }
 
 // OpenStackClientStatus defines the observed state of OpenStackClient
