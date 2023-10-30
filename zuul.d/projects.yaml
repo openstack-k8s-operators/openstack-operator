@@ -1,5 +1,39 @@
 ---
+- job:
+    name: openstack-operator-tempest-multinode
+    parent: podified-multinode-edpm-deployment-crc-3comp
+    dependencies: ["openstack-k8s-operators-content-provider"]
+    vars:
+      cifmw_tempest_tempestconf_profile:
+          overrides:
+            compute.min_compute_nodes: 3
+            compute-feature-enabled.vnc_console: true
+            compute-feature-enabled.stable_rescue: true
+            compute_feature_enabled.hostname_fqdn_sanitization: true
+            validation.run_validation: true
+            # NOTE(gibi): This is a WA to force the publicURL as otherwise
+            # tempest gets configured with adminURL and that causes test
+            # instability.
+            identity.v3_endpoint_type: public
+      cifmw_tempest_tests_allowed:
+      # NOTE(gibi): enable only the high level scenario tests to keep the
+      # job run time reasonable
+        - tempest.scenario
+      cifmw_tempest_tests_skipped:
+      # NOTE(gibi): there are no cinder backend enabled so test needing a
+      # volumes needs to be skipped
+        - tempest.scenario.test_minimum_basic.TestMinimumBasicScenario
+        - test_shelve_volume_backed_instance
+        - tempest.scenario.test_stamp_pattern.TestStampPattern
+        - tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
+      # NOTE(gibi): move operations does not work yet
+        - test_server_connectivity_cold_migration
+        - test_server_connectivity_live_migration
+        - test_server_connectivity_resize
 - project:
     name: openstack-k8s-operators/openstack-operator
     templates:
       - podified-multinode-edpm-baremetal-pipeline
+    github-check:
+      jobs:
+        - openstack-operator-tempest-multinode
