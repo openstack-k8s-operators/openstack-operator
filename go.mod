@@ -5,33 +5,33 @@ go 1.19
 require (
 	github.com/cert-manager/cert-manager v1.11.5
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/logr v1.3.0
 	github.com/imdario/mergo v0.3.16
 	github.com/onsi/ginkgo/v2 v2.13.0
-	github.com/onsi/gomega v1.28.1
+	github.com/onsi/gomega v1.29.0
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20231020183900-9e910befd6b1
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20231025160052-5d51372f9dba
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20231025155817-d0678103cc7d
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20231029224549-c73b9e5eddac
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20231029084849-1626f1b5fd75
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20231024034110-9dd57dde400d
-	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20231025072835-a16aa54e25d7
+	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20231030011854-d014e871e1c1
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231020142809-b6b6796c004f
-	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231024213007-f31460847218
+	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231026221435-33533d2716d9
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231020144009-3e445cd965f8
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231026121133-ba4e6b302156
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231026121133-ba4e6b302156
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231026121133-ba4e6b302156
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231027113646-46f2fdbf77f1
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231027113646-46f2fdbf77f1
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231027113646-46f2fdbf77f1
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20231025113820-f49225061a75
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20231024153304-3bd4917dd1d5
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20231024012242-a8ddfbf9ad44
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20231023151852-dff958978e7e
+	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20231027160956-be7c8bc55252
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20231024120852-0456c0ac7b33
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20231023175719-eb5337817c2c
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231026104821-01bd4fad7f1e
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230725141229-4ce90d0120fd
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20231024074835-a78eb29a9730
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20231023114150-dd05f83eb75a
-	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20231024223604-5e8a0298f64c
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20231024132610-e981d0453b44
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20231027163223-d167c0bc319e
+	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20231027133710-2ab891796f11
+	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20231027131443-90f3912444f1
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20231026160130-4d8f151f7f30
 	github.com/operator-framework/api v0.17.6
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	go.uber.org/zap v1.26.0
@@ -71,7 +71,7 @@ require (
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	github.com/gophercloud/gophercloud v1.7.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -81,8 +81,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231026121133-ba4e6b302156 //indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231026121133-ba4e6b302156 //indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231027113646-46f2fdbf77f1 //indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231027113646-46f2fdbf77f1 //indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
