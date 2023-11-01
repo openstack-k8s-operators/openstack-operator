@@ -124,7 +124,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Eventually(func(g Gomega) {
 				th.GetSecret(names.RootCAPublicName)
 				caBundle := th.GetSecret(names.CABundleName)
-				g.Expect(len(caBundle.Data)).Should(Equal(int(1)))
+				g.Expect(caBundle.Data).Should(HaveLen(int(1)))
+				// g.Expect(len(caBundle.Data)).Should(Equal(int(1)))
 			}, timeout, interval).Should(Succeed())
 		})
 	})
