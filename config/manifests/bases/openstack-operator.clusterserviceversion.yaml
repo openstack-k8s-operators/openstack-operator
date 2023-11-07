@@ -4,6 +4,7 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
+    features.operators.openshift.io/disconnected: "true"
     operatorframework.io/suggested-namespace: openstack-operators
     operators.openshift.io/infrastructure-features: '["disconnected"]'
     operators.operatorframework.io/builder: operator-sdk-v1.26.0
