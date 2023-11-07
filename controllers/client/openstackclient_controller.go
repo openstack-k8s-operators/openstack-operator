@@ -26,14 +26,19 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
@@ -368,8 +373,63 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 }
 
+// fields to index to reconcile when change
+const (
+	caSecretNameField          = ".spec.caSecretName"
+	openStackConfigMapField    = ".spec.openStackConfigMap"
+	openStackConfigSecretField = ".spec.openStackConfigSecret"
+)
+
+var (
+	allWatchFields = []string{
+		caSecretNameField,
+		openStackConfigMapField,
+		openStackConfigSecretField,
+	}
+)
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
+	// index caSecretName
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &clientv1.OpenStackClient{}, caSecretNameField, func(rawObj client.Object) []string {
+		// Extract the secret name from the spec, if one is provided
+		cr := rawObj.(*clientv1.OpenStackClient)
+		if cr.Spec.CaSecretName == "" {
+			return nil
+		}
+		return []string{cr.Spec.CaSecretName}
+	}); err != nil {
+		return err
+	}
+	// index openStackConfigMap
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &clientv1.OpenStackClient{}, openStackConfigMapField, func(rawObj client.Object) []string {
+		// Extract the configmap name from the spec, if one is provided
+		cr := rawObj.(*clientv1.OpenStackClient)
+		if cr.Spec.OpenStackConfigMap == nil {
+			return nil
+		}
+		if *cr.Spec.OpenStackConfigMap == "" {
+			return nil
+		}
+		return []string{*cr.Spec.OpenStackConfigMap}
+	}); err != nil {
+		return err
+	}
+	// index openStackConfigSecret
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &clientv1.OpenStackClient{}, openStackConfigSecretField, func(rawObj client.Object) []string {
+		// Extract the configmap name from the spec, if one is provided
+		cr := rawObj.(*clientv1.OpenStackClient)
+		if cr.Spec.OpenStackConfigSecret == nil {
+			return nil
+		}
+		if *cr.Spec.OpenStackConfigSecret == "" {
+			return nil
+		}
+		return []string{*cr.Spec.OpenStackConfigSecret}
+	}); err != nil {
+		return err
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&clientv1.OpenStackClient{}).
@@ -377,8 +437,44 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
-		Watches( // watch for secrets we added ourselves as additional owners, NOT as controller
+		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			&handler.EnqueueRequestForOwner{OwnerType: &clientv1.OpenStackClient{}, IsController: false}).
+			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
+		Watches(
+			&source.Kind{Type: &corev1.ConfigMap{}},
+			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
 		Complete(r)
+}
+
+func (r *OpenStackClientReconciler) findObjectsForSrc(src client.Object) []reconcile.Request {
+	requests := []reconcile.Request{}
+
+	for _, field := range allWatchFields {
+		crList := &clientv1.OpenStackClientList{}
+		listOps := &client.ListOptions{
+			FieldSelector: fields.OneTermEqualSelector(field, src.GetName()),
+			Namespace:     src.GetNamespace(),
+		}
+		err := r.List(context.TODO(), crList, listOps)
+		if err != nil {
+			return []reconcile.Request{}
+		}
+
+		for _, item := range crList.Items {
+			requests = append(requests,
+				reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Name:      item.GetName(),
+						Namespace: item.GetNamespace(),
+					},
+				},
+			)
+		}
+	}
+
+	return requests
 }
