@@ -135,8 +135,8 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
 
 	// create/update combined CA secret
-	if instance.Spec.TLS.CaSecretName != "" {
-		caSecret, _, err := secret.GetSecret(ctx, helper, instance.Spec.TLS.CaSecretName, instance.Namespace)
+	if instance.Spec.TLS.CaBundleSecretName != "" {
+		caSecret, _, err := secret.GetSecret(ctx, helper, instance.Spec.TLS.CaBundleSecretName, instance.Namespace)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1.OpenStackControlPlaneCAReadyCondition,
@@ -144,7 +144,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 				condition.SeverityWarning,
 				corev1.OpenStackControlPlaneCAReadyErrorMessage,
 				"secret",
-				instance.Spec.TLS.CaSecretName,
+				instance.Spec.TLS.CaBundleSecretName,
 				err.Error()))
 
 			return ctrlResult, err
