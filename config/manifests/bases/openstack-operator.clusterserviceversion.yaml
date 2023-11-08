@@ -54,6 +54,22 @@ spec:
       - description: Template - Overrides to use when creating Cinder Resources
         displayName: Template
         path: cinder.template
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: designate.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: designate.apiOverride.tls
+      - description: Enabled - Whether the Designate service should be deployed and
+          managed
+        displayName: Enabled
+        path: designate.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating Designate Resources
+        displayName: Template
+        path: designate.template
       - description: DNS - Parameters related to the DNSMasq service
         displayName: DNS
         path: dns

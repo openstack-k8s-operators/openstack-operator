@@ -32,6 +32,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
@@ -93,6 +94,7 @@ func init() {
 	utilruntime.Must(ovnv1.AddToScheme(scheme))
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
 	utilruntime.Must(octaviav1.AddToScheme(scheme))
+	utilruntime.Must(designatev1.AddToScheme(scheme))
 	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
@@ -299,4 +301,7 @@ func setupServiceOperatorDefaults() {
 
 	// Octavia
 	octaviav1.SetupDefaults()
+
+	// Designate
+	designatev1.SetupDefaults()
 }
