@@ -159,10 +159,10 @@ github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231026221435-3
 github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231026221435-33533d2716d9/go.mod h1:jvTIQq25VtL21YtigO639tstZjc+aDwgOXk8/k58KsY=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231020144009-3e445cd965f8 h1:PpTqb+ZQfKJ81M2ngBsVAXWrxdpTogeWTgNAOYHEsXk=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231020144009-3e445cd965f8/go.mod h1:sDYtAWryP7mF2v4XfmKdAoFquVAMts2J5PuYFV9VBQU=
-github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231027113646-46f2fdbf77f1 h1:IBqwFm4+3TEkKIie7PhwYf8t46pV+QQIlkFfoRmTYQQ=
-github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231027113646-46f2fdbf77f1/go.mod h1:TmvBx0eRe/K3hqPPwzhvjBhl3ugtpcmuV5KYjSpCMj0=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231027113646-46f2fdbf77f1 h1:2bUnS5bGT77jBguPF2zyivaHhcfWti/yB9TUXN803hY=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231027113646-46f2fdbf77f1/go.mod h1:NvjAETczXby5m3IvylR3YaOiEBWkmWbHBx/UrnUVtfA=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231109064837-a0ac89bc5a39 h1:f6F22jZ6HNBdlrTBDziaoWM1HqW2LOME3nq+07SuC+s=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231109064837-a0ac89bc5a39/go.mod h1:Gr8E0kTkczsoUJ1AIzj9Z5vhl6V21ZrNJXICMB527qI=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231102083359-58e12a1299b2 h1:U4hwPDoo9k2wo6PldPyJbgfvo9Mdyuhum7vLWTHez1c=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231102083359-58e12a1299b2/go.mod h1:NvjAETczXby5m3IvylR3YaOiEBWkmWbHBx/UrnUVtfA=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231027113646-46f2fdbf77f1 h1:tcqkGudMGkhYtLbMq8O0BVggrqsSdcdw1hEzplAO2Xc=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231027113646-46f2fdbf77f1/go.mod h1:bGwj+Spj1d880n7PhlmaRhLXpzTaX61b+ET0pfhm5gU=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231027113646-46f2fdbf77f1 h1:XeHpej7gpMu3rMy97+JPm8BUXsxbCwK/prYXmQsIhco=

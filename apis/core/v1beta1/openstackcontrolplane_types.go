@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
@@ -38,7 +39,6 @@ import (
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
-	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
