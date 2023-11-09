@@ -358,16 +358,21 @@ func (ed *EndpointDetails) CreateRoute(
 				}
 			}
 		} else {
+			certRequest := certmanager.CertificateRequest{
+				IssuerName:  ed.TLS.Issuer,
+				CertName:    ed.Name,
+				Duration:    nil,
+				Hostnames:   []string{*ed.Hostname},
+				Ips:         nil,
+				Annotations: ed.Annotations,
+				Labels:      ed.Labels,
+				Usages:      nil,
+			}
 			//create the cert using our issuer for the endpoint
 			certSecret, ctrlResult, err = certmanager.EnsureCert(
 				ctx,
 				helper,
-				ed.TLS.Issuer,
-				ed.Name,
-				nil,
-				[]string{*ed.Hostname},
-				ed.Annotations,
-				ed.Labels)
+				certRequest)
 			if err != nil {
 				return ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {
