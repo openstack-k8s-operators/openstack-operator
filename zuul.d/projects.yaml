@@ -26,10 +26,8 @@
         - test_shelve_volume_backed_instance
         - tempest.scenario.test_stamp_pattern.TestStampPattern
         - tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
-      # NOTE(gibi): move operations does not work yet
-        - test_server_connectivity_cold_migration
+      # NOTE(gibi): live migration does not work yet
         - test_server_connectivity_live_migration
-        - test_server_connectivity_resize
 - project:
     name: openstack-k8s-operators/openstack-operator
     templates:
