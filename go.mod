@@ -94,9 +94,9 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/term v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/term v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -123,7 +123,7 @@ replace ( //allow-merging
 )
 
 // Bump golang.org/x/net to avoid Rapid Reset CVE
-replace golang.org/x/net => golang.org/x/net v0.17.0 //allow-merging
+replace golang.org/x/net => golang.org/x/net v0.18.0 //allow-merging
 
 replace github.com/openstack-k8s-operators/openstack-operator/apis => ./apis
 
