@@ -204,6 +204,8 @@ github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.2.0 h1:x/
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.2.0/go.mod h1:gCsHjYsZWdF8DOd4MH++2RZ+tF/VOuhhaVXWB7HrLCg=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.2.1-0.20231110151729-31804fd49e8d h1:2wEHRoos8wFpjQ9XdNDoEpiWMwv4kaPS0chL8nBDgVA=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.2.1-0.20231110151729-31804fd49e8d/go.mod h1:5WxAwn7RQ80InE9EsW8E5q02z4y3LQ8ey0kCOeMItCs=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.2.1-0.20231111000310-b6a099c83479 h1:tvvCXC8Ili0jHBVKxLIYBETxG1+kcrgeTMLRLgNeR14=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.2.1-0.20231111000310-b6a099c83479/go.mod h1:5WxAwn7RQ80InE9EsW8E5q02z4y3LQ8ey0kCOeMItCs=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231005142619-75b1fbd8777c h1:yTBjF7jvRwFtKCNirjNQ/a28RoZWtcK3Zv8+UXPDA7A=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231005142619-75b1fbd8777c/go.mod h1:NoT8mqCPShT+DaSjVbA9VHzwf/TtQp/zLvKvMk6FwIE=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231109134311-9ce7c9365645 h1:aGhjLo9/sV5BJbj+Y6UPuCffpvDdvSqMs+XfBbpfd9I=
