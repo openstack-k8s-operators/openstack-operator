@@ -18,7 +18,6 @@
             compute-feature-enabled.attach_encrypted_volume: false
             compute-feature-enabled.live_migration: true
             compute-feature-enabled.block_migration_for_live_migration: true
-            validation.run_validation: true
             # NOTE(gibi): This is a WA to force the publicURL as otherwise
             # tempest gets configured with adminURL and that causes test
             # instability.
