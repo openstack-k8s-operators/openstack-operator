@@ -1640,6 +1640,109 @@ spec:
                         required:
                         - containerImage
                         type: object
+                      designateBackendbind9:
+                        properties:
+                          None:
+                            type: string
+                          backendMdnsServerProtocol:
+                            type: string
+                          backendWorkerServerProtocol:
+                            type: string
+                          containerImage:
+                            type: string
+                          customServiceConfig:
+                            type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
+                          databaseHostname:
+                            type: string
+                          databaseUser:
+                            default: designate
+                            type: string
+                          debug:
+                            properties:
+                              initContainer:
+                                default: false
+                                type: boolean
+                              service:
+                                default: false
+                                type: boolean
+                            type: object
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          passwordSelectors:
+                            default:
+                              database: DesignateDatabasePassword
+                              service: DesignatePassword
+                            properties:
+                              database:
+                                default: DesignateDatabasePassword
+                                type: string
+                              service:
+                                default: DesignatePassword
+                                type: string
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          secret:
+                            type: string
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: designate
+                            type: string
+                          transportURLSecret:
+                            type: string
+                        required:
+                        - containerImage
+                        type: object
                       designateCentral:
                         properties:
                           None:
@@ -2112,6 +2215,7 @@ spec:
                         type: string
                     required:
                     - designateAPI
+                    - designateBackendbind9
                     - designateCentral
                     - designateMdns
                     - designateProducer

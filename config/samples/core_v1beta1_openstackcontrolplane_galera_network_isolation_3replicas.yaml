@@ -337,7 +337,7 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
-      desiganteAPI:
+      designateAPI:
         override:
           service:
             internal:
@@ -356,7 +356,11 @@ spec:
           - designate
       designateProducer:
         replicas: 0
-      designateMdn:
+      designateMdns:
+        replicas: 0
+        networkAttachements:
+          - designate
+      designateBackendbind9:
         replicas: 0
         networkAttachements:
           - designate
