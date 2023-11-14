@@ -18,6 +18,7 @@ import (
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -48,7 +49,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 
 		for _, config := range instance.Spec.TLS.Endpoint {
 			if config.Enabled {
-				openstackclient.Spec.Ca.CaBundleSecretName = CombinedCASecret
+				openstackclient.Spec.Ca.CaBundleSecretName = tls.CABundleSecret
 				break
 			}
 		}

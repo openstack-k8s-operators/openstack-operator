@@ -57,6 +57,13 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// preserve any previously set TLS certs,set CA cert
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Cinder.Template.CinderAPI.TLS = cinder.Spec.CinderAPI.TLS
+	}
+	instance.Spec.Cinder.Template.CinderAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
+	var endpointDetails = Endpoints{}
 	if cinder.Status.Conditions.IsTrue(cinderv1.CinderAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -69,7 +76,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Cinder.Template.CinderAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -78,12 +85,19 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Cinder.Template.CinderAPI.Override.Service,
 			instance.Spec.Cinder.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeCinderReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Cinder.Template.CinderAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Cinder.Template.CinderAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Cinder.Template.CinderAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")

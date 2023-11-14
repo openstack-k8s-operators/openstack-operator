@@ -684,6 +684,24 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         required:
                         - containerImage
                         type: object
@@ -4568,6 +4586,24 @@ spec:
                               type: string
                             storageRequest:
                               type: string
+                            tls:
+                              properties:
+                                api:
+                                  properties:
+                                    internal:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
+                                    public:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
+                                  type: object
+                                caBundleSecretName:
+                                  type: string
+                              type: object
                             type:
                               default: split
                               enum:
@@ -6432,6 +6468,24 @@ spec:
                         type: object
                       secret:
                         type: string
+                      tls:
+                        properties:
+                          api:
+                            properties:
+                              internal:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                              public:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                            type: object
+                          caBundleSecretName:
+                            type: string
+                        type: object
                       trustFlushArgs:
                         default: ""
                         type: string
@@ -6445,6 +6499,7 @@ spec:
                     - containerImage
                     - databaseInstance
                     - memcachedInstance
+                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
@@ -8663,6 +8718,24 @@ spec:
                       serviceUser:
                         default: neutron
                         type: string
+                      tls:
+                        properties:
+                          api:
+                            properties:
+                              internal:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                              public:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                            type: object
+                          caBundleSecretName:
+                            type: string
+                        type: object
                     required:
                     - containerImage
                     - databaseInstance
@@ -15953,6 +16026,23 @@ spec:
                   - type
                   type: object
                 type: array
+              tls:
+                properties:
+                  caBundleSecretName:
+                    type: string
+                  endpoint:
+                    additionalProperties:
+                      properties:
+                        expires:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - expires
+                      - name
+                      type: object
+                    type: object
+                type: object
             type: object
         type: object
     served: true

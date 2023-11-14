@@ -69,6 +69,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	}
 
 	// Heat API
+	var apiServiceEndpointDetails = Endpoints{}
 	if heat.Status.Conditions.IsTrue(heatv1.HeatAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -81,7 +82,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Heat.Template.HeatAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		apiServiceEndpointDetails, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -90,15 +91,19 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatAPI.Override.Service,
 			instance.Spec.Heat.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Heat.Template.HeatAPI.Override.Service = apiServiceEndpointDetails.GetEndpointServiceOverrides()
 	}
 
 	// Heat CFNAPI
+	var cfnAPIServiceEndpointDetails = Endpoints{}
 	if heat.Status.Conditions.IsTrue(heatv1.HeatCfnAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -111,7 +116,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		cfnAPIServiceEndpointDetails, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -120,12 +125,15 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatCfnAPI.Override.Service,
 			instance.Spec.Heat.CnfAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service = cfnAPIServiceEndpointDetails.GetEndpointServiceOverrides()
 	}
 
 	Log := GetLogger(ctx)

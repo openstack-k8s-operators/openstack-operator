@@ -58,6 +58,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		}
 	}
 
+	var endpointDetails = Endpoints{}
 	if swift.Status.Conditions.IsTrue(swiftv1.SwiftProxyReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -70,7 +71,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Swift.Template.SwiftProxy.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -79,12 +80,15 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			instance.Spec.Swift.Template.SwiftProxy.Override.Service,
 			instance.Spec.Swift.ProxyOverride,
 			corev1beta1.OpenStackControlPlaneExposeSwiftReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Swift.Template.SwiftProxy.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	helper.GetLogger().Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")

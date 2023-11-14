@@ -25,13 +25,14 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240104130506-42419651f900
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240103003254-97178240dd81
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
-	k8s.io/apimachinery v0.27.7
+	k8s.io/apimachinery v0.28.1
 	sigs.k8s.io/controller-runtime v0.15.1
 )
 
 require (
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3 // indirect
 	github.com/rhobs/observability-operator v0.0.20 // indirect
@@ -78,7 +79,7 @@ require (
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/oauth2 v0.10.0 // indirect
+	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
@@ -89,12 +90,12 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.27.7
-	k8s.io/apiextensions-apiserver v0.27.7 //indirect
-	k8s.io/client-go v0.27.7
-	k8s.io/component-base v0.27.7 //indirect
+	k8s.io/api v0.28.1
+	k8s.io/apiextensions-apiserver v0.28.1 //indirect
+	k8s.io/client-go v0.28.1
+	k8s.io/component-base v0.28.1 //indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20230525220651-2546d827e515 //indirect
+	k8s.io/kube-openapi v0.0.0-20230905202853-d090da108d2f //indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e //indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd //indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0 // indirect
@@ -102,13 +103,22 @@ require (
 )
 
 replace ( //allow-merging
+	github.com/google/gnostic => github.com/google/gnostic v0.6.9
 	// pin to k8s 0.26.x for now
-	k8s.io/api => k8s.io/api v0.26.9
-	k8s.io/apimachinery => k8s.io/apimachinery v0.26.9
-	k8s.io/client-go => k8s.io/client-go v0.26.9
-	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.14.6
+	k8s.io/api => k8s.io/api v0.26.11
+	k8s.io/apimachinery => k8s.io/apimachinery v0.26.11
+	k8s.io/client-go => k8s.io/client-go v0.26.11
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.14.7
 )
 
 // mschuppert: map to latest commit from release-4.13 tag
 // must consistent within modules and service operators
 replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7 //allow-merging
+
+replace github.com/openstack-k8s-operators/keystone-operator/api => github.com/stuggi/keystone-operator/api v0.0.0-20240110132207-643df3216ef6
+
+replace github.com/openstack-k8s-operators/neutron-operator/api => github.com/stuggi/neutron-operator/api v0.0.0-20240110132446-b7dd116f719a
+
+replace github.com/openstack-k8s-operators/glance-operator/api => github.com/stuggi/glance-operator/api v0.0.0-20240110140133-e82ebb00ccb7
+
+replace github.com/openstack-k8s-operators/cinder-operator/api => github.com/stuggi/cinder-operator/api v0.0.0-20240110132541-fed2378a8cb1

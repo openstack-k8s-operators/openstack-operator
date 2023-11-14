@@ -56,6 +56,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		}
 	}
 
+	var endpointDetails = Endpoints{}
 	if barbican.Status.Conditions.IsTrue(barbicanv1.BarbicanAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -68,7 +69,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		}
 
 		var ctrlResult reconcile.Result
-		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -77,12 +78,15 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			instance.Spec.Barbican.Template.BarbicanAPI.Override.Service,
 			instance.Spec.Barbican.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeBarbicanReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	helper.GetLogger().Info("Reconciling Barbican", "Barbican.Namespace", instance.Namespace, "Barbican.Name", "barbican")

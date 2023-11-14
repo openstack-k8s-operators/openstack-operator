@@ -98,7 +98,6 @@ func clientPodVolumes(
 	instance *clientv1.OpenStackClient,
 ) []corev1.Volume {
 	return []corev1.Volume{
-
 		{
 			Name: "openstack-config",
 			VolumeSource: corev1.VolumeSource{

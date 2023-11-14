@@ -43,6 +43,13 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
+	// When component services got created check if there is the need to create a route
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "glance", Namespace: instance.Namespace}, glance); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	}
+
 	// add selector to service overrides
 	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
 		for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
@@ -55,16 +62,17 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			svcOverride := glanceAPI.Override.Service[endpointType]
 			svcOverride.AddLabel(getGlanceAPILabelMap(glance.Name, name))
 			glanceAPI.Override.Service[endpointType] = svcOverride
-			instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 		}
-	}
-	// When component services got created check if there is the need to create a route
-	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "glance", Namespace: instance.Namespace}, glance); err != nil {
-		if !k8s_errors.IsNotFound(err) {
-			return ctrl.Result{}, err
+
+		// preserve any previously set TLS certs,set CA cert
+		if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+			glanceAPI.TLS.API = glance.Spec.GlanceAPIs[name].TLS.API
 		}
+		glanceAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+		instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 	}
 
+	var endpointDetails = Endpoints{}
 	if glance.Status.Conditions.IsTrue(glancev1.GlanceAPIReadyCondition) {
 		// initialize the main APIOverride struct
 		if instance.Spec.Glance.APIOverride == nil {
@@ -74,7 +82,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		var ctrlResult reconcile.Result
 		var changed bool = false
 		for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
-			if _, ok := instance.Spec.Glance.APIOverride[name]; ok {
+			if _, ok := instance.Spec.Glance.APIOverride[name]; !ok {
 				instance.Spec.Glance.APIOverride[name] = corev1beta1.Override{}
 			}
 			// Retrieve the services by Label and filter on glanceAPI: for
@@ -92,7 +100,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			if err != nil {
 				return ctrl.Result{}, err
 			}
-			_, ctrlResult, err = EnsureEndpointConfig(
+			endpointDetails, ctrlResult, err = EnsureEndpointConfig(
 				ctx,
 				instance,
 				helper,
@@ -101,10 +109,18 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				glanceAPI.Override.Service,
 				instance.Spec.Glance.APIOverride[name],
 				corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition,
+				false, // TODO (mschuppert) could be removed when all integrated service support TLS
 			)
 			if err != nil {
 				return ctrlResult, err
 			}
+			glanceAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+			// update TLS cert secret
+			glanceAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+			glanceAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+			instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
+
 			// let's keep track of changes for any instance, but return
 			// only when the iteration on the whole APIList is over
 			if (ctrlResult != ctrl.Result{}) {
@@ -144,6 +160,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			}
 			glance.Spec.ExtraMounts = glanceVolumes
 		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), glance, helper.GetScheme())
 		if err != nil {
 			return err
