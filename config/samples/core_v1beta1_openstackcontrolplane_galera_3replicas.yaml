@@ -53,6 +53,10 @@ spec:
       databaseInstance: openstack
       storageClass: ""
       storageRequest: 10G
+      secret: osp-secret
+      glanceAPI:
+        replicas: 1
+        type: single
   cinder:
     template:
       databaseInstance: openstack

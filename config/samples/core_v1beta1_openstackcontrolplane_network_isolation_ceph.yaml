@@ -101,19 +101,19 @@ spec:
         rbd_store_user = openstack
       storageClass: ""
       storageRequest: 10G
-      glanceAPIInternal:
+      secret: osp-secret
+      glanceAPI:
+        replicas: 1
         override:
           service:
-            metadata:
-              annotations:
-                metallb.universe.tf/address-pool: internalapi
-                metallb.universe.tf/allow-shared-ip: internalapi
-                metallb.universe.tf/loadBalancerIPs: 172.17.0.80
-            spec:
-              type: LoadBalancer
-        networkAttachments:
-        - storage
-      glanceAPIExternal:
+            internal:
+              metadata:
+                annotations:
+                  metallb.universe.tf/address-pool: internalapi
+                  metallb.universe.tf/allow-shared-ip: internalapi
+                  metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+              spec:
+                type: LoadBalancer
         networkAttachments:
         - storage
   keystone:
