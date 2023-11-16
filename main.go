@@ -30,6 +30,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
@@ -107,6 +108,7 @@ func init() {
 	utilruntime.Must(redisv1.AddToScheme(scheme))
 	utilruntime.Must(routev1.AddToScheme(scheme))
 	utilruntime.Must(certmgrv1.AddToScheme(scheme))
+	utilruntime.Must(barbicanv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -304,4 +306,7 @@ func setupServiceOperatorDefaults() {
 
 	// Designate
 	designatev1.SetupDefaults()
+
+	//  Barbican
+	barbicanv1.SetupDefaults()
 }

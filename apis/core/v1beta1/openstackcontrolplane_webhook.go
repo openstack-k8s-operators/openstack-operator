@@ -155,6 +155,10 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
 			reqs = "MariaDB or Galera, Memcached, Keystone"
 		}
+	case "Barbican":
+		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
+			reqs = "MariaDB or Galera, Keystone"
+		}
 	case "Octavia":
 		// TODO(beagles): So far we haven't declared Redis as dependency for Octavia, but we might.
 		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
@@ -291,6 +295,13 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 		}
 	}
 
+	if r.Spec.Barbican.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Barbican"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("barbican").Child("enabled"), r.Spec.Barbican.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+
 	return allErrs
 }
 
@@ -419,6 +430,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Octavia
 	r.Spec.Octavia.Template.Default()
+
+	// Barbican
+	r.Spec.Barbican.Template.Default()
 
 	// Redis
 	for key, template := range r.Spec.Redis.Templates {

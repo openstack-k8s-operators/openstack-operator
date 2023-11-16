@@ -159,6 +159,17 @@ spec:
         replicas: 0 # backend needs to be configured
       designateBackendbind9:
         replicas: 0 # backend needs to be configured
+  barbican:
+    enabled: true
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      barbicanAPI:
+        replicas: 1
+      barbicanWorker:
+        replicas: 1
+      barbicanKeystoneListener:
+        replicas: 1
   tls:
     endpoint:
       internal:
@@ -171,6 +182,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
+  - message: OpenStackControlPlane Barbican completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneBarbicanReady
   - message: OpenStackControlPlane CAs completed
     reason: Ready
     status: "True"
@@ -187,6 +202,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneClientReady
+  - message: OpenStackControlPlane barbican service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeBarbicanReady
   - message: OpenStackControlPlane cinder service exposed
     reason: Ready
     status: "True"

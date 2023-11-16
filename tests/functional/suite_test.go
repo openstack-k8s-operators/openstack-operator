@@ -29,6 +29,7 @@ import (
 	routev1 "github.com/openshift/api/route/v1"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
+	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
@@ -157,6 +158,9 @@ var _ = BeforeSuite(func() {
 	designatev1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/designate-operator/api", "../../go.mod", "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	barbicanv1CRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/barbican-operator/api", "../../go.mod", "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 	rabbitmqv2CRDs, err := test.GetCRDDirFromModule(
 		"github.com/rabbitmq/cluster-operator/v2", "../../go.mod", "config/crd/bases")
 	Expect(err).ShouldNot(HaveOccurred())
@@ -185,6 +189,7 @@ var _ = BeforeSuite(func() {
 			swiftv1CRDs,
 			telemetryv1CRDs,
 			designatev1CRDs,
+			barbicanv1CRDs,
 			rabbitmqv2CRDs,
 			certmgrv1CRDs,
 		},
@@ -244,6 +249,8 @@ var _ = BeforeSuite(func() {
 	err = telemetryv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = designatev1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = barbicanv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = rabbitmqv2.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())

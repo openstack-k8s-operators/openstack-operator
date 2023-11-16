@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
@@ -167,6 +168,9 @@ type OpenStackControlPlaneSpec struct {
 
 	// Designate - Parameters related to the Designate service
 	Designate DesignateSection `json:"designate,omitempty"`
+
+	// Barbican - Parameters related to the Barbican service
+	Barbican BarbicanSection `json:"barbican,omitempty"`
 
 	// Redis - Parameters related to the Redis service
 	Redis RedisSection `json:"redis,omitempty"`
@@ -621,6 +625,25 @@ type DesignateSection struct {
 	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
+// BarbicanSection defines the desired state of Barbican service
+type BarbicanSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether Barbican service should be deployed and managed
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating the Barbican Service
+	Template barbicanv1.BarbicanSpec `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+}
+
 // RedisSection defines the desired state of the Redis service
 type RedisSection struct {
 	// +kubebuilder:validation:Optional
@@ -724,6 +747,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneSwiftReadyCondition, condition.InitReason, OpenStackControlPlaneSwiftReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOctaviaReadyCondition, condition.InitReason, OpenStackControlPlaneOctaviaReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneDesignateReadyCondition, condition.InitReason, OpenStackControlPlaneDesignateReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneBarbicanReadyCondition, condition.InitReason, OpenStackControlPlaneBarbicanReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneRedisReadyCondition, condition.InitReason, OpenStackControlPlaneRedisReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
 

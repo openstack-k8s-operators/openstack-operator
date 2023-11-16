@@ -5,6 +5,10 @@ dependencies:
       version: ">=0.0.0"
   - type: olm.package
     value:
+      packageName: barbican-operator
+      version: ">=0.0.0"
+  - type: olm.package
+    value:
       packageName: cinder-operator
       version: ">=0.0.0"
   - type: olm.package

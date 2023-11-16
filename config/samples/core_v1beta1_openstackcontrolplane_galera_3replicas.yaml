@@ -44,6 +44,16 @@ spec:
     templates:
       memcached:
         replicas: 1
+  barbican:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      barbicanAPI:
+        replicas: 1
+      barbicanWorker:
+        replicas: 1
+      barbicanKeystoneListener:
+        replicas: 1
   placement:
     template:
       databaseInstance: openstack
