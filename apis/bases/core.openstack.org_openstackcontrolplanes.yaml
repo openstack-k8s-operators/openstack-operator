@@ -9341,6 +9341,18 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      lbMgmtNetwork:
+                        default:
+                          manageLbMgmtNetworks: true
+                          subnetIpVersion: 4
+                        properties:
+                          manageLbMgmtNetworks:
+                            default: true
+                            type: boolean
+                          subnetIpVersion:
+                            default: 4
+                            type: integer
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -9518,6 +9530,18 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          lbMgmtNetwork:
+                            default:
+                              manageLbMgmtNetworks: true
+                              subnetIpVersion: 4
+                            properties:
+                              manageLbMgmtNetworks:
+                                default: true
+                                type: boolean
+                              subnetIpVersion:
+                                default: 4
+                                type: integer
+                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -9583,6 +9607,9 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          tenantName:
+                            default: service
                             type: string
                           transportURLSecret:
                             type: string
@@ -9613,6 +9640,18 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          lbMgmtNetwork:
+                            default:
+                              manageLbMgmtNetworks: true
+                              subnetIpVersion: 4
+                            properties:
+                              manageLbMgmtNetworks:
+                                default: true
+                                type: boolean
+                              subnetIpVersion:
+                                default: 4
+                                type: integer
+                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -9678,6 +9717,9 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          tenantName:
+                            default: service
                             type: string
                           transportURLSecret:
                             type: string
@@ -9708,6 +9750,18 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          lbMgmtNetwork:
+                            default:
+                              manageLbMgmtNetworks: true
+                              subnetIpVersion: 4
+                            properties:
+                              manageLbMgmtNetworks:
+                                default: true
+                                type: boolean
+                              subnetIpVersion:
+                                default: 4
+                                type: integer
+                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -9773,6 +9827,9 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          tenantName:
+                            default: service
                             type: string
                           transportURLSecret:
                             type: string
