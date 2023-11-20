@@ -8638,8 +8638,6 @@ spec:
                               default: rabbitmq
                               type: string
                             conductorServiceTemplate:
-                              default:
-                                containerImage: quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
                               properties:
                                 containerImage:
                                   type: string
