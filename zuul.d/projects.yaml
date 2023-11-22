@@ -34,6 +34,7 @@
     name: openstack-k8s-operators/openstack-operator
     templates:
       - podified-multinode-edpm-baremetal-pipeline
+      - data-plane-adoption-pipeline
     github-check:
       jobs:
         - openstack-operator-tempest-multinode
