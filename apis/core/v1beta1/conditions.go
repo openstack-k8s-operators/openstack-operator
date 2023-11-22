@@ -105,8 +105,8 @@ const (
 	// OpenStackControlPlaneCAReadyCondition Status=True condition which indicates if the CAs are configured and operational
 	OpenStackControlPlaneCAReadyCondition condition.Type = "OpenStackControlPlaneCAReadyCondition"
 
-	// OpenStackControlPlaneCeilometerReadyCondition Status=True condition which indicates if OpenStack Ceilometer service is configured and operational
-	OpenStackControlPlaneCeilometerReadyCondition condition.Type = "OpenStackControlPlaneCeilometerReady"
+	// OpenStackControlPlaneTelemetryReadyCondition Status=True condition which indicates if OpenStack Telemetry service is configured and operational
+	OpenStackControlPlaneTelemetryReadyCondition condition.Type = "OpenStackControlPlaneTelemetryReady"
 
 	// OpenStackControlPlaneServiceOverrideReadyCondition Status=True condition which indicates if OpenStack service override has created ok
 	OpenStackControlPlaneServiceOverrideReadyCondition condition.Type = "OpenStackControlPlaneServiceOverrideReady"
@@ -355,17 +355,17 @@ const (
 	// OpenStackControlPlaneDNSReadyErrorMessage
 	OpenStackControlPlaneDNSReadyErrorMessage = "OpenStackControlPlane DNS error occured %s"
 
-	// OpenStackControlPlaneCeilometerReadyInitMessage
-	OpenStackControlPlaneCeilometerReadyInitMessage = "OpenStackControlPlane Ceilometer not started"
+	// OpenStackControlPlaneTelemetryReadyInitMessage
+	OpenStackControlPlaneTelemetryReadyInitMessage = "OpenStackControlPlane Telemetry not started"
 
-	// OpenStackControlPlaneCeilometerReadyMessage
-	OpenStackControlPlaneCeilometerReadyMessage = "OpenStackControlPlane Ceilometer completed"
+	// OpenStackControlPlaneTelemetryReadyMessage
+	OpenStackControlPlaneTelemetryReadyMessage = "OpenStackControlPlane Telemetry completed"
 
-	// OpenStackControlPlaneCeilometerReadyRunningMessage
-	OpenStackControlPlaneCeilometerReadyRunningMessage = "OpenStackControlPlane Ceilometer in progress"
+	// OpenStackControlPlaneTelemetryReadyRunningMessage
+	OpenStackControlPlaneTelemetryReadyRunningMessage = "OpenStackControlPlane Telemetry in progress"
 
-	// OpenStackControlPlaneCeilometerReadyErrorMessage
-	OpenStackControlPlaneCeilometerReadyErrorMessage = "OpenStackControlPlane Ceilometer error occured %s"
+	// OpenStackControlPlaneTelemetryReadyErrorMessage
+	OpenStackControlPlaneTelemetryReadyErrorMessage = "OpenStackControlPlane Telemetry error occured %s"
 
 	// OpenStackControlPlaneOctaviaReadyInitMessage
 	OpenStackControlPlaneOctaviaReadyInitMessage = "OpenStackControlPlane Octavia not started"

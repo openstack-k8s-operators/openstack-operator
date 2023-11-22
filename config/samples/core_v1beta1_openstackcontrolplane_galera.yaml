@@ -141,12 +141,21 @@ spec:
       ironicNeutronAgent:
         replicas: 1
       secret: osp-secret
-  ceilometer:
+  telemetry:
+    enabled: true
     template:
-      passwordSelector:
-        service: CeilometerPassword
-      secret: osp-secret
-      serviceUser: ceilometer
+      autoscaling:
+        enabled: false
+        prometheus:
+          deployPrometheus: false
+        aodh:
+          databaseInstance: openstack
+          memcachedInstance: memcached
+          secret: osp-secret
+        heatInstance: heat
+      ceilometer:
+        enabled: true
+        secret: osp-secret
   swift:
     enabled: true
     template:

@@ -457,7 +457,7 @@ rules:
 - apiGroups:
   - telemetry.openstack.org
   resources:
-  - ceilometers
+  - telemetries
   verbs:
   - create
   - delete
