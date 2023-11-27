@@ -27,6 +27,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/util"
+	"golang.org/x/exp/maps"
 
 	semver "github.com/blang/semver/v4"
 	"github.com/operator-framework/api/pkg/lib/version"
@@ -157,14 +158,31 @@ func main() {
 		Status:     csvBase.Status}
 
 	installStrategyBase := csvBase.Spec.InstallStrategy.StrategySpec
-	csvNew.Spec.RelatedImages = csvBase.Spec.RelatedImages
 
-	envVarList := []v1.EnvVar{}
+	uniqueImages := make(map[string]csvv1alpha1.RelatedImage)
+	uniqueEnv := make(map[string]v1.EnvVar)
 	if len(*importEnvFiles) > 0 {
 		for _, filename := range strings.Split(*importEnvFiles, ",") {
-			envVarList = append(envVarList, getEnvsFromFile(filename)...)
+			envVarList := getEnvsFromFile(filename)
+			for _, env := range envVarList {
+				uniqueEnv[env.Name] = env
+				if strings.HasPrefix(env.Name, "RELATED_IMAGE_") {
+					imgName := strings.Replace(strings.ToLower(env.Name), "related_image_", "", -1)
+					uniqueImages[imgName] = csvv1alpha1.RelatedImage{
+						Name:  imgName,
+						Image: env.Value,
+					}
+					imgNameDash := strings.Replace(imgName, "_", "-", -1)
+					uniqueImages[imgNameDash] = csvv1alpha1.RelatedImage{
+						Name:  imgNameDash,
+						Image: env.Value,
+					}
+				}
+			}
+
 		}
 	}
+
 	for _, csvFile := range csvs {
 		if csvFile != "" {
 			csvBytes, err := os.ReadFile(csvFile)
@@ -184,14 +202,31 @@ func main() {
 			for _, container := range csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[0].Spec.Template.Spec.Containers {
 				// Copy env vars from the Service Operator into the OpenStack Operator
 				if container.Name == "manager" {
-					envVarList = append(envVarList, container.Env...)
+					for idx, env := range container.Env {
+						_, ok := uniqueEnv[env.Name]
+						// Ensuring dataplane gets the same hash from service operators
+						if ok && strings.HasPrefix(csvStruct.Name, "dataplane") {
+							container.Env[idx] = uniqueEnv[env.Name]
+							continue
+						}
+						uniqueEnv[env.Name] = env
+					}
 				}
 			}
 
 			installStrategyBase.DeploymentSpecs = append(installStrategyBase.DeploymentSpecs, csvStruct.Spec.InstallStrategy.StrategySpec.DeploymentSpecs...)
 			installStrategyBase.ClusterPermissions = append(installStrategyBase.ClusterPermissions, csvStruct.Spec.InstallStrategy.StrategySpec.ClusterPermissions...)
 			installStrategyBase.Permissions = append(installStrategyBase.Permissions, csvStruct.Spec.InstallStrategy.StrategySpec.Permissions...)
-			csvNew.Spec.RelatedImages = append(csvNew.Spec.RelatedImages, csvStruct.Spec.RelatedImages...)
+			for _, img := range csvStruct.Spec.RelatedImages {
+				_, ok := uniqueImages[img.Name]
+				// Ensuring dataplane doesn't overwrite the service operators related images
+				if ok && strings.HasPrefix(csvStruct.Name, "dataplane") {
+					continue
+				}
+				if img.Name != "manager" {
+					uniqueImages[img.Name] = img
+				}
+			}
 
 			for _, owned := range csvStruct.Spec.CustomResourceDefinitions.Owned {
 				csvNew.Spec.CustomResourceDefinitions.Owned = append(
@@ -229,14 +264,15 @@ func main() {
 		}
 
 	}
+	csvNew.Spec.RelatedImages = append(csvBase.Spec.RelatedImages, maps.Values(uniqueImages)...)
 	if len(*exportEnvFile) > 0 {
-		writeEnvToYaml(*exportEnvFile, envVarList)
+		writeEnvToYaml(*exportEnvFile, maps.Values(uniqueEnv))
 	} else {
 		installStrategyBase.DeploymentSpecs[0].Spec.Template.Spec.Containers[1].Env = append(
 			// OpenStack Operator controller-manager container env vars
 			installStrategyBase.DeploymentSpecs[0].Spec.Template.Spec.Containers[1].Env,
 			// Service Operator controller-manager container env vars
-			envVarList...,
+			maps.Values(uniqueEnv)...,
 		)
 	}
 
