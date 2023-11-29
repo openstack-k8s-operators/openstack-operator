@@ -225,6 +225,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"designate": map[string]interface{}{
 			"enabled": false,
 		},
+		"barbican": map[string]interface{}{
+			"enabled": false,
+		},
 	}
 }
 

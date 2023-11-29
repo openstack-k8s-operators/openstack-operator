@@ -196,6 +196,11 @@ metadata:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
+  name: barbican-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
   name: keystone-public
 ---
 apiVersion: route.openshift.io/v1

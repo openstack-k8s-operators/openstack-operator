@@ -26,6 +26,21 @@ spec:
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
       specDescriptors:
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: barbican.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: barbican.apiOverride.tls
+      - description: Enabled - Whether Barbican service should be deployed and managed
+        displayName: Enabled
+        path: barbican.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Barbican Service
+        displayName: Template
+        path: barbican.template
       - description: Enabled - Whether OpenStack Ceilometer servicesshould be deployed
           and managed
         displayName: Enabled

@@ -147,6 +147,9 @@ const (
 	// OpenStackControlPlaneDesignateReadyCondition Status=True condition which indicates if Designate is configured and operational
 	OpenStackControlPlaneDesignateReadyCondition condition.Type = "OpenStackControlPlaneDesignateReady"
 
+	// OpenStackControlPlaneBarbicanReadyCondition Status=True condition which indicates if Barbican is configured and operational
+	OpenStackControlPlaneBarbicanReadyCondition condition.Type = "OpenStackControlPlaneBarbicanReady"
+
 	// OpenStackControlPlaneRedisReadyCondition Status=True condition which indicates if Redis is configured and operational
 	OpenStackControlPlaneRedisReadyCondition condition.Type = "OpenStackControlPlaneRedisReady"
 
@@ -155,6 +158,9 @@ const (
 
 	// OpenStackControlPlaneExposeDesignateReadyCondition Status=True condition which indicates if Designate is exposed via a route
 	OpenStackControlPlaneExposeDesignateReadyCondition condition.Type = "OpenStackControlPlaneExposeDesignateReady"
+
+	// OpenStackControlPlaneExposeBarbicanReadyCondition Status=True condition which indicates if Barbican is exposed via a route
+	OpenStackControlPlaneExposeBarbicanReadyCondition condition.Type = "OpenStackControlPlaneExposeBarbicanReady"
 )
 
 // OpenStackControlPlane Reasons used by API objects.
@@ -384,6 +390,18 @@ const (
 
 	// OpenStackControlPlaneDesignateReadyErrorMessage
 	OpenStackControlPlaneDesignateReadyErrorMessage = "OpenStackControlPlane Designate error occured %s"
+
+	// OpenStackControlPlaneBarbicanReadyInitMessage
+	OpenStackControlPlaneBarbicanReadyInitMessage = "OpenStackControlPlane Barbican not started"
+
+	// OpenStackControlPlaneBarbicanReadyMessage
+	OpenStackControlPlaneBarbicanReadyMessage = "OpenStackControlPlane Barbican completed"
+
+	// OpenStackControlPlaneBarbicanReadyRunningMessage
+	OpenStackControlPlaneBarbicanReadyRunningMessage = "OpenStackControlPlane Barbican in progress"
+
+	// OpenStackControlPlaneBarbicanReadyErrorMessage
+	OpenStackControlPlaneBarbicanReadyErrorMessage = "OpenStackControlPlane Barbican error occured %s"
 
 	// OpenStackControlPlaneRedisReadyInitMessage
 	OpenStackControlPlaneRedisReadyInitMessage = "OpenStackControlPlane Redis not started"

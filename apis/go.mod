@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/onsi/ginkgo/v2 v2.13.1
 	github.com/onsi/gomega v1.30.0
+	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20231122193628-96ca1e05d8ad
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20231121084647-689b50f424d8
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20231121201004-def8670ef7e9
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20231121125418-e3f2a877f48c
