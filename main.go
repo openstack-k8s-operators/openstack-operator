@@ -282,13 +282,7 @@ func setupServiceOperatorDefaults() {
 	placementv1.SetupDefaults()
 
 	// Heat
-	heatDefaults := heatv1.HeatDefaults{
-		APIContainerImageURL:    os.Getenv("RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT"),
-		CfnAPIContainerImageURL: os.Getenv("RELATED_IMAGE_HEAT_CFNAPI_IMAGE_URL_DEFAULT"),
-		EngineContainerImageURL: os.Getenv("RELATED_IMAGE_HEAT_ENGINE_IMAGE_URL_DEFAULT"),
-	}
-
-	heatv1.SetupHeatDefaults(heatDefaults)
+	heatv1.SetupDefaults()
 
 	// Redis
 	redisv1.SetupDefaults()
