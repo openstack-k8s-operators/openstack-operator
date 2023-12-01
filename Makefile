@@ -234,18 +234,16 @@ $(GINKGO): $(LOCALBIN)
 	test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo
 
 .PHONY: bundle
-bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
+bundle: build manifests kustomize bundle-cache-extra-data ## Generate bundle manifests and metadata, then validate generated files.
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS)
 	cp dependencies.yaml ./bundle/metadata
 	operator-sdk bundle validate ./bundle
-	DOCKERFILE=custom-bundle.Dockerfile /bin/bash hack/pin-bundle-images.sh
-
 
 .PHONY: bundle-build
 bundle-build: bundle ## Build the bundle image.
-	podman build -f custom-bundle.Dockerfile.pinned -t $(BUNDLE_IMG) .
+	podman build -f custom-bundle.Dockerfile -t $(BUNDLE_IMG) .
 
 .PHONY: bundle-push
 bundle-push: ## Push the bundle image.
@@ -364,3 +362,11 @@ run-with-webhook: export HEALTH_PORT?=8081
 run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/configure_local_webhook.sh
 	go run ./main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)"
+
+# refresh the bundle extra data based on go.mod entries
+# bundle extra data includes:
+#  - extracted ENV vars from all operators (required for webhooks)
+#  - dataplane-operator bundle (this gets merged into openstack-operator's bundle)
+.PHONY: bundle-cache-extra-data
+bundle-cache-extra-data: build
+	bash hack/bundle-cache-data.sh
