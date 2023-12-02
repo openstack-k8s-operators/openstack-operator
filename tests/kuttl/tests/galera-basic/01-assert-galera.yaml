@@ -37,8 +37,9 @@ spec:
     template:
       databaseInstance: openstack
       storageRequest: 10G
-      glanceAPI:
-        replicas: 1
+      glanceAPIs:
+        default:
+          replicas: 1
   cinder:
     template:
       databaseInstance: openstack

@@ -64,9 +64,11 @@ spec:
       databaseInstance: openstack
       storageClass: ""
       storageRequest: 10G
-      glanceAPI:
-        type: single
-        replicas: 1
+      keystoneEndpoint: default
+      glanceAPIs:
+        default:
+          type: single
+          replicas: 1
   cinder:
     template:
       databaseInstance: openstack
