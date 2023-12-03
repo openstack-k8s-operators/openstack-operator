@@ -22,17 +22,17 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.1.0
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.1.0
 	github.com/rabbitmq/cluster-operator v1.14.0
-	k8s.io/apimachinery v0.26.10
-	sigs.k8s.io/controller-runtime v0.14.6
+	k8s.io/apimachinery v0.27.7
+	sigs.k8s.io/controller-runtime v0.15.0
 )
 
 require (
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
+	github.com/stretchr/testify v1.8.3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
+	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/tools v0.12.0 // indirect
 )
@@ -44,7 +44,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
@@ -85,10 +85,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.26.10
-	k8s.io/apiextensions-apiserver v0.26.10 //indirect
-	k8s.io/client-go v0.26.10
-	k8s.io/component-base v0.26.10 //indirect
+	k8s.io/api v0.27.7
+	k8s.io/apiextensions-apiserver v0.27.7 //indirect
+	k8s.io/client-go v0.27.7
+	k8s.io/component-base v0.27.7 //indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230515203736-54b630e78af5 //indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b //indirect
