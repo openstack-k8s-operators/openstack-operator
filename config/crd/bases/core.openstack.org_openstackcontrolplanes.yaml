@@ -457,68 +457,6 @@ spec:
                     - serviceAccount
                     type: object
                 type: object
-              ceilometer:
-                properties:
-                  enabled:
-                    default: true
-                    type: boolean
-                  template:
-                    properties:
-                      centralImage:
-                        type: string
-                      computeImage:
-                        type: string
-                      customServiceConfig:
-                        default: '# add your customization here'
-                        type: string
-                      defaultConfigOverwrite:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      ipmiImage:
-                        type: string
-                      networkAttachmentDefinitions:
-                        items:
-                          type: string
-                        type: array
-                      nodeExporterImage:
-                        type: string
-                      notificationImage:
-                        type: string
-                      passwordSelector:
-                        default:
-                          service: CeilometerPassword
-                        properties:
-                          aodhService:
-                            default: AodhPassword
-                            type: string
-                          database:
-                            default: AodhDatabasePassword
-                            type: string
-                          service:
-                            default: CeilometerPassword
-                            type: string
-                        type: object
-                      rabbitMqClusterName:
-                        default: rabbitmq
-                        type: string
-                      secret:
-                        type: string
-                      serviceUser:
-                        default: ceilometer
-                        type: string
-                      sgCoreImage:
-                        type: string
-                    required:
-                    - centralImage
-                    - computeImage
-                    - ipmiImage
-                    - nodeExporterImage
-                    - notificationImage
-                    - secret
-                    - sgCoreImage
-                    type: object
-                type: object
               cinder:
                 properties:
                   apiOverride:
@@ -15335,6 +15273,9 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          enabled:
+                            default: true
+                            type: boolean
                           ipmiImage:
                             type: string
                           networkAttachmentDefinitions:
@@ -15378,9 +15319,6 @@ spec:
                         - secret
                         - sgCoreImage
                         type: object
-                    required:
-                    - autoscaling
-                    - ceilometer
                     type: object
                 type: object
               tls:
