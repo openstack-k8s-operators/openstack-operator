@@ -14,6 +14,8 @@
             # while cinder/nova is not configured to talk to barbican
             # re-enable this when that support is added
             compute-feature-enabled.attach_encrypted_volume: false
+            compute-feature-enabled.live_migration: true
+            compute-feature-enabled.block_migration_for_live_migration: true
             validation.run_validation: true
             # NOTE(gibi): This is a WA to force the publicURL as otherwise
             # tempest gets configured with adminURL and that causes test
@@ -23,6 +25,9 @@
       # NOTE(gibi): enable only the high level scenario tests to keep the
       # job run time reasonable
         - tempest.scenario
+      # Plus an extra live migration test until we have cinder volumes / ceph
+      # to run the live migration scenario tests with it
+        - tempest.api.compute.admin.test_live_migration.LiveAutoBlockMigrationV225Test
       cifmw_tempest_tests_skipped:
       # NOTE(gibi): there are no cinder backend enabled so test needing a
       # volumes needs to be skipped
@@ -30,8 +35,17 @@
         - test_shelve_volume_backed_instance
         - tempest.scenario.test_stamp_pattern.TestStampPattern
         - tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
-      # NOTE(gibi): live migration does not work yet
-        - test_server_connectivity_live_migration
+        - tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_live_migration
+      # Libvirt refuses to live-migrate a paused VM with post-copy enabled
+      # See https://bugs.launchpad.net/nova/+bug/1946752
+        - test_live_block_migration_paused
+      # We need to use a custom cpu model to allow live migrating between
+      # slightly different computes coming from the node pool
+      cifmw_edpm_deploy_nova_compute_extra_config: |
+        [libvirt]
+        cpu_mode = custom
+        cpu_models = Nehalem
+
 - project:
     name: openstack-k8s-operators/openstack-operator
     templates:
