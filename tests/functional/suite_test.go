@@ -302,6 +302,7 @@ var _ = BeforeSuite(func() {
 
 	openstackclientv1.SetupDefaults()
 	corev1.SetupDefaults()
+	cinderv1.SetupDefaults()
 
 	err = (&client_ctrl.OpenStackClientReconciler{
 		Client:  k8sManager.GetClient(),
