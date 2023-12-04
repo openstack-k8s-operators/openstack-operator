@@ -47,6 +47,7 @@ import (
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -300,9 +301,9 @@ var _ = BeforeSuite(func() {
 	err = (&corev1.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
+	openstack.SetupServiceOperatorDefaults()
 	openstackclientv1.SetupDefaults()
 	corev1.SetupDefaults()
-	cinderv1.SetupDefaults()
 
 	err = (&client_ctrl.OpenStackClientReconciler{
 		Client:  k8sManager.GetClient(),

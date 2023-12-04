@@ -70,6 +70,7 @@ import (
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
+	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -199,7 +200,7 @@ func main() {
 	}
 
 	// Defaults for service operators
-	setupServiceOperatorDefaults()
+	openstack.SetupServiceOperatorDefaults()
 
 	// Defaults for OpenStackClient
 	clientv1.SetupDefaults()
@@ -241,67 +242,4 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
-}
-
-// Set up any defaults used by service operator defaulting logic
-func setupServiceOperatorDefaults() {
-	// Acquire environmental defaults and initialize service operators that
-	// require each respective default
-
-	// Cinder
-	cinderv1.SetupDefaults()
-
-	// Glance
-	glancev1.SetupDefaults()
-
-	// Ironic
-	ironicv1.SetupDefaults()
-
-	// Keystone
-	keystonev1.SetupDefaults()
-
-	// Manila
-	manilav1.SetupDefaults()
-
-	// MariaDB
-	mariadbv1.SetupDefaults()
-
-	// Memcached
-	memcachedv1.SetupDefaults()
-
-	// Neutron
-	neutronv1.SetupDefaults()
-
-	// Nova
-	novav1.SetupDefaults()
-
-	// OVN
-	ovnv1.SetupDefaults()
-
-	// Placement
-	placementv1.SetupDefaults()
-
-	// Heat
-	heatv1.SetupDefaults()
-
-	// Redis
-	redisv1.SetupDefaults()
-
-	// DNS
-	networkv1.SetupDefaults()
-
-	// Ceilometer
-	telemetryv1.SetupDefaultsCeilometer()
-
-	// Swift
-	swiftv1.SetupDefaults()
-
-	// Octavia
-	octaviav1.SetupDefaults()
-
-	// Designate
-	designatev1.SetupDefaults()
-
-	//  Barbican
-	barbicanv1.SetupDefaults()
 }
