@@ -16,8 +16,12 @@ function extract_bundle {
 function extract_csv {
     local IN_DIR=$1
     local OUT_DIR=$2
+
     for X in $(file ${IN_DIR}/* | grep gzip | cut -f 1 -d ':'); do
-        tar xvf $X -C ${OUT_DIR} --wildcards --no-anchor '**/*clusterserviceversion.yaml'
+        # NOTE(gibi): There might be multiple gzip in the bundle and
+        # not all of them hand csv file in it. If none of them has
+        # the csv then the build will fail at the csv-merger call
+        tar xvf $X -C ${OUT_DIR} --wildcards --no-anchor '**/*clusterserviceversion.yaml' || true
     done
 }
 
