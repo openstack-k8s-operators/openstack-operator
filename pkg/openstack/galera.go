@@ -93,6 +93,7 @@ func reconcileGalera(
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
 	if !instance.Spec.Galera.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, galera); err != nil {
@@ -102,7 +103,7 @@ func reconcileGalera(
 		return galeraReady, nil
 	}
 
-	helper.GetLogger().Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
+	Log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
 		spec.DeepCopyInto(&galera.Spec)
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), galera, helper.GetScheme())
@@ -117,7 +118,7 @@ func reconcileGalera(
 		return galeraFailed, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("Galera %s - %s", galera.Name, op))
+		Log.Info(fmt.Sprintf("Galera %s - %s", galera.Name, op))
 	}
 
 	if galera.IsReady() {

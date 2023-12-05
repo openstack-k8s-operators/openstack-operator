@@ -28,6 +28,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
 	if !instance.Spec.Manila.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, manila); err != nil {
@@ -86,7 +87,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
-	helper.GetLogger().Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
+	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), manila, func() error {
 		instance.Spec.Manila.Template.DeepCopyInto(&manila.Spec)
 
@@ -132,7 +133,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("Manila %s - %s", manila.Name, op))
+		Log.Info(fmt.Sprintf("Manila %s - %s", manila.Name, op))
 	}
 
 	if manila.IsReady() {

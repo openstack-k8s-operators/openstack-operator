@@ -29,6 +29,8 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		},
 	}
 
+	Log := GetLogger(ctx)
+
 	if !instance.Spec.Keystone.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, keystoneAPI); err != nil {
 			return res, err
@@ -86,6 +88,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	}
 
 	helper.GetLogger().Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
+	Log.Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec)
 
@@ -116,7 +119,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("KeystoneAPI %s - %s", keystoneAPI.Name, op))
+		Log.Info(fmt.Sprintf("KeystoneAPI %s - %s", keystoneAPI.Name, op))
 	}
 
 	if keystoneAPI.IsReady() {

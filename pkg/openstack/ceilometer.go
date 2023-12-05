@@ -30,6 +30,8 @@ func ReconcileCeilometer(ctx context.Context, instance *corev1beta1.OpenStackCon
 		},
 	}
 
+	Log := GetLogger(ctx)
+
 	if !instance.Spec.Ceilometer.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, ceilometer); err != nil {
 			return res, err
@@ -38,7 +40,7 @@ func ReconcileCeilometer(ctx context.Context, instance *corev1beta1.OpenStackCon
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling Ceilometer", ceilometerNamespaceLabel, instance.Namespace, ceilometerNameLabel, ceilometerName)
+	Log.Info("Reconciling Ceilometer", ceilometerNamespaceLabel, instance.Namespace, ceilometerNameLabel, ceilometerName)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ceilometer, func() error {
 		instance.Spec.Ceilometer.Template.DeepCopyInto(&ceilometer.Spec)
 
@@ -63,7 +65,7 @@ func ReconcileCeilometer(ctx context.Context, instance *corev1beta1.OpenStackCon
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("%s %s - %s", ceilometerName, ceilometer.Name, op))
+		Log.Info(fmt.Sprintf("%s %s - %s", ceilometerName, ceilometer.Name, op))
 	}
 
 	if ceilometer.IsReady() {

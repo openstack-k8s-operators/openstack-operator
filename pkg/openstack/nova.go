@@ -45,6 +45,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			Namespace: instance.Namespace,
 		},
 	}
+	Log := GetLogger(ctx)
 
 	if !instance.Spec.Nova.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, nova); err != nil {
@@ -172,7 +173,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 	}
 
-	helper.GetLogger().Info("Reconciling Nova", "Nova.Namespace", instance.Namespace, "Nova.Name", nova.Name)
+	Log.Info("Reconciling Nova", "Nova.Namespace", instance.Namespace, "Nova.Name", nova.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), nova, func() error {
 		// 1)
 		// Nova.Spec.APIDatabaseInstance and each NovaCell.CellDatabaseInstance
@@ -209,7 +210,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("Nova %s - %s", nova.Name, op))
+		Log.Info(fmt.Sprintf("Nova %s - %s", nova.Name, op))
 	}
 
 	if nova.IsReady() {

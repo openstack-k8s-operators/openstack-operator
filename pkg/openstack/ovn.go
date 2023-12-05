@@ -17,6 +17,9 @@ import (
 
 // ReconcileOVN -
 func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+
+	Log := GetLogger(ctx)
+
 	OVNDBClustersReady := len(instance.Spec.Ovn.Template.OVNDBCluster) != 0
 	for name, dbcluster := range instance.Spec.Ovn.Template.OVNDBCluster {
 		OVNDBCluster := &ovnv1.OVNDBCluster{
@@ -34,7 +37,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 			continue
 		}
 
-		helper.GetLogger().Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
+		Log.Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
 		op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNDBCluster, func() error {
 
 			dbcluster.DeepCopyInto(&OVNDBCluster.Spec)
@@ -63,7 +66,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 			return ctrl.Result{}, err
 		}
 		if op != controllerutil.OperationResultNone {
-			helper.GetLogger().Info(fmt.Sprintf("OVNDBCluster %s - %s", OVNDBCluster.Name, op))
+			Log.Info(fmt.Sprintf("OVNDBCluster %s - %s", OVNDBCluster.Name, op))
 		}
 		OVNDBClustersReady = OVNDBClustersReady && OVNDBCluster.IsReady()
 	}
@@ -83,7 +86,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
+	Log.Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNNorthd, func() error {
 
 		instance.Spec.Ovn.Template.OVNNorthd.DeepCopyInto(&OVNNorthd.Spec)
@@ -109,7 +112,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
+		Log.Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
 	}
 
 	OVNController := &ovnv1.OVNController{
@@ -127,7 +130,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		return ctrl.Result{}, nil
 	}
 
-	helper.GetLogger().Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")
+	Log.Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")
 	op, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {
 
 		instance.Spec.Ovn.Template.OVNController.DeepCopyInto(&OVNController.Spec)
@@ -153,7 +156,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("OVNController %s - %s", OVNController.Name, op))
+		Log.Info(fmt.Sprintf("OVNController %s - %s", OVNController.Name, op))
 	}
 
 	// Expect all services (dbclusters, northd, ovn-controller) ready

@@ -18,7 +18,6 @@ package core
 
 import (
 	"context"
-	"fmt"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	routev1 "github.com/openshift/api/route/v1"
@@ -52,14 +51,13 @@ import (
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
+	"github.com/go-logr/logr"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/go-logr/logr"
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // OpenStackControlPlaneReconciler reconciles a OpenStackControlPlane object
@@ -67,7 +65,11 @@ type OpenStackControlPlaneReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
 	Kclient kubernetes.Interface
-	Log     logr.Logger
+}
+
+// GetLog returns a logger object with a prefix of "conroller.name" and aditional controller context fields
+func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Logger {
+	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackControlPlane")
 }
 
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;create;update;patch;delete
@@ -111,8 +113,8 @@ type OpenStackControlPlaneReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.1/pkg/reconcile
 func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-	_ = log.FromContext(ctx)
 
+	Log := r.GetLogger(ctx)
 	// Fetch the OpenStackControlPlane instance
 	instance := &corev1beta1.OpenStackControlPlane{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -121,7 +123,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers. Return and don't requeue.
-			r.Log.Info("OpenStackControlPlane instance is not found, probaby deleted. Nothing to do.")
+			Log.Info("OpenStackControlPlane instance is not found, probaby deleted. Nothing to do.")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
@@ -133,11 +135,11 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		r.Log,
+		Log,
 	)
 	if err != nil {
 		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
-		r.Log.Error(err, fmt.Sprintf("unable to acquire helper for OpenStackControlPlane %s", instance.Name))
+		Log.Error(err, "unable to acquire helper for OpenStackControlPlane")
 		return ctrl.Result{}, err
 	}
 

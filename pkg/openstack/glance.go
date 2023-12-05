@@ -29,6 +29,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		},
 	}
 
+	Log := GetLogger(ctx)
+
 	if !instance.Spec.Glance.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, glance); err != nil {
 			return res, err
@@ -85,7 +87,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
-	helper.GetLogger().Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")
+	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
 		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec)
 
@@ -130,7 +132,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("glance %s - %s", glance.Name, op))
+		Log.Info(fmt.Sprintf("glance %s - %s", glance.Name, op))
 	}
 
 	if glance.IsReady() {

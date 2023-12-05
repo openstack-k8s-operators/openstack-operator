@@ -138,6 +138,8 @@ func reconcileMemcached(
 		},
 	}
 
+	Log := GetLogger(ctx)
+
 	if !instance.Spec.Memcached.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, memcached); err != nil {
 			return memcachedFailed, err
@@ -146,7 +148,7 @@ func reconcileMemcached(
 		return memcachedReady, nil
 	}
 
-	helper.GetLogger().Info("Reconciling Memcached", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
+	Log.Info("Reconciling Memcached", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), memcached, func() error {
 		spec.DeepCopyInto(&memcached.Spec)
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), memcached, helper.GetScheme())
@@ -161,7 +163,7 @@ func reconcileMemcached(
 		return memcachedFailed, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("Memcached %s - %s", memcached.Name, op))
+		Log.Info(fmt.Sprintf("Memcached %s - %s", memcached.Name, op))
 	}
 
 	if memcached.IsReady() {
