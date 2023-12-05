@@ -7,7 +7,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.3.0
 	github.com/imdario/mergo v0.3.16
-	github.com/onsi/ginkgo/v2 v2.13.1
+	github.com/onsi/ginkgo/v2 v2.13.2
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20231122193628-96ca1e05d8ad
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20231124170114-3771599a828e
