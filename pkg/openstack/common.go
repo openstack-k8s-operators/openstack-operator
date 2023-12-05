@@ -7,6 +7,16 @@ import (
 
 	"github.com/go-logr/logr"
 	routev1 "github.com/openshift/api/route/v1"
+	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
+	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
+	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
+	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
+	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
+	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -15,7 +25,16 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
+	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -431,4 +450,67 @@ func (ed *EndpointDetails) CreateRoute(
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// Set up any defaults used by service operator defaulting logic
+func SetupServiceOperatorDefaults() {
+	// Acquire environmental defaults and initialize service operators that
+	// require each respective default
+
+	// Cinder
+	cinderv1.SetupDefaults()
+
+	// Glance
+	glancev1.SetupDefaults()
+
+	// Ironic
+	ironicv1.SetupDefaults()
+
+	// Keystone
+	keystonev1.SetupDefaults()
+
+	// Manila
+	manilav1.SetupDefaults()
+
+	// MariaDB
+	mariadbv1.SetupDefaults()
+
+	// Memcached
+	memcachedv1.SetupDefaults()
+
+	// Neutron
+	neutronv1.SetupDefaults()
+
+	// Nova
+	novav1.SetupDefaults()
+
+	// OVN
+	ovnv1.SetupDefaults()
+
+	// Placement
+	placementv1.SetupDefaults()
+
+	// Heat
+	heatv1.SetupDefaults()
+
+	// Redis
+	redisv1.SetupDefaults()
+
+	// DNS
+	networkv1.SetupDefaults()
+
+	// Ceilometer
+	telemetryv1.SetupDefaultsCeilometer()
+
+	// Swift
+	swiftv1.SetupDefaults()
+
+	// Octavia
+	octaviav1.SetupDefaults()
+
+	// Designate
+	designatev1.SetupDefaults()
+
+	//  Barbican
+	barbicanv1.SetupDefaults()
 }
