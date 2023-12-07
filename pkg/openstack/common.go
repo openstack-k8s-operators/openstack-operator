@@ -499,8 +499,8 @@ func SetupServiceOperatorDefaults() {
 	// DNS
 	networkv1.SetupDefaults()
 
-	// Ceilometer
-	telemetryv1.SetupDefaultsCeilometer()
+	// Telemetry
+	telemetryv1.SetupDefaultsTelemetry()
 
 	// Swift
 	swiftv1.SetupDefaults()

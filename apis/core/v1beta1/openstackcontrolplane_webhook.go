@@ -412,8 +412,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// DNS
 	r.Spec.DNS.Template.Default()
 
-	// Ceilometer
-	r.Spec.Ceilometer.Template.Default()
+	// Telemetry
+	r.Spec.Telemetry.Template.Default()
 
 	// Heat
 	r.Spec.Heat.Template.Default()

@@ -20,11 +20,15 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const (
+	heatName = "heat"
+)
+
 // ReconcileHeat -
 func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 	heat := &heatv1.Heat{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "heat",
+			Name:      heatName,
 			Namespace: instance.Namespace,
 		},
 	}

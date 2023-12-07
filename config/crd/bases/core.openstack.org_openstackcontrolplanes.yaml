@@ -457,68 +457,6 @@ spec:
                     - serviceAccount
                     type: object
                 type: object
-              ceilometer:
-                properties:
-                  enabled:
-                    default: true
-                    type: boolean
-                  template:
-                    properties:
-                      centralImage:
-                        type: string
-                      computeImage:
-                        type: string
-                      customServiceConfig:
-                        default: '# add your customization here'
-                        type: string
-                      defaultConfigOverwrite:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      ipmiImage:
-                        type: string
-                      networkAttachmentDefinitions:
-                        items:
-                          type: string
-                        type: array
-                      nodeExporterImage:
-                        type: string
-                      notificationImage:
-                        type: string
-                      passwordSelector:
-                        default:
-                          service: CeilometerPassword
-                        properties:
-                          aodhService:
-                            default: AodhPassword
-                            type: string
-                          database:
-                            default: AodhDatabasePassword
-                            type: string
-                          service:
-                            default: CeilometerPassword
-                            type: string
-                        type: object
-                      rabbitMqClusterName:
-                        default: rabbitmq
-                        type: string
-                      secret:
-                        type: string
-                      serviceUser:
-                        default: ceilometer
-                        type: string
-                      sgCoreImage:
-                        type: string
-                    required:
-                    - centralImage
-                    - computeImage
-                    - ipmiImage
-                    - nodeExporterImage
-                    - notificationImage
-                    - secret
-                    - sgCoreImage
-                    type: object
-                type: object
               cinder:
                 properties:
                   apiOverride:
@@ -15176,6 +15114,211 @@ spec:
                     - swiftProxy
                     - swiftRing
                     - swiftStorage
+                    type: object
+                type: object
+              telemetry:
+                properties:
+                  enabled:
+                    default: true
+                    type: boolean
+                  template:
+                    properties:
+                      autoscaling:
+                        properties:
+                          aodh:
+                            properties:
+                              apiImage:
+                                type: string
+                              customServiceConfig:
+                                default: '# add your customization here'
+                                type: string
+                              databaseInstance:
+                                type: string
+                              databaseUser:
+                                default: aodh
+                                type: string
+                              defaultConfigOverwrite:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              evaluatorImage:
+                                type: string
+                              listenerImage:
+                                type: string
+                              memcachedInstance:
+                                default: memcached
+                                type: string
+                              networkAttachmentDefinitions:
+                                items:
+                                  type: string
+                                type: array
+                              notifierImage:
+                                type: string
+                              override:
+                                properties:
+                                  service:
+                                    properties:
+                                      endpointURL:
+                                        type: string
+                                      metadata:
+                                        properties:
+                                          annotations:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          labels:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                        type: object
+                                      spec:
+                                        properties:
+                                          externalName:
+                                            type: string
+                                          externalTrafficPolicy:
+                                            type: string
+                                          internalTrafficPolicy:
+                                            type: string
+                                          ipFamilyPolicy:
+                                            type: string
+                                          loadBalancerClass:
+                                            type: string
+                                          loadBalancerSourceRanges:
+                                            items:
+                                              type: string
+                                            type: array
+                                          sessionAffinity:
+                                            type: string
+                                          sessionAffinityConfig:
+                                            properties:
+                                              clientIP:
+                                                properties:
+                                                  timeoutSeconds:
+                                                    format: int32
+                                                    type: integer
+                                                type: object
+                                            type: object
+                                          type:
+                                            type: string
+                                        type: object
+                                    type: object
+                                type: object
+                              passwordSelector:
+                                default:
+                                  aodhService: AodhPassword
+                                  database: AodhDatabasePassword
+                                properties:
+                                  aodhService:
+                                    default: AodhPassword
+                                    type: string
+                                  database:
+                                    default: AodhDatabasePassword
+                                    type: string
+                                  service:
+                                    default: CeilometerPassword
+                                    type: string
+                                type: object
+                              preserveJobs:
+                                default: false
+                                type: boolean
+                              rabbitMqClusterName:
+                                default: rabbitmq
+                                type: string
+                              secret:
+                                type: string
+                              serviceUser:
+                                default: aodh
+                                type: string
+                            required:
+                            - apiImage
+                            - databaseInstance
+                            - evaluatorImage
+                            - listenerImage
+                            - memcachedInstance
+                            - notifierImage
+                            - secret
+                            type: object
+                          enabled:
+                            default: false
+                            type: boolean
+                          heatInstance:
+                            default: heat
+                            type: string
+                          prometheus:
+                            properties:
+                              deployPrometheus:
+                                default: false
+                                type: boolean
+                              host:
+                                type: string
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                            type: object
+                        required:
+                        - heatInstance
+                        type: object
+                      ceilometer:
+                        properties:
+                          centralImage:
+                            type: string
+                          computeImage:
+                            type: string
+                          customServiceConfig:
+                            default: '# add your customization here'
+                            type: string
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          enabled:
+                            default: true
+                            type: boolean
+                          ipmiImage:
+                            type: string
+                          networkAttachmentDefinitions:
+                            items:
+                              type: string
+                            type: array
+                          nodeExporterImage:
+                            type: string
+                          notificationImage:
+                            type: string
+                          passwordSelector:
+                            default:
+                              service: CeilometerPassword
+                            properties:
+                              aodhService:
+                                default: AodhPassword
+                                type: string
+                              database:
+                                default: AodhDatabasePassword
+                                type: string
+                              service:
+                                default: CeilometerPassword
+                                type: string
+                            type: object
+                          rabbitMqClusterName:
+                            default: rabbitmq
+                            type: string
+                          secret:
+                            type: string
+                          serviceUser:
+                            default: ceilometer
+                            type: string
+                          sgCoreImage:
+                            type: string
+                        required:
+                        - centralImage
+                        - computeImage
+                        - ipmiImage
+                        - nodeExporterImage
+                        - notificationImage
+                        - secret
+                        - sgCoreImage
+                        type: object
                     type: object
                 type: object
               tls:

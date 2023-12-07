@@ -127,12 +127,18 @@ spec:
       ironicNeutronAgent:
         replicas: 1
       secret: osp-secret
-  ceilometer:
+  telemetry:
+    enabled: true
     template:
-      passwordSelector:
-        service: CeilometerPassword
-      secret: osp-secret
-      serviceUser: ceilometer
+      autoscaling:
+        aodh:
+          secret: osp-secret
+          serviceUser: aodh
+      ceilometer:
+        passwordSelector:
+          service: CeilometerPassword
+        secret: osp-secret
+        serviceUser: ceilometer
   swift:
     enabled: true
     template:
@@ -190,10 +196,6 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneCAReadyCondition
-  - message: OpenStackControlPlane Ceilometer completed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneCeilometerReady
   - message: OpenStackControlPlane Cinder completed
     reason: Ready
     status: "True"
@@ -274,3 +276,7 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneSwiftReady
+  - message: OpenStackControlPlane Telemetry completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneTelemetryReady
