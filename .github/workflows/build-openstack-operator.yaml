@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - '*'
+  schedule:
+    - cron: '15 3 * * *'
+  workflow_dispatch:
 
 env:
   imageregistry: 'quay.io'
