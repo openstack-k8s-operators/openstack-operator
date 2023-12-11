@@ -160,8 +160,6 @@ github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240104150350-
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240104150350-1cb9656d2d92/go.mod h1:661OeCQQ1NlU8lg0zzZOY/qi1R800JshTNLaXNE4aEQ=
 github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240104133234-31762c2b9fda h1:F4S4fHht/zEOeZH/ZqPTxxNPEs+M9wwrKwnkGv8amR0=
 github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240104133234-31762c2b9fda/go.mod h1:mDiJuW2bPgD45yXgWgZtbluMr2NOm8tbYdu5xOrQe88=
-github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240104123737-45f6dc371626 h1:ApB8Am6T10duf3yo4cFXI8aJ9dK3pBvO+Ml67CDkx7Q=
-github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240104123737-45f6dc371626/go.mod h1:KTxmLkSbU4UPncQyrAfDUgTH/mbgFm9FR6Uq8zcUeiA=
 github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240104130506-42419651f900 h1:KdpEKM6SDFnLoWaSJy9JtXrPWOESxlXHZo4xBo33qsc=
 github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240104130506-42419651f900/go.mod h1:qtmCTt7oNM58iCrHGZhNtyWNUhpHqMuH3AU+KAGwG5g=
 github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240103003254-97178240dd81 h1:K805MjEY6QGQ6T2tAWBaFPeoYx3S036h7o0Ms7MjGuQ=
@@ -211,6 +209,8 @@ github.com/stuggi/keystone-operator/api v0.0.0-20240110132207-643df3216ef6 h1:NP
 github.com/stuggi/keystone-operator/api v0.0.0-20240110132207-643df3216ef6/go.mod h1:5quo1o1B7wLTXAD6j8sPXDxB5ASYaL9ImyiouAPrXtg=
 github.com/stuggi/neutron-operator/api v0.0.0-20240110132446-b7dd116f719a h1:r19DMgleke1s0KfyMFawd6Zs3WmOL3bOE0JZwrMYVnY=
 github.com/stuggi/neutron-operator/api v0.0.0-20240110132446-b7dd116f719a/go.mod h1:yPMojR9cveY8v9D33Xg7TKgMLv1/eC5iUx38I+oW+os=
+github.com/stuggi/placement-operator/api v0.0.0-20231220103240-24d8879cbaab h1:S+0i4XbDtElrNkMMa+uwCd3Le8AWWM/kQIg1ip9VGHM=
+github.com/stuggi/placement-operator/api v0.0.0-20231220103240-24d8879cbaab/go.mod h1:AAwgTkClTNTxz+2V0drAqYAbzQ54TxFAbzcGPGinbAQ=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
 github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415/go.mod h1:GwrjFmJcFw6At/Gs6z4yjiIwzuJ1/+UwLxMQDVQXShQ=
 github.com/xeipuuv/gojsonschema v1.2.0/go.mod h1:anYRn/JVcOK2ZgGU+IjEV4nwlhoK5sQluxsYJ78Id3Y=

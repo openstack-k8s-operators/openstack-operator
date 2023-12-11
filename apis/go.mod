@@ -122,3 +122,5 @@ replace github.com/openstack-k8s-operators/neutron-operator/api => github.com/st
 replace github.com/openstack-k8s-operators/glance-operator/api => github.com/stuggi/glance-operator/api v0.0.0-20240110140133-e82ebb00ccb7
 
 replace github.com/openstack-k8s-operators/cinder-operator/api => github.com/stuggi/cinder-operator/api v0.0.0-20240110132541-fed2378a8cb1
+
+replace github.com/openstack-k8s-operators/placement-operator/api => github.com/stuggi/placement-operator/api v0.0.0-20231220103240-24d8879cbaab
