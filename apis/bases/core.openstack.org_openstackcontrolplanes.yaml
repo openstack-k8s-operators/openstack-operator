@@ -3512,7 +3512,7 @@ spec:
               galera:
                 properties:
                   enabled:
-                    default: false
+                    default: true
                     type: boolean
                   templates:
                     additionalProperties:
@@ -7611,35 +7611,6 @@ spec:
                     - manilaScheduler
                     - memcachedInstance
                     - rabbitMqClusterName
-                    type: object
-                type: object
-              mariadb:
-                properties:
-                  enabled:
-                    default: true
-                    type: boolean
-                  templates:
-                    additionalProperties:
-                      properties:
-                        adoptionRedirect:
-                          properties:
-                            host:
-                              type: string
-                          type: object
-                        containerImage:
-                          type: string
-                        secret:
-                          type: string
-                        storageClass:
-                          type: string
-                        storageRequest:
-                          type: string
-                      required:
-                      - containerImage
-                      - secret
-                      - storageClass
-                      - storageRequest
-                      type: object
                     type: object
                 type: object
               memcached:

@@ -9,7 +9,7 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
-  mariadb:
+  galera:
     templates:
       openstack:
         storageRequest: 500M
