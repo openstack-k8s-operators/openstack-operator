@@ -48,7 +48,7 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
