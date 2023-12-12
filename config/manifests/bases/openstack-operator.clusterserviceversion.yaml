@@ -406,6 +406,12 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
+    - description: OpenStackVersion is the Schema for the openstackversionupdates
+        API
+      displayName: Open Stack Version
+      kind: OpenStackVersion
+      name: openstackversions.core.openstack.org
+      version: v1beta1
   description: Install and configure OpenStack
   displayName: OpenStack
   icon:

@@ -1,5 +1,5 @@
 /*
-Copyright 2022.
+Copyright 2023.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,28 +20,69 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // OpenStackVersionSpec defines the desired state of OpenStackVersion
 type OpenStackVersionSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of OpenStackVersion. Edit openstackversion_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Strategy -
+	//Strategy UpdateStrategy `json:"strategy,omitempty"`
+
+	// 1.0.1 --> 1.0.2
+	TargetVersion string `json:"targetVersion,omitempty"`
+
+	// +kubebuilder:default="openstack"
+	OpenStackControlPlaneName string `json:"openstackControlPlaneName,omitempty"`
+
+	// ServiceExcludes is a list of services to exclude from the update. Any named service here will be excluded from the update.
+	ServiceExcludes []string `json:"serviceExcludes,omitempty"`
+
+	// CinderVolumeExcludes is a list of cinder volumes to exclude from the update. Any named Cinder volume instance here will be excluded.
+	CinderVolumeExcludes []string `json:"cinderVolumeExcludes,omitempty"`
+
+	//FIXME: add parameters for other custom service maps (Neutron, etc)
+}
+
+// UpdateStrategy defines the strategy used to roll out updates to the OpenStack services
+/*
+type UpdateStrategy struct {
+
+	// +kubebuilder:default="automatic"
+	UpdateType string `json:"updateType,omitempty"`
+
+
+	// Type serial or parallel
+	// +kubebuilder:default="serial"
+	//Type string `json:"type"`
+}*/
+
+type ServiceVersionURL struct {
+	ServiceName       string `json:"name,omitempty"`
+	ContainerImageUrl string `json:"containerImageUrl,omitempty"`
+}
+
+type OpenStackService struct {
+	ServiceName string `json:"name,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
 type OpenStackVersionStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	ServicesNeedingUpdates []OpenStackService `json:"updateNeeded,omitempty"`
+
+	DeployedVersions []OpenStackService `json:"updateApplied,omitempty"`
+
+	TargetVersion string `json:"targetVersion,omitempty"`
+
+	AvailableVersion string `json:"availableVersion,omitempty"`
+
+	AvailableServices []string `json:"availableService,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+// +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Version"
+// +kubebuilder:printcolumn:name="Target Version",type=string,JSONPath=`.spec.targetVersion`
+// +kubebuilder:printcolumn:name="Available Version",type=string,JSONPath=`.status.availableVersion`
 
-// OpenStackVersion is the Schema for the openstackversions API
+// OpenStackVersion is the Schema for the openstackversionupdates API
 type OpenStackVersion struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

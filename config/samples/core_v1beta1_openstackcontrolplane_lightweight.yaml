@@ -15,14 +15,8 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
-  mariadb:
-    templates:
-      openstack:
-        storageRequest: 500M
-      openstack-cell1:
-        storageRequest: 500M
   galera:
-    enabled: false
+    enabled: true
     templates:
       openstack:
         storageClass: local-storage
@@ -63,6 +57,7 @@ spec:
       barbicanKeystoneListener:
         replicas: 1
   placement:
+    enabled: false
     template:
       databaseInstance: openstack
       secret: osp-secret
@@ -117,6 +112,7 @@ spec:
           ovn-bridge: "br-int"
           ovn-encap-type: "geneve"
   neutron:
+    enabled: false
     template:
       databaseInstance: openstack
       secret: osp-secret
@@ -126,6 +122,7 @@ spec:
       replicas: 1
       secret: osp-secret
   nova:
+    enabled: false
     template:
       secret: osp-secret
   heat:
