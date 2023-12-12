@@ -10332,6 +10332,10 @@ spec:
                             type: object
                           networkAttachment:
                             type: string
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           nicMappings:
                             additionalProperties:
                               type: string
