@@ -156,8 +156,6 @@ spec:
                     properties:
                       barbicanAPI:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -285,13 +283,9 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       barbicanKeystoneListener:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -347,13 +341,9 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       barbicanWorker:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -409,8 +399,6 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       customServiceConfig:
                         type: string
@@ -580,8 +568,6 @@ spec:
                     properties:
                       cinderAPI:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -701,13 +687,9 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       cinderBackup:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -758,13 +740,9 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       cinderScheduler:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -815,14 +793,10 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       cinderVolumes:
                         additionalProperties:
                           properties:
-                            containerImage:
-                              type: string
                             customServiceConfig:
                               type: string
                             customServiceConfigSecrets:
@@ -874,8 +848,6 @@ spec:
                                     x-kubernetes-int-or-string: true
                                   type: object
                               type: object
-                          required:
-                          - containerImage
                           type: object
                         type: object
                       customServiceConfig:
@@ -1825,8 +1797,6 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -1955,8 +1925,6 @@ spec:
                             type: string
                           transportURLSecret:
                             type: string
-                        required:
-                        - containerImage
                         type: object
                       designateBackendbind9:
                         properties:
@@ -1966,8 +1934,6 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2045,8 +2011,6 @@ spec:
                             type: string
                           transportURLSecret:
                             type: string
-                        required:
-                        - containerImage
                         type: object
                       designateCentral:
                         properties:
@@ -2056,8 +2020,6 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2135,8 +2097,6 @@ spec:
                             type: string
                           transportURLSecret:
                             type: string
-                        required:
-                        - containerImage
                         type: object
                       designateMdns:
                         properties:
@@ -2146,8 +2106,6 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2225,8 +2183,6 @@ spec:
                             type: string
                           transportURLSecret:
                             type: string
-                        required:
-                        - containerImage
                         type: object
                       designateProducer:
                         properties:
@@ -2236,8 +2192,6 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2315,13 +2269,9 @@ spec:
                             type: string
                           transportURLSecret:
                             type: string
-                        required:
-                        - containerImage
                         type: object
                       designateUnbound:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2379,8 +2329,6 @@ spec:
                             type: object
                           serviceAccount:
                             type: string
-                        required:
-                        - containerImage
                         type: object
                       designateWorker:
                         properties:
@@ -2390,8 +2338,6 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2469,8 +2415,6 @@ spec:
                             type: string
                           transportURLSecret:
                             type: string
-                        required:
-                        - containerImage
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -3405,8 +3349,6 @@ spec:
                             host:
                               type: string
                           type: object
-                        containerImage:
-                          type: string
                         customServiceConfig:
                           type: string
                         disableNonTLSListeners:
@@ -3437,7 +3379,6 @@ spec:
                               type: string
                           type: object
                       required:
-                      - containerImage
                       - replicas
                       - secret
                       - storageClass
@@ -3560,8 +3501,6 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      containerImage:
-                        type: string
                       customServiceConfig:
                         type: string
                       customServiceConfigSecrets:
@@ -4561,7 +4500,6 @@ spec:
                       storageRequest:
                         type: string
                     required:
-                    - containerImage
                     - databaseInstance
                     - glanceAPIs
                     - imageCache
@@ -4803,8 +4741,6 @@ spec:
                         type: object
                       heatAPI:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           defaultConfigOverwrite:
@@ -4921,13 +4857,9 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       heatCfnAPI:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           defaultConfigOverwrite:
@@ -5044,13 +4976,9 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       heatEngine:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           defaultConfigOverwrite:
@@ -5098,8 +5026,6 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       memcachedInstance:
                         default: memcached
@@ -5254,8 +5180,6 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      containerImage:
-                        type: string
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -6125,7 +6049,6 @@ spec:
                             type: string
                         type: object
                     required:
-                    - containerImage
                     - memcachedInstance
                     - secret
                     type: object
@@ -6360,21 +6283,6 @@ spec:
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
-                        type: object
-                      images:
-                        properties:
-                          api:
-                            type: string
-                          conductor:
-                            type: string
-                          inspector:
-                            type: string
-                          ironicPythonAgent:
-                            type: string
-                          neutronAgent:
-                            type: string
-                          pxe:
-                            type: string
                         type: object
                       ironicAPI:
                         properties:
@@ -6978,8 +6886,6 @@ spec:
                       adminUser:
                         default: admin
                         type: string
-                      containerImage:
-                        type: string
                       customServiceConfig:
                         type: string
                       databaseAccount:
@@ -7143,7 +7049,6 @@ spec:
                         default: false
                         type: boolean
                     required:
-                    - containerImage
                     - databaseInstance
                     - memcachedInstance
                     - rabbitMqClusterName
@@ -8045,8 +7950,6 @@ spec:
                         type: array
                       manilaAPI:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -8168,13 +8071,9 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       manilaScheduler:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -8227,14 +8126,10 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
-                        required:
-                        - containerImage
                         type: object
                       manilaShares:
                         additionalProperties:
                           properties:
-                            containerImage:
-                              type: string
                             customServiceConfig:
                               default: '# add your customization here'
                               type: string
@@ -8287,8 +8182,6 @@ spec:
                                     x-kubernetes-int-or-string: true
                                   type: object
                               type: object
-                          required:
-                          - containerImage
                           type: object
                         type: object
                       memcachedInstance:
@@ -8332,8 +8225,6 @@ spec:
                   templates:
                     additionalProperties:
                       properties:
-                        containerImage:
-                          type: string
                         replicas:
                           default: 1
                           format: int32
@@ -8345,8 +8236,6 @@ spec:
                             secretName:
                               type: string
                           type: object
-                      required:
-                      - containerImage
                       type: object
                     type: object
                 type: object
@@ -8463,8 +8352,6 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      containerImage:
-                        type: string
                       customServiceConfig:
                         type: string
                       databaseAccount:
@@ -9374,7 +9261,6 @@ spec:
                             type: object
                         type: object
                     required:
-                    - containerImage
                     - databaseInstance
                     - memcachedInstance
                     - rabbitMqClusterName
@@ -10505,8 +10391,6 @@ spec:
                         type: object
                       octaviaAPI:
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -10662,7 +10546,6 @@ spec:
                           transportURLSecret:
                             type: string
                         required:
-                        - containerImage
                         - databaseInstance
                         - secret
                         - serviceAccount
@@ -10691,8 +10574,6 @@ spec:
                               - name
                               type: object
                             type: array
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -10819,8 +10700,6 @@ spec:
                               - name
                               type: object
                             type: array
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -10947,8 +10826,6 @@ spec:
                               - name
                               type: object
                             type: array
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -11193,10 +11070,6 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          ovnContainerImage:
-                            type: string
-                          ovsContainerImage:
-                            type: string
                           resources:
                             properties:
                               claims:
@@ -11235,15 +11108,10 @@ spec:
                               secretName:
                                 type: string
                             type: object
-                        required:
-                        - ovnContainerImage
-                        - ovsContainerImage
                         type: object
                       ovnDBCluster:
                         additionalProperties:
                           properties:
-                            containerImage:
-                              type: string
                             dbType:
                               default: NB
                               pattern: ^NB|SB$
@@ -11318,15 +11186,12 @@ spec:
                                   type: string
                               type: object
                           required:
-                          - containerImage
                           - dbType
                           - storageRequest
                           type: object
                         type: object
                       ovnNorthd:
                         properties:
-                          containerImage:
-                            type: string
                           logLevel:
                             default: info
                             type: string
@@ -11384,8 +11249,6 @@ spec:
                               secretName:
                                 type: string
                             type: object
-                        required:
-                        - containerImage
                         type: object
                     type: object
                 type: object
@@ -11502,8 +11365,6 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      containerImage:
-                        type: string
                       customServiceConfig:
                         type: string
                       databaseAccount:
@@ -11646,7 +11507,6 @@ spec:
                             type: string
                         type: object
                     required:
-                    - containerImage
                     - databaseInstance
                     - secret
                     type: object
@@ -12029,16 +11889,6 @@ spec:
                           format: int32
                           minimum: 0
                           type: integer
-                        image:
-                          type: string
-                        imagePullSecrets:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                            type: object
-                            x-kubernetes-map-type: atomic
-                          type: array
                         override:
                           properties:
                             service:
@@ -15694,8 +15544,6 @@ spec:
                               type: object
                           type: object
                         service:
-                          default:
-                            type: ClusterIP
                           properties:
                             annotations:
                               additionalProperties:
@@ -15758,8 +15606,6 @@ spec:
                   templates:
                     additionalProperties:
                       properties:
-                        containerImage:
-                          type: string
                         replicas:
                           default: 1
                           format: int32
@@ -15771,8 +15617,6 @@ spec:
                             secretName:
                               type: string
                           type: object
-                      required:
-                      - containerImage
                       type: object
                     type: object
                 type: object
@@ -15908,8 +15752,6 @@ spec:
                           ceilometerEnabled:
                             default: false
                             type: boolean
-                          containerImageProxy:
-                            type: string
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -16016,7 +15858,6 @@ spec:
                                 type: string
                             type: object
                         required:
-                        - containerImageProxy
                         - memcachedServers
                         - rabbitMqClusterName
                         - replicas
@@ -16025,8 +15866,6 @@ spec:
                         type: object
                       swiftRing:
                         properties:
-                          containerImage:
-                            type: string
                           minPartHours:
                             default: 1
                             format: int64
@@ -16048,21 +15887,12 @@ spec:
                                 type: string
                             type: object
                         required:
-                        - containerImage
                         - minPartHours
                         - partPower
                         - ringReplicas
                         type: object
                       swiftStorage:
                         properties:
-                          containerImageAccount:
-                            type: string
-                          containerImageContainer:
-                            type: string
-                          containerImageObject:
-                            type: string
-                          containerImageProxy:
-                            type: string
                           containerSharderEnabled:
                             default: false
                             type: boolean
@@ -16089,10 +15919,6 @@ spec:
                             default: 10Gi
                             type: string
                         required:
-                        - containerImageAccount
-                        - containerImageContainer
-                        - containerImageObject
-                        - containerImageProxy
                         - memcachedServers
                         - replicas
                         - storageClass
@@ -16435,8 +16261,6 @@ spec:
                         properties:
                           aodh:
                             properties:
-                              apiImage:
-                                type: string
                               customServiceConfig:
                                 default: '# add your customization here'
                                 type: string
@@ -16449,10 +16273,6 @@ spec:
                                 additionalProperties:
                                   type: string
                                 type: object
-                              evaluatorImage:
-                                type: string
-                              listenerImage:
-                                type: string
                               memcachedInstance:
                                 default: memcached
                                 type: string
@@ -16460,8 +16280,6 @@ spec:
                                 items:
                                   type: string
                                 type: array
-                              notifierImage:
-                                type: string
                               override:
                                 properties:
                                   service:
@@ -16554,12 +16372,8 @@ spec:
                                     type: string
                                 type: object
                             required:
-                            - apiImage
                             - databaseInstance
-                            - evaluatorImage
-                            - listenerImage
                             - memcachedInstance
-                            - notifierImage
                             - secret
                             type: object
                           enabled:
@@ -16582,10 +16396,6 @@ spec:
                         type: object
                       ceilometer:
                         properties:
-                          centralImage:
-                            type: string
-                          computeImage:
-                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -16596,14 +16406,10 @@ spec:
                           enabled:
                             default: true
                             type: boolean
-                          ipmiImage:
-                            type: string
                           networkAttachmentDefinitions:
                             items:
                               type: string
                             type: array
-                          notificationImage:
-                            type: string
                           passwordSelector:
                             default:
                               service: CeilometerPassword
@@ -16615,8 +16421,6 @@ spec:
                                 default: CeilometerPassword
                                 type: string
                             type: object
-                          proxyImage:
-                            type: string
                           rabbitMqClusterName:
                             default: rabbitmq
                             type: string
@@ -16624,8 +16428,6 @@ spec:
                             type: string
                           serviceUser:
                             default: ceilometer
-                            type: string
-                          sgCoreImage:
                             type: string
                           tls:
                             properties:
@@ -16635,13 +16437,7 @@ spec:
                                 type: string
                             type: object
                         required:
-                        - centralImage
-                        - computeImage
-                        - ipmiImage
-                        - notificationImage
-                        - proxyImage
                         - secret
-                        - sgCoreImage
                         type: object
                       logging:
                         properties:
@@ -17443,6 +17239,169 @@ spec:
                   - type
                   type: object
                 type: array
+              containerImages:
+                properties:
+                  agentImage:
+                    type: string
+                  ansibleeeImage:
+                    type: string
+                  aodhAPIImage:
+                    type: string
+                  aodhEvaluatorImage:
+                    type: string
+                  aodhListenerImage:
+                    type: string
+                  aodhNotifierImage:
+                    type: string
+                  apacheImage:
+                    type: string
+                  barbicanAPIImage:
+                    type: string
+                  barbicanKeystoneListenerImage:
+                    type: string
+                  barbicanWorkerImage:
+                    type: string
+                  ceilometerCentralImage:
+                    type: string
+                  ceilometerComputeImage:
+                    type: string
+                  ceilometerIpmiImage:
+                    type: string
+                  ceilometerNotificationImage:
+                    type: string
+                  ceilometerSgcoreImage:
+                    type: string
+                  cinderAPIImage:
+                    type: string
+                  cinderBackupImage:
+                    type: string
+                  cinderSchedulerImage:
+                    type: string
+                  cinderVolumeImages:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  designateAPIImage:
+                    type: string
+                  designateBackendbind9Image:
+                    type: string
+                  designateCentralImage:
+                    type: string
+                  designateMdnsImage:
+                    type: string
+                  designateProducerImage:
+                    type: string
+                  designateUnboundImage:
+                    type: string
+                  designateWorkerImage:
+                    type: string
+                  edpmFrrImage:
+                    type: string
+                  edpmIscsidImage:
+                    type: string
+                  edpmLogrotateCrondImage:
+                    type: string
+                  edpmNeutronMetadataAgentImage:
+                    type: string
+                  edpmNeutronSriovAgentImage:
+                    type: string
+                  edpmNodeExporterImage:
+                    type: string
+                  edpmOvnBgpAgentImage:
+                    type: string
+                  glanceAPIImage:
+                    type: string
+                  heatAPIImage:
+                    type: string
+                  heatCfnapiImage:
+                    type: string
+                  heatEngineImage:
+                    type: string
+                  horizonImage:
+                    type: string
+                  infraDnsmasqImage:
+                    type: string
+                  infraMemcachedImage:
+                    type: string
+                  infraRedisImage:
+                    type: string
+                  ironicAPIImage:
+                    type: string
+                  ironicConductorImage:
+                    type: string
+                  ironicInspectorImage:
+                    type: string
+                  ironicNeutronAgentImage:
+                    type: string
+                  ironicPxeImage:
+                    type: string
+                  ironicPythonAgentImage:
+                    type: string
+                  keystoneAPIImage:
+                    type: string
+                  manilaAPIImage:
+                    type: string
+                  manilaSchedulerImage:
+                    type: string
+                  manilaShareImages:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  mariadbImage:
+                    type: string
+                  neutronAPIImage:
+                    type: string
+                  novaAPIImage:
+                    type: string
+                  novaComputeImage:
+                    type: string
+                  novaConductorImage:
+                    type: string
+                  novaNovncImage:
+                    type: string
+                  novaSchedulerImage:
+                    type: string
+                  octaviaAPIImage:
+                    type: string
+                  octaviaHealthmanagerImage:
+                    type: string
+                  octaviaHousekeepingImage:
+                    type: string
+                  octaviaWorkerImage:
+                    type: string
+                  openstackClientImage:
+                    type: string
+                  osContainerImage:
+                    type: string
+                  ovnControllerImage:
+                    type: string
+                  ovnControllerOvsImage:
+                    type: string
+                  ovnNbDbclusterImage:
+                    type: string
+                  ovnNorthdImage:
+                    type: string
+                  ovnSbDbclusterImage:
+                    type: string
+                  placementAPIImage:
+                    type: string
+                  rabbitmqImage:
+                    type: string
+                  swiftAccountImage:
+                    type: string
+                  swiftContainerImage:
+                    type: string
+                  swiftObjectImage:
+                    type: string
+                  swiftProxyImage:
+                    type: string
+                  telemetryNodeExporterImage:
+                    type: string
+                type: object
+              deployedOVNVersion:
+                type: string
+              deployedVersion:
+                type: string
               tls:
                 properties:
                   caBundleSecretName:

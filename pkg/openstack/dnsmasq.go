@@ -17,7 +17,7 @@ import (
 )
 
 // ReconcileDNSMasqs -
-func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	dnsmasq := &networkv1.DNSMasq{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "dns",
@@ -38,6 +38,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 	Log.Info("Reconciling DNSMasq", "DNSMasq.Namespace", instance.Namespace, "DNSMasq.Name", "dnsmasq")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), dnsmasq, func() error {
 		instance.Spec.DNS.Template.DeepCopyInto(&dnsmasq.Spec)
+		dnsmasq.Spec.ContainerImage = *version.Status.ContainerImages.InfraDnsmasqImage
 		if dnsmasq.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
 			dnsmasq.Spec.NodeSelector = instance.Spec.NodeSelector
 		}
@@ -61,7 +62,8 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 		Log.Info(fmt.Sprintf("dnsmasq %s - %s", dnsmasq.Name, op))
 	}
 
-	if dnsmasq.IsReady() {
+	if dnsmasq.IsReady() { // FIXME ObservedGeneration
+		instance.Status.ContainerImages.InfraDnsmasqImage = version.Status.ContainerImages.InfraDnsmasqImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneDNSReadyCondition, corev1beta1.OpenStackControlPlaneDNSReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

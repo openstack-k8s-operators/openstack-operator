@@ -22,7 +22,7 @@ import (
 )
 
 // ReconcileNeutron -
-func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	neutronAPI := &neutronv1.NeutronAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "neutron",
@@ -132,8 +132,8 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	Log.Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
-		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec)
-
+		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec.NeutronAPISpecCore)
+		neutronAPI.Spec.ContainerImage = *version.Status.ContainerImages.NeutronAPIImage
 		if neutronAPI.Spec.Secret == "" {
 			neutronAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -172,7 +172,8 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		Log.Info(fmt.Sprintf("neutronAPI %s - %s", neutronAPI.Name, op))
 	}
 
-	if neutronAPI.IsReady() {
+	if neutronAPI.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.NeutronAPIImage = version.Status.ContainerImages.NeutronAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneNeutronReadyCondition, corev1beta1.OpenStackControlPlaneNeutronReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

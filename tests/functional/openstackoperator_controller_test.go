@@ -29,8 +29,10 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
@@ -181,6 +183,19 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// make keystoneAPI ready and create secrets usually created by keystone-controller
 			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
 
+			// openstackversion exists
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
 			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 
@@ -222,6 +237,224 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 		})
 	})
+
+	When("A Manila OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["manila"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"manilaAPI": map[string]interface{}{
+						"replicas": 1,
+					},
+					"manilaScheduler": map[string]interface{}{
+						"replicas": 1,
+					},
+					"manilaShares": map[string]interface{}{
+						"share1": map[string]interface{}{
+							"replicas": 1,
+						},
+					},
+				},
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have Manila enabled", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Manila.Enabled).Should(BeTrue())
+
+			// manila exists
+			Eventually(func(g Gomega) {
+				manila := &manilav1.Manila{}
+				Eventually(func(g Gomega) {
+					g.Expect(k8sClient.Get(ctx, names.ManilaName, manila)).Should(Succeed())
+					g.Expect(manila).ShouldNot(BeNil())
+				}, timeout, interval).Should(Succeed())
+			})
+
+			// FIXME add helpers to manila-operator to simulate ready state
+			Eventually(func(g Gomega) {
+				manila := &manilav1.Manila{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.ManilaName, manila)).Should(Succeed())
+				manila.Status.ObservedGeneration = manila.Generation
+				manila.Status.Conditions.MarkTrue(manilav1.ManilaAPIReadyCondition, "Ready")
+				manila.Status.Conditions.MarkTrue(manilav1.ManilaSchedulerReadyCondition, "Ready")
+				manila.Status.Conditions.MarkTrue(manilav1.ManilaShareReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, manila)).To(Succeed())
+
+				th.Logger.Info("Simulated Manila ready", "on", names.ManilaName)
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneManilaReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have Manila Shares configured", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Manila.Enabled).Should(BeTrue())
+
+			// manila exists
+			Eventually(func(g Gomega) {
+				manila := &manilav1.Manila{}
+				Eventually(func(g Gomega) {
+					g.Expect(k8sClient.Get(ctx, names.ManilaName, manila)).Should(Succeed())
+					g.Expect(manila).ShouldNot(BeNil())
+				}, timeout, interval).Should(Succeed())
+			})
+
+			// FIXME add helpers to manila-operator to simulate ready state
+			Eventually(func(g Gomega) {
+				manila := &manilav1.Manila{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.ManilaName, manila)).Should(Succeed())
+				manila.Status.ObservedGeneration = manila.Generation
+				manila.Status.Conditions.MarkTrue(manilav1.ManilaAPIReadyCondition, "Ready")
+				manila.Status.Conditions.MarkTrue(manilav1.ManilaSchedulerReadyCondition, "Ready")
+				manila.Status.Conditions.MarkTrue(manilav1.ManilaShareReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, manila)).To(Succeed())
+
+				g.Expect(manila.Spec.ManilaShares).Should(HaveLen(1))
+				g.Expect(manila.Spec.ManilaShares["share1"]).ShouldNot(BeNil())
+				replicas := int32(1)
+				g.Expect(manila.Spec.ManilaShares["share1"].Replicas).Should(Equal(&replicas))
+
+				th.Logger.Info("Simulated Manila ready", "on", names.ManilaName)
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneManilaReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+	})
+
+	When("A Cinder OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["cinder"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"cinderAPI": map[string]interface{}{
+						"replicas": 1,
+					},
+					"cinderBackup": map[string]interface{}{
+						"replicas": 1,
+					},
+					"cinderScheduler": map[string]interface{}{
+						"replicas": 1,
+					},
+					"cinderVolumes": map[string]interface{}{
+						"volume1": map[string]interface{}{
+							"replicas": 1,
+						},
+					},
+				},
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have Cinder enabled", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Cinder.Enabled).Should(BeTrue())
+
+			// cinder exists
+			Eventually(func(g Gomega) {
+				cinder := &cinderv1.Cinder{}
+				Eventually(func(g Gomega) {
+					g.Expect(k8sClient.Get(ctx, names.CinderName, cinder)).Should(Succeed())
+					g.Expect(cinder).ShouldNot(BeNil())
+				}, timeout, interval).Should(Succeed())
+			})
+
+			// FIXME add helpers to cinder-operator to simulate ready state
+			Eventually(func(g Gomega) {
+				cinder := &cinderv1.Cinder{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.CinderName, cinder)).Should(Succeed())
+				cinder.Status.ObservedGeneration = cinder.Generation
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderAPIReadyCondition, "Ready")
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderBackupReadyCondition, "Ready")
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderSchedulerReadyCondition, "Ready")
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderVolumeReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, cinder)).To(Succeed())
+
+				th.Logger.Info("Simulated Cinder ready", "on", names.CinderName)
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneCinderReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have Cinder Volume configured", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Cinder.Enabled).Should(BeTrue())
+
+			// cinder exists
+			Eventually(func(g Gomega) {
+				cinder := &cinderv1.Cinder{}
+				Eventually(func(g Gomega) {
+					g.Expect(k8sClient.Get(ctx, names.CinderName, cinder)).Should(Succeed())
+					g.Expect(cinder).ShouldNot(BeNil())
+				}, timeout, interval).Should(Succeed())
+			})
+
+			// FIXME add helpers to cinder-operator to simulate ready state
+			Eventually(func(g Gomega) {
+				cinder := &cinderv1.Cinder{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.CinderName, cinder)).Should(Succeed())
+				cinder.Status.ObservedGeneration = cinder.Generation
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderAPIReadyCondition, "Ready")
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderBackupReadyCondition, "Ready")
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderSchedulerReadyCondition, "Ready")
+				cinder.Status.Conditions.MarkTrue(cinderv1.CinderVolumeReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, cinder)).To(Succeed())
+
+				g.Expect(cinder.Spec.CinderVolumes).Should(HaveLen(1))
+				g.Expect(cinder.Spec.CinderVolumes["volume1"]).ShouldNot(BeNil())
+				replicas := int32(1)
+				g.Expect(cinder.Spec.CinderVolumes["volume1"].Replicas).Should(Equal(&replicas))
+
+				th.Logger.Info("Simulated Cinder ready", "on", names.CinderName)
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneCinderReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+	})
+
 	When("A OVN OpenStackControlplane instance is created", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()

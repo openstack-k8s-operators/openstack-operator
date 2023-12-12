@@ -57,6 +57,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -75,6 +76,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;create
 //+kubebuilder:rbac:groups=ironic.openstack.org,resources=ironics,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=horizon.openstack.org,resources=horizons,verbs=get;list;watch;create;update;patch;delete
@@ -164,16 +166,83 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		}
 	}()
 
-	if instance.Status.Conditions == nil {
-		instance.InitConditions()
-		// Register overall status immediately to have an early feedback e.g. in the cli
-		return ctrl.Result{}, nil
+	instance.InitConditions()
+
+	Log.Info("Looking up the current OpenStackVersion")
+	ctrlResult, version, err := openstack.ReconcileVersion(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
 	}
 
-	return r.reconcileNormal(ctx, instance, helper)
+	// wait until the version is initialized so we have images on the version.Status
+	if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionInitialized) {
+		return ctrlResult, nil
+	}
+
+	if instance.Status.DeployedVersion == nil || version.Spec.TargetVersion == *instance.Status.DeployedVersion {
+		// green field deployment or no minor update in progress
+		ctrlResult, err := r.reconcileNormal(ctx, instance, version, helper)
+		if err != nil {
+			Log.Info("Error reconciling normal", "error", err)
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			Log.Info("Reconciling normal")
+			return ctrlResult, nil
+		}
+		// this will allow reconcileNormal to proceed in subsequent reconciles
+		instance.Status.DeployedVersion = &version.Spec.TargetVersion
+		return ctrl.Result{}, nil
+	} else {
+		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
+			Log.Info("Minor update OVN on the ControlPlane")
+			ctrlResult, err := r.reconcileOVNControllers(ctx, instance, version, helper)
+			if err != nil {
+				return ctrl.Result{}, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
+			instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
+			return ctrl.Result{}, nil
+		} else if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
+			Log.Info("Minor update on the ControlPlane")
+			ctrlResult, err := r.reconcileNormal(ctx, instance, version, helper)
+			if err != nil {
+				return ctrl.Result{}, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
+			// this will allow reconcileNormal to proceed in subsequent reconciles
+			instance.Status.DeployedVersion = &version.Spec.TargetVersion
+			return ctrl.Result{}, nil
+		} else {
+			Log.Info("Skipping reconcile. Waiting on minor update to proceed.")
+			return ctrl.Result{}, nil
+		}
+	}
+
 }
 
-func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+
+	OVNControllerReady, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if !OVNControllerReady {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+	} else {
+		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
+	}
+	return ctrl.Result{}, nil
+
+}
+
+func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 
 	ctrlResult, err := openstack.ReconcileCAs(ctx, instance, helper)
 	if err != nil {
@@ -182,154 +251,154 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileDNSMasqs(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileDNSMasqs(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileRabbitMQs(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileRabbitMQs(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileGaleras(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileGaleras(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileMemcacheds(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileMemcacheds(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcilePlacementAPI(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcilePlacementAPI(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileGlance(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileGlance(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileCinder(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileCinder(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileOVN(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileOVN(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileNeutron(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileNeutron(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileNova(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileNova(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileHeat(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileHeat(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileIronic(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileIronic(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileOpenStackClient(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileManila(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileManila(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileHorizon(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileHorizon(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileTelemetry(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileTelemetry(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileBarbican(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileBarbican(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileRedis(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileRedis(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileOctavia(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileOctavia(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileDesignate(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileDesignate(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileSwift(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileSwift(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
@@ -341,6 +410,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1beta1.OpenStackControlPlane{}).
 		Owns(&clientv1.OpenStackClient{}).
@@ -370,5 +440,6 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&certmgrv1.Issuer{}).
 		Owns(&certmgrv1.Certificate{}).
 		Owns(&barbicanv1.Barbican{}).
+		Owns(&corev1beta1.OpenStackVersion{}).
 		Complete(r)
 }

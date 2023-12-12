@@ -33,8 +33,11 @@ import (
 type Names struct {
 	Namespace                 string
 	OpenStackControlplaneName types.NamespacedName
+	OpenStackVersionName      types.NamespacedName
 	KeystoneAPIName           types.NamespacedName
 	MemcachedName             types.NamespacedName
+	CinderName                types.NamespacedName
+	ManilaName                types.NamespacedName
 	DBName                    types.NamespacedName
 	DBCertName                types.NamespacedName
 	DBCell1Name               types.NamespacedName
@@ -60,6 +63,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 	return Names{
 		Namespace:                 openstackControlplaneName.Namespace,
 		OpenStackControlplaneName: openstackControlplaneName,
+		OpenStackVersionName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      openstackControlplaneName.Name, // same name as controlplane
+		},
 		RootCAPublicName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rootca-public"},
@@ -91,6 +98,14 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		MemcachedName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "memcached",
+		},
+		CinderName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cinder",
+		},
+		ManilaName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "manila",
 		},
 		DBName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -167,6 +182,37 @@ func GetOpenStackClient(name types.NamespacedName) *openstackclientv1.OpenStackC
 
 func OpenStackClientConditionGetter(name types.NamespacedName) condition.Conditions {
 	instance := GetOpenStackClient(name)
+	return instance.Status.Conditions
+}
+
+func CreateOpenStackVersion(name types.NamespacedName, spec map[string]interface{}) client.Object {
+
+	raw := map[string]interface{}{
+		"apiVersion": "core.openstack.org/v1beta1",
+		"kind":       "OpenStackVersion",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+	return th.CreateUnstructured(raw)
+}
+
+func GetDefaultOpenStackVersionSpec() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func GetOpenStackVersion(name types.NamespacedName) *corev1.OpenStackVersion {
+	instance := &corev1.OpenStackVersion{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+func OpenStackVersionConditionGetter(name types.NamespacedName) condition.Conditions {
+	instance := GetOpenStackVersion(name)
 	return instance.Status.Conditions
 }
 

@@ -329,18 +329,6 @@ func initializeOverrideSpec(override **route.OverrideSpec, anno map[string]strin
 
 // DefaultServices - common function for calling individual services' defaulting functions
 func (r *OpenStackControlPlane) DefaultServices() {
-	// RabbitMQ
-	// This is a special case in that we don't own the RabbitMQ operator,
-	// so we aren't able to add and call a Default function on its spec.
-	// Instead we just directly set the defaults we need.
-	for key, template := range r.Spec.Rabbitmq.Templates {
-		if template.Image == "" {
-			template.Image = openstackControlPlaneDefaults.RabbitMqImageURL
-			// By-value copy, need to update
-			r.Spec.Rabbitmq.Templates[key] = template
-		}
-	}
-
 	// Cinder
 	r.Spec.Cinder.Template.Default()
 

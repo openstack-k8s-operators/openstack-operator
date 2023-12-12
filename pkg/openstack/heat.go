@@ -23,7 +23,7 @@ const (
 )
 
 // ReconcileHeat -
-func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	heat := &heatv1.Heat{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      heatName,
@@ -149,7 +149,14 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 
 	Log.Info("Reconcile heat", "heat.Namespace", instance.Namespace, "heat.Name", "heat")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), heat, func() error {
-		instance.Spec.Heat.Template.DeepCopyInto(&heat.Spec)
+		instance.Spec.Heat.Template.HeatSpecBase.DeepCopyInto(&heat.Spec.HeatSpecBase)
+		instance.Spec.Heat.Template.HeatAPI.DeepCopyInto(&heat.Spec.HeatAPI.HeatAPITemplateCore)
+		instance.Spec.Heat.Template.HeatCfnAPI.DeepCopyInto(&heat.Spec.HeatCfnAPI.HeatCfnAPITemplateCore)
+		instance.Spec.Heat.Template.HeatEngine.DeepCopyInto(&heat.Spec.HeatEngine.HeatEngineTemplateCore)
+
+		heat.Spec.HeatAPI.ContainerImage = *version.Status.ContainerImages.HeatAPIImage
+		heat.Spec.HeatCfnAPI.ContainerImage = *version.Status.ContainerImages.HeatCfnapiImage
+		heat.Spec.HeatEngine.ContainerImage = *version.Status.ContainerImages.HeatEngineImage
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), heat, helper.GetScheme())
 		if err != nil {
@@ -171,7 +178,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		Log.Info(fmt.Sprintf("heat %s - %s", heat.Name, op))
 	}
 
-	if heat.IsReady() {
+	if heat.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.HeatAPIImage = version.Status.ContainerImages.HeatAPIImage
+		instance.Status.ContainerImages.HeatCfnapiImage = version.Status.ContainerImages.HeatCfnapiImage
+		instance.Status.ContainerImages.HeatEngineImage = version.Status.ContainerImages.HeatEngineImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneHeatReadyCondition, corev1beta1.OpenStackControlPlaneHeatReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

@@ -31,6 +31,7 @@ const (
 func ReconcileGaleras(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 	if !instance.Spec.Galera.Enabled {
@@ -76,7 +77,7 @@ func ReconcileGaleras(
 		spec.TLS.Ca.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 		spec.TLS.SecretName = ptr.To(certSecret.Name)
 
-		status, err := reconcileGalera(ctx, instance, helper, name, &spec)
+		status, err := reconcileGalera(ctx, instance, version, helper, name, &spec)
 
 		switch status {
 		case galeraFailed:
@@ -85,7 +86,7 @@ func ReconcileGaleras(
 			inprogress = append(inprogress, name)
 		case galeraReady:
 		default:
-			return ctrl.Result{}, fmt.Errorf("Invalid galeraStatus from reconcileGalera: %d for Galera %s", status, name)
+			return ctrl.Result{}, fmt.Errorf("invalid galeraStatus from reconcileGalera: %d for Galera %s", status, name)
 		}
 	}
 
@@ -121,9 +122,10 @@ func ReconcileGaleras(
 func reconcileGalera(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
-	spec *mariadbv1.GaleraSpec,
+	spec *mariadbv1.GaleraSpecCore,
 ) (galeraStatus, error) {
 	galera := &mariadbv1.Galera{
 		ObjectMeta: metav1.ObjectMeta{
@@ -143,8 +145,8 @@ func reconcileGalera(
 
 	Log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
-		spec.DeepCopyInto(&galera.Spec)
-
+		spec.DeepCopyInto(&galera.Spec.GaleraSpecCore)
+		galera.Spec.ContainerImage = *version.Status.ContainerImages.MariadbImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), galera, helper.GetScheme())
 		if err != nil {
 			return err
@@ -160,7 +162,8 @@ func reconcileGalera(
 		Log.Info(fmt.Sprintf("Galera %s - %s", galera.Name, op))
 	}
 
-	if galera.IsReady() {
+	if galera.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.MariadbImage = version.Status.ContainerImages.MariadbImage
 		return galeraReady, nil
 	}
 

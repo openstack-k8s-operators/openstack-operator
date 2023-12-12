@@ -2,11 +2,16 @@ apiVersion: core.openstack.org/v1beta1
 kind: OpenStackVersion
 metadata:
   labels:
-    app.kubernetes.io/name: openstackversion
-    app.kubernetes.io/instance: openstackversion-sample
-    app.kubernetes.io/part-of: openstack-operator
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: openstack-operator
-  name: openstackversion-sample
+    #app.kubernetes.io/name: openstackversionupdate
+    #app.kubernetes.io/instance: openstackversionupdate-sample
+    #app.kubernetes.io/part-of: openstack-operator
+    #app.kubernetes.io/managed-by: kustomize
+    #app.kubernetes.io/created-by: openstack-operator
+  name: openstack
 spec:
-  # TODO(user): Add fields here
+  targetVersion: 1.0.1
+  customContainerImages:
+    cinderApiImage: <custom_image_here>
+    cinderVolumeImages:
+      netapp: <custom_image_here>
+      dell: <custom_image_here>

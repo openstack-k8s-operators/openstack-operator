@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileManila -
-func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	manila := &manilav1.Manila{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "manila",
@@ -100,7 +101,32 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), manila, func() error {
-		instance.Spec.Manila.Template.DeepCopyInto(&manila.Spec)
+		instance.Spec.Manila.Template.ManilaSpecBase.DeepCopyInto(&manila.Spec.ManilaSpecBase)
+		instance.Spec.Manila.Template.ManilaAPI.DeepCopyInto(&manila.Spec.ManilaAPI.ManilaAPITemplateCore)
+		instance.Spec.Manila.Template.ManilaScheduler.DeepCopyInto(&manila.Spec.ManilaScheduler.ManilaSchedulerTemplateCore)
+
+		manila.Spec.ManilaAPI.ContainerImage = *version.Status.ContainerImages.ManilaAPIImage
+		manila.Spec.ManilaScheduler.ContainerImage = *version.Status.ContainerImages.ManilaSchedulerImage
+
+		defaultShareImg := version.Status.ContainerImages.ManilaShareImages["default"]
+		if defaultShareImg == nil {
+			return errors.New("default Manila Share images is unset")
+		}
+
+		if manila.Spec.ManilaShares == nil {
+			manila.Spec.ManilaShares = make(map[string]manilav1.ManilaShareTemplate)
+		}
+
+		for name, share := range instance.Spec.Manila.Template.ManilaShares {
+			manilaCore := manilav1.ManilaShareTemplate{}
+			share.DeepCopyInto(&manilaCore.ManilaShareTemplateCore)
+			if volVal, ok := version.Status.ContainerImages.ManilaShareImages[name]; ok {
+				manilaCore.ContainerImage = *volVal
+			} else {
+				manilaCore.ContainerImage = *defaultShareImg
+			}
+			manila.Spec.ManilaShares[name] = manilaCore
+		}
 
 		if manila.Spec.Secret == "" {
 			manila.Spec.Secret = instance.Spec.Secret
@@ -140,7 +166,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		Log.Info(fmt.Sprintf("Manila %s - %s", manila.Name, op))
 	}
 
-	if manila.IsReady() {
+	if manila.Status.ObservedGeneration == manila.Generation && manila.IsReady() {
+		instance.Status.ContainerImages.ManilaAPIImage = version.Status.ContainerImages.ManilaAPIImage
+		instance.Status.ContainerImages.ManilaSchedulerImage = version.Status.ContainerImages.ManilaSchedulerImage
+		instance.Status.ContainerImages.ManilaShareImages = version.Status.ContainerImages.ManilaShareImages
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneManilaReadyCondition, corev1beta1.OpenStackControlPlaneManilaReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

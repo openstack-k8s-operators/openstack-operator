@@ -21,7 +21,7 @@ import (
 )
 
 // ReconcileHorizon -
-func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	horizon := &horizonv1.Horizon{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "horizon",
@@ -106,7 +106,9 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	Log.Info("Reconcile Horizon", "horizon.Namespace", instance.Namespace, "horizon.Name", "horizon")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), horizon, func() error {
-		instance.Spec.Horizon.Template.DeepCopyInto(&horizon.Spec)
+		instance.Spec.Horizon.Template.DeepCopyInto(&horizon.Spec.HorizonSpecCore)
+
+		horizon.Spec.ContainerImage = *version.Status.ContainerImages.HorizonImage
 		horizon.Spec.Override.Service = ptr.To(serviceOverrides[service.EndpointPublic])
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), horizon, helper.GetScheme())
@@ -129,7 +131,8 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		Log.Info(fmt.Sprintf("Horizon %s - %s", horizon.Name, op))
 	}
 
-	if horizon.IsReady() {
+	if horizon.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.HorizonImage = version.Status.ContainerImages.HorizonImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneHorizonReadyCondition, corev1beta1.OpenStackControlPlaneHorizonReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

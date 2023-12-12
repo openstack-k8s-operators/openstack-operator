@@ -39,7 +39,7 @@ import (
 )
 
 // ReconcileNova -
-func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	nova := &novav1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova",
@@ -282,6 +282,13 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec)
 
+		nova.Spec.NovaImages.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
+		nova.Spec.NovaImages.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
+		nova.Spec.NovaImages.ConductorContainerImageURL = *version.Status.ContainerImages.NovaConductorImage
+		nova.Spec.NovaImages.MetadataContainerImageURL = *version.Status.ContainerImages.NovaAPIImage //metadata uses novaAPI image
+		nova.Spec.NovaImages.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
+		nova.Spec.NovaImages.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), nova, helper.GetScheme())
 		if err != nil {
 			return err
@@ -302,7 +309,12 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		Log.Info(fmt.Sprintf("Nova %s - %s", nova.Name, op))
 	}
 
-	if nova.IsReady() {
+	if nova.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.NovaAPIImage = version.Status.ContainerImages.NovaAPIImage
+		instance.Status.ContainerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
+		instance.Status.ContainerImages.NovaConductorImage = version.Status.ContainerImages.NovaConductorImage
+		instance.Status.ContainerImages.NovaNovncImage = version.Status.ContainerImages.NovaNovncImage
+		instance.Status.ContainerImages.NovaSchedulerImage = version.Status.ContainerImages.NovaSchedulerImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneNovaReadyCondition, corev1beta1.OpenStackControlPlaneNovaReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

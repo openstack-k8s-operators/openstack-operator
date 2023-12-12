@@ -20,7 +20,7 @@ import (
 )
 
 // ReconcileDesignate -
-func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	designate := &designatev1.Designate{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "designate",
@@ -90,7 +90,34 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	helper.GetLogger().Info("Reconciling Designate", "Designate.Namespace", instance.Namespace, "Designate.Name", "designate")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), designate, func() error {
-		instance.Spec.Designate.Template.DeepCopyInto(&designate.Spec)
+		// FIXME: the designate structs need some rework (images should be at the top level, not in the sub structs)
+		instance.Spec.Designate.Template.DesignateSpecBase.DeepCopyInto(&designate.Spec.DesignateSpecBase)
+		// API
+		instance.Spec.Designate.Template.DesignateAPI.DesignateAPISpecBase.DeepCopyInto(&designate.Spec.DesignateAPI.DesignateAPISpecBase)
+		instance.Spec.Designate.Template.DesignateAPI.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateAPI.DesignateServiceTemplateCore)
+		// Central
+		instance.Spec.Designate.Template.DesignateCentral.DesignateCentralSpecBase.DeepCopyInto(&designate.Spec.DesignateCentral.DesignateCentralSpecBase)
+		instance.Spec.Designate.Template.DesignateCentral.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateCentral.DesignateServiceTemplateCore)
+		// Worker
+		instance.Spec.Designate.Template.DesignateWorker.DesignateWorkerSpecBase.DeepCopyInto(&designate.Spec.DesignateWorker.DesignateWorkerSpecBase)
+		instance.Spec.Designate.Template.DesignateWorker.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateWorker.DesignateServiceTemplateCore)
+		// Mdns
+		instance.Spec.Designate.Template.DesignateMdns.DesignateMdnsSpecBase.DeepCopyInto(&designate.Spec.DesignateMdns.DesignateMdnsSpecBase)
+		instance.Spec.Designate.Template.DesignateMdns.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateMdns.DesignateServiceTemplateCore)
+		// Producer
+		instance.Spec.Designate.Template.DesignateProducer.DesignateProducerSpecBase.DeepCopyInto(&designate.Spec.DesignateProducer.DesignateProducerSpecBase)
+		instance.Spec.Designate.Template.DesignateProducer.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateProducer.DesignateServiceTemplateCore)
+		// Bind9
+		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateBackendbind9SpecBase.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateBackendbind9SpecBase)
+		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateServiceTemplateCore)
+
+		designate.Spec.DesignateAPI.ContainerImage = *version.Status.ContainerImages.DesignateAPIImage
+		designate.Spec.DesignateCentral.ContainerImage = *version.Status.ContainerImages.DesignateCentralImage
+		designate.Spec.DesignateMdns.ContainerImage = *version.Status.ContainerImages.DesignateMdnsImage
+		designate.Spec.DesignateProducer.ContainerImage = *version.Status.ContainerImages.DesignateProducerImage
+		designate.Spec.DesignateWorker.ContainerImage = *version.Status.ContainerImages.DesignateWorkerImage
+		designate.Spec.DesignateBackendbind9.ContainerImage = *version.Status.ContainerImages.DesignateBackendbind9Image
+		designate.Spec.DesignateUnbound.ContainerImage = *version.Status.ContainerImages.DesignateUnboundImage
 
 		if designate.Spec.Secret == "" {
 			designate.Spec.Secret = instance.Spec.Secret
@@ -122,7 +149,14 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		helper.GetLogger().Info(fmt.Sprintf("Designate %s - %s", designate.Name, op))
 	}
 
-	if designate.IsReady() {
+	if designate.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.DesignateAPIImage = version.Status.ContainerImages.DesignateAPIImage
+		instance.Status.ContainerImages.DesignateCentralImage = version.Status.ContainerImages.DesignateCentralImage
+		instance.Status.ContainerImages.DesignateMdnsImage = version.Status.ContainerImages.DesignateMdnsImage
+		instance.Status.ContainerImages.DesignateProducerImage = version.Status.ContainerImages.DesignateProducerImage
+		instance.Status.ContainerImages.DesignateWorkerImage = version.Status.ContainerImages.DesignateWorkerImage
+		instance.Status.ContainerImages.DesignateBackendbind9Image = version.Status.ContainerImages.DesignateBackendbind9Image
+		instance.Status.ContainerImages.DesignateUnboundImage = version.Status.ContainerImages.DesignateUnboundImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneDesignateReadyCondition, corev1beta1.OpenStackControlPlaneDesignateReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

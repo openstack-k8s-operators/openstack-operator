@@ -100,7 +100,7 @@ var (
 	importEnvFiles = flag.String("import-env-files", "", "Comma separated list of file names to read default operator ENVs from. Used for inter-bundle ENV merging.")
 	exportEnvFile  = flag.String("export-env-file", "", "Name the external file to write operator ENVs to. Used for inter-bundle ENV merging.")
 	almExamples    = flag.Bool("alm-examples", false, "Merge almExamples into the CSV")
-	visibleCRDList = flag.String("visible-crds-list", "openstackcontrolplanes.core.openstack.org,openstackdataplanenodesets.dataplane.openstack.org,openstackdataplanedeployments.dataplane.openstack.org",
+	visibleCRDList = flag.String("visible-crds-list", "openstackversions.core.openstack.org,openstackcontrolplanes.core.openstack.org,openstackdataplanenodesets.dataplane.openstack.org,openstackdataplanedeployments.dataplane.openstack.org",
 		"Comma separated list of all the CRDs that should be visible in OLM console")
 )
 
