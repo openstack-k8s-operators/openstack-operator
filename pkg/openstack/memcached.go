@@ -32,6 +32,7 @@ const (
 func ReconcileMemcacheds(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 	var failures []string = []string{}
@@ -88,7 +89,7 @@ func ReconcileMemcacheds(
 	var err error
 	var status memcachedStatus
 	for name, spec := range instance.Spec.Memcached.Templates {
-		status, ctrlResult, err = reconcileMemcached(ctx, instance, helper, name, &spec)
+		status, ctrlResult, err = reconcileMemcached(ctx, instance, version, helper, name, &spec)
 
 		switch status {
 		case memcachedFailed:
@@ -133,6 +134,7 @@ func ReconcileMemcacheds(
 func reconcileMemcached(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
 	spec *memcachedv1.MemcachedSpec,
@@ -193,7 +195,7 @@ func reconcileMemcached(
 			memcached.Spec.TLS.SecretName = ptr.To(tlsCert)
 		}
 		memcached.Spec.TLS.CaBundleSecretName = tls.CABundleSecret
-
+		memcached.Spec.ContainerImage = *version.Status.ContainerImages.InfraMemcachedImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), memcached, helper.GetScheme())
 		if err != nil {
 			return err
@@ -208,6 +210,8 @@ func reconcileMemcached(
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("Memcached %s - %s", memcached.Name, op))
 	}
+
+	instance.Status.ContainerImages.InfraMemcachedImage = version.Status.ContainerImages.InfraMemcachedImage
 
 	if memcached.IsReady() {
 		return memcachedReady, ctrl.Result{}, nil

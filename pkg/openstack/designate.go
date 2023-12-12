@@ -20,7 +20,7 @@ import (
 )
 
 // ReconcileDesignate -
-func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	designate := &designatev1.Designate{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "designate",
@@ -92,6 +92,14 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), designate, func() error {
 		instance.Spec.Designate.Template.DeepCopyInto(&designate.Spec)
 
+		designate.Spec.DesignateAPI.ContainerImage = *version.Status.ContainerImages.DesignateApiImage
+		designate.Spec.DesignateCentral.ContainerImage = *version.Status.ContainerImages.DesignateCentralImage
+		designate.Spec.DesignateMdns.ContainerImage = *version.Status.ContainerImages.DesignateMdnsImage
+		designate.Spec.DesignateProducer.ContainerImage = *version.Status.ContainerImages.DesignateProducerImage
+		designate.Spec.DesignateWorker.ContainerImage = *version.Status.ContainerImages.DesignateWorkerImage
+		designate.Spec.DesignateBackendbind9.ContainerImage = *version.Status.ContainerImages.DesignateBackendbind9Image
+		designate.Spec.DesignateUnbound.ContainerImage = *version.Status.ContainerImages.DesignateUnboundImage
+
 		if designate.Spec.Secret == "" {
 			designate.Spec.Secret = instance.Spec.Secret
 		}
@@ -131,6 +139,14 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneDesignateReadyRunningMessage))
 	}
+
+	instance.Status.ContainerImages.DesignateApiImage = version.Status.ContainerImages.DesignateApiImage
+	instance.Status.ContainerImages.DesignateCentralImage = version.Status.ContainerImages.DesignateCentralImage
+	instance.Status.ContainerImages.DesignateMdnsImage = version.Status.ContainerImages.DesignateMdnsImage
+	instance.Status.ContainerImages.DesignateProducerImage = version.Status.ContainerImages.DesignateProducerImage
+	instance.Status.ContainerImages.DesignateWorkerImage = version.Status.ContainerImages.DesignateWorkerImage
+	instance.Status.ContainerImages.DesignateBackendbind9Image = version.Status.ContainerImages.DesignateBackendbind9Image
+	instance.Status.ContainerImages.DesignateUnboundImage = version.Status.ContainerImages.DesignateUnboundImage
 
 	return ctrl.Result{}, nil
 

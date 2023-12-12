@@ -36,7 +36,7 @@ import (
 )
 
 // ReconcileOctavia -
-func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	octavia := &octaviav1.Octavia{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "octavia",
@@ -117,6 +117,12 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 	helper.GetLogger().Info("Reconciling Octavia", "Octavia.Namespace", instance.Namespace, "Octavia.Name", octavia.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), octavia, func() error {
 		instance.Spec.Octavia.Template.DeepCopyInto(&octavia.Spec)
+
+		octavia.Spec.OctaviaAPI.ContainerImage = *version.Status.ContainerImages.OctaviaApiImage
+		octavia.Spec.OctaviaWorker.ContainerImage = *version.Status.ContainerImages.OctaviaWorkerImage
+		octavia.Spec.OctaviaHealthManager.ContainerImage = *version.Status.ContainerImages.OctaviaHealthmanagerImage
+		octavia.Spec.OctaviaHousekeeping.ContainerImage = *version.Status.ContainerImages.OctaviaHousekeepingImage
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), octavia, helper.GetScheme())
 		if err != nil {
 			return err
@@ -146,6 +152,10 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneOctaviaReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.OctaviaApiImage = version.Status.ContainerImages.OctaviaApiImage
+	instance.Status.ContainerImages.OctaviaWorkerImage = version.Status.ContainerImages.OctaviaWorkerImage
+	instance.Status.ContainerImages.OctaviaHealthmanagerImage = version.Status.ContainerImages.OctaviaHealthmanagerImage
+	instance.Status.ContainerImages.OctaviaHousekeepingImage = version.Status.ContainerImages.OctaviaHousekeepingImage
 
 	return ctrl.Result{}, nil
 }

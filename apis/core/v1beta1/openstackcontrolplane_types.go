@@ -730,9 +730,20 @@ type OpenStackControlPlaneStatus struct {
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	// TLS
 	TLS TLSStatus `json:"tls,omitempty" optional:"true"`
+
+	//+operator-sdk:csv:customresourcedefinitions:type=status
+	// DeployedVersion
+	DeployedVersion *string `json:"deployedVersion,omitempty"`
+
+	//+operator-sdk:csv:customresourcedefinitions:type=status
+	// DeployedOVNVersion
+	DeployedOVNVersion *string `json:"deployedOVNVersion,omitempty"`
+
+	// ContainerImages
+	ContainerImages ContainerImages `json:"containerImages,omitempty"`
 }
 
 // TLSStatus defines the observed state of TLS

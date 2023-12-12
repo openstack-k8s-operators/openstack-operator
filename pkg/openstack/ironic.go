@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcileIronic -
-func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	ironic := &ironicv1.Ironic{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "ironic",
@@ -148,6 +148,14 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	Log.Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ironic, func() error {
 		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec)
+
+		ironic.Spec.Images.API = *version.Status.ContainerImages.IronicApiImage
+		ironic.Spec.Images.Conductor = *version.Status.ContainerImages.IronicConductorImage
+		ironic.Spec.Images.Inspector = *version.Status.ContainerImages.IronicInspectorImage
+		ironic.Spec.Images.NeutronAgent = *version.Status.ContainerImages.IronicNeutronAgentImage
+		ironic.Spec.Images.Pxe = *version.Status.ContainerImages.IronicPxeImage
+		ironic.Spec.Images.IronicPythonAgent = *version.Status.ContainerImages.IronicPythonAgentImage
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), ironic, helper.GetScheme())
 		if err != nil {
 			return err
@@ -177,6 +185,12 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneIronicReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.IronicApiImage = version.Status.ContainerImages.IronicApiImage
+	instance.Status.ContainerImages.IronicConductorImage = version.Status.ContainerImages.IronicConductorImage
+	instance.Status.ContainerImages.IronicInspectorImage = version.Status.ContainerImages.IronicInspectorImage
+	instance.Status.ContainerImages.IronicNeutronAgentImage = version.Status.ContainerImages.IronicNeutronAgentImage
+	instance.Status.ContainerImages.IronicPxeImage = version.Status.ContainerImages.IronicPxeImage
+	instance.Status.ContainerImages.IronicPythonAgentImage = version.Status.ContainerImages.IronicPythonAgentImage
 
 	return ctrl.Result{}, nil
 

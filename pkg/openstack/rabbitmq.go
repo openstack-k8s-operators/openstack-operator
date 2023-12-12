@@ -40,6 +40,7 @@ const (
 func ReconcileRabbitMQs(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 	var failures []string = []string{}
@@ -49,7 +50,7 @@ func ReconcileRabbitMQs(
 	var status mqStatus
 
 	for name, spec := range instance.Spec.Rabbitmq.Templates {
-		status, ctrlResult, err = reconcileRabbitMQ(ctx, instance, helper, name, spec)
+		status, ctrlResult, err = reconcileRabbitMQ(ctx, instance, version, helper, name, spec)
 
 		switch status {
 		case mqFailed:
@@ -93,6 +94,7 @@ func ReconcileRabbitMQs(
 func reconcileRabbitMQ(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
 	spec corev1beta1.RabbitmqTemplate,
@@ -226,13 +228,7 @@ func reconcileRabbitMQ(
 
 		spec.RabbitmqClusterSpec.DeepCopyInto(&rabbitmq.Spec)
 
-		//FIXME: We shouldn't have to set this here but not setting it causes the rabbitmq
-		// operator to continuously mutate the CR when setting it:
-		// https://github.com/rabbitmq/cluster-operator/blob/main/controllers/reconcile_operator_defaults.go#L19
-		if rabbitmq.Spec.Image == "" {
-			rabbitmq.Spec.Image = "registry.redhat.io/rhosp-rhel9/openstack-rabbitmq:17.0"
-		}
-
+		rabbitmq.Spec.Image = *version.Status.ContainerImages.RabbitmqImage
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
 			Log.Info(fmt.Sprintf("Setting StorageClassName: " + instance.Spec.StorageClass))
 			rabbitmq.Spec.Persistence.StorageClassName = &instance.Spec.StorageClass
@@ -287,6 +283,7 @@ func reconcileRabbitMQ(
 			return mqReady, ctrl.Result{}, nil
 		}
 	}
+	instance.Status.ContainerImages.RabbitmqImage = version.Status.ContainerImages.RabbitmqImage
 
 	return mqCreating, ctrl.Result{}, nil
 }

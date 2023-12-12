@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcileSwift -
-func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	swift := &swiftv1.Swift{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "swift",
@@ -102,6 +102,13 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), swift, func() error {
 		instance.Spec.Swift.Template.DeepCopyInto(&swift.Spec)
 
+		swift.Spec.SwiftRing.ContainerImage = *version.Status.ContainerImages.SwiftProxyImage
+		swift.Spec.SwiftStorage.ContainerImageAccount = *version.Status.ContainerImages.SwiftAccountImage
+		swift.Spec.SwiftStorage.ContainerImageContainer = *version.Status.ContainerImages.SwiftContainerImage
+		swift.Spec.SwiftStorage.ContainerImageObject = *version.Status.ContainerImages.SwiftObjectImage
+		swift.Spec.SwiftStorage.ContainerImageProxy = *version.Status.ContainerImages.SwiftProxyImage
+		swift.Spec.SwiftProxy.ContainerImageProxy = *version.Status.ContainerImages.SwiftProxyImage
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), swift, helper.GetScheme())
 		if err != nil {
 			return err
@@ -131,6 +138,10 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneSwiftReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.SwiftAccountImage = version.Status.ContainerImages.SwiftAccountImage
+	instance.Status.ContainerImages.SwiftContainerImage = version.Status.ContainerImages.SwiftContainerImage
+	instance.Status.ContainerImages.SwiftObjectImage = version.Status.ContainerImages.SwiftObjectImage
+	instance.Status.ContainerImages.SwiftProxyImage = version.Status.ContainerImages.SwiftProxyImage
 
 	return ctrl.Result{}, nil
 }

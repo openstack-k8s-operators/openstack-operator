@@ -39,7 +39,7 @@ import (
 )
 
 // ReconcileNova -
-func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	nova := &novav1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova",
@@ -282,6 +282,22 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec)
 
+		nova.Spec.APIServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaApiImage
+		nova.Spec.MetadataServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaApiImage //metadata uses novaAPI image
+		nova.Spec.SchedulerServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaSchedulerImage
+
+		for _, cellTemplate := range nova.Spec.CellTemplates {
+			cellTemplate.ConductorServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaConductorImage
+			cellTemplate.MetadataServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaApiImage //metadata uses novaAPI image
+			cellTemplate.NoVNCProxyServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaNovncImage
+
+			for computeName, computeTemplate := range cellTemplate.NovaComputeTemplates {
+				computeTemplate.ContainerImage = *version.Status.ContainerImages.NovaComputeImage
+				cellTemplate.NovaComputeTemplates[computeName] = computeTemplate
+
+			}
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), nova, helper.GetScheme())
 		if err != nil {
 			return err
@@ -311,6 +327,11 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneNovaReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.NovaApiImage = version.Status.ContainerImages.NovaApiImage
+	instance.Status.ContainerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
+	instance.Status.ContainerImages.NovaConductorImage = version.Status.ContainerImages.NovaConductorImage
+	instance.Status.ContainerImages.NovaNovncImage = version.Status.ContainerImages.NovaNovncImage
+	instance.Status.ContainerImages.NovaSchedulerImage = version.Status.ContainerImages.NovaSchedulerImage
 
 	return ctrl.Result{}, nil
 }

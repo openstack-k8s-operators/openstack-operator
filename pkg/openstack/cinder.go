@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileCinder -
-func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	cinder := &cinderv1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "cinder",
@@ -101,6 +102,22 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), cinder, func() error {
 		instance.Spec.Cinder.Template.DeepCopyInto(&cinder.Spec)
 
+		cinder.Spec.CinderAPI.ContainerImage = *version.Status.ContainerImages.CinderApiImage
+		cinder.Spec.CinderScheduler.ContainerImage = *version.Status.ContainerImages.CinderSchedulerImage
+		cinder.Spec.CinderBackup.ContainerImage = *version.Status.ContainerImages.CinderBackupImage
+
+		defaultVolumeImg := version.Status.ContainerImages.CinderVolumeImages["default"]
+		if defaultVolumeImg == nil {
+			return errors.New("default Cinder Volume images is unset")
+		}
+		for name, volume := range cinder.Spec.CinderVolumes {
+			if volVal, ok := version.Status.ContainerImages.CinderVolumeImages[name]; ok {
+				volume.ContainerImage = *volVal
+			} else {
+				volume.ContainerImage = *defaultVolumeImg
+			}
+		}
+
 		if cinder.Spec.Secret == "" {
 			cinder.Spec.Secret = instance.Spec.Secret
 		}
@@ -125,7 +142,6 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 		return nil
 	})
-
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneCinderReadyCondition,
@@ -148,6 +164,11 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneCinderReadyRunningMessage))
 	}
+
+	instance.Status.ContainerImages.CinderApiImage = version.Status.ContainerImages.CinderApiImage
+	instance.Status.ContainerImages.CinderSchedulerImage = version.Status.ContainerImages.CinderSchedulerImage
+	instance.Status.ContainerImages.CinderBackupImage = version.Status.ContainerImages.CinderBackupImage
+	instance.Status.ContainerImages.CinderVolumeImages = version.Status.ContainerImages.DeepCopy().CinderVolumeImages
 
 	return ctrl.Result{}, nil
 

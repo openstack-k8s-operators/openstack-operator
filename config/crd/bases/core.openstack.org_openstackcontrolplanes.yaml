@@ -16451,6 +16451,155 @@ spec:
                   - type
                   type: object
                 type: array
+              containerImages:
+                properties:
+                  agentImage:
+                    type: string
+                  ansibleeeImage:
+                    type: string
+                  aodhApiImage:
+                    type: string
+                  aodhEvaluatorImage:
+                    type: string
+                  aodhListenerImage:
+                    type: string
+                  aodhNotifierImage:
+                    type: string
+                  apacheImage:
+                    type: string
+                  barbicanApiImage:
+                    type: string
+                  barbicanKeystoneListenerImage:
+                    type: string
+                  barbicanWorkerImage:
+                    type: string
+                  ceilometerCentralImage:
+                    type: string
+                  ceilometerComputeImage:
+                    type: string
+                  ceilometerIpmiImage:
+                    type: string
+                  ceilometerNotificationImage:
+                    type: string
+                  ceilometerSgcoreImage:
+                    type: string
+                  cinderApiImage:
+                    type: string
+                  cinderBackupImage:
+                    type: string
+                  cinderSchedulerImage:
+                    type: string
+                  cinderVolumeImages:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  designateApiImage:
+                    type: string
+                  designateBackendbind9Image:
+                    type: string
+                  designateCentralImage:
+                    type: string
+                  designateMdnsImage:
+                    type: string
+                  designateProducerImage:
+                    type: string
+                  designateUnboundImage:
+                    type: string
+                  designateWorkerImage:
+                    type: string
+                  glanceApiImage:
+                    type: string
+                  heatApiImage:
+                    type: string
+                  heatCfnapiImage:
+                    type: string
+                  heatEngineImage:
+                    type: string
+                  horizonImage:
+                    type: string
+                  infraDnsmasqImage:
+                    type: string
+                  infraMemcachedImage:
+                    type: string
+                  infraRedisImage:
+                    type: string
+                  ironicApiImage:
+                    type: string
+                  ironicConductorImage:
+                    type: string
+                  ironicInspectorImage:
+                    type: string
+                  ironicNeutronAgentImage:
+                    type: string
+                  ironicPxeImage:
+                    type: string
+                  ironicPythonAgentImage:
+                    type: string
+                  keystoneApiImage:
+                    type: string
+                  manilaApiImage:
+                    type: string
+                  manilaSchedulerImage:
+                    type: string
+                  manilaShareImages:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  mariadbImage:
+                    type: string
+                  neutronApiImage:
+                    type: string
+                  novaApiImage:
+                    type: string
+                  novaComputeImage:
+                    type: string
+                  novaConductorImage:
+                    type: string
+                  novaNovncImage:
+                    type: string
+                  novaSchedulerImage:
+                    type: string
+                  octaviaApiImage:
+                    type: string
+                  octaviaHealthmanagerImage:
+                    type: string
+                  octaviaHousekeepingImage:
+                    type: string
+                  octaviaWorkerImage:
+                    type: string
+                  openstackClientImage:
+                    type: string
+                  osContainerImage:
+                    type: string
+                  ovnControllerImage:
+                    type: string
+                  ovnControllerOvsImage:
+                    type: string
+                  ovnNbDbclusterImage:
+                    type: string
+                  ovnNorthdImage:
+                    type: string
+                  ovnSbDbclusterImage:
+                    type: string
+                  placementApiImage:
+                    type: string
+                  rabbitmqImage:
+                    type: string
+                  swiftAccountImage:
+                    type: string
+                  swiftContainerImage:
+                    type: string
+                  swiftObjectImage:
+                    type: string
+                  swiftProxyImage:
+                    type: string
+                  telemetryNodeExporterImage:
+                    type: string
+                type: object
+              deployedOVNVersion:
+                type: string
+              deployedVersion:
+                type: string
               tls:
                 properties:
                   caBundleSecretName:

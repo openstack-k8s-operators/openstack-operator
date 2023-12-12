@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileManila -
-func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	manila := &manilav1.Manila{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "manila",
@@ -101,6 +102,20 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), manila, func() error {
 		instance.Spec.Manila.Template.DeepCopyInto(&manila.Spec)
+		manila.Spec.ManilaAPI.ContainerImage = *version.Status.ContainerImages.ManilaApiImage
+		manila.Spec.ManilaScheduler.ContainerImage = *version.Status.ContainerImages.ManilaSchedulerImage
+
+		defaultShareImg := version.Status.ContainerImages.ManilaShareImages["default"]
+		if defaultShareImg == nil {
+			return errors.New("default Manila Share images is unset")
+		}
+		for name, share := range manila.Spec.ManilaShares {
+			if volVal, ok := version.Status.ContainerImages.ManilaShareImages[name]; ok {
+				share.ContainerImage = *volVal
+			} else {
+				share.ContainerImage = *defaultShareImg
+			}
+		}
 
 		if manila.Spec.Secret == "" {
 			manila.Spec.Secret = instance.Spec.Secret
@@ -149,6 +164,9 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneManilaReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.ManilaApiImage = version.Status.ContainerImages.ManilaApiImage
+	instance.Status.ContainerImages.ManilaSchedulerImage = version.Status.ContainerImages.ManilaSchedulerImage
+	instance.Status.ContainerImages.ManilaShareImages = version.Status.ContainerImages.ManilaShareImages
 
 	return ctrl.Result{}, nil
 }

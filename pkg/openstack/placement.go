@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcilePlacementAPI -
-func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	placementAPI := &placementv1.PlacementAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "placement",
@@ -100,6 +100,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), placementAPI, func() error {
 		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec)
 
+		placementAPI.Spec.ContainerImage = *version.Status.ContainerImages.PlacementApiImage
 		if placementAPI.Spec.Secret == "" {
 			placementAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -138,6 +139,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlanePlacementAPIReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.PlacementApiImage = version.Status.ContainerImages.PlacementApiImage
 
 	return ctrl.Result{}, nil
 

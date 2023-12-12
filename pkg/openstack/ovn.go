@@ -20,8 +20,8 @@ import (
 )
 
 // ReconcileOVN -
-func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
-
+func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+	Log := GetLogger(ctx)
 	setOVNReadyError := func(instance *corev1beta1.OpenStackControlPlane, err error) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
@@ -31,20 +31,25 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 			err.Error()))
 	}
 
-	OVNDBClustersReady, err := ReconcileOVNDbClusters(ctx, instance, helper)
+	OVNDBClustersReady, err := ReconcileOVNDbClusters(ctx, instance, version, helper)
 	if err != nil {
+		Log.Error(err, "Failed to reconcile OVNDBClusters")
 		setOVNReadyError(instance, err)
 	}
 
-	OVNNorthdReady, err := ReconcileOVNNorthd(ctx, instance, helper)
+	OVNNorthdReady, err := ReconcileOVNNorthd(ctx, instance, version, helper)
 	if err != nil {
+		Log.Error(err, "Failed to reconcile OVNNorthd")
 		setOVNReadyError(instance, err)
 	}
 
-	OVNControllerReady, err := ReconcileOVNController(ctx, instance, helper)
+	OVNControllerReady, err := ReconcileOVNController(ctx, instance, version, helper)
 	if err != nil {
+		Log.Error(err, "Failed to reconcile OVNController")
 		setOVNReadyError(instance, err)
 	}
+
+	Log.Info("Reconciling OVN", "OVNDBClustersReady", OVNDBClustersReady, "OVNNorthdReady", OVNNorthdReady, "OVNControllerReady", OVNControllerReady)
 
 	// Expect all services (dbclusters, northd, ovn-controller) ready
 	if OVNDBClustersReady && OVNNorthdReady && OVNControllerReady {
@@ -61,7 +66,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	return ctrl.Result{}, nil
 }
 
-func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (bool, error) {
+func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
 	OVNDBClustersReady := len(instance.Spec.Ovn.Template.OVNDBCluster) != 0
@@ -131,6 +136,13 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 
 			dbcluster.DeepCopyInto(&OVNDBCluster.Spec)
 
+			// we always set these to match OpenStackVersion
+			if dbcluster.DBType == ovnv1.NBDBType {
+				dbcluster.ContainerImage = *version.Status.ContainerImages.OvnNbDbclusterImage
+			} else if dbcluster.DBType == ovnv1.SBDBType {
+				dbcluster.ContainerImage = *version.Status.ContainerImages.OvnSbDbclusterImage
+			}
+
 			if OVNDBCluster.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
 				OVNDBCluster.Spec.NodeSelector = instance.Spec.NodeSelector
 			}
@@ -146,6 +158,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		})
 
 		if err != nil {
+			Log.Error(err, "Failed to reconcile OVNDBCluster")
 			return false, err
 		}
 		if op != controllerutil.OperationResultNone {
@@ -153,10 +166,12 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		}
 		OVNDBClustersReady = OVNDBClustersReady && OVNDBCluster.IsReady()
 	}
+	instance.Status.ContainerImages.OvnNbDbclusterImage = version.Status.ContainerImages.OvnNbDbclusterImage
+	instance.Status.ContainerImages.OvnSbDbclusterImage = version.Status.ContainerImages.OvnSbDbclusterImage
 	return OVNDBClustersReady, nil
 }
 
-func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (bool, error) {
+func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
 	OVNNorthd := &ovnv1.OVNNorthd{
@@ -222,6 +237,8 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 		instance.Spec.Ovn.Template.OVNNorthd.DeepCopyInto(&OVNNorthd.Spec)
 
+		OVNNorthd.Spec.ContainerImage = *version.Status.ContainerImages.OvnNorthdImage
+
 		if OVNNorthd.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
 			OVNNorthd.Spec.NodeSelector = instance.Spec.NodeSelector
 		}
@@ -240,15 +257,17 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 			condition.SeverityWarning,
 			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
 			err.Error()))
+		Log.Error(err, "Failed to reconcile OVNNorthd")
 		return false, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
 	}
+	instance.Status.ContainerImages.OvnNorthdImage = version.Status.ContainerImages.OvnNorthdImage
 	return OVNNorthd.IsReady(), nil
 }
 
-func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (bool, error) {
+func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
 	OVNController := &ovnv1.OVNController{
@@ -313,6 +332,8 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {
 
 		instance.Spec.Ovn.Template.OVNController.DeepCopyInto(&OVNController.Spec)
+		OVNController.Spec.OvnContainerImage = *version.Status.ContainerImages.OvnControllerImage
+		OVNController.Spec.OvsContainerImage = *version.Status.ContainerImages.OvnControllerOvsImage
 
 		if OVNController.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
 			OVNController.Spec.NodeSelector = instance.Spec.NodeSelector
@@ -332,11 +353,15 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 			condition.SeverityWarning,
 			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
 			err.Error()))
+		Log.Error(err, "Failed to reconcile OVNController")
 		return false, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("OVNController %s - %s", OVNController.Name, op))
 	}
+
+	instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
+	instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
 
 	return OVNController.IsReady(), nil
 }

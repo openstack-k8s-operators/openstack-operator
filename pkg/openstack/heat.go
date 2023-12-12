@@ -23,7 +23,7 @@ const (
 )
 
 // ReconcileHeat -
-func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	heat := &heatv1.Heat{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      heatName,
@@ -151,6 +151,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), heat, func() error {
 		instance.Spec.Heat.Template.DeepCopyInto(&heat.Spec)
 
+		heat.Spec.HeatAPI.ContainerImage = *version.Status.ContainerImages.HeatApiImage
+		heat.Spec.HeatCfnAPI.ContainerImage = *version.Status.ContainerImages.HeatCfnapiImage
+		heat.Spec.HeatEngine.ContainerImage = *version.Status.ContainerImages.HeatEngineImage
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), heat, helper.GetScheme())
 		if err != nil {
 			return err
@@ -180,6 +184,9 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneHeatReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.HeatApiImage = version.Status.ContainerImages.HeatApiImage
+	instance.Status.ContainerImages.HeatCfnapiImage = version.Status.ContainerImages.HeatCfnapiImage
+	instance.Status.ContainerImages.HeatEngineImage = version.Status.ContainerImages.HeatEngineImage
 
 	return ctrl.Result{}, nil
 }

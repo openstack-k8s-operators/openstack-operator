@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcileKeystoneAPI -
-func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	keystoneAPI := &keystonev1.KeystoneAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone", //FIXME (keystone doesn't seem to work unless named "keystone")
@@ -102,6 +102,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec)
 
+		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneApiImage
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -142,6 +143,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.KeystoneApiImage = version.Status.ContainerImages.KeystoneApiImage
 
 	return ctrl.Result{}, nil
 }
