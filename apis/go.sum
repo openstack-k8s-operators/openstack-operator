@@ -148,12 +148,12 @@ github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231127105109-2
 github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231127105109-2a854ad66b54/go.mod h1:H6BuZ52u+Dq/vWJgpGIJLttRTnPPH3xdVeqhI99QE/k=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231128185906-0b4579c3dadf h1:Omn04tJTZlNOXIszGurB8XfpbsGf+6LIn86BaN9XRDs=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231128185906-0b4579c3dadf/go.mod h1:kDtQ2LCkf28F7xgK8GBFAMPDhXnL6iRb8NztHhrYaO0=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231207110546-628604e7579b h1:xXWByZ9fpR5IR+RIUQrJ9hKyzABuiy6XGFQReQwkjxc=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231207110546-628604e7579b/go.mod h1:9n2nMFDiV5hGZHKr81aTAOHUoAxvEKivHeWCXFRJEZ4=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231209173030-f7a552f208e7 h1:fZ0YF3m9kJDPjHg2rC6XJbGPxv00Nc9N/1/Cdg1Die0=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231209173030-f7a552f208e7/go.mod h1:gcsno+cczP8lUANyOQ/jHKHv3QgzmZvLv8cMSS0rMws=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231207110546-628604e7579b h1:YXL6GK03FiyirGZt35/DSssHfn9t4DTD5ZHpAY2Q2/Q=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231207110546-628604e7579b/go.mod h1:SfdtKhpn1MGom0ZEOsgY27QFu+7SdDhO/LiuDe5cDXk=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231207110546-628604e7579b h1:YrSbxQnM1jFK4ADqN9sTAoogIQNNV62H8kJAxdMhizg=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231207110546-628604e7579b/go.mod h1:cZDEOHUMdjWrYlxxF7a4iE30GYEVSGwJYc76FJk/znY=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231209173030-f7a552f208e7 h1:4kp53MzDy8lTUumGMJ3zoJwTebdC01XwUnJbZbwARPc=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231209173030-f7a552f208e7/go.mod h1:cZDEOHUMdjWrYlxxF7a4iE30GYEVSGwJYc76FJk/znY=
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20231205160200-1f061113c717 h1:sgVrbr7S2U3O2c+UpZtVZtRRv3tHfeweBr4g2f+ZOc4=
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20231205160200-1f061113c717/go.mod h1:zxkLJiNomToJs6K0dICg78vTvv/NQRW7EeblG1sg3rE=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20231205003453-c971bdd03386 h1:d+rwNT9RK6zuGIV1OJbiyiDQxKnIktzEZiDvWhQGAf8=
@@ -227,8 +227,8 @@ golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5y
 golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.15.0/go.mod h1:4ChreQoLWfG3xLDer1WdlH5NdlQ3+mwnQq1YTKY+72g=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
-golang.org/x/exp v0.0.0-20231127185646-65229373498e h1:Gvh4YaCaXNs6dKTlfgismwWZKyjVZXwOPfIyUaqU3No=
-golang.org/x/exp v0.0.0-20231127185646-65229373498e/go.mod h1:iRJReGqOEeBhDZGkGbynYwcHlctCvnjTYIamk7uXpHI=
+golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb h1:c0vyKkb6yr3KR7jEfJaOSv4lG7xPkbN6r52aJz1d8a8=
+golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb/go.mod h1:iRJReGqOEeBhDZGkGbynYwcHlctCvnjTYIamk7uXpHI=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
 golang.org/x/lint v0.0.0-20190227174305-5b3e6a55c961/go.mod h1:wehouNa3lNwaWXcvxsM5YxQ5yQlVC4a0KAMCusXpPoU=
 golang.org/x/lint v0.0.0-20190313153728-d0100b6bd8b3/go.mod h1:6SW0HCj/g11FgYtHlgUYUwCkIfeOF89ocIRzGO/8vkc=

@@ -14,7 +14,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231206173636-5eb2ad7769a7
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20231127105109-2a854ad66b54
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20231128185906-0b4579c3dadf
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231207110546-628604e7579b
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231209173030-f7a552f208e7
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20231205160200-1f061113c717
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20231205003453-c971bdd03386
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20231206091318-5f09d2fd3c1b
@@ -35,7 +35,7 @@ require (
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/tools v0.16.0 // indirect
 )
 
@@ -68,7 +68,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20231207110546-628604e7579b //indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231207110546-628604e7579b
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231209173030-f7a552f208e7
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
