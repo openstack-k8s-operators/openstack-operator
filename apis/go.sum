@@ -154,8 +154,6 @@ github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240104144719-7
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240104144719-72b9a4ab968c/go.mod h1:AIdqCEAycRS/78wgnLhAjRkgkt7gygVmakvOp//vlz0=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240104162634-fe72003c6343 h1:KrzABqo34PVd4kGxVwTZj/j4ZbTmH/vE/TL13t/ojGA=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240104162634-fe72003c6343/go.mod h1:Ehw3pMZJrmmIscJ4npkAux7BuZ+2XSXnCuSeF1tzeL0=
-github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240104123738-13980c2f529d h1:bQWbPEd9iBcFoil+id1kYUcxjxI83DLscgLZlyz0Hz0=
-github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240104123738-13980c2f529d/go.mod h1:NuZtXGv0KqWpN9A6HeclDgIQZn9SD3ompfiiyI2fV4c=
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240104150350-1cb9656d2d92 h1:mJyxKHC80qo1F9FtYrg7ZUgb8QQ80zdc1VRHlaHfZT8=
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240104150350-1cb9656d2d92/go.mod h1:661OeCQQ1NlU8lg0zzZOY/qi1R800JshTNLaXNE4aEQ=
 github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240104133234-31762c2b9fda h1:F4S4fHht/zEOeZH/ZqPTxxNPEs+M9wwrKwnkGv8amR0=
@@ -209,6 +207,8 @@ github.com/stuggi/keystone-operator/api v0.0.0-20240110132207-643df3216ef6 h1:NP
 github.com/stuggi/keystone-operator/api v0.0.0-20240110132207-643df3216ef6/go.mod h1:5quo1o1B7wLTXAD6j8sPXDxB5ASYaL9ImyiouAPrXtg=
 github.com/stuggi/neutron-operator/api v0.0.0-20240110132446-b7dd116f719a h1:r19DMgleke1s0KfyMFawd6Zs3WmOL3bOE0JZwrMYVnY=
 github.com/stuggi/neutron-operator/api v0.0.0-20240110132446-b7dd116f719a/go.mod h1:yPMojR9cveY8v9D33Xg7TKgMLv1/eC5iUx38I+oW+os=
+github.com/stuggi/nova-operator/api v0.0.0-20240110132701-d343627c1d40 h1:1JsmWURQ1DLsX9VLwJPSh+T93XNXRMXS/8C1oqtJbFY=
+github.com/stuggi/nova-operator/api v0.0.0-20240110132701-d343627c1d40/go.mod h1:5Zn+uNB6bWf5NzrVCO479Y+cFpXBs37zZ2gsO4cF+dI=
 github.com/stuggi/placement-operator/api v0.0.0-20231220103240-24d8879cbaab h1:S+0i4XbDtElrNkMMa+uwCd3Le8AWWM/kQIg1ip9VGHM=
 github.com/stuggi/placement-operator/api v0.0.0-20231220103240-24d8879cbaab/go.mod h1:AAwgTkClTNTxz+2V0drAqYAbzQ54TxFAbzcGPGinbAQ=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
