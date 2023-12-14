@@ -116,55 +116,55 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 
 	switch name {
 	case "Keystone":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled) {
-			reqs = "MariaDB or Galera, Memcached"
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled) {
+			reqs = "Galera, Memcached"
 		}
 	case "Glance":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Memcached, Keystone"
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "Galera, Memcached, Keystone"
 		}
 	case "Cinder":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone"
+			reqs = "Galera, Memcached, RabbitMQ, Keystone"
 		}
 	case "Placement":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Memcached, Keystone"
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "Galera, Memcached, Keystone"
 		}
 	case "Neutron":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, RabbitMQ, Keystone"
+			reqs = "Galera, RabbitMQ, Keystone"
 		}
 	case "Nova":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled) {
-			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone, Glance Neutron, Placement"
+			reqs = "Galera, Memcached, RabbitMQ, Keystone, Glance Neutron, Placement"
 		}
 	case "Heat":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone"
+			reqs = "Galera, Memcached, RabbitMQ, Keystone"
 		}
 	case "Swift":
 		if !(r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
 			reqs = "Memcached, Keystone"
 		}
 	case "Horizon":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Memcached, Keystone"
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "Galera, Memcached, Keystone"
 		}
 	case "Barbican":
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
-			reqs = "MariaDB or Galera, Keystone"
+		if !((r.Spec.Galera.Enabled) && r.Spec.Keystone.Enabled) {
+			reqs = "Galera, Keystone"
 		}
 	case "Octavia":
 		// TODO(beagles): So far we haven't declared Redis as dependency for Octavia, but we might.
-		if !((r.Spec.Mariadb.Enabled || r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled &&
 			r.Spec.Ovn.Enabled) {
-			reqs = "MariaDB or Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
+			reqs = "Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
 		}
 	}
 
@@ -216,12 +216,6 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 // enabled
 func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path) field.ErrorList {
 	var allErrs field.ErrorList
-
-	// Temporary check until MariaDB is deprecated
-	if r.Spec.Mariadb.Enabled && r.Spec.Galera.Enabled {
-		err := field.Invalid(basePath.Child("mariaDB").Child("enabled"), r.Spec.Mariadb.Enabled, "Mariadb and Galera are mutually exclusive")
-		allErrs = append(allErrs, err)
-	}
 
 	// Add service dependency validations
 
@@ -369,19 +363,6 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Manila
 	r.Spec.Manila.Template.Default()
-
-	// MariaDB
-	for key, template := range r.Spec.Mariadb.Templates {
-		if template.StorageClass == "" {
-			template.StorageClass = r.Spec.StorageClass
-		}
-		if template.Secret == "" {
-			template.Secret = r.Spec.Secret
-		}
-		template.Default()
-		// By-value copy, need to update
-		r.Spec.Mariadb.Templates[key] = template
-	}
 
 	// Memcached
 	for key, template := range r.Spec.Memcached.Templates {
