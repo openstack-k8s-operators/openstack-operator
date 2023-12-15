@@ -109,10 +109,10 @@ spec:
       - description: APIOverride, provides the ability to override the generated manifest
           of several child resources.
         displayName: APIOverride
-        path: glance.apiOverride
+        path: glance.apiOverrides
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
-        path: glance.apiOverride.tls
+        path: glance.apiOverrides.tls
       - description: Enabled - Whether Glance service should be deployed and managed
         displayName: Enabled
         path: glance.enabled

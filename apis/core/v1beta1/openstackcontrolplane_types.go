@@ -297,7 +297,7 @@ type GlanceSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// APIOverride, provides the ability to override the generated manifest of several child resources.
-	APIOverride Override `json:"apiOverride,omitempty"`
+	APIOverride map[string]Override `json:"apiOverrides,omitempty"`
 }
 
 // CinderSection defines the desired state of Cinder service
