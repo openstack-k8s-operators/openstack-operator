@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/cert-manager/cert-manager v1.11.5
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-logr/logr v1.3.0
+	github.com/go-logr/logr v1.4.1
 	github.com/imdario/mergo v0.3.16
 	github.com/onsi/ginkgo/v2 v2.13.2
 	github.com/onsi/gomega v1.30.0
@@ -34,13 +34,13 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20231210161825-4daf37ecb2bb
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20231130161451-e5ca233aa206
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20231212092541-76f6f1e20cd0
-	github.com/operator-framework/api v0.17.6
+	github.com/operator-framework/api v0.20.0
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
-	k8s.io/api v0.27.2
-	k8s.io/apimachinery v0.27.4
-	k8s.io/client-go v0.27.2
+	k8s.io/api v0.27.7
+	k8s.io/apimachinery v0.27.7
+	k8s.io/client-go v0.27.7
 	sigs.k8s.io/controller-runtime v0.15.1
 )
 
@@ -90,7 +90,7 @@ require (
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.0 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/sirupsen/logrus v1.9.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
@@ -105,8 +105,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.27.2 //indirect
-	k8s.io/component-base v0.27.2 //indirect
+	k8s.io/apiextensions-apiserver v0.27.7 //indirect
+	k8s.io/component-base v0.27.7 //indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230525220651-2546d827e515 //indirect
 	k8s.io/utils v0.0.0-20231127182322-b307cd553661
