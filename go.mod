@@ -37,7 +37,7 @@ require (
 	github.com/operator-framework/api v0.17.6
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
+	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b
 	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.4
 	k8s.io/client-go v0.27.2
