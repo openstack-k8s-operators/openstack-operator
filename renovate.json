@@ -5,7 +5,7 @@
   "constraints": {
     "go": "1.19"
   },
-  "baseBranches": ["main","dev-preview"],
+  "baseBranches": ["main"],
   "useBaseBranchConfig": "merge",
   "packageRules": [
     {
