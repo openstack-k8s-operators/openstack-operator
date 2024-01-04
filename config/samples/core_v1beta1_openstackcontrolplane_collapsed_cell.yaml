@@ -9,7 +9,7 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
-  mariadb:
+  galera:
     templates:
       openstack:
         storageRequest: 500M
@@ -48,9 +48,11 @@ spec:
       databaseInstance: openstack
       storageClass: ""
       storageRequest: 10G
-      glanceAPI:
-        replicas: 1
-        type: single
+      keystoneEndpoint: default
+      glanceAPIs:
+        default:
+          replicas: 1
+          type: single
   cinder:
     template:
       databaseInstance: openstack

@@ -1,11 +1,11 @@
 {
   "extends": [
-    "github>openstack-k8s-operators/renovate-config"
+    "github>openstack-k8s-operators/renovate-config:default.json5"
   ],
   "constraints": {
     "go": "1.19"
   },
-  "baseBranches": ["main","dev-preview"],
+  "baseBranches": ["main"],
   "useBaseBranchConfig": "merge",
   "packageRules": [
     {

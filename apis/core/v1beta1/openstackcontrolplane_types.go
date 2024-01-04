@@ -107,11 +107,6 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// Mariadb - Parameters related to the Mariadb service
-	Mariadb MariadbSection `json:"mariadb,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Galera - Parameters related to the Galera services
 	Galera GaleraSection `json:"galera,omitempty"`
 
@@ -302,7 +297,7 @@ type GlanceSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// APIOverride, provides the ability to override the generated manifest of several child resources.
-	APIOverride Override `json:"apiOverride,omitempty"`
+	APIOverride map[string]Override `json:"apiOverrides,omitempty"`
 }
 
 // CinderSection defines the desired state of Cinder service
@@ -324,24 +319,10 @@ type CinderSection struct {
 	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
-// MariadbSection defines the desired state of MariaDB service
-type MariadbSection struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Enabled - Whether MariaDB service should be deployed and managed
-	Enabled bool `json:"enabled"`
-
-	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// Templates - Overrides to use when creating the MariaDB databases
-	Templates map[string]mariadbv1.MariaDBSpec `json:"templates,omitempty"`
-}
-
 // GaleraSection defines the desired state of Galera services
 type GaleraSection struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
+	// +kubebuilder:default=true
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether Galera services should be deployed and managed
 	Enabled bool `json:"enabled"`

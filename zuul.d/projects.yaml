@@ -29,6 +29,9 @@
       # NOTE(gibi): plus the whitebox vTPM tests as there is no scenario
       # test that covers barbican - nova integration
         - VTPMTest
+      # Plus an extra live migration test until we have cinder volumes / ceph
+      # to run the live migration scenario tests with it
+        - tempest.api.compute.admin.test_live_migration.LiveAutoBlockMigrationV225Test
       cifmw_tempest_tests_skipped:
       # NOTE(gibi): there are no cinder backend enabled so test needing a
       # volumes needs to be skipped
@@ -36,8 +39,17 @@
         - test_shelve_volume_backed_instance
         - tempest.scenario.test_stamp_pattern.TestStampPattern
         - tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
-      # NOTE(gibi): live migration does not work yet
-        - test_server_connectivity_live_migration
+        - tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_live_migration
+      # Libvirt refuses to live-migrate a paused VM with post-copy enabled
+      # See https://bugs.launchpad.net/nova/+bug/1946752
+        - test_live_block_migration_paused
+      # We need to use a custom cpu model to allow live migrating between
+      # slightly different computes coming from the node pool
+      cifmw_edpm_deploy_nova_compute_extra_config: |
+        [libvirt]
+        cpu_mode = custom
+        cpu_models = Nehalem
+
 - project:
     name: openstack-k8s-operators/openstack-operator
     templates:

@@ -41,16 +41,6 @@ spec:
       - description: Template - Overrides to use when creating the Barbican Service
         displayName: Template
         path: barbican.template
-      - description: Enabled - Whether OpenStack Ceilometer servicesshould be deployed
-          and managed
-        displayName: Enabled
-        path: ceilometer.enabled
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Template - Overrides to use when creating the OpenStack Ceilometer
-          service
-        displayName: Template
-        path: ceilometer.template
       - description: Cinder - Parameters related to the Cinder service
         displayName: Cinder
         path: cinder
@@ -119,10 +109,10 @@ spec:
       - description: APIOverride, provides the ability to override the generated manifest
           of several child resources.
         displayName: APIOverride
-        path: glance.apiOverride
+        path: glance.apiOverrides
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
-        path: glance.apiOverride.tls
+        path: glance.apiOverrides.tls
       - description: Enabled - Whether Glance service should be deployed and managed
         displayName: Enabled
         path: glance.enabled
@@ -221,17 +211,6 @@ spec:
         path: manila.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Mariadb - Parameters related to the Mariadb service
-        displayName: Mariadb
-        path: mariadb
-      - description: Enabled - Whether MariaDB service should be deployed and managed
-        displayName: Enabled
-        path: mariadb.enabled
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Templates - Overrides to use when creating the MariaDB databases
-        displayName: Templates
-        path: mariadb.templates
       - description: Memcached - Parameters related to the Memcached service
         displayName: Memcached
         path: memcached
@@ -399,6 +378,16 @@ spec:
       - description: Template - Overrides to use when creating Swift Resources
         displayName: Template
         path: swift.template
+      - description: Enabled - Whether OpenStack Telemetry services should be deployed
+          and managed
+        displayName: Enabled
+        path: telemetry.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the OpenStack Telemetry
+          services
+        displayName: Template
+        path: telemetry.template
       - description: TLS - Parameters related to the TLS
         displayName: TLS
         path: tls

@@ -15,14 +15,7 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
-  mariadb:
-    templates:
-      openstack:
-        storageRequest: 500M
-      openstack-cell1:
-        storageRequest: 500M
   galera:
-    enabled: false
     templates:
       openstack:
         storageClass: local-storage
@@ -71,9 +64,11 @@ spec:
       databaseInstance: openstack
       storageClass: ""
       storageRequest: 10G
-      glanceAPI:
-        type: single
-        replicas: 1
+      keystoneEndpoint: default
+      glanceAPIs:
+        default:
+          type: single
+          replicas: 1
   cinder:
     template:
       databaseInstance: openstack
