@@ -8,6 +8,7 @@ DOCKERFILE=${DOCKERFILE:-""}
 IMAGENAMESPACE=${IMAGENAMESPACE:-"openstack-k8s-operators"}
 IMAGEREGISTRY=${IMAGEREGISTRY:-"quay.io"}
 IMAGEBASE=${IMAGEBASE:-}
+IMAGECUSTOMTAG=${IMAGECUSTOMTAG:-}
 LOCAL_REGISTRY=${LOCAL_REGISTRY:-0}
 
 if [ -n "$DOCKERFILE" ]; then
@@ -26,10 +27,17 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
 
     GIT_REPO=${MOD_PATH%"/apis"}
     GIT_REPO=${GIT_REPO%"/api"}
-    REF=$(echo $MOD_VERSION | sed -e 's|v[0-9]*.[0-9]*.[0-9]*-.*[0-9]*-\(.*\)$|\1|')
-    if [[ "$REF" == v* ]]; then
-        REF=$(git ls-remote https://${GIT_REPO} | grep ${REF} | awk 'NR==1{print $1}')
+
+    # Check if there is a custom tag for IMAGEBASE operator
+    if [[ -n "$IMAGECUSTOMTAG" && "$BASE" == "$IMAGEBASE" ]]; then
+        REF=${IMAGECUSTOMTAG}
+    else
+        REF=$(echo $MOD_VERSION | sed -e 's|v[0-9]*.[0-9]*.[0-9]*-.*[0-9]*-\(.*\)$|\1|')
+        if [[ "$REF" == v* ]]; then
+            REF=$(git ls-remote https://${GIT_REPO} | grep ${REF} | awk 'NR==1{print $1}')
+        fi
     fi
+
     GITHUB_USER=$(echo $MOD_PATH | sed -e 's|github.com/\(.*\)/.*-operator/.*$|\1|')
     CURL_REGISTRY="quay.io"
     REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/openstack-k8s-operators"
