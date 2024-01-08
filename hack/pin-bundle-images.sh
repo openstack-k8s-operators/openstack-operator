@@ -55,7 +55,7 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
     elif [[ "${CURL_REGISTRY}" != "quay.io" ]]; then
         # quay.rdoproject.io doesn't support filter_tag_name, so increase limit to 100
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?limit=100 | jq -r .tags[].name | sort -u | grep $REF)
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true?limit=100 | jq -r .tags[].name | sort -u | grep $REF)
     else
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r .tags[].name)
     fi
