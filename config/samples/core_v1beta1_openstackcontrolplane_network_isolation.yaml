@@ -309,6 +309,10 @@ spec:
   telemetry:
     enabled: true
     template:
+      metricStorage:
+        enabled: false
+        monitoringStack:
+          type: prometheus
       autoscaling:
         enabled: false
         prometheus:
