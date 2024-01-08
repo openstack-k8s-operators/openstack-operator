@@ -13,14 +13,14 @@ require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240104132718-a962cceb867d
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240104172704-238ed4f5b9f5
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240104144436-858a0383741c
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240104144437-f17cd244921e
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240109080016-338d4287e4ec
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240104130506-4f3841d6042d
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240104144435-fdfef4b8a33f
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240104150635-c4ffc51e0752
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240104144719-8030e9e8c962
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240104144437-5355d932c316
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240104154954-dc504be0d9be
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240104154954-dc504be0d9be
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240108143014-3f12c3253835
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240104154954-dc504be0d9be
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240104144719-72b9a4ab968c
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240104162634-fe72003c6343
@@ -37,7 +37,7 @@ require (
 	github.com/operator-framework/api v0.20.0
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b
+	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 	k8s.io/api v0.27.7
 	k8s.io/apimachinery v0.27.7
 	k8s.io/client-go v0.27.7
