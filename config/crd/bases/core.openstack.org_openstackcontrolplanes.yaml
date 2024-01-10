@@ -10257,7 +10257,7 @@ spec:
                 properties:
                   template:
                     properties:
-                      caSecretName:
+                      caBundleSecretName:
                         type: string
                       containerImage:
                         type: string
@@ -15915,7 +15915,7 @@ spec:
                     public:
                       enabled: true
                 properties:
-                  caSecretName:
+                  caBundleSecretName:
                     type: string
                   endpoint:
                     additionalProperties:

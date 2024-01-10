@@ -21,8 +21,13 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
+
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
+	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {
@@ -125,6 +130,49 @@ var _ = Describe("OpenStackOperator controller", func() {
 				th.GetSecret(names.RootCAPublicName)
 				caBundle := th.GetSecret(names.CABundleName)
 				g.Expect(caBundle.Data).Should(HaveLen(int(1)))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should create an openstackclient", func() {
+			// keystone exists
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			// make keystoneAPI ready and create secrets usually created by keystone-controller
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+
+			// openstackclient exists
+			Eventually(func(g Gomega) {
+				osclient := GetOpenStackClient(names.OpenStackClientName)
+				g.Expect(osclient).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackClientName,
+					ConditionGetterFunc(OpenStackClientConditionGetter),
+					clientv1.OpenStackClientReadyCondition,
+					corev1.ConditionTrue,
+				)
+
+				pod := &corev1.Pod{}
+				err := th.K8sClient.Get(ctx, names.OpenStackClientName, pod)
+				g.Expect(pod).Should(Not(BeNil()))
+				g.Expect(err).ToNot(HaveOccurred())
+				vols := []string{}
+				for _, x := range pod.Spec.Volumes {
+					vols = append(vols, x.Name)
+				}
+				g.Expect(vols).To(ContainElements("combined-ca-bundle", "openstack-config", "openstack-config-secret"))
+
+				volMounts := map[string]string{}
+				for _, x := range pod.Spec.Containers[0].VolumeMounts {
+					volMounts[x.Name] = x.MountPath
+				}
+				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", "/home/cloud-admin/.config/openstack/clouds.yaml"))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", "/home/cloud-admin/.config/openstack/secure.yaml"))
 			}, timeout, interval).Should(Succeed())
 		})
 	})

@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 )
@@ -42,6 +43,7 @@ type Names struct {
 	RootCAInternalName        types.NamespacedName
 	SelfSignedIssuerName      types.NamespacedName
 	CABundleName              types.NamespacedName
+	OpenStackClientName       types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -93,6 +95,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rabbitmq-cell1",
 		},
+		OpenStackClientName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "openstackclient",
+		},
 	}
 }
 
@@ -120,6 +126,11 @@ func GetOpenStackClient(name types.NamespacedName) *openstackclientv1.OpenStackC
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
 	return instance
+}
+
+func OpenStackClientConditionGetter(name types.NamespacedName) condition.Conditions {
+	instance := GetOpenStackClient(name)
+	return instance.Status.Conditions
 }
 
 func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {

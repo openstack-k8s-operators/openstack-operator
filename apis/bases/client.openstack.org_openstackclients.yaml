@@ -36,7 +36,7 @@ spec:
             type: object
           spec:
             properties:
-              caSecretName:
+              caBundleSecretName:
                 type: string
               containerImage:
                 type: string

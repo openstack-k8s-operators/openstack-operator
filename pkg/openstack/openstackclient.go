@@ -48,7 +48,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 
 		for _, config := range instance.Spec.TLS.Endpoint {
 			if config.Enabled {
-				openstackclient.Spec.Ca.CaSecretName = CombinedCASecret
+				openstackclient.Spec.Ca.CaBundleSecretName = CombinedCASecret
 				break
 			}
 		}
