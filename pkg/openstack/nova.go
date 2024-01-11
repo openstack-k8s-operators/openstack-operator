@@ -55,9 +55,16 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		return ctrl.Result{}, nil
 	}
 
-	// add selector to service overrides
+	// When component services got created check if there is the need to create routes and certificates
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova", Namespace: instance.Namespace}, nova); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	}
+
+	// Add selectors to service overrides for api, metadata and novncproxy
+	// NovaAPI
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
-		// NovaAPI
 		if instance.Spec.Nova.Template.APIServiceTemplate.Override.Service == nil {
 			instance.Spec.Nova.Template.APIServiceTemplate.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
@@ -65,31 +72,33 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			AddServiceComponentLabel(
 				instance.Spec.Nova.Template.APIServiceTemplate.Override.Service[endpointType],
 				nova.Name+"-api")
+	}
 
-		// cell NoVNCProxy service override
-		for cellName, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
-			// skip adding override for all the cells where novncproxy is disabled
-			if cellTemplate.NoVNCProxyServiceTemplate.Enabled == ptr.To(false) {
-				continue
-			}
+	// NovaMetadata
+	if metadataEnabled(instance.Spec.Nova.Template.MetadataServiceTemplate) {
+		if instance.Spec.Nova.Template.MetadataServiceTemplate.Override.Service == nil {
+			instance.Spec.Nova.Template.MetadataServiceTemplate.Override.Service = &service.OverrideSpec{}
+		}
+		instance.Spec.Nova.Template.MetadataServiceTemplate.Override.Service.AddLabel(centralMetadataLabelMap(nova.Name))
+	}
+	// Cells
+	for cellName, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
+		// add override where novncproxy enabled is not specified or explicitely set to true
+		if noVNCProxyEnabled(cellTemplate.NoVNCProxyServiceTemplate) {
 			if cellTemplate.NoVNCProxyServiceTemplate.Override.Service == nil {
 				cellTemplate.NoVNCProxyServiceTemplate.Override.Service = &service.RoutedOverrideSpec{}
 			}
-
-			*cellTemplate.NoVNCProxyServiceTemplate.Override.Service =
-				AddServiceComponentLabel(
-					*cellTemplate.NoVNCProxyServiceTemplate.Override.Service,
-					getNoVNCProxyServiceLabel(nova.Name, cellName))
-
-			instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
+			cellTemplate.NoVNCProxyServiceTemplate.Override.Service.AddLabel(getNoVNCProxyLabelMap(nova.Name, cellName))
 		}
-	}
 
-	// When component services got created check if there is the need to create a route
-	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova", Namespace: instance.Namespace}, nova); err != nil {
-		if !k8s_errors.IsNotFound(err) {
-			return ctrl.Result{}, err
+		// add override where metadata enabled is set to true
+		if metadataEnabled(cellTemplate.MetadataServiceTemplate) {
+			if cellTemplate.MetadataServiceTemplate.Override.Service == nil {
+				cellTemplate.MetadataServiceTemplate.Override.Service = &service.OverrideSpec{}
+			}
+			cellTemplate.MetadataServiceTemplate.Override.Service.AddLabel(cellMetadataLabelMap(nova.Name, cellName))
 		}
+		instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
 	}
 
 	// Nova API
@@ -125,53 +134,48 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	}
 
 	if nova.Status.Conditions.IsTrue(novav1.NovaAllCellsReadyCondition) {
-		// cell NoVNCProxy
+		// cell Metadata and NoVNCProxy
 		for cellName, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
-			// skip checking for/creating route if service is not enabled
-			if cellTemplate.NoVNCProxyServiceTemplate.Enabled == ptr.To(false) {
-				continue
-			}
+			// NoVNCProxy check for/creating route if service is enabled
+			if noVNCProxyEnabled(cellTemplate.NoVNCProxyServiceTemplate) {
+				if cellTemplate.NoVNCProxyServiceTemplate.Override.Service == nil {
+					cellTemplate.NoVNCProxyServiceTemplate.Override.Service = &service.RoutedOverrideSpec{}
+				}
 
-			if cellTemplate.NoVNCProxyServiceTemplate.Override.Service == nil {
-				cellTemplate.NoVNCProxyServiceTemplate.Override.Service = &service.RoutedOverrideSpec{}
-			}
+				svcs, err := service.GetServicesListWithLabel(
+					ctx,
+					helper,
+					instance.Namespace,
+					getNoVNCProxyLabelMap(nova.Name, cellName),
+				)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
 
-			svcs, err := service.GetServicesListWithLabel(
-				ctx,
-				helper,
-				instance.Namespace,
-				map[string]string{
-					common.AppSelector: getNoVNCProxyServiceLabel(nova.Name, cellName),
-				},
-			)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
+				endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+					ctx,
+					instance,
+					helper,
+					nova,
+					svcs,
+					map[service.Endpoint]service.RoutedOverrideSpec{
+						service.EndpointPublic: *cellTemplate.NoVNCProxyServiceTemplate.Override.Service,
+					},
+					instance.Spec.Nova.CellOverride[cellName].NoVNCProxy,
+					corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
+					true, // TODO: (mschuppert) disable TLS for now until implemented
+				)
+				if err != nil {
+					return ctrlResult, err
+				} else if (ctrlResult != ctrl.Result{}) {
+					return ctrlResult, nil
+				}
 
-			endpointDetails, ctrlResult, err := EnsureEndpointConfig(
-				ctx,
-				instance,
-				helper,
-				nova,
-				svcs,
-				map[service.Endpoint]service.RoutedOverrideSpec{
-					service.EndpointPublic: *cellTemplate.NoVNCProxyServiceTemplate.Override.Service,
-				},
-				instance.Spec.Nova.CellOverride[cellName].NoVNCProxy,
-				corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
-				true, // TODO: (mschuppert) disable TLS for now until implemented
-			)
-			if err != nil {
-				return ctrlResult, err
-			} else if (ctrlResult != ctrl.Result{}) {
-				return ctrlResult, nil
+				routedOverrideSpec := endpointDetails.GetEndpointServiceOverrides()
+				cellTemplate.NoVNCProxyServiceTemplate.Override.Service = ptr.To(routedOverrideSpec[service.EndpointPublic])
 			}
-
-			routedOverrideSpec := endpointDetails.GetEndpointServiceOverrides()
-			cellTemplate.NoVNCProxyServiceTemplate.Override.Service = ptr.To(routedOverrideSpec[service.EndpointPublic])
 
 			instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
-
 		}
 	}
 
@@ -228,6 +232,34 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	return ctrl.Result{}, nil
 }
 
-func getNoVNCProxyServiceLabel(name string, cellName string) string {
-	return name + "-novncproxy-" + cellName
+func getNoVNCProxyLabelMap(name string, cellName string) map[string]string {
+	return map[string]string{
+		common.AppSelector: name + "-novncproxy",
+		"cell":             cellName,
+	}
+}
+
+func getMetadataLabelMap(name string, instType string) map[string]string {
+	return map[string]string{
+		common.AppSelector: name + "-metadata",
+		"type":             instType,
+	}
+}
+
+func centralMetadataLabelMap(name string) map[string]string {
+	return getMetadataLabelMap(name, "central")
+}
+
+func cellMetadataLabelMap(name string, cell string) map[string]string {
+	lm := getMetadataLabelMap(name, "cell")
+	lm["cell"] = cell
+	return lm
+}
+
+func metadataEnabled(metadata novav1.NovaMetadataTemplate) bool {
+	return metadata.Enabled != nil && *metadata.Enabled == true
+}
+
+func noVNCProxyEnabled(vncproxy novav1.NovaNoVNCProxyTemplate) bool {
+	return vncproxy.Enabled != nil && *vncproxy.Enabled == true
 }
