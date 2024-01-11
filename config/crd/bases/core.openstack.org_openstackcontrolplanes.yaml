@@ -9709,6 +9709,9 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      certssecret:
+                        default: octavia-certs-secret
+                        type: string
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -9905,7 +9908,6 @@ spec:
                             default: octavia-ca-passphrase
                             type: string
                           certssecret:
-                            default: octavia-certs-secret
                             type: string
                           containerImage:
                             type: string
@@ -10001,7 +10003,6 @@ spec:
                           transportURLSecret:
                             type: string
                         required:
-                        - certssecret
                         - databaseInstance
                         - role
                         - secret
@@ -10013,7 +10014,6 @@ spec:
                             default: octavia-ca-passphrase
                             type: string
                           certssecret:
-                            default: octavia-certs-secret
                             type: string
                           containerImage:
                             type: string
@@ -10109,7 +10109,6 @@ spec:
                           transportURLSecret:
                             type: string
                         required:
-                        - certssecret
                         - databaseInstance
                         - role
                         - secret
@@ -10121,7 +10120,6 @@ spec:
                             default: octavia-ca-passphrase
                             type: string
                           certssecret:
-                            default: octavia-certs-secret
                             type: string
                           containerImage:
                             type: string
@@ -10217,7 +10215,6 @@ spec:
                           transportURLSecret:
                             type: string
                         required:
-                        - certssecret
                         - databaseInstance
                         - role
                         - secret
@@ -10247,6 +10244,7 @@ spec:
                         default: octavia
                         type: string
                     required:
+                    - certssecret
                     - databaseInstance
                     - octaviaAPI
                     - rabbitMqClusterName
