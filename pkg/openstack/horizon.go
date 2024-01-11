@@ -10,7 +10,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -79,8 +78,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			return ctrl.Result{}, err
 		}
 
-		var ctrlResult reconcile.Result
-		serviceOverrides, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -89,12 +87,14 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			serviceOverrides,
 			instance.Spec.Horizon.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHorizonReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+		serviceOverrides = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	Log.Info("Reconcile Horizon", "horizon.Namespace", instance.Namespace, "horizon.Name", "horizon")

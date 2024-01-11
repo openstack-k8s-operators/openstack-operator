@@ -652,6 +652,23 @@ type OpenStackControlPlaneStatus struct {
 	//+operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// TLS
+	TLS TLSStatus `json:"tls,omitempty" optional:"true"`
+}
+
+// TLSStatus defines the observed state of TLS
+type TLSStatus struct {
+	Endpoint map[service.Endpoint]TLSCAStatus `json:"endpoint,omitempty"`
+	tls.Ca   `json:",inline"`
+}
+
+// TLSCAStatus defines the observed state of TLS
+type TLSCAStatus struct {
+	Name string `json:"name"`
+	// +kubebuilder:validation:Format="date-time"
+	Expires string `json:"expires"`
 }
 
 //+kubebuilder:object:root=true
@@ -747,4 +764,14 @@ func SetupDefaults() {
 	}
 
 	SetupOpenStackControlPlaneDefaults(openstackControlPlaneDefaults)
+}
+
+// Enabled - returns status of tls configuration for the passed in endpoint type
+func (t *TLSSection) Enabled(endpt service.Endpoint) bool {
+	if t != nil {
+		if cfg, ok := t.Endpoint[service.EndpointInternal]; ok && cfg.Enabled {
+			return true
+		}
+	}
+	return false
 }
