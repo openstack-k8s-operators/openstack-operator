@@ -10,7 +10,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240205082437-655a181feae0
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240131135629-5e8e748d6046
+	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240207124115-6572d1bc92c9
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240206123725-eb350187c545
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240205082155-620a93388acf
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240206110918-d3646fda9535
