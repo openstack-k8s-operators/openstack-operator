@@ -62,6 +62,12 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			svcOverride.AddLabel(getGlanceAPILabelMap(glance.Name, name))
 			glanceAPI.Override.Service[endpointType] = svcOverride
 		}
+
+		// preserve any previously set TLS certs,set CA cert
+		if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+			glanceAPI.TLS.API = glance.Spec.GlanceAPIs[name].TLS.API
+		}
+		glanceAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 		instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 	}
 
@@ -73,7 +79,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 		var changed bool = false
 		for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
-			if _, ok := instance.Spec.Glance.APIOverride[name]; ok {
+			if _, ok := instance.Spec.Glance.APIOverride[name]; !ok {
 				instance.Spec.Glance.APIOverride[name] = corev1beta1.Override{}
 			}
 			// Retrieve the services by Label and filter on glanceAPI: for
@@ -100,12 +106,16 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				glanceAPI.Override.Service,
 				instance.Spec.Glance.APIOverride[name],
 				corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition,
-				true, // TODO: (mschuppert) disable TLS for now until implemented
+				false, // TODO (mschuppert) could be removed when all integrated service support TLS
 			)
 			if err != nil {
 				return ctrlResult, err
 			}
 			glanceAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+			// update TLS cert secret
+			glanceAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+			glanceAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 			instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 
 			// let's keep track of changes for any instance, but return
@@ -147,6 +157,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			}
 			glance.Spec.ExtraMounts = glanceVolumes
 		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), glance, helper.GetScheme())
 		if err != nil {
 			return err
