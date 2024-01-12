@@ -14,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 const (
@@ -43,6 +42,13 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
+	// When component services got created check if there is the need to create a route
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "glance", Namespace: instance.Namespace}, glance); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	}
+
 	// add selector to service overrides
 	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
 		for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
@@ -55,14 +61,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			svcOverride := glanceAPI.Override.Service[endpointType]
 			svcOverride.AddLabel(getGlanceAPILabelMap(glance.Name, name))
 			glanceAPI.Override.Service[endpointType] = svcOverride
-			instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 		}
-	}
-	// When component services got created check if there is the need to create a route
-	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "glance", Namespace: instance.Namespace}, glance); err != nil {
-		if !k8s_errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
+		instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 	}
 
 	if glance.Status.Conditions.IsTrue(glancev1.GlanceAPIReadyCondition) {
@@ -71,7 +71,6 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Glance.APIOverride = map[string]corev1beta1.Override{}
 		}
 
-		var ctrlResult reconcile.Result
 		var changed bool = false
 		for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
 			if _, ok := instance.Spec.Glance.APIOverride[name]; ok {
@@ -92,7 +91,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			if err != nil {
 				return ctrl.Result{}, err
 			}
-			_, ctrlResult, err = EnsureEndpointConfig(
+			endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 				ctx,
 				instance,
 				helper,
@@ -101,10 +100,14 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				glanceAPI.Override.Service,
 				instance.Spec.Glance.APIOverride[name],
 				corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition,
+				true, // TODO: (mschuppert) disable TLS for now until implemented
 			)
 			if err != nil {
 				return ctrlResult, err
 			}
+			glanceAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+			instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
+
 			// let's keep track of changes for any instance, but return
 			// only when the iteration on the whole APIList is over
 			if (ctrlResult != ctrl.Result{}) {

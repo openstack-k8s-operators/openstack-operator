@@ -24,7 +24,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -74,17 +74,19 @@ func EnsureDeleted(ctx context.Context, helper *helper.Helper, obj client.Object
 // AddServiceComponentLabel - adds component label to the service override to be able to query
 // the service labels to check for any route creation
 func AddServiceComponentLabel(svcOverride service.RoutedOverrideSpec, value string) service.RoutedOverrideSpec {
-	if svcOverride.EmbeddedLabelsAnnotations == nil {
-		svcOverride.EmbeddedLabelsAnnotations = &service.EmbeddedLabelsAnnotations{}
-	}
-	svcOverride.EmbeddedLabelsAnnotations.Labels = util.MergeStringMaps(
-		svcOverride.EmbeddedLabelsAnnotations.Labels, map[string]string{common.AppSelector: value})
+	svcOverride.AddLabel(map[string]string{common.AppSelector: value})
 
 	return svcOverride
 }
 
-// EndpointDetails - endpoint details
-type EndpointDetails struct {
+// Endpoints
+type Endpoints struct {
+	EndpointDetails map[service.Endpoint]EndpointDetail
+	tls.Ca
+}
+
+// EndpointDetail - endpoint details
+type EndpointDetail struct {
 	Name        string
 	Namespace   string
 	Type        service.Endpoint
@@ -93,31 +95,38 @@ type EndpointDetails struct {
 	Service     ServiceDetails
 	Route       RouteDetails
 	Hostname    *string
+	Proto       service.Protocol
 	EndpointURL string
-	TLS         TLSDetails
 }
 
-// TLSDetails - tls settings for the endpoint
-type TLSDetails struct {
-	Enabled    bool
-	Issuer     string
-	CertSecret *string
-	InternalCA string
-
-	//PublicEndpoint   bool
-	//InternalEndpoint bool
+// ServiceTLSDetails - tls settings for the endpoint
+type ServiceTLSDetails struct {
+	Enabled bool
+	tls.GenericService
+	tls.Ca
 }
 
 // ServiceDetails - service details
 type ServiceDetails struct {
 	Spec         *k8s_corev1.Service
 	OverrideSpec service.RoutedOverrideSpec
+	TLS          ServiceTLSDetails
 }
 
 // RouteDetails - route details
 type RouteDetails struct {
+	Create       bool
 	Route        *routev1.Route
 	OverrideSpec route.OverrideSpec
+	TLS          RouteTLSDetails
+}
+
+// RouteTLSDetails - tls settings for the endpoint
+type RouteTLSDetails struct {
+	Enabled    bool
+	SecretName *string
+	IssuerName *string
+	tls.Ca
 }
 
 // GetRoutesListWithLabel - Get all routes in namespace of the obj matching label selector
@@ -141,6 +150,16 @@ func GetRoutesListWithLabel(
 	return routeList, nil
 }
 
+// GetEndpointServiceOverrides -
+func (e *Endpoints) GetEndpointServiceOverrides() map[service.Endpoint]service.RoutedOverrideSpec {
+	overrides := map[service.Endpoint]service.RoutedOverrideSpec{}
+	for endpt, endptCfg := range e.EndpointDetails {
+		overrides[endpt] = *endptCfg.Service.OverrideSpec.DeepCopy()
+	}
+
+	return overrides
+}
+
 // EnsureEndpointConfig -
 func EnsureEndpointConfig(
 	ctx context.Context,
@@ -151,9 +170,14 @@ func EnsureEndpointConfig(
 	svcOverrides map[service.Endpoint]service.RoutedOverrideSpec,
 	publicOverride corev1.Override,
 	condType condition.Type,
-) (map[service.Endpoint]service.RoutedOverrideSpec, ctrl.Result, error) {
+	serviceTLSDisabled bool,
+) (Endpoints, ctrl.Result, error) {
+	endpoints := Endpoints{
+		EndpointDetails: map[service.Endpoint]EndpointDetail{},
+	}
+
 	for _, svc := range svcs.Items {
-		ed := EndpointDetails{
+		ed := EndpointDetail{
 			Name:      svc.Name,
 			Namespace: svc.Namespace,
 			Type:      service.Endpoint(svc.Annotations[service.AnnotationEndpointKey]),
@@ -161,43 +185,112 @@ func EnsureEndpointConfig(
 				Spec: &svc,
 			},
 		}
-		if publicOverride.Route != nil {
-			ed.Route.OverrideSpec = *publicOverride.Route
-		}
-
-		if tlsEndpointConfig := instance.Spec.TLS.Endpoint[ed.Type]; tlsEndpointConfig.Enabled {
-			ed.TLS.Enabled = true
-			ed.TLS.Issuer = DefaultCAPrefix + string(ed.Type)
-
-			// TODO: (mschuppert) for TLSE create TLS cert for service
-			//if ed.Type == service.EndpointInternal {
-			//	TODO: for TLSE create TLS cert for service
-			//}
-		}
-
-		if instance.Spec.TLS.Endpoint[service.EndpointInternal].Enabled {
-			// TODO: (mschuppert) get the CA cert for internal CA to add it to the route
-			// to be able to connect to the TLS internal endpoint
-			ed.TLS.InternalCA = ""
-		}
 
 		ed.Service.OverrideSpec = svcOverrides[ed.Type]
 
-		if ed.Type == service.EndpointPublic {
-			if ed.TLS.Enabled {
+		// TLS on the pod level is enabled if
+		// * TLS is enabled for internal endpoint
+		// * the particular service has not TLS.Disabled set to true
+		if tlsEndpointConfig := instance.Spec.TLS.Endpoint[service.EndpointInternal]; tlsEndpointConfig.Enabled && !serviceTLSDisabled {
+			ed.Service.TLS.Enabled = true
+		} else {
+			ed.Service.TLS.Enabled = false
+		}
+
+		switch ed.Type {
+		case service.EndpointPublic:
+			// If the service has the create ingress annotation and its a default ClusterIP service -> create route
+			ed.Route.Create = svc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "true" &&
+				svc.Spec.Type == k8s_corev1.ServiceTypeClusterIP
+
+			if publicOverride.Route != nil {
+				ed.Route.OverrideSpec = *publicOverride.Route
+			}
+
+			// if public endpoint TLS is enabled
+			if tlsEndpointConfig := instance.Spec.TLS.Endpoint[ed.Type]; tlsEndpointConfig.Enabled {
+				// TLS for route enabled if public endpoint TLS is true
+				ed.Route.TLS.Enabled = true
+
 				// if a custom cert secret was provided we'll use this for
 				// the route, otherwise the issuer is used to request one
 				// for the endpoint.
 				if publicOverride.TLS != nil && publicOverride.TLS.SecretName != "" {
-					ed.TLS.CertSecret = ptr.To(publicOverride.TLS.SecretName)
+					ed.Route.TLS.SecretName = ptr.To(publicOverride.TLS.SecretName)
+				} else {
+					// use public issuer to create cert for the route
+					ed.Route.TLS.IssuerName = ptr.To(tls.DefaultCAPrefix + ed.Type.String())
+				}
+
+				// For re-encryption the route required the internal CA bundle to validate
+				// internal certificate from route -> service -> pod. Add the internal CA bundle when
+				// * TLS is enabled for internal endpoint
+				// * the particular service has not TLS.Disabled set to true
+				if ed.Service.TLS.Enabled {
+					ed.Service.TLS.CaBundleSecretName = tls.CABundleSecret
+					// create certificate for public pod virthost
+					// TODO: (mschuppert) - if ed.Route.Create == false and custom cert secret provided
+					// for the public endpoint, use this and not the issuer. This is the case when
+					// env got deployed with LoadBalancer service instead of a route for the public
+					// endpoint.
+					// request certificate
+					certRequest := certmanager.CertificateRequest{
+						IssuerName:  tls.DefaultCAPrefix + ed.Type.String(),
+						CertName:    fmt.Sprintf("%s-svc", ed.Name),
+						Duration:    nil,
+						Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
+						Ips:         nil,
+						Annotations: ed.Annotations,
+						Labels:      ed.Labels,
+						Usages:      nil,
+					}
+					certSecret, ctrlResult, err := certmanager.EnsureCert(
+						ctx,
+						helper,
+						certRequest)
+					if err != nil {
+						return endpoints, ctrlResult, err
+					} else if (ctrlResult != ctrl.Result{}) {
+						return endpoints, ctrlResult, nil
+					}
+
+					ed.Service.TLS.SecretName = &certSecret.Name
 				}
 			}
 
 			ctrlResult, err := ed.ensureRoute(ctx, instance, helper, &svc, owner, condType)
 			if err != nil {
-				return svcOverrides, ctrlResult, err
+				return endpoints, ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {
-				return svcOverrides, ctrlResult, nil
+				return endpoints, ctrlResult, nil
+			}
+
+		case service.EndpointInternal:
+			if ed.Service.TLS.Enabled {
+				ed.Service.TLS.CaBundleSecretName = tls.CABundleSecret
+				// create certificate for internal pod virthost
+				// request certificate
+				certRequest := certmanager.CertificateRequest{
+					IssuerName:  tls.DefaultCAPrefix + ed.Type.String(),
+					CertName:    fmt.Sprintf("%s-svc", ed.Name),
+					Duration:    nil,
+					Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
+					Ips:         nil,
+					Annotations: ed.Annotations,
+					Labels:      ed.Labels,
+					Usages:      nil,
+				}
+				certSecret, ctrlResult, err := certmanager.EnsureCert(
+					ctx,
+					helper,
+					certRequest)
+				if err != nil {
+					return endpoints, ctrlResult, err
+				} else if (ctrlResult != ctrl.Result{}) {
+					return endpoints, ctrlResult, nil
+				}
+
+				ed.Service.TLS.SecretName = &certSecret.Name
 			}
 		}
 
@@ -208,13 +301,13 @@ func EnsureEndpointConfig(
 			instance.Status.Conditions.MarkTrue(condType, corev1.OpenStackControlPlaneExposeServiceReadyMessage, owner.GetName())
 		}
 
-		svcOverrides[ed.Type] = ed.Service.OverrideSpec
+		endpoints.EndpointDetails[ed.Type] = ed
 	}
 
-	return svcOverrides, ctrl.Result{}, nil
+	return endpoints, ctrl.Result{}, nil
 }
 
-func (ed *EndpointDetails) ensureRoute(
+func (ed *EndpointDetail) ensureRoute(
 	ctx context.Context,
 	instance *corev1.OpenStackControlPlane,
 	helper *helper.Helper,
@@ -269,8 +362,7 @@ func (ed *EndpointDetails) ensureRoute(
 		}
 	}
 
-	// If the service has the create ingress annotation and its a default ClusterIP service -> create route
-	if svc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "true" && svc.Spec.Type == k8s_corev1.ServiceTypeClusterIP {
+	if ed.Route.Create {
 		if instance.Status.Conditions.Get(condType) == nil {
 			instance.Status.Conditions.Set(condition.UnknownCondition(
 				condType,
@@ -312,7 +404,7 @@ func (ed *EndpointDetails) ensureRoute(
 }
 
 // CreateRoute -
-func (ed *EndpointDetails) CreateRoute(
+func (ed *EndpointDetail) CreateRoute(
 	ctx context.Context,
 	helper *helper.Helper,
 	owner metav1.Object,
@@ -339,7 +431,7 @@ func (ed *EndpointDetails) CreateRoute(
 	// to get the hostname for creating the cert
 	serviceRoute := &routev1.Route{}
 	err = helper.GetClient().Get(ctx, types.NamespacedName{Name: ed.Name, Namespace: ed.Namespace}, serviceRoute)
-	if !ed.TLS.Enabled || (ed.TLS.Enabled && err != nil && k8s_errors.IsNotFound(err)) {
+	if !ed.Route.TLS.Enabled || (ed.Route.TLS.Enabled && err != nil && k8s_errors.IsNotFound(err)) {
 		ctrlResult, err := enptRoute.CreateOrPatch(ctx, helper)
 		if err != nil {
 			return ctrlResult, err
@@ -354,8 +446,8 @@ func (ed *EndpointDetails) CreateRoute(
 		ed.Hostname = &serviceRoute.Spec.Host
 	}
 
-	// if the issuer is provided TLS is enabled
-	if ed.TLS.Enabled {
+	// if TLS is enabled for the route
+	if ed.Route.TLS.Enabled {
 		var ctrlResult reconcile.Result
 
 		certSecret := &k8s_corev1.Secret{}
@@ -365,11 +457,11 @@ func (ed *EndpointDetails) CreateRoute(
 		// Right now there is no check if certificate is valid for
 		// the hostname of the route. If the referenced secret is
 		// there and has the required files it is just being used.
-		if ed.TLS.CertSecret != nil {
-			certSecret, _, err = secret.GetSecret(ctx, helper, *ed.TLS.CertSecret, ed.Namespace)
+		if ed.Route.TLS.SecretName != nil {
+			certSecret, _, err = secret.GetSecret(ctx, helper, *ed.Route.TLS.SecretName, ed.Namespace)
 			if err != nil {
 				if k8s_errors.IsNotFound(err) {
-					return ctrl.Result{}, fmt.Errorf("certificate secret %s not found: %w", *ed.TLS.CertSecret, err)
+					return ctrl.Result{}, fmt.Errorf("certificate secret %s not found: %w", *ed.Route.TLS.SecretName, err)
 				}
 
 				return ctrl.Result{}, err
@@ -379,14 +471,14 @@ func (ed *EndpointDetails) CreateRoute(
 			if certSecret != nil {
 				for _, key := range []string{"tls.crt", "tls.key", "ca.crt"} {
 					if _, exist := certSecret.Data[key]; !exist {
-						return ctrl.Result{}, fmt.Errorf("certificate secret %s does not provide %s", *ed.TLS.CertSecret, key)
+						return ctrl.Result{}, fmt.Errorf("certificate secret %s does not provide %s", *ed.Route.TLS.SecretName, key)
 					}
 				}
 			}
 		} else {
 			certRequest := certmanager.CertificateRequest{
-				IssuerName:  ed.TLS.Issuer,
-				CertName:    ed.Name,
+				IssuerName:  *ed.Route.TLS.IssuerName,
+				CertName:    fmt.Sprintf("%s-route", ed.Name),
 				Duration:    nil,
 				Hostnames:   []string{*ed.Hostname},
 				Ips:         nil,
@@ -409,16 +501,25 @@ func (ed *EndpointDetails) CreateRoute(
 		// create default TLS route override
 		tlsConfig := &routev1.TLSConfig{
 			Termination:                   routev1.TLSTerminationEdge,
-			Certificate:                   string(certSecret.Data["tls.crt"]),
-			Key:                           string(certSecret.Data["tls.key"]),
-			CACertificate:                 string(certSecret.Data["ca.crt"]),
+			Certificate:                   string(certSecret.Data[tls.CertKey]),
+			Key:                           string(certSecret.Data[tls.PrivateKey]),
+			CACertificate:                 string(certSecret.Data[tls.CAKey]),
 			InsecureEdgeTerminationPolicy: routev1.InsecureEdgeTerminationPolicyRedirect,
 		}
 
 		// for internal TLS (TLSE) use routev1.TLSTerminationReencrypt
-		if ed.TLS.InternalCA != "" {
+		if ed.Service.TLS.Enabled {
+			// get the TLSInternalCABundleFile to add it to the route
+			// to be able to validate public/internal service endpoints
+			tlsConfig.DestinationCACertificate, ctrlResult, err = secret.GetDataFromSecret(
+				ctx, helper, ed.Service.TLS.CaBundleSecretName, 5, tls.InternalCABundleKey)
+			if err != nil {
+				return ctrlResult, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
+
 			tlsConfig.Termination = routev1.TLSTerminationReencrypt
-			tlsConfig.DestinationCACertificate = ed.TLS.InternalCA
 		}
 
 		enptRoute, err = route.NewRoute(
@@ -444,12 +545,25 @@ func (ed *EndpointDetails) CreateRoute(
 			return ctrlResult, nil
 		}
 
-		ed.EndpointURL = "https://" + *ed.Hostname
+		ed.Proto = service.ProtocolHTTPS
 	} else {
-		ed.EndpointURL = "http://" + *ed.Hostname
+		ed.Proto = service.ProtocolHTTP
 	}
 
+	ed.EndpointURL = ed.Proto.String() + "://" + *ed.Hostname
+
 	return ctrl.Result{}, nil
+}
+
+// GetEndptCertSecret -
+func (e *Endpoints) GetEndptCertSecret(endpt service.Endpoint) *string {
+	var endptTLSSecret *string
+
+	if endptCfg, ok := e.EndpointDetails[endpt]; ok && endptCfg.Service.TLS.Enabled {
+		endptTLSSecret = endptCfg.Service.TLS.SecretName
+	}
+
+	return endptTLSSecret
 }
 
 // Set up any defaults used by service operator defaulting logic

@@ -10,7 +10,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -67,8 +66,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			return ctrl.Result{}, err
 		}
 
-		var ctrlResult reconcile.Result
-		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -77,12 +75,15 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			instance.Spec.Barbican.Template.BarbicanAPI.Override.Service,
 			instance.Spec.Barbican.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeBarbicanReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	helper.GetLogger().Info("Reconciling Barbican", "Barbican.Namespace", instance.Namespace, "Barbican.Name", "barbican")

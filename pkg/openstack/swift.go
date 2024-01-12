@@ -10,7 +10,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -69,8 +68,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			return ctrl.Result{}, err
 		}
 
-		var ctrlResult reconcile.Result
-		instance.Spec.Swift.Template.SwiftProxy.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -79,12 +77,15 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			instance.Spec.Swift.Template.SwiftProxy.Override.Service,
 			instance.Spec.Swift.ProxyOverride,
 			corev1beta1.OpenStackControlPlaneExposeSwiftReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Swift.Template.SwiftProxy.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	helper.GetLogger().Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")

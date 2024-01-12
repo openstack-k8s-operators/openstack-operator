@@ -10,7 +10,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -68,8 +67,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			return ctrl.Result{}, err
 		}
 
-		var ctrlResult reconcile.Result
-		instance.Spec.Cinder.Template.CinderAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -78,12 +76,15 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Cinder.Template.CinderAPI.Override.Service,
 			instance.Spec.Cinder.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeCinderReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Cinder.Template.CinderAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")

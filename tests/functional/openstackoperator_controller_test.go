@@ -27,6 +27,7 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 )
 
@@ -122,14 +123,16 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 		})
 
-		It("should create ca bundle", func() {
+		It("should create full ca bundle", func() {
 			crtmgr.GetCert(names.RootCAPublicName)
 			crtmgr.GetIssuer(names.RootCAPublicName)
 
 			Eventually(func(g Gomega) {
 				th.GetSecret(names.RootCAPublicName)
 				caBundle := th.GetSecret(names.CABundleName)
-				g.Expect(caBundle.Data).Should(HaveLen(int(1)))
+				g.Expect(caBundle.Data).Should(HaveLen(int(2)))
+				g.Expect(caBundle.Data).Should(HaveKey(tls.CABundleKey))
+				g.Expect(caBundle.Data).Should(HaveKey(tls.InternalCABundleKey))
 			}, timeout, interval).Should(Succeed())
 		})
 

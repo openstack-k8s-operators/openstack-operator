@@ -10,7 +10,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -80,8 +79,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			return ctrl.Result{}, err
 		}
 
-		var ctrlResult reconcile.Result
-		instance.Spec.Heat.Template.HeatAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -90,12 +88,15 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatAPI.Override.Service,
 			instance.Spec.Heat.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Heat.Template.HeatAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	// Heat CFNAPI
@@ -110,8 +111,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			return ctrl.Result{}, err
 		}
 
-		var ctrlResult reconcile.Result
-		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -120,12 +120,15 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatCfnAPI.Override.Service,
 			instance.Spec.Heat.CnfAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	Log := GetLogger(ctx)

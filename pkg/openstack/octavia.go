@@ -26,7 +26,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -83,8 +82,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			return ctrl.Result{}, err
 		}
 
-		var ctrlResult reconcile.Result
-		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service, ctrlResult, err = EnsureEndpointConfig(
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -93,12 +91,15 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Octavia.Template.OctaviaAPI.Override.Service,
 			instance.Spec.Octavia.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeOctaviaReadyCondition,
+			true, // TODO: (mschuppert) disable TLS for now until implemented
 		)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+
+		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 
 	helper.GetLogger().Info("Reconciling Octavia", "Octavia.Namespace", instance.Namespace, "Octavia.Name", octavia.Name)

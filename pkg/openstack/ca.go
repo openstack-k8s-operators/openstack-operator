@@ -27,19 +27,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const (
-	// CombinedCASecret -
-	CombinedCASecret = "combined-ca-bundle"
-	// TLSCABundleFile -
-	TLSCABundleFile = "tls-ca-bundle.pem"
-	// DefaultCAPrefix -
-	DefaultCAPrefix = "rootca-"
-	// DownstreamTLSCABundlePath -
-	DownstreamTLSCABundlePath = "/etc/pki/ca-trust/extracted/pem/" + TLSCABundleFile
-	// UpstreamTLSCABundlePath -
-	UpstreamTLSCABundlePath = "/etc/ssl/certs/ca-certificates.crt"
-)
-
 // ReconcileCAs -
 func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 	// create selfsigned-issuer
@@ -86,21 +73,34 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	}
 
 	bundle := newBundle()
+	caOnlyBundle := newBundle()
 
 	// load current CA bundle from secret if exist
-	currentCASecret, _, err := secret.GetSecret(ctx, helper, CombinedCASecret, instance.Namespace)
+	currentCASecret, _, err := secret.GetSecret(ctx, helper, tls.CABundleSecret, instance.Namespace)
 	if err != nil && !k8s_errors.IsNotFound(err) {
 		return ctrl.Result{}, err
 	}
 	if currentCASecret != nil {
-		if _, ok := currentCASecret.Data[TLSCABundleFile]; ok {
-			err = bundle.getCertsFromPEM(currentCASecret.Data[TLSCABundleFile])
+		// full CA Bundle file
+		if _, ok := currentCASecret.Data[tls.CABundleKey]; ok {
+			err = bundle.getCertsFromPEM(currentCASecret.Data[tls.CABundleKey])
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+
+		// only issuer CA bundle
+		if _, ok := currentCASecret.Data[tls.InternalCABundleKey]; ok {
+			err = caOnlyBundle.getCertsFromPEM(currentCASecret.Data[tls.InternalCABundleKey])
 			if err != nil {
 				return ctrl.Result{}, err
 			}
 		}
 	}
 
+	if instance.Status.TLS.Endpoint == nil {
+		instance.Status.TLS.Endpoint = map[service.Endpoint]corev1.TLSCAStatus{}
+	}
 	// create RootCA cert and Issuer that uses the generated CA certificate to issue certs
 	for endpoint, config := range instance.Spec.TLS.Endpoint {
 		if config.Enabled {
@@ -109,6 +109,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			if endpoint == service.EndpointInternal {
 				labels[certmanager.RootCAIssuerInternalLabel] = ""
 			}
+			caName := tls.DefaultCAPrefix + string(endpoint)
 			// always create a root CA and issuer for the endpoint as we can
 			// not expect that all services are yet configured to be provided with
 			// a custom secret holding the cert/private key
@@ -117,7 +118,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 				instance,
 				helper,
 				issuerReq,
-				DefaultCAPrefix+string(endpoint),
+				caName,
 				labels,
 			)
 			if err != nil {
@@ -130,6 +131,19 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			if err != nil {
 				return ctrl.Result{}, err
 			}
+			err = caOnlyBundle.getCertsFromPEM(caCert)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			status := corev1.TLSCAStatus{
+				Name: caName,
+			}
+			if len(caOnlyBundle.certs) > 0 {
+				status.Expires = caOnlyBundle.certs[0].expire.Format(time.RFC3339)
+			}
+
+			instance.Status.TLS.Endpoint[endpoint] = status
 		}
 	}
 	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
@@ -146,8 +160,14 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 				"secret",
 				instance.Spec.TLS.CaBundleSecretName,
 				err.Error()))
+			if k8s_errors.IsNotFound(err) {
+				timeout := time.Second * 10
+				helper.GetLogger().Info(fmt.Sprintf("Certificate %s not found, reconcile in %s", instance.Spec.TLS.CaBundleSecretName, timeout.String()))
 
-			return ctrlResult, err
+				return ctrl.Result{RequeueAfter: timeout}, nil
+			}
+
+			return ctrl.Result{}, err
 		}
 
 		for _, caCert := range caSecret.Data {
@@ -160,13 +180,13 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	// get CA bundle from operator image. Downstream and upstream build use a different
 	// base image, so the ca bundle cert file can be in different locations
-	caBundle, err := getOperatorCABundle(DownstreamTLSCABundlePath)
+	caBundle, err := getOperatorCABundle(tls.DownstreamTLSCABundlePath)
 	if err != nil {
 		// if the DownstreamTLSCABundlePath does not exist in the operator image,
 		// check for UpstreamTLSCABundlePath
 		if errors.Is(err, os.ErrNotExist) {
-			helper.GetLogger().Info(fmt.Sprintf("Downstream CA bundle not found using: %s", UpstreamTLSCABundlePath))
-			caBundle, err = getOperatorCABundle(UpstreamTLSCABundlePath)
+			helper.GetLogger().Info(fmt.Sprintf("Downstream CA bundle not found using: %s", tls.UpstreamTLSCABundlePath))
+			caBundle, err = getOperatorCABundle(tls.UpstreamTLSCABundlePath)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
@@ -181,7 +201,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	saSecretTemplate := []util.Template{
 		{
-			Name:               CombinedCASecret,
+			Name:               tls.CABundleSecret,
 			Namespace:          instance.Namespace,
 			Type:               util.TemplateTypeNone,
 			InstanceType:       instance.Kind,
@@ -191,7 +211,11 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 				tls.CABundleLabel: "",
 			},
 			ConfigOptions: nil,
-			CustomData:    map[string]string{TLSCABundleFile: bundle.getBundlePEM()},
+			CustomData: map[string]string{
+				tls.CABundleKey:         bundle.getBundlePEM(),
+				tls.InternalCABundleKey: caOnlyBundle.getBundlePEM(),
+			},
+			SkipSetOwner: true, // TODO: (mschuppert) instead add e.g. keystoneapi to secret to prevent keystoneapi on cleanup to switch to not ready
 		},
 	}
 
@@ -202,11 +226,13 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			condition.SeverityWarning,
 			corev1.OpenStackControlPlaneCAReadyErrorMessage,
 			"secret",
-			CombinedCASecret,
+			tls.CABundleSecret,
 			err.Error()))
 
 		return ctrlResult, err
 	}
+
+	instance.Status.TLS.CaBundleSecretName = tls.CABundleSecret
 
 	return ctrl.Result{}, nil
 }
@@ -352,8 +378,9 @@ type caBundle struct {
 }
 
 type caCert struct {
-	hash string
-	cert *x509.Certificate
+	hash   string
+	cert   *x509.Certificate
+	expire time.Time
 }
 
 // newBundle returns a new, empty Bundle
@@ -415,8 +442,9 @@ func (cab *caBundle) getCertsFromPEM(PEMdata []byte) error {
 		if idx == -1 {
 			cab.certs = append(cab.certs,
 				caCert{
-					hash: blockHash,
-					cert: certificate,
+					hash:   blockHash,
+					cert:   certificate,
+					expire: certificate.NotAfter,
 				})
 		}
 	}
