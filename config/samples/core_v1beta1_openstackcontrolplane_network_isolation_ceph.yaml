@@ -20,7 +20,7 @@ spec:
             projected:
               sources:
               - secret:
-                  name: ceph-conf-files
+                  name: ceph-conf-files-0
           mounts:
           - name: ceph
             mountPath: "/etc/ceph"
