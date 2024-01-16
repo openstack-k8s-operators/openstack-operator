@@ -112,3 +112,5 @@ replace ( //allow-merging
 // mschuppert: map to latest commit from release-4.13 tag
 // must consistent within modules and service operators
 replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7 //allow-merging
+
+replace github.com/openstack-k8s-operators/barbican-operator/api => github.com/d34dh0r53/barbican-operator/api v0.0.0-20240105224926-8416f11cbe53
