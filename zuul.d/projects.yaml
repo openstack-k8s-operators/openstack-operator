@@ -36,9 +36,6 @@
         - tempest.scenario.test_stamp_pattern.TestStampPattern
         - tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
         - tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_live_migration
-      # Libvirt refuses to live-migrate a paused VM with post-copy enabled
-      # See https://bugs.launchpad.net/nova/+bug/1946752
-        - test_live_block_migration_paused
       # We need to use a custom cpu model to allow live migrating between
       # slightly different computes coming from the node pool
       cifmw_edpm_deploy_nova_compute_extra_config: |
