@@ -11,7 +11,7 @@ require (
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240116213344-de338962b133
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240115132912-653e1ff5359a
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240116101957-6a023bdbfa62
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240123135739-7083263a0cc4
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240104144436-858a0383741c
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240114144110-9b32acbd4b90
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240110150403-dbf022bd8ae6
