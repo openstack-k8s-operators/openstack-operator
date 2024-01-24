@@ -15914,11 +15914,6 @@ spec:
                                     - persistent
                                     type: string
                                 type: object
-                              type:
-                                default: prometheus
-                                enum:
-                                - prometheus
-                                type: string
                             type: object
                         type: object
                     type: object

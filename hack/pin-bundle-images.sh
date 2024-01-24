@@ -50,6 +50,9 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
             # for local registry
             if [[ ${LOCAL_REGISTRY} -eq 1 ]]; then
                 REPO_CURL_URL="${CURL_REGISTRY}/v2/${IMAGENAMESPACE}"
+            elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
+                # replace docker.io by hub.docker.com to read tags
+                REPO_CURL_URL="https://hub.docker.com/v2/repositories/${IMAGENAMESPACE}"
             else
                 REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
             fi
@@ -61,6 +64,8 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
 
     if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
+    elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/?page_size=100 | jq -r .results[].name | sort -u | grep $REF)
     elif [[ "${CURL_REGISTRY}" != "quay.io" ]]; then
         # quay.rdoproject.io doesn't support filter_tag_name, so increase limit to 100
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true?limit=100 | jq -r .tags[].name | sort -u | grep $REF)
