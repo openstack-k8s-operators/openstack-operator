@@ -4568,6 +4568,24 @@ spec:
                               type: string
                             storageRequest:
                               type: string
+                            tls:
+                              properties:
+                                api:
+                                  properties:
+                                    internal:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
+                                    public:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
+                                  type: object
+                                caBundleSecretName:
+                                  type: string
+                              type: object
                             type:
                               default: split
                               enum:
@@ -4988,6 +5006,24 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         required:
                         - containerImage
                         type: object
@@ -5098,6 +5134,24 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
                             type: object
                         required:
                         - containerImage
@@ -6432,6 +6486,24 @@ spec:
                         type: object
                       secret:
                         type: string
+                      tls:
+                        properties:
+                          api:
+                            properties:
+                              internal:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                              public:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                            type: object
+                          caBundleSecretName:
+                            type: string
+                        type: object
                       trustFlushArgs:
                         default: ""
                         type: string
@@ -6445,6 +6517,7 @@ spec:
                     - containerImage
                     - databaseInstance
                     - memcachedInstance
+                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
@@ -9016,6 +9089,24 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         type: object
                       cellTemplates:
                         additionalProperties:
@@ -9190,6 +9281,13 @@ spec:
                                         x-kubernetes-int-or-string: true
                                       type: object
                                   type: object
+                                tls:
+                                  properties:
+                                    caBundleSecretName:
+                                      type: string
+                                    secretName:
+                                      type: string
+                                  type: object
                               type: object
                             noVNCProxyServiceTemplate:
                               properties:
@@ -9296,6 +9394,13 @@ spec:
                                         pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                         x-kubernetes-int-or-string: true
                                       type: object
+                                  type: object
+                                tls:
+                                  properties:
+                                    caBundleSecretName:
+                                      type: string
+                                    secretName:
+                                      type: string
                                   type: object
                               type: object
                             nodeSelector:
@@ -9509,6 +9614,13 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
                             type: object
                         type: object
                       nodeSelector:
@@ -10756,6 +10868,24 @@ spec:
                       serviceUser:
                         default: placement
                         type: string
+                      tls:
+                        properties:
+                          api:
+                            properties:
+                              internal:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                              public:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                            type: object
+                          caBundleSecretName:
+                            type: string
+                        type: object
                     required:
                     - containerImage
                     - databaseInstance
@@ -15294,6 +15424,41 @@ spec:
                         - notificationImage
                         - secret
                         - sgCoreImage
+                        type: object
+                      logging:
+                        properties:
+                          cloNamespace:
+                            default: openshift-logging
+                            type: string
+                          enabled:
+                            default: true
+                            type: boolean
+                          ipaddr:
+                            type: string
+                          network:
+                            type: string
+                          port:
+                            default: 10514
+                            format: int32
+                            type: integer
+                          rsyslogQueueSize:
+                            default: 10000
+                            format: int32
+                            type: integer
+                          rsyslogQueueType:
+                            default: linkedList
+                            type: string
+                          rsyslogRetries:
+                            default: 100
+                            format: int32
+                            type: integer
+                          targetPort:
+                            default: 10514
+                            type: integer
+                        required:
+                        - ipaddr
+                        - network
+                        - rsyslogQueueType
                         type: object
                       metricStorage:
                         properties:
