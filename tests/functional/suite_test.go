@@ -62,6 +62,7 @@ import (
 	common_test "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	test "github.com/openstack-k8s-operators/lib-common/modules/test"
 	mariadb_test "github.com/openstack-k8s-operators/mariadb-operator/api/test/helpers"
+	ovn_test "github.com/openstack-k8s-operators/ovn-operator/api/test/helpers"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -80,6 +81,7 @@ var (
 	mariadb   *mariadb_test.TestHelper
 	infra     *infra_test.TestHelper
 	crtmgr    *certmanager_test.TestHelper
+	ovn       *ovn_test.TestHelper
 	namespace string
 	names     Names
 )
@@ -277,6 +279,8 @@ var _ = BeforeSuite(func() {
 	Expect(infra).NotTo(BeNil())
 	crtmgr = certmanager_test.NewTestHelper(ctx, k8sClient, timeout, interval, logger)
 	Expect(crtmgr).NotTo(BeNil())
+	ovn = ovn_test.NewTestHelper(ctx, k8sClient, timeout, interval, logger)
+	Expect(ovn).NotTo(BeNil())
 
 	// Start the controller-manager if goroutine
 	webhookInstallOptions := &testEnv.WebhookInstallOptions
