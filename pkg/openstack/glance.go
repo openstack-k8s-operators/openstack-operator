@@ -59,7 +59,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				glanceAPI.Override.Service[endpointType], glance.Name)
 
 			svcOverride := glanceAPI.Override.Service[endpointType]
-			svcOverride.AddLabel(getGlanceAPILabelMap(glance.Name, name))
+			svcOverride.AddLabel(getGlanceAPILabelMap(glance.Name, name, glanceAPI.Type))
 			glanceAPI.Override.Service[endpointType] = svcOverride
 		}
 
@@ -92,7 +92,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				ctx,
 				helper,
 				instance.Namespace,
-				getGlanceAPILabelMap(glance.Name, name),
+				getGlanceAPILabelMap(glance.Name, name, glanceAPI.Type),
 			)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -191,8 +191,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	return ctrl.Result{}, nil
 }
 
-func getGlanceAPILabelMap(name string, apiName string) map[string]string {
-	apiFilter := fmt.Sprintf("%s-%s", name, apiName)
+func getGlanceAPILabelMap(name string, apiName string, apiType string) map[string]string {
+	apiFilter := fmt.Sprintf("%s-%s-%s", name, apiName, apiType)
 
 	return map[string]string{
 		svcSelector: apiFilter,
