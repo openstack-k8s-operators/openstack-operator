@@ -5486,6 +5486,13 @@ spec:
                         type: object
                       secret:
                         type: string
+                      tls:
+                        properties:
+                          caBundleSecretName:
+                            type: string
+                          secretName:
+                            type: string
+                        type: object
                     required:
                     - containerImage
                     - memcachedInstance

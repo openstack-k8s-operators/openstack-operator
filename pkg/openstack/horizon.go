@@ -67,6 +67,12 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
+	// preserve any previously set TLS certs, set CA cert
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Horizon.Template.TLS = horizon.Spec.TLS
+	}
+	instance.Spec.Horizon.Template.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	if horizon.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -87,7 +93,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			serviceOverrides,
 			instance.Spec.Horizon.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHorizonReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -95,6 +101,8 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			return ctrlResult, nil
 		}
 		serviceOverrides = endpointDetails.GetEndpointServiceOverrides()
+
+		instance.Spec.Horizon.Template.TLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 	}
 
 	Log.Info("Reconcile Horizon", "horizon.Namespace", instance.Namespace, "horizon.Name", "horizon")
