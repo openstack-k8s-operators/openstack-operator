@@ -67,6 +67,14 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 	}
 
+	// preserve any previously set TLS certs,set CA cert
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Heat.Template.HeatAPI.TLS = heat.Spec.HeatAPI.TLS
+		instance.Spec.Heat.Template.HeatCfnAPI.TLS = heat.Spec.HeatCfnAPI.TLS
+	}
+	instance.Spec.Heat.Template.HeatAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Heat.Template.HeatCfnAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	// Heat API
 	if heat.Status.Conditions.IsTrue(heatv1.HeatAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
@@ -88,7 +96,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatAPI.Override.Service,
 			instance.Spec.Heat.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -97,6 +105,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		instance.Spec.Heat.Template.HeatAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Heat.Template.HeatAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Heat.Template.HeatAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	// Heat CFNAPI
@@ -120,7 +132,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatCfnAPI.Override.Service,
 			instance.Spec.Heat.CnfAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -129,6 +141,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 
 		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Heat.Template.HeatCfnAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Heat.Template.HeatCfnAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	Log := GetLogger(ctx)
