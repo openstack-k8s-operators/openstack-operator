@@ -64,6 +64,14 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// preserve any previously set TLS certs,set CA cert
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Ironic.Template.IronicAPI.TLS = ironic.Spec.IronicAPI.TLS
+		instance.Spec.Ironic.Template.IronicInspector.TLS = ironic.Spec.IronicInspector.TLS
+	}
+	instance.Spec.Ironic.Template.IronicAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Ironic.Template.IronicInspector.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	// Ironic API
 	if ironic.Status.Conditions.IsTrue(ironicv1.IronicAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
@@ -85,7 +93,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.Template.IronicAPI.Override.Service,
 			instance.Spec.Ironic.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -94,6 +102,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		instance.Spec.Ironic.Template.IronicAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Ironic.Template.IronicAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Ironic.Template.IronicAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	// Ironic Inspector
@@ -117,7 +129,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.Template.IronicInspector.Override.Service,
 			instance.Spec.Ironic.InspectorOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -126,6 +138,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		instance.Spec.Ironic.Template.IronicInspector.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Ironic.Template.IronicInspector.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Ironic.Template.IronicInspector.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	Log.Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
