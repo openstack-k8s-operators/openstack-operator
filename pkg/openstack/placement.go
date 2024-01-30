@@ -55,6 +55,12 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		}
 	}
 
+	// set CA cert and preserve any previously set TLS certs
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Placement.Template.TLS = placementAPI.Spec.TLS
+	}
+	instance.Spec.Placement.Template.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	if placementAPI.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -75,7 +81,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 			instance.Spec.Placement.Template.Override.Service,
 			instance.Spec.Placement.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposePlacementAPIReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -84,6 +90,10 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		}
 
 		instance.Spec.Placement.Template.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Placement.Template.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Placement.Template.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	Log.Info("Reconciling PlacementAPI", "PlacementAPI.Namespace", instance.Namespace, "PlacementAPI.Name", "placement")
