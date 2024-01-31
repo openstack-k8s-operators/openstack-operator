@@ -29,6 +29,7 @@ import (
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
+	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {
@@ -225,6 +226,40 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Eventually(func(g Gomega) {
 				ovnDbServerSB := ovn.GetOVNDBCluster(names.OVNDbServerSBName)
 				g.Expect(ovnDbServerSB).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should remove OVN resources on disable", func() {
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.Ovn.Enabled = false
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(OSCtlplane.Spec.Ovn.Enabled).Should(BeFalse())
+			}, timeout, interval).Should(Succeed())
+
+			// ovn services don't exist
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNNorthd{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNNorthdName, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNDBCluster{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNDbServerNBName, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNDBCluster{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNDbServerSBName, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNController{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNControllerName, instance)).Should(Not(Succeed()))
 			}, timeout, interval).Should(Succeed())
 		})
 	})
