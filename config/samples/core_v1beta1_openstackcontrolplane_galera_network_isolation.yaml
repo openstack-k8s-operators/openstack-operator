@@ -98,6 +98,7 @@ spec:
       databaseInstance: openstack
       secret: osp-secret
   galera:
+    enabled: true
     templates:
       openstack:
         storageRequest: 500M
