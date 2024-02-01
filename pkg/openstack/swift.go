@@ -57,6 +57,12 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		}
 	}
 
+	// preserve any previously set TLS certs,set CA cert
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Swift.Template.SwiftProxy.TLS = swift.Spec.SwiftProxy.TLS
+	}
+	instance.Spec.Swift.Template.SwiftProxy.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	if swift.Status.Conditions.IsTrue(swiftv1.SwiftProxyReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
 			ctx,
@@ -77,7 +83,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			instance.Spec.Swift.Template.SwiftProxy.Override.Service,
 			instance.Spec.Swift.ProxyOverride,
 			corev1beta1.OpenStackControlPlaneExposeSwiftReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -86,9 +92,12 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		}
 
 		instance.Spec.Swift.Template.SwiftProxy.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Swift.Template.SwiftProxy.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Swift.Template.SwiftProxy.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	helper.GetLogger().Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")
 	Log.Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), swift, func() error {
 		instance.Spec.Swift.Template.DeepCopyInto(&swift.Spec)

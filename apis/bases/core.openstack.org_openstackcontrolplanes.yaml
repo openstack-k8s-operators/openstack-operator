@@ -15231,6 +15231,24 @@ spec:
                           swiftConfSecret:
                             default: swift-conf
                             type: string
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         required:
                         - containerImageProxy
                         - memcachedServers
@@ -15266,6 +15284,9 @@ spec:
                             type: string
                           containerImageProxy:
                             type: string
+                          containerSharderEnabled:
+                            default: false
+                            type: boolean
                           memcachedServers:
                             default: ""
                             type: string

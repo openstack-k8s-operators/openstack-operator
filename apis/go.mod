@@ -22,7 +22,7 @@ require (
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240202095506-b8bae01af213
 	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240131114124-8bdccc638150
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240125124919-72883dc08303
-	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240202092455-1f31bfa3d313
+	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240202170409-a34147b1d7d3
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240130075809-6609fa1c0732
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	k8s.io/apimachinery v0.27.7
