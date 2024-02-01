@@ -35,17 +35,16 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		instance.GetNamespace(),
 		map[string]string{},
 	)
-	/*
-		// Cleanuo?
-		if !instance.Spec.TLS.Enabled {
-			if err := cert.Delete(ctx, helper); err != nil {
-				return ctrl.Result{}, err
-			}
-			instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneCAsReadyCondition)
 
-			return ctrl.Result{}, nil
-		}
-	*/
+	// Note (mschuppert) - right now additional custom CA certs can only be passed to the services if
+	// tls is enabled, otherwise CA bundle creation will be skipped and no bundle will be passed to the
+	// service CAs.
+	if !instance.Spec.TLS.Enabled(service.EndpointInternal) && !instance.Spec.TLS.Enabled(service.EndpointPublic) {
+		// we are not deleting certificates if tls gets disabled
+		instance.Status.Conditions.Remove(corev1.OpenStackControlPlaneCAReadyCondition)
+
+		return ctrl.Result{}, nil
+	}
 
 	helper.GetLogger().Info("Reconciling CAs", "Namespace", instance.Namespace, "Name", issuerReq.Name)
 
