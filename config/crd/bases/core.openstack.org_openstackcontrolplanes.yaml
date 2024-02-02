@@ -3529,6 +3529,8 @@ spec:
                           type: string
                         customServiceConfig:
                           type: string
+                        disableNonTLSListeners:
+                          type: boolean
                         nodeSelector:
                           additionalProperties:
                             type: string
@@ -3547,6 +3549,13 @@ spec:
                           type: string
                         storageRequest:
                           type: string
+                        tls:
+                          properties:
+                            caBundleSecretName:
+                              type: string
+                            secretName:
+                              type: string
+                          type: object
                       required:
                       - containerImage
                       - replicas
@@ -9555,18 +9564,6 @@ spec:
                             cellMessageBusInstance: rabbitmq-cell1
                             hasAPIAccess: true
                         type: object
-                      debug:
-                        properties:
-                          preserveJobs:
-                            default: false
-                            type: boolean
-                          stopJob:
-                            default: false
-                            type: boolean
-                          stopService:
-                            default: false
-                            type: boolean
-                        type: object
                       keystoneInstance:
                         default: keystone
                         type: string
@@ -9702,6 +9699,9 @@ spec:
                             default: NovaPassword
                             type: string
                         type: object
+                      preserveJobs:
+                        default: false
+                        type: boolean
                       schedulerServiceTemplate:
                         default:
                           replicas: 1
@@ -15134,6 +15134,13 @@ spec:
                     type: object
                   template:
                     properties:
+                      memcachedInstance:
+                        default: memcached
+                        type: string
+                      networkAttachments:
+                        items:
+                          type: string
+                        type: array
                       storageClass:
                         default: ""
                         type: string
@@ -15142,10 +15149,15 @@ spec:
                         type: string
                       swiftProxy:
                         properties:
-                          containerImageMemcached:
-                            type: string
                           containerImageProxy:
                             type: string
+                          memcachedServers:
+                            default: ""
+                            type: string
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           override:
                             properties:
                               service:
@@ -15220,8 +15232,8 @@ spec:
                             default: swift-conf
                             type: string
                         required:
-                        - containerImageMemcached
                         - containerImageProxy
+                        - memcachedServers
                         - replicas
                         - secret
                         - serviceUser
@@ -15250,12 +15262,17 @@ spec:
                             type: string
                           containerImageContainer:
                             type: string
-                          containerImageMemcached:
-                            type: string
                           containerImageObject:
                             type: string
                           containerImageProxy:
                             type: string
+                          memcachedServers:
+                            default: ""
+                            type: string
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           replicas:
                             default: 1
                             format: int32
@@ -15273,15 +15290,16 @@ spec:
                         required:
                         - containerImageAccount
                         - containerImageContainer
-                        - containerImageMemcached
                         - containerImageObject
                         - containerImageProxy
+                        - memcachedServers
                         - replicas
                         - storageClass
                         - storageRequest
                         - swiftConfSecret
                         type: object
                     required:
+                    - memcachedInstance
                     - storageClass
                     - swiftConfSecret
                     - swiftProxy
