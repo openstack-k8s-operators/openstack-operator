@@ -352,6 +352,8 @@ spec:
         ringReplicas: 1
       swiftStorage:
         replicas: 1
+        networkAttachements:
+          - storage
       swiftProxy:
         replicas: 1
         override:
@@ -364,6 +366,8 @@ spec:
                   metallb.universe.tf/loadBalancerIPs: 172.17.0.80
               spec:
                 type: LoadBalancer
+        networkAttachements:
+          - storage
   octavia:
     enabled: false
     template:
