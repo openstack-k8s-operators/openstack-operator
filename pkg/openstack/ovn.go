@@ -18,6 +18,44 @@ import (
 // ReconcileOVN -
 func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 
+	setOVNReadyError := func(instance *corev1beta1.OpenStackControlPlane, err error) {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
+			err.Error()))
+	}
+
+	OVNDBClustersReady, err := ReconcileOVNDbClusters(ctx, instance, helper)
+	if err != nil {
+		setOVNReadyError(instance, err)
+	}
+
+	OVNNorthdReady, err := ReconcileOVNNorthd(ctx, instance, helper)
+	if err != nil {
+		setOVNReadyError(instance, err)
+	}
+
+	OVNControllerReady, err := ReconcileOVNController(ctx, instance, helper)
+	if err != nil {
+		setOVNReadyError(instance, err)
+	}
+
+	// Expect all services (dbclusters, northd, ovn-controller) ready
+	if OVNDBClustersReady && OVNNorthdReady && OVNControllerReady {
+		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
+	} else {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+	}
+	return ctrl.Result{}, nil
+}
+
+func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
 	OVNDBClustersReady := len(instance.Spec.Ovn.Template.OVNDBCluster) != 0
@@ -30,8 +68,8 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		}
 
 		if !instance.Spec.Ovn.Enabled {
-			if res, err := EnsureDeleted(ctx, helper, OVNDBCluster); err != nil {
-				return res, err
+			if _, err := EnsureDeleted(ctx, helper, OVNDBCluster); err != nil {
+				return false, err
 			}
 			instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
 			continue
@@ -57,19 +95,18 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		})
 
 		if err != nil {
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1beta1.OpenStackControlPlaneOVNReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityWarning,
-				corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
-				err.Error()))
-			return ctrl.Result{}, err
+			return false, err
 		}
 		if op != controllerutil.OperationResultNone {
 			Log.Info(fmt.Sprintf("OVNDBCluster %s - %s", OVNDBCluster.Name, op))
 		}
 		OVNDBClustersReady = OVNDBClustersReady && OVNDBCluster.IsReady()
 	}
+	return OVNDBClustersReady, nil
+}
+
+func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (bool, error) {
+	Log := GetLogger(ctx)
 
 	OVNNorthd := &ovnv1.OVNNorthd{
 		ObjectMeta: metav1.ObjectMeta{
@@ -79,11 +116,11 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	}
 
 	if !instance.Spec.Ovn.Enabled {
-		if res, err := EnsureDeleted(ctx, helper, OVNNorthd); err != nil {
-			return res, err
+		if _, err := EnsureDeleted(ctx, helper, OVNNorthd); err != nil {
+			return false, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
-		return ctrl.Result{}, nil
+		return false, nil
 	}
 
 	Log.Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
@@ -109,11 +146,16 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 			condition.SeverityWarning,
 			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
 			err.Error()))
-		return ctrl.Result{}, err
+		return false, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
 	}
+	return OVNNorthd.IsReady(), nil
+}
+
+func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (bool, error) {
+	Log := GetLogger(ctx)
 
 	OVNController := &ovnv1.OVNController{
 		ObjectMeta: metav1.ObjectMeta{
@@ -123,15 +165,15 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	}
 
 	if !instance.Spec.Ovn.Enabled {
-		if res, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
-			return res, err
+		if _, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
+			return false, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
-		return ctrl.Result{}, nil
+		return false, nil
 	}
 
 	Log.Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")
-	op, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {
+	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {
 
 		instance.Spec.Ovn.Template.OVNController.DeepCopyInto(&OVNController.Spec)
 
@@ -153,21 +195,11 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 			condition.SeverityWarning,
 			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
 			err.Error()))
-		return ctrl.Result{}, err
+		return false, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("OVNController %s - %s", OVNController.Name, op))
 	}
 
-	// Expect all services (dbclusters, northd, ovn-controller) ready
-	if OVNDBClustersReady && OVNNorthd.IsReady() && OVNController.IsReady() {
-		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
-	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
-	}
-	return ctrl.Result{}, nil
+	return OVNController.IsReady(), nil
 }
