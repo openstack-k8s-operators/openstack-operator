@@ -6,8 +6,10 @@ import (
 	"strings"
 
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
@@ -40,9 +42,12 @@ func ReconcileRabbitMQs(
 ) (ctrl.Result, error) {
 	var failures []string = []string{}
 	var inprogress []string = []string{}
+	var ctrlResult ctrl.Result
+	var err error
+	var status mqStatus
 
 	for name, spec := range instance.Spec.Rabbitmq.Templates {
-		status, err := reconcileRabbitMQ(ctx, instance, helper, name, spec)
+		status, ctrlResult, err = reconcileRabbitMQ(ctx, instance, helper, name, spec)
 
 		switch status {
 		case mqFailed:
@@ -80,7 +85,7 @@ func ReconcileRabbitMQs(
 		)
 	}
 
-	return ctrl.Result{}, nil
+	return ctrlResult, nil
 }
 
 func reconcileRabbitMQ(
@@ -89,7 +94,7 @@ func reconcileRabbitMQ(
 	helper *helper.Helper,
 	name string,
 	spec corev1beta1.RabbitmqTemplate,
-) (mqStatus, error) {
+) (mqStatus, ctrl.Result, error) {
 	rabbitmq := &rabbitmqv2.RabbitmqCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -101,10 +106,10 @@ func reconcileRabbitMQ(
 	Log.Info("Reconciling RabbitMQ", "RabbitMQ.Namespace", instance.Namespace, "RabbitMQ.Name", name)
 	if !instance.Spec.Rabbitmq.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, rabbitmq); err != nil {
-			return mqFailed, err
+			return mqFailed, ctrl.Result{}, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition)
-		return mqReady, nil
+		return mqReady, ctrl.Result{}, nil
 	}
 
 	defaultStatefulSet := rabbitmqv2.StatefulSet{
@@ -166,6 +171,28 @@ func reconcileRabbitMQ(
 		},
 	}
 
+	hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
+	tlsCert := ""
+
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: instance.Status.TLS.Endpoint[service.EndpointInternal].Name,
+			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
+			Hostnames:  []string{hostname},
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest)
+		if err != nil {
+			return mqFailed, ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return mqCreating, ctrlResult, nil
+		}
+
+		tlsCert = certSecret.Name
+	}
+
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 
 		spec.RabbitmqClusterSpec.DeepCopyInto(&rabbitmq.Spec)
@@ -191,7 +218,7 @@ func reconcileRabbitMQ(
 			rabbitmq.Spec.Override.Service.Spec.Type == corev1.ServiceTypeLoadBalancer {
 			rabbitmq.Spec.Override.Service.Annotations =
 				util.MergeStringMaps(rabbitmq.Spec.Override.Service.Annotations,
-					map[string]string{networkv1.AnnotationHostnameKey: fmt.Sprintf("%s.%s.svc", name, instance.Namespace)})
+					map[string]string{networkv1.AnnotationHostnameKey: hostname})
 		}
 
 		if rabbitmq.Spec.Rabbitmq.AdditionalConfig == "" {
@@ -199,6 +226,13 @@ func reconcileRabbitMQ(
 			// This is the same situation as RABBITMQ_UPGRADE_LOG above,
 			// except for the "main" rabbitmq log we can just force it to use the console.
 			rabbitmq.Spec.Rabbitmq.AdditionalConfig = "log.console = true"
+		}
+
+		if tlsCert != "" {
+			rabbitmq.Spec.TLS.CaSecretName = instance.Status.TLS.Endpoint[service.EndpointInternal].Name
+			rabbitmq.Spec.TLS.SecretName = tlsCert
+			// disable non tls listeners
+			rabbitmq.Spec.TLS.DisableNonTLSListeners = true
 		}
 
 		// overrides
@@ -211,7 +245,7 @@ func reconcileRabbitMQ(
 	})
 
 	if err != nil {
-		return mqFailed, err
+		return mqFailed, ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("RabbitMQ %s - %s", rabbitmq.Name, op))
@@ -221,9 +255,9 @@ func reconcileRabbitMQ(
 		// Forced to hardcode "ClusterAvailable" here because linter will not allow
 		// us to import "github.com/rabbitmq/cluster-operator/internal/status"
 		if string(oldCond.Type) == "ClusterAvailable" && oldCond.Status == corev1.ConditionTrue {
-			return mqReady, nil
+			return mqReady, ctrl.Result{}, nil
 		}
 	}
 
-	return mqCreating, nil
+	return mqCreating, ctrl.Result{}, nil
 }
