@@ -401,21 +401,6 @@ spec:
                       databaseUser:
                         default: barbican
                         type: string
-                      debug:
-                        properties:
-                          dbInitContainer:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                          initContainer:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -1827,15 +1812,6 @@ spec:
                       databaseUser:
                         default: designate
                         type: string
-                      debug:
-                        properties:
-                          dbInitContainer:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -1861,15 +1837,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2015,15 +1982,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2118,15 +2076,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2221,15 +2170,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2324,15 +2264,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2416,15 +2347,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2500,15 +2422,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2660,12 +2573,6 @@ spec:
                     properties:
                       containerImage:
                         type: string
-                      debug:
-                        properties:
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       dnsDataLabelSelectorValue:
                         default: dnsdata
                         type: string
@@ -3693,12 +3600,19 @@ spec:
                       databaseUser:
                         default: glance
                         type: string
+                      dbPurge:
+                        properties:
+                          age:
+                            default: 30
+                            minimum: 1
+                            type: integer
+                          schedule:
+                            default: 1 0 * * *
+                            type: string
+                        type: object
                       debug:
                         properties:
-                          cronJob:
-                            default: false
-                            type: boolean
-                          dbSync:
+                          dbPurge:
                             default: false
                             type: boolean
                         type: object
@@ -4469,12 +4383,9 @@ spec:
                               items:
                                 type: string
                               type: array
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
+                            imageCacheSize:
+                              default: ""
+                              type: string
                             networkAttachments:
                               items:
                                 type: string
@@ -4604,6 +4515,7 @@ spec:
                               type: string
                           required:
                           - containerImage
+                          - imageCacheSize
                           - storageRequest
                           type: object
                         type: object
@@ -4897,12 +4809,6 @@ spec:
                       databaseUser:
                         default: heat
                         type: string
-                      debug:
-                        properties:
-                          dbSync:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -4913,12 +4819,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5042,12 +4942,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5171,12 +5065,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5387,12 +5275,6 @@ spec:
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
-                      debug:
-                        properties:
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -6400,18 +6282,6 @@ spec:
                       databaseUser:
                         default: keystone
                         type: string
-                      debug:
-                        properties:
-                          bootstrap:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -6706,9 +6576,6 @@ spec:
                       debug:
                         properties:
                           dbPurge:
-                            default: false
-                            type: boolean
-                          dbSync:
                             default: false
                             type: boolean
                         type: object
@@ -7479,12 +7346,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -7595,12 +7456,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -7661,12 +7516,6 @@ spec:
                               items:
                                 type: string
                               type: array
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
                             networkAttachments:
                               items:
                                 type: string
@@ -7894,18 +7743,6 @@ spec:
                       databaseUser:
                         default: neutron
                         type: string
-                      debug:
-                        properties:
-                          bootstrap:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -9893,15 +9730,6 @@ spec:
                       databaseUser:
                         default: octavia
                         type: string
-                      debug:
-                        properties:
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -9936,15 +9764,6 @@ spec:
                           databaseUser:
                             default: octavia
                             type: string
-                          debug:
-                            properties:
-                              dbSync:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -10457,12 +10276,6 @@ spec:
                     properties:
                       ovnController:
                         properties:
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           external-ids:
                             properties:
                               enable-chassis-as-gateway:
@@ -10543,12 +10356,6 @@ spec:
                               default: NB
                               pattern: ^NB|SB$
                               type: string
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
                             electionTimer:
                               default: 10000
                               format: int32
@@ -10621,12 +10428,6 @@ spec:
                         properties:
                           containerImage:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           logLevel:
                             default: info
                             type: string
@@ -10800,15 +10601,6 @@ spec:
                       databaseUser:
                         default: placement
                         type: string
-                      debug:
-                        properties:
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -15012,6 +14804,13 @@ spec:
                           default: 1
                           format: int32
                           type: integer
+                        tls:
+                          properties:
+                            caBundleSecretName:
+                              type: string
+                            secretName:
+                              type: string
+                          type: object
                       required:
                       - containerImage
                       type: object
