@@ -222,10 +222,6 @@ spec:
       ovnNorthd:
         networkAttachment: internalapi
       ovnController:
-        external-ids:
-          system-id: "random"
-          ovn-bridge: "br-int"
-          ovn-encap-type: "geneve"
         networkAttachment: tenant
   placement:
     apiOverride:

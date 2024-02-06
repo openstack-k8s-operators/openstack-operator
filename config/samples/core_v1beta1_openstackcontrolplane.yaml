@@ -104,11 +104,7 @@ spec:
           storageRequest: 10G
       ovnNorthd:
         replicas: 1
-      ovnController:
-        external-ids:
-          system-id: "random"
-          ovn-bridge: "br-int"
-          ovn-encap-type: "geneve"
+      ovnController: {}
   neutron:
     template:
       databaseInstance: openstack
