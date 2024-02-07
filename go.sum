@@ -145,8 +145,8 @@ github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240205082437-6
 github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240205082437-655a181feae0/go.mod h1:mC7tpqh65pTV1tm3lFX/Onya/OAWfD8kssfrnvjj5n8=
 github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240131135629-5e8e748d6046 h1:e0/Y91PcpmV+7xqu9ZwSOLN+lGexwmbHpm4B456XhiE=
 github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240131135629-5e8e748d6046/go.mod h1:dmFpsn/Ad88blxLOsDp1rKzcz+/hQ7FtsYPxKrYphdA=
-github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240206123725-eb350187c545 h1:eiUyijt5ij1Do1abYQjqzcFujjGSMJRQbP8Z/L+MqfY=
-github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240206123725-eb350187c545/go.mod h1:Q21yYPSzEhCLoi4aJyl1AW+V5RQE3+GzXaxhtGp2x/Y=
+github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240207124115-4350989565db h1:Wap5Qkh1b1iKMmmaqhSaXhvfksDl66TaQJCSPLVeaPI=
+github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240207124115-4350989565db/go.mod h1:Q21yYPSzEhCLoi4aJyl1AW+V5RQE3+GzXaxhtGp2x/Y=
 github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240205082155-620a93388acf h1:uDIKwac+IXC7biK/XRygnR2qSVWFUdx1Jj3MrPB8DIs=
 github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240205082155-620a93388acf/go.mod h1:lKjYKU6WeGidYNhTOdiEvKRpgl3NVewmcM4b5mROGQ0=
 github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240206110918-d3646fda9535 h1:iS4FHKleKOMy8750d95+baxj8y1diIMJCRHdRCsMLTU=
