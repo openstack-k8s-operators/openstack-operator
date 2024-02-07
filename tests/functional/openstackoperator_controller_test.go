@@ -29,6 +29,7 @@ import (
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
+	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {
@@ -38,22 +39,23 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// will fail to generate the ConfigMap as it does not find common.sh
 		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
 		Expect(err).NotTo(HaveOccurred())
+
+		// (mschuppert) create root CA secret as there is no certmanager running.
+		// it is not used, just to make sure reconcile proceeds and creates the ca-bundle.
+		Eventually(func(g Gomega) {
+			th.CreateSecret(
+				names.RootCAPublicName,
+				map[string][]byte{
+					"ca.crt":  []byte("test"),
+					"tls.crt": []byte("test"),
+					"tls.key": []byte("test"),
+				})
+		}, timeout, interval).Should(Succeed())
+
 	})
 
 	When("A default OpenStackControlplane instance is created", func() {
 		BeforeEach(func() {
-			// (mschuppert) create root CA secret as there is no certmanager running.
-			// it is not used, just to make sure reconcile proceeds and creates the ca-bundle.
-			Eventually(func(g Gomega) {
-				th.CreateSecret(
-					names.RootCAPublicName,
-					map[string][]byte{
-						"ca.crt":  []byte("test"),
-						"tls.crt": []byte("test"),
-						"tls.key": []byte("test"),
-					})
-			}, timeout, interval).Should(Succeed())
-
 			DeferCleanup(
 				th.DeleteInstance,
 				CreateOpenStackControlPlane(names.OpenStackControlplaneName, GetDefaultOpenStackControlPlaneSpec()),
@@ -176,6 +178,88 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"))
 				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", "/home/cloud-admin/.config/openstack/clouds.yaml"))
 				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", "/home/cloud-admin/.config/openstack/secure.yaml"))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("A OVN OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["ovn"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"ovnDBCluster": map[string]interface{}{
+						"ovndbcluster-nb": map[string]interface{}{
+							"dbType": "NB",
+						},
+						"ovndbcluster-sb": map[string]interface{}{
+							"dbType": "SB",
+						},
+					},
+				},
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have OVN enabled", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Ovn.Enabled).Should(BeTrue())
+
+			// ovn services exist
+			Eventually(func(g Gomega) {
+				ovnNorthd := ovn.GetOVNNorthd(names.OVNNorthdName)
+				g.Expect(ovnNorthd).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				ovnController := ovn.GetOVNController(names.OVNControllerName)
+				g.Expect(ovnController).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				ovnDbServerNB := ovn.GetOVNDBCluster(names.OVNDbServerNBName)
+				g.Expect(ovnDbServerNB).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				ovnDbServerSB := ovn.GetOVNDBCluster(names.OVNDbServerSBName)
+				g.Expect(ovnDbServerSB).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should remove OVN resources on disable", func() {
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.Ovn.Enabled = false
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(OSCtlplane.Spec.Ovn.Enabled).Should(BeFalse())
+			}, timeout, interval).Should(Succeed())
+
+			// ovn services don't exist
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNNorthd{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNNorthdName, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNDBCluster{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNDbServerNBName, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNDBCluster{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNDbServerSBName, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				instance := &ovnv1.OVNController{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNControllerName, instance)).Should(Not(Succeed()))
 			}, timeout, interval).Should(Succeed())
 		})
 	})

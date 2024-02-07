@@ -44,6 +44,10 @@ type Names struct {
 	SelfSignedIssuerName      types.NamespacedName
 	CABundleName              types.NamespacedName
 	OpenStackClientName       types.NamespacedName
+	OVNNorthdName             types.NamespacedName
+	OVNControllerName         types.NamespacedName
+	OVNDbServerNBName         types.NamespacedName
+	OVNDbServerSBName         types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -98,6 +102,22 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		OpenStackClientName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "openstackclient",
+		},
+		OVNNorthdName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "ovnnorthd",
+		},
+		OVNDbServerNBName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "ovndbcluster-nb",
+		},
+		OVNDbServerSBName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "ovndbcluster-sb",
+		},
+		OVNControllerName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "ovncontroller",
 		},
 	}
 }
