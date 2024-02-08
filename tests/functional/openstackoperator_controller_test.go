@@ -22,7 +22,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
+	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -33,6 +33,7 @@ import (
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
+	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 )
 
@@ -162,10 +163,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 					names.OpenStackClientName,
 					ConditionGetterFunc(OpenStackClientConditionGetter),
 					clientv1.OpenStackClientReadyCondition,
-					corev1.ConditionTrue,
+					k8s_corev1.ConditionTrue,
 				)
 
-				pod := &corev1.Pod{}
+				pod := &k8s_corev1.Pod{}
 				err := th.K8sClient.Get(ctx, names.OpenStackClientName, pod)
 				g.Expect(pod).Should(Not(BeNil()))
 				g.Expect(err).ToNot(HaveOccurred())
@@ -201,6 +202,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 					},
 				},
 			}
+			// TODO: had to disable tls to allow control plane status to update
+			spec["tls"] = map[string]interface{}{}
 			DeferCleanup(
 				th.DeleteInstance,
 				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
@@ -230,6 +233,22 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Eventually(func(g Gomega) {
 				ovnDbServerSB := ovn.GetOVNDBCluster(names.OVNDbServerSBName)
 				g.Expect(ovnDbServerSB).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// set ready states for each ovn component
+			ovn.SimulateOVNNorthdReady(names.OVNNorthdName)
+			ovn.SimulateOVNDBClusterReady(names.OVNDbServerNBName)
+			ovn.SimulateOVNDBClusterReady(names.OVNDbServerSBName)
+			ovn.SimulateOVNControllerReady(names.OVNControllerName)
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneOVNReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
 			}, timeout, interval).Should(Succeed())
 		})
 
@@ -264,6 +283,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Eventually(func(g Gomega) {
 				instance := &ovnv1.OVNController{}
 				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNControllerName, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ovn ready condition removed to not affect deployment success
+			Eventually(func(g Gomega) {
+				conditions := OpenStackControlPlaneConditionGetter(names.OpenStackControlplaneName)
+				g.Expect(conditions.Has(corev1.OpenStackControlPlaneOVNReadyCondition)).To(BeFalse())
 			}, timeout, interval).Should(Succeed())
 		})
 	})
