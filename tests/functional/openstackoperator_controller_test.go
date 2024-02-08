@@ -17,13 +17,17 @@ limitations under the License.
 package functional_test
 
 import (
+	"errors"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
@@ -262,5 +266,43 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNControllerName, instance)).Should(Not(Succeed()))
 			}, timeout, interval).Should(Succeed())
 		})
+	})
+})
+
+var _ = Describe("OpenStackOperator Webhook", func() {
+
+	It("calls placement validation webhook", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+		spec["placement"] = map[string]interface{}{
+			"template": map[string]interface{}{
+				"defaultConfigOverwrite": map[string]interface{}{
+					"api-paste.ini": "not supported",
+				},
+			},
+		}
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "openstack",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			ctx, k8sClient, unstructuredObj, func() error { return nil })
+
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"invalid: spec.placement.template.defaultConfigOverwrite: " +
+					"Invalid value: \"api-paste.ini\": " +
+					"Only the following keys are valid: policy.yaml",
+			),
+		)
 	})
 })
