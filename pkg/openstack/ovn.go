@@ -45,6 +45,8 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	// Expect all services (dbclusters, northd, ovn-controller) ready
 	if OVNDBClustersReady && OVNNorthdReady && OVNControllerReady {
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
+	} else if !instance.Spec.Ovn.Enabled {
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
