@@ -73,7 +73,6 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			if _, err := EnsureDeleted(ctx, helper, OVNDBCluster); err != nil {
 				return false, err
 			}
-			instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
 			continue
 		}
 
@@ -121,7 +120,6 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		if _, err := EnsureDeleted(ctx, helper, OVNNorthd); err != nil {
 			return false, err
 		}
-		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
 		return false, nil
 	}
 
@@ -170,7 +168,6 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		if _, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
 			return false, err
 		}
-		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
 		return false, nil
 	}
 
