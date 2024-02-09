@@ -56,6 +56,12 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// preserve any previously set TLS certs, set CA cert
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Manila.Template.ManilaAPI.TLS = manila.Spec.ManilaAPI.TLS
+	}
+	instance.Spec.Manila.Template.ManilaAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	// When component services got created check if there is the need to create a route
 	if manila.Status.Conditions.IsTrue(manilav1.ManilaAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
@@ -77,7 +83,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Manila.Template.ManilaAPI.Override.Service,
 			instance.Spec.Manila.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeManilaReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -86,6 +92,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 
 		instance.Spec.Manila.Template.ManilaAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Manila.Template.ManilaAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Manila.Template.ManilaAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
