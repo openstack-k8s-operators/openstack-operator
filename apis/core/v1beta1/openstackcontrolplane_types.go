@@ -253,7 +253,7 @@ type Override struct {
 	TLS *TLSServiceOverride `json:"tls,omitempty"`
 }
 
-// TLSServiceOverride overrides tls parameters for publioc endpoint
+// TLSServiceOverride overrides tls parameters for public endpoint
 type TLSServiceOverride struct {
 	// +kubebuilder:validation:Optional
 	// Name of a Secret in the same Namespace as the service, containing the server's private key, public certificate
@@ -660,14 +660,13 @@ type OpenStackControlPlaneStatus struct {
 
 // TLSStatus defines the observed state of TLS
 type TLSStatus struct {
-	Endpoint map[service.Endpoint]TLSCAStatus `json:"endpoint,omitempty"`
-	tls.Ca   `json:",inline"`
+	CAList []TLSCAStatus `json:"caList,omitempty"`
+	tls.Ca `json:",inline"`
 }
 
 // TLSCAStatus defines the observed state of TLS
 type TLSCAStatus struct {
-	Name string `json:"name"`
-	// +kubebuilder:validation:Format="date-time"
+	Name    string `json:"name"`
 	Expires string `json:"expires"`
 }
 

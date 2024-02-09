@@ -29,6 +29,8 @@ import (
 
 // ReconcileCAs -
 func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+	Log := GetLogger(ctx)
+
 	// create selfsigned-issuer
 	issuerReq := certmanager.SelfSignedIssuer(
 		"selfsigned-issuer",
@@ -36,17 +38,11 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		map[string]string{},
 	)
 
-	// Note (mschuppert) - right now additional custom CA certs can only be passed to the services if
-	// tls is enabled, otherwise CA bundle creation will be skipped and no bundle will be passed to the
-	// service CAs.
-	if !instance.Spec.TLS.Enabled(service.EndpointInternal) && !instance.Spec.TLS.Enabled(service.EndpointPublic) {
-		// we are not deleting certificates if tls gets disabled
-		instance.Status.Conditions.Remove(corev1.OpenStackControlPlaneCAReadyCondition)
+	// Note (mschuppert) - we always create required CAs and CA bundle, even if TLS should be not enabled.
+	// This is to allow easy switch to enable TLS later and also be able to distribute the bundle as a pre
+	// step for adoption
 
-		return ctrl.Result{}, nil
-	}
-
-	helper.GetLogger().Info("Reconciling CAs", "Namespace", instance.Namespace, "Name", issuerReq.Name)
+	Log.Info("Reconciling CAs", "Namespace", instance.Namespace, "Name", issuerReq.Name)
 
 	issuer := certmanager.NewIssuer(issuerReq, 5)
 	ctrlResult, err := issuer.CreateOrPatch(ctx, helper)
@@ -97,53 +93,49 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		}
 	}
 
-	if instance.Status.TLS.Endpoint == nil {
-		instance.Status.TLS.Endpoint = map[service.Endpoint]corev1.TLSCAStatus{}
-	}
+	instance.Status.TLS.CAList = []corev1.TLSCAStatus{}
+
 	// create RootCA cert and Issuer that uses the generated CA certificate to issue certs
-	for endpoint, config := range instance.Spec.TLS.Endpoint {
-		if config.Enabled {
-
-			labels := map[string]string{}
-			if endpoint == service.EndpointInternal {
-				labels[certmanager.RootCAIssuerInternalLabel] = ""
-			}
-			caName := tls.DefaultCAPrefix + string(endpoint)
-			// always create a root CA and issuer for the endpoint as we can
-			// not expect that all services are yet configured to be provided with
-			// a custom secret holding the cert/private key
-			caCert, ctrlResult, err := createRootCACertAndIssuer(
-				ctx,
-				instance,
-				helper,
-				issuerReq,
-				caName,
-				labels,
-			)
-			if err != nil {
-				return ctrlResult, err
-			} else if (ctrlResult != ctrl.Result{}) {
-				return ctrlResult, nil
-			}
-
-			err = bundle.getCertsFromPEM(caCert)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			err = caOnlyBundle.getCertsFromPEM(caCert)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-
-			status := corev1.TLSCAStatus{
-				Name: caName,
-			}
-			if len(caOnlyBundle.certs) > 0 {
-				status.Expires = caOnlyBundle.certs[0].expire.Format(time.RFC3339)
-			}
-
-			instance.Status.TLS.Endpoint[endpoint] = status
+	for _, endpoint := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
+		labels := map[string]string{}
+		if endpoint == service.EndpointInternal {
+			labels[certmanager.RootCAIssuerInternalLabel] = ""
 		}
+		caName := tls.DefaultCAPrefix + string(endpoint)
+		// always create a root CA and issuer for the endpoint as we can
+		// not expect that all services are yet configured to be provided with
+		// a custom secret holding the cert/private key
+		caCert, ctrlResult, err := createRootCACertAndIssuer(
+			ctx,
+			instance,
+			helper,
+			issuerReq,
+			caName,
+			labels,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		err = bundle.getCertsFromPEM(caCert)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		err = caOnlyBundle.getCertsFromPEM(caCert)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		status := corev1.TLSCAStatus{
+			Name: caName,
+		}
+		if len(caOnlyBundle.certs) > 0 {
+			status.Expires = caOnlyBundle.certs[0].expire.Format(time.RFC3339)
+		}
+
+		instance.Status.TLS.CAList = append(instance.Status.TLS.CAList, status)
 	}
 	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
 
@@ -161,7 +153,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 				err.Error()))
 			if k8s_errors.IsNotFound(err) {
 				timeout := time.Second * 10
-				helper.GetLogger().Info(fmt.Sprintf("Certificate %s not found, reconcile in %s", instance.Spec.TLS.CaBundleSecretName, timeout.String()))
+				Log.Info(fmt.Sprintf("Certificate %s not found, reconcile in %s", instance.Spec.TLS.CaBundleSecretName, timeout.String()))
 
 				return ctrl.Result{RequeueAfter: timeout}, nil
 			}
@@ -184,7 +176,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		// if the DownstreamTLSCABundlePath does not exist in the operator image,
 		// check for UpstreamTLSCABundlePath
 		if errors.Is(err, os.ErrNotExist) {
-			helper.GetLogger().Info(fmt.Sprintf("Downstream CA bundle not found using: %s", tls.UpstreamTLSCABundlePath))
+			Log.Info(fmt.Sprintf("Downstream CA bundle not found using: %s", tls.UpstreamTLSCABundlePath))
 			caBundle, err = getOperatorCABundle(tls.UpstreamTLSCABundlePath)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -433,7 +425,6 @@ func (cab *caBundle) getCertsFromPEM(PEMdata []byte) error {
 		}
 
 		// if cert is not already in bundle list add it
-		// validate of nextip is already in a reservation and its not us
 		f := func(c caCert) bool {
 			return c.hash == blockHash
 		}
