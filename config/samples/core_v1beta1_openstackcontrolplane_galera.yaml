@@ -96,11 +96,7 @@ spec:
           storageRequest: 10G
       ovnNorthd:
         replicas: 1
-      ovnController:
-        external-ids:
-          system-id: "random"
-          ovn-bridge: "br-int"
-          ovn-encap-type: "geneve"
+      ovnController: {}
   neutron:
     template:
       databaseInstance: openstack
@@ -141,12 +137,18 @@ spec:
       metricStorage:
         enabled: false
         monitoringStack:
-          type: prometheus
+          alertingEnabled: true
+          scrapeInterval: 30s
+          storage:
+            strategy: persistent
+            retention: 24h
+            persistent:
+              pvcStorageRequest: 20G
       autoscaling:
         enabled: false
-        prometheus:
-          deployPrometheus: false
         aodh:
+          passwordSelectors:
+          databaseUser: aodh
           databaseInstance: openstack
           memcachedInstance: memcached
           secret: osp-secret
@@ -154,6 +156,12 @@ spec:
       ceilometer:
         enabled: true
         secret: osp-secret
+      logging:
+        enabled: false
+        network: internalapi
+        ipaddr: 172.17.0.80
+        port: 10514
+        cloNamespace: openshift-logging
   swift:
     enabled: true
     template:

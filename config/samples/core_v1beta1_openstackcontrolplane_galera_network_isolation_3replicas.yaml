@@ -222,10 +222,6 @@ spec:
       ovnNorthd:
         networkAttachment: internalapi
       ovnController:
-        external-ids:
-          system-id: "random"
-          ovn-bridge: "br-int"
-          ovn-encap-type: "geneve"
         networkAttachment: tenant
   placement:
     apiOverride:
@@ -318,12 +314,18 @@ spec:
       metricStorage:
         enabled: false
         monitoringStack:
-          type: prometheus
+          alertingEnabled: true
+          scrapeInterval: 30s
+          storage:
+            strategy: persistent
+            retention: 24h
+            persistent:
+              pvcStorageRequest: 20G
       autoscaling:
         enabled: false
-        prometheus:
-          deployPrometheus: false
         aodh:
+          passwordSelectors:
+          databaseUser: aodh
           databaseInstance: openstack
           memcachedInstance: memcached
           secret: osp-secret
@@ -331,6 +333,12 @@ spec:
       ceilometer:
         enabled: true
         secret: osp-secret
+      logging:
+        enabled: false
+        network: internalapi
+        ipaddr: 172.17.0.80
+        port: 10514
+        cloNamespace: openshift-logging
   swift:
     enabled: true
     proxyOverride:
@@ -340,6 +348,8 @@ spec:
         ringReplicas: 1
       swiftStorage:
         replicas: 1
+        networkAttachements:
+          - storage
       swiftProxy:
         replicas: 1
         override:
@@ -352,6 +362,8 @@ spec:
                   metallb.universe.tf/loadBalancerIPs: 172.17.0.80
               spec:
                 type: LoadBalancer
+        networkAttachements:
+          - storage
   octavia:
     enabled: false
     template:

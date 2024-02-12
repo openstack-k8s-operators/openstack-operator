@@ -419,21 +419,6 @@ spec:
                       databaseUser:
                         default: barbican
                         type: string
-                      debug:
-                        properties:
-                          dbInitContainer:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                          initContainer:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -701,6 +686,24 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
                             type: object
                         required:
                         - containerImage
@@ -1845,15 +1848,6 @@ spec:
                       databaseUser:
                         default: designate
                         type: string
-                      debug:
-                        properties:
-                          dbInitContainer:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -1879,15 +1873,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2033,15 +2018,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2136,15 +2112,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2239,15 +2206,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2342,15 +2300,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2434,15 +2383,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2518,15 +2458,6 @@ spec:
                           databaseUser:
                             default: designate
                             type: string
-                          debug:
-                            properties:
-                              initContainer:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -2678,12 +2609,6 @@ spec:
                     properties:
                       containerImage:
                         type: string
-                      debug:
-                        properties:
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       dnsDataLabelSelectorValue:
                         default: dnsdata
                         type: string
@@ -3547,6 +3472,8 @@ spec:
                           type: string
                         customServiceConfig:
                           type: string
+                        disableNonTLSListeners:
+                          type: boolean
                         nodeSelector:
                           additionalProperties:
                             type: string
@@ -3565,6 +3492,13 @@ spec:
                           type: string
                         storageRequest:
                           type: string
+                        tls:
+                          properties:
+                            caBundleSecretName:
+                              type: string
+                            secretName:
+                              type: string
+                          type: object
                       required:
                       - containerImage
                       - replicas
@@ -3702,12 +3636,19 @@ spec:
                       databaseUser:
                         default: glance
                         type: string
+                      dbPurge:
+                        properties:
+                          age:
+                            default: 30
+                            minimum: 1
+                            type: integer
+                          schedule:
+                            default: 1 0 * * *
+                            type: string
+                        type: object
                       debug:
                         properties:
-                          cronJob:
-                            default: false
-                            type: boolean
-                          dbSync:
+                          dbPurge:
                             default: false
                             type: boolean
                         type: object
@@ -4478,12 +4419,9 @@ spec:
                               items:
                                 type: string
                               type: array
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
+                            imageCacheSize:
+                              default: ""
+                              type: string
                             networkAttachments:
                               items:
                                 type: string
@@ -4586,6 +4524,24 @@ spec:
                               type: string
                             storageRequest:
                               type: string
+                            tls:
+                              properties:
+                                api:
+                                  properties:
+                                    internal:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
+                                    public:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
+                                  type: object
+                                caBundleSecretName:
+                                  type: string
+                              type: object
                             type:
                               default: split
                               enum:
@@ -4595,6 +4551,7 @@ spec:
                               type: string
                           required:
                           - containerImage
+                          - imageCacheSize
                           - storageRequest
                           type: object
                         type: object
@@ -4888,12 +4845,6 @@ spec:
                       databaseUser:
                         default: heat
                         type: string
-                      debug:
-                        properties:
-                          dbSync:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -4904,12 +4855,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5005,6 +4950,24 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
                             type: object
                         required:
                         - containerImage
@@ -5015,12 +4978,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5117,6 +5074,24 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         required:
                         - containerImage
                         type: object
@@ -5126,12 +5101,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5342,12 +5311,6 @@ spec:
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
-                      debug:
-                        properties:
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -5450,6 +5413,13 @@ spec:
                         type: object
                       secret:
                         type: string
+                      tls:
+                        properties:
+                          caBundleSecretName:
+                            type: string
+                          secretName:
+                            type: string
+                        type: object
                     required:
                     - containerImage
                     - memcachedInstance
@@ -5816,6 +5786,24 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         type: object
                       ironicConductors:
                         items:
@@ -6074,6 +6062,24 @@ spec:
                             type: string
                           storageClass:
                             type: string
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         type: object
                       ironicNeutronAgent:
                         properties:
@@ -6312,18 +6318,6 @@ spec:
                       databaseUser:
                         default: keystone
                         type: string
-                      debug:
-                        properties:
-                          bootstrap:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -6450,6 +6444,24 @@ spec:
                         type: object
                       secret:
                         type: string
+                      tls:
+                        properties:
+                          api:
+                            properties:
+                              internal:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                              public:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                            type: object
+                          caBundleSecretName:
+                            type: string
+                        type: object
                       trustFlushArgs:
                         default: ""
                         type: string
@@ -6463,6 +6475,7 @@ spec:
                     - containerImage
                     - databaseInstance
                     - memcachedInstance
+                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
@@ -6599,9 +6612,6 @@ spec:
                       debug:
                         properties:
                           dbPurge:
-                            default: false
-                            type: boolean
-                          dbSync:
                             default: false
                             type: boolean
                         type: object
@@ -7372,12 +7382,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -7488,12 +7492,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -7554,12 +7552,6 @@ spec:
                               items:
                                 type: string
                               type: array
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
                             networkAttachments:
                               items:
                                 type: string
@@ -7787,18 +7779,6 @@ spec:
                       databaseUser:
                         default: neutron
                         type: string
-                      debug:
-                        properties:
-                          bootstrap:
-                            default: false
-                            type: boolean
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -8681,6 +8661,24 @@ spec:
                       serviceUser:
                         default: neutron
                         type: string
+                      tls:
+                        properties:
+                          api:
+                            properties:
+                              internal:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                              public:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                            type: object
+                          caBundleSecretName:
+                            type: string
+                        type: object
                     required:
                     - containerImage
                     - databaseInstance
@@ -9034,6 +9032,24 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         type: object
                       cellTemplates:
                         additionalProperties:
@@ -9208,6 +9224,13 @@ spec:
                                         x-kubernetes-int-or-string: true
                                       type: object
                                   type: object
+                                tls:
+                                  properties:
+                                    caBundleSecretName:
+                                      type: string
+                                    secretName:
+                                      type: string
+                                  type: object
                               type: object
                             noVNCProxyServiceTemplate:
                               properties:
@@ -9315,6 +9338,13 @@ spec:
                                         x-kubernetes-int-or-string: true
                                       type: object
                                   type: object
+                                tls:
+                                  properties:
+                                    caBundleSecretName:
+                                      type: string
+                                    secretName:
+                                      type: string
+                                  type: object
                               type: object
                             nodeSelector:
                               additionalProperties:
@@ -9406,18 +9436,6 @@ spec:
                             cellDatabaseUser: nova_cell1
                             cellMessageBusInstance: rabbitmq-cell1
                             hasAPIAccess: true
-                        type: object
-                      debug:
-                        properties:
-                          preserveJobs:
-                            default: false
-                            type: boolean
-                          stopJob:
-                            default: false
-                            type: boolean
-                          stopService:
-                            default: false
-                            type: boolean
                         type: object
                       keystoneInstance:
                         default: keystone
@@ -9528,6 +9546,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -9547,6 +9572,9 @@ spec:
                             default: NovaPassword
                             type: string
                         type: object
+                      preserveJobs:
+                        default: false
+                        type: boolean
                       schedulerServiceTemplate:
                         default:
                           replicas: 1
@@ -9738,15 +9766,6 @@ spec:
                       databaseUser:
                         default: octavia
                         type: string
-                      debug:
-                        properties:
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -9781,15 +9800,6 @@ spec:
                           databaseUser:
                             default: octavia
                             type: string
-                          debug:
-                            properties:
-                              dbSync:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -10302,12 +10312,6 @@ spec:
                     properties:
                       ovnController:
                         properties:
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           external-ids:
                             properties:
                               enable-chassis-as-gateway:
@@ -10388,12 +10392,6 @@ spec:
                               default: NB
                               pattern: ^NB|SB$
                               type: string
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
                             electionTimer:
                               default: 10000
                               format: int32
@@ -10466,12 +10464,6 @@ spec:
                         properties:
                           containerImage:
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           logLevel:
                             default: info
                             type: string
@@ -10645,15 +10637,6 @@ spec:
                       databaseUser:
                         default: placement
                         type: string
-                      debug:
-                        properties:
-                          dbSync:
-                            default: false
-                            type: boolean
-                          service:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -10774,6 +10757,24 @@ spec:
                       serviceUser:
                         default: placement
                         type: string
+                      tls:
+                        properties:
+                          api:
+                            properties:
+                              internal:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                              public:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
+                            type: object
+                          caBundleSecretName:
+                            type: string
+                        type: object
                     required:
                     - containerImage
                     - databaseInstance
@@ -14839,6 +14840,13 @@ spec:
                           default: 1
                           format: int32
                           type: integer
+                        tls:
+                          properties:
+                            caBundleSecretName:
+                              type: string
+                            secretName:
+                              type: string
+                          type: object
                       required:
                       - containerImage
                       type: object
@@ -14961,6 +14969,13 @@ spec:
                     type: object
                   template:
                     properties:
+                      memcachedInstance:
+                        default: memcached
+                        type: string
+                      networkAttachments:
+                        items:
+                          type: string
+                        type: array
                       storageClass:
                         default: ""
                         type: string
@@ -14969,10 +14984,15 @@ spec:
                         type: string
                       swiftProxy:
                         properties:
-                          containerImageMemcached:
-                            type: string
                           containerImageProxy:
                             type: string
+                          memcachedServers:
+                            default: ""
+                            type: string
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           override:
                             properties:
                               service:
@@ -15046,9 +15066,27 @@ spec:
                           swiftConfSecret:
                             default: swift-conf
                             type: string
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         required:
-                        - containerImageMemcached
                         - containerImageProxy
+                        - memcachedServers
                         - replicas
                         - secret
                         - serviceUser
@@ -15077,12 +15115,20 @@ spec:
                             type: string
                           containerImageContainer:
                             type: string
-                          containerImageMemcached:
-                            type: string
                           containerImageObject:
                             type: string
                           containerImageProxy:
                             type: string
+                          containerSharderEnabled:
+                            default: false
+                            type: boolean
+                          memcachedServers:
+                            default: ""
+                            type: string
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
                           replicas:
                             default: 1
                             format: int32
@@ -15100,15 +15146,16 @@ spec:
                         required:
                         - containerImageAccount
                         - containerImageContainer
-                        - containerImageMemcached
                         - containerImageObject
                         - containerImageProxy
+                        - memcachedServers
                         - replicas
                         - storageClass
                         - storageRequest
                         - swiftConfSecret
                         type: object
                     required:
+                    - memcachedInstance
                     - storageClass
                     - swiftConfSecret
                     - swiftProxy
@@ -15312,6 +15359,41 @@ spec:
                         - notificationImage
                         - secret
                         - sgCoreImage
+                        type: object
+                      logging:
+                        properties:
+                          cloNamespace:
+                            default: openshift-logging
+                            type: string
+                          enabled:
+                            default: true
+                            type: boolean
+                          ipaddr:
+                            type: string
+                          network:
+                            type: string
+                          port:
+                            default: 10514
+                            format: int32
+                            type: integer
+                          rsyslogQueueSize:
+                            default: 10000
+                            format: int32
+                            type: integer
+                          rsyslogQueueType:
+                            default: linkedList
+                            type: string
+                          rsyslogRetries:
+                            default: 100
+                            format: int32
+                            type: integer
+                          targetPort:
+                            default: 10514
+                            type: integer
+                        required:
+                        - ipaddr
+                        - network
+                        - rsyslogQueueType
                         type: object
                       metricStorage:
                         properties:

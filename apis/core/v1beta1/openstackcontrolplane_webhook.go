@@ -191,6 +191,10 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) fie
 		errors = append(errors, r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"))...)
 	}
 
+	if r.Spec.Placement.Enabled {
+		errors = append(errors, r.Spec.Placement.Template.ValidateCreate(basePath.Child("placement").Child("template"))...)
+	}
+
 	return errors
 }
 
@@ -207,6 +211,10 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 
 	if r.Spec.Nova.Enabled {
 		errors = append(errors, r.Spec.Nova.Template.ValidateUpdate(old.Nova.Template, basePath.Child("nova").Child("template"))...)
+	}
+
+	if r.Spec.Placement.Enabled {
+		errors = append(errors, r.Spec.Placement.Template.ValidateUpdate(old.Placement.Template, basePath.Child("placement").Child("template"))...)
 	}
 
 	return errors
