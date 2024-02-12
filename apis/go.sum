@@ -166,8 +166,8 @@ github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240205082155-
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240205082155-fca054830e06/go.mod h1:u5RKT1S7MJqUqnEVIDOmwidFhBRIjMcUG78tWW1SUuE=
 github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240206110402-41e2d7f8870e h1:/E9k0cDpYcsvV4P10WSC4k0KKJgC06IwAs+Z+GTkDQ0=
 github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240206110402-41e2d7f8870e/go.mod h1:rYCOWkIWOBRf+6GijQo4uadwR9Sz/prV4HVTdUZoFHQ=
-github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240206120950-4285571a7211 h1:WPMYG5TQl7a7G4Acknp41Er3qjYcp1Onbl1kqvnMQX0=
-github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240206120950-4285571a7211/go.mod h1:G4XUqjS1C8V5U066HUcjnCyxTNhU4cSZOOGXcOCOhz4=
+github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240209144511-533e51daa424 h1:JdJDQ60QVjkTV6+mDt9zQQUIMc/51Cn9vY77QsBjhew=
+github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240209144511-533e51daa424/go.mod h1:xM0W1YMKuIoQnXhFVf4656QpyJlGa9m3cMj45KQt1pQ=
 github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240206105420-de58be701128 h1:j3iwtF7ptHjneP9tboCd1K6H3PdhhdTGXiKbXddEqZY=
 github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240206105420-de58be701128/go.mod h1:WxFJzl/l+1EjCEiBrQ+KydXEnZhxXtRvtcCn5O3q47E=
 github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240205163246-3add3edb159c h1:w5/UiRR7xyJ2qtQ6gA/Exp8XJd3MhVpBOUrnfmDQ92o=
