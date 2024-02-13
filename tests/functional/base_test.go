@@ -269,3 +269,8 @@ func GetOpenStackControlPlane(name types.NamespacedName) *corev1.OpenStackContro
 	}, timeout, interval).Should(Succeed())
 	return instance
 }
+
+func OpenStackControlPlaneConditionGetter(name types.NamespacedName) condition.Conditions {
+	instance := GetOpenStackControlPlane(name)
+	return instance.Status.Conditions
+}
