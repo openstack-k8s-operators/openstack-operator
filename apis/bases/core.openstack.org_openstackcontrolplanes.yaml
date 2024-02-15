@@ -5650,12 +5650,6 @@ spec:
                         type: string
                       databaseInstance:
                         type: string
-                      debug:
-                        properties:
-                          dbSync:
-                            default: false
-                            type: boolean
-                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string
@@ -5680,12 +5674,6 @@ spec:
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5813,12 +5801,6 @@ spec:
                             customServiceConfig:
                               default: '# add your customization here'
                               type: string
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
                             defaultConfigOverwrite:
                               additionalProperties:
                                 type: string
@@ -5908,15 +5890,6 @@ spec:
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
-                          debug:
-                            properties:
-                              dbSync:
-                                default: false
-                                type: boolean
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -6086,12 +6059,6 @@ spec:
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -7477,6 +7444,24 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
                             type: object
                         required:
                         - containerImage
@@ -9068,10 +9053,6 @@ spec:
                                   type: string
                                 customServiceConfig:
                                   type: string
-                                defaultConfigOverwrite:
-                                  additionalProperties:
-                                    type: string
-                                  type: object
                                 networkAttachments:
                                   items:
                                     type: string
@@ -9238,10 +9219,6 @@ spec:
                                   type: string
                                 customServiceConfig:
                                   type: string
-                                defaultConfigOverwrite:
-                                  additionalProperties:
-                                    type: string
-                                  type: object
                                 enabled:
                                   type: boolean
                                 networkAttachments:
@@ -9583,10 +9560,6 @@ spec:
                             type: string
                           customServiceConfig:
                             type: string
-                          defaultConfigOverwrite:
-                            additionalProperties:
-                              type: string
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -9755,7 +9728,7 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      certssecret:
+                      certsSecret:
                         default: octavia-certs-secret
                         type: string
                       customServiceConfig:
@@ -9932,10 +9905,10 @@ spec:
                         type: object
                       octaviaHealthManager:
                         properties:
-                          certspassphrasesecret:
+                          certsPassphraseSecret:
                             default: octavia-ca-passphrase
                             type: string
-                          certssecret:
+                          certsSecret:
                             type: string
                           containerImage:
                             type: string
@@ -10024,6 +9997,10 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          sshPrivkeySecret:
+                            type: string
+                          sshPubkey:
                             type: string
                           tenantName:
                             default: service
@@ -10038,10 +10015,10 @@ spec:
                         type: object
                       octaviaHousekeeping:
                         properties:
-                          certspassphrasesecret:
+                          certsPassphraseSecret:
                             default: octavia-ca-passphrase
                             type: string
-                          certssecret:
+                          certsSecret:
                             type: string
                           containerImage:
                             type: string
@@ -10130,6 +10107,10 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          sshPrivkeySecret:
+                            type: string
+                          sshPubkey:
                             type: string
                           tenantName:
                             default: service
@@ -10144,10 +10125,10 @@ spec:
                         type: object
                       octaviaWorker:
                         properties:
-                          certspassphrasesecret:
+                          certsPassphraseSecret:
                             default: octavia-ca-passphrase
                             type: string
-                          certssecret:
+                          certsSecret:
                             type: string
                           containerImage:
                             type: string
@@ -10236,6 +10217,10 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          sshPrivkeySecret:
+                            type: string
+                          sshPubkey:
                             type: string
                           tenantName:
                             default: service
@@ -10271,8 +10256,14 @@ spec:
                       serviceUser:
                         default: octavia
                         type: string
+                      sshPrivkeySecret:
+                        default: octavia-ssh-privkey-secret
+                        type: string
+                      sshPubkey:
+                        default: octavia-ssh-pubkey
+                        type: string
                     required:
-                    - certssecret
+                    - certsSecret
                     - databaseInstance
                     - octaviaAPI
                     - rabbitMqClusterName
@@ -12106,6 +12097,19 @@ spec:
                                                         format: int32
                                                         type: integer
                                                     type: object
+                                                  resizePolicy:
+                                                    items:
+                                                      properties:
+                                                        resourceName:
+                                                          type: string
+                                                        restartPolicy:
+                                                          type: string
+                                                      required:
+                                                      - resourceName
+                                                      - restartPolicy
+                                                      type: object
+                                                    type: array
+                                                    x-kubernetes-list-type: atomic
                                                   resources:
                                                     properties:
                                                       claims:
@@ -12137,6 +12141,8 @@ spec:
                                                           x-kubernetes-int-or-string: true
                                                         type: object
                                                     type: object
+                                                  restartPolicy:
+                                                    type: string
                                                   securityContext:
                                                     properties:
                                                       allowPrivilegeEscalation:
@@ -12735,6 +12741,19 @@ spec:
                                                         format: int32
                                                         type: integer
                                                     type: object
+                                                  resizePolicy:
+                                                    items:
+                                                      properties:
+                                                        resourceName:
+                                                          type: string
+                                                        restartPolicy:
+                                                          type: string
+                                                      required:
+                                                      - resourceName
+                                                      - restartPolicy
+                                                      type: object
+                                                    type: array
+                                                    x-kubernetes-list-type: atomic
                                                   resources:
                                                     properties:
                                                       claims:
@@ -12766,6 +12785,8 @@ spec:
                                                           x-kubernetes-int-or-string: true
                                                         type: object
                                                     type: object
+                                                  restartPolicy:
+                                                    type: string
                                                   securityContext:
                                                     properties:
                                                       allowPrivilegeEscalation:
@@ -13371,6 +13392,19 @@ spec:
                                                         format: int32
                                                         type: integer
                                                     type: object
+                                                  resizePolicy:
+                                                    items:
+                                                      properties:
+                                                        resourceName:
+                                                          type: string
+                                                        restartPolicy:
+                                                          type: string
+                                                      required:
+                                                      - resourceName
+                                                      - restartPolicy
+                                                      type: object
+                                                    type: array
+                                                    x-kubernetes-list-type: atomic
                                                   resources:
                                                     properties:
                                                       claims:
@@ -13402,6 +13436,8 @@ spec:
                                                           x-kubernetes-int-or-string: true
                                                         type: object
                                                     type: object
+                                                  restartPolicy:
+                                                    type: string
                                                   securityContext:
                                                     properties:
                                                       allowPrivilegeEscalation:
@@ -15096,6 +15132,16 @@ spec:
                         properties:
                           containerImage:
                             type: string
+                          minPartHours:
+                            default: 1
+                            format: int64
+                            minimum: 1
+                            type: integer
+                          partPower:
+                            default: 10
+                            format: int64
+                            minimum: 1
+                            type: integer
                           ringReplicas:
                             default: 1
                             format: int64
@@ -15106,6 +15152,8 @@ spec:
                             type: string
                         required:
                         - containerImage
+                        - minPartHours
+                        - partPower
                         - ringReplicas
                         - swiftConfSecret
                         type: object
@@ -15362,6 +15410,14 @@ spec:
                         type: object
                       logging:
                         properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            default:
+                              metallb.universe.tf/address-pool: internalapi
+                              metallb.universe.tf/allow-shared-ip: internalapi
+                              metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+                            type: object
                           cloNamespace:
                             default: openshift-logging
                             type: string
@@ -15369,8 +15425,6 @@ spec:
                             default: true
                             type: boolean
                           ipaddr:
-                            type: string
-                          network:
                             type: string
                           port:
                             default: 10514
@@ -15392,7 +15446,6 @@ spec:
                             type: integer
                         required:
                         - ipaddr
-                        - network
                         - rsyslogQueueType
                         type: object
                       metricStorage:
@@ -15945,6 +15998,10 @@ spec:
                               alertingEnabled:
                                 default: true
                                 type: boolean
+                              dataplaneNetwork:
+                                default: ctlplane
+                                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                                type: string
                               scrapeInterval:
                                 default: 30s
                                 type: string
@@ -15996,6 +16053,8 @@ spec:
                                     - persistent
                                     type: string
                                 type: object
+                            required:
+                            - dataplaneNetwork
                             type: object
                         type: object
                     type: object

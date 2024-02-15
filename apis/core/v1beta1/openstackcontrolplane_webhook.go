@@ -26,6 +26,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // OpenStackControlPlaneDefaults -
@@ -56,7 +57,7 @@ func (r *OpenStackControlPlane) SetupWebhookWithManager(mgr ctrl.Manager) error 
 var _ webhook.Validator = &OpenStackControlPlane{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackControlPlane) ValidateCreate() error {
+func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 	openstackcontrolplanelog.Info("validate create", "name", r.Name)
 
 	var allErrs field.ErrorList
@@ -66,21 +67,21 @@ func (r *OpenStackControlPlane) ValidateCreate() error {
 	}
 
 	if len(allErrs) != 0 {
-		return apierrors.NewInvalid(
+		return nil, apierrors.NewInvalid(
 			schema.GroupKind{Group: "core.openstack.org", Kind: "OpenStackControlPlane"},
 			r.Name, allErrs)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) error {
+func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	openstackcontrolplanelog.Info("validate update", "name", r.Name)
 
 	oldControlPlane, ok := old.(*OpenStackControlPlane)
 	if !ok || oldControlPlane == nil {
-		return apierrors.NewInternalError(fmt.Errorf("unable to convert existing object"))
+		return nil, apierrors.NewInternalError(fmt.Errorf("unable to convert existing object"))
 	}
 
 	var allErrs field.ErrorList
@@ -90,24 +91,23 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) error {
 	}
 
 	if len(allErrs) != 0 {
-		return apierrors.NewInvalid(
+		return nil, apierrors.NewInvalid(
 			schema.GroupKind{Group: "core.openstack.org", Kind: "OpenStackControlPlane"},
 			r.Name, allErrs)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackControlPlane) ValidateDelete() error {
+func (r *OpenStackControlPlane) ValidateDelete() (admission.Warnings, error) {
 	openstackcontrolplanelog.Info("validate delete", "name", r.Name)
 
-	return nil
+	return nil, nil
 }
 
 // checkDepsEnabled - returns a non-empty string if required services are missing (disabled) for "name" service
 func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
-
 	// "msg" will hold any dependency validation error we might find
 	msg := ""
 	// "reqs" will be set to the required services for "name" service
