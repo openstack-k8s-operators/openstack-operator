@@ -40,7 +40,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
@@ -85,7 +84,6 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 
 // Reconcile -
 func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-
 	Log := r.GetLogger(ctx)
 
 	instance := &clientv1.OpenStackClient{}
@@ -346,7 +344,6 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			// Delete pod when its config changed. In this case we just re-create the
 			// openstackclient pod
 			if err := r.Delete(ctx, osclient); err != nil && !k8s_errors.IsNotFound(err) {
-
 				// Error deleting the object
 				return ctrl.Result{}, fmt.Errorf("Error deleting OpenStackClient pod %s: %w", osclient.Name, err)
 			}
@@ -382,7 +379,6 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	)
 
 	return ctrl.Result{}, nil
-
 }
 
 // fields to index to reconcile when change
@@ -392,17 +388,14 @@ const (
 	openStackConfigSecretField = ".spec.openStackConfigSecret"
 )
 
-var (
-	allWatchFields = []string{
-		caBundleSecretNameField,
-		openStackConfigMapField,
-		openStackConfigSecretField,
-	}
-)
+var allWatchFields = []string{
+	caBundleSecretNameField,
+	openStackConfigMapField,
+	openStackConfigSecretField,
+}
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
-
 	// index caBundleSecretNameField
 	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &clientv1.OpenStackClient{}, caBundleSecretNameField, func(rawObj client.Object) []string {
 		// Extract the secret name from the spec, if one is provided
@@ -450,24 +443,24 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
 		Watches(
-			&source.Kind{Type: &corev1.Secret{}},
+			&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
 		).
 		Watches(
-			&source.Kind{Type: &corev1.ConfigMap{}},
+			&corev1.ConfigMap{},
 			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
 		).
 		Watches(
-			&source.Kind{Type: &corev1.Secret{}},
+			&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
 		).
 		Complete(r)
 }
 
-func (r *OpenStackClientReconciler) findObjectsForSrc(src client.Object) []reconcile.Request {
+func (r *OpenStackClientReconciler) findObjectsForSrc(ctx context.Context, src client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
 
 	for _, field := range allWatchFields {

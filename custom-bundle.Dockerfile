@@ -1,4 +1,4 @@
-ARG GOLANG_CTX=golang:1.19
+ARG GOLANG_CTX=golang:1.20
 
 FROM $GOLANG_CTX as builder
 
@@ -33,9 +33,9 @@ RUN cp -a /bundle_extra_data/manifests/* /manifests/
 #  -dataplane-operator CSV
 #  -ENV vars from all operators (for webhooks)
 RUN /workspace/csv-merger \
-  --import-env-files=/bundle_extra_data/env-vars.yaml \
-  --dataplane-csv=/bundle_extra_data/manifests/dataplane-operator.clusterserviceversion.yaml \
-  --base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
+	--import-env-files=/bundle_extra_data/env-vars.yaml \
+	--dataplane-csv=/bundle_extra_data/manifests/dataplane-operator.clusterserviceversion.yaml \
+	--base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's
 RUN rm /manifests/*clusterserviceversion.yaml
