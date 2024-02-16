@@ -42,10 +42,9 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		if instance.Spec.Barbican.Template.BarbicanAPI.Override.Service == nil {
 			instance.Spec.Barbican.Template.BarbicanAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
-		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service[endpointType] =
-			AddServiceComponentLabel(
-				instance.Spec.Barbican.Template.BarbicanAPI.Override.Service[endpointType],
-				barbican.Name)
+		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service[endpointType] = AddServiceComponentLabel(
+			instance.Spec.Barbican.Template.BarbicanAPI.Override.Service[endpointType],
+			barbican.Name)
 	}
 
 	// When component services got created check if there is the need to create a route
@@ -54,6 +53,12 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			return ctrl.Result{}, err
 		}
 	}
+
+	// preserve any previously set TLS certs, set CA cert
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		instance.Spec.Barbican.Template.BarbicanAPI.TLS = barbican.Spec.BarbicanAPI.TLS
+	}
+	instance.Spec.Barbican.Template.BarbicanAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	if barbican.Status.Conditions.IsTrue(barbicanv1.BarbicanAPIReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
@@ -75,7 +80,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			instance.Spec.Barbican.Template.BarbicanAPI.Override.Service,
 			instance.Spec.Barbican.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeBarbicanReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -84,6 +89,10 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		}
 
 		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Barbican.Template.BarbicanAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Barbican.Template.BarbicanAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	helper.GetLogger().Info("Reconciling Barbican", "Barbican.Namespace", instance.Namespace, "Barbican.Name", "barbican")
@@ -97,8 +106,8 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			barbican.Spec.NodeSelector = instance.Spec.NodeSelector
 		}
 		if barbican.Spec.DatabaseInstance == "" {
-			//barbican.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
-			barbican.Spec.DatabaseInstance = "openstack" //FIXME: see above
+			// barbican.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
+			barbican.Spec.DatabaseInstance = "openstack" // FIXME: see above
 		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), barbican, helper.GetScheme())
@@ -107,7 +116,6 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		}
 		return nil
 	})
-
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneBarbicanReadyCondition,
