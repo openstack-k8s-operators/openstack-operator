@@ -26,7 +26,7 @@ require (
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240215101232-18efcbf25ef5
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
 	k8s.io/apimachinery v0.28.6
-	sigs.k8s.io/controller-runtime v0.16.4
+	sigs.k8s.io/controller-runtime v0.16.5
 )
 
 require (
