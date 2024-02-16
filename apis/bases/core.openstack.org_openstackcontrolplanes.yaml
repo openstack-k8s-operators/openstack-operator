@@ -16109,11 +16109,10 @@ spec:
                 properties:
                   caBundleSecretName:
                     type: string
-                  endpoint:
-                    additionalProperties:
+                  caList:
+                    items:
                       properties:
                         expires:
-                          format: date-time
                           type: string
                         name:
                           type: string
@@ -16121,7 +16120,7 @@ spec:
                       - expires
                       - name
                       type: object
-                    type: object
+                    type: array
                 type: object
             type: object
         type: object

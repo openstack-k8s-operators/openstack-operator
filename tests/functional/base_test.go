@@ -17,8 +17,11 @@ limitations under the License.
 package functional_test
 
 import (
+	"encoding/base64"
+
 	. "github.com/onsi/gomega"
 
+	k8s_corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -33,7 +36,9 @@ type Names struct {
 	KeystoneAPIName           types.NamespacedName
 	MemcachedName             types.NamespacedName
 	DBName                    types.NamespacedName
+	DBCertName                types.NamespacedName
 	DBCell1Name               types.NamespacedName
+	DBCell1CertName           types.NamespacedName
 	RabbitMQName              types.NamespacedName
 	RabbitMQCell1Name         types.NamespacedName
 	ServiceAccountName        types.NamespacedName
@@ -87,9 +92,17 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "openstack",
 		},
+		DBCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-openstack-svc",
+		},
 		DBCell1Name: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "openstack-cell1",
+		},
+		DBCell1CertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-openstack-cell1-svc",
 		},
 		RabbitMQName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -273,4 +286,46 @@ func GetOpenStackControlPlane(name types.NamespacedName) *corev1.OpenStackContro
 func OpenStackControlPlaneConditionGetter(name types.NamespacedName) condition.Conditions {
 	instance := GetOpenStackControlPlane(name)
 	return instance.Status.Conditions
+}
+
+func CreatePublicCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
+	certBase64 := "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJlekNDQVNLZ0F3SUJBZ0lRTkhER1lzQnM3OThpYkREN3EvbzJsakFLQmdncWhrak9QUVFEQWpBZU1Sd3cKR2dZRFZRUURFeE55YjI5MFkyRXRhM1YwZEd3dGNIVmliR2xqTUI0WERUSTBNREV4TlRFd01UVXpObG9YRFRNMApNREV4TWpFd01UVXpObG93SGpFY01Cb0dBMVVFQXhNVGNtOXZkR05oTFd0MWRIUnNMWEIxWW14cFl6QlpNQk1HCkJ5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEEwSUFCRDc4YXZYcWhyaEM1dzhzOVdrZDRJcGJlRXUwM0NSK1hYVWQKa0R6T1J5eGE5d2NjSWREaXZiR0pqSkZaVFRjVm1ianExQk1Zc2pyMTJVSUU1RVQzVmxxalFqQkFNQTRHQTFVZApEd0VCL3dRRUF3SUNwREFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQjBHQTFVZERnUVdCQlRLSml6V1VKOWVVS2kxCmRzMGxyNmM2c0Q3RUJEQUtCZ2dxaGtqT1BRUURBZ05IQURCRUFpQklad1lxNjFCcU1KYUI2VWNGb1JzeGVjd0gKNXovek1PZHJPeWUwbU5pOEpnSWdRTEI0d0RLcnBmOXRYMmxvTSswdVRvcEFEU1lJbnJjZlZ1NEZCdVlVM0lnPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+	keyBase64 := "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUptbGNLUEl1RitFc3RhYkxnVmowZkNhdzFTK09xNnJPU3M0U3pMQkJGYVFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFUHZ4cTllcUd1RUxuRHl6MWFSM2dpbHQ0UzdUY0pINWRkUjJRUE01SExGcjNCeHdoME9LOQpzWW1Na1ZsTk54V1p1T3JVRXhpeU92WFpRZ1RrUlBkV1dnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=="
+
+	cert, _ := base64.StdEncoding.DecodeString(certBase64)
+	key, _ := base64.StdEncoding.DecodeString(keyBase64)
+
+	s := &k8s_corev1.Secret{}
+	Eventually(func(g Gomega) {
+		s = th.CreateSecret(
+			name,
+			map[string][]byte{
+				"ca.crt":  []byte(cert),
+				"tls.crt": []byte(cert),
+				"tls.key": []byte(key),
+			})
+	}, timeout, interval).Should(Succeed())
+
+	return s
+}
+
+func CreateInternalCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
+	certBase64 := "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJmekNDQVNhZ0F3SUJBZ0lRUWxlcTNZcDBtU2kwVDNiTm03Q29UVEFLQmdncWhrak9QUVFEQWpBZ01SNHcKSEFZRFZRUURFeFZ5YjI5MFkyRXRhM1YwZEd3dGFXNTBaWEp1WVd3d0hoY05NalF3TVRFMU1URTBOelUwV2hjTgpNelF3TVRFeU1URTBOelUwV2pBZ01SNHdIQVlEVlFRREV4VnliMjkwWTJFdGEzVjBkR3d0YVc1MFpYSnVZV3d3CldUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqT1BRTUJCd05DQUFTRk9rNHJPUldVUGhoTjUrK09EN1I2MW5Gb1lBY0QKenpvUS91SW93NktjeGhwRWNQTDFxb3ZZUGxUYUJabEh3c2FpNE50VHA4aDA1RHVRSGZKOE9JNXFvMEl3UURBTwpCZ05WSFE4QkFmOEVCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXE3TGtFSk1TCm1MOVpKWjBSOUluKzZkclhycEl3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnVlN1K00ydnZ3QlF3eTJHMVlhdkkKQld2RGtSNlRla0I5U0VqdzJIblRSMWtDSUZSNFNkWGFPQkFGWjVHa2RLWCtSY2IzaDFIZm52eFJEVW96bTl2agphenp3Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K=="
+	keyBase64 := "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUV3dlQ2dFZMUWRrVnlXUDV1VnJ3RWRyZ0VLK3drdmttRjFKa0xNYzJCUVFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFaFRwT0t6a1ZsRDRZVGVmdmpnKzBldFp4YUdBSEE4ODZFUDdpS01PaW5NWWFSSER5OWFxTAoyRDVVMmdXWlI4TEdvdURiVTZmSWRPUTdrQjN5ZkRpT2FnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=="
+
+	cert, _ := base64.StdEncoding.DecodeString(certBase64)
+	key, _ := base64.StdEncoding.DecodeString(keyBase64)
+
+	s := &k8s_corev1.Secret{}
+	Eventually(func(g Gomega) {
+		s = th.CreateSecret(
+			name,
+			map[string][]byte{
+				"ca.crt":  []byte(cert),
+				"tls.crt": []byte(cert),
+				"tls.key": []byte(key),
+			})
+	}, timeout, interval).Should(Succeed())
+
+	return s
 }

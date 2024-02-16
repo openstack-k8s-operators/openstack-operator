@@ -10,6 +10,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
@@ -176,7 +177,7 @@ func reconcileRabbitMQ(
 
 	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
 		certRequest := certmanager.CertificateRequest{
-			IssuerName: instance.Status.TLS.Endpoint[service.EndpointInternal].Name,
+			IssuerName: tls.DefaultCAPrefix + string(service.EndpointInternal),
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
 			Hostnames:  []string{hostname},
 		}
@@ -229,7 +230,7 @@ func reconcileRabbitMQ(
 		}
 
 		if tlsCert != "" {
-			rabbitmq.Spec.TLS.CaSecretName = instance.Status.TLS.Endpoint[service.EndpointInternal].Name
+			rabbitmq.Spec.TLS.CaSecretName = tls.DefaultCAPrefix + string(service.EndpointInternal)
 			rabbitmq.Spec.TLS.SecretName = tlsCert
 			// disable non tls listeners
 			rabbitmq.Spec.TLS.DisableNonTLSListeners = true
