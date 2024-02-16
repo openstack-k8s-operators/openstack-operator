@@ -1,4 +1,4 @@
-ARG GOLANG_BUILDER=golang:1.20
+ARG GOLANG_BUILDER=docker.io/library/golang:1.20
 ARG OPERATOR_BASE_IMAGE=gcr.io/distroless/static:nonroot
 
 # Build the manager binary
