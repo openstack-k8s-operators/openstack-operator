@@ -3,8 +3,8 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.20
 
 require (
-	github.com/onsi/ginkgo/v2 v2.14.0
-	github.com/onsi/gomega v1.30.0
+	github.com/onsi/ginkgo/v2 v2.15.0
+	github.com/onsi/gomega v1.31.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240216141430-461e99fa1b3c
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240216172128-52771a306313
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240216102618-e7d16424a045
@@ -24,8 +24,8 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240216174613-3d349f26e681
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240216164023-80bb42077844
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240216195458-a0493d51b492
-	github.com/rabbitmq/cluster-operator/v2 v2.5.0
-	k8s.io/apimachinery v0.28.6
+	github.com/rabbitmq/cluster-operator/v2 v2.7.0
+	k8s.io/apimachinery v0.29.0
 	sigs.k8s.io/controller-runtime v0.16.5
 )
 
@@ -33,7 +33,7 @@ require (
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
-	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
+	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3 // indirect
 	github.com/rhobs/observability-operator v0.0.20 // indirect
@@ -89,10 +89,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.28.6
-	k8s.io/apiextensions-apiserver v0.28.3 //indirect
-	k8s.io/client-go v0.28.6
-	k8s.io/component-base v0.28.3 //indirect
+	k8s.io/api v0.29.0
+	k8s.io/apiextensions-apiserver v0.29.0 //indirect
+	k8s.io/client-go v0.29.0
+	k8s.io/component-base v0.29.0 //indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240209001042-7a0d5b415232 //indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e //indirect
