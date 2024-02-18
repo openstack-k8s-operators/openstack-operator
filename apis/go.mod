@@ -25,7 +25,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240216164023-80bb42077844
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240216195458-a0493d51b492
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
-	k8s.io/apimachinery v0.28.6
+	k8s.io/apimachinery v0.28.7
 	sigs.k8s.io/controller-runtime v0.16.5
 )
 
@@ -89,10 +89,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.28.6
-	k8s.io/apiextensions-apiserver v0.28.3 //indirect
-	k8s.io/client-go v0.28.6
-	k8s.io/component-base v0.28.3 //indirect
+	k8s.io/api v0.28.7
+	k8s.io/apiextensions-apiserver v0.28.7 //indirect
+	k8s.io/client-go v0.28.7
+	k8s.io/component-base v0.28.7 //indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240209001042-7a0d5b415232 //indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e //indirect
