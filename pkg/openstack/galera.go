@@ -5,14 +5,19 @@ import (
 	"fmt"
 	"strings"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -38,6 +43,34 @@ func ReconcileGaleras(
 	var inprogress []string = []string{}
 
 	for name, spec := range instance.Spec.Galera.Templates {
+		hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
+
+		// Galera gets always configured to support TLS connections.
+		// If TLS can/must be used is a per user configuration.
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: tls.DefaultCAPrefix + string(service.EndpointInternal),
+			CertName:   fmt.Sprintf("galera-%s-svc", name),
+			Hostnames:  []string{hostname},
+			Usages: []certmgrv1.KeyUsage{
+				"key encipherment",
+				"digital signature",
+				"server auth",
+				"client auth",
+			},
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		spec.TLS.Ca.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+		spec.TLS.SecretName = ptr.To(certSecret.Name)
+
 		status, err := reconcileGalera(ctx, instance, helper, name, &spec)
 
 		switch status {
@@ -106,6 +139,7 @@ func reconcileGalera(
 	Log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
 		spec.DeepCopyInto(&galera.Spec)
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), galera, helper.GetScheme())
 		if err != nil {
 			return err
