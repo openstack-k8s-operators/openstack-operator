@@ -1,4 +1,4 @@
-ARG GOLANG_CTX=golang:1.20
+ARG GOLANG_CTX=registry.access.redhat.com/ubi9/go-toolset:1.20
 
 FROM $GOLANG_CTX as builder
 
@@ -14,16 +14,20 @@ COPY apis/ apis/
 RUN go mod download
 
 # Copy the go source
+USER root
 COPY cmd/csv-merger/csv-merger.go csv-merger.go
 COPY pkg/ pkg/
 
 # Build the csv-merger
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o csv-merger csv-merger.go
 
+USER $USER_ID
+
 FROM $GOLANG_CTX as merger
 WORKDIR /workspace
 COPY --from=builder /workspace/csv-merger .
 
+USER root
 # local operator manifests
 COPY bundle/manifests /manifests/
 COPY bundle_extra_data /bundle_extra_data
@@ -39,6 +43,8 @@ RUN /workspace/csv-merger \
 
 # remove all individual operator CSV's
 RUN rm /manifests/*clusterserviceversion.yaml
+
+USER $USER_ID
 
 ### Put everything together
 FROM scratch
@@ -58,6 +64,7 @@ LABEL operators.operatorframework.io.test.mediatype.v1=scorecard+v1
 LABEL operators.operatorframework.io.test.config.v1=tests/scorecard/
 
 # Copy files to locations specified by labels.
+USER root
 COPY bundle/metadata /metadata/
 COPY bundle/tests/scorecard /tests/scorecard/
 
@@ -67,3 +74,5 @@ COPY --from=merger /manifests/* /manifests/
 
 # overwrite with the final merged CSV
 COPY --from=merger /openstack-operator.clusterserviceversion.yaml.new /manifests/openstack-operator.clusterserviceversion.yaml
+
+USER $USER_ID
