@@ -162,21 +162,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			// make keystoneAPI ready and create secrets usually created by keystone-controller
 			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
 			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 
-			// openstackclient exists
+			// client pod exists
 			Eventually(func(g Gomega) {
-				osclient := GetOpenStackClient(names.OpenStackClientName)
-				g.Expect(osclient).Should(Not(BeNil()))
-
-				th.ExpectCondition(
-					names.OpenStackClientName,
-					ConditionGetterFunc(OpenStackClientConditionGetter),
-					clientv1.OpenStackClientReadyCondition,
-					k8s_corev1.ConditionTrue,
-				)
-
 				pod := &k8s_corev1.Pod{}
 				err := th.K8sClient.Get(ctx, names.OpenStackClientName, pod)
 				g.Expect(pod).Should(Not(BeNil()))
@@ -194,6 +185,22 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"))
 				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", "/home/cloud-admin/.config/openstack/clouds.yaml"))
 				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", "/home/cloud-admin/.config/openstack/secure.yaml"))
+
+				// simulate pod being in the ready state
+				th.SimulatePodReady(names.OpenStackClientName)
+			}, timeout, interval).Should(Succeed())
+
+			// openstackclient exists
+			Eventually(func(g Gomega) {
+				osclient := GetOpenStackClient(names.OpenStackClientName)
+				g.Expect(osclient).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackClientName,
+					ConditionGetterFunc(OpenStackClientConditionGetter),
+					clientv1.OpenStackClientReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
 			}, timeout, interval).Should(Succeed())
 		})
 	})

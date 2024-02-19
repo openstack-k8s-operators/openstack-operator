@@ -45,6 +45,9 @@ const (
 	// OpenStackClientInputReady
 	OpenStackClientInputReady = "OpenStack Client input ready"
 
+	// OpenStackClientReadyRunningMessage
+	OpenStackClientReadyRunningMessage = "OpenStack Client in progress"
+
 	// OpenStackClientReadyMessage
 	OpenStackClientReadyMessage = "OpenStack Client created"
 
