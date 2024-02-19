@@ -15160,6 +15160,9 @@ spec:
                             envConfig:
                               maxLength: 100000
                               type: string
+                            erlangInetConfig:
+                              maxLength: 2000
+                              type: string
                           type: object
                         replicas:
                           default: 1
@@ -15245,6 +15248,12 @@ spec:
                               additionalProperties:
                                 type: string
                               type: object
+                            ipFamilyPolicy:
+                              enum:
+                              - SingleStack
+                              - PreferDualStack
+                              - RequireDualStack
+                              type: string
                             type:
                               default: ClusterIP
                               enum:

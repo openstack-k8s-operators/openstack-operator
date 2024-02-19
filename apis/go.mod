@@ -24,7 +24,7 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240229134606-d2a5a5abde9d
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240301170116-13941759ec79
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240301135657-444ba309cbb5
-	github.com/rabbitmq/cluster-operator/v2 v2.5.0
+	github.com/rabbitmq/cluster-operator/v2 v2.6.0
 	k8s.io/apimachinery v0.29.0
 	sigs.k8s.io/controller-runtime v0.16.5
 )
@@ -34,7 +34,7 @@ require (
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
-	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
+	github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3 // indirect
 	github.com/rhobs/observability-operator v0.0.20 // indirect
