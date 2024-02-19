@@ -3,8 +3,8 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.20
 
 require (
-	github.com/onsi/ginkgo/v2 v2.14.0
-	github.com/onsi/gomega v1.30.0
+	github.com/onsi/ginkgo/v2 v2.15.0
+	github.com/onsi/gomega v1.31.1
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240216141430-461e99fa1b3c
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240216172128-52771a306313
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240216102618-e7d16424a045
