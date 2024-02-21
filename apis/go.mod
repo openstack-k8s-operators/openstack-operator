@@ -11,7 +11,7 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240216191912-f09285faf21b
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240216110209-c405c043e280
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240217031606-5f5dac9bb5b7
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240218132212-ad757a2f5bab
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240219153539-99face71256b
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240216150409-296d5c6420a5
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240216173228-eec429bcc776
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240216173409-86913e6d5885
@@ -25,7 +25,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240216164023-80bb42077844
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240219111006-cce4d37e5187
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
-	k8s.io/apimachinery v0.28.6
+	k8s.io/apimachinery v0.28.7
 	sigs.k8s.io/controller-runtime v0.16.5
 )
 
@@ -89,10 +89,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.28.6
-	k8s.io/apiextensions-apiserver v0.28.3 //indirect
-	k8s.io/client-go v0.28.6
-	k8s.io/component-base v0.28.3 //indirect
+	k8s.io/api v0.28.7
+	k8s.io/apiextensions-apiserver v0.28.7 //indirect
+	k8s.io/client-go v0.28.7
+	k8s.io/component-base v0.28.7 //indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240209001042-7a0d5b415232 //indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e //indirect
