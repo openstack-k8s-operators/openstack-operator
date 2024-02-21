@@ -373,10 +373,27 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		)
 	}
 
-	instance.Status.Conditions.MarkTrue(
-		clientv1.OpenStackClientReadyCondition,
-		clientv1.OpenStackClientReadyMessage,
-	)
+	podReady := false
+
+	for _, condition := range osclient.Status.Conditions {
+		if condition.Type == corev1.PodReady && condition.Status == corev1.ConditionTrue {
+			podReady = true
+			break
+		}
+	}
+
+	if podReady {
+		instance.Status.Conditions.MarkTrue(
+			clientv1.OpenStackClientReadyCondition,
+			clientv1.OpenStackClientReadyMessage,
+		)
+	} else {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			clientv1.OpenStackClientReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			clientv1.OpenStackClientReadyRunningMessage))
+	}
 
 	return ctrl.Result{}, nil
 }
