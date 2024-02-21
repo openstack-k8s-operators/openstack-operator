@@ -30,7 +30,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240216162346-b1dca894860d
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240217021438-5918cf3aefdf
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240216200042-7835df58ed0c
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240221131248-e97a8e5ca98f
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240216174613-3d349f26e681
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240216164023-80bb42077844
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240216195458-a0493d51b492
