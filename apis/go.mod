@@ -25,11 +25,12 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240216164023-80bb42077844
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240219111006-cce4d37e5187
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
-	k8s.io/apimachinery v0.28.7
+	k8s.io/apimachinery v0.29.0
 	sigs.k8s.io/controller-runtime v0.16.5
 )
 
 require (
+	github.com/evanphx/json-patch v5.7.0+incompatible // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
@@ -37,6 +38,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3 // indirect
 	github.com/rhobs/observability-operator v0.0.20 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	go.uber.org/goleak v1.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect
@@ -89,10 +92,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.28.7
-	k8s.io/apiextensions-apiserver v0.28.7 //indirect
-	k8s.io/client-go v0.28.7
-	k8s.io/component-base v0.28.7 //indirect
+	k8s.io/api v0.29.0
+	k8s.io/apiextensions-apiserver v0.29.0 //indirect
+	k8s.io/client-go v0.29.0
+	k8s.io/component-base v0.29.0 //indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240209001042-7a0d5b415232 //indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e //indirect
