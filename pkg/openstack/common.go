@@ -410,13 +410,18 @@ func (ed *EndpointDetail) CreateRoute(
 	owner metav1.Object,
 ) (ctrl.Result, error) {
 	// initialize the route with any custom provided route override
+	// per default use the service name as targetPortName if we don't have the annotation.
+	targetPortName := ed.Service.Spec.Name
+	if name, ok := ed.Service.Spec.ObjectMeta.Annotations[service.AnnotationIngressTargetPortNameKey]; ok && name != "" {
+		targetPortName = name
+	}
 	enptRoute, err := route.NewRoute(
 		route.GenericRoute(&route.GenericRouteDetails{
 			Name:           ed.Name,
 			Namespace:      ed.Namespace,
 			Labels:         ed.Labels,
 			ServiceName:    ed.Service.Spec.Name,
-			TargetPortName: ed.Service.Spec.Name,
+			TargetPortName: targetPortName,
 		}),
 		time.Duration(5)*time.Second,
 		[]route.OverrideSpec{ed.Route.OverrideSpec},
