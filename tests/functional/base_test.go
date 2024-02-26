@@ -94,7 +94,7 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		},
 		DBCertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
-			Name:      "cert-openstack-svc",
+			Name:      "cert-galera-openstack-svc",
 		},
 		DBCell1Name: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -102,7 +102,7 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		},
 		DBCell1CertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
-			Name:      "cert-openstack-cell1-svc",
+			Name:      "cert-galera-openstack-cell1-svc",
 		},
 		RabbitMQName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,

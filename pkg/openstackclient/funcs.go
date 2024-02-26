@@ -14,10 +14,12 @@ package openstackclient
 
 import (
 	"context"
+	"fmt"
 
 	env "github.com/openstack-k8s-operators/lib-common/modules/common/env"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
@@ -34,6 +36,10 @@ func ClientPodSpec(
 	envVars := map[string]env.Setter{}
 	envVars["OS_CLOUD"] = env.SetValue("default")
 	envVars["CONFIG_HASH"] = env.SetValue(configHash)
+	envVars["PROMETHEUS_HOST"] = env.SetValue(fmt.Sprintf("%s-prometheus.%s.svc",
+		telemetryv1.DefaultServiceName,
+		instance.Namespace))
+	envVars["PROMETHEUS_PORT"] = env.SetValue(fmt.Sprint(telemetryv1.DefaultPrometheusPort))
 
 	// create Volume and VolumeMounts
 	volumes := clientPodVolumes(instance)
