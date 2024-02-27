@@ -301,7 +301,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileSwift(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileBarbican(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
@@ -329,7 +329,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileBarbican(ctx, instance, helper)
+	ctrlResult, err = openstack.ReconcileSwift(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
