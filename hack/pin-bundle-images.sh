@@ -74,7 +74,7 @@ for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path |
     fi
 
     if [ -z "$SHA" ]; then
-        echo ",EMPTY_SHA:$SHA:$REPO_CURL_URL"
+        echo ",EMPTY_SHA:$REF:$REPO_CURL_URL"
         exit 1
     fi
 
