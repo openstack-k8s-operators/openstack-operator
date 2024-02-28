@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -47,7 +46,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Heat.Template.HeatAPI.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Heat.Template.HeatAPI.Override.Service[endpointType],
 				heat.Name+"-api")
 
@@ -55,7 +54,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.HeatCfnAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Heat.Template.HeatCfnAPI.Override.Service[endpointType],
 				heat.Name+"-cfn")
 	}
@@ -76,17 +75,17 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	instance.Spec.Heat.Template.HeatCfnAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	// Heat API
-	if heat.Status.Conditions.IsTrue(heatv1.HeatAPIReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: heat.Name + "-api"},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(heat.Name+"-api"),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Heat.Template.HeatAPI.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -103,26 +102,25 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Heat.Template.HeatAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
 		// update TLS settings with cert secret
 		instance.Spec.Heat.Template.HeatAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 		instance.Spec.Heat.Template.HeatAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	// Heat CFNAPI
-	if heat.Status.Conditions.IsTrue(heatv1.HeatCfnAPIReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: heat.Name + "-cfn"},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
+	svcs, err = service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(heat.Name+"-cfn"),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Heat.Template.HeatCfnAPI.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -139,14 +137,12 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Heat.Template.HeatCfnAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
 		// update TLS settings with cert secret
 		instance.Spec.Heat.Template.HeatCfnAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 		instance.Spec.Heat.Template.HeatCfnAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
-
 	Log := GetLogger(ctx)
 
 	Log.Info("Reconcile heat", "heat.Namespace", instance.Namespace, "heat.Name", "heat")
