@@ -60,8 +60,10 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
 		instance.Spec.Swift.Template.SwiftProxy.TLS = swift.Spec.SwiftProxy.TLS
+		instance.Spec.Swift.Template.SwiftRing.TLS = swift.Spec.SwiftProxy.TLS
 	}
 	instance.Spec.Swift.Template.SwiftProxy.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Swift.Template.SwiftRing.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	if swift.Status.Conditions.IsTrue(swiftv1.SwiftProxyReadyCondition) {
 		svcs, err := service.GetServicesListWithLabel(
