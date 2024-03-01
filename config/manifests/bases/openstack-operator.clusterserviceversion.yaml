@@ -392,14 +392,46 @@ spec:
       - description: TLS - Parameters related to the TLS
         displayName: TLS
         path: tls
-      - description: The key must be the endpoint type (public, internal)
-        displayName: Endpoint
-        path: tls.endpoint
+      - displayName: Ingress
+        path: tls.ingress
+      - description: Ca - defines details for CA cert config
+        displayName: Ca
+        path: tls.ingress.ca
+      - description: Cert - defines details for cert config
+        displayName: Cert
+        path: tls.ingress.cert
       - description: Enabled - Whether TLS should be enabled for endpoint type
         displayName: Enabled
-        path: tls.endpoint.enabled
+        path: tls.ingress.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - displayName: Pod Level
+        path: tls.podLevel
+      - description: Default - CA used for all OpenStackControlPlane and OpenStackDataplane
+          endpoints, except OVN related CA and certs
+        displayName: Default
+        path: tls.podLevel.default
+      - description: Ca - defines details for CA cert config
+        displayName: Ca
+        path: tls.podLevel.default.ca
+      - description: Cert - defines details for cert config
+        displayName: Cert
+        path: tls.podLevel.default.cert
+      - description: Enabled - Whether TLS should be enabled for endpoint type
+        displayName: Enabled
+        path: tls.podLevel.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Ovn - CA used for all OVN services on OpenStackControlPlane and
+          OpenStackDataplane
+        displayName: Ovn
+        path: tls.podLevel.ovn
+      - description: Ca - defines details for CA cert config
+        displayName: Ca
+        path: tls.podLevel.ovn.ca
+      - description: Cert - defines details for cert config
+        displayName: Cert
+        path: tls.podLevel.ovn.cert
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

@@ -94,49 +94,60 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	}
 
 	instance.Status.TLS.CAList = []corev1.TLSCAStatus{}
-
-	// create RootCA cert and Issuer that uses the generated CA certificate to issue certs
-	for _, endpoint := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
-		labels := map[string]string{}
-		if endpoint == service.EndpointInternal {
-			labels[certmanager.RootCAIssuerInternalLabel] = ""
-		}
-		caName := tls.DefaultCAPrefix + string(endpoint)
-		// always create a root CA and issuer for the endpoint as we can
-		// not expect that all services are yet configured to be provided with
-		// a custom secret holding the cert/private key
-		caCert, ctrlResult, err := createRootCACertAndIssuer(
-			ctx,
-			instance,
-			helper,
-			issuerReq,
-			caName,
-			labels,
-		)
-		if err != nil {
-			return ctrlResult, err
-		} else if (ctrlResult != ctrl.Result{}) {
-			return ctrlResult, nil
-		}
-
-		err = bundle.getCertsFromPEM(caCert)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		err = caOnlyBundle.getCertsFromPEM(caCert)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		status := corev1.TLSCAStatus{
-			Name: caName,
-		}
-		if len(caOnlyBundle.certs) > 0 {
-			status.Expires = caOnlyBundle.certs[0].expire.Format(time.RFC3339)
-		}
-
-		instance.Status.TLS.CAList = append(instance.Status.TLS.CAList, status)
+	// create CA for ingress and public podLevel termination
+	ctrlResult, err = ensureRootCA(
+		ctx,
+		instance,
+		helper,
+		issuerReq,
+		tls.DefaultCAPrefix+string(service.EndpointPublic),
+		map[string]string{},
+		bundle,
+		caOnlyBundle,
+		instance.Spec.TLS.Ingress.Ca,
+	)
+	if err != nil {
+		return ctrlResult, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
 	}
+
+	// create CA for internal podLevel termination
+	ctrlResult, err = ensureRootCA(
+		ctx,
+		instance,
+		helper,
+		issuerReq,
+		tls.DefaultCAPrefix+string(service.EndpointInternal),
+		map[string]string{certmanager.RootCAIssuerInternalLabel: ""},
+		bundle,
+		caOnlyBundle,
+		instance.Spec.TLS.PodLevel.Default.Ca,
+	)
+	if err != nil {
+		return ctrlResult, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
+	// create CA for ovn
+	ctrlResult, err = ensureRootCA(
+		ctx,
+		instance,
+		helper,
+		issuerReq,
+		tls.DefaultCAPrefix+"ovn",
+		map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""},
+		bundle,
+		caOnlyBundle,
+		instance.Spec.TLS.PodLevel.Ovn.Ca,
+	)
+	if err != nil {
+		return ctrlResult, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
 
 	// create/update combined CA secret
@@ -228,6 +239,56 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	return ctrl.Result{}, nil
 }
 
+func ensureRootCA(
+	ctx context.Context,
+	instance *corev1.OpenStackControlPlane,
+	helper *helper.Helper,
+	issuerReq *certmgrv1.Issuer,
+	caName string,
+	labels map[string]string,
+	bundle *caBundle,
+	caOnlyBundle *caBundle,
+	caCfg corev1.CertConfig,
+) (ctrl.Result, error) {
+	// always create a root CA and issuer for the endpoint as we can
+	// not expect that all services are yet configured to be provided with
+	// a custom secret holding the cert/private key
+	caCert, ctrlResult, err := createRootCACertAndIssuer(
+		ctx,
+		instance,
+		helper,
+		issuerReq,
+		caName,
+		labels,
+		caCfg,
+	)
+	if err != nil {
+		return ctrlResult, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
+	err = bundle.getCertsFromPEM(caCert)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	err = caOnlyBundle.getCertsFromPEM(caCert)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	status := corev1.TLSCAStatus{
+		Name: caName,
+	}
+	if len(caOnlyBundle.certs) > 0 {
+		status.Expires = caOnlyBundle.certs[0].expire.Format(time.RFC3339)
+	}
+
+	instance.Status.TLS.CAList = append(instance.Status.TLS.CAList, status)
+
+	return ctrl.Result{}, nil
+}
+
 func createRootCACertAndIssuer(
 	ctx context.Context,
 	instance *corev1.OpenStackControlPlane,
@@ -235,6 +296,7 @@ func createRootCACertAndIssuer(
 	selfsignedIssuerReq *certmgrv1.Issuer,
 	caName string,
 	labels map[string]string,
+	caCfg corev1.CertConfig,
 ) ([]byte, ctrl.Result, error) {
 	// create RootCA Certificate used to sign certificates
 	caCertReq := certmanager.Cert(
@@ -254,6 +316,8 @@ func createRootCACertAndIssuer(
 				Kind:  selfsignedIssuerReq.Kind,
 				Group: selfsignedIssuerReq.GroupVersionKind().Group,
 			},
+			Duration:    caCfg.Duration,
+			RenewBefore: caCfg.RenewBefore,
 		})
 	cert := certmanager.NewCertificate(caCertReq, 5)
 
