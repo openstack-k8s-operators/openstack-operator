@@ -4663,6 +4663,9 @@ spec:
                       keystoneEndpoint:
                         default: ""
                         type: string
+                      memcachedInstance:
+                        default: memcached
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -4717,6 +4720,7 @@ spec:
                     - glanceAPIs
                     - imageCache
                     - keystoneEndpoint
+                    - memcachedInstance
                     - secret
                     - storageRequest
                     type: object
@@ -9265,6 +9269,20 @@ spec:
                                       type: object
                                   type: object
                               type: object
+                            dbPurge:
+                              properties:
+                                archiveAge:
+                                  default: 30
+                                  minimum: 1
+                                  type: integer
+                                purgeAge:
+                                  default: 90
+                                  minimum: 1
+                                  type: integer
+                                schedule:
+                                  default: 0 0 * * *
+                                  type: string
+                              type: object
                             hasAPIAccess:
                               type: boolean
                             memcachedInstance:
@@ -9899,6 +9917,28 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      amphoraCustomFlavors:
+                        items:
+                          properties:
+                            RAM:
+                              type: integer
+                            RxTxFactor:
+                              type: string
+                            VCPUs:
+                              type: integer
+                            description:
+                              type: string
+                            disk:
+                              type: integer
+                            name:
+                              type: string
+                          required:
+                          - RAM
+                          - VCPUs
+                          - disk
+                          - name
+                          type: object
+                        type: array
                       certsSecret:
                         default: octavia-certs-secret
                         type: string
@@ -10076,6 +10116,28 @@ spec:
                         type: object
                       octaviaHealthManager:
                         properties:
+                          amphoraCustomFlavors:
+                            items:
+                              properties:
+                                RAM:
+                                  type: integer
+                                RxTxFactor:
+                                  type: string
+                                VCPUs:
+                                  type: integer
+                                description:
+                                  type: string
+                                disk:
+                                  type: integer
+                                name:
+                                  type: string
+                              required:
+                              - RAM
+                              - VCPUs
+                              - disk
+                              - name
+                              type: object
+                            type: array
                           certsPassphraseSecret:
                             default: octavia-ca-passphrase
                             type: string
@@ -10186,6 +10248,28 @@ spec:
                         type: object
                       octaviaHousekeeping:
                         properties:
+                          amphoraCustomFlavors:
+                            items:
+                              properties:
+                                RAM:
+                                  type: integer
+                                RxTxFactor:
+                                  type: string
+                                VCPUs:
+                                  type: integer
+                                description:
+                                  type: string
+                                disk:
+                                  type: integer
+                                name:
+                                  type: string
+                              required:
+                              - RAM
+                              - VCPUs
+                              - disk
+                              - name
+                              type: object
+                            type: array
                           certsPassphraseSecret:
                             default: octavia-ca-passphrase
                             type: string
@@ -10296,6 +10380,28 @@ spec:
                         type: object
                       octaviaWorker:
                         properties:
+                          amphoraCustomFlavors:
+                            items:
+                              properties:
+                                RAM:
+                                  type: integer
+                                RxTxFactor:
+                                  type: string
+                                VCPUs:
+                                  type: integer
+                                description:
+                                  type: string
+                                disk:
+                                  type: integer
+                                name:
+                                  type: string
+                              required:
+                              - RAM
+                              - VCPUs
+                              - disk
+                              - name
+                              type: object
+                            type: array
                           certsPassphraseSecret:
                             default: octavia-ca-passphrase
                             type: string
@@ -15346,6 +15452,9 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          encryptionEnabled:
+                            default: false
+                            type: boolean
                           memcachedServers:
                             default: ""
                             type: string
@@ -15474,6 +15583,11 @@ spec:
                           swiftConfSecret:
                             default: swift-conf
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                         required:
                         - containerImage
                         - minPartHours
