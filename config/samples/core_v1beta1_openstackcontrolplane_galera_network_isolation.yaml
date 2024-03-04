@@ -338,7 +338,7 @@ spec:
         port: 10514
         cloNamespace: openshift-logging
   swift:
-    enabled: true
+    enabled: false
     proxyOverride:
       route: {}
     template:
