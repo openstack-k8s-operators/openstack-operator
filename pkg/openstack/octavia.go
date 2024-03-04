@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -59,7 +58,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Octavia.Template.OctaviaAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Octavia.Template.OctaviaAPI.Override.Service[endpointType],
 				octavia.Name)
 	}
@@ -71,17 +70,18 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
-	if octavia.Status.Conditions.IsTrue(condition.ReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: octavia.Name},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(octavia.Name),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Octavia.Template.OctaviaAPI.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -98,7 +98,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,8 +19,11 @@ import (
 
 const (
 	// svcSelector is used as selector to get the list of "Services" associated
-	// to a specific glanceAPI instance
-	svcSelector = "glanceAPI"
+	// to a specific glanceAPI instance. It must be different from glanceAPI
+	// label set by the service operator as in case of split glanceAPI type the
+	// the label on public svc gets set to -external and internal instance svc
+	// to -internal instead of the glance top level glanceType split
+	svcSelector = "tlGlanceAPI"
 )
 
 // ReconcileGlance -
@@ -55,7 +59,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			if glanceAPI.Override.Service == nil {
 				glanceAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 			}
-			glanceAPI.Override.Service[endpointType] = AddServiceComponentLabel(
+			glanceAPI.Override.Service[endpointType] = AddServiceOpenStackOperatorLabel(
 				glanceAPI.Override.Service[endpointType], glance.Name)
 
 			svcOverride := glanceAPI.Override.Service[endpointType]
@@ -71,32 +75,36 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 	}
 
-	if glance.Status.Conditions.IsTrue(glancev1.GlanceAPIReadyCondition) {
-		// initialize the main APIOverride struct
-		if instance.Spec.Glance.APIOverride == nil {
-			instance.Spec.Glance.APIOverride = map[string]corev1beta1.Override{}
-		}
+	// initialize the main APIOverride struct
+	if instance.Spec.Glance.APIOverride == nil {
+		instance.Spec.Glance.APIOverride = map[string]corev1beta1.Override{}
+	}
 
-		var changed bool = false
-		for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
-			if _, ok := instance.Spec.Glance.APIOverride[name]; !ok {
-				instance.Spec.Glance.APIOverride[name] = corev1beta1.Override{}
-			}
-			// Retrieve the services by Label and filter on glanceAPI: for
-			// each instance we should get **only** the associated `SVCs`
-			// and not the whole list. As per the Glance design doc we know
-			// that a given instance name is made in the form: "<service>
-			// <apiName> <apiType>", so we build the filter accordingly
-			// to resolve the label as <service>-<apiName>
-			svcs, err := service.GetServicesListWithLabel(
-				ctx,
-				helper,
-				instance.Namespace,
+	var changed = false
+	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
+		if _, ok := instance.Spec.Glance.APIOverride[name]; !ok {
+			instance.Spec.Glance.APIOverride[name] = corev1beta1.Override{}
+		}
+		// Retrieve the services by Label and filter on glanceAPI: for
+		// each instance we should get **only** the associated `SVCs`
+		// and not the whole list. As per the Glance design doc we know
+		// that a given instance name is made in the form: "<service>
+		// <apiName> <apiType>", so we build the filter accordingly
+		// to resolve the label as <service>-<apiName>
+		svcs, err := service.GetServicesListWithLabel(
+			ctx,
+			helper,
+			instance.Namespace,
+			util.MergeMaps(
+				GetServiceOpenStackOperatorLabel(glance.Name),
 				getGlanceAPILabelMap(glance.Name, name, glanceAPI.Type),
-			)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
+			),
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		// make sure to get to EndpointConfig when all service got created
+		if len(svcs.Items) == len(glanceAPI.Override.Service) {
 			endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 				ctx,
 				instance,
@@ -111,12 +119,11 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			if err != nil {
 				return ctrlResult, err
 			}
+			// set service overrides
 			glanceAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
 			// update TLS cert secret
 			glanceAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 			glanceAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
-			instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 
 			// let's keep track of changes for any instance, but return
 			// only when the iteration on the whole APIList is over
@@ -124,10 +131,10 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				changed = true
 			}
 		}
-		// if one of the API changed, return
-		if changed {
-			return ctrl.Result{}, nil
-		}
+		instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
+	}
+	if changed {
+		return ctrl.Result{}, nil
 	}
 
 	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")

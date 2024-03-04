@@ -21,11 +21,11 @@ import (
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -71,7 +71,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Nova.Template.APIServiceTemplate.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Nova.Template.APIServiceTemplate.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Nova.Template.APIServiceTemplate.Override.Service[endpointType],
 				nova.Name+"-api")
 	}
@@ -127,17 +127,18 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	}
 
 	// Nova API
-	if nova.Status.Conditions.IsTrue(novav1.NovaAPIReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: nova.Name + "-api"},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(nova.Name+"-api"),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Nova.Template.APIServiceTemplate.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -154,9 +155,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Nova.Template.APIServiceTemplate.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
 		// set NovaAPI TLS cert secret
 		instance.Spec.Nova.Template.APIServiceTemplate.TLS.API.Public.SecretName =
 			endpointDetails.GetEndptCertSecret(service.EndpointPublic)
@@ -164,64 +164,64 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if nova.Status.Conditions.IsTrue(novav1.NovaAllCellsReadyCondition) {
-		// create certificate for central Metadata agent if internal TLS and Metadata are enabled
+	// create certificate for central Metadata agent if internal TLS and Metadata are enabled
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) &&
+		metadataEnabled(instance.Spec.Nova.Template.MetadataServiceTemplate) {
+		certScrt, ctrlResult, err := certmanager.EnsureCertForServiceWithSelector(
+			ctx,
+			helper,
+			nova.Namespace,
+			instance.Spec.Nova.Template.MetadataServiceTemplate.Override.Service.Labels,
+			tls.DefaultCAPrefix+string(service.EndpointInternal))
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		// update NovaMetadata cert secret
+		instance.Spec.Nova.Template.MetadataServiceTemplate.TLS.SecretName = ptr.To(certScrt)
+	}
+
+	// cell Metadata and NoVNCProxy
+	for cellName, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
+		// create certificate for Metadata agend if internal TLS and Metadata per cell is enabled
 		if instance.Spec.TLS.Enabled(service.EndpointInternal) &&
-			metadataEnabled(instance.Spec.Nova.Template.MetadataServiceTemplate) {
+			metadataEnabled(cellTemplate.MetadataServiceTemplate) {
+
 			certScrt, ctrlResult, err := certmanager.EnsureCertForServiceWithSelector(
 				ctx,
 				helper,
 				nova.Namespace,
-				instance.Spec.Nova.Template.MetadataServiceTemplate.Override.Service.Labels,
+				cellTemplate.MetadataServiceTemplate.Override.Service.Labels,
 				tls.DefaultCAPrefix+string(service.EndpointInternal))
 			if err != nil && !k8s_errors.IsNotFound(err) {
 				return ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {
 				return ctrlResult, nil
 			}
-
 			// update NovaMetadata cert secret
-			instance.Spec.Nova.Template.MetadataServiceTemplate.TLS.SecretName = ptr.To(certScrt)
+			cellTemplate.MetadataServiceTemplate.TLS.SecretName = ptr.To(certScrt)
 		}
 
-		// cell Metadata and NoVNCProxy
-		for cellName, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
-			// create certificate for Metadata agend if internal TLS and Metadata per cell is enabled
-			if instance.Spec.TLS.Enabled(service.EndpointInternal) &&
-				metadataEnabled(cellTemplate.MetadataServiceTemplate) {
-
-				certScrt, ctrlResult, err := certmanager.EnsureCertForServiceWithSelector(
-					ctx,
-					helper,
-					nova.Namespace,
-					cellTemplate.MetadataServiceTemplate.Override.Service.Labels,
-					tls.DefaultCAPrefix+string(service.EndpointInternal))
-				if err != nil && !k8s_errors.IsNotFound(err) {
-					return ctrlResult, err
-				} else if (ctrlResult != ctrl.Result{}) {
-					return ctrlResult, nil
-				}
-
-				// update NovaMetadata cert secret
-				cellTemplate.MetadataServiceTemplate.TLS.SecretName = ptr.To(certScrt)
+		// NoVNCProxy check for/creating route if service is enabled
+		if noVNCProxyEnabled(cellTemplate.NoVNCProxyServiceTemplate) {
+			if cellTemplate.NoVNCProxyServiceTemplate.Override.Service == nil {
+				cellTemplate.NoVNCProxyServiceTemplate.Override.Service = &service.RoutedOverrideSpec{}
 			}
 
-			// NoVNCProxy check for/creating route if service is enabled
-			if noVNCProxyEnabled(cellTemplate.NoVNCProxyServiceTemplate) {
-				if cellTemplate.NoVNCProxyServiceTemplate.Override.Service == nil {
-					cellTemplate.NoVNCProxyServiceTemplate.Override.Service = &service.RoutedOverrideSpec{}
-				}
+			svcs, err := service.GetServicesListWithLabel(
+				ctx,
+				helper,
+				instance.Namespace,
+				getNoVNCProxyLabelMap(nova.Name, cellName),
+			)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 
-				svcs, err := service.GetServicesListWithLabel(
-					ctx,
-					helper,
-					instance.Namespace,
-					getNoVNCProxyLabelMap(nova.Name, cellName),
-				)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-
+			// make sure to get to EndpointConfig when all service got created
+			if len(svcs.Items) == 1 {
 				endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 					ctx,
 					instance,
@@ -240,17 +240,16 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				} else if (ctrlResult != ctrl.Result{}) {
 					return ctrlResult, nil
 				}
-
+				// set service overrides
 				routedOverrideSpec := endpointDetails.GetEndpointServiceOverrides()
 				cellTemplate.NoVNCProxyServiceTemplate.Override.Service = ptr.To(routedOverrideSpec[service.EndpointPublic])
-
 				// update NoVNCProxy cert secret
 				cellTemplate.NoVNCProxyServiceTemplate.TLS.SecretName =
 					endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 			}
-
-			instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
 		}
+
+		instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
 	}
 
 	Log.Info("Reconciling Nova", "Nova.Namespace", instance.Namespace, "Nova.Name", nova.Name)
@@ -307,17 +306,17 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 }
 
 func getNoVNCProxyLabelMap(name string, cellName string) map[string]string {
-	return map[string]string{
-		common.AppSelector: name + "-novncproxy",
-		"cell":             cellName,
-	}
+	return util.MergeMaps(
+		GetServiceOpenStackOperatorLabel(name+"-novncproxy"),
+		map[string]string{"cell": cellName},
+	)
 }
 
 func getMetadataLabelMap(name string, instType string) map[string]string {
-	return map[string]string{
-		common.AppSelector: name + "-metadata",
-		"type":             instType,
-	}
+	return util.MergeMaps(
+		GetServiceOpenStackOperatorLabel(name+"-metadata"),
+		map[string]string{"type": instType},
+	)
 }
 
 func centralMetadataLabelMap(name string) map[string]string {

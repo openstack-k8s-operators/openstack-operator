@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -43,7 +42,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Designate.Template.DesignateAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Designate.Template.DesignateAPI.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Designate.Template.DesignateAPI.Override.Service[endpointType],
 				designate.Name)
 	}
@@ -55,17 +54,18 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 	}
 
-	if designate.Status.Conditions.IsTrue(designatev1.DesignateAPIReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: designate.Name},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(designate.Name),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Designate.Template.DesignateAPI.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -82,7 +82,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Designate.Template.DesignateAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 	}
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -44,7 +43,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.Template.IronicAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Ironic.Template.IronicAPI.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Ironic.Template.IronicAPI.Override.Service[endpointType],
 				ironic.Name+"-api")
 
@@ -52,7 +51,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.Template.IronicInspector.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Ironic.Template.IronicInspector.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Ironic.Template.IronicInspector.Override.Service[endpointType],
 				ironic.Name+"-inspector")
 	}
@@ -73,54 +72,52 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	instance.Spec.Ironic.Template.IronicInspector.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	// Ironic API
-	if ironic.Status.Conditions.IsTrue(ironicv1.IronicAPIReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: ironic.Name + "-api"},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
-			ctx,
-			instance,
-			helper,
-			ironic,
-			svcs,
-			instance.Spec.Ironic.Template.IronicAPI.Override.Service,
-			instance.Spec.Ironic.APIOverride,
-			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
-			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-		)
-		if err != nil {
-			return ctrlResult, err
-		} else if (ctrlResult != ctrl.Result{}) {
-			return ctrlResult, nil
-		}
-
-		instance.Spec.Ironic.Template.IronicAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
-		// update TLS settings with cert secret
-		instance.Spec.Ironic.Template.IronicAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
-		instance.Spec.Ironic.Template.IronicAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(ironic.Name+"-api"),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
-	// Ironic Inspector
-	if ironic.Status.Conditions.IsTrue(ironicv1.IronicInspectorReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: ironic.Name + "-inspector"},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+		ctx,
+		instance,
+		helper,
+		ironic,
+		svcs,
+		instance.Spec.Ironic.Template.IronicAPI.Override.Service,
+		instance.Spec.Ironic.APIOverride,
+		corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
+		false, // TODO (mschuppert) could be removed when all integrated service support TLS
+	)
+	if err != nil {
+		return ctrlResult, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
 
-		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+	instance.Spec.Ironic.Template.IronicAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+	// update TLS settings with cert secret
+	instance.Spec.Ironic.Template.IronicAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+	instance.Spec.Ironic.Template.IronicAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+
+	// Ironic Inspector
+	svcs, err = service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(ironic.Name+"-inspector"),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Ironic.Template.IronicAPI.Override.Service) {
+		endpointDetails, ctrlResult, err = EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -136,9 +133,8 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Ironic.Template.IronicInspector.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
 		// update TLS settings with cert secret
 		instance.Spec.Ironic.Template.IronicInspector.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 		instance.Spec.Ironic.Template.IronicInspector.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -40,23 +39,13 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	// add selector to service overrides
-	/*
-		for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
-			if instance.Spec.Horizon.Template.Override.Service == nil {
-				instance.Spec.Horizon.Template.Override.Service = map[string]service.RoutedOverrideSpec{}
-			}
-			instance.Spec.Horizon.Template.Override.Service[string(endpointType)] =
-				AddServiceComponentLabel(
-					ptr.To(instance.Spec.Horizon.Template.Override.Service[string(endpointType)]),
-					horizon.Name)
-	*/
 	serviceOverrides := map[service.Endpoint]service.RoutedOverrideSpec{}
 	if instance.Spec.Horizon.Template.Override.Service != nil {
 		serviceOverrides[service.EndpointPublic] = *instance.Spec.Horizon.Template.Override.Service
 	}
 
 	// add selector to service overrides
-	serviceOverrides[service.EndpointPublic] = AddServiceComponentLabel(
+	serviceOverrides[service.EndpointPublic] = AddServiceOpenStackOperatorLabel(
 		serviceOverrides[service.EndpointPublic],
 		horizon.Name)
 
@@ -73,17 +62,18 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 	instance.Spec.Horizon.Template.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
-	if horizon.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: horizon.Name},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(horizon.Name),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == 1 {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -100,8 +90,9 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+		// set service overrides
 		serviceOverrides = endpointDetails.GetEndpointServiceOverrides()
-
+		// update TLS settings with cert secret
 		instance.Spec.Horizon.Template.TLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 	}
 

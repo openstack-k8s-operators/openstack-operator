@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -42,7 +41,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		if instance.Spec.Barbican.Template.BarbicanAPI.Override.Service == nil {
 			instance.Spec.Barbican.Template.BarbicanAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
-		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service[endpointType] = AddServiceComponentLabel(
+		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service[endpointType] = AddServiceOpenStackOperatorLabel(
 			instance.Spec.Barbican.Template.BarbicanAPI.Override.Service[endpointType],
 			barbican.Name)
 	}
@@ -60,17 +59,18 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 	}
 	instance.Spec.Barbican.Template.BarbicanAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
-	if barbican.Status.Conditions.IsTrue(barbicanv1.BarbicanAPIReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: barbican.Name},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(barbican.Name),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Barbican.Template.BarbicanAPI.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -87,9 +87,8 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Barbican.Template.BarbicanAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
 		// update TLS settings with cert secret
 		instance.Spec.Barbican.Template.BarbicanAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 		instance.Spec.Barbican.Template.BarbicanAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)

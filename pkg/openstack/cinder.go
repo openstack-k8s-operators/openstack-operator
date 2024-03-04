@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -44,7 +43,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Cinder.Template.CinderAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 		}
 		instance.Spec.Cinder.Template.CinderAPI.Override.Service[endpointType] =
-			AddServiceComponentLabel(
+			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Cinder.Template.CinderAPI.Override.Service[endpointType],
 				cinder.Name)
 	}
@@ -62,17 +61,18 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 	instance.Spec.Cinder.Template.CinderAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
-	if cinder.Status.Conditions.IsTrue(cinderv1.CinderAPIReadyCondition) {
-		svcs, err := service.GetServicesListWithLabel(
-			ctx,
-			helper,
-			instance.Namespace,
-			map[string]string{common.AppSelector: cinder.Name},
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(cinder.Name),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Cinder.Template.CinderAPI.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -89,9 +89,8 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
+		// set service overrides
 		instance.Spec.Cinder.Template.CinderAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-
 		// update TLS settings with cert secret
 		instance.Spec.Cinder.Template.CinderAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 		instance.Spec.Cinder.Template.CinderAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)

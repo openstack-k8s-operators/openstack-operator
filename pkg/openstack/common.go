@@ -18,7 +18,6 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
-	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
@@ -47,6 +46,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+const (
+	// ooSelector is used as a selector to the labels to differentiate from
+	// any other possible labels added to services, because  e.g. the common.AppSelector
+	// is also used by service operators.
+	ooSelector = "osctlplane"
+
+	// ooAppSelector service selector label added by the openstack-operator to service
+	// overrides
+	ooAppSelector = "osctlplane-service"
+)
+
 // GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
 func GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenstackControlPlane")
@@ -71,10 +81,20 @@ func EnsureDeleted(ctx context.Context, helper *helper.Helper, obj client.Object
 
 }
 
-// AddServiceComponentLabel - adds component label to the service override to be able to query
+// GetServiceOpenStackOperatorLabel - returns the labels to be added to service override
+func GetServiceOpenStackOperatorLabel(value string) map[string]string {
+	return map[string]string{
+		ooAppSelector: value,
+		ooSelector:    "",
+	}
+}
+
+// AddServiceOpenStackOperatorLabel - adds labels to the service override to be able to query
 // the service labels to check for any route creation
-func AddServiceComponentLabel(svcOverride service.RoutedOverrideSpec, value string) service.RoutedOverrideSpec {
-	svcOverride.AddLabel(map[string]string{common.AppSelector: value})
+func AddServiceOpenStackOperatorLabel(svcOverride service.RoutedOverrideSpec, value string) service.RoutedOverrideSpec {
+	for s, v := range GetServiceOpenStackOperatorLabel(value) {
+		svcOverride.AddLabel(map[string]string{s: v})
+	}
 
 	return svcOverride
 }
@@ -315,13 +335,13 @@ func (ed *EndpointDetail) ensureRoute(
 	owner metav1.Object,
 	condType condition.Type,
 ) (ctrl.Result, error) {
-	// check if there is already a route with common.AppSelector from the service
-	if svcLabelVal, ok := svc.Labels[common.AppSelector]; ok {
+	// check if there is already a route with ooAppSelector from the service
+	if svcLabelVal, ok := svc.Labels[ooAppSelector]; ok {
 		routes, err := GetRoutesListWithLabel(
 			ctx,
 			helper,
 			instance.Namespace,
-			map[string]string{common.AppSelector: svcLabelVal},
+			map[string]string{ooAppSelector: svcLabelVal},
 		)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -376,8 +396,8 @@ func (ed *EndpointDetail) ensureRoute(
 			ed.Service.OverrideSpec.EmbeddedLabelsAnnotations = &service.EmbeddedLabelsAnnotations{}
 		}
 
-		if labelVal, ok := ed.Service.OverrideSpec.EmbeddedLabelsAnnotations.Labels[common.AppSelector]; ok {
-			ed.Labels = map[string]string{common.AppSelector: labelVal}
+		if labelVal, ok := ed.Service.OverrideSpec.EmbeddedLabelsAnnotations.Labels[ooAppSelector]; ok {
+			ed.Labels = map[string]string{ooAppSelector: labelVal}
 		}
 
 		ctrlResult, err := ed.CreateRoute(ctx, helper, owner)
