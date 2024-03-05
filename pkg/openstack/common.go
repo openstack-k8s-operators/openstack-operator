@@ -191,6 +191,7 @@ func EnsureEndpointConfig(
 	ingressOverride corev1.Override,
 	condType condition.Type,
 	serviceTLSDisabled bool,
+	tlsConfig tls.API,
 ) (Endpoints, ctrl.Result, error) {
 	endpoints := Endpoints{
 		EndpointDetails: map[service.Endpoint]EndpointDetail{},
@@ -257,10 +258,8 @@ func EnsureEndpointConfig(
 				// we'll use this for the service, otherwise issue a cert. This is for
 				// use case where you deploy without ingress/routes and also use
 				// a LoadBalancer (MetalLB) for the public endpoints.
-				// TODO: (mschuppert) it should not be the cert secret from ingressOverride
-				// instead should be the one from template.TLS.API.Public.SecretName.
-				if !ed.Route.Create && (ingressOverride.TLS != nil && ingressOverride.TLS.SecretName != "") {
-					ed.Service.TLS.SecretName = ptr.To(ingressOverride.TLS.SecretName)
+				if !ed.Route.Create && (tlsConfig.API.Public.SecretName != nil && *tlsConfig.API.Public.SecretName != "") {
+					ed.Service.TLS.SecretName = tlsConfig.API.Public.SecretName
 					_, ctrlResult, err := ed.Service.TLS.GenericService.ValidateCertSecret(ctx, helper, instance.GetNamespace())
 					if err != nil {
 						return endpoints, ctrlResult, err

@@ -84,6 +84,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 			instance.Spec.Keystone.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeKeystoneAPIReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Keystone.Template.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

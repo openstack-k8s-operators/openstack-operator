@@ -83,6 +83,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Neutron.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeNeutronReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Neutron.Template.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

@@ -84,6 +84,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Manila.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeManilaReadyCondition,
 			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Manila.Template.ManilaAPI.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

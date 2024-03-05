@@ -94,6 +94,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Ironic.Template.IronicAPI.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -130,6 +131,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.InspectorOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Ironic.Template.IronicInspector.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

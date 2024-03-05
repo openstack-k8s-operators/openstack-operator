@@ -7,6 +7,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -84,6 +85,13 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Horizon.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHorizonReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			tls.API{
+				API: tls.APIService{
+					Public: tls.GenericService{
+						SecretName: instance.Spec.Horizon.Template.TLS.SecretName,
+					},
+				},
+			},
 		)
 		if err != nil {
 			return ctrlResult, err

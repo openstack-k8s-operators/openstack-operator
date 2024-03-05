@@ -84,6 +84,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			instance.Spec.Swift.ProxyOverride,
 			corev1beta1.OpenStackControlPlaneExposeSwiftReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Swift.Template.SwiftProxy.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

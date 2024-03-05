@@ -96,6 +96,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Heat.Template.HeatAPI.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -131,6 +132,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.CnfAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Heat.Template.HeatCfnAPI.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

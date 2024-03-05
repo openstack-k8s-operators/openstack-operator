@@ -115,6 +115,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				instance.Spec.Glance.APIOverride[name],
 				corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition,
 				false, // TODO (mschuppert) could be removed when all integrated service support TLS
+				glanceAPI.TLS,
 			)
 			if err != nil {
 				return ctrlResult, err
