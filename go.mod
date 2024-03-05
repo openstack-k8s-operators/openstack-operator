@@ -35,7 +35,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240301170116-13941759ec79
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240301135657-444ba309cbb5
 	github.com/operator-framework/api v0.20.0
-	github.com/rabbitmq/cluster-operator/v2 v2.6.0
+	github.com/rabbitmq/cluster-operator/v2 v2.7.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
 	k8s.io/api v0.29.0
@@ -48,7 +48,7 @@ require (
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
-	github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 // indirect
+	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0 // indirect
 	github.com/metal3-io/baremetal-operator/apis v0.5.0 // indirect
 	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.4.0 // indirect
