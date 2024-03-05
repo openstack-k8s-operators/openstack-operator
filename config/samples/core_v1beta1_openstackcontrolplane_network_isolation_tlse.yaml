@@ -6,8 +6,6 @@ spec:
   secret: osp-secret
   storageClass: local-storage
   tls:
-    ingress:
-      enabled: true
     podLevel:
       enabled: true
   dns:
