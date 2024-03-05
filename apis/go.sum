@@ -43,8 +43,8 @@ github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeN
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/gofuzz v1.2.0 h1:xRy4A+RhZaiKjJ1bPfwQ8sedCA+YS2YcCHW6ec7JMi0=
 github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
-github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 h1:2XF1Vzq06X+inNqgJ9tRnGuw+ZVCB3FazXODD6JE1R8=
-github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3/go.mod h1:79YE0hCXdHag9sBkw2o+N/YnZtTkXi0UT9Nnixa5eYk=
+github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 h1:pUa4ghanp6q4IJHwE9RwLgmVFfReJN+KbQ8ExNEUUoQ=
+github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98/go.mod h1:czg5+yv1E0ZGTi6S6vVK1mke0fV+FaUhNGcd6VRS9Ik=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gophercloud/gophercloud v1.9.0 h1:zKvmHOmHuaZlnx9d2DJpEgbMxrGt/+CJ/bKOKQh9Xzo=
@@ -129,8 +129,8 @@ github.com/prometheus/common v0.46.0 h1:doXzt5ybi1HBKpsZOL0sSkaNHJJqkyfEWZGGqqSc
 github.com/prometheus/common v0.46.0/go.mod h1:Tp0qkxpb9Jsg54QMe+EAmqXkSV7Evdy1BTn+g2pa/hQ=
 github.com/prometheus/procfs v0.12.0 h1:jluTpSng7V9hY0O2R9DzzJHYb2xULk9VTR1V1R/k6Bo=
 github.com/prometheus/procfs v0.12.0/go.mod h1:pcuDEFsWDnvcgNzo4EEweacyhjeA9Zk3cnaOZAZEfOo=
-github.com/rabbitmq/cluster-operator/v2 v2.5.0 h1:eaGRv735A06onSnGhbjr1qeASrOAIe4YT8lypWno+I8=
-github.com/rabbitmq/cluster-operator/v2 v2.5.0/go.mod h1:XD5mUEfmpMQwLhAku0gEzHHM5/Uf3/Vk1cpwECI1FYY=
+github.com/rabbitmq/cluster-operator/v2 v2.6.0 h1:pr42elurQgi4DVmLTI1cOh8VZRNkfFKZK9+FgQuM/8w=
+github.com/rabbitmq/cluster-operator/v2 v2.6.0/go.mod h1:Zryxg5YgbPUFcLSCcKpf10il8kIRAK5HloNo6khhdis=
 github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3 h1:vy4ElN2RHyrIzzPn5b8vKuQLg4ZofuUAz65eLqLqloA=
 github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3/go.mod h1:p+YsgXodntOtgwXKTpWrJzVS7QmMfZlGDG0v6Noze7s=
 github.com/rhobs/observability-operator v0.0.20 h1:u4Ejzq/Yt3rY4b/apKhpgYIvmp+MpcV9hhEzhzedpk4=
