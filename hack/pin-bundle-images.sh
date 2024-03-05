@@ -87,5 +87,5 @@ done
 # append the rabbitmq URL only if we aren't in Dockerfile mode
 if [ -z "$DOCKERFILE" ]; then
     # pin rabbit to sha256 for the e2d413c102bc73d4b5e186d1d1b1f9bf728701e1 tag (v2.6.0)
-    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:b3e37b529e76faf5b140021b3e5fd9ba5ef8cfa7c26e74845cf47d075e204906"
+    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:261306a5a39a379079a7f30491491ce1bd3ae3e21d9610af9734e4e56d32358d"
 fi
