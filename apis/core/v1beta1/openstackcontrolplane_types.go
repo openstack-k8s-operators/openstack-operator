@@ -76,7 +76,7 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// +kubebuilder:default={ingress: {enabled: true, ca: {duration: "43800h"}, cert: {duration: "8760h"}}, podLevel: {enabled: false, default:{ca: {duration: "43800h"}, cert: {duration: "8760h"}}, ovn: {ca: {duration: "43800h"}, cert: {duration: "8760h"}}}}
+	// +kubebuilder:default={ingress: {enabled: true, ca: {duration: "43800h"}, cert: {duration: "8760h"}}, podLevel: {enabled: false, internal:{ca: {duration: "43800h"}, cert: {duration: "8760h"}}, ovn: {ca: {duration: "43800h"}, cert: {duration: "8760h"}}}}
 	// TLS - Parameters related to the TLS
 	TLS TLSSection `json:"tls"`
 
@@ -224,9 +224,9 @@ type TLSPodLevelConfig struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// Default - CA used for all OpenStackControlPlane and OpenStackDataplane endpoints,
+	// Internal - default CA used for all OpenStackControlPlane and OpenStackDataplane endpoints,
 	// except OVN related CA and certs
-	Default CertSection `json:"default,omitempty"`
+	Internal CertSection `json:"internal,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec

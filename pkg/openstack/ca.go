@@ -122,7 +122,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		map[string]string{certmanager.RootCAIssuerInternalLabel: ""},
 		bundle,
 		caOnlyBundle,
-		instance.Spec.TLS.PodLevel.Default.Ca,
+		instance.Spec.TLS.PodLevel.Internal.Ca,
 	)
 	if err != nil {
 		return ctrlResult, err

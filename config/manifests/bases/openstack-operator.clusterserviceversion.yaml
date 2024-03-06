@@ -407,21 +407,21 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - displayName: Pod Level
         path: tls.podLevel
-      - description: Default - CA used for all OpenStackControlPlane and OpenStackDataplane
-          endpoints, except OVN related CA and certs
-        displayName: Default
-        path: tls.podLevel.default
-      - description: Ca - defines details for CA cert config
-        displayName: Ca
-        path: tls.podLevel.default.ca
-      - description: Cert - defines details for cert config
-        displayName: Cert
-        path: tls.podLevel.default.cert
       - description: Enabled - Whether TLS should be enabled for endpoint type
         displayName: Enabled
         path: tls.podLevel.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Internal - default CA used for all OpenStackControlPlane and
+          OpenStackDataplane endpoints, except OVN related CA and certs
+        displayName: Internal
+        path: tls.podLevel.internal
+      - description: Ca - defines details for CA cert config
+        displayName: Ca
+        path: tls.podLevel.internal.ca
+      - description: Cert - defines details for cert config
+        displayName: Cert
+        path: tls.podLevel.internal.cert
       - description: Ovn - CA used for all OVN services on OpenStackControlPlane and
           OpenStackDataplane
         displayName: Ovn
