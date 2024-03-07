@@ -82,27 +82,30 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, err
 	}
 
-	endpointDetails, ctrlResult, err := EnsureEndpointConfig(
-		ctx,
-		instance,
-		helper,
-		ironic,
-		svcs,
-		instance.Spec.Ironic.Template.IronicAPI.Override.Service,
-		instance.Spec.Ironic.APIOverride,
-		corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
-		false, // TODO (mschuppert) could be removed when all integrated service support TLS
-	)
-	if err != nil {
-		return ctrlResult, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Ironic.Template.IronicAPI.Override.Service) {
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+			ctx,
+			instance,
+			helper,
+			ironic,
+			svcs,
+			instance.Spec.Ironic.Template.IronicAPI.Override.Service,
+			instance.Spec.Ironic.APIOverride,
+			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
 
-	instance.Spec.Ironic.Template.IronicAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-	// update TLS settings with cert secret
-	instance.Spec.Ironic.Template.IronicAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
-	instance.Spec.Ironic.Template.IronicAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+		instance.Spec.Ironic.Template.IronicAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+		// update TLS settings with cert secret
+		instance.Spec.Ironic.Template.IronicAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Ironic.Template.IronicAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+	}
 
 	// Ironic Inspector
 	svcs, err = service.GetServicesListWithLabel(
@@ -116,8 +119,8 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	// make sure to get to EndpointConfig when all service got created
-	if len(svcs.Items) == len(instance.Spec.Ironic.Template.IronicAPI.Override.Service) {
-		endpointDetails, ctrlResult, err = EnsureEndpointConfig(
+	if len(svcs.Items) == len(instance.Spec.Ironic.Template.IronicInspector.Override.Service) {
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
