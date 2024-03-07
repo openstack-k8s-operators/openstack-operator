@@ -95,12 +95,12 @@ spec:
       # separation implemented.
       cellTemplates:
           cell0:
-            cellDatabaseUser: nova_cell0
+            cellDatabaseAccount: nova-cell0
             conductorServiceTemplate:
               replicas: 0
             hasAPIAccess: true
           cell1:
-            cellDatabaseUser: nova_cell1
+            cellDatabaseAccount: nova-cell1
             cellDatabaseInstance: openstack
             cellMessageBusInstance: rabbitmq
             conductorServiceTemplate:
