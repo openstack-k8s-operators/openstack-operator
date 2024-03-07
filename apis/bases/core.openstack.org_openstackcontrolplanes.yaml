@@ -592,12 +592,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -724,12 +718,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -787,12 +775,6 @@ spec:
                             items:
                               type: string
                             type: array
-                          debug:
-                            properties:
-                              service:
-                                default: false
-                                type: boolean
-                            type: object
                           networkAttachments:
                             items:
                               type: string
@@ -851,12 +833,6 @@ spec:
                               items:
                                 type: string
                               type: array
-                            debug:
-                              properties:
-                                service:
-                                  default: false
-                                  type: boolean
-                              type: object
                             networkAttachments:
                               items:
                                 type: string
@@ -908,10 +884,10 @@ spec:
                         type: object
                       customServiceConfig:
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: cinder
+                        type: string
+                      databaseInstance:
                         type: string
                       dbPurge:
                         properties:
@@ -926,9 +902,6 @@ spec:
                       debug:
                         properties:
                           dbPurge:
-                            default: false
-                            type: boolean
-                          dbSync:
                             default: false
                             type: boolean
                         type: object
@@ -1697,12 +1670,8 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: CinderDatabasePassword
                           service: CinderPassword
                         properties:
-                          database:
-                            default: CinderDatabasePassword
-                            type: string
                           service:
                             default: CinderPassword
                             type: string
@@ -1849,10 +1818,10 @@ spec:
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: designate
+                        type: string
+                      databaseInstance:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -1874,10 +1843,10 @@ spec:
                             items:
                               type: string
                             type: array
-                          databaseHostname:
-                            type: string
-                          databaseUser:
+                          databaseAccount:
                             default: designate
+                            type: string
+                          databaseHostname:
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -1944,12 +1913,8 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: DesignateDatabasePassword
                               service: DesignatePassword
                             properties:
-                              database:
-                                default: DesignateDatabasePassword
-                                type: string
                               service:
                                 default: DesignatePassword
                                 type: string
@@ -2019,10 +1984,10 @@ spec:
                             items:
                               type: string
                             type: array
-                          databaseHostname:
-                            type: string
-                          databaseUser:
+                          databaseAccount:
                             default: designate
+                            type: string
+                          databaseHostname:
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -2038,12 +2003,8 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: DesignateDatabasePassword
                               service: DesignatePassword
                             properties:
-                              database:
-                                default: DesignateDatabasePassword
-                                type: string
                               service:
                                 default: DesignatePassword
                                 type: string
@@ -2113,10 +2074,10 @@ spec:
                             items:
                               type: string
                             type: array
-                          databaseHostname:
-                            type: string
-                          databaseUser:
+                          databaseAccount:
                             default: designate
+                            type: string
+                          databaseHostname:
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -2132,12 +2093,8 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: DesignateDatabasePassword
                               service: DesignatePassword
                             properties:
-                              database:
-                                default: DesignateDatabasePassword
-                                type: string
                               service:
                                 default: DesignatePassword
                                 type: string
@@ -2207,10 +2164,10 @@ spec:
                             items:
                               type: string
                             type: array
-                          databaseHostname:
-                            type: string
-                          databaseUser:
+                          databaseAccount:
                             default: designate
+                            type: string
+                          databaseHostname:
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -2226,12 +2183,8 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: DesignateDatabasePassword
                               service: DesignatePassword
                             properties:
-                              database:
-                                default: DesignateDatabasePassword
-                                type: string
                               service:
                                 default: DesignatePassword
                                 type: string
@@ -2301,10 +2254,10 @@ spec:
                             items:
                               type: string
                             type: array
-                          databaseHostname:
-                            type: string
-                          databaseUser:
+                          databaseAccount:
                             default: designate
+                            type: string
+                          databaseHostname:
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -2320,12 +2273,8 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: DesignateDatabasePassword
                               service: DesignatePassword
                             properties:
-                              database:
-                                default: DesignateDatabasePassword
-                                type: string
                               service:
                                 default: DesignatePassword
                                 type: string
@@ -2459,10 +2408,10 @@ spec:
                             items:
                               type: string
                             type: array
-                          databaseHostname:
-                            type: string
-                          databaseUser:
+                          databaseAccount:
                             default: designate
+                            type: string
+                          databaseHostname:
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -2478,12 +2427,8 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: DesignateDatabasePassword
                               service: DesignatePassword
                             properties:
-                              database:
-                                default: DesignateDatabasePassword
-                                type: string
                               service:
                                 default: DesignatePassword
                                 type: string
@@ -2543,12 +2488,8 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: DesignateDatabasePassword
                           service: DesignatePassword
                         properties:
-                          database:
-                            default: DesignateDatabasePassword
-                            type: string
                           service:
                             default: DesignatePassword
                             type: string
@@ -3637,10 +3578,10 @@ spec:
                         items:
                           type: string
                         type: array
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: glance
+                        type: string
+                      databaseInstance:
                         type: string
                       dbPurge:
                         properties:
@@ -4591,12 +4532,8 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: GlanceDatabasePassword
                           service: GlancePassword
                         properties:
-                          database:
-                            default: GlanceDatabasePassword
-                            type: string
                           service:
                             default: GlancePassword
                             type: string
@@ -4865,10 +4802,10 @@ spec:
                     properties:
                       customServiceConfig:
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: heat
+                        type: string
+                      databaseInstance:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -5184,14 +5121,10 @@ spec:
                       passwordSelectors:
                         default:
                           authEncryptionKey: HeatAuthEncryptionKey
-                          database: HeatDatabasePassword
                           service: HeatPassword
                         properties:
                           authEncryptionKey:
                             default: HeatAuthEncryptionKey
-                            type: string
-                          database:
-                            default: HeatDatabasePassword
                             type: string
                           service:
                             default: HeatPassword
@@ -6305,10 +6238,10 @@ spec:
                         type: string
                       customServiceConfig:
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: keystone
+                        type: string
+                      databaseInstance:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -6382,13 +6315,9 @@ spec:
                       passwordSelectors:
                         default:
                           admin: AdminPassword
-                          database: KeystoneDatabasePassword
                         properties:
                           admin:
                             default: AdminPassword
-                            type: string
-                          database:
-                            default: KeystoneDatabasePassword
                             type: string
                         type: object
                       preserveJobs:
@@ -8935,11 +8864,11 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiDatabaseAccount:
+                        default: nova-api
+                        type: string
                       apiDatabaseInstance:
                         default: openstack
-                        type: string
-                      apiDatabaseUser:
-                        default: nova_api
                         type: string
                       apiMessageBusInstance:
                         default: rabbitmq
@@ -9074,10 +9003,10 @@ spec:
                       cellTemplates:
                         additionalProperties:
                           properties:
+                            cellDatabaseAccount:
+                              type: string
                             cellDatabaseInstance:
                               default: openstack
-                              type: string
-                            cellDatabaseUser:
                               type: string
                             cellMessageBusInstance:
                               default: rabbitmq
@@ -9443,25 +9372,17 @@ spec:
                                 - computeDriver
                                 type: object
                               type: object
-                            passwordSelectors:
-                              default:
-                                database: NovaCell0DatabasePassword
-                              properties:
-                                database:
-                                  default: NovaCell0DatabasePassword
-                                  type: string
-                              type: object
                           required:
-                          - cellDatabaseUser
+                          - cellDatabaseAccount
                           - hasAPIAccess
                           type: object
                         default:
                           cell0:
-                            cellDatabaseUser: nova_cell0
+                            cellDatabaseAccount: nova-cell0
                             hasAPIAccess: true
                           cell1:
+                            cellDatabaseAccount: nova-cell1
                             cellDatabaseInstance: openstack-cell1
-                            cellDatabaseUser: nova_cell1
                             cellMessageBusInstance: rabbitmq-cell1
                             hasAPIAccess: true
                         type: object
@@ -9593,9 +9514,6 @@ spec:
                         default:
                           service: NovaPassword
                         properties:
-                          apiDatabase:
-                            default: NovaAPIDatabasePassword
-                            type: string
                           metadataSecret:
                             default: MetadataSecret
                             type: string
@@ -10516,6 +10434,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                         required:
                         - ovnContainerImage
                         - ovsContainerImage
@@ -10591,6 +10516,13 @@ spec:
                               type: string
                             storageRequest:
                               type: string
+                            tls:
+                              properties:
+                                caBundleSecretName:
+                                  type: string
+                                secretName:
+                                  type: string
+                              type: object
                           required:
                           - containerImage
                           - dbType
@@ -10646,6 +10578,13 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
                             type: object
                         required:
                         - containerImage
@@ -10769,10 +10708,10 @@ spec:
                         type: string
                       customServiceConfig:
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: placement
+                        type: string
+                      databaseInstance:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -10839,12 +10778,8 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: PlacementDatabasePassword
                           service: PlacementPassword
                         properties:
-                          database:
-                            default: PlacementDatabasePassword
-                            type: string
                           service:
                             default: PlacementPassword
                             type: string
@@ -15495,6 +15430,24 @@ spec:
                               serviceUser:
                                 default: aodh
                                 type: string
+                              tls:
+                                properties:
+                                  api:
+                                    properties:
+                                      internal:
+                                        properties:
+                                          secretName:
+                                            type: string
+                                        type: object
+                                      public:
+                                        properties:
+                                          secretName:
+                                            type: string
+                                        type: object
+                                    type: object
+                                  caBundleSecretName:
+                                    type: string
+                                type: object
                             required:
                             - apiImage
                             - databaseInstance
