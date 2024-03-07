@@ -8,7 +8,6 @@
       cifmw_operator_build_golang_alt_ct: "quay.rdoproject.org/openstack-k8s-operators/golang:1.20"
       cifmw_tempest_tempestconf_profile:
           overrides:
-            compute.min_compute_nodes: 3
             compute-feature-enabled.vnc_console: true
             compute-feature-enabled.stable_rescue: true
             compute_feature_enabled.hostname_fqdn_sanitization: true
@@ -18,7 +17,6 @@
             compute-feature-enabled.attach_encrypted_volume: false
             compute-feature-enabled.live_migration: true
             compute-feature-enabled.block_migration_for_live_migration: true
-            validation.run_validation: true
             # NOTE(gibi): This is a WA to force the publicURL as otherwise
             # tempest gets configured with adminURL and that causes test
             # instability.
