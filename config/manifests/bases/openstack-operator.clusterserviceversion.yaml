@@ -379,6 +379,13 @@ spec:
       - description: Template - Overrides to use when creating Swift Resources
         displayName: Template
         path: swift.template
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: telemetry.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: telemetry.apiOverride.tls
       - description: Enabled - Whether OpenStack Telemetry services should be deployed
           and managed
         displayName: Enabled
