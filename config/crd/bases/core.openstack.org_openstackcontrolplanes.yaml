@@ -8627,6 +8627,11 @@ spec:
                             type: object
                           caBundleSecretName:
                             type: string
+                          ovn:
+                            properties:
+                              secretName:
+                                type: string
+                            type: object
                         type: object
                     required:
                     - containerImage

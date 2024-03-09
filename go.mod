@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/cert-manager/cert-manager v1.11.5
+	github.com/cert-manager/cert-manager v1.13.4
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.1
 	github.com/google/uuid v1.6.0
@@ -27,7 +27,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240305194401-0fda28a84acb
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240308170012-6b04e3e9b9ee
-	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240305155525-acb164bd7d67
+	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240308065128-4ba88761f83f
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240307151724-2fc1351673af
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240305155754-2dcd200b721a
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240305134542-42210080a43a
@@ -87,7 +87,7 @@ require (
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3 // indirect
 	github.com/rhobs/observability-operator v0.0.20 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/sirupsen/logrus v1.9.2 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/mod v0.15.0 // indirect
@@ -108,7 +108,7 @@ require (
 	k8s.io/component-base v0.28.7 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
-	sigs.k8s.io/gateway-api v0.6.0 // indirect
+	sigs.k8s.io/gateway-api v0.8.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
