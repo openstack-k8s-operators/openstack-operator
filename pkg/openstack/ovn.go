@@ -4,14 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -76,6 +81,51 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			continue
 		}
 
+		// preserve any previously set TLS certs, set CA cert
+		if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: name, Namespace: instance.Namespace}, OVNDBCluster); err != nil {
+			if !k8s_errors.IsNotFound(err) {
+				return false, err
+			}
+		}
+		if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+			dbcluster.TLS = OVNDBCluster.Spec.TLS
+		}
+		dbcluster.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
+		if OVNDBCluster.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
+			// create certificate for ovndbclusters
+			certRequest := certmanager.CertificateRequest{
+				IssuerName: OvnDbCaName,
+				CertName:   fmt.Sprintf("%s-ovndbs", name),
+				Duration:   nil,
+				// Cert needs to be valid for the individual pods in the statefulset so make this a wildcard cert
+				Hostnames: []string{
+					fmt.Sprintf("*.%s.svc", instance.Namespace),
+					fmt.Sprintf("*.%s.svc.%s", instance.Namespace, ovnv1.DNSSuffix),
+				},
+				Ips: nil,
+				Usages: []certmgrv1.KeyUsage{
+					certmgrv1.UsageKeyEncipherment,
+					certmgrv1.UsageDigitalSignature,
+					certmgrv1.UsageServerAuth,
+					certmgrv1.UsageClientAuth,
+				},
+			}
+			certSecret, ctrlResult, err := certmanager.EnsureCert(
+				ctx,
+				helper,
+				certRequest)
+			if err != nil {
+				return false, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return false, nil
+			}
+
+			if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+				dbcluster.TLS.SecretName = &certSecret.Name
+			}
+		}
+
 		Log.Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
 		op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNDBCluster, func() error {
 
@@ -122,6 +172,49 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 		return false, nil
 	}
+
+	ovnNorthdSpec := &instance.Spec.Ovn.Template.OVNNorthd
+
+	// preserve any previously set TLS certs, set CA cert
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "ovnnorthd", Namespace: instance.Namespace}, OVNNorthd); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return false, err
+		}
+	}
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		ovnNorthdSpec.TLS = OVNNorthd.Spec.TLS
+
+		serviceName := ovnv1.ServiceNameOvnNorthd
+		// create certificate for ovnnorthd
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: OvnDbCaName,
+			CertName:   fmt.Sprintf("%s-ovndbs", "ovnnorthd"),
+			Duration:   nil,
+			Hostnames: []string{
+				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
+				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ovnv1.DNSSuffix),
+			},
+			Ips: nil,
+			Usages: []certmgrv1.KeyUsage{
+				certmgrv1.UsageKeyEncipherment,
+				certmgrv1.UsageDigitalSignature,
+				certmgrv1.UsageServerAuth,
+				certmgrv1.UsageClientAuth,
+			},
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest)
+		if err != nil {
+			return false, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return false, nil
+		}
+
+		ovnNorthdSpec.TLS.SecretName = &certSecret.Name
+	}
+	ovnNorthdSpec.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	Log.Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNNorthd, func() error {
@@ -170,6 +263,49 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		}
 		return false, nil
 	}
+
+	ovnControllerSpec := &instance.Spec.Ovn.Template.OVNController
+
+	// preserve any previously set TLS certs, set CA cert
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "ovncontroller", Namespace: instance.Namespace}, OVNController); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return false, err
+		}
+	}
+	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		ovnControllerSpec.TLS = OVNController.Spec.TLS
+
+		serviceName := ovnv1.ServiceNameOvnController
+		// create certificate for ovncontroller
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: OvnDbCaName,
+			CertName:   fmt.Sprintf("%s-ovndbs", "ovncontroller"),
+			Duration:   nil,
+			Hostnames: []string{
+				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
+				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ovnv1.DNSSuffix),
+			},
+			Ips: nil,
+			Usages: []certmgrv1.KeyUsage{
+				certmgrv1.UsageKeyEncipherment,
+				certmgrv1.UsageDigitalSignature,
+				certmgrv1.UsageServerAuth,
+				certmgrv1.UsageClientAuth,
+			},
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest)
+		if err != nil {
+			return false, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return false, nil
+		}
+
+		ovnControllerSpec.TLS.SecretName = &certSecret.Name
+	}
+	ovnControllerSpec.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	Log.Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {

@@ -27,6 +27,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const (
+	OvnDbCaName = tls.DefaultCAPrefix + "ovn"
+)
+
 // ReconcileCAs -
 func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 	Log := GetLogger(ctx)
@@ -136,7 +140,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		instance,
 		helper,
 		issuerReq,
-		tls.DefaultCAPrefix+"ovn",
+		OvnDbCaName,
 		map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""},
 		bundle,
 		caOnlyBundle,
