@@ -46,6 +46,7 @@ type Names struct {
 	RoleBindingName           types.NamespacedName
 	RootCAPublicName          types.NamespacedName
 	RootCAInternalName        types.NamespacedName
+	RootCAOvnName             types.NamespacedName
 	SelfSignedIssuerName      types.NamespacedName
 	CABundleName              types.NamespacedName
 	OpenStackClientName       types.NamespacedName
@@ -65,6 +66,9 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		RootCAInternalName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rootca-internal"},
+		RootCAOvnName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "rootca-ovn"},
 		SelfSignedIssuerName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "selfsigned-issuer"},
@@ -211,9 +215,13 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	}
 
 	tlsTemplate := map[string]interface{}{
-		"endpoint": map[string]interface{}{
-			"public": map[string]interface{}{
-				"enabled": true,
+		"ingress": map[string]interface{}{
+			"enabled": true,
+			"ca": map[string]interface{}{
+				"duration": "100h",
+			},
+			"cert": map[string]interface{}{
+				"duration": "10h",
 			},
 		},
 	}
@@ -310,6 +318,27 @@ func CreatePublicCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
 }
 
 func CreateInternalCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
+	certBase64 := "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJmekNDQVNhZ0F3SUJBZ0lRUWxlcTNZcDBtU2kwVDNiTm03Q29UVEFLQmdncWhrak9QUVFEQWpBZ01SNHcKSEFZRFZRUURFeFZ5YjI5MFkyRXRhM1YwZEd3dGFXNTBaWEp1WVd3d0hoY05NalF3TVRFMU1URTBOelUwV2hjTgpNelF3TVRFeU1URTBOelUwV2pBZ01SNHdIQVlEVlFRREV4VnliMjkwWTJFdGEzVjBkR3d0YVc1MFpYSnVZV3d3CldUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqT1BRTUJCd05DQUFTRk9rNHJPUldVUGhoTjUrK09EN1I2MW5Gb1lBY0QKenpvUS91SW93NktjeGhwRWNQTDFxb3ZZUGxUYUJabEh3c2FpNE50VHA4aDA1RHVRSGZKOE9JNXFvMEl3UURBTwpCZ05WSFE4QkFmOEVCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXE3TGtFSk1TCm1MOVpKWjBSOUluKzZkclhycEl3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnVlN1K00ydnZ3QlF3eTJHMVlhdkkKQld2RGtSNlRla0I5U0VqdzJIblRSMWtDSUZSNFNkWGFPQkFGWjVHa2RLWCtSY2IzaDFIZm52eFJEVW96bTl2agphenp3Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K=="
+	keyBase64 := "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUV3dlQ2dFZMUWRrVnlXUDV1VnJ3RWRyZ0VLK3drdmttRjFKa0xNYzJCUVFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFaFRwT0t6a1ZsRDRZVGVmdmpnKzBldFp4YUdBSEE4ODZFUDdpS01PaW5NWWFSSER5OWFxTAoyRDVVMmdXWlI4TEdvdURiVTZmSWRPUTdrQjN5ZkRpT2FnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=="
+
+	cert, _ := base64.StdEncoding.DecodeString(certBase64)
+	key, _ := base64.StdEncoding.DecodeString(keyBase64)
+
+	s := &k8s_corev1.Secret{}
+	Eventually(func(g Gomega) {
+		s = th.CreateSecret(
+			name,
+			map[string][]byte{
+				"ca.crt":  []byte(cert),
+				"tls.crt": []byte(cert),
+				"tls.key": []byte(key),
+			})
+	}, timeout, interval).Should(Succeed())
+
+	return s
+}
+
+func CreateOvnCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
 	certBase64 := "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJmekNDQVNhZ0F3SUJBZ0lRUWxlcTNZcDBtU2kwVDNiTm03Q29UVEFLQmdncWhrak9QUVFEQWpBZ01SNHcKSEFZRFZRUURFeFZ5YjI5MFkyRXRhM1YwZEd3dGFXNTBaWEp1WVd3d0hoY05NalF3TVRFMU1URTBOelUwV2hjTgpNelF3TVRFeU1URTBOelUwV2pBZ01SNHdIQVlEVlFRREV4VnliMjkwWTJFdGEzVjBkR3d0YVc1MFpYSnVZV3d3CldUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqT1BRTUJCd05DQUFTRk9rNHJPUldVUGhoTjUrK09EN1I2MW5Gb1lBY0QKenpvUS91SW93NktjeGhwRWNQTDFxb3ZZUGxUYUJabEh3c2FpNE50VHA4aDA1RHVRSGZKOE9JNXFvMEl3UURBTwpCZ05WSFE4QkFmOEVCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXE3TGtFSk1TCm1MOVpKWjBSOUluKzZkclhycEl3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnVlN1K00ydnZ3QlF3eTJHMVlhdkkKQld2RGtSNlRla0I5U0VqdzJIblRSMWtDSUZSNFNkWGFPQkFGWjVHa2RLWCtSY2IzaDFIZm52eFJEVW96bTl2agphenp3Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K=="
 	keyBase64 := "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUV3dlQ2dFZMUWRrVnlXUDV1VnJ3RWRyZ0VLK3drdmttRjFKa0xNYzJCUVFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFaFRwT0t6a1ZsRDRZVGVmdmpnKzBldFp4YUdBSEE4ODZFUDdpS01PaW5NWWFSSER5OWFxTAoyRDVVMmdXWlI4TEdvdURiVTZmSWRPUTdrQjN5ZkRpT2FnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=="
 

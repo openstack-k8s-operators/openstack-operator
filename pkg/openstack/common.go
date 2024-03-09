@@ -188,9 +188,10 @@ func EnsureEndpointConfig(
 	owner metav1.Object,
 	svcs *k8s_corev1.ServiceList,
 	svcOverrides map[service.Endpoint]service.RoutedOverrideSpec,
-	publicOverride corev1.Override,
+	ingressOverride corev1.Override,
 	condType condition.Type,
 	serviceTLSDisabled bool,
+	tlsConfig tls.API,
 ) (Endpoints, ctrl.Result, error) {
 	endpoints := Endpoints{
 		EndpointDetails: map[service.Endpoint]EndpointDetail{},
@@ -209,9 +210,9 @@ func EnsureEndpointConfig(
 		ed.Service.OverrideSpec = svcOverrides[ed.Type]
 
 		// TLS on the pod level is enabled if
-		// * TLS is enabled for internal endpoint
+		// * TLS is enabled for pod level
 		// * the particular service has not TLS.Disabled set to true
-		if tlsEndpointConfig := instance.Spec.TLS.Endpoint[service.EndpointInternal]; tlsEndpointConfig.Enabled && !serviceTLSDisabled {
+		if instance.Spec.TLS.PodLevel.Enabled && !serviceTLSDisabled {
 			ed.Service.TLS.Enabled = true
 		} else {
 			ed.Service.TLS.Enabled = false
@@ -223,46 +224,64 @@ func EnsureEndpointConfig(
 			ed.Route.Create = svc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "true" &&
 				svc.Spec.Type == k8s_corev1.ServiceTypeClusterIP
 
-			if publicOverride.Route != nil {
-				ed.Route.OverrideSpec = *publicOverride.Route
+			if ingressOverride.Route != nil {
+				ed.Route.OverrideSpec = *ingressOverride.Route
 			}
 
-			// if public endpoint TLS is enabled
-			if tlsEndpointConfig := instance.Spec.TLS.Endpoint[ed.Type]; tlsEndpointConfig.Enabled {
+			// if TLS termination at the ingress (route) is enabled
+			if instance.Spec.TLS.Ingress.Enabled {
 				// TLS for route enabled if public endpoint TLS is true
 				ed.Route.TLS.Enabled = true
 
 				// if a custom cert secret was provided we'll use this for
 				// the route, otherwise the issuer is used to request one
 				// for the endpoint.
-				if publicOverride.TLS != nil && publicOverride.TLS.SecretName != "" {
-					ed.Route.TLS.SecretName = ptr.To(publicOverride.TLS.SecretName)
+				if ingressOverride.TLS != nil && ingressOverride.TLS.SecretName != "" {
+					ed.Route.TLS.SecretName = ptr.To(ingressOverride.TLS.SecretName)
+					validateSecret := &tls.GenericService{SecretName: ed.Route.TLS.SecretName}
+					_, ctrlResult, err := validateSecret.ValidateCertSecret(ctx, helper, instance.GetNamespace())
+					if err != nil {
+						return endpoints, ctrlResult, err
+					} else if (ctrlResult != ctrl.Result{}) {
+						return endpoints, ctrlResult, nil
+					}
 				} else {
 					// use public issuer to create cert for the route
 					ed.Route.TLS.IssuerName = ptr.To(tls.DefaultCAPrefix + ed.Type.String())
 				}
+			}
 
-				// For re-encryption the route required the internal CA bundle to validate
-				// internal certificate from route -> service -> pod. Add the internal CA bundle when
-				// * TLS is enabled for internal endpoint
-				// * the particular service has not TLS.Disabled set to true
-				if ed.Service.TLS.Enabled {
-					ed.Service.TLS.CaBundleSecretName = tls.CABundleSecret
-					// create certificate for public pod virthost
-					// TODO: (mschuppert) - if ed.Route.Create == false and custom cert secret provided
-					// for the public endpoint, use this and not the issuer. This is the case when
-					// env got deployed with LoadBalancer service instead of a route for the public
-					// endpoint.
-					// request certificate
+			if ed.Service.TLS.Enabled {
+				ed.Service.TLS.CaBundleSecretName = tls.CABundleSecret
+
+				// if a custom cert secret was provided and ed.Route.Create == false
+				// we'll use this for the service, otherwise issue a cert. This is for
+				// use case where you deploy without ingress/routes and also use
+				// a LoadBalancer (MetalLB) for the public endpoints.
+				if !ed.Route.Create && (tlsConfig.API.Public.SecretName != nil && *tlsConfig.API.Public.SecretName != "") {
+					ed.Service.TLS.SecretName = tlsConfig.API.Public.SecretName
+					_, ctrlResult, err := ed.Service.TLS.GenericService.ValidateCertSecret(ctx, helper, instance.GetNamespace())
+					if err != nil {
+						return endpoints, ctrlResult, err
+					} else if (ctrlResult != ctrl.Result{}) {
+						return endpoints, ctrlResult, nil
+					}
+				} else {
+					// issue a certificate for public pod virthost
 					certRequest := certmanager.CertificateRequest{
 						IssuerName:  tls.DefaultCAPrefix + ed.Type.String(),
 						CertName:    fmt.Sprintf("%s-svc", ed.Name),
-						Duration:    nil,
 						Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
 						Ips:         nil,
 						Annotations: ed.Annotations,
 						Labels:      ed.Labels,
 						Usages:      nil,
+					}
+					if instance.Spec.TLS.Ingress.Cert.Duration != nil {
+						certRequest.Duration = &instance.Spec.TLS.Ingress.Cert.Duration.Duration
+					}
+					if instance.Spec.TLS.Ingress.Cert.RenewBefore != nil {
+						certRequest.RenewBefore = &instance.Spec.TLS.Ingress.Cert.RenewBefore.Duration
 					}
 					certSecret, ctrlResult, err := certmanager.EnsureCert(
 						ctx,
@@ -293,12 +312,17 @@ func EnsureEndpointConfig(
 				certRequest := certmanager.CertificateRequest{
 					IssuerName:  tls.DefaultCAPrefix + ed.Type.String(),
 					CertName:    fmt.Sprintf("%s-svc", ed.Name),
-					Duration:    nil,
 					Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
 					Ips:         nil,
 					Annotations: ed.Annotations,
 					Labels:      ed.Labels,
 					Usages:      nil,
+				}
+				if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
+					certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
+				}
+				if instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore != nil {
+					certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore.Duration
 				}
 				certSecret, ctrlResult, err := certmanager.EnsureCert(
 					ctx,
@@ -400,7 +424,7 @@ func (ed *EndpointDetail) ensureRoute(
 			ed.Labels = map[string]string{ooAppSelector: labelVal}
 		}
 
-		ctrlResult, err := ed.CreateRoute(ctx, helper, owner)
+		ctrlResult, err := ed.CreateRoute(ctx, instance, helper, owner)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				condType,
@@ -426,6 +450,7 @@ func (ed *EndpointDetail) ensureRoute(
 // CreateRoute -
 func (ed *EndpointDetail) CreateRoute(
 	ctx context.Context,
+	instance *corev1.OpenStackControlPlane,
 	helper *helper.Helper,
 	owner metav1.Object,
 ) (ctrl.Result, error) {
@@ -504,12 +529,17 @@ func (ed *EndpointDetail) CreateRoute(
 			certRequest := certmanager.CertificateRequest{
 				IssuerName:  *ed.Route.TLS.IssuerName,
 				CertName:    fmt.Sprintf("%s-route", ed.Name),
-				Duration:    nil,
 				Hostnames:   []string{*ed.Hostname},
 				Ips:         nil,
 				Annotations: ed.Annotations,
 				Labels:      ed.Labels,
 				Usages:      nil,
+			}
+			if instance.Spec.TLS.Ingress.Cert.Duration != nil {
+				certRequest.Duration = &instance.Spec.TLS.Ingress.Cert.Duration.Duration
+			}
+			if instance.Spec.TLS.Ingress.Cert.RenewBefore != nil {
+				certRequest.RenewBefore = &instance.Spec.TLS.Ingress.Cert.RenewBefore.Duration
 			}
 			//create the cert using our issuer for the endpoint
 			certSecret, ctrlResult, err = certmanager.EnsureCert(
@@ -533,11 +563,11 @@ func (ed *EndpointDetail) CreateRoute(
 		}
 
 		// for internal TLS (TLSE) use routev1.TLSTerminationReencrypt
-		if ed.Service.TLS.Enabled {
+		if ed.Service.TLS.Enabled && ed.Service.TLS.SecretName != nil {
 			// get the TLSInternalCABundleFile to add it to the route
 			// to be able to validate public/internal service endpoints
 			tlsConfig.DestinationCACertificate, ctrlResult, err = secret.GetDataFromSecret(
-				ctx, helper, ed.Service.TLS.CaBundleSecretName, 5, tls.InternalCABundleKey)
+				ctx, helper, *ed.Service.TLS.SecretName, 5, tls.CAKey)
 			if err != nil {
 				return ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {

@@ -47,11 +47,8 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
 		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec)
 
-		for _, config := range instance.Spec.TLS.Endpoint {
-			if config.Enabled {
-				openstackclient.Spec.Ca.CaBundleSecretName = tls.CABundleSecret
-				break
-			}
+		if instance.Spec.TLS.Ingress.Enabled || instance.Spec.TLS.PodLevel.Enabled {
+			openstackclient.Spec.Ca.CaBundleSecretName = tls.CABundleSecret
 		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), openstackclient, helper.GetScheme())

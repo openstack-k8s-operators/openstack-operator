@@ -58,6 +58,12 @@ func ReconcileGaleras(
 				"client auth",
 			},
 		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore.Duration
+		}
 		certSecret, ctrlResult, err := certmanager.EnsureCert(
 			ctx,
 			helper,

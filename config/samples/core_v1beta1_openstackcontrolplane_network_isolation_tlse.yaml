@@ -6,11 +6,8 @@ spec:
   secret: osp-secret
   storageClass: local-storage
   tls:
-    endpoint:
-      internal:
-        enabled: true
-      public:
-        enabled: true
+    podLevel:
+      enabled: true
   dns:
     template:
       override:

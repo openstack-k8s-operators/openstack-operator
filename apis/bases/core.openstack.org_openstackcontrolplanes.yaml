@@ -16182,20 +16182,84 @@ spec:
                 type: object
               tls:
                 default:
-                  endpoint:
+                  ingress:
+                    ca:
+                      duration: 43800h
+                    cert:
+                      duration: 8760h
+                    enabled: true
+                  podLevel:
+                    enabled: false
                     internal:
-                      enabled: false
-                    public:
-                      enabled: true
+                      ca:
+                        duration: 43800h
+                      cert:
+                        duration: 8760h
+                    ovn:
+                      ca:
+                        duration: 43800h
+                      cert:
+                        duration: 8760h
                 properties:
                   caBundleSecretName:
                     type: string
-                  endpoint:
-                    additionalProperties:
-                      properties:
-                        enabled:
-                          type: boolean
-                      type: object
+                  ingress:
+                    properties:
+                      ca:
+                        properties:
+                          duration:
+                            type: string
+                          renewBefore:
+                            type: string
+                        type: object
+                      cert:
+                        properties:
+                          duration:
+                            type: string
+                          renewBefore:
+                            type: string
+                        type: object
+                      enabled:
+                        type: boolean
+                    type: object
+                  podLevel:
+                    properties:
+                      enabled:
+                        type: boolean
+                      internal:
+                        properties:
+                          ca:
+                            properties:
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                          cert:
+                            properties:
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                        type: object
+                      ovn:
+                        properties:
+                          ca:
+                            properties:
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                          cert:
+                            properties:
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                        type: object
                     type: object
                 type: object
             required:

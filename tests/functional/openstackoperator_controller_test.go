@@ -29,7 +29,6 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
@@ -49,6 +48,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// it is not used, just to make sure reconcile proceeds and creates the ca-bundle.
 		DeferCleanup(k8sClient.Delete, ctx, CreatePublicCACertSecret(names.RootCAPublicName))
 		DeferCleanup(k8sClient.Delete, ctx, CreateInternalCACertSecret(names.RootCAInternalName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateOvnCACertSecret(names.RootCAOvnName))
 		// create cert secrets for galera instances
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCertName))
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
@@ -68,8 +68,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Rabbitmq.Enabled).Should(BeTrue())
 			Expect(OSCtlplane.Spec.Memcached.Enabled).Should(BeTrue())
 			Expect(OSCtlplane.Spec.Keystone.Enabled).Should(BeTrue())
-			Expect(OSCtlplane.Spec.TLS.Endpoint[service.EndpointPublic].Enabled).Should(BeTrue())
-			Expect(OSCtlplane.Spec.TLS.Endpoint[service.EndpointInternal].Enabled).Should(BeFalse())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
 
 			// galera exists
 			Eventually(func(g Gomega) {
@@ -100,15 +100,15 @@ var _ = Describe("OpenStackOperator controller", func() {
 		It("should create selfsigned issuer and public+internal CA and issuer", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 
-			Expect(OSCtlplane.Spec.TLS.Endpoint[service.EndpointPublic].Enabled).Should(BeTrue())
-			Expect(OSCtlplane.Spec.TLS.Endpoint[service.EndpointInternal].Enabled).Should(BeFalse())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
 
 			// creates selfsigned issuer
 			Eventually(func(g Gomega) {
 				crtmgr.GetIssuer(names.SelfSignedIssuerName)
 			}, timeout, interval).Should(Succeed())
 
-			// creates public+internal root CA and issuer
+			// creates public, internal and ovn root CA and issuer
 			Eventually(func(g Gomega) {
 				// ca cert
 				cert := crtmgr.GetCert(names.RootCAPublicName)
@@ -121,7 +121,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAPublicName.Name))
-
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				// ca cert
@@ -135,7 +134,19 @@ var _ = Describe("OpenStackOperator controller", func() {
 				issuer := crtmgr.GetIssuer(names.RootCAInternalName)
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAInternalName.Name))
-
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				// ca cert
+				cert := crtmgr.GetCert(names.RootCAOvnName)
+				g.Expect(cert).Should(Not(BeNil()))
+				g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCAOvnName.Name))
+				g.Expect(cert.Spec.IsCA).Should(BeTrue())
+				g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+				g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCAOvnName.Name))
+				// issuer
+				issuer := crtmgr.GetIssuer(names.RootCAOvnName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAOvnName.Name))
 			}, timeout, interval).Should(Succeed())
 		})
 
@@ -144,6 +155,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 			crtmgr.GetIssuer(names.RootCAPublicName)
 			crtmgr.GetCert(names.RootCAInternalName)
 			crtmgr.GetIssuer(names.RootCAInternalName)
+			crtmgr.GetCert(names.RootCAOvnName)
+			crtmgr.GetIssuer(names.RootCAOvnName)
 
 			Eventually(func(g Gomega) {
 				th.GetSecret(names.RootCAPublicName)

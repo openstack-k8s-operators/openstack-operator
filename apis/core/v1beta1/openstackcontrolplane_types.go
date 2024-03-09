@@ -75,8 +75,8 @@ type OpenStackControlPlaneSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={endpoint: {public: {enabled: true}, internal: {enabled: false}}}
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={ingress: {enabled: true, ca: {duration: "43800h"}, cert: {duration: "8760h"}}, podLevel: {enabled: false, internal:{ca: {duration: "43800h"}, cert: {duration: "8760h"}}, ovn: {ca: {duration: "43800h"}, cert: {duration: "8760h"}}}}
 	// TLS - Parameters related to the TLS
 	TLS TLSSection `json:"tls"`
 
@@ -189,8 +189,11 @@ type OpenStackControlPlaneSpec struct {
 type TLSSection struct {
 	// +kubebuilder:validation:optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	// The key must be the endpoint type (public, internal)
-	Endpoint map[service.Endpoint]TLSEndpointConfig `json:"endpoint,omitempty"`
+	Ingress TLSIngressConfig `json:"ingress,omitempty"`
+
+	// +kubebuilder:validation:optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	PodLevel TLSPodLevelConfig `json:"podLevel,omitempty"`
 
 	// +kubebuilder:validation:optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
@@ -200,12 +203,67 @@ type TLSSection struct {
 	tls.Ca `json:",inline"`
 }
 
-// TLSEndpointConfig defines the desired state of TLSEndpoint configuration
-type TLSEndpointConfig struct {
+// TLSIngressConfig defines the desired state of the TLS configuration for the ingress configuration (route)
+type TLSIngressConfig struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether TLS should be enabled for endpoint type
 	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	CertSection `json:",inline"`
+}
+
+// TLSPodLevelConfig defines the desired state of the TLS configuration for TLS termination at the pod level
+type TLSPodLevelConfig struct {
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether TLS should be enabled for endpoint type
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Internal - default CA used for all OpenStackControlPlane and OpenStackDataplane endpoints,
+	// except OVN related CA and certs
+	Internal CertSection `json:"internal,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Ovn - CA used for all OVN services on OpenStackControlPlane and OpenStackDataplane
+	Ovn CertSection `json:"ovn,omitempty"`
+}
+
+// CertSection defines details for CA config and its certs
+type CertSection struct {
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Cert - defines details for cert config
+	Cert CertConfig `json:"cert,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Ca - defines details for CA cert config
+	Ca CertConfig `json:"ca,omitempty"`
+}
+
+// CertConfig defines details for cert configs
+type CertConfig struct {
+	// The requested 'duration' (i.e. lifetime) of the Certificate.
+	// The Certificate will be renewed either 2/3 through its duration or
+	// `renewBefore` period before its expiry, whichever is later. Minimum
+	// accepted duration is 1 hour. Value must be in units accepted by Go
+	// time.ParseDuration https://golang.org/pkg/time/#ParseDuration
+	// +optional
+	Duration *metav1.Duration `json:"duration,omitempty"`
+
+	// How long before the currently issued certificate's expiry
+	// cert-manager should renew the certificate. The default is 2/3 of the
+	// issued certificate's duration. Minimum accepted value is 5 minutes.
+	// Value must be in units accepted by Go time.ParseDuration
+	// https://golang.org/pkg/time/#ParseDuration
+	// +optional
+	RenewBefore *metav1.Duration `json:"renewBefore,omitempty"`
 }
 
 // DNSMasqSection defines the desired state of DNSMasq service
@@ -768,8 +826,12 @@ func SetupDefaults() {
 // Enabled - returns status of tls configuration for the passed in endpoint type
 func (t *TLSSection) Enabled(endpt service.Endpoint) bool {
 	if t != nil {
-		if cfg, ok := t.Endpoint[endpt]; ok && cfg.Enabled {
-			return true
+		switch endpt {
+		case service.EndpointPublic:
+			return t.Ingress.Enabled
+
+		case service.EndpointInternal:
+			return t.PodLevel.Enabled
 		}
 	}
 	return false

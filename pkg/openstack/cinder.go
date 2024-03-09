@@ -83,6 +83,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Cinder.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeCinderReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Cinder.Template.CinderAPI.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

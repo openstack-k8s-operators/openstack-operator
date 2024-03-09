@@ -82,6 +82,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 			instance.Spec.Placement.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposePlacementAPIReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Placement.Template.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

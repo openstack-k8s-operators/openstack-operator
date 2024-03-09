@@ -125,11 +125,24 @@ spec:
       barbicanKeystoneListener:
         replicas: 1
   tls:
-    endpoint:
+    ingress:
+      ca:
+        duration: 43800h0m0s
+      cert:
+        duration: 8760h0m0s
+      enabled: true
+    podLevel:
+      enabled: false
       internal:
-        enabled: false
-      public:
-        enabled: true
+        ca:
+          duration: 43800h0m0s
+        cert:
+          duration: 8760h0m0s
+      ovn:
+        ca:
+          duration: 43800h0m0s
+        cert:
+          duration: 8760h0m0s
 status:
   conditions:
   - message: Setup complete

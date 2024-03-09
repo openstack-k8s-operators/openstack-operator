@@ -81,6 +81,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			instance.Spec.Barbican.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeBarbicanReadyCondition,
 			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Barbican.Template.BarbicanAPI.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err

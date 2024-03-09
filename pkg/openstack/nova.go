@@ -149,6 +149,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Nova.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Nova.Template.APIServiceTemplate.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -234,6 +235,13 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 					instance.Spec.Nova.CellOverride[cellName].NoVNCProxy,
 					corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
 					false, // TODO (mschuppert) could be removed when all integrated service support TLS
+					tls.API{
+						API: tls.APIService{
+							Public: tls.GenericService{
+								SecretName: cellTemplate.NoVNCProxyServiceTemplate.TLS.SecretName,
+							},
+						},
+					},
 				)
 				if err != nil {
 					return ctrlResult, err

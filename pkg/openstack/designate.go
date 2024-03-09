@@ -7,6 +7,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -76,6 +77,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Designate.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeDesignateReadyCondition,
 			true, // TODO: (mschuppert) disable TLS for now until implemented
+			tls.API{},
 		)
 		if err != nil {
 			return ctrlResult, err
