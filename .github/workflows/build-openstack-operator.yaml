@@ -1,6 +1,7 @@
 name: openstack operator image builder
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - '*'
