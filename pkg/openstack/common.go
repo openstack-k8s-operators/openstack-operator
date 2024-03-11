@@ -567,7 +567,7 @@ func (ed *EndpointDetail) CreateRoute(
 			// get the TLSInternalCABundleFile to add it to the route
 			// to be able to validate public/internal service endpoints
 			tlsConfig.DestinationCACertificate, ctrlResult, err = secret.GetDataFromSecret(
-				ctx, helper, *ed.Service.TLS.SecretName, 5, tls.CAKey)
+				ctx, helper, ed.Service.TLS.CaBundleSecretName, 5, tls.InternalCABundleKey)
 			if err != nil {
 				return ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {
