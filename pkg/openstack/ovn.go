@@ -7,7 +7,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -87,7 +86,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 				return false, err
 			}
 		}
-		if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+		if instance.Spec.TLS.PodLevel.Enabled {
 			dbcluster.TLS = OVNDBCluster.Spec.TLS
 		}
 		dbcluster.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
@@ -121,7 +120,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 				return false, nil
 			}
 
-			if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+			if instance.Spec.TLS.PodLevel.Enabled {
 				dbcluster.TLS.SecretName = &certSecret.Name
 			}
 		}
@@ -181,7 +180,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 			return false, err
 		}
 	}
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		ovnNorthdSpec.TLS = OVNNorthd.Spec.TLS
 
 		serviceName := ovnv1.ServiceNameOvnNorthd
@@ -272,7 +271,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 			return false, err
 		}
 	}
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		ovnControllerSpec.TLS = OVNController.Spec.TLS
 
 		serviceName := ovnv1.ServiceNameOvnController

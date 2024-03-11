@@ -58,7 +58,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	// preserve any previously set TLS certs, set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Horizon.Template.TLS = horizon.Spec.TLS
 	}
 	instance.Spec.Horizon.Template.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName

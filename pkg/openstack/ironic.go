@@ -64,7 +64,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	// preserve any previously set TLS certs,set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Ironic.Template.IronicAPI.TLS = ironic.Spec.IronicAPI.TLS
 		instance.Spec.Ironic.Template.IronicInspector.TLS = ironic.Spec.IronicInspector.TLS
 	}

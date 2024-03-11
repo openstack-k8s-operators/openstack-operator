@@ -158,7 +158,7 @@ func reconcileMemcached(
 	Log.Info("Reconciling Memcached", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
 
 	tlsCert := ""
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: tls.DefaultCAPrefix + string(service.EndpointInternal),
 			CertName:   fmt.Sprintf("%s-svc", memcached.Name),

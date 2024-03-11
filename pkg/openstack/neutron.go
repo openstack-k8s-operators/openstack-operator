@@ -59,7 +59,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	// preserve any previously set TLS certs,set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Neutron.Template.TLS = neutronAPI.Spec.TLS
 
 		serviceName := "neutron"

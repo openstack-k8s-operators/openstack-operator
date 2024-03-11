@@ -56,7 +56,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	// preserve any previously set TLS certs, set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Manila.Template.ManilaAPI.TLS = manila.Spec.ManilaAPI.TLS
 	}
 	instance.Spec.Manila.Template.ManilaAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName

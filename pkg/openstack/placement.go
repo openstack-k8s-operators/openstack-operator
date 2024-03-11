@@ -55,7 +55,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 	}
 
 	// set CA cert and preserve any previously set TLS certs
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Placement.Template.TLS = placementAPI.Spec.TLS
 	}
 	instance.Spec.Placement.Template.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
