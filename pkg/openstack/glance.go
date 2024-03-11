@@ -150,20 +150,13 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		if glance.Spec.StorageClass == "" {
 			glance.Spec.StorageClass = instance.Spec.StorageClass
 		}
-		// if already defined at service level (template section), we don't merge
-		// with the global defined extra volumes
-		if len(glance.Spec.ExtraMounts) == 0 {
-
-			var glanceVolumes []glancev1.GlanceExtraVolMounts
-
-			for _, ev := range instance.Spec.ExtraMounts {
-				glanceVolumes = append(glanceVolumes, glancev1.GlanceExtraVolMounts{
-					Name:      ev.Name,
-					Region:    ev.Region,
-					VolMounts: ev.VolMounts,
-				})
-			}
-			glance.Spec.ExtraMounts = glanceVolumes
+		// Append globally defined extraMounts to the service's own list.
+		for _, ev := range instance.Spec.ExtraMounts {
+			glance.Spec.ExtraMounts = append(glance.Spec.ExtraMounts, glancev1.GlanceExtraVolMounts{
+				Name:      ev.Name,
+				Region:    ev.Region,
+				VolMounts: ev.VolMounts,
+			})
 		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), glance, helper.GetScheme())

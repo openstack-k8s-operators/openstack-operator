@@ -143,20 +143,13 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			neutronAPI.Spec.DatabaseInstance = "openstack"
 		}
 
-		// if already defined at service level (template section), we don't merge
-		// with the global defined extra volumes
-		if len(neutronAPI.Spec.ExtraMounts) == 0 {
-
-			var neutronVolumes []neutronv1.NeutronExtraVolMounts
-
-			for _, ev := range instance.Spec.ExtraMounts {
-				neutronVolumes = append(neutronVolumes, neutronv1.NeutronExtraVolMounts{
-					Name:      ev.Name,
-					Region:    ev.Region,
-					VolMounts: ev.VolMounts,
-				})
-			}
-			neutronAPI.Spec.ExtraMounts = neutronVolumes
+		// Append globally defined extraMounts to the service's own list.
+		for _, ev := range instance.Spec.ExtraMounts {
+			neutronAPI.Spec.ExtraMounts = append(neutronAPI.Spec.ExtraMounts, neutronv1.NeutronExtraVolMounts{
+				Name:      ev.Name,
+				Region:    ev.Region,
+				VolMounts: ev.VolMounts,
+			})
 		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), neutronAPI, helper.GetScheme())
 		if err != nil {
