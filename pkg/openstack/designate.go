@@ -90,7 +90,26 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	helper.GetLogger().Info("Reconciling Designate", "Designate.Namespace", instance.Namespace, "Designate.Name", "designate")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), designate, func() error {
-		instance.Spec.Designate.Template.DeepCopyInto(&designate.Spec)
+		// FIXME: the designate structs need some rework (images should be at the top level, not in the sub structs)
+		instance.Spec.Designate.Template.DesignateSpecBase.DeepCopyInto(&designate.Spec.DesignateSpecBase)
+		// API
+		instance.Spec.Designate.Template.DesignateAPI.DesignateAPISpecBase.DeepCopyInto(&designate.Spec.DesignateAPI.DesignateAPISpecBase)
+		instance.Spec.Designate.Template.DesignateAPI.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateAPI.DesignateServiceTemplateCore)
+		// Central
+		instance.Spec.Designate.Template.DesignateCentral.DesignateCentralSpecBase.DeepCopyInto(&designate.Spec.DesignateCentral.DesignateCentralSpecBase)
+		instance.Spec.Designate.Template.DesignateCentral.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateCentral.DesignateServiceTemplateCore)
+		// Worker
+		instance.Spec.Designate.Template.DesignateWorker.DesignateWorkerSpecBase.DeepCopyInto(&designate.Spec.DesignateWorker.DesignateWorkerSpecBase)
+		instance.Spec.Designate.Template.DesignateWorker.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateWorker.DesignateServiceTemplateCore)
+		// Mdns
+		instance.Spec.Designate.Template.DesignateMdns.DesignateMdnsSpecBase.DeepCopyInto(&designate.Spec.DesignateMdns.DesignateMdnsSpecBase)
+		instance.Spec.Designate.Template.DesignateMdns.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateMdns.DesignateServiceTemplateCore)
+		// Producer
+		instance.Spec.Designate.Template.DesignateProducer.DesignateProducerSpecBase.DeepCopyInto(&designate.Spec.DesignateProducer.DesignateProducerSpecBase)
+		instance.Spec.Designate.Template.DesignateProducer.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateProducer.DesignateServiceTemplateCore)
+		// Bind9
+		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateBackendbind9SpecBase.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateBackendbind9SpecBase)
+		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateServiceTemplateCore)
 
 		designate.Spec.DesignateAPI.ContainerImage = *version.Status.ContainerImages.DesignateApiImage
 		designate.Spec.DesignateCentral.ContainerImage = *version.Status.ContainerImages.DesignateCentralImage

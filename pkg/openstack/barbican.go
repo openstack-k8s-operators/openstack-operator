@@ -97,7 +97,10 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 
 	helper.GetLogger().Info("Reconciling Barbican", "Barbican.Namespace", instance.Namespace, "Barbican.Name", "barbican")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), barbican, func() error {
-		instance.Spec.Barbican.Template.DeepCopyInto(&barbican.Spec)
+		instance.Spec.Barbican.Template.BarbicanSpecBase.DeepCopyInto(&barbican.Spec.BarbicanSpecBase)
+		instance.Spec.Barbican.Template.BarbicanAPI.DeepCopyInto(&barbican.Spec.BarbicanAPI.BarbicanAPITemplateCore)
+		instance.Spec.Barbican.Template.BarbicanWorker.DeepCopyInto(&barbican.Spec.BarbicanWorker.BarbicanWorkerTemplateCore)
+		instance.Spec.Barbican.Template.BarbicanKeystoneListener.DeepCopyInto(&barbican.Spec.BarbicanKeystoneListener.BarbicanKeystoneListenerTemplateCore)
 
 		barbican.Spec.BarbicanAPI.ContainerImage = *version.Status.ContainerImages.BarbicanApiImage
 		barbican.Spec.BarbicanWorker.ContainerImage = *version.Status.ContainerImages.BarbicanWorkerImage

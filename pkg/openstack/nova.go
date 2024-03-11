@@ -282,21 +282,12 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec)
 
-		nova.Spec.APIServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaApiImage
-		nova.Spec.MetadataServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaApiImage //metadata uses novaAPI image
-		nova.Spec.SchedulerServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaSchedulerImage
-
-		for _, cellTemplate := range nova.Spec.CellTemplates {
-			cellTemplate.ConductorServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaConductorImage
-			cellTemplate.MetadataServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaApiImage //metadata uses novaAPI image
-			cellTemplate.NoVNCProxyServiceTemplate.ContainerImage = *version.Status.ContainerImages.NovaNovncImage
-
-			for computeName, computeTemplate := range cellTemplate.NovaComputeTemplates {
-				computeTemplate.ContainerImage = *version.Status.ContainerImages.NovaComputeImage
-				cellTemplate.NovaComputeTemplates[computeName] = computeTemplate
-
-			}
-		}
+		nova.Spec.NovaImages.APIContainerImageURL = *version.Status.ContainerImages.NovaApiImage
+		nova.Spec.NovaImages.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
+		nova.Spec.NovaImages.ConductorContainerImageURL = *version.Status.ContainerImages.NovaConductorImage
+		nova.Spec.NovaImages.MetadataContainerImageURL = *version.Status.ContainerImages.NovaApiImage //metadata uses novaAPI image
+		nova.Spec.NovaImages.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
+		nova.Spec.NovaImages.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), nova, helper.GetScheme())
 		if err != nil {

@@ -100,7 +100,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 
 	Log.Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
-		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec)
+		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec.KeystoneAPISpecCore)
 
 		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneApiImage
 		if keystoneAPI.Spec.Secret == "" {

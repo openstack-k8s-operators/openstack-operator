@@ -116,7 +116,11 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	helper.GetLogger().Info("Reconciling Octavia", "Octavia.Namespace", instance.Namespace, "Octavia.Name", octavia.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), octavia, func() error {
-		instance.Spec.Octavia.Template.DeepCopyInto(&octavia.Spec)
+		instance.Spec.Octavia.Template.OctaviaSpecBase.DeepCopyInto(&octavia.Spec.OctaviaSpecBase)
+		instance.Spec.Octavia.Template.OctaviaAPI.DeepCopyInto(&octavia.Spec.OctaviaAPI.OctaviaAPISpecCore)
+		instance.Spec.Octavia.Template.OctaviaHousekeeping.DeepCopyInto(&octavia.Spec.OctaviaHousekeeping.OctaviaAmphoraControllerSpecCore)
+		instance.Spec.Octavia.Template.OctaviaHealthManager.DeepCopyInto(&octavia.Spec.OctaviaHealthManager.OctaviaAmphoraControllerSpecCore)
+		instance.Spec.Octavia.Template.OctaviaWorker.DeepCopyInto(&octavia.Spec.OctaviaWorker.OctaviaAmphoraControllerSpecCore)
 
 		octavia.Spec.OctaviaAPI.ContainerImage = *version.Status.ContainerImages.OctaviaApiImage
 		octavia.Spec.OctaviaWorker.ContainerImage = *version.Status.ContainerImages.OctaviaWorkerImage

@@ -149,7 +149,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 
 	Log.Info("Reconcile heat", "heat.Namespace", instance.Namespace, "heat.Name", "heat")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), heat, func() error {
-		instance.Spec.Heat.Template.DeepCopyInto(&heat.Spec)
+		instance.Spec.Heat.Template.HeatSpecBase.DeepCopyInto(&heat.Spec.HeatSpecBase)
+		instance.Spec.Heat.Template.HeatAPI.DeepCopyInto(&heat.Spec.HeatAPI.HeatAPITemplateCore)
+		instance.Spec.Heat.Template.HeatCfnAPI.DeepCopyInto(&heat.Spec.HeatCfnAPI.HeatCfnAPITemplateCore)
+		instance.Spec.Heat.Template.HeatEngine.DeepCopyInto(&heat.Spec.HeatEngine.HeatEngineTemplateCore)
 
 		heat.Spec.HeatAPI.ContainerImage = *version.Status.ContainerImages.HeatApiImage
 		heat.Spec.HeatCfnAPI.ContainerImage = *version.Status.ContainerImages.HeatCfnapiImage

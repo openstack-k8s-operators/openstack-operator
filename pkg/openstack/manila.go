@@ -101,7 +101,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), manila, func() error {
-		instance.Spec.Manila.Template.DeepCopyInto(&manila.Spec)
+		instance.Spec.Manila.Template.ManilaSpecBase.DeepCopyInto(&manila.Spec.ManilaSpecBase)
+		instance.Spec.Manila.Template.ManilaAPI.DeepCopyInto(&manila.Spec.ManilaAPI.ManilaAPITemplateCore)
+		instance.Spec.Manila.Template.ManilaScheduler.DeepCopyInto(&manila.Spec.ManilaScheduler.ManilaSchedulerTemplateCore)
+
 		manila.Spec.ManilaAPI.ContainerImage = *version.Status.ContainerImages.ManilaApiImage
 		manila.Spec.ManilaScheduler.ContainerImage = *version.Status.ContainerImages.ManilaSchedulerImage
 
@@ -110,6 +113,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			return errors.New("default Manila Share images is unset")
 		}
 		for name, share := range manila.Spec.ManilaShares {
+			templateCore := share.ManilaShareTemplateCore
+			instanceCore := instance.Spec.Manila.Template.ManilaShares[name]
+			instanceCore.DeepCopyInto(&templateCore)
+
 			if volVal, ok := version.Status.ContainerImages.ManilaShareImages[name]; ok {
 				share.ContainerImage = *volVal
 			} else {

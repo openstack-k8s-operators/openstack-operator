@@ -210,7 +210,8 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			Log.Info("Minor update Controlplane is not in ready condition, waiting")
 			return ctrl.Result{}, nil
 		}
-		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerImage, instance.Status.ContainerImages.OvnControllerImage) {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerImage, instance.Status.ContainerImages.OvnControllerImage) ||
+			controlPlane.Status.Conditions.IsFalse(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
 				condition.RequestedReason,

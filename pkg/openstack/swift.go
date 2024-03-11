@@ -100,7 +100,10 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 
 	Log.Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), swift, func() error {
-		instance.Spec.Swift.Template.DeepCopyInto(&swift.Spec)
+		instance.Spec.Swift.Template.SwiftSpecBase.DeepCopyInto(&swift.Spec.SwiftSpecBase)
+		instance.Spec.Swift.Template.SwiftProxy.DeepCopyInto(&swift.Spec.SwiftProxy.SwiftProxySpecCore)
+		instance.Spec.Swift.Template.SwiftStorage.DeepCopyInto(&swift.Spec.SwiftStorage.SwiftStorageSpecCore)
+		instance.Spec.Swift.Template.SwiftRing.DeepCopyInto(&swift.Spec.SwiftRing.SwiftRingSpecCore)
 
 		swift.Spec.SwiftRing.ContainerImage = *version.Status.ContainerImages.SwiftProxyImage
 		swift.Spec.SwiftStorage.ContainerImageAccount = *version.Status.ContainerImages.SwiftAccountImage

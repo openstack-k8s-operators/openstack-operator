@@ -106,7 +106,8 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	Log.Info("Reconcile Horizon", "horizon.Namespace", instance.Namespace, "horizon.Name", "horizon")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), horizon, func() error {
-		instance.Spec.Horizon.Template.DeepCopyInto(&horizon.Spec)
+		instance.Spec.Horizon.Template.DeepCopyInto(&horizon.Spec.HorizonSpecCore)
+
 		horizon.Spec.ContainerImage = *version.Status.ContainerImages.HorizonImage
 		horizon.Spec.Override.Service = ptr.To(serviceOverrides[service.EndpointPublic])
 

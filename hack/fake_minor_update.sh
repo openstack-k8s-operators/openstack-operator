@@ -7,4 +7,3 @@ sed -i csv.yaml -e "s|value: .*quay.io/podified-antelope-centos9/\(.*\)@.*|value
 # also bump the OPENSTACK_RELEASE_VERSION value (it is the only field set like this)
 sed -i csv.yaml -e "s|value: 0.0.1|value: 0.0.2|"
 oc apply -n openstack-operators -f csv.yaml
-

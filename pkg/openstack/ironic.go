@@ -147,7 +147,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	Log.Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ironic, func() error {
-		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec)
+		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec.IronicSpecCore)
 
 		ironic.Spec.Images.API = *version.Status.ContainerImages.IronicApiImage
 		ironic.Spec.Images.Conductor = *version.Status.ContainerImages.IronicConductorImage

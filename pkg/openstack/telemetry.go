@@ -102,7 +102,9 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	helper.GetLogger().Info("Reconciling Telemetry", telemetryNamespaceLabel, instance.Namespace, telemetryNameLabel, telemetryName)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), telemetry, func() error {
-		instance.Spec.Telemetry.Template.DeepCopyInto(&telemetry.Spec)
+		instance.Spec.Telemetry.Template.TelemetrySpecBase.DeepCopyInto(&telemetry.Spec.TelemetrySpecBase)
+		instance.Spec.Telemetry.Template.Autoscaling.AutoscalingSpecBase.DeepCopyInto(&telemetry.Spec.Autoscaling.AutoscalingSpecBase)
+		instance.Spec.Telemetry.Template.Ceilometer.CeilometerSpecCore.DeepCopyInto(&telemetry.Spec.Ceilometer.CeilometerSpecCore)
 
 		telemetry.Spec.Ceilometer.CentralImage = *version.Status.ContainerImages.CeilometerCentralImage
 		telemetry.Spec.Ceilometer.ComputeImage = *version.Status.ContainerImages.CeilometerComputeImage

@@ -100,7 +100,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), cinder, func() error {
-		instance.Spec.Cinder.Template.DeepCopyInto(&cinder.Spec)
+		instance.Spec.Cinder.Template.CinderSpecBase.DeepCopyInto(&cinder.Spec.CinderSpecBase)
+		instance.Spec.Cinder.Template.CinderAPI.DeepCopyInto(&cinder.Spec.CinderAPI.CinderAPITemplateCore)
+		instance.Spec.Cinder.Template.CinderScheduler.DeepCopyInto(&cinder.Spec.CinderScheduler.CinderSchedulerTemplateCore)
+		instance.Spec.Cinder.Template.CinderBackup.DeepCopyInto(&cinder.Spec.CinderBackup.CinderBackupTemplateCore)
 
 		cinder.Spec.CinderAPI.ContainerImage = *version.Status.ContainerImages.CinderApiImage
 		cinder.Spec.CinderScheduler.ContainerImage = *version.Status.ContainerImages.CinderSchedulerImage
@@ -111,6 +114,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			return errors.New("default Cinder Volume images is unset")
 		}
 		for name, volume := range cinder.Spec.CinderVolumes {
+			templateCore := volume.CinderVolumeTemplateCore
+			instanceCore := instance.Spec.Cinder.Template.CinderVolumes[name]
+			instanceCore.DeepCopyInto(&templateCore)
+
 			if volVal, ok := version.Status.ContainerImages.CinderVolumeImages[name]; ok {
 				volume.ContainerImage = *volVal
 			} else {

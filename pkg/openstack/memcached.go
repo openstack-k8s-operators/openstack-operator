@@ -137,7 +137,7 @@ func reconcileMemcached(
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
-	spec *memcachedv1.MemcachedSpec,
+	spec *memcachedv1.MemcachedSpecCore,
 ) (memcachedStatus, ctrl.Result, error) {
 	memcached := &memcachedv1.Memcached{
 		ObjectMeta: metav1.ObjectMeta{
@@ -189,7 +189,7 @@ func reconcileMemcached(
 	}
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), memcached, func() error {
-		spec.DeepCopyInto(&memcached.Spec)
+		spec.DeepCopyInto(&memcached.Spec.MemcachedSpecCore)
 
 		if tlsCert != "" {
 			memcached.Spec.TLS.SecretName = ptr.To(tlsCert)

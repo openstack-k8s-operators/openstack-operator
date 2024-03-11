@@ -134,13 +134,13 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		Log.Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
 		op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNDBCluster, func() error {
 
-			dbcluster.DeepCopyInto(&OVNDBCluster.Spec)
+			dbcluster.DeepCopyInto(&OVNDBCluster.Spec.OVNDBClusterSpecCore)
 
 			// we always set these to match OpenStackVersion
 			if dbcluster.DBType == ovnv1.NBDBType {
-				dbcluster.ContainerImage = *version.Status.ContainerImages.OvnNbDbclusterImage
+				OVNDBCluster.Spec.ContainerImage = *version.Status.ContainerImages.OvnNbDbclusterImage
 			} else if dbcluster.DBType == ovnv1.SBDBType {
-				dbcluster.ContainerImage = *version.Status.ContainerImages.OvnSbDbclusterImage
+				OVNDBCluster.Spec.ContainerImage = *version.Status.ContainerImages.OvnSbDbclusterImage
 			}
 
 			if OVNDBCluster.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
@@ -235,7 +235,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 	Log.Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNNorthd, func() error {
 
-		instance.Spec.Ovn.Template.OVNNorthd.DeepCopyInto(&OVNNorthd.Spec)
+		instance.Spec.Ovn.Template.OVNNorthd.DeepCopyInto(&OVNNorthd.Spec.OVNNorthdSpecCore)
 
 		OVNNorthd.Spec.ContainerImage = *version.Status.ContainerImages.OvnNorthdImage
 
@@ -331,7 +331,8 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 	Log.Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {
 
-		instance.Spec.Ovn.Template.OVNController.DeepCopyInto(&OVNController.Spec)
+		instance.Spec.Ovn.Template.OVNController.DeepCopyInto(&OVNController.Spec.OVNControllerSpecCore)
+
 		OVNController.Spec.OvnContainerImage = *version.Status.ContainerImages.OvnControllerImage
 		OVNController.Spec.OvsContainerImage = *version.Status.ContainerImages.OvnControllerOvsImage
 

@@ -125,7 +125,7 @@ func reconcileGalera(
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
-	spec *mariadbv1.GaleraSpec,
+	spec *mariadbv1.GaleraSpecCore,
 ) (galeraStatus, error) {
 	galera := &mariadbv1.Galera{
 		ObjectMeta: metav1.ObjectMeta{
@@ -145,7 +145,7 @@ func reconcileGalera(
 
 	Log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
-		spec.DeepCopyInto(&galera.Spec)
+		spec.DeepCopyInto(&galera.Spec.GaleraSpecCore)
 		galera.Spec.ContainerImage = *version.Status.ContainerImages.MariadbImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), galera, helper.GetScheme())
 		if err != nil {

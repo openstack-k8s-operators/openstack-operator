@@ -98,7 +98,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 
 	Log.Info("Reconciling PlacementAPI", "PlacementAPI.Namespace", instance.Namespace, "PlacementAPI.Name", "placement")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), placementAPI, func() error {
-		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec)
+		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec.PlacementAPISpecCore)
 
 		placementAPI.Spec.ContainerImage = *version.Status.ContainerImages.PlacementApiImage
 		if placementAPI.Spec.Secret == "" {

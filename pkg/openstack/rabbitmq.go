@@ -180,7 +180,7 @@ func reconcileRabbitMQ(
 							Name: "rabbitmq",
 							// NOTE(gibi): without this the second RabbitMqCluster
 							// will fail as the Pod will have no image.
-							Image: spec.Image,
+							Image: *version.Status.ContainerImages.RabbitmqImage,
 							Env:   envVars,
 							Args: []string{
 								// OSP17 runs kolla_start here, instead just run rabbitmq-server directly
@@ -226,9 +226,25 @@ func reconcileRabbitMQ(
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 
-		spec.RabbitmqClusterSpec.DeepCopyInto(&rabbitmq.Spec)
-
 		rabbitmq.Spec.Image = *version.Status.ContainerImages.RabbitmqImage
+		rabbitmq.Spec.Replicas = spec.Replicas
+		rabbitmq.Spec.Tolerations = spec.Tolerations
+		rabbitmq.Spec.SkipPostDeploySteps = spec.SkipPostDeploySteps
+		rabbitmq.Spec.TerminationGracePeriodSeconds = spec.TerminationGracePeriodSeconds
+		rabbitmq.Spec.DelayStartSeconds = spec.DelayStartSeconds
+		spec.Service.DeepCopyInto(&rabbitmq.Spec.Service)
+		spec.Persistence.DeepCopyInto(&rabbitmq.Spec.Persistence)
+		spec.Override.DeepCopyInto(&rabbitmq.Spec.Override)
+		spec.SecretBackend.DeepCopyInto(&rabbitmq.Spec.SecretBackend)
+		if spec.Resources != nil {
+			rabbitmq.Spec.Resources = spec.Resources
+			//spec.Resources.DeepCopyInto(rabbitmq.Spec.Resources)
+		}
+		if spec.Affinity != nil {
+			rabbitmq.Spec.Affinity = spec.Affinity
+			//spec.Affinity.DeepCopyInto(rabbitmq.Spec.Affinity)
+		}
+
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
 			Log.Info(fmt.Sprintf("Setting StorageClassName: " + instance.Spec.StorageClass))
 			rabbitmq.Spec.Persistence.StorageClassName = &instance.Spec.StorageClass
