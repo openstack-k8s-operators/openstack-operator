@@ -173,7 +173,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			helper,
 			nova.Namespace,
 			instance.Spec.Nova.Template.MetadataServiceTemplate.Override.Service.Labels,
-			tls.DefaultCAPrefix+string(service.EndpointInternal))
+			tls.DefaultCAPrefix+string(service.EndpointInternal),
+			nil)
 		if err != nil && !k8s_errors.IsNotFound(err) {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
@@ -195,7 +196,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				helper,
 				nova.Namespace,
 				cellTemplate.MetadataServiceTemplate.Override.Service.Labels,
-				tls.DefaultCAPrefix+string(service.EndpointInternal))
+				tls.DefaultCAPrefix+string(service.EndpointInternal),
+				nil)
 			if err != nil && !k8s_errors.IsNotFound(err) {
 				return ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {

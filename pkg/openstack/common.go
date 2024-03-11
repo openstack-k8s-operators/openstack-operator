@@ -286,7 +286,8 @@ func EnsureEndpointConfig(
 					certSecret, ctrlResult, err := certmanager.EnsureCert(
 						ctx,
 						helper,
-						certRequest)
+						certRequest,
+						nil)
 					if err != nil {
 						return endpoints, ctrlResult, err
 					} else if (ctrlResult != ctrl.Result{}) {
@@ -327,7 +328,8 @@ func EnsureEndpointConfig(
 				certSecret, ctrlResult, err := certmanager.EnsureCert(
 					ctx,
 					helper,
-					certRequest)
+					certRequest,
+					nil)
 				if err != nil {
 					return endpoints, ctrlResult, err
 				} else if (ctrlResult != ctrl.Result{}) {
@@ -545,7 +547,8 @@ func (ed *EndpointDetail) CreateRoute(
 			certSecret, ctrlResult, err = certmanager.EnsureCert(
 				ctx,
 				helper,
-				certRequest)
+				certRequest,
+				nil)
 			if err != nil {
 				return ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {
