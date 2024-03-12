@@ -190,9 +190,9 @@ func reconcileMemcached(
 		spec.DeepCopyInto(&memcached.Spec)
 
 		if tlsCert != "" {
-			memcached.Spec.TLS.CaBundleSecretName = tls.CABundleSecret
 			memcached.Spec.TLS.SecretName = ptr.To(tlsCert)
 		}
+		memcached.Spec.TLS.CaBundleSecretName = tls.CABundleSecret
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), memcached, helper.GetScheme())
 		if err != nil {
