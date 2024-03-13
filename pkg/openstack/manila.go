@@ -112,20 +112,13 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			//manila.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
 			manila.Spec.DatabaseInstance = "openstack" //FIXME: see above
 		}
-		// if already defined at service level (template section), we don't merge
-		// with the global defined extra volumes
-		if len(manila.Spec.ExtraMounts) == 0 {
-
-			var manilaVolumes []manilav1.ManilaExtraVolMounts
-
-			for _, ev := range instance.Spec.ExtraMounts {
-				manilaVolumes = append(manilaVolumes, manilav1.ManilaExtraVolMounts{
-					Name:      ev.Name,
-					Region:    ev.Region,
-					VolMounts: ev.VolMounts,
-				})
-			}
-			manila.Spec.ExtraMounts = manilaVolumes
+		// Append globally defined extraMounts to the service's own list.
+		for _, ev := range instance.Spec.ExtraMounts {
+			manila.Spec.ExtraMounts = append(manila.Spec.ExtraMounts, manilav1.ManilaExtraVolMounts{
+				Name:      ev.Name,
+				Region:    ev.Region,
+				VolMounts: ev.VolMounts,
+			})
 		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), manila, helper.GetScheme())
 		if err != nil {

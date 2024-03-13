@@ -111,20 +111,13 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			//cinder.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
 			cinder.Spec.DatabaseInstance = "openstack" //FIXME: see above
 		}
-		// if already defined at service level (template section), we don't merge
-		// with the global defined extra volumes
-		if len(cinder.Spec.ExtraMounts) == 0 {
-
-			var cinderVolumes []cinderv1.CinderExtraVolMounts
-
-			for _, ev := range instance.Spec.ExtraMounts {
-				cinderVolumes = append(cinderVolumes, cinderv1.CinderExtraVolMounts{
-					Name:      ev.Name,
-					Region:    ev.Region,
-					VolMounts: ev.VolMounts,
-				})
-			}
-			cinder.Spec.ExtraMounts = cinderVolumes
+		// Append globally defined extraMounts to the service's own list.
+		for _, ev := range instance.Spec.ExtraMounts {
+			cinder.Spec.ExtraMounts = append(cinder.Spec.ExtraMounts, cinderv1.CinderExtraVolMounts{
+				Name:      ev.Name,
+				Region:    ev.Region,
+				VolMounts: ev.VolMounts,
+			})
 		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), cinder, helper.GetScheme())
 		if err != nil {
