@@ -30,7 +30,6 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -821,18 +820,4 @@ func SetupDefaults() {
 	}
 
 	SetupOpenStackControlPlaneDefaults(openstackControlPlaneDefaults)
-}
-
-// Enabled - returns status of tls configuration for the passed in endpoint type
-func (t *TLSSection) Enabled(endpt service.Endpoint) bool {
-	if t != nil {
-		switch endpt {
-		case service.EndpointPublic:
-			return t.Ingress.Enabled
-
-		case service.EndpointInternal:
-			return t.PodLevel.Enabled
-		}
-	}
-	return false
 }

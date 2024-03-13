@@ -57,7 +57,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	}
 
 	// preserve any previously set TLS certs,set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Keystone.Template.TLS = keystoneAPI.Spec.TLS
 	}
 	instance.Spec.Keystone.Template.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName

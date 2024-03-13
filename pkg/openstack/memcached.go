@@ -6,13 +6,17 @@ import (
 	"strings"
 
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -81,8 +85,11 @@ func ReconcileMemcacheds(
 	}
 
 	// then reconcile ones listed in spec
+	var ctrlResult ctrl.Result
+	var err error
+	var status memcachedStatus
 	for name, spec := range instance.Spec.Memcached.Templates {
-		status, err := reconcileMemcached(ctx, instance, helper, name, &spec)
+		status, ctrlResult, err = reconcileMemcached(ctx, instance, helper, name, &spec)
 
 		switch status {
 		case memcachedFailed:
@@ -105,7 +112,7 @@ func ReconcileMemcacheds(
 			corev1beta1.OpenStackControlPlaneMemcachedReadyErrorMessage,
 			errors))
 
-		return ctrl.Result{}, fmt.Errorf(errors)
+		return ctrlResult, fmt.Errorf(errors)
 
 	} else if len(inprogress) > 0 {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -120,7 +127,7 @@ func ReconcileMemcacheds(
 		)
 	}
 
-	return ctrl.Result{}, nil
+	return ctrlResult, nil
 }
 
 // reconcileMemcached -
@@ -130,7 +137,7 @@ func reconcileMemcached(
 	helper *helper.Helper,
 	name string,
 	spec *memcachedv1.MemcachedSpec,
-) (memcachedStatus, error) {
+) (memcachedStatus, ctrl.Result, error) {
 	memcached := &memcachedv1.Memcached{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -142,15 +149,51 @@ func reconcileMemcached(
 
 	if !instance.Spec.Memcached.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, memcached); err != nil {
-			return memcachedFailed, err
+			return memcachedFailed, ctrl.Result{}, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneMemcachedReadyCondition)
-		return memcachedReady, nil
+		return memcachedReady, ctrl.Result{}, nil
 	}
 
 	Log.Info("Reconciling Memcached", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
+
+	tlsCert := ""
+	if instance.Spec.TLS.PodLevel.Enabled {
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: tls.DefaultCAPrefix + string(service.EndpointInternal),
+			CertName:   fmt.Sprintf("%s-svc", memcached.Name),
+			Hostnames: []string{
+				fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
+				fmt.Sprintf("*.%s.%s.svc", name, instance.Namespace),
+			},
+		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore.Duration
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest)
+		if err != nil {
+			return memcachedFailed, ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return memcachedCreating, ctrlResult, nil
+		}
+
+		tlsCert = certSecret.Name
+	}
+
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), memcached, func() error {
 		spec.DeepCopyInto(&memcached.Spec)
+
+		if tlsCert != "" {
+			memcached.Spec.TLS.SecretName = ptr.To(tlsCert)
+		}
+		memcached.Spec.TLS.CaBundleSecretName = tls.CABundleSecret
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), memcached, helper.GetScheme())
 		if err != nil {
 			return err
@@ -160,15 +203,15 @@ func reconcileMemcached(
 	})
 
 	if err != nil {
-		return memcachedFailed, err
+		return memcachedFailed, ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("Memcached %s - %s", memcached.Name, op))
 	}
 
 	if memcached.IsReady() {
-		return memcachedReady, nil
+		return memcachedReady, ctrl.Result{}, nil
 	}
 
-	return memcachedCreating, nil
+	return memcachedCreating, ctrl.Result{}, nil
 }

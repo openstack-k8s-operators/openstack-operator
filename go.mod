@@ -21,7 +21,7 @@ require (
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240304130922-946bc7dd0996
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240308113717-eaf5876d69c3
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240229174131-28e3aee56d91
-	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240307113114-033a606862c3
+	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240310093110-b4b2614f40ba
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240306153230-dc65ab49ebc0
@@ -67,7 +67,7 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 // indirect
-	github.com/gophercloud/gophercloud v1.10.0 // indirect
+	github.com/gophercloud/gophercloud v1.11.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0 // indirect

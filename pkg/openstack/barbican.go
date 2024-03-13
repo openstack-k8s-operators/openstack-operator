@@ -54,7 +54,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 	}
 
 	// preserve any previously set TLS certs, set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Barbican.Template.BarbicanAPI.TLS = barbican.Spec.BarbicanAPI.TLS
 	}
 	instance.Spec.Barbican.Template.BarbicanAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName

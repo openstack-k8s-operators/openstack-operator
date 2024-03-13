@@ -56,7 +56,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	// preserve any previously set TLS certs,set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Cinder.Template.CinderAPI.TLS = cinder.Spec.CinderAPI.TLS
 	}
 	instance.Spec.Cinder.Template.CinderAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName

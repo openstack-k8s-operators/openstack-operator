@@ -67,7 +67,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	}
 
 	// preserve any previously set TLS certs,set CA cert
-	if instance.Spec.TLS.Enabled(service.EndpointInternal) {
+	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Heat.Template.HeatAPI.TLS = heat.Spec.HeatAPI.TLS
 		instance.Spec.Heat.Template.HeatCfnAPI.TLS = heat.Spec.HeatCfnAPI.TLS
 	}
