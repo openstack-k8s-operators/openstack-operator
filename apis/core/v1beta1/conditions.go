@@ -108,6 +108,9 @@ const (
 	// OpenStackControlPlaneTelemetryReadyCondition Status=True condition which indicates if OpenStack Telemetry service is configured and operational
 	OpenStackControlPlaneTelemetryReadyCondition condition.Type = "OpenStackControlPlaneTelemetryReady"
 
+	// OpenStackControlPlaneExposeTelemetryReadyCondition Status=True condition which indicates if Telemetry is exposed via a route
+	OpenStackControlPlaneExposeTelemetryReadyCondition condition.Type = "OpenStackControlPlaneExposeTelemetryReady"
+
 	// OpenStackControlPlaneServiceOverrideReadyCondition Status=True condition which indicates if OpenStack service override has created ok
 	OpenStackControlPlaneServiceOverrideReadyCondition condition.Type = "OpenStackControlPlaneServiceOverrideReady"
 

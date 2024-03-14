@@ -6,6 +6,7 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
@@ -36,6 +37,59 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneTelemetryReadyCondition)
 		return ctrl.Result{}, nil
+	}
+
+	// add selector to service overrides
+	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
+		if instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service == nil {
+			instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service = make(map[service.Endpoint]service.RoutedOverrideSpec)
+		}
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service[endpointType] =
+			AddServiceOpenStackOperatorLabel(
+				instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service[endpointType],
+				telemetry.Name)
+	}
+
+	// preserve any previously set TLS certs, set CA cert
+	if instance.Spec.TLS.PodLevel.Enabled {
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
+	}
+	instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
+	svcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		GetServiceOpenStackOperatorLabel(telemetry.Name),
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// make sure to get to EndpointConfig when all service got created
+	if len(svcs.Items) == len(instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service) {
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+			ctx,
+			instance,
+			helper,
+			telemetry,
+			svcs,
+			instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service,
+			instance.Spec.Telemetry.APIOverride,
+			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		// set service overrides
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+		// update TLS settings with cert secret
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	helper.GetLogger().Info("Reconciling Telemetry", telemetryNamespaceLabel, instance.Namespace, telemetryNameLabel, telemetryName)
