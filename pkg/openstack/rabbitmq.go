@@ -9,6 +9,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/ocp"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -113,6 +114,57 @@ func reconcileRabbitMQ(
 		return mqReady, ctrl.Result{}, nil
 	}
 
+	envVars := []corev1.EnvVar{
+		{
+			// The upstream rabbitmq image has /var/log/rabbitmq mode 777, so when
+			// openshift runs the rabbitmq container as a random uid it can still write
+			// the logs there.  The OSP image however has the directory more constrained,
+			// so the random uid cannot write the logs there.  Force it into /var/lib
+			// where it can create the file without crashing.
+			Name:  "RABBITMQ_UPGRADE_LOG",
+			Value: "/var/lib/rabbitmq/rabbitmq_upgrade.log",
+		},
+		{
+			// For some reason HOME needs to be explictly set here even though the entry
+			// for the random user in /etc/passwd has the correct homedir set.
+			Name:  "HOME",
+			Value: "/var/lib/rabbitmq",
+		},
+		{
+			// The various /usr/sbin/rabbitmq* scripts are really all the same
+			// wrapper shell-script that performs some "sanity checks" and then
+			// invokes the corresponding "real" program in
+			// /usr/lib/rabbitmq/bin.  The main "sanity check" is to ensure that
+			// the user running the command is either root or rabbitmq.  Inside
+			// of an openshift pod, however, the user is neither of these, so
+			// the wrapper script will always fail.
+
+			// By putting the real programs ahead of the wrapper in PATH we can
+			// avoid the unnecessary check and just run things directly as
+			// whatever user the pod has graciously generated for us.
+			Name:  "PATH",
+			Value: "/usr/lib/rabbitmq/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+		},
+	}
+
+	if instance.Spec.TLS.PodLevel.Enabled {
+		fipsEnabled, err := ocp.IsFipsCluster(ctx, helper)
+		if err != nil {
+			return mqFailed, ctrl.Result{}, err
+		}
+		if fipsEnabled {
+			fipsModeStr := "-crypto fips_mode true"
+
+			envVars = append(envVars, corev1.EnvVar{
+				Name:  "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS",
+				Value: fipsModeStr,
+			}, corev1.EnvVar{
+				Name:  "RABBITMQ_CTL_ERL_ARGS",
+				Value: fipsModeStr,
+			})
+		}
+	}
+
 	defaultStatefulSet := rabbitmqv2.StatefulSet{
 		Spec: &rabbitmqv2.StatefulSetSpec{
 			Template: &rabbitmqv2.PodTemplateSpec{
@@ -127,38 +179,7 @@ func reconcileRabbitMQ(
 							// NOTE(gibi): without this the second RabbitMqCluster
 							// will fail as the Pod will have no image.
 							Image: spec.Image,
-							Env: []corev1.EnvVar{
-								{
-									// The upstream rabbitmq image has /var/log/rabbitmq mode 777, so when
-									// openshift runs the rabbitmq container as a random uid it can still write
-									// the logs there.  The OSP image however has the directory more constrained,
-									// so the random uid cannot write the logs there.  Force it into /var/lib
-									// where it can create the file without crashing.
-									Name:  "RABBITMQ_UPGRADE_LOG",
-									Value: "/var/lib/rabbitmq/rabbitmq_upgrade.log",
-								},
-								{
-									// For some reason HOME needs to be explictly set here even though the entry
-									// for the random user in /etc/passwd has the correct homedir set.
-									Name:  "HOME",
-									Value: "/var/lib/rabbitmq",
-								},
-								{
-									// The various /usr/sbin/rabbitmq* scripts are really all the same
-									// wrapper shell-script that performs some "sanity checks" and then
-									// invokes the corresponding "real" program in
-									// /usr/lib/rabbitmq/bin.  The main "sanity check" is to ensure that
-									// the user running the command is either root or rabbitmq.  Inside
-									// of an openshift pod, however, the user is neither of these, so
-									// the wrapper script will always fail.
-
-									// By putting the real programs ahead of the wrapper in PATH we can
-									// avoid the unnecessary check and just run things directly as
-									// whatever user the pod has graciously generated for us.
-									Name:  "PATH",
-									Value: "/usr/lib/rabbitmq/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-								},
-							},
+							Env:   envVars,
 							Args: []string{
 								// OSP17 runs kolla_start here, instead just run rabbitmq-server directly
 								"/usr/lib/rabbitmq/bin/rabbitmq-server",
