@@ -65,7 +65,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		serviceName := "neutron"
 		// create ovndb client certificate for neutron
 		certRequest := certmanager.CertificateRequest{
-			IssuerName: OvnDbCaName,
+			IssuerName: instance.GetOvnIssuer(),
 			CertName:   fmt.Sprintf("%s-ovndbs", serviceName),
 			Duration:   nil,
 			Hostnames: []string{

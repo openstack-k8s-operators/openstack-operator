@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -25,10 +26,7 @@ import (
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
-)
-
-const (
-	OvnDbCaName = tls.DefaultCAPrefix + "ovn"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ReconcileCAs -
@@ -99,57 +97,128 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	instance.Status.TLS.CAList = []corev1.TLSCAStatus{}
 	// create CA for ingress and public podLevel termination
-	ctrlResult, err = ensureRootCA(
-		ctx,
-		instance,
-		helper,
-		issuerReq,
-		tls.DefaultCAPrefix+string(service.EndpointPublic),
-		map[string]string{},
-		bundle,
-		caOnlyBundle,
-		instance.Spec.TLS.Ingress.Ca,
-	)
-	if err != nil {
-		return ctrlResult, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
+	issuerLabels := map[string]string{certmanager.RootCAIssuerPublicLabel: ""}
+	if !instance.Spec.TLS.Ingress.Ca.IsCustomIssuer() {
+		ctrlResult, err = ensureRootCA(
+			ctx,
+			instance,
+			helper,
+			issuerReq,
+			tls.DefaultCAPrefix+string(service.EndpointPublic),
+			issuerLabels,
+			bundle,
+			caOnlyBundle,
+			instance.Spec.TLS.Ingress.Ca.CertConfig,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+	} else {
+		// add CA labelselector to issuer
+		caCertSecretName, err := addIssuerLabel(ctx, helper, *instance.Spec.TLS.Ingress.Ca.CustomIssuer, instance.Namespace, issuerLabels)
+		if err != nil {
+			return ctrlResult, err
+		}
+
+		caCert, ctrlResult, err := getCAFromSecret(ctx, instance, helper, caCertSecretName)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		ctrlResult, err = ensureCaBundles(
+			instance,
+			*instance.Spec.TLS.Ingress.Ca.CustomIssuer,
+			caCert,
+			bundle,
+			caOnlyBundle,
+		)
 	}
 
 	// create CA for internal podLevel termination
-	ctrlResult, err = ensureRootCA(
-		ctx,
-		instance,
-		helper,
-		issuerReq,
-		tls.DefaultCAPrefix+string(service.EndpointInternal),
-		map[string]string{certmanager.RootCAIssuerInternalLabel: ""},
-		bundle,
-		caOnlyBundle,
-		instance.Spec.TLS.PodLevel.Internal.Ca,
-	)
-	if err != nil {
-		return ctrlResult, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
+	issuerLabels = map[string]string{certmanager.RootCAIssuerInternalLabel: ""}
+	if !instance.Spec.TLS.PodLevel.Internal.Ca.IsCustomIssuer() {
+		ctrlResult, err = ensureRootCA(
+			ctx,
+			instance,
+			helper,
+			issuerReq,
+			tls.DefaultCAPrefix+string(service.EndpointInternal),
+			issuerLabels,
+			bundle,
+			caOnlyBundle,
+			instance.Spec.TLS.PodLevel.Internal.Ca.CertConfig,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+	} else {
+		// add CA labelselector to issuer
+		caCertSecretName, err := addIssuerLabel(ctx, helper, *instance.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer, instance.Namespace, issuerLabels)
+		if err != nil {
+			return ctrlResult, err
+		}
+
+		caCert, ctrlResult, err := getCAFromSecret(ctx, instance, helper, caCertSecretName)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		ctrlResult, err = ensureCaBundles(
+			instance,
+			*instance.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer,
+			caCert,
+			bundle,
+			caOnlyBundle,
+		)
 	}
 
 	// create CA for ovn
-	ctrlResult, err = ensureRootCA(
-		ctx,
-		instance,
-		helper,
-		issuerReq,
-		OvnDbCaName,
-		map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""},
-		bundle,
-		caOnlyBundle,
-		instance.Spec.TLS.PodLevel.Ovn.Ca,
-	)
-	if err != nil {
-		return ctrlResult, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
+	if !instance.Spec.TLS.PodLevel.Ovn.Ca.IsCustomIssuer() {
+		ctrlResult, err = ensureRootCA(
+			ctx,
+			instance,
+			helper,
+			issuerReq,
+			corev1.OvnDbCaName,
+			map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""},
+			bundle,
+			caOnlyBundle,
+			instance.Spec.TLS.PodLevel.Ovn.Ca.CertConfig,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+	} else {
+		// add CA labelselector to issuer
+		caCertSecretName, err := addIssuerLabel(ctx, helper, *instance.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer, instance.Namespace, issuerLabels)
+		if err != nil {
+			return ctrlResult, err
+		}
+
+		caCert, ctrlResult, err := getCAFromSecret(ctx, instance, helper, caCertSecretName)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		ctrlResult, err = ensureCaBundles(
+			instance,
+			*instance.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer,
+			caCert,
+			bundle,
+			caOnlyBundle,
+		)
 	}
 
 	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
@@ -272,7 +341,24 @@ func ensureRootCA(
 		return ctrlResult, nil
 	}
 
-	err = bundle.getCertsFromPEM(caCert)
+	return ensureCaBundles(
+		instance,
+		caName,
+		caCert,
+		bundle,
+		caOnlyBundle,
+	)
+}
+
+func ensureCaBundles(
+	instance *corev1.OpenStackControlPlane,
+	caName string,
+	caCert []byte,
+	bundle *caBundle,
+	caOnlyBundle *caBundle,
+) (ctrl.Result, error) {
+
+	err := bundle.getCertsFromPEM(caCert)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -520,4 +606,56 @@ func (cab *caBundle) getBundlePEM() string {
 	}
 
 	return bundleData
+}
+
+func addIssuerLabel(
+	ctx context.Context,
+	helper *helper.Helper,
+	name string,
+	namespace string,
+	labels map[string]string,
+) (string, error) {
+	var caCertSecretName string
+	// get  issuer
+	issuer, err := certmanager.GetIssuerByName(
+		ctx,
+		helper,
+		name,
+		namespace,
+	)
+	if err != nil {
+		return caCertSecretName, err
+	}
+
+	caCertSecretName = issuer.Spec.CA.SecretName
+
+	beforeIssuer := issuer.DeepCopyObject().(client.Object)
+	// merge labels
+	issuer.Labels = util.MergeMaps(issuer.Labels, labels)
+
+	// patch issuer
+	patch := client.MergeFrom(beforeIssuer)
+	diff, err := patch.Data(issuer)
+	if err != nil {
+		return caCertSecretName, err
+	}
+
+	// Unmarshal patch data into a local map for logging
+	patchDiff := map[string]interface{}{}
+	if err := json.Unmarshal(diff, &patchDiff); err != nil {
+		return caCertSecretName, err
+	}
+
+	if _, ok := patchDiff["metadata"]; ok {
+		err = helper.GetClient().Patch(ctx, issuer, patch)
+		if k8s_errors.IsConflict(err) {
+			return caCertSecretName, fmt.Errorf("error metadata update conflict: %w", err)
+		} else if err != nil && !k8s_errors.IsNotFound(err) {
+			return caCertSecretName, fmt.Errorf("error metadata update failed: %w", err)
+		}
+
+		helper.GetLogger().Info(fmt.Sprintf("Issuer %s labels patched - diff %+v", name, patchDiff["metadata"]))
+	}
+
+	return caCertSecretName, nil
 }

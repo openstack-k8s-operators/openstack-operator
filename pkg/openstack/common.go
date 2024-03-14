@@ -145,7 +145,7 @@ type RouteDetails struct {
 type RouteTLSDetails struct {
 	Enabled    bool
 	SecretName *string
-	IssuerName *string
+	IssuerName string
 	tls.Ca
 }
 
@@ -246,8 +246,7 @@ func EnsureEndpointConfig(
 						return endpoints, ctrlResult, nil
 					}
 				} else {
-					// use public issuer to create cert for the route
-					ed.Route.TLS.IssuerName = ptr.To(tls.DefaultCAPrefix + ed.Type.String())
+					ed.Route.TLS.IssuerName = instance.GetPublicIssuer()
 				}
 			}
 
@@ -269,7 +268,7 @@ func EnsureEndpointConfig(
 				} else {
 					// issue a certificate for public pod virthost
 					certRequest := certmanager.CertificateRequest{
-						IssuerName:  tls.DefaultCAPrefix + ed.Type.String(),
+						IssuerName:  instance.GetPublicIssuer(),
 						CertName:    fmt.Sprintf("%s-svc", ed.Name),
 						Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
 						Ips:         nil,
@@ -311,7 +310,7 @@ func EnsureEndpointConfig(
 				// create certificate for internal pod virthost
 				// request certificate
 				certRequest := certmanager.CertificateRequest{
-					IssuerName:  tls.DefaultCAPrefix + ed.Type.String(),
+					IssuerName:  instance.GetInternalIssuer(),
 					CertName:    fmt.Sprintf("%s-svc", ed.Name),
 					Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
 					Ips:         nil,
@@ -529,7 +528,7 @@ func (ed *EndpointDetail) CreateRoute(
 			}
 		} else {
 			certRequest := certmanager.CertificateRequest{
-				IssuerName:  *ed.Route.TLS.IssuerName,
+				IssuerName:  ed.Route.TLS.IssuerName,
 				CertName:    fmt.Sprintf("%s-route", ed.Name),
 				Hostnames:   []string{*ed.Hostname},
 				Ips:         nil,

@@ -198,7 +198,7 @@ func reconcileRabbitMQ(
 
 	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
-			IssuerName: tls.DefaultCAPrefix + string(service.EndpointInternal),
+			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
 			Hostnames:  []string{hostname},
 		}
