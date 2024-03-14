@@ -38,6 +38,7 @@
         - tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_live_migration
         - tempest.scenario.test_server_volume_attachment.TestServerVolumeAttachScenarioOldVersion
         - tempest.scenario.test_server_volume_attachment.TestServerVolumeAttachmentScenario
+        - tempest.api.compute.admin.test_live_migration.LiveAutoBlockMigrationV225Test.test_live_block_migration_with_attached_volume
       # We need to use a custom cpu model to allow live migrating between
       # slightly different computes coming from the node pool
       cifmw_edpm_deploy_nova_compute_extra_config: |
