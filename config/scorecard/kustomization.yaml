@@ -1,8 +1,6 @@
 resources:
 - bases/config.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-patches:
+patchesJson6902:
 - path: patches/basic.config.yaml
   target:
     group: scorecard.operatorframework.io
