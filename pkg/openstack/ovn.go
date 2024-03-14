@@ -113,7 +113,8 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			certSecret, ctrlResult, err := certmanager.EnsureCert(
 				ctx,
 				helper,
-				certRequest)
+				certRequest,
+				nil)
 			if err != nil {
 				return false, err
 			} else if (ctrlResult != ctrl.Result{}) {
@@ -204,7 +205,8 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		certSecret, ctrlResult, err := certmanager.EnsureCert(
 			ctx,
 			helper,
-			certRequest)
+			certRequest,
+			nil)
 		if err != nil {
 			return false, err
 		} else if (ctrlResult != ctrl.Result{}) {
@@ -295,7 +297,8 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		certSecret, ctrlResult, err := certmanager.EnsureCert(
 			ctx,
 			helper,
-			certRequest)
+			certRequest,
+			nil)
 		if err != nil {
 			return false, err
 		} else if (ctrlResult != ctrl.Result{}) {

@@ -67,7 +67,8 @@ func ReconcileGaleras(
 		certSecret, ctrlResult, err := certmanager.EnsureCert(
 			ctx,
 			helper,
-			certRequest)
+			certRequest,
+			nil)
 		if err != nil {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
