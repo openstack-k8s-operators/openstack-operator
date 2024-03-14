@@ -1,11 +1,22 @@
 ---
 - job:
     name: openstack-operator-tempest-multinode
-    parent: podified-multinode-edpm-deployment-crc-3comp
+    parent: podified-multinode-hci-deployment-crc-3comp
     dependencies: ["openstack-k8s-operators-content-provider"]
     vars:
+      cifmw_control_plane_ceph_backend_include_vars: "{{ cifmw_basedir }}/artifacts/pre_deploy_ceph_deploy.yml"
       cifmw_operator_build_golang_ct: "docker.io/library/golang:1.20"
       cifmw_operator_build_golang_alt_ct: "quay.rdoproject.org/openstack-k8s-operators/golang:1.20"
+      cifmw_make_ceph_environment:
+        CEPH_TIMEOUT: 90
+        CEPH_DATASIZE: "10Gi"
+      pre_deploy:
+        - name: Ceph deploy
+          type: playbook
+          source: ceph-deploy.yml
+        - name: Kustomize OpenStack CR with Ceph
+          type: playbook
+          source: control_plane_ceph_backends.yml
       cifmw_tempest_tempestconf_profile:
           overrides:
             compute-feature-enabled.vnc_console: true
@@ -47,9 +58,9 @@
 
 - project:
     name: openstack-k8s-operators/openstack-operator
-    templates:
-      - podified-multinode-edpm-baremetal-pipeline
-      - data-plane-adoption-pipeline
     github-check:
       jobs:
-        - openstack-operator-tempest-multinode
+        - openstack-k8s-operators-content-provider
+        - openstack-operator-tempest-multinode:
+            dependencies:
+              - openstack-k8s-operators-content-provider
