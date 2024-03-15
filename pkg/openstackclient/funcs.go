@@ -18,11 +18,13 @@ import (
 
 	env "github.com/openstack-k8s-operators/lib-common/modules/common/env"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ClientPodSpec func
@@ -40,6 +42,14 @@ func ClientPodSpec(
 		telemetryv1.DefaultServiceName,
 		instance.Namespace))
 	envVars["PROMETHEUS_PORT"] = env.SetValue(fmt.Sprint(telemetryv1.DefaultPrometheusPort))
+	metricStorage := &telemetryv1.MetricStorage{}
+	err := helper.GetClient().Get(ctx, client.ObjectKey{
+		Namespace: instance.Namespace,
+		Name:      telemetryv1.DefaultServiceName,
+	}, metricStorage)
+	if err == nil && metricStorage.Spec.PrometheusTLS.Enabled() {
+		envVars["PROMETHEUS_CA_CERT"] = env.SetValue(tls.DownstreamTLSCABundlePath)
+	}
 
 	// create Volume and VolumeMounts
 	volumes := clientPodVolumes(instance)
