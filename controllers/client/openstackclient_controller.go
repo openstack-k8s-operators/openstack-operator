@@ -49,6 +49,7 @@ import (
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	common_rbac "github.com/openstack-k8s-operators/lib-common/modules/common/rbac"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -72,6 +73,7 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 //+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/finalizers,verbs=update
 //+kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch
+//+kubebuilder:rbac:groups=telemetry.openstack.org,resources=metricstorages,verbs=get;list;watch
 //+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;
 //+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;
 // service account, role, rolebinding
@@ -275,6 +277,15 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		configVars[instance.Spec.CaBundleSecretName] = env.SetValue(secretHash)
 	}
 
+	metricStorage := &telemetryv1.MetricStorage{}
+	err = helper.GetClient().Get(ctx, client.ObjectKey{
+		Namespace: instance.Namespace,
+		Name:      telemetryv1.DefaultServiceName,
+	}, metricStorage)
+	if err == nil {
+		configVars["PrometheusTls"] = env.SetValue(fmt.Sprint(metricStorage.Spec.PrometheusTLS.Enabled()))
+	}
+
 	configVarsHash, err := util.HashOfInputHashes(configVars)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -453,6 +464,33 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
+	Log := r.GetLogger(context.Background())
+	metricStorageFn := func(ctx context.Context, o client.Object) []reconcile.Request {
+		result := []reconcile.Request{}
+
+		// get all openstackclient CRs
+		openstackclients := &clientv1.OpenStackClientList{}
+		listOpts := []client.ListOption{
+			client.InNamespace(o.GetNamespace()),
+		}
+		if err := r.Client.List(context.Background(), openstackclients, listOpts...); err != nil {
+			Log.Error(err, "Unable to retrieve OpenstackClient CRs %v")
+			return nil
+		}
+		for _, cr := range openstackclients.Items {
+			name := client.ObjectKey{
+				Namespace: o.GetNamespace(),
+				Name:      cr.Name,
+			}
+			Log.Info(fmt.Sprintf("OpenStackClient %s will be reconciled, because a MetricStorage %s changed", cr.Name, o.GetName()))
+			result = append(result, reconcile.Request{NamespacedName: name})
+		}
+		if len(result) > 0 {
+			return result
+		}
+		return nil
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&clientv1.OpenStackClient{}).
 		Owns(&corev1.Pod{}).
@@ -473,6 +511,13 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
+		Watches(
+			// Reconcile all openstackclients when a MetricStorage changes.
+			// This is needed to ensure the observability client is
+			// configured correctly when tls is enabled or disabled.
+			&telemetryv1.MetricStorage{},
+			handler.EnqueueRequestsFromMapFunc(metricStorageFn),
 		).
 		Complete(r)
 }
