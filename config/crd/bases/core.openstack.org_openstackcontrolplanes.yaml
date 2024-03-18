@@ -5602,6 +5602,9 @@ spec:
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
+                      databaseAccount:
+                        default: ironic
+                        type: string
                       databaseInstance:
                         type: string
                       defaultConfigOverwrite:
@@ -5844,6 +5847,9 @@ spec:
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
+                          databaseAccount:
+                            default: ironic-inspector
+                            type: string
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5934,12 +5940,8 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: IronicInspectorDatabasePassword
                               service: IronicInspectorPassword
                             properties:
-                              database:
-                                default: IronicInspectorDatabasePassword
-                                type: string
                               service:
                                 default: IronicInspectorPassword
                                 type: string
@@ -6068,12 +6070,8 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: IronicDatabasePassword
                           service: IronicPassword
                         properties:
-                          database:
-                            default: IronicDatabasePassword
-                            type: string
                           service:
                             default: IronicPassword
                             type: string
@@ -6515,10 +6513,10 @@ spec:
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: manila
+                        type: string
+                      databaseInstance:
                         type: string
                       dbPurge:
                         properties:
@@ -7548,12 +7546,8 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: ManilaDatabasePassword
                           service: ManilaPassword
                         properties:
-                          database:
-                            default: ManilaDatabasePassword
-                            type: string
                           service:
                             default: ManilaPassword
                             type: string
@@ -8865,6 +8859,8 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiContainerImageURL:
+                        type: string
                       apiDatabaseAccount:
                         default: nova-api
                         type: string
@@ -8878,8 +8874,6 @@ spec:
                         default:
                           replicas: 1
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           defaultConfigOverwrite:
@@ -9014,8 +9008,6 @@ spec:
                               type: string
                             conductorServiceTemplate:
                               properties:
-                                containerImage:
-                                  type: string
                                 customServiceConfig:
                                   type: string
                                 networkAttachments:
@@ -9084,8 +9076,6 @@ spec:
                               type: string
                             metadataServiceTemplate:
                               properties:
-                                containerImage:
-                                  type: string
                                 customServiceConfig:
                                   type: string
                                 defaultConfigOverwrite:
@@ -9196,8 +9186,6 @@ spec:
                               type: object
                             noVNCProxyServiceTemplate:
                               properties:
-                                containerImage:
-                                  type: string
                                 customServiceConfig:
                                   type: string
                                 enabled:
@@ -9316,8 +9304,6 @@ spec:
                                     - ironic.IronicDriver
                                     - fake.FakeDriver
                                     type: string
-                                  containerImage:
-                                    type: string
                                   customServiceConfig:
                                     type: string
                                   defaultConfigOverwrite:
@@ -9387,18 +9373,22 @@ spec:
                             cellMessageBusInstance: rabbitmq-cell1
                             hasAPIAccess: true
                         type: object
+                      computeContainerImageURL:
+                        type: string
+                      conductorContainerImageURL:
+                        type: string
                       keystoneInstance:
                         default: keystone
                         type: string
                       memcachedInstance:
                         default: memcached
                         type: string
+                      metadataContainerImageURL:
+                        type: string
                       metadataServiceTemplate:
                         default:
                           enabled: true
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           defaultConfigOverwrite:
@@ -9511,6 +9501,8 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      novncproxyContainerImageURL:
+                        type: string
                       passwordSelectors:
                         default:
                           service: NovaPassword
@@ -9525,12 +9517,12 @@ spec:
                       preserveJobs:
                         default: false
                         type: boolean
+                      schedulerContainerImageURL:
+                        type: string
                       schedulerServiceTemplate:
                         default:
                           replicas: 1
                         properties:
-                          containerImage:
-                            type: string
                           customServiceConfig:
                             type: string
                           networkAttachments:
@@ -9585,6 +9577,12 @@ spec:
                         default: nova
                         type: string
                     required:
+                    - apiContainerImageURL
+                    - computeContainerImageURL
+                    - conductorContainerImageURL
+                    - metadataContainerImageURL
+                    - novncproxyContainerImageURL
+                    - schedulerContainerImageURL
                     - secret
                     type: object
                 type: object
@@ -9723,16 +9721,13 @@ spec:
                           - name
                           type: object
                         type: array
-                      certsSecret:
-                        default: octavia-certs-secret
-                        type: string
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: octavia
+                        type: string
+                      databaseInstance:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -9761,12 +9756,12 @@ spec:
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
+                          databaseAccount:
+                            default: octavia
+                            type: string
                           databaseHostname:
                             type: string
                           databaseInstance:
-                            type: string
-                          databaseUser:
-                            default: octavia
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -9833,7 +9828,6 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: OctaviaDatabasePassword
                               service: OctaviaPassword
                             properties:
                               database:
@@ -9843,6 +9837,9 @@ spec:
                                 default: OctaviaPassword
                                 type: string
                             type: object
+                          persistenceDatabaseAccount:
+                            default: octavia-persistence
+                            type: string
                           preserveJobs:
                             default: false
                             type: boolean
@@ -9922,22 +9919,17 @@ spec:
                               - name
                               type: object
                             type: array
-                          certsPassphraseSecret:
-                            default: octavia-ca-passphrase
-                            type: string
-                          certsSecret:
-                            type: string
                           containerImage:
                             type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
+                          databaseAccount:
+                            default: octavia
+                            type: string
                           databaseHostname:
                             type: string
                           databaseInstance:
-                            type: string
-                          databaseUser:
-                            default: octavia
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -9965,7 +9957,6 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: OctaviaDatabasePassword
                               service: OctaviaPassword
                             properties:
                               database:
@@ -9975,6 +9966,13 @@ spec:
                                 default: OctaviaPassword
                                 type: string
                             type: object
+                          persistenceDatabaseAccount:
+                            default: octavia-persistence
+                            type: string
+                          redisHostIPs:
+                            items:
+                              type: string
+                            type: array
                           resources:
                             properties:
                               claims:
@@ -10014,10 +10012,6 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
-                            type: string
-                          sshPrivkeySecret:
-                            type: string
-                          sshPubkey:
                             type: string
                           tenantName:
                             default: service
@@ -10054,22 +10048,17 @@ spec:
                               - name
                               type: object
                             type: array
-                          certsPassphraseSecret:
-                            default: octavia-ca-passphrase
-                            type: string
-                          certsSecret:
-                            type: string
                           containerImage:
                             type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
+                          databaseAccount:
+                            default: octavia
+                            type: string
                           databaseHostname:
                             type: string
                           databaseInstance:
-                            type: string
-                          databaseUser:
-                            default: octavia
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -10097,7 +10086,6 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: OctaviaDatabasePassword
                               service: OctaviaPassword
                             properties:
                               database:
@@ -10107,6 +10095,13 @@ spec:
                                 default: OctaviaPassword
                                 type: string
                             type: object
+                          persistenceDatabaseAccount:
+                            default: octavia-persistence
+                            type: string
+                          redisHostIPs:
+                            items:
+                              type: string
+                            type: array
                           resources:
                             properties:
                               claims:
@@ -10146,10 +10141,6 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
-                            type: string
-                          sshPrivkeySecret:
-                            type: string
-                          sshPubkey:
                             type: string
                           tenantName:
                             default: service
@@ -10186,22 +10177,17 @@ spec:
                               - name
                               type: object
                             type: array
-                          certsPassphraseSecret:
-                            default: octavia-ca-passphrase
-                            type: string
-                          certsSecret:
-                            type: string
                           containerImage:
                             type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
+                          databaseAccount:
+                            default: octavia
+                            type: string
                           databaseHostname:
                             type: string
                           databaseInstance:
-                            type: string
-                          databaseUser:
-                            default: octavia
                             type: string
                           defaultConfigOverwrite:
                             additionalProperties:
@@ -10229,7 +10215,6 @@ spec:
                             type: object
                           passwordSelectors:
                             default:
-                              database: OctaviaDatabasePassword
                               service: OctaviaPassword
                             properties:
                               database:
@@ -10239,6 +10224,13 @@ spec:
                                 default: OctaviaPassword
                                 type: string
                             type: object
+                          persistenceDatabaseAccount:
+                            default: octavia-persistence
+                            type: string
+                          redisHostIPs:
+                            items:
+                              type: string
+                            type: array
                           resources:
                             properties:
                               claims:
@@ -10279,10 +10271,6 @@ spec:
                           serviceUser:
                             default: octavia
                             type: string
-                          sshPrivkeySecret:
-                            type: string
-                          sshPubkey:
-                            type: string
                           tenantName:
                             default: service
                             type: string
@@ -10296,7 +10284,6 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: OctaviaDatabasePassword
                           service: OctaviaPassword
                         properties:
                           database:
@@ -10306,6 +10293,9 @@ spec:
                             default: OctaviaPassword
                             type: string
                         type: object
+                      persistenceDatabaseAccount:
+                        default: octavia-persistence
+                        type: string
                       preserveJobs:
                         default: false
                         type: boolean
@@ -10324,7 +10314,6 @@ spec:
                         default: octavia-ssh-pubkey
                         type: string
                     required:
-                    - certsSecret
                     - databaseInstance
                     - octaviaAPI
                     - rabbitMqClusterName
