@@ -9,7 +9,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -160,7 +159,7 @@ func reconcileMemcached(
 	tlsCert := ""
 	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
-			IssuerName: tls.DefaultCAPrefix + string(service.EndpointInternal),
+			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", memcached.Name),
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", name, instance.Namespace),

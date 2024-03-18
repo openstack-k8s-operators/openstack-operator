@@ -9,8 +9,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -48,7 +46,7 @@ func ReconcileGaleras(
 		// Galera gets always configured to support TLS connections.
 		// If TLS can/must be used is a per user configuration.
 		certRequest := certmanager.CertificateRequest{
-			IssuerName: tls.DefaultCAPrefix + string(service.EndpointInternal),
+			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("galera-%s-svc", name),
 			Hostnames:  []string{hostname},
 			Usages: []certmgrv1.KeyUsage{

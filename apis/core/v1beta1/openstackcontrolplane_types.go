@@ -30,6 +30,7 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -53,6 +54,8 @@ const (
 
 	// RabbitMqContainerImage is the fall-back container image for RabbitMQ
 	RabbitMqContainerImage = "quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified"
+
+	OvnDbCaName = tls.DefaultCAPrefix + "ovn"
 )
 
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
@@ -243,7 +246,19 @@ type CertSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Ca - defines details for CA cert config
-	Ca CertConfig `json:"ca,omitempty"`
+	Ca CACertConfig `json:"ca,omitempty"`
+}
+
+// CACertConfig defines details for ca cert configs
+type CACertConfig struct {
+	// +kubebuilder:validation:optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	CertConfig `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// CustomIssuer - use pre-created issue for this CA. No CA and issure is being created
+	// the CA cert and chain needs to be added using the CaBundleSecretName.
+	CustomIssuer *string `json:"customIssuer,omitempty"`
 }
 
 // CertConfig defines details for cert configs
@@ -825,4 +840,39 @@ func SetupDefaults() {
 	}
 
 	SetupOpenStackControlPlaneDefaults(openstackControlPlaneDefaults)
+}
+
+// IsCustomIssuer - returns true if CustomIssuer is provided and not empty string
+func (ca CACertConfig) IsCustomIssuer() bool {
+	return ca.CustomIssuer != nil && *ca.CustomIssuer != ""
+}
+
+// GetPublicIssuer - returns the public CA issuer name or custom if configured
+func (instance OpenStackControlPlane) GetPublicIssuer() string {
+	// use custom issuer if set
+	if instance.Spec.TLS.Ingress.Ca.IsCustomIssuer() {
+		return *instance.Spec.TLS.Ingress.Ca.CustomIssuer
+	}
+
+	return tls.DefaultCAPrefix + string(service.EndpointPublic)
+}
+
+// GetInternalIssuer - returns the internal CA issuer name or custom if configured
+func (instance OpenStackControlPlane) GetInternalIssuer() string {
+	// use custom issuer if set
+	if instance.Spec.TLS.PodLevel.Internal.Ca.IsCustomIssuer() {
+		return *instance.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer
+	}
+
+	return tls.DefaultCAPrefix + string(service.EndpointInternal)
+}
+
+// GetOvnIssuer - returns the ovn CA issuer name or custom if configured
+func (instance OpenStackControlPlane) GetOvnIssuer() string {
+	// use custom issuer if set
+	if instance.Spec.TLS.PodLevel.Ovn.Ca.IsCustomIssuer() {
+		return *instance.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer
+	}
+
+	return OvnDbCaName
 }

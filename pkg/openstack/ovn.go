@@ -94,7 +94,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		if OVNDBCluster.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
 			// create certificate for ovndbclusters
 			certRequest := certmanager.CertificateRequest{
-				IssuerName: OvnDbCaName,
+				IssuerName: instance.GetOvnIssuer(),
 				CertName:   fmt.Sprintf("%s-ovndbs", name),
 				Duration:   nil,
 				// Cert needs to be valid for the individual pods in the statefulset so make this a wildcard cert
@@ -187,7 +187,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		serviceName := ovnv1.ServiceNameOvnNorthd
 		// create certificate for ovnnorthd
 		certRequest := certmanager.CertificateRequest{
-			IssuerName: OvnDbCaName,
+			IssuerName: instance.GetOvnIssuer(),
 			CertName:   fmt.Sprintf("%s-ovndbs", "ovnnorthd"),
 			Duration:   nil,
 			Hostnames: []string{
@@ -279,7 +279,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		serviceName := ovnv1.ServiceNameOvnController
 		// create certificate for ovncontroller
 		certRequest := certmanager.CertificateRequest{
-			IssuerName: OvnDbCaName,
+			IssuerName: instance.GetOvnIssuer(),
 			CertName:   fmt.Sprintf("%s-ovndbs", "ovncontroller"),
 			Duration:   nil,
 			Hostnames: []string{

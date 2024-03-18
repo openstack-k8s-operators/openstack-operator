@@ -16320,6 +16320,8 @@ spec:
                     properties:
                       ca:
                         properties:
+                          customIssuer:
+                            type: string
                           duration:
                             type: string
                           renewBefore:
@@ -16343,6 +16345,8 @@ spec:
                         properties:
                           ca:
                             properties:
+                              customIssuer:
+                                type: string
                               duration:
                                 type: string
                               renewBefore:
@@ -16360,6 +16364,8 @@ spec:
                         properties:
                           ca:
                             properties:
+                              customIssuer:
+                                type: string
                               duration:
                                 type: string
                               renewBefore:
