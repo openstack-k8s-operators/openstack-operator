@@ -414,10 +414,10 @@ spec:
                         type: object
                       customServiceConfig:
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: barbican
+                        type: string
+                      databaseInstance:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -429,13 +429,9 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: BarbicanDatabasePassword
                           service: BarbicanPassword
                           simplecryptokek: BarbicanSimpleCryptoKEK
                         properties:
-                          database:
-                            default: BarbicanDatabasePassword
-                            type: string
                           service:
                             default: BarbicanPassword
                             type: string
