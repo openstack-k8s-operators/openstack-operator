@@ -306,14 +306,25 @@ var _ = BeforeSuite(func() {
 
 	err = (&openstackclientv1.OpenStackClient{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
+	err = (&corev1.OpenStackVersion{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
 	err = (&corev1.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
+	core_ctrl.SetupVersionDefaults()
 	openstack.SetupServiceOperatorDefaults()
 	openstackclientv1.SetupDefaults()
 	corev1.SetupDefaults()
+	corev1.SetupVersionDefaults()
 
 	err = (&client_ctrl.OpenStackClientReconciler{
+		Client:  k8sManager.GetClient(),
+		Scheme:  k8sManager.GetScheme(),
+		Kclient: kclient,
+	}).SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+
+	err = (&core_ctrl.OpenStackVersionReconciler{
 		Client:  k8sManager.GetClient(),
 		Scheme:  k8sManager.GetScheme(),
 		Kclient: kclient,

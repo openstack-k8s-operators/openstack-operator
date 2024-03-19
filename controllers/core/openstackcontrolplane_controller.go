@@ -177,7 +177,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	}
 
 	// wait until the version is initialized so we have images on the version.Status
-	if version.Status.Conditions.IsFalse(corev1beta1.OpenStackVersionInitialized) {
+	if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionInitialized) {
 		return ctrlResult, nil
 	}
 
@@ -195,7 +195,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		instance.Status.DeployedVersion = &version.Spec.TargetVersion
 		return ctrl.Result{}, nil
 	} else {
-		if version.Status.Conditions.IsFalse(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
+		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
 			Log.Info("Minor update OVN on the ControlPlane")
 			ctrlResult, err := r.reconcileOVNControllers(ctx, instance, version, helper)
 			if err != nil {
@@ -205,7 +205,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			}
 			instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
 			return ctrl.Result{}, nil
-		} else if version.Status.Conditions.IsFalse(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
+		} else if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
 			Log.Info("Minor update on the ControlPlane")
 			ctrlResult, err := r.reconcileNormal(ctx, instance, version, helper)
 			if err != nil {

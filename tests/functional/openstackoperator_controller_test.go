@@ -176,6 +176,19 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// make keystoneAPI ready and create secrets usually created by keystone-controller
 			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
 
+			// openstackversion exists
+			Eventually(func(g Gomega) {
+				osclient := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osclient).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
 			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 

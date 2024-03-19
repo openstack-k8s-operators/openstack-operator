@@ -22,12 +22,15 @@ import (
 )
 
 const (
+	// MinorUpdateOvnControlPlane -
 	MinorUpdateOvnControlPlane string = "Minor Update OVN Controlplane In Progress"
-	MinorUpdateControlPlane    string = "Minor Update OVN Controlplane In Progress"
-	MinorUpdateComplete        string = "Complete"
+	// MinorUpdateControlPlane -
+	MinorUpdateControlPlane string = "Minor Update Controlplane In Progress"
+	// MinorUpdateComplete -
+	MinorUpdateComplete string = "Complete"
 )
 
-// OpenStackVersionSpec defines the desired state of OpenStackVersion
+// OpenStackVersionSpec - defines the desired state of OpenStackVersion
 type OpenStackVersionSpec struct {
 
 	// +kubebuilder:validation:Required
@@ -38,21 +41,21 @@ type OpenStackVersionSpec struct {
 	CustomContainerImages CustomContainerImages `json:"customContainerImages,omitempty"`
 }
 
-// struct for custom container images
+// CustomContainerImages - struct for custom container images
 type CustomContainerImages struct {
 	ContainerTemplate  `json:",inline"`
 	CinderVolumeImages map[string]*string `json:"cinderVolumeImages,omitempty"`
 	ManilaShareImages  map[string]*string `json:"manilaShareImages,omitempty"`
 }
 
-// struct that contains container image default URLs for each service (internal use only)
+// ContainerDefaults - struct that contains container image default URLs for each service (internal use only)
 type ContainerDefaults struct {
 	ContainerTemplate `json:",inline"`
 	CinderVolumeImage *string `json:"cinderVolumeImage,omitempty"`
 	ManilaShareImage  *string `json:"manilaShareImage,omitempty"`
 }
 
-// struct acts as the source of truth for container image URLs to be deployed
+// ContainerImages - struct acts as the source of truth for container image URLs to be deployed
 type ContainerImages struct {
 	ContainerTemplate `json:",inline"`
 	// CinderVolumeImages custom Cinder Volume images for each backend (default Cinder volume image is stored 'default' key)
@@ -63,7 +66,7 @@ type ContainerImages struct {
 	ManilaShareImages map[string]*string `json:"manilaShareImages,omitempty"`
 }
 
-// struct that contains container image URLs for each service in OpenStackControlplane
+// ContainerTemplate - struct that contains container image URLs for each service in OpenStackControlplane
 type ContainerTemplate struct {
 	AgentImage                    *string `json:"agentImage,omitempty"`
 	AnsibleeeImage                *string `json:"ansibleeeImage,omitempty"`
@@ -177,4 +180,9 @@ type OpenStackVersionList struct {
 
 func init() {
 	SchemeBuilder.Register(&OpenStackVersion{}, &OpenStackVersionList{})
+}
+
+// IsReady - returns true if service is ready to serve requests
+func (instance OpenStackVersion) IsReady() bool {
+    return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }

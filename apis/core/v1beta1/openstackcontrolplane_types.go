@@ -55,6 +55,7 @@ const (
 	// RabbitMqContainerImage is the fall-back container image for RabbitMQ
 	RabbitMqContainerImage = "quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified"
 
+	// OvnDbCaName -
 	OvnDbCaName = tls.DefaultCAPrefix + "ovn"
 )
 

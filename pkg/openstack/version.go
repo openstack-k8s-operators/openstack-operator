@@ -41,7 +41,6 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 		Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
 		if field.IsValid() && field.CanSet() {
-			//field.SetString(*val)
 			field.Set(reflect.ValueOf(val))
 		} else {
 			Log.Info(fmt.Sprintf("Field not found: %s", fieldName))

@@ -18,7 +18,6 @@ package core
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
@@ -43,7 +42,6 @@ var envAvailableVersion string
 
 // SetupVersionDefaults -
 func SetupVersionDefaults() {
-	fmt.Println("SetupVersionDefaults")
 	localVars := make(map[string]*string)
 	for _, name := range os.Environ() {
 		envArr := strings.Split(name, "=")
@@ -122,7 +120,6 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	instance.Status.Conditions = condition.Conditions{}
 	// greenfield deployment
-	//cl := condition.Conditions{}
 	cl := condition.CreateList(
 		condition.UnknownCondition(corev1beta1.OpenStackVersionInitialized, condition.InitReason, string(corev1beta1.OpenStackVersionInitializedInitMessage)),
 	)
@@ -206,12 +203,8 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	// minor update for OVN Controlplane in progress
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
-		if controlPlane.Status.Conditions.IsFalse(condition.ReadyCondition) {
-			Log.Info("Minor update Controlplane is not in ready condition, waiting")
-			return ctrl.Result{}, nil
-		}
 		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerImage, instance.Status.ContainerImages.OvnControllerImage) ||
-			controlPlane.Status.Conditions.IsFalse(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
+			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
 				condition.RequestedReason,
@@ -242,7 +235,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 	}
 
-	if controlPlane.Status.Conditions.AllSubConditionIsTrue() {
+	if controlPlane.IsReady() {
 		Log.Info("Setting DeployedVersion")
 		instance.Status.DeployedVersion = &instance.Spec.TargetVersion
 	}
