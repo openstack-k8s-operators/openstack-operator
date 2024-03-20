@@ -99,7 +99,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), barbican, func() error {
 		instance.Spec.Barbican.Template.DeepCopyInto(&barbican.Spec)
 
-        // FIXME: barbican webhooks are not setting this correctly yet
+		// FIXME: barbican webhooks are not setting this correctly yet
 		if barbican.Spec.DatabaseAccount == "" {
 			barbican.Spec.DatabaseAccount = "barbican"
 		}
