@@ -15429,10 +15429,10 @@ spec:
                               customServiceConfig:
                                 default: '# add your customization here'
                                 type: string
-                              databaseInstance:
-                                type: string
-                              databaseUser:
+                              databaseAccount:
                                 default: aodh
+                                type: string
+                              databaseInstance:
                                 type: string
                               defaultConfigOverwrite:
                                 additionalProperties:
@@ -15505,13 +15505,9 @@ spec:
                               passwordSelector:
                                 default:
                                   aodhService: AodhPassword
-                                  database: AodhDatabasePassword
                                 properties:
                                   aodhService:
                                     default: AodhPassword
-                                    type: string
-                                  database:
-                                    default: AodhDatabasePassword
                                     type: string
                                   service:
                                     default: CeilometerPassword
@@ -15568,6 +15564,8 @@ spec:
                             maximum: 65535
                             minimum: 1
                             type: integer
+                          prometheusTLS:
+                            type: boolean
                         required:
                         - heatInstance
                         type: object
@@ -15602,13 +15600,12 @@ spec:
                               aodhService:
                                 default: AodhPassword
                                 type: string
-                              database:
-                                default: AodhDatabasePassword
-                                type: string
                               service:
                                 default: CeilometerPassword
                                 type: string
                             type: object
+                          proxyImage:
+                            type: string
                           rabbitMqClusterName:
                             default: rabbitmq
                             type: string
@@ -15619,11 +15616,19 @@ spec:
                             type: string
                           sgCoreImage:
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                         required:
                         - centralImage
                         - computeImage
                         - ipmiImage
                         - notificationImage
+                        - proxyImage
                         - secret
                         - sgCoreImage
                         type: object
@@ -16217,6 +16222,9 @@ spec:
                               alertingEnabled:
                                 default: true
                                 type: boolean
+                              dashboardsEnabled:
+                                default: false
+                                type: boolean
                               dataplaneNetwork:
                                 default: ctlplane
                                 pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
@@ -16274,6 +16282,13 @@ spec:
                                 type: object
                             required:
                             - dataplaneNetwork
+                            type: object
+                          prometheusTls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
                             type: object
                         type: object
                     type: object
