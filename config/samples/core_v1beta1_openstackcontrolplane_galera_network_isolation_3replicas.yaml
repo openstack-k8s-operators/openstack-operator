@@ -342,7 +342,7 @@ spec:
         ringReplicas: 1
       swiftStorage:
         replicas: 1
-        networkAttachements:
+        networkAttachments:
           - storage
       swiftProxy:
         replicas: 1
@@ -356,7 +356,7 @@ spec:
                   metallb.universe.tf/loadBalancerIPs: 172.17.0.80
               spec:
                 type: LoadBalancer
-        networkAttachements:
+        networkAttachments:
           - storage
   octavia:
     enabled: false
@@ -389,15 +389,15 @@ spec:
         replicas: 1
       designateWorker:
         replicas: 0
-        networkAttachements:
+        networkAttachments:
           - designate
       designateProducer:
         replicas: 0
       designateMdns:
         replicas: 0
-        networkAttachements:
+        networkAttachments:
           - designate
       designateBackendbind9:
         replicas: 0
-        networkAttachements:
+        networkAttachments:
           - designate

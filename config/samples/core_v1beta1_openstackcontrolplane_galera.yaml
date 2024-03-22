@@ -202,15 +202,15 @@ spec:
         replicas: 1
       designateWorker:
         replicas: 0
-        networkAttachements:
+        networkAttachments:
           - designate
       designateProducer:
         replicas: 0
       designateMdns:
         replicas: 0
-        networkAttachements:
+        networkAttachments:
           - designate
       designateBackendbind9:
         replicas: 0
-        networkAttachements:
+        networkAttachments:
           - designate
