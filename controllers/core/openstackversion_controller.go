@@ -204,7 +204,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	// minor update for OVN Controlplane in progress
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
 		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerImage, instance.Status.ContainerImages.OvnControllerImage) ||
-			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
+			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
 				condition.RequestedReason,

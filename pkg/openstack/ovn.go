@@ -364,5 +364,9 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 	instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
 	instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
 
-	return OVNController.IsReady(), nil
+	if OVNController.Status.ObservedGeneration != OVNController.Generation {
+		return false, nil
+	} else {
+		return OVNController.IsReady(), nil
+	}
 }

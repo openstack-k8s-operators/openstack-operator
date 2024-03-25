@@ -10,6 +10,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dprince/ovn-operator/api v0.0.0-20240326183925-450158835581 h1:K/UwagSdsw+OUSK1ThcskEa+CtG8f8Pxp0MQdxJ/kgE=
+github.com/dprince/ovn-operator/api v0.0.0-20240326183925-450158835581/go.mod h1:ITwD6+WReIhvqx7Q0fQ7IBZHn6iIEs+EpFg1lcukZyo=
 github.com/emicklei/go-restful/v3 v3.11.2 h1:1onLa9DcsMYO9P+CXaL0dStDqQ2EHHXLiz+BtnqkLAU=
 github.com/emicklei/go-restful/v3 v3.11.2/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/evanphx/json-patch v5.7.0+incompatible h1:vgGkfT/9f8zE6tvSCe74nfpAVDQ2tG6yudJd8LBksgI=
@@ -140,8 +142,6 @@ github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.202
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240313103756-fb4ac5373b65/go.mod h1:SONAy6PaXQfqSyx6/KuiUh0ZljeUi4wNoIhEFCkhiZU=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240318132611-4df20882649d h1:NoCFZ4l8xwbmclJwRvjqLdQcsxuVXrR+tLvjjy1BYS0=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240318132611-4df20882649d/go.mod h1:VBiTU5t4StrJUYbGtVN0RPUl45DmC39eKjvXSLRF0hA=
-github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240318052728-f132fab5c943 h1:klU6Jc46yVMFAoXZgJO1gaJiw3ZjaYTNshfirR0M5oA=
-github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240318052728-f132fab5c943/go.mod h1:dcKA0ZNATdkWVmltQQX8jYpEzM89FRIvzlo9Byj8H04=
 github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240313145348-1dd69c7bc338 h1:4px3BVSfWmfvJf+Nurf0EJb4ViKHW4qM8ocDqH0u8C4=
 github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240313145348-1dd69c7bc338/go.mod h1:i7bl0Vg4iyaOR4GCfduMWq0V9k5h9ltKDnx0hZg1JDE=
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20240313124519-961a0ee8bf7f h1:wWaOCAkCym4t+NZWXYT/LErGhKujDdKgc7Qy/3vX4uU=
