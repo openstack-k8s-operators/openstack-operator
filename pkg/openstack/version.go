@@ -37,6 +37,7 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 				fieldName += strings.ToUpper(matches[i])[0:1]
 				fieldName += strings.ToLower(matches[i])[1:]
 			}
+			fieldName = strings.Replace(fieldName, "Api", "API", -1)
 		}
 		Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
@@ -67,7 +68,7 @@ func getImg(val1 *string, val2 *string) *string {
 
 }
 
-// ProcessContainerImages - initializes OpenStackVersion CR with default container images
+// GetContainerImages - initializes OpenStackVersion CR with default container images
 func GetContainerImages(ctx context.Context, defaults *corev1beta1.ContainerDefaults, instance corev1beta1.OpenStackVersion) corev1beta1.ContainerImages {
 
 	containerImages := corev1beta1.ContainerImages{
@@ -76,12 +77,12 @@ func GetContainerImages(ctx context.Context, defaults *corev1beta1.ContainerDefa
 		ContainerTemplate: corev1beta1.ContainerTemplate{
 			AgentImage:                    getImg(instance.Spec.CustomContainerImages.AgentImage, defaults.AgentImage),
 			AnsibleeeImage:                getImg(instance.Spec.CustomContainerImages.AnsibleeeImage, defaults.AnsibleeeImage),
-			AodhApiImage:                  getImg(instance.Spec.CustomContainerImages.AodhApiImage, defaults.AodhApiImage),
+			AodhAPIImage:                  getImg(instance.Spec.CustomContainerImages.AodhAPIImage, defaults.AodhAPIImage),
 			AodhEvaluatorImage:            getImg(instance.Spec.CustomContainerImages.AodhEvaluatorImage, defaults.AodhEvaluatorImage),
 			AodhListenerImage:             getImg(instance.Spec.CustomContainerImages.AodhListenerImage, defaults.AodhListenerImage),
 			AodhNotifierImage:             getImg(instance.Spec.CustomContainerImages.AodhNotifierImage, defaults.AodhNotifierImage),
 			ApacheImage:                   getImg(instance.Spec.CustomContainerImages.ApacheImage, defaults.ApacheImage),
-			BarbicanApiImage:              getImg(instance.Spec.CustomContainerImages.BarbicanApiImage, defaults.BarbicanApiImage),
+			BarbicanAPIImage:              getImg(instance.Spec.CustomContainerImages.BarbicanAPIImage, defaults.BarbicanAPIImage),
 			BarbicanKeystoneListenerImage: getImg(instance.Spec.CustomContainerImages.BarbicanKeystoneListenerImage, defaults.BarbicanKeystoneListenerImage),
 			BarbicanWorkerImage:           getImg(instance.Spec.CustomContainerImages.BarbicanWorkerImage, defaults.BarbicanWorkerImage),
 			CeilometerCentralImage:        getImg(instance.Spec.CustomContainerImages.CeilometerCentralImage, defaults.CeilometerCentralImage),
@@ -89,41 +90,41 @@ func GetContainerImages(ctx context.Context, defaults *corev1beta1.ContainerDefa
 			CeilometerIpmiImage:           getImg(instance.Spec.CustomContainerImages.CeilometerIpmiImage, defaults.CeilometerIpmiImage),
 			CeilometerNotificationImage:   getImg(instance.Spec.CustomContainerImages.CeilometerNotificationImage, defaults.CeilometerNotificationImage),
 			CeilometerSgcoreImage:         getImg(instance.Spec.CustomContainerImages.CeilometerSgcoreImage, defaults.CeilometerSgcoreImage),
-			CinderApiImage:                getImg(instance.Spec.CustomContainerImages.CinderApiImage, defaults.CinderApiImage),
+			CinderAPIImage:                getImg(instance.Spec.CustomContainerImages.CinderAPIImage, defaults.CinderAPIImage),
 			CinderBackupImage:             getImg(instance.Spec.CustomContainerImages.CinderBackupImage, defaults.CinderBackupImage),
 			CinderSchedulerImage:          getImg(instance.Spec.CustomContainerImages.CinderSchedulerImage, defaults.CinderSchedulerImage),
-			DesignateApiImage:             getImg(instance.Spec.CustomContainerImages.DesignateApiImage, defaults.DesignateApiImage),
+			DesignateAPIImage:             getImg(instance.Spec.CustomContainerImages.DesignateAPIImage, defaults.DesignateAPIImage),
 			DesignateBackendbind9Image:    getImg(instance.Spec.CustomContainerImages.DesignateBackendbind9Image, defaults.DesignateBackendbind9Image),
 			DesignateCentralImage:         getImg(instance.Spec.CustomContainerImages.DesignateCentralImage, defaults.DesignateCentralImage),
 			DesignateMdnsImage:            getImg(instance.Spec.CustomContainerImages.DesignateMdnsImage, defaults.DesignateMdnsImage),
 			DesignateProducerImage:        getImg(instance.Spec.CustomContainerImages.DesignateProducerImage, defaults.DesignateProducerImage),
 			DesignateUnboundImage:         getImg(instance.Spec.CustomContainerImages.DesignateUnboundImage, defaults.DesignateUnboundImage),
 			DesignateWorkerImage:          getImg(instance.Spec.CustomContainerImages.DesignateWorkerImage, defaults.DesignateWorkerImage),
-			GlanceApiImage:                getImg(instance.Spec.CustomContainerImages.GlanceApiImage, defaults.GlanceApiImage),
-			HeatApiImage:                  getImg(instance.Spec.CustomContainerImages.HeatApiImage, defaults.HeatApiImage),
+			GlanceAPIImage:                getImg(instance.Spec.CustomContainerImages.GlanceAPIImage, defaults.GlanceAPIImage),
+			HeatAPIImage:                  getImg(instance.Spec.CustomContainerImages.HeatAPIImage, defaults.HeatAPIImage),
 			HeatCfnapiImage:               getImg(instance.Spec.CustomContainerImages.HeatCfnapiImage, defaults.HeatCfnapiImage),
 			HeatEngineImage:               getImg(instance.Spec.CustomContainerImages.HeatEngineImage, defaults.HeatEngineImage),
 			HorizonImage:                  getImg(instance.Spec.CustomContainerImages.HorizonImage, defaults.HorizonImage),
 			InfraDnsmasqImage:             getImg(instance.Spec.CustomContainerImages.InfraDnsmasqImage, defaults.InfraDnsmasqImage),
 			InfraMemcachedImage:           getImg(instance.Spec.CustomContainerImages.InfraMemcachedImage, defaults.InfraMemcachedImage),
 			InfraRedisImage:               getImg(instance.Spec.CustomContainerImages.InfraRedisImage, defaults.InfraRedisImage),
-			IronicApiImage:                getImg(instance.Spec.CustomContainerImages.IronicApiImage, defaults.IronicApiImage),
+			IronicAPIImage:                getImg(instance.Spec.CustomContainerImages.IronicAPIImage, defaults.IronicAPIImage),
 			IronicConductorImage:          getImg(instance.Spec.CustomContainerImages.IronicConductorImage, defaults.IronicConductorImage),
 			IronicInspectorImage:          getImg(instance.Spec.CustomContainerImages.IronicInspectorImage, defaults.IronicInspectorImage),
 			IronicNeutronAgentImage:       getImg(instance.Spec.CustomContainerImages.IronicNeutronAgentImage, defaults.IronicNeutronAgentImage),
 			IronicPxeImage:                getImg(instance.Spec.CustomContainerImages.IronicPxeImage, defaults.IronicPxeImage),
 			IronicPythonAgentImage:        getImg(instance.Spec.CustomContainerImages.IronicPythonAgentImage, defaults.IronicPythonAgentImage),
-			KeystoneApiImage:              getImg(instance.Spec.CustomContainerImages.KeystoneApiImage, defaults.KeystoneApiImage),
-			ManilaApiImage:                getImg(instance.Spec.CustomContainerImages.ManilaApiImage, defaults.ManilaApiImage),
+			KeystoneAPIImage:              getImg(instance.Spec.CustomContainerImages.KeystoneAPIImage, defaults.KeystoneAPIImage),
+			ManilaAPIImage:                getImg(instance.Spec.CustomContainerImages.ManilaAPIImage, defaults.ManilaAPIImage),
 			ManilaSchedulerImage:          getImg(instance.Spec.CustomContainerImages.ManilaSchedulerImage, defaults.ManilaSchedulerImage),
 			MariadbImage:                  getImg(instance.Spec.CustomContainerImages.MariadbImage, defaults.MariadbImage),
-			NeutronApiImage:               getImg(instance.Spec.CustomContainerImages.NeutronApiImage, defaults.NeutronApiImage),
-			NovaApiImage:                  getImg(instance.Spec.CustomContainerImages.NovaApiImage, defaults.NovaApiImage),
+			NeutronAPIImage:               getImg(instance.Spec.CustomContainerImages.NeutronAPIImage, defaults.NeutronAPIImage),
+			NovaAPIImage:                  getImg(instance.Spec.CustomContainerImages.NovaAPIImage, defaults.NovaAPIImage),
 			NovaComputeImage:              getImg(instance.Spec.CustomContainerImages.NovaComputeImage, defaults.NovaComputeImage),
 			NovaConductorImage:            getImg(instance.Spec.CustomContainerImages.NovaConductorImage, defaults.NovaConductorImage),
 			NovaNovncImage:                getImg(instance.Spec.CustomContainerImages.NovaNovncImage, defaults.NovaNovncImage),
 			NovaSchedulerImage:            getImg(instance.Spec.CustomContainerImages.NovaSchedulerImage, defaults.NovaSchedulerImage),
-			OctaviaApiImage:               getImg(instance.Spec.CustomContainerImages.OctaviaApiImage, defaults.OctaviaApiImage),
+			OctaviaAPIImage:               getImg(instance.Spec.CustomContainerImages.OctaviaAPIImage, defaults.OctaviaAPIImage),
 			OctaviaHealthmanagerImage:     getImg(instance.Spec.CustomContainerImages.OctaviaHealthmanagerImage, defaults.OctaviaHealthmanagerImage),
 			OctaviaHousekeepingImage:      getImg(instance.Spec.CustomContainerImages.OctaviaHousekeepingImage, defaults.OctaviaHousekeepingImage),
 			OctaviaWorkerImage:            getImg(instance.Spec.CustomContainerImages.OctaviaWorkerImage, defaults.OctaviaWorkerImage),
@@ -134,7 +135,7 @@ func GetContainerImages(ctx context.Context, defaults *corev1beta1.ContainerDefa
 			OvnNbDbclusterImage:           getImg(instance.Spec.CustomContainerImages.OvnNbDbclusterImage, defaults.OvnNbDbclusterImage),
 			OvnNorthdImage:                getImg(instance.Spec.CustomContainerImages.OvnNorthdImage, defaults.OvnNorthdImage),
 			OvnSbDbclusterImage:           getImg(instance.Spec.CustomContainerImages.OvnSbDbclusterImage, defaults.OvnSbDbclusterImage),
-			PlacementApiImage:             getImg(instance.Spec.CustomContainerImages.PlacementApiImage, defaults.PlacementApiImage),
+			PlacementAPIImage:             getImg(instance.Spec.CustomContainerImages.PlacementAPIImage, defaults.PlacementAPIImage),
 			RabbitmqImage:                 getImg(instance.Spec.CustomContainerImages.RabbitmqImage, defaults.RabbitmqImage),
 			SwiftAccountImage:             getImg(instance.Spec.CustomContainerImages.SwiftAccountImage, defaults.SwiftAccountImage),
 			SwiftContainerImage:           getImg(instance.Spec.CustomContainerImages.SwiftContainerImage, defaults.SwiftContainerImage),
@@ -153,7 +154,7 @@ func GetContainerImages(ctx context.Context, defaults *corev1beta1.ContainerDefa
 }
 
 // ReconcileVersion - reconciles OpenStackVersion CR
-func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error, *corev1beta1.OpenStackVersion) {
+func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, *corev1beta1.OpenStackVersion, error) {
 	version := &corev1beta1.OpenStackVersion{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.Name,
@@ -183,11 +184,11 @@ func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackContro
 	})
 
 	if err != nil {
-		return ctrl.Result{}, err, nil
+		return ctrl.Result{}, nil, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("OpenStackVersion %s - %s", version.Name, op))
 	}
 
-	return ctrl.Result{}, nil, version
+	return ctrl.Result{}, version, nil
 }

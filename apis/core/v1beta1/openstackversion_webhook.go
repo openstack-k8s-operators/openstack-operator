@@ -45,6 +45,7 @@ func SetupOpenStackVersionDefaults(defaults OpenStackVersionDefaults) {
 	openstackversionlog.Info("OpenStackVersion defaults initialized", "defaults", defaults)
 }
 
+// SetupWebhookWithManager - register OpenStackVersion with the controller manager
 func (r *OpenStackVersion) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).

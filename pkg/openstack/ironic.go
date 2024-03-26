@@ -149,7 +149,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ironic, func() error {
 		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec.IronicSpecCore)
 
-		ironic.Spec.Images.API = *version.Status.ContainerImages.IronicApiImage
+		ironic.Spec.Images.API = *version.Status.ContainerImages.IronicAPIImage
 		ironic.Spec.Images.Conductor = *version.Status.ContainerImages.IronicConductorImage
 		ironic.Spec.Images.Inspector = *version.Status.ContainerImages.IronicInspectorImage
 		ironic.Spec.Images.NeutronAgent = *version.Status.ContainerImages.IronicNeutronAgentImage
@@ -185,7 +185,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneIronicReadyRunningMessage))
 	}
-	instance.Status.ContainerImages.IronicApiImage = version.Status.ContainerImages.IronicApiImage
+	instance.Status.ContainerImages.IronicAPIImage = version.Status.ContainerImages.IronicAPIImage
 	instance.Status.ContainerImages.IronicConductorImage = version.Status.ContainerImages.IronicConductorImage
 	instance.Status.ContainerImages.IronicInspectorImage = version.Status.ContainerImages.IronicInspectorImage
 	instance.Status.ContainerImages.IronicNeutronAgentImage = version.Status.ContainerImages.IronicNeutronAgentImage

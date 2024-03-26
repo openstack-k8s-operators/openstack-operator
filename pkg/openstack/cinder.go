@@ -105,7 +105,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.CinderScheduler.DeepCopyInto(&cinder.Spec.CinderScheduler.CinderSchedulerTemplateCore)
 		instance.Spec.Cinder.Template.CinderBackup.DeepCopyInto(&cinder.Spec.CinderBackup.CinderBackupTemplateCore)
 
-		cinder.Spec.CinderAPI.ContainerImage = *version.Status.ContainerImages.CinderApiImage
+		cinder.Spec.CinderAPI.ContainerImage = *version.Status.ContainerImages.CinderAPIImage
 		cinder.Spec.CinderScheduler.ContainerImage = *version.Status.ContainerImages.CinderSchedulerImage
 		cinder.Spec.CinderBackup.ContainerImage = *version.Status.ContainerImages.CinderBackupImage
 
@@ -172,7 +172,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			corev1beta1.OpenStackControlPlaneCinderReadyRunningMessage))
 	}
 
-	instance.Status.ContainerImages.CinderApiImage = version.Status.ContainerImages.CinderApiImage
+	instance.Status.ContainerImages.CinderAPIImage = version.Status.ContainerImages.CinderAPIImage
 	instance.Status.ContainerImages.CinderSchedulerImage = version.Status.ContainerImages.CinderSchedulerImage
 	instance.Status.ContainerImages.CinderBackupImage = version.Status.ContainerImages.CinderBackupImage
 	instance.Status.ContainerImages.CinderVolumeImages = version.Status.ContainerImages.DeepCopy().CinderVolumeImages

@@ -70,12 +70,12 @@ type ContainerImages struct {
 type ContainerTemplate struct {
 	AgentImage                    *string `json:"agentImage,omitempty"`
 	AnsibleeeImage                *string `json:"ansibleeeImage,omitempty"`
-	AodhApiImage                  *string `json:"aodhApiImage,omitempty"`
+	AodhAPIImage                  *string `json:"aodhAPIImage,omitempty"`
 	AodhEvaluatorImage            *string `json:"aodhEvaluatorImage,omitempty"`
 	AodhListenerImage             *string `json:"aodhListenerImage,omitempty"`
 	AodhNotifierImage             *string `json:"aodhNotifierImage,omitempty"`
 	ApacheImage                   *string `json:"apacheImage,omitempty"`
-	BarbicanApiImage              *string `json:"barbicanApiImage,omitempty"`
+	BarbicanAPIImage              *string `json:"barbicanAPIImage,omitempty"`
 	BarbicanKeystoneListenerImage *string `json:"barbicanKeystoneListenerImage,omitempty"`
 	BarbicanWorkerImage           *string `json:"barbicanWorkerImage,omitempty"`
 	CeilometerCentralImage        *string `json:"ceilometerCentralImage,omitempty"`
@@ -83,41 +83,41 @@ type ContainerTemplate struct {
 	CeilometerIpmiImage           *string `json:"ceilometerIpmiImage,omitempty"`
 	CeilometerNotificationImage   *string `json:"ceilometerNotificationImage,omitempty"`
 	CeilometerSgcoreImage         *string `json:"ceilometerSgcoreImage,omitempty"`
-	CinderApiImage                *string `json:"cinderApiImage,omitempty"`
+	CinderAPIImage                *string `json:"cinderAPIImage,omitempty"`
 	CinderBackupImage             *string `json:"cinderBackupImage,omitempty"`
 	CinderSchedulerImage          *string `json:"cinderSchedulerImage,omitempty"`
-	DesignateApiImage             *string `json:"designateApiImage,omitempty"`
+	DesignateAPIImage             *string `json:"designateAPIImage,omitempty"`
 	DesignateBackendbind9Image    *string `json:"designateBackendbind9Image,omitempty"`
 	DesignateCentralImage         *string `json:"designateCentralImage,omitempty"`
 	DesignateMdnsImage            *string `json:"designateMdnsImage,omitempty"`
 	DesignateProducerImage        *string `json:"designateProducerImage,omitempty"`
 	DesignateUnboundImage         *string `json:"designateUnboundImage,omitempty"`
 	DesignateWorkerImage          *string `json:"designateWorkerImage,omitempty"`
-	GlanceApiImage                *string `json:"glanceApiImage,omitempty"`
-	HeatApiImage                  *string `json:"heatApiImage,omitempty"`
+	GlanceAPIImage                *string `json:"glanceAPIImage,omitempty"`
+	HeatAPIImage                  *string `json:"heatAPIImage,omitempty"`
 	HeatCfnapiImage               *string `json:"heatCfnapiImage,omitempty"`
 	HeatEngineImage               *string `json:"heatEngineImage,omitempty"`
 	HorizonImage                  *string `json:"horizonImage,omitempty"`
 	InfraDnsmasqImage             *string `json:"infraDnsmasqImage,omitempty"`
 	InfraMemcachedImage           *string `json:"infraMemcachedImage,omitempty"`
 	InfraRedisImage               *string `json:"infraRedisImage,omitempty"`
-	IronicApiImage                *string `json:"ironicApiImage,omitempty"`
+	IronicAPIImage                *string `json:"ironicAPIImage,omitempty"`
 	IronicConductorImage          *string `json:"ironicConductorImage,omitempty"`
 	IronicInspectorImage          *string `json:"ironicInspectorImage,omitempty"`
 	IronicNeutronAgentImage       *string `json:"ironicNeutronAgentImage,omitempty"`
 	IronicPxeImage                *string `json:"ironicPxeImage,omitempty"`
 	IronicPythonAgentImage        *string `json:"ironicPythonAgentImage,omitempty"`
-	KeystoneApiImage              *string `json:"keystoneApiImage,omitempty"`
-	ManilaApiImage                *string `json:"manilaApiImage,omitempty"`
+	KeystoneAPIImage              *string `json:"keystoneAPIImage,omitempty"`
+	ManilaAPIImage                *string `json:"manilaAPIImage,omitempty"`
 	ManilaSchedulerImage          *string `json:"manilaSchedulerImage,omitempty"`
 	MariadbImage                  *string `json:"mariadbImage,omitempty"`
-	NeutronApiImage               *string `json:"neutronApiImage,omitempty"`
-	NovaApiImage                  *string `json:"novaApiImage,omitempty"`
+	NeutronAPIImage               *string `json:"neutronAPIImage,omitempty"`
+	NovaAPIImage                  *string `json:"novaAPIImage,omitempty"`
 	NovaComputeImage              *string `json:"novaComputeImage,omitempty"`
 	NovaConductorImage            *string `json:"novaConductorImage,omitempty"`
 	NovaNovncImage                *string `json:"novaNovncImage,omitempty"`
 	NovaSchedulerImage            *string `json:"novaSchedulerImage,omitempty"`
-	OctaviaApiImage               *string `json:"octaviaApiImage,omitempty"`
+	OctaviaAPIImage               *string `json:"octaviaAPIImage,omitempty"`
 	OctaviaHealthmanagerImage     *string `json:"octaviaHealthmanagerImage,omitempty"`
 	OctaviaHousekeepingImage      *string `json:"octaviaHousekeepingImage,omitempty"`
 	OctaviaWorkerImage            *string `json:"octaviaWorkerImage,omitempty"`
@@ -128,7 +128,7 @@ type ContainerTemplate struct {
 	OvnNbDbclusterImage           *string `json:"ovnNbDbclusterImage,omitempty"`
 	OvnNorthdImage                *string `json:"ovnNorthdImage,omitempty"`
 	OvnSbDbclusterImage           *string `json:"ovnSbDbclusterImage,omitempty"`
-	PlacementApiImage             *string `json:"placementApiImage,omitempty"`
+	PlacementAPIImage             *string `json:"placementAPIImage,omitempty"`
 	RabbitmqImage                 *string `json:"rabbitmqImage,omitempty"`
 	SwiftAccountImage             *string `json:"swiftAccountImage,omitempty"`
 	SwiftContainerImage           *string `json:"swiftContainerImage,omitempty"`
@@ -184,5 +184,5 @@ func init() {
 
 // IsReady - returns true if service is ready to serve requests
 func (instance OpenStackVersion) IsReady() bool {
-    return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }

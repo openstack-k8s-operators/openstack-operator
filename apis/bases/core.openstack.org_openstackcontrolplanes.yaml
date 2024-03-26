@@ -6147,9 +6147,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                      enableSecureRBAC:
-                        default: true
-                        type: boolean
                       memcachedInstance:
                         default: memcached
                         type: string
@@ -6268,6 +6265,12 @@ spec:
                         type: object
                       secret:
                         type: string
+                      secureRBACEnforceNewDefaults:
+                        default: true
+                        type: boolean
+                      secureRBACEnforceScope:
+                        default: false
+                        type: boolean
                       tls:
                         properties:
                           api:
@@ -16260,7 +16263,7 @@ spec:
                     type: string
                   ansibleeeImage:
                     type: string
-                  aodhApiImage:
+                  aodhAPIImage:
                     type: string
                   aodhEvaluatorImage:
                     type: string
@@ -16270,7 +16273,7 @@ spec:
                     type: string
                   apacheImage:
                     type: string
-                  barbicanApiImage:
+                  barbicanAPIImage:
                     type: string
                   barbicanKeystoneListenerImage:
                     type: string
@@ -16286,7 +16289,7 @@ spec:
                     type: string
                   ceilometerSgcoreImage:
                     type: string
-                  cinderApiImage:
+                  cinderAPIImage:
                     type: string
                   cinderBackupImage:
                     type: string
@@ -16296,7 +16299,7 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                  designateApiImage:
+                  designateAPIImage:
                     type: string
                   designateBackendbind9Image:
                     type: string
@@ -16310,9 +16313,9 @@ spec:
                     type: string
                   designateWorkerImage:
                     type: string
-                  glanceApiImage:
+                  glanceAPIImage:
                     type: string
-                  heatApiImage:
+                  heatAPIImage:
                     type: string
                   heatCfnapiImage:
                     type: string
@@ -16326,7 +16329,7 @@ spec:
                     type: string
                   infraRedisImage:
                     type: string
-                  ironicApiImage:
+                  ironicAPIImage:
                     type: string
                   ironicConductorImage:
                     type: string
@@ -16338,9 +16341,9 @@ spec:
                     type: string
                   ironicPythonAgentImage:
                     type: string
-                  keystoneApiImage:
+                  keystoneAPIImage:
                     type: string
-                  manilaApiImage:
+                  manilaAPIImage:
                     type: string
                   manilaSchedulerImage:
                     type: string
@@ -16350,9 +16353,9 @@ spec:
                     type: object
                   mariadbImage:
                     type: string
-                  neutronApiImage:
+                  neutronAPIImage:
                     type: string
-                  novaApiImage:
+                  novaAPIImage:
                     type: string
                   novaComputeImage:
                     type: string
@@ -16362,7 +16365,7 @@ spec:
                     type: string
                   novaSchedulerImage:
                     type: string
-                  octaviaApiImage:
+                  octaviaAPIImage:
                     type: string
                   octaviaHealthmanagerImage:
                     type: string
@@ -16384,7 +16387,7 @@ spec:
                     type: string
                   ovnSbDbclusterImage:
                     type: string
-                  placementApiImage:
+                  placementAPIImage:
                     type: string
                   rabbitmqImage:
                     type: string

@@ -164,11 +164,15 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		if op != controllerutil.OperationResultNone {
 			Log.Info(fmt.Sprintf("OVNDBCluster %s - %s", OVNDBCluster.Name, op))
 		}
-		OVNDBClustersReady = OVNDBClustersReady && OVNDBCluster.IsReady()
+
+		OVNDBClustersReady = OVNDBClustersReady && (OVNDBCluster.Status.ObservedGeneration == OVNDBCluster.Generation) && OVNDBCluster.IsReady()
+
 	}
 	instance.Status.ContainerImages.OvnNbDbclusterImage = version.Status.ContainerImages.OvnNbDbclusterImage
 	instance.Status.ContainerImages.OvnSbDbclusterImage = version.Status.ContainerImages.OvnSbDbclusterImage
+
 	return OVNDBClustersReady, nil
+
 }
 
 func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
@@ -264,7 +268,13 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		Log.Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
 	}
 	instance.Status.ContainerImages.OvnNorthdImage = version.Status.ContainerImages.OvnNorthdImage
-	return OVNNorthd.IsReady(), nil
+
+	if OVNNorthd.Status.ObservedGeneration != OVNNorthd.Generation {
+		return false, nil
+	} else {
+		return OVNNorthd.IsReady(), nil
+	}
+
 }
 
 func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {

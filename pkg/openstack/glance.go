@@ -141,7 +141,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
 		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec.GlanceSpecCore)
-		glance.Spec.ContainerImage = *version.Status.ContainerImages.GlanceApiImage
+		glance.Spec.ContainerImage = *version.Status.ContainerImages.GlanceAPIImage
 		if glance.Spec.Secret == "" {
 			glance.Spec.Secret = instance.Spec.Secret
 		}
@@ -189,7 +189,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneGlanceReadyRunningMessage))
 	}
-	instance.Status.ContainerImages.GlanceApiImage = version.Status.ContainerImages.GlanceApiImage
+	instance.Status.ContainerImages.GlanceAPIImage = version.Status.ContainerImages.GlanceAPIImage
 
 	return ctrl.Result{}, nil
 }

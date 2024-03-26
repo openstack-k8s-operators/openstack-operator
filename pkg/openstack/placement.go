@@ -100,7 +100,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), placementAPI, func() error {
 		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec.PlacementAPISpecCore)
 
-		placementAPI.Spec.ContainerImage = *version.Status.ContainerImages.PlacementApiImage
+		placementAPI.Spec.ContainerImage = *version.Status.ContainerImages.PlacementAPIImage
 		if placementAPI.Spec.Secret == "" {
 			placementAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -139,7 +139,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlanePlacementAPIReadyRunningMessage))
 	}
-	instance.Status.ContainerImages.PlacementApiImage = version.Status.ContainerImages.PlacementApiImage
+	instance.Status.ContainerImages.PlacementAPIImage = version.Status.ContainerImages.PlacementAPIImage
 
 	return ctrl.Result{}, nil
 

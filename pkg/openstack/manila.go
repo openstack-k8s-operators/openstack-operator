@@ -105,7 +105,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.ManilaAPI.DeepCopyInto(&manila.Spec.ManilaAPI.ManilaAPITemplateCore)
 		instance.Spec.Manila.Template.ManilaScheduler.DeepCopyInto(&manila.Spec.ManilaScheduler.ManilaSchedulerTemplateCore)
 
-		manila.Spec.ManilaAPI.ContainerImage = *version.Status.ContainerImages.ManilaApiImage
+		manila.Spec.ManilaAPI.ContainerImage = *version.Status.ContainerImages.ManilaAPIImage
 		manila.Spec.ManilaScheduler.ContainerImage = *version.Status.ContainerImages.ManilaSchedulerImage
 
 		defaultShareImg := version.Status.ContainerImages.ManilaShareImages["default"]
@@ -171,7 +171,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneManilaReadyRunningMessage))
 	}
-	instance.Status.ContainerImages.ManilaApiImage = version.Status.ContainerImages.ManilaApiImage
+	instance.Status.ContainerImages.ManilaAPIImage = version.Status.ContainerImages.ManilaAPIImage
 	instance.Status.ContainerImages.ManilaSchedulerImage = version.Status.ContainerImages.ManilaSchedulerImage
 	instance.Status.ContainerImages.ManilaShareImages = version.Status.ContainerImages.ManilaShareImages
 

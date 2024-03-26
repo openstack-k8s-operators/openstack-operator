@@ -111,7 +111,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateBackendbind9SpecBase.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateBackendbind9SpecBase)
 		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateServiceTemplateCore)
 
-		designate.Spec.DesignateAPI.ContainerImage = *version.Status.ContainerImages.DesignateApiImage
+		designate.Spec.DesignateAPI.ContainerImage = *version.Status.ContainerImages.DesignateAPIImage
 		designate.Spec.DesignateCentral.ContainerImage = *version.Status.ContainerImages.DesignateCentralImage
 		designate.Spec.DesignateMdns.ContainerImage = *version.Status.ContainerImages.DesignateMdnsImage
 		designate.Spec.DesignateProducer.ContainerImage = *version.Status.ContainerImages.DesignateProducerImage
@@ -159,7 +159,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 			corev1beta1.OpenStackControlPlaneDesignateReadyRunningMessage))
 	}
 
-	instance.Status.ContainerImages.DesignateApiImage = version.Status.ContainerImages.DesignateApiImage
+	instance.Status.ContainerImages.DesignateAPIImage = version.Status.ContainerImages.DesignateAPIImage
 	instance.Status.ContainerImages.DesignateCentralImage = version.Status.ContainerImages.DesignateCentralImage
 	instance.Status.ContainerImages.DesignateMdnsImage = version.Status.ContainerImages.DesignateMdnsImage
 	instance.Status.ContainerImages.DesignateProducerImage = version.Status.ContainerImages.DesignateProducerImage

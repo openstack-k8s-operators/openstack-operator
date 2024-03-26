@@ -169,7 +169,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	instance.InitConditions()
 
 	Log.Info("Looking up the current OpenStackVersion")
-	ctrlResult, err, version := openstack.ReconcileVersion(ctx, instance, helper)
+	ctrlResult, version, err := openstack.ReconcileVersion(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {

@@ -154,7 +154,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Heat.Template.HeatCfnAPI.DeepCopyInto(&heat.Spec.HeatCfnAPI.HeatCfnAPITemplateCore)
 		instance.Spec.Heat.Template.HeatEngine.DeepCopyInto(&heat.Spec.HeatEngine.HeatEngineTemplateCore)
 
-		heat.Spec.HeatAPI.ContainerImage = *version.Status.ContainerImages.HeatApiImage
+		heat.Spec.HeatAPI.ContainerImage = *version.Status.ContainerImages.HeatAPIImage
 		heat.Spec.HeatCfnAPI.ContainerImage = *version.Status.ContainerImages.HeatCfnapiImage
 		heat.Spec.HeatEngine.ContainerImage = *version.Status.ContainerImages.HeatEngineImage
 
@@ -187,7 +187,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneHeatReadyRunningMessage))
 	}
-	instance.Status.ContainerImages.HeatApiImage = version.Status.ContainerImages.HeatApiImage
+	instance.Status.ContainerImages.HeatAPIImage = version.Status.ContainerImages.HeatAPIImage
 	instance.Status.ContainerImages.HeatCfnapiImage = version.Status.ContainerImages.HeatCfnapiImage
 	instance.Status.ContainerImages.HeatEngineImage = version.Status.ContainerImages.HeatEngineImage
 

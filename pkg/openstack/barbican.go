@@ -102,7 +102,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		instance.Spec.Barbican.Template.BarbicanWorker.DeepCopyInto(&barbican.Spec.BarbicanWorker.BarbicanWorkerTemplateCore)
 		instance.Spec.Barbican.Template.BarbicanKeystoneListener.DeepCopyInto(&barbican.Spec.BarbicanKeystoneListener.BarbicanKeystoneListenerTemplateCore)
 
-		barbican.Spec.BarbicanAPI.ContainerImage = *version.Status.ContainerImages.BarbicanApiImage
+		barbican.Spec.BarbicanAPI.ContainerImage = *version.Status.ContainerImages.BarbicanAPIImage
 		barbican.Spec.BarbicanWorker.ContainerImage = *version.Status.ContainerImages.BarbicanWorkerImage
 		barbican.Spec.BarbicanKeystoneListener.ContainerImage = *version.Status.ContainerImages.BarbicanKeystoneListenerImage
 
@@ -149,6 +149,9 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneBarbicanReadyRunningMessage))
 	}
+	instance.Status.ContainerImages.BarbicanAPIImage = version.Status.ContainerImages.BarbicanAPIImage
+	instance.Status.ContainerImages.BarbicanWorkerImage = version.Status.ContainerImages.BarbicanWorkerImage
+	instance.Status.ContainerImages.BarbicanKeystoneListenerImage = version.Status.ContainerImages.BarbicanKeystoneListenerImage
 
 	return ctrl.Result{}, nil
 }

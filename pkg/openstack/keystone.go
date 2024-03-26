@@ -102,7 +102,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec.KeystoneAPISpecCore)
 
-		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneApiImage
+		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneAPIImage
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -134,7 +134,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		Log.Info(fmt.Sprintf("KeystoneAPI %s - %s", keystoneAPI.Name, op))
 	}
 
-	if keystoneAPI.IsReady() {
+	if keystoneAPI.Status.ObservedGeneration == keystoneAPI.Generation && keystoneAPI.IsReady() {
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition, corev1beta1.OpenStackControlPlaneKeystoneAPIReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -143,7 +143,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyRunningMessage))
 	}
-	instance.Status.ContainerImages.KeystoneApiImage = version.Status.ContainerImages.KeystoneApiImage
+	instance.Status.ContainerImages.KeystoneAPIImage = version.Status.ContainerImages.KeystoneAPIImage
 
 	return ctrl.Result{}, nil
 }

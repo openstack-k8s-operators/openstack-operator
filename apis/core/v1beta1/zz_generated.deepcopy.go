@@ -215,8 +215,8 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.AodhApiImage != nil {
-		in, out := &in.AodhApiImage, &out.AodhApiImage
+	if in.AodhAPIImage != nil {
+		in, out := &in.AodhAPIImage, &out.AodhAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -240,8 +240,8 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.BarbicanApiImage != nil {
-		in, out := &in.BarbicanApiImage, &out.BarbicanApiImage
+	if in.BarbicanAPIImage != nil {
+		in, out := &in.BarbicanAPIImage, &out.BarbicanAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -280,8 +280,8 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.CinderApiImage != nil {
-		in, out := &in.CinderApiImage, &out.CinderApiImage
+	if in.CinderAPIImage != nil {
+		in, out := &in.CinderAPIImage, &out.CinderAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -295,8 +295,8 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.DesignateApiImage != nil {
-		in, out := &in.DesignateApiImage, &out.DesignateApiImage
+	if in.DesignateAPIImage != nil {
+		in, out := &in.DesignateAPIImage, &out.DesignateAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -330,13 +330,13 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.GlanceApiImage != nil {
-		in, out := &in.GlanceApiImage, &out.GlanceApiImage
+	if in.GlanceAPIImage != nil {
+		in, out := &in.GlanceAPIImage, &out.GlanceAPIImage
 		*out = new(string)
 		**out = **in
 	}
-	if in.HeatApiImage != nil {
-		in, out := &in.HeatApiImage, &out.HeatApiImage
+	if in.HeatAPIImage != nil {
+		in, out := &in.HeatAPIImage, &out.HeatAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -370,8 +370,8 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.IronicApiImage != nil {
-		in, out := &in.IronicApiImage, &out.IronicApiImage
+	if in.IronicAPIImage != nil {
+		in, out := &in.IronicAPIImage, &out.IronicAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -400,13 +400,13 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.KeystoneApiImage != nil {
-		in, out := &in.KeystoneApiImage, &out.KeystoneApiImage
+	if in.KeystoneAPIImage != nil {
+		in, out := &in.KeystoneAPIImage, &out.KeystoneAPIImage
 		*out = new(string)
 		**out = **in
 	}
-	if in.ManilaApiImage != nil {
-		in, out := &in.ManilaApiImage, &out.ManilaApiImage
+	if in.ManilaAPIImage != nil {
+		in, out := &in.ManilaAPIImage, &out.ManilaAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -420,13 +420,13 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.NeutronApiImage != nil {
-		in, out := &in.NeutronApiImage, &out.NeutronApiImage
+	if in.NeutronAPIImage != nil {
+		in, out := &in.NeutronAPIImage, &out.NeutronAPIImage
 		*out = new(string)
 		**out = **in
 	}
-	if in.NovaApiImage != nil {
-		in, out := &in.NovaApiImage, &out.NovaApiImage
+	if in.NovaAPIImage != nil {
+		in, out := &in.NovaAPIImage, &out.NovaAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -450,8 +450,8 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.OctaviaApiImage != nil {
-		in, out := &in.OctaviaApiImage, &out.OctaviaApiImage
+	if in.OctaviaAPIImage != nil {
+		in, out := &in.OctaviaAPIImage, &out.OctaviaAPIImage
 		*out = new(string)
 		**out = **in
 	}
@@ -505,8 +505,8 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.PlacementApiImage != nil {
-		in, out := &in.PlacementApiImage, &out.PlacementApiImage
+	if in.PlacementAPIImage != nil {
+		in, out := &in.PlacementAPIImage, &out.PlacementAPIImage
 		*out = new(string)
 		**out = **in
 	}

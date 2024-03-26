@@ -282,10 +282,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec)
 
-		nova.Spec.NovaImages.APIContainerImageURL = *version.Status.ContainerImages.NovaApiImage
+		nova.Spec.NovaImages.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
 		nova.Spec.NovaImages.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
 		nova.Spec.NovaImages.ConductorContainerImageURL = *version.Status.ContainerImages.NovaConductorImage
-		nova.Spec.NovaImages.MetadataContainerImageURL = *version.Status.ContainerImages.NovaApiImage //metadata uses novaAPI image
+		nova.Spec.NovaImages.MetadataContainerImageURL = *version.Status.ContainerImages.NovaAPIImage //metadata uses novaAPI image
 		nova.Spec.NovaImages.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
 		nova.Spec.NovaImages.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
 
@@ -318,7 +318,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneNovaReadyRunningMessage))
 	}
-	instance.Status.ContainerImages.NovaApiImage = version.Status.ContainerImages.NovaApiImage
+	instance.Status.ContainerImages.NovaAPIImage = version.Status.ContainerImages.NovaAPIImage
 	instance.Status.ContainerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
 	instance.Status.ContainerImages.NovaConductorImage = version.Status.ContainerImages.NovaConductorImage
 	instance.Status.ContainerImages.NovaNovncImage = version.Status.ContainerImages.NovaNovncImage

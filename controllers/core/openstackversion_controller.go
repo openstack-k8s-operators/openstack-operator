@@ -182,12 +182,12 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	instance.Status.ContainerImageVersionDefaults[envAvailableVersion] = defaults
 
 	// calculate the container images for the target version
-	if val, ok := instance.Status.ContainerImageVersionDefaults[instance.Spec.TargetVersion]; !ok {
+	val, ok := instance.Status.ContainerImageVersionDefaults[instance.Spec.TargetVersion]
+	if !ok {
 		Log.Info("Target version not found in defaults", "targetVersion", instance.Spec.TargetVersion)
 		return ctrl.Result{}, nil
-	} else {
-		instance.Status.ContainerImages = openstack.GetContainerImages(ctx, val, *instance)
 	}
+	instance.Status.ContainerImages = openstack.GetContainerImages(ctx, val, *instance)
 
 	instance.Status.Conditions.MarkTrue(
 		corev1beta1.OpenStackVersionInitialized,
@@ -219,7 +219,8 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 		// minor update for Controlplane in progress
 		// we only check keystone here as it will only get updated during this phase
-		if !compareStringPointers(controlPlane.Status.ContainerImages.KeystoneApiImage, instance.Status.ContainerImages.KeystoneApiImage) {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.KeystoneAPIImage, instance.Status.ContainerImages.KeystoneAPIImage) ||
+			!controlPlane.IsReady() {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateControlplane,
 				condition.RequestedReason,

@@ -14,7 +14,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240313161042-88282483a04f
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240315174418-d016dbadd829
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240313143432-9108b7f7290a
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240314165949-fec16b14c33b
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240326081751-56015b1ae3f6
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240314165949-fec16b14c33b
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240315120315-d76653575db5
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240314113200-40cf3e6aa38e
@@ -106,4 +106,6 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202304141430
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.6.0_patches_tag)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20240313124519-961a0ee8bf7f //allow-merging
 
-replace github.com/openstack-k8s-operators/ovn-operator/api => github.com/dprince/ovn-operator/api v0.0.0-20240326183925-450158835581 //allow-merging
+replace github.com/openstack-k8s-operators/ovn-operator/api => github.com/dprince/ovn-operator/api v0.0.0-20240327173949-685116405532 //allow-merging
+
+replace github.com/openstack-k8s-operators/keystone-operator/api => github.com/dprince/keystone-operator/api v0.0.0-20240327174424-05527caa1208 //allow-merging

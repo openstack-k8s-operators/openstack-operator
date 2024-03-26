@@ -133,7 +133,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 	Log.Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
 		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec.NeutronAPISpecCore)
-		neutronAPI.Spec.ContainerImage = *version.Status.ContainerImages.NeutronApiImage
+		neutronAPI.Spec.ContainerImage = *version.Status.ContainerImages.NeutronAPIImage
 		if neutronAPI.Spec.Secret == "" {
 			neutronAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -182,7 +182,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			corev1beta1.OpenStackControlPlaneNeutronReadyRunningMessage))
 	}
 
-	instance.Status.ContainerImages.NeutronApiImage = version.Status.ContainerImages.NeutronApiImage
+	instance.Status.ContainerImages.NeutronAPIImage = version.Status.ContainerImages.NeutronAPIImage
 
 	return ctrl.Result{}, nil
 
