@@ -64,6 +64,12 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 				octavia.Name)
 	}
 
+	// preserve any previously set TLS certs, set CA cert
+	if instance.Spec.TLS.PodLevel.Enabled {
+		instance.Spec.Octavia.Template.OctaviaAPI.TLS = octavia.Spec.OctaviaAPI.TLS
+	}
+	instance.Spec.Octavia.Template.OctaviaAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	// When component services got created check if there is the need to create a route
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "octavia", Namespace: instance.Namespace}, octavia); err != nil {
 		if !k8s_errors.IsNotFound(err) {
@@ -92,7 +98,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Octavia.Template.OctaviaAPI.Override.Service,
 			instance.Spec.Octavia.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeOctaviaReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
+			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
 			tls.API{},
 		)
 		if err != nil {
@@ -102,6 +108,10 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 		// set service overrides
 		instance.Spec.Octavia.Template.OctaviaAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Octavia.Template.OctaviaAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Octavia.Template.OctaviaAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	helper.GetLogger().Info("Reconciling Octavia", "Octavia.Namespace", instance.Namespace, "Octavia.Name", octavia.Name)

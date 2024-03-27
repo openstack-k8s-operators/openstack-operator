@@ -9721,6 +9721,10 @@ spec:
                           - name
                           type: object
                         type: array
+                      amphoraImageContainerImage:
+                        type: string
+                      apacheContainerImage:
+                        type: string
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -9887,6 +9891,24 @@ spec:
                           serviceUser:
                             default: octavia
                             type: string
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         required:
@@ -9935,18 +9957,12 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          lbMgmtNetwork:
-                            default:
-                              manageLbMgmtNetworks: true
-                              subnetIpVersion: 4
-                            properties:
-                              manageLbMgmtNetworks:
-                                default: true
-                                type: boolean
-                              subnetIpVersion:
-                                default: 4
-                                type: integer
-                            type: object
+                          lbMgmtNetworkID:
+                            default: ""
+                            type: string
+                          lbSecurityGroupID:
+                            default: ""
+                            type: string
                           networkAttachments:
                             items:
                               type: string
@@ -10016,6 +10032,11 @@ spec:
                           tenantName:
                             default: service
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         required:
@@ -10064,18 +10085,12 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          lbMgmtNetwork:
-                            default:
-                              manageLbMgmtNetworks: true
-                              subnetIpVersion: 4
-                            properties:
-                              manageLbMgmtNetworks:
-                                default: true
-                                type: boolean
-                              subnetIpVersion:
-                                default: 4
-                                type: integer
-                            type: object
+                          lbMgmtNetworkID:
+                            default: ""
+                            type: string
+                          lbSecurityGroupID:
+                            default: ""
+                            type: string
                           networkAttachments:
                             items:
                               type: string
@@ -10145,6 +10160,11 @@ spec:
                           tenantName:
                             default: service
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         required:
@@ -10193,18 +10213,12 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          lbMgmtNetwork:
-                            default:
-                              manageLbMgmtNetworks: true
-                              subnetIpVersion: 4
-                            properties:
-                              manageLbMgmtNetworks:
-                                default: true
-                                type: boolean
-                              subnetIpVersion:
-                                default: 4
-                                type: integer
-                            type: object
+                          lbMgmtNetworkID:
+                            default: ""
+                            type: string
+                          lbSecurityGroupID:
+                            default: ""
+                            type: string
                           networkAttachments:
                             items:
                               type: string
@@ -10274,6 +10288,11 @@ spec:
                           tenantName:
                             default: service
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         required:
@@ -10302,7 +10321,40 @@ spec:
                       rabbitMqClusterName:
                         default: rabbitmq
                         type: string
+                      resources:
+                        properties:
+                          claims:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            type: array
+                            x-kubernetes-list-map-keys:
+                            - name
+                            x-kubernetes-list-type: map
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            type: object
+                        type: object
                       secret:
+                        type: string
+                      serviceAccount:
                         type: string
                       serviceUser:
                         default: octavia
@@ -10313,11 +10365,16 @@ spec:
                       sshPubkey:
                         default: octavia-ssh-pubkey
                         type: string
+                      tenantName:
+                        default: service
+                        type: string
                     required:
+                    - apacheContainerImage
                     - databaseInstance
                     - octaviaAPI
                     - rabbitMqClusterName
                     - secret
+                    - serviceAccount
                     type: object
                 type: object
               openstackclient:
