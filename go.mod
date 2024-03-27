@@ -10,11 +10,11 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/imdario/mergo v0.3.16
 	github.com/onsi/ginkgo/v2 v2.16.0
-	github.com/onsi/gomega v1.31.1
+	github.com/onsi/gomega v1.32.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240310115941-5124bc86e50e
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240315185259-92a4d93fc876
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240315071715-308b1a7103ed
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240327153615-f6bc8feafe29
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240306213520-073a542389ea
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240314145536-52b38176eb3f
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240318020653-c1d2b66c7c41
@@ -31,7 +31,7 @@ require (
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240313153742-4685453be3fb
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240314110716-d81f1e5d229d
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240313103756-fb4ac5373b65
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240318080957-e5f6ab918182
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240318132611-4df20882649d
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240318052728-f132fab5c943
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240313145348-1dd69c7bc338
@@ -55,10 +55,14 @@ require (
 	github.com/emicklei/go-restful/v3 v3.11.2 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
 	github.com/go-openapi/jsonreference v0.20.4 // indirect
 	github.com/go-openapi/swag v0.22.9 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.19.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -71,6 +75,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/metal3-io/baremetal-operator/apis v0.5.1 // indirect
 	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.4.0 // indirect
@@ -90,6 +95,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect

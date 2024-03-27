@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/onsi/ginkgo/v2 v2.16.0
-	github.com/onsi/gomega v1.31.1
+	github.com/onsi/gomega v1.32.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240310115941-5124bc86e50e
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240315185259-92a4d93fc876
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240306213520-073a542389ea
