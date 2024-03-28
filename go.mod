@@ -9,34 +9,34 @@ require (
 	github.com/go-logr/logr v1.4.1
 	github.com/google/uuid v1.6.0
 	github.com/imdario/mergo v0.3.16
-	github.com/onsi/ginkgo/v2 v2.16.0
+	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.32.0
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240310115941-5124bc86e50e
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240315185259-92a4d93fc876
+	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240328090230-49d1d7a67733
+	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240327185700-7961ee3dc287
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240328001623-e2689c66926a
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240306213520-073a542389ea
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240314145536-52b38176eb3f
-	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240318020653-c1d2b66c7c41
-	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240318073115-dd46fc11a8f4
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240313161042-88282483a04f
-	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240315174418-d016dbadd829
-	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240313143432-9108b7f7290a
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240315120315-d76653575db5
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240328104133-47e8a3c29c74
+	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240327132943-1bd0e441658a
+	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240327115044-7b8ae0178623
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240327192142-3a7330c5f527
+	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240320220525-7cb8f24d903d
+	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240327200030-a38a655f6ed8
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240327185132-1b212e96ef99
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240314113200-40cf3e6aa38e
-	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240308065128-4ba88761f83f
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240313153742-4685453be3fb
-	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240326115129-7fd1a4fa51c3
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240313103756-fb4ac5373b65
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240318132611-4df20882649d
+	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240327152515-9708f9e8a2b2
+	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240327140817-6274ce7a470d
+	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240327182116-ab2d34e6617f
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240328100547-bef9e93c04c4
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240327125944-20c4db02e417
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240318052728-f132fab5c943
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240313145348-1dd69c7bc338
-	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240315154317-8b38ff1e6a8d
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240311060559-4ecd4f5c3961
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240328080116-1260d2eea72d
+	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240326071624-3558f06077e6
+	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240327111213-a51539152d24
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240328013859-efe82b24869e
 	github.com/operator-framework/api v0.20.0
 	github.com/rabbitmq/cluster-operator/v2 v2.6.0
 	go.uber.org/zap v1.27.0
@@ -82,15 +82,15 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240314165949-fec16b14c33b // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240314165949-fec16b14c33b // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240326081751-56015b1ae3f6 // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240326081751-56015b1ae3f6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.46.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.64.1-rhobs3 // indirect
-	github.com/rhobs/observability-operator v0.0.20 // indirect
+	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.69.0-rhobs1 // indirect
+	github.com/rhobs/observability-operator v0.0.28 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

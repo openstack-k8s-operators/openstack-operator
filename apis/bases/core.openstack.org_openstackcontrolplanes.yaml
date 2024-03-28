@@ -895,12 +895,6 @@ spec:
                             default: 1 0 * * *
                             type: string
                         type: object
-                      debug:
-                        properties:
-                          dbPurge:
-                            default: false
-                            type: boolean
-                        type: object
                       extraMounts:
                         items:
                           properties:
@@ -6241,9 +6235,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                      enableSecureRBAC:
-                        default: true
-                        type: boolean
                       memcachedInstance:
                         default: memcached
                         type: string
@@ -6362,6 +6353,12 @@ spec:
                         type: object
                       secret:
                         type: string
+                      secureRBACEnforceNewDefaults:
+                        default: true
+                        type: boolean
+                      secureRBACEnforceScope:
+                        default: false
+                        type: boolean
                       tls:
                         properties:
                           api:
@@ -6522,6 +6519,7 @@ spec:
                         properties:
                           age:
                             default: 30
+                            minimum: 1
                             type: integer
                           schedule:
                             default: 1 0 * * *
@@ -7713,10 +7711,10 @@ spec:
                         type: string
                       customServiceConfig:
                         type: string
-                      databaseInstance:
-                        type: string
-                      databaseUser:
+                      databaseAccount:
                         default: neutron
+                        type: string
+                      databaseInstance:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -8542,12 +8540,8 @@ spec:
                         type: object
                       passwordSelectors:
                         default:
-                          database: NeutronDatabasePassword
                           service: NeutronPassword
                         properties:
-                          database:
-                            default: NeutronDatabasePassword
-                            type: string
                           service:
                             default: NeutronPassword
                             type: string
@@ -10583,6 +10577,10 @@ spec:
                           logLevel:
                             default: info
                             type: string
+                          nThreads:
+                            default: 1
+                            format: int32
+                            type: integer
                           networkAttachment:
                             type: string
                           nodeSelector:
@@ -15486,10 +15484,10 @@ spec:
                               customServiceConfig:
                                 default: '# add your customization here'
                                 type: string
-                              databaseInstance:
-                                type: string
-                              databaseUser:
+                              databaseAccount:
                                 default: aodh
+                                type: string
+                              databaseInstance:
                                 type: string
                               defaultConfigOverwrite:
                                 additionalProperties:
@@ -15562,13 +15560,9 @@ spec:
                               passwordSelector:
                                 default:
                                   aodhService: AodhPassword
-                                  database: AodhDatabasePassword
                                 properties:
                                   aodhService:
                                     default: AodhPassword
-                                    type: string
-                                  database:
-                                    default: AodhDatabasePassword
                                     type: string
                                   service:
                                     default: CeilometerPassword
@@ -15625,6 +15619,8 @@ spec:
                             maximum: 65535
                             minimum: 1
                             type: integer
+                          prometheusTLS:
+                            type: boolean
                         required:
                         - heatInstance
                         type: object
@@ -15659,13 +15655,12 @@ spec:
                               aodhService:
                                 default: AodhPassword
                                 type: string
-                              database:
-                                default: AodhDatabasePassword
-                                type: string
                               service:
                                 default: CeilometerPassword
                                 type: string
                             type: object
+                          proxyImage:
+                            type: string
                           rabbitMqClusterName:
                             default: rabbitmq
                             type: string
@@ -15676,11 +15671,19 @@ spec:
                             type: string
                           sgCoreImage:
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                         required:
                         - centralImage
                         - computeImage
                         - ipmiImage
                         - notificationImage
+                        - proxyImage
                         - secret
                         - sgCoreImage
                         type: object
@@ -15896,6 +15899,24 @@ spec:
                                             type:
                                               type: string
                                           type: object
+                                        azureAd:
+                                          properties:
+                                            cloud:
+                                              enum:
+                                              - AzureChina
+                                              - AzureGovernment
+                                              - AzurePublic
+                                              type: string
+                                            managedIdentity:
+                                              properties:
+                                                clientId:
+                                                  type: string
+                                              required:
+                                              - clientId
+                                              type: object
+                                          required:
+                                          - managedIdentity
+                                          type: object
                                         basicAuth:
                                           properties:
                                             password:
@@ -16025,6 +16046,8 @@ spec:
                                           pattern: ^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$
                                           type: string
                                         sendExemplars:
+                                          type: boolean
+                                        sendNativeHistograms:
                                           type: boolean
                                         sigv4:
                                           properties:
@@ -16196,6 +16219,9 @@ spec:
                                     format: int32
                                     minimum: 0
                                     type: integer
+                                  scrapeInterval:
+                                    pattern: ^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$
+                                    type: string
                                 type: object
                               resourceSelector:
                                 nullable: true
@@ -16274,6 +16300,9 @@ spec:
                               alertingEnabled:
                                 default: true
                                 type: boolean
+                              dashboardsEnabled:
+                                default: false
+                                type: boolean
                               dataplaneNetwork:
                                 default: ctlplane
                                 pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
@@ -16331,6 +16360,13 @@ spec:
                                 type: object
                             required:
                             - dataplaneNetwork
+                            type: object
+                          prometheusTls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
                             type: object
                         type: object
                     type: object
