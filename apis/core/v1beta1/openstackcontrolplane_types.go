@@ -78,7 +78,7 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// +kubebuilder:default={ingress: {enabled: true, ca: {duration: "43800h"}, cert: {duration: "8760h"}}, podLevel: {enabled: false, internal:{ca: {duration: "43800h"}, cert: {duration: "8760h"}}, ovn: {ca: {duration: "43800h"}, cert: {duration: "8760h"}}}}
+	// +kubebuilder:default={ingress: {enabled: true, ca: {duration: "43800h"}, cert: {duration: "8760h"}}, podLevel: {enabled: true, internal:{ca: {duration: "43800h"}, cert: {duration: "8760h"}}, ovn: {ca: {duration: "43800h"}, cert: {duration: "8760h"}}}}
 	// TLS - Parameters related to the TLS
 	TLS TLSSection `json:"tls"`
 

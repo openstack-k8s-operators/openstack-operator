@@ -14,7 +14,7 @@ require (
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240401125932-8d6162aed60d
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240401190259-4d30fdbf5531
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240401125648-018312133e03
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240409011851-660e2767d84d
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240403153039-29d27af23767
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240403091918-407c91f5e7aa
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240404063020-d33c69bed5bd
@@ -33,7 +33,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240405191225-a61ca8697bf2
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240403043315-77086641d3fd
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240403151939-f1aeebd1f2e0
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240409005731-765fc25c55d9
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240404140050-69252e99daaf
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240405150212-f8cecba5f227
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240404090348-ab779da79e83

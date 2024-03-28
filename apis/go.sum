@@ -107,8 +107,8 @@ github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240404163736-a2d
 github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240404163736-a2d67e46f9f2/go.mod h1:qTPC7HGMWkxan3Z3YD5/cgw8kWraEW5ikdrKZ76XpBw=
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240404073049-a8b012482299 h1:G53Kd5koCQn0nUfAvEcvkDZ4ik885sXuuG+5nazdQXA=
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240404073049-a8b012482299/go.mod h1:EZymlUAhQzGNIAGrpGZ5P6oqfq2IhqY2lNPKLG9iKh8=
-github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240403151939-f1aeebd1f2e0 h1:35YK6H2OJpSZ+zOCLgautGSPbEh1EYZGbtpmiLwvLWk=
-github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240403151939-f1aeebd1f2e0/go.mod h1:gouaaSPxUBLC1ifDBAdFsbl1njab50Uc2cBE8M6oKGc=
+github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240409005731-765fc25c55d9 h1:8Qx/czqE2YAkR3TIFGuluPfVGrQpwtxmlEbxrWbw25M=
+github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240409005731-765fc25c55d9/go.mod h1:geYtiRKn+GKR61YhAMsvPvLqVdMb4wtvMrj1kFG0SdU=
 github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240404140050-69252e99daaf h1:O7RzcKH3qRORucojkKZc1vIpQv5naYoWn34zhVzTs0E=
 github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240404140050-69252e99daaf/go.mod h1:NYOgk2HS4mSR+4WwsiexepNU1pjxeo7h2WTs8qtS9/0=
 github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240405150212-f8cecba5f227 h1:aX8lFcr9d7SzsP9MUvHzrki1jUPqYbAFlfdlu4OWxl0=
