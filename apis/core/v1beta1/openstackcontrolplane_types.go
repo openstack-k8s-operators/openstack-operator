@@ -622,8 +622,18 @@ type TelemetrySection struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// APIOverride, provides the ability to override the generated manifest of several child resources.
-	APIOverride Override `json:"apiOverride,omitempty"`
+	// AodhAPIOverride, provides the ability to override the generated manifest of several child resources.
+	AodhAPIOverride Override `json:"aodhApiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// PrometheusOverride, provides the ability to override the generated manifest of several child resources.
+	PrometheusOverride Override `json:"prometheusOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// AlertmanagerOverride, provides the ability to override the generated manifest of several child resources.
+	AlertmanagerOverride Override `json:"alertmanagerOverride,omitempty"`
 }
 
 // SwiftSection defines the desired state of Swift service

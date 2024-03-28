@@ -36,7 +36,7 @@ require (
 	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240318052728-f132fab5c943
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240313145348-1dd69c7bc338
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240315154317-8b38ff1e6a8d
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240311060559-4ecd4f5c3961
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240320060823-d7b27511017b
 	github.com/operator-framework/api v0.20.0
 	github.com/rabbitmq/cluster-operator/v2 v2.6.0
 	go.uber.org/zap v1.27.0
@@ -67,7 +67,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/gnostic-models v0.6.8 // indirect
+	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 // indirect

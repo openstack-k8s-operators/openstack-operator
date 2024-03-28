@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
@@ -61,10 +63,14 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
+		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS = telemetry.Spec.MetricStorage.PrometheusTLS
+		instance.Spec.Telemetry.Template.Ceilometer.TLS = telemetry.Spec.Ceilometer.TLS
 	}
 	instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.Ceilometer.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
-	svcs, err := service.GetServicesListWithLabel(
+	aodhSvcs, err := service.GetServicesListWithLabel(
 		ctx,
 		helper,
 		instance.Namespace,
@@ -74,16 +80,45 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		return ctrl.Result{}, err
 	}
 
+	prometheusSvcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		map[string]string{"app.kubernetes.io/name": fmt.Sprintf("%s-prometheus", telemetryv1.DefaultServiceName)},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	alertmanagerSvcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		map[string]string{"app.kubernetes.io/name": fmt.Sprintf("%s-alertmanager", telemetryv1.DefaultServiceName)},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	ceilometerSvcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		map[string]string{common.AppSelector: "ceilometer"},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// make sure to get to EndpointConfig when all service got created
-	if len(svcs.Items) == len(instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service) {
+	if len(aodhSvcs.Items) == len(instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service) {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
 			telemetry,
-			svcs,
+			aodhSvcs,
 			instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service,
-			instance.Spec.Telemetry.APIOverride,
+			instance.Spec.Telemetry.AodhAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 			instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS,
@@ -98,6 +133,89 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		// update TLS settings with cert secret
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+	}
+
+	if telemetry.Status.Conditions.IsTrue(telemetryv1.MetricStorageReadyCondition) {
+		// EnsureEndpoint for prometheus
+		// NOTE: We don't manage the prometheus service, it's managed by COO, we just annotate it
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+			ctx,
+			instance,
+			helper,
+			telemetry,
+			prometheusSvcs,
+			nil,
+			instance.Spec.Telemetry.PrometheusOverride,
+			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			tls.API{
+				API: tls.APIService{
+					Public: tls.GenericService{
+						SecretName: instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName,
+					},
+				},
+			},
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		// update TLS settings with cert secret
+		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+
+		// TODO: rewrite this once we have TLS on alertmanager
+		for _, alertmanagerSvc := range alertmanagerSvcs.Items {
+			ed := EndpointDetail{
+				Name:      alertmanagerSvc.Name,
+				Namespace: alertmanagerSvc.Namespace,
+				Type:      service.Endpoint(alertmanagerSvc.Annotations[service.AnnotationEndpointKey]),
+				Service: ServiceDetails{
+					Spec: &alertmanagerSvc,
+				},
+			}
+			ed.Route.Create = alertmanagerSvc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "true"
+			ed.Route.TLS.Enabled = false
+			if instance.Spec.Telemetry.AlertmanagerOverride.Route != nil {
+				ed.Route.OverrideSpec = *instance.Spec.Telemetry.AlertmanagerOverride.Route
+			}
+			ctrlResult, err := ed.ensureRoute(
+				ctx,
+				instance,
+				helper,
+				&alertmanagerSvc,
+				telemetry,
+				corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+			)
+			if err != nil {
+				return ctrlResult, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
+		}
+	}
+
+	if telemetry.Status.Conditions.IsTrue(telemetryv1.CeilometerReadyCondition) {
+		// NOTE: We don't have svc overrides for ceilometer objects.
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+			ctx,
+			instance,
+			helper,
+			telemetry,
+			ceilometerSvcs,
+			nil,
+			corev1beta1.Override{},
+			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			tls.API{},
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		// update TLS settings with cert secret
+		instance.Spec.Telemetry.Template.Ceilometer.TLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	helper.GetLogger().Info("Reconciling Telemetry", telemetryNamespaceLabel, instance.Namespace, telemetryNameLabel, telemetryName)

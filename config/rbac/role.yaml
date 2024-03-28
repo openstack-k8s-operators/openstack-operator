@@ -445,6 +445,14 @@ rules:
 - apiGroups:
   - telemetry.openstack.org
   resources:
+  - metricstorages
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - telemetry.openstack.org
+  resources:
   - telemetries
   verbs:
   - create
