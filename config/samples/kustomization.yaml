@@ -4,4 +4,5 @@ resources:
 - core_v1beta1_openstackcontrolplane_collapsed_cell.yaml
 - core_v1beta1_openstackcontrolplane_network_isolation.yaml
 - client_v1beta1_openstackclient.yaml
+- core_v1beta1_openstackversion.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

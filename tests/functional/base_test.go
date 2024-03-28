@@ -170,6 +170,33 @@ func OpenStackClientConditionGetter(name types.NamespacedName) condition.Conditi
 	return instance.Status.Conditions
 }
 
+func CreateOpenStackVersion(name types.NamespacedName, spec map[string]interface{}) client.Object {
+
+	raw := map[string]interface{}{
+		"apiVersion": "core.openstack.org/v1beta1",
+		"kind":       "OpenStackVersion",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+	return th.CreateUnstructured(raw)
+}
+
+func GetOpenStackVersion(name types.NamespacedName) *corev1.OpenStackVersion {
+	instance := &corev1.OpenStackVersion{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+func OpenStackVersionConditionGetter(name types.NamespacedName) condition.Conditions {
+	instance := GetOpenStackVersion(name)
+	return instance.Status.Conditions
+}
+
 func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {
 
 	raw := map[string]interface{}{

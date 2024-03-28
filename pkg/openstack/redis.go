@@ -29,6 +29,7 @@ const (
 func ReconcileRedis(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 	var failures []string = []string{}
@@ -66,7 +67,7 @@ func ReconcileRedis(
 
 	// then reconcile ones listed in spec
 	for name, spec := range instance.Spec.Redis.Templates {
-		status, err := reconcileRedis(ctx, instance, helper, name, &spec)
+		status, err := reconcileRedis(ctx, instance, version, helper, name, &spec)
 
 		switch status {
 		case redisFailed:
@@ -113,9 +114,10 @@ func ReconcileRedis(
 func reconcileRedis(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
-	spec *redisv1.RedisSpec,
+	spec *redisv1.RedisSpecCore,
 ) (redisStatus, error) {
 	redis := &redisv1.Redis{
 		ObjectMeta: metav1.ObjectMeta{
@@ -133,7 +135,8 @@ func reconcileRedis(
 
 	helper.GetLogger().Info("Reconciling Redis", "Redis.Namespace", instance.Namespace, "Redis.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), redis, func() error {
-		spec.DeepCopyInto(&redis.Spec)
+		spec.DeepCopyInto(&redis.Spec.RedisSpecCore)
+		redis.Spec.ContainerImage = *version.Status.ContainerImages.InfraRedisImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), redis, helper.GetScheme())
 		if err != nil {
 			return err
@@ -148,6 +151,7 @@ func reconcileRedis(
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("Redis %s - %s", redis.Name, op))
 	}
+	instance.Status.ContainerImages.InfraRedisImage = version.Status.ContainerImages.InfraRedisImage
 
 	if redis.IsReady() {
 		return redisReady, nil

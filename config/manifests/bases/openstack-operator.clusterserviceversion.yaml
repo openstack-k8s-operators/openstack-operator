@@ -445,6 +445,27 @@ spec:
         path: conditions
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
+      - description: DeployedOVNVersion
+        displayName: Deployed OVNVersion
+        path: deployedOVNVersion
+      - description: DeployedVersion
+        displayName: Deployed Version
+        path: deployedVersion
+      - description: TLS
+        displayName: TLS
+        path: tls
+      version: v1beta1
+    - description: OpenStackVersion is the Schema for the openstackversionupdates
+        API
+      displayName: OpenStack Version
+      kind: OpenStackVersion
+      name: openstackversions.core.openstack.org
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
   description: Install and configure OpenStack
   displayName: OpenStack

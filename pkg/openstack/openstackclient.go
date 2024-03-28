@@ -33,7 +33,7 @@ const (
 )
 
 // ReconcileOpenStackClient -
-func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackControlPlane, version *corev1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 
 	openstackclient := &clientv1.OpenStackClient{
 		ObjectMeta: metav1.ObjectMeta{
@@ -46,6 +46,8 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 	Log.Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
 		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec)
+
+		openstackclient.Spec.ContainerImage = *version.Status.ContainerImages.OpenstackClientImage
 
 		if instance.Spec.TLS.Ingress.Enabled || instance.Spec.TLS.PodLevel.Enabled {
 			openstackclient.Spec.Ca.CaBundleSecretName = tls.CABundleSecret
@@ -82,6 +84,8 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 			condition.SeverityInfo,
 			corev1.OpenStackControlPlaneClientReadyRunningMessage))
 	}
+
+	instance.Status.ContainerImages.OpenstackClientImage = version.Status.ContainerImages.OpenstackClientImage
 
 	return ctrl.Result{}, nil
 }

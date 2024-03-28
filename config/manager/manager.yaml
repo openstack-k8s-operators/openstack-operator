@@ -41,6 +41,9 @@ spec:
         - /manager
         args:
         - --leader-elect
+        env:
+        - name: OPENSTACK_RELEASE_VERSION
+          value: 0.0.1
         image: controller:latest
         name: manager
         securityContext:
