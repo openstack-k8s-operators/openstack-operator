@@ -6,13 +6,16 @@ import (
 	"strings"
 
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -64,9 +67,44 @@ func ReconcileRedis(
 		return ctrl.Result{}, err
 	}
 
+	for _, redis := range redises.Items {
+		for _, ref := range redis.GetOwnerReferences() {
+			// Check owner UID to ensure the redis instance is owned by this OpenStackControlPlane instance
+			if ref.UID == instance.GetUID() {
+				owned := false
+
+				// Check whether the name appears in spec
+				for name := range instance.Spec.Redis.Templates {
+					if name == redis.GetName() {
+						owned = true
+						break
+					}
+				}
+
+				// The instance name is no longer part of the spec. Let's delete it
+				if !owned {
+					mc := &redisv1.Redis{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      redis.GetName(),
+							Namespace: redis.GetNamespace(),
+						},
+					}
+					_, err := EnsureDeleted(ctx, helper, mc)
+					if err != nil {
+						failures = append(failures, fmt.Sprintf("%s(deleted)(%v)", redis.GetName(), err.Error()))
+					}
+				}
+			}
+		}
+	}
+
 	// then reconcile ones listed in spec
+	var ctrlResult ctrl.Result
+	var err error
+	var status redisStatus
+
 	for name, spec := range instance.Spec.Redis.Templates {
-		status, err := reconcileRedis(ctx, instance, helper, name, &spec)
+		status, ctrlResult, err = reconcileRedis(ctx, instance, helper, name, &spec)
 
 		switch status {
 		case redisFailed:
@@ -89,7 +127,7 @@ func ReconcileRedis(
 			corev1beta1.OpenStackControlPlaneRedisReadyErrorMessage,
 			errors))
 
-		return ctrl.Result{}, fmt.Errorf(errors)
+		return ctrlResult, fmt.Errorf(errors)
 
 	} else if len(inprogress) > 0 {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -106,7 +144,7 @@ func ReconcileRedis(
 		)
 	}
 
-	return ctrl.Result{}, nil
+	return ctrlResult, nil
 }
 
 // reconcileRedis -
@@ -116,7 +154,7 @@ func reconcileRedis(
 	helper *helper.Helper,
 	name string,
 	spec *redisv1.RedisSpec,
-) (redisStatus, error) {
+) (redisStatus, ctrl.Result, error) {
 	redis := &redisv1.Redis{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -126,14 +164,51 @@ func reconcileRedis(
 
 	if !instance.Spec.Redis.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, redis); err != nil {
-			return redisFailed, err
+			return redisFailed, ctrl.Result{}, err
 		}
-		return redisReady, nil
+		return redisReady, ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling Redis", "Redis.Namespace", instance.Namespace, "Redis.Name", name)
+
+	tlsCert := ""
+	if instance.Spec.TLS.PodLevel.Enabled {
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: instance.GetInternalIssuer(),
+			CertName:   fmt.Sprintf("%s-svc", redis.Name),
+			Hostnames: []string{
+				fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
+				fmt.Sprintf("*.%s.%s.svc", name, instance.Namespace),
+			},
+		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore.Duration
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest,
+			nil)
+		if err != nil {
+			return redisFailed, ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return redisCreating, ctrlResult, nil
+		}
+
+		tlsCert = certSecret.Name
+	}
+
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), redis, func() error {
 		spec.DeepCopyInto(&redis.Spec)
+		if tlsCert != "" {
+
+			redis.Spec.TLS.SecretName = ptr.To(tlsCert)
+		}
+		redis.Spec.TLS.CaBundleSecretName = tls.CABundleSecret
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), redis, helper.GetScheme())
 		if err != nil {
 			return err
@@ -143,15 +218,15 @@ func reconcileRedis(
 	})
 
 	if err != nil {
-		return redisFailed, err
+		return redisFailed, ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("Redis %s - %s", redis.Name, op))
 	}
 
 	if redis.IsReady() {
-		return redisReady, nil
+		return redisReady, ctrl.Result{}, nil
 	}
 
-	return redisCreating, nil
+	return redisCreating, ctrl.Result{}, nil
 }
