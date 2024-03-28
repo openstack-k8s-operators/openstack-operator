@@ -685,3 +685,22 @@ func SetupServiceOperatorDefaults() {
 	//  Barbican
 	barbicanv1.SetupDefaults()
 }
+
+func GetIssuerCertSecret(
+	ctx context.Context,
+	helper *helper.Helper,
+	name string,
+	namespace string,
+) (string, error) {
+	// get  issuer
+	issuer, err := certmanager.GetIssuerByName(
+		ctx,
+		helper,
+		name,
+		namespace,
+	)
+	if err != nil {
+		return "", err
+	}
+	return issuer.Spec.CA.SecretName, nil
+}

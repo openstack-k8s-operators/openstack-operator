@@ -10,8 +10,6 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/ocp"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
@@ -195,6 +193,7 @@ func reconcileRabbitMQ(
 
 	hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 	tlsCert := ""
+	tlsCaCert := ""
 
 	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
@@ -220,6 +219,11 @@ func reconcileRabbitMQ(
 		}
 
 		tlsCert = certSecret.Name
+
+		tlsCaCert, err = GetIssuerCertSecret(ctx, helper, instance.GetInternalIssuer(), instance.Namespace)
+		if err != nil {
+			return mqFailed, ctrlResult, err
+		}
 	}
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
@@ -258,7 +262,7 @@ func reconcileRabbitMQ(
 		}
 
 		if tlsCert != "" {
-			rabbitmq.Spec.TLS.CaSecretName = tls.DefaultCAPrefix + string(service.EndpointInternal)
+			rabbitmq.Spec.TLS.CaSecretName = tlsCaCert
 			rabbitmq.Spec.TLS.SecretName = tlsCert
 			// disable non tls listeners
 			rabbitmq.Spec.TLS.DisableNonTLSListeners = true
