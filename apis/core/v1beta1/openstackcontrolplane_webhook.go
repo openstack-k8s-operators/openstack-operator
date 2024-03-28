@@ -19,6 +19,7 @@ package v1beta1
 import (
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -318,6 +319,14 @@ func (r *OpenStackControlPlane) Default() {
 	r.DefaultServices()
 }
 
+// Helper function to initialize overrideSpec object. Could be moved to lib-common.
+func initializeOverrideSpec(override **route.OverrideSpec, anno map[string]string) {
+	if *override == nil {
+		*override = &route.OverrideSpec{}
+	}
+	(*override).AddAnnotation(anno)
+}
+
 // DefaultServices - common function for calling individual services' defaulting functions
 func (r *OpenStackControlPlane) DefaultServices() {
 	// RabbitMQ
@@ -381,6 +390,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Neutron
 	r.Spec.Neutron.Template.Default()
+	initializeOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
 
 	// Nova
 	r.Spec.Nova.Template.Default()
