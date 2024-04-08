@@ -357,7 +357,6 @@ func ensureCaBundles(
 	bundle *caBundle,
 	caOnlyBundle *caBundle,
 ) (ctrl.Result, error) {
-
 	err := bundle.getCertsFromPEM(caCert)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -367,11 +366,15 @@ func ensureCaBundles(
 		return ctrl.Result{}, err
 	}
 
-	status := corev1.TLSCAStatus{
-		Name: caName,
+	caCertStatusBundle := newBundle()
+	err = caCertStatusBundle.getCertsFromPEM(caCert)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
-	if len(caOnlyBundle.certs) > 0 {
-		status.Expires = caOnlyBundle.certs[0].expire.Format(time.RFC3339)
+
+	status := corev1.TLSCAStatus{
+		Name:    caName,
+		Expires: caCertStatusBundle.certs[0].expire.Format(time.RFC3339),
 	}
 
 	instance.Status.TLS.CAList = append(instance.Status.TLS.CAList, status)
