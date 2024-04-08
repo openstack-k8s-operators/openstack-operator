@@ -90,6 +90,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
+github.com/olliewalsh/ovn-operator/api v0.0.0-20240408230545-fd17ad63a9a5 h1:viHSm6d71ygGp1EwHGi+nG+pJYbzC5QnOJySglrxW7s=
+github.com/olliewalsh/ovn-operator/api v0.0.0-20240408230545-fd17ad63a9a5/go.mod h1:geYtiRKn+GKR61YhAMsvPvLqVdMb4wtvMrj1kFG0SdU=
 github.com/onsi/ginkgo/v2 v2.17.1 h1:V++EzdbhI4ZV4ev0UTIj0PzhzOcReJFyJaLjtSF55M8=
 github.com/onsi/ginkgo/v2 v2.17.1/go.mod h1:llBI3WDLL9Z6taip6f33H76YcWtJv+7R3HigUjbIBOs=
 github.com/onsi/gomega v1.32.0 h1:JRYU78fJ1LPxlckP6Txi/EYqJvjtMrDC04/MM5XRHPk=
@@ -140,8 +142,6 @@ github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.202
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240405191225-a61ca8697bf2/go.mod h1:LlYu56B20n7SQPqgKaOsqXb3qNcjtR7Gd7ppYwz60kk=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240403043315-77086641d3fd h1:jqRNpIY3sPV1o/F/SmVzo2FFIkdS64gpMDOn/wTtBE4=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240403043315-77086641d3fd/go.mod h1:EqjDBKsxNSU9p+Cu5XNAr5ETxpDOJ2oV/EaxB8hKj8Q=
-github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240403151939-f1aeebd1f2e0 h1:35YK6H2OJpSZ+zOCLgautGSPbEh1EYZGbtpmiLwvLWk=
-github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240403151939-f1aeebd1f2e0/go.mod h1:gouaaSPxUBLC1ifDBAdFsbl1njab50Uc2cBE8M6oKGc=
 github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240404140050-69252e99daaf h1:O7RzcKH3qRORucojkKZc1vIpQv5naYoWn34zhVzTs0E=
 github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240404140050-69252e99daaf/go.mod h1:NYOgk2HS4mSR+4WwsiexepNU1pjxeo7h2WTs8qtS9/0=
 github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240405150212-f8cecba5f227 h1:aX8lFcr9d7SzsP9MUvHzrki1jUPqYbAFlfdlu4OWxl0=
