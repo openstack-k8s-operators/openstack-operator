@@ -15905,6 +15905,9 @@ spec:
                         type: string
                       swiftProxy:
                         properties:
+                          ceilometerEnabled:
+                            default: false
+                            type: boolean
                           containerImageProxy:
                             type: string
                           defaultConfigOverwrite:
@@ -15980,6 +15983,9 @@ spec:
                                 default: SwiftPassword
                                 type: string
                             type: object
+                          rabbitMqClusterName:
+                            default: rabbitmq
+                            type: string
                           replicas:
                             default: 1
                             format: int32
@@ -16012,6 +16018,7 @@ spec:
                         required:
                         - containerImageProxy
                         - memcachedServers
+                        - rabbitMqClusterName
                         - replicas
                         - secret
                         - serviceUser
