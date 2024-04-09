@@ -345,6 +345,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.EdpmMultipathdImage != nil {
+		in, out := &in.EdpmMultipathdImage, &out.EdpmMultipathdImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.EdpmNeutronMetadataAgentImage != nil {
 		in, out := &in.EdpmNeutronMetadataAgentImage, &out.EdpmNeutronMetadataAgentImage
 		*out = new(string)

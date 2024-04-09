@@ -113,6 +113,7 @@ func GetContainerImages(ctx context.Context, defaults *corev1beta1.ContainerDefa
 			EdpmFrrImage:                  getImg(instance.Spec.CustomContainerImages.EdpmFrrImage, defaults.EdpmFrrImage),
 			EdpmIscsidImage:               getImg(instance.Spec.CustomContainerImages.EdpmIscsidImage, defaults.EdpmIscsidImage),
 			EdpmLogrotateCrondImage:       getImg(instance.Spec.CustomContainerImages.EdpmLogrotateCrondImage, defaults.EdpmLogrotateCrondImage),
+			EdpmMultipathdImage:           getImg(instance.Spec.CustomContainerImages.EdpmMultipathdImage, defaults.EdpmMultipathdImage),
 			EdpmNeutronMetadataAgentImage: getImg(instance.Spec.CustomContainerImages.EdpmNeutronMetadataAgentImage, defaults.EdpmNeutronMetadataAgentImage),
 			EdpmNeutronSriovAgentImage:    getImg(instance.Spec.CustomContainerImages.EdpmNeutronSriovAgentImage, defaults.EdpmNeutronSriovAgentImage),
 			EdpmOvnBgpAgentImage:          getImg(instance.Spec.CustomContainerImages.EdpmOvnBgpAgentImage, defaults.EdpmOvnBgpAgentImage),

@@ -73,6 +73,7 @@ export RELATED_IMAGE_BARBICAN_KEYSTONE_LISTENER_IMAGE_URL_DEFAULT=quay.io/podifi
 export RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG=quay.io/podified-antelope-centos9/openstack-frr:current-podified
 export RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG=quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
 export RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG=quay.io/podified-antelope-centos9/openstack-cron:current-podified
+export RELATED_IMAGE_OPENSTACK_EDPM_MULTIPATHD_IMG=quay.io/podified-antelope-centos9/openstack-multipathd:current-podified
 export RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG=quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
 export RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_SRIOV_AGENT_DEFAULT_IMG=quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified
 export RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE=quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified

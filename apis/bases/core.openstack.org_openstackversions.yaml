@@ -99,6 +99,8 @@ spec:
                     type: string
                   edpmLogrotateCrondImage:
                     type: string
+                  edpmMultipathdImage:
+                    type: string
                   edpmNeutronMetadataAgentImage:
                     type: string
                   edpmNeutronSriovAgentImage:
@@ -288,6 +290,8 @@ spec:
                       type: string
                     edpmLogrotateCrondImage:
                       type: string
+                    edpmMultipathdImage:
+                      type: string
                     edpmNeutronMetadataAgentImage:
                       type: string
                     edpmNeutronSriovAgentImage:
@@ -445,6 +449,8 @@ spec:
                   edpmIscsidImage:
                     type: string
                   edpmLogrotateCrondImage:
+                    type: string
+                  edpmMultipathdImage:
                     type: string
                   edpmNeutronMetadataAgentImage:
                     type: string
