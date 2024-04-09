@@ -18,6 +18,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	routev1 "github.com/openshift/api/route/v1"
@@ -53,12 +54,17 @@ import (
 
 	"github.com/go-logr/logr"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // OpenStackControlPlaneReconciler reconciles a OpenStackControlPlane object
@@ -408,8 +414,84 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 	return ctrl.Result{}, nil
 }
 
+// fields to index to reconcile when change
+const (
+	passwordSecretField               = ".spec.secret"
+	tlsCABundleSecretNameField        = ".spec.tls.caBundleSecretName"
+	tlsIngressCACustomIssuer          = ".spec.tls.ingerss.ca.customIssuer"
+	tlsPodLevelInternalCACustomIssuer = ".spec.tls.podLevel.internal.ca.customIssuer"
+	tlsPodLevelOvnCACustomIssuer      = ".spec.tls.podLevel.ovn.ca.customIssuer"
+)
+
+var allWatchFields = []string{
+	passwordSecretField,
+	tlsCABundleSecretNameField,
+	tlsIngressCACustomIssuer,
+	tlsPodLevelInternalCACustomIssuer,
+	tlsPodLevelOvnCACustomIssuer,
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// index passwordSecretField
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, passwordSecretField, func(rawObj client.Object) []string {
+		// Extract the secret name from the spec, if one is provided
+		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
+		if cr.Spec.Secret == "" {
+			return nil
+		}
+		return []string{cr.Spec.Secret}
+	}); err != nil {
+		return err
+	}
+
+	// index caBundleSecretNameField
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsCABundleSecretNameField, func(rawObj client.Object) []string {
+		// Extract the secret name from the spec, if one is provided
+		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
+		if cr.Spec.TLS.CaBundleSecretName == "" {
+			return nil
+		}
+		return []string{cr.Spec.TLS.CaBundleSecretName}
+	}); err != nil {
+		return err
+	}
+
+	// index tlsIngressCACustomIssuer
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsIngressCACustomIssuer, func(rawObj client.Object) []string {
+		// Extract the secret name from the spec, if one is provided
+		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
+		if cr.Spec.TLS.Ingress.Ca.CustomIssuer == nil {
+			return nil
+		}
+		return []string{*cr.Spec.TLS.Ingress.Ca.CustomIssuer}
+	}); err != nil {
+		return err
+	}
+
+	// index tlsPodLevelInternalCACustomIssuer
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsPodLevelInternalCACustomIssuer, func(rawObj client.Object) []string {
+		// Extract the secret name from the spec, if one is provided
+		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
+		if cr.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer == nil {
+			return nil
+		}
+		return []string{*cr.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer}
+	}); err != nil {
+		return err
+	}
+
+	// index tlsPodLevelOvnCACustomIssuer
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsPodLevelOvnCACustomIssuer, func(rawObj client.Object) []string {
+		// Extract the secret name from the spec, if one is provided
+		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
+		if cr.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer == nil {
+			return nil
+		}
+		return []string{*cr.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer}
+	}); err != nil {
+		return err
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1beta1.OpenStackControlPlane{}).
@@ -441,5 +523,48 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Owns(&certmgrv1.Certificate{}).
 		Owns(&barbicanv1.Barbican{}).
 		Owns(&corev1beta1.OpenStackVersion{}).
+		Watches(
+			&corev1.Secret{},
+			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
+		Watches(
+			&certmgrv1.Issuer{},
+			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
 		Complete(r)
+}
+
+func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context, src client.Object) []reconcile.Request {
+	requests := []reconcile.Request{}
+
+	l := log.FromContext(ctx).WithName("Controllers").WithName("OpenStackControlPlane")
+
+	for _, field := range allWatchFields {
+		crList := &corev1beta1.OpenStackControlPlaneList{}
+		listOps := &client.ListOptions{
+			FieldSelector: fields.OneTermEqualSelector(field, src.GetName()),
+			Namespace:     src.GetNamespace(),
+		}
+		err := r.List(ctx, crList, listOps)
+		if err != nil {
+			return []reconcile.Request{}
+		}
+
+		for _, item := range crList.Items {
+			l.Info(fmt.Sprintf("input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
+
+			requests = append(requests,
+				reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Name:      item.GetName(),
+						Namespace: item.GetNamespace(),
+					},
+				},
+			)
+		}
+	}
+
+	return requests
 }
