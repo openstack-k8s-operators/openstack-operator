@@ -50,6 +50,7 @@ const (
 	// ooSelector is used as a selector to the labels to differentiate from
 	// any other possible labels added to services, because  e.g. the common.AppSelector
 	// is also used by service operators.
+	// foo
 	ooSelector = "osctlplane"
 
 	// ooAppSelector service selector label added by the openstack-operator to service
