@@ -199,7 +199,10 @@ func reconcileRabbitMQ(
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
-			Hostnames:  []string{hostname},
+			Hostnames: []string{
+				hostname,
+				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+			},
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration

@@ -55,6 +55,9 @@ const (
 	// ooAppSelector service selector label added by the openstack-operator to service
 	// overrides
 	ooAppSelector = "osctlplane-service"
+
+	// ClusterInternalDomain - cluster internal dns domain
+	ClusterInternalDomain = "cluster.local"
 )
 
 // GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
@@ -268,9 +271,12 @@ func EnsureEndpointConfig(
 				} else {
 					// issue a certificate for public pod virthost
 					certRequest := certmanager.CertificateRequest{
-						IssuerName:  instance.GetPublicIssuer(),
-						CertName:    fmt.Sprintf("%s-svc", ed.Name),
-						Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
+						IssuerName: instance.GetPublicIssuer(),
+						CertName:   fmt.Sprintf("%s-svc", ed.Name),
+						Hostnames: []string{
+							fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace),
+							fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, ClusterInternalDomain),
+						},
 						Ips:         nil,
 						Annotations: ed.Annotations,
 						Labels:      ed.Labels,
@@ -310,9 +316,12 @@ func EnsureEndpointConfig(
 				// create certificate for internal pod virthost
 				// request certificate
 				certRequest := certmanager.CertificateRequest{
-					IssuerName:  instance.GetInternalIssuer(),
-					CertName:    fmt.Sprintf("%s-svc", ed.Name),
-					Hostnames:   []string{fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace)},
+					IssuerName: instance.GetInternalIssuer(),
+					CertName:   fmt.Sprintf("%s-svc", ed.Name),
+					Hostnames: []string{
+						fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace),
+						fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, ClusterInternalDomain),
+					},
 					Ips:         nil,
 					Annotations: ed.Annotations,
 					Labels:      ed.Labels,

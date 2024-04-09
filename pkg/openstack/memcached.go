@@ -164,6 +164,8 @@ func reconcileMemcached(
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
 				fmt.Sprintf("*.%s.%s.svc", name, instance.Namespace),
+				fmt.Sprintf("%s.%s.svc.%s", name, instance.Namespace, ClusterInternalDomain),
+				fmt.Sprintf("*.%s.%s.svc.%s", name, instance.Namespace, ClusterInternalDomain),
 			},
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
