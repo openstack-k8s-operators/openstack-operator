@@ -32,6 +32,7 @@ const (
 func ReconcileRedis(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 	var failures []string = []string{}
@@ -104,7 +105,7 @@ func ReconcileRedis(
 	var status redisStatus
 
 	for name, spec := range instance.Spec.Redis.Templates {
-		status, ctrlResult, err = reconcileRedis(ctx, instance, helper, name, &spec)
+		status, ctrlResult, err = reconcileRedis(ctx, instance, version, helper, name, &spec)
 
 		switch status {
 		case redisFailed:
@@ -151,9 +152,10 @@ func ReconcileRedis(
 func reconcileRedis(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
-	spec *redisv1.RedisSpec,
+	spec *redisv1.RedisSpecCore,
 ) (redisStatus, ctrl.Result, error) {
 	redis := &redisv1.Redis{
 		ObjectMeta: metav1.ObjectMeta{
@@ -202,13 +204,14 @@ func reconcileRedis(
 	}
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), redis, func() error {
-		spec.DeepCopyInto(&redis.Spec)
+		spec.DeepCopyInto(&redis.Spec.RedisSpecCore)
 		if tlsCert != "" {
 
 			redis.Spec.TLS.SecretName = ptr.To(tlsCert)
 		}
 		redis.Spec.TLS.CaBundleSecretName = tls.CABundleSecret
 
+		redis.Spec.ContainerImage = *version.Status.ContainerImages.InfraRedisImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), redis, helper.GetScheme())
 		if err != nil {
 			return err
@@ -224,7 +227,8 @@ func reconcileRedis(
 		helper.GetLogger().Info(fmt.Sprintf("Redis %s - %s", redis.Name, op))
 	}
 
-	if redis.IsReady() {
+	if redis.IsReady() { //FIXME ObserverdGeneration
+		instance.Status.ContainerImages.InfraRedisImage = version.Status.ContainerImages.InfraRedisImage
 		return redisReady, ctrl.Result{}, nil
 	}
 

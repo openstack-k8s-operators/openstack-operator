@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileCinder -
-func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	cinder := &cinderv1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "cinder",
@@ -99,7 +100,34 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), cinder, func() error {
-		instance.Spec.Cinder.Template.DeepCopyInto(&cinder.Spec)
+		instance.Spec.Cinder.Template.CinderSpecBase.DeepCopyInto(&cinder.Spec.CinderSpecBase)
+		instance.Spec.Cinder.Template.CinderAPI.DeepCopyInto(&cinder.Spec.CinderAPI.CinderAPITemplateCore)
+		instance.Spec.Cinder.Template.CinderScheduler.DeepCopyInto(&cinder.Spec.CinderScheduler.CinderSchedulerTemplateCore)
+		instance.Spec.Cinder.Template.CinderBackup.DeepCopyInto(&cinder.Spec.CinderBackup.CinderBackupTemplateCore)
+
+		cinder.Spec.CinderAPI.ContainerImage = *version.Status.ContainerImages.CinderAPIImage
+		cinder.Spec.CinderScheduler.ContainerImage = *version.Status.ContainerImages.CinderSchedulerImage
+		cinder.Spec.CinderBackup.ContainerImage = *version.Status.ContainerImages.CinderBackupImage
+
+		defaultVolumeImg := version.Status.ContainerImages.CinderVolumeImages["default"]
+		if defaultVolumeImg == nil {
+			return errors.New("default Cinder Volume images is unset")
+		}
+
+		if cinder.Spec.CinderVolumes == nil {
+			cinder.Spec.CinderVolumes = make(map[string]cinderv1.CinderVolumeTemplate)
+		}
+
+		for name, volume := range instance.Spec.Cinder.Template.CinderVolumes {
+			cinderCore := cinderv1.CinderVolumeTemplate{}
+			volume.DeepCopyInto(&cinderCore.CinderVolumeTemplateCore)
+			if volVal, ok := version.Status.ContainerImages.CinderVolumeImages[name]; ok {
+				cinderCore.ContainerImage = *volVal
+			} else {
+				cinderCore.ContainerImage = *defaultVolumeImg
+			}
+			cinder.Spec.CinderVolumes[name] = cinderCore
+		}
 
 		if cinder.Spec.Secret == "" {
 			cinder.Spec.Secret = instance.Spec.Secret
@@ -125,7 +153,6 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 		return nil
 	})
-
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneCinderReadyCondition,
@@ -139,7 +166,11 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		Log.Info(fmt.Sprintf("Cinder %s - %s", cinder.Name, op))
 	}
 
-	if cinder.IsReady() {
+	if cinder.Status.ObservedGeneration == cinder.Generation && cinder.IsReady() {
+		instance.Status.ContainerImages.CinderAPIImage = version.Status.ContainerImages.CinderAPIImage
+		instance.Status.ContainerImages.CinderSchedulerImage = version.Status.ContainerImages.CinderSchedulerImage
+		instance.Status.ContainerImages.CinderBackupImage = version.Status.ContainerImages.CinderBackupImage
+		instance.Status.ContainerImages.CinderVolumeImages = version.Status.ContainerImages.DeepCopy().CinderVolumeImages
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneCinderReadyCondition, corev1beta1.OpenStackControlPlaneCinderReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

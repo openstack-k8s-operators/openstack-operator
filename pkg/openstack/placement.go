@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcilePlacementAPI -
-func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	placementAPI := &placementv1.PlacementAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "placement",
@@ -98,8 +98,9 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 
 	Log.Info("Reconciling PlacementAPI", "PlacementAPI.Namespace", instance.Namespace, "PlacementAPI.Name", "placement")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), placementAPI, func() error {
-		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec)
+		instance.Spec.Placement.Template.DeepCopyInto(&placementAPI.Spec.PlacementAPISpecCore)
 
+		placementAPI.Spec.ContainerImage = *version.Status.ContainerImages.PlacementAPIImage
 		if placementAPI.Spec.Secret == "" {
 			placementAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -130,6 +131,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 	}
 
 	if placementAPI.IsReady() {
+		instance.Status.ContainerImages.PlacementAPIImage = version.Status.ContainerImages.PlacementAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, corev1beta1.OpenStackControlPlanePlacementAPIReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

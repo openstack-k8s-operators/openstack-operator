@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcileKeystoneAPI -
-func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	keystoneAPI := &keystonev1.KeystoneAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone", //FIXME (keystone doesn't seem to work unless named "keystone")
@@ -100,8 +100,9 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 
 	Log.Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
-		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec)
+		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec.KeystoneAPISpecCore)
 
+		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneAPIImage
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}
@@ -133,7 +134,8 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		Log.Info(fmt.Sprintf("KeystoneAPI %s - %s", keystoneAPI.Name, op))
 	}
 
-	if keystoneAPI.IsReady() {
+	if keystoneAPI.Status.ObservedGeneration == keystoneAPI.Generation && keystoneAPI.IsReady() {
+		instance.Status.ContainerImages.KeystoneAPIImage = version.Status.ContainerImages.KeystoneAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition, corev1beta1.OpenStackControlPlaneKeystoneAPIReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

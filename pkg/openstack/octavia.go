@@ -36,7 +36,7 @@ import (
 )
 
 // ReconcileOctavia -
-func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	octavia := &octaviav1.Octavia{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "octavia",
@@ -116,7 +116,17 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	helper.GetLogger().Info("Reconciling Octavia", "Octavia.Namespace", instance.Namespace, "Octavia.Name", octavia.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), octavia, func() error {
-		instance.Spec.Octavia.Template.DeepCopyInto(&octavia.Spec)
+		instance.Spec.Octavia.Template.OctaviaSpecBase.DeepCopyInto(&octavia.Spec.OctaviaSpecBase)
+		instance.Spec.Octavia.Template.OctaviaAPI.DeepCopyInto(&octavia.Spec.OctaviaAPI.OctaviaAPISpecCore)
+		instance.Spec.Octavia.Template.OctaviaHousekeeping.DeepCopyInto(&octavia.Spec.OctaviaHousekeeping.OctaviaAmphoraControllerSpecCore)
+		instance.Spec.Octavia.Template.OctaviaHealthManager.DeepCopyInto(&octavia.Spec.OctaviaHealthManager.OctaviaAmphoraControllerSpecCore)
+		instance.Spec.Octavia.Template.OctaviaWorker.DeepCopyInto(&octavia.Spec.OctaviaWorker.OctaviaAmphoraControllerSpecCore)
+
+		octavia.Spec.OctaviaAPI.ContainerImage = *version.Status.ContainerImages.OctaviaAPIImage
+		octavia.Spec.OctaviaWorker.ContainerImage = *version.Status.ContainerImages.OctaviaWorkerImage
+		octavia.Spec.OctaviaHealthManager.ContainerImage = *version.Status.ContainerImages.OctaviaHealthmanagerImage
+		octavia.Spec.OctaviaHousekeeping.ContainerImage = *version.Status.ContainerImages.OctaviaHousekeepingImage
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), octavia, helper.GetScheme())
 		if err != nil {
 			return err
@@ -137,7 +147,11 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		helper.GetLogger().Info(fmt.Sprintf("Octavia %s - %s", octavia.Name, op))
 	}
 
-	if octavia.IsReady() {
+	if octavia.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.OctaviaAPIImage = version.Status.ContainerImages.OctaviaAPIImage
+		instance.Status.ContainerImages.OctaviaWorkerImage = version.Status.ContainerImages.OctaviaWorkerImage
+		instance.Status.ContainerImages.OctaviaHealthmanagerImage = version.Status.ContainerImages.OctaviaHealthmanagerImage
+		instance.Status.ContainerImages.OctaviaHousekeepingImage = version.Status.ContainerImages.OctaviaHousekeepingImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOctaviaReadyCondition, corev1beta1.OpenStackControlPlaneOctaviaReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

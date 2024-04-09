@@ -27,7 +27,7 @@ const (
 )
 
 // ReconcileGlance -
-func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	glance := &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "glance",
@@ -140,7 +140,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
-		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec)
+		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec.GlanceSpecCore)
+		glance.Spec.ContainerImage = *version.Status.ContainerImages.GlanceAPIImage
 		if glance.Spec.Secret == "" {
 			glance.Spec.Secret = instance.Spec.Secret
 		}
@@ -179,7 +180,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		Log.Info(fmt.Sprintf("glance %s - %s", glance.Name, op))
 	}
 
-	if glance.IsReady() {
+	if glance.Status.ObservedGeneration == glance.Generation && glance.IsReady() {
+		instance.Status.ContainerImages.GlanceAPIImage = version.Status.ContainerImages.GlanceAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneGlanceReadyCondition, corev1beta1.OpenStackControlPlaneGlanceReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

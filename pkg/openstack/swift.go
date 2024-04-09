@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcileSwift -
-func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	swift := &swiftv1.Swift{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "swift",
@@ -100,7 +100,17 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 
 	Log.Info("Reconciling Swift", "Swift.Namespace", instance.Namespace, "Swift.Name", "swift")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), swift, func() error {
-		instance.Spec.Swift.Template.DeepCopyInto(&swift.Spec)
+		instance.Spec.Swift.Template.SwiftSpecBase.DeepCopyInto(&swift.Spec.SwiftSpecBase)
+		instance.Spec.Swift.Template.SwiftProxy.DeepCopyInto(&swift.Spec.SwiftProxy.SwiftProxySpecCore)
+		instance.Spec.Swift.Template.SwiftStorage.DeepCopyInto(&swift.Spec.SwiftStorage.SwiftStorageSpecCore)
+		instance.Spec.Swift.Template.SwiftRing.DeepCopyInto(&swift.Spec.SwiftRing.SwiftRingSpecCore)
+
+		swift.Spec.SwiftRing.ContainerImage = *version.Status.ContainerImages.SwiftProxyImage
+		swift.Spec.SwiftStorage.ContainerImageAccount = *version.Status.ContainerImages.SwiftAccountImage
+		swift.Spec.SwiftStorage.ContainerImageContainer = *version.Status.ContainerImages.SwiftContainerImage
+		swift.Spec.SwiftStorage.ContainerImageObject = *version.Status.ContainerImages.SwiftObjectImage
+		swift.Spec.SwiftStorage.ContainerImageProxy = *version.Status.ContainerImages.SwiftProxyImage
+		swift.Spec.SwiftProxy.ContainerImageProxy = *version.Status.ContainerImages.SwiftProxyImage
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), swift, helper.GetScheme())
 		if err != nil {
@@ -122,7 +132,11 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		Log.Info(fmt.Sprintf("Swift %s - %s", swift.Name, op))
 	}
 
-	if swift.IsReady() {
+	if swift.Status.ObservedGeneration == swift.GetGeneration() && swift.IsReady() {
+		instance.Status.ContainerImages.SwiftAccountImage = version.Status.ContainerImages.SwiftAccountImage
+		instance.Status.ContainerImages.SwiftContainerImage = version.Status.ContainerImages.SwiftContainerImage
+		instance.Status.ContainerImages.SwiftObjectImage = version.Status.ContainerImages.SwiftObjectImage
+		instance.Status.ContainerImages.SwiftProxyImage = version.Status.ContainerImages.SwiftProxyImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneSwiftReadyCondition, corev1beta1.OpenStackControlPlaneSwiftReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(

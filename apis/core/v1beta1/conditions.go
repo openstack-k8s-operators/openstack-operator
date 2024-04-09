@@ -114,35 +114,11 @@ const (
 	// OpenStackControlPlaneServiceOverrideReadyCondition Status=True condition which indicates if OpenStack service override has created ok
 	OpenStackControlPlaneServiceOverrideReadyCondition condition.Type = "OpenStackControlPlaneServiceOverrideReady"
 
-	// OpenStackControlPlaneManilaReadyInitMessage
-	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
-
-	// OpenStackControlPlaneManilaReadyMessage
-	OpenStackControlPlaneManilaReadyMessage = "OpenStackControlPlane Manila completed"
-
-	// OpenStackControlPlaneManilaReadyRunningMessage
-	OpenStackControlPlaneManilaReadyRunningMessage = "OpenStackControlPlane Manila in progress"
-
-	// OpenStackControlPlaneManilaReadyErrorMessage
-	OpenStackControlPlaneManilaReadyErrorMessage = "OpenStackControlPlane Manila error occured %s"
-
 	// OpenStackControlPlaneSwiftReadyCondition Status=True condition which indicates if Swift is configured and operational
 	OpenStackControlPlaneSwiftReadyCondition condition.Type = "OpenStackControlPlaneSwiftReady"
 
 	// OpenStackControlPlaneExposeSwiftReadyCondition Status=True condition which indicates if Swift is exposed via a route
 	OpenStackControlPlaneExposeSwiftReadyCondition condition.Type = "OpenStackControlPlaneExposeSwiftReady"
-
-	// OpenStackControlPlaneSwiftReadyInitMessage
-	OpenStackControlPlaneSwiftReadyInitMessage = "OpenStackControlPlane Swift not started"
-
-	// OpenStackControlPlaneSwiftReadyMessage
-	OpenStackControlPlaneSwiftReadyMessage = "OpenStackControlPlane Swift completed"
-
-	// OpenStackControlPlaneSwiftReadyRunningMessage
-	OpenStackControlPlaneSwiftReadyRunningMessage = "OpenStackControlPlane Swift in progress"
-
-	// OpenStackControlPlaneSwiftReadyErrorMessage
-	OpenStackControlPlaneSwiftReadyErrorMessage = "OpenStackControlPlane Swift error occured %s"
 
 	// OpenStackControlPlaneOctaviaReadyCondition Status=True condition which indicates if Octavia is configured and operational
 	OpenStackControlPlaneOctaviaReadyCondition condition.Type = "OpenStackControlPlaneOctaviaReady"
@@ -165,9 +141,6 @@ const (
 	// OpenStackControlPlaneExposeBarbicanReadyCondition Status=True condition which indicates if Barbican is exposed via a route
 	OpenStackControlPlaneExposeBarbicanReadyCondition condition.Type = "OpenStackControlPlaneExposeBarbicanReady"
 )
-
-// OpenStackControlPlane Reasons used by API objects.
-const ()
 
 // Common Messages used by API objects.
 const (
@@ -406,6 +379,30 @@ const (
 	// OpenStackControlPlaneBarbicanReadyErrorMessage
 	OpenStackControlPlaneBarbicanReadyErrorMessage = "OpenStackControlPlane Barbican error occured %s"
 
+	// OpenStackControlPlaneSwiftReadyInitMessage
+	OpenStackControlPlaneSwiftReadyInitMessage = "OpenStackControlPlane Swift not started"
+
+	// OpenStackControlPlaneSwiftReadyMessage
+	OpenStackControlPlaneSwiftReadyMessage = "OpenStackControlPlane Swift completed"
+
+	// OpenStackControlPlaneSwiftReadyRunningMessage
+	OpenStackControlPlaneSwiftReadyRunningMessage = "OpenStackControlPlane Swift in progress"
+
+	// OpenStackControlPlaneSwiftReadyErrorMessage
+	OpenStackControlPlaneSwiftReadyErrorMessage = "OpenStackControlPlane Swift error occured %s"
+
+	// OpenStackControlPlaneManilaReadyInitMessage
+	OpenStackControlPlaneManilaReadyInitMessage = "OpenStackControlPlane Manila not started"
+
+	// OpenStackControlPlaneManilaReadyMessage
+	OpenStackControlPlaneManilaReadyMessage = "OpenStackControlPlane Manila completed"
+
+	// OpenStackControlPlaneManilaReadyRunningMessage
+	OpenStackControlPlaneManilaReadyRunningMessage = "OpenStackControlPlane Manila in progress"
+
+	// OpenStackControlPlaneManilaReadyErrorMessage
+	OpenStackControlPlaneManilaReadyErrorMessage = "OpenStackControlPlane Manila error occured %s"
+
 	// OpenStackControlPlaneRedisReadyInitMessage
 	OpenStackControlPlaneRedisReadyInitMessage = "OpenStackControlPlane Redis not started"
 
@@ -438,4 +435,45 @@ const (
 
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCAReadyErrorMessage = "OpenStackControlPlane CAs %s %s error occured %s"
+)
+
+// Version Conditions used by API objects.
+const (
+	OpenStackVersionInitialized condition.Type = "Initialized"
+
+	OpenStackVersionMinorUpdateOVNDataplane condition.Type = "MinorUpdateOVNDataplane"
+
+	OpenStackVersionMinorUpdateOVNControlplane condition.Type = "MinorUpdateOVNControlplane"
+
+	OpenStackVersionMinorUpdateControlplane condition.Type = "MinorUpdateControlplane"
+
+	OpenStackVersionMinorUpdateDataplane condition.Type = "MinorUpdateDataplane"
+)
+
+// Version Messages used by API objects.
+const (
+
+	// OpenStackVersionInitializedInitMessage
+	OpenStackVersionInitializedInitMessage = "not started"
+
+	// OpenStackVersionInitializedReadyMessage
+	OpenStackVersionInitializedReadyMessage = "completed"
+
+	// OpenStackVersionInitializedReadyRunningMessage
+	OpenStackVersionInitializedReadyRunningMessage = "in progress"
+
+	// OpenStackVersionInitializedReadyErrorMessage
+	OpenStackVersionInitializedReadyErrorMessage = "error occured %s"
+
+	// OpenStackVersionMinorUpdateInitMessage
+	OpenStackVersionMinorUpdateInitMessage = "not started"
+
+	// OpenStackVersionMinorUpdateReadyMessage
+	OpenStackVersionMinorUpdateReadyMessage = "completed"
+
+	// OpenStackVersionMinorUpdateReadyRunningMessage
+	OpenStackVersionMinorUpdateReadyRunningMessage = "in progress"
+
+	// OpenStackVersionMinorUpdateReadyErrorMessage
+	//OpenStackVersionMinorUpdateReadyErrorMessage = "error occured %s"
 )

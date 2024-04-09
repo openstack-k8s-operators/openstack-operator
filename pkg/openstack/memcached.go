@@ -32,6 +32,7 @@ const (
 func ReconcileMemcacheds(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 	var failures []string = []string{}
@@ -88,7 +89,7 @@ func ReconcileMemcacheds(
 	var err error
 	var status memcachedStatus
 	for name, spec := range instance.Spec.Memcached.Templates {
-		status, ctrlResult, err = reconcileMemcached(ctx, instance, helper, name, &spec)
+		status, ctrlResult, err = reconcileMemcached(ctx, instance, version, helper, name, &spec)
 
 		switch status {
 		case memcachedFailed:
@@ -133,9 +134,10 @@ func ReconcileMemcacheds(
 func reconcileMemcached(
 	ctx context.Context,
 	instance *corev1beta1.OpenStackControlPlane,
+	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
-	spec *memcachedv1.MemcachedSpec,
+	spec *memcachedv1.MemcachedSpecCore,
 ) (memcachedStatus, ctrl.Result, error) {
 	memcached := &memcachedv1.Memcached{
 		ObjectMeta: metav1.ObjectMeta{
@@ -187,13 +189,13 @@ func reconcileMemcached(
 	}
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), memcached, func() error {
-		spec.DeepCopyInto(&memcached.Spec)
+		spec.DeepCopyInto(&memcached.Spec.MemcachedSpecCore)
 
 		if tlsCert != "" {
 			memcached.Spec.TLS.SecretName = ptr.To(tlsCert)
 		}
 		memcached.Spec.TLS.CaBundleSecretName = tls.CABundleSecret
-
+		memcached.Spec.ContainerImage = *version.Status.ContainerImages.InfraMemcachedImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), memcached, helper.GetScheme())
 		if err != nil {
 			return err
@@ -209,7 +211,8 @@ func reconcileMemcached(
 		Log.Info(fmt.Sprintf("Memcached %s - %s", memcached.Name, op))
 	}
 
-	if memcached.IsReady() {
+	if memcached.IsReady() { //FIXME ObservedGeneration
+		instance.Status.ContainerImages.InfraMemcachedImage = version.Status.ContainerImages.InfraMemcachedImage
 		return memcachedReady, ctrl.Result{}, nil
 	}
 

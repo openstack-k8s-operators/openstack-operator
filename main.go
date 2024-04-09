@@ -69,8 +69,10 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	routev1 "github.com/openshift/api/route/v1"
+
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
@@ -206,6 +208,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&corecontrollers.OpenStackVersionReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Kclient: kclient,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackVersion")
+		os.Exit(1)
+	}
+	corecontrollers.SetupVersionDefaults()
+
 	// Defaults for service operators
 	openstack.SetupServiceOperatorDefaults()
 
@@ -214,6 +226,7 @@ func main() {
 
 	// Defaults for anything else that was not covered by OpenStackClient nor service operator defaults
 	corev1.SetupDefaults()
+	corev1.SetupVersionDefaults()
 
 	// Webhooks
 	checker := healthz.Ping
@@ -227,11 +240,14 @@ func main() {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackClient")
 			os.Exit(1)
 		}
+		if err = (&corev1.OpenStackVersion{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackVersion")
+			os.Exit(1)
+		}
 		checker = mgr.GetWebhookServer().StartedChecker()
 	}
 
 	//+kubebuilder:scaffold:builder
-
 	if err := mgr.AddHealthzCheck("healthz", checker); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)
