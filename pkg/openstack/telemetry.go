@@ -86,10 +86,12 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS = telemetry.Spec.MetricStorage.PrometheusTLS
 		instance.Spec.Telemetry.Template.Ceilometer.TLS = telemetry.Spec.Ceilometer.TLS
 		instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS = telemetry.Spec.Ceilometer.MysqldExporterTLS
+		instance.Spec.Telemetry.Template.Ceilometer.KSMTLS = telemetry.Spec.Ceilometer.KSMTLS
 	}
 	instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.Ceilometer.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.Ceilometer.KSMTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	aodhSvcs, err := service.GetServicesListWithLabel(
@@ -126,6 +128,15 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		helper,
 		instance.Namespace,
 		map[string]string{common.AppSelector: "ceilometer"},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	ksmSvcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		map[string]string{common.AppSelector: "kube-state-metrics"},
 	)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -272,6 +283,27 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			// update TLS settings with cert secret
 			instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 		}
+
+		// NOTE: We don't have svc overrides for KSM objects too.
+		ksmEpDetails, ctrlResult, err := EnsureEndpointConfig(
+			ctx,
+			instance,
+			helper,
+			telemetry,
+			ksmSvcs,
+			nil,
+			corev1beta1.Override{},
+			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			tls.API{},
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		// update TLS settings with cert secret
+		instance.Spec.Telemetry.Template.Ceilometer.KSMTLS.SecretName = ksmEpDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	helper.GetLogger().Info("Reconciling Telemetry", telemetryNamespaceLabel, instance.Namespace, telemetryNameLabel, telemetryName)
@@ -292,6 +324,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.NotificationImage = *version.Status.ContainerImages.CeilometerNotificationImage
 		telemetry.Spec.Ceilometer.SgCoreImage = *version.Status.ContainerImages.CeilometerSgcoreImage
 		telemetry.Spec.Ceilometer.ProxyImage = *version.Status.ContainerImages.CeilometerProxyImage
+		telemetry.Spec.Ceilometer.KSMImage = *version.Status.ContainerImages.KsmImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
@@ -346,6 +379,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.CeilometerSgcoreImage = version.Status.ContainerImages.CeilometerSgcoreImage
 		instance.Status.ContainerImages.CeilometerProxyImage = version.Status.ContainerImages.CeilometerProxyImage
 		instance.Status.ContainerImages.CeilometerMysqldExporterImage = version.Status.ContainerImages.CeilometerMysqldExporterImage
+		instance.Status.ContainerImages.KsmImage = version.Status.ContainerImages.KsmImage
 		instance.Status.ContainerImages.AodhAPIImage = version.Status.ContainerImages.AodhAPIImage
 		instance.Status.ContainerImages.AodhEvaluatorImage = version.Status.ContainerImages.AodhEvaluatorImage
 		instance.Status.ContainerImages.AodhNotifierImage = version.Status.ContainerImages.AodhNotifierImage
