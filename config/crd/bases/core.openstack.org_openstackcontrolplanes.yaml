@@ -18361,6 +18361,8 @@ spec:
                     type: string
                   keystoneAPIImage:
                     type: string
+                  ksmImage:
+                    type: string
                   manilaAPIImage:
                     type: string
                   manilaSchedulerImage:
