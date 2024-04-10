@@ -7,7 +7,7 @@ spec:
   storageClass: local-storage
   tls:
     podLevel:
-      enabled: true
+      enabled: false
   dns:
     template:
       override:
