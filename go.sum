@@ -118,12 +118,12 @@ github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240402154848
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240402154848-e5f862707f49/go.mod h1:opUQY0YZNCyA11FKLToVhaVZTTEMfbnf0ozOLmkKfGs=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240404123425-54f145c97484 h1:4PS7ywfixWWDM+UyjWblXInNOb4IwjryvPsTrbnN1bE=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240404123425-54f145c97484/go.mod h1:MkhvdDYL/CI7aQdKGHLVmUwnBGTnWhcUQMdCB9ZE4BI=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240404123425-54f145c97484 h1:P3I3QBjZql8M5XXB/XBUdeM//e3XHtLv4yu7e+QlYQ8=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240404123425-54f145c97484/go.mod h1:gqByVGUdKQB/NkhKV4eD+8NWYkHq961nC96rTCB3ywE=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034 h1:HLI/aUA7KnBK5oLPIWXMasz7zqjal4GhNn1P/fdLI20=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034/go.mod h1:gqByVGUdKQB/NkhKV4eD+8NWYkHq961nC96rTCB3ywE=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240404123425-54f145c97484 h1:0Wmtd+xyvPvU1O6xd2G27XwZfYY2ewhTrbd9ELHlHwg=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240404123425-54f145c97484/go.mod h1:U32T7Jz/vUBbMJVYuGSmhcPT2+WiOr+8zt2G9RPJGMI=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240404123425-54f145c97484 h1:OvNHhOe3C34x9Oh29XPtjcOyGi790vgso4+okxbLs9s=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240404123425-54f145c97484/go.mod h1:/ieOXgiSRmc2LpZ9kCnvtXagh/QM88prKpisVNLwrjg=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240408095526-357d8fffa034 h1:LDWJWy545zW7KsZ2d2d+J5mJJK5eX/pL7mnSqn63PH4=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240408095526-357d8fffa034/go.mod h1:/ieOXgiSRmc2LpZ9kCnvtXagh/QM88prKpisVNLwrjg=
 github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240404123425-54f145c97484 h1:PleqKcc38K3NxJEF8lgZEphEfBkAqRFwtspvv5yq5SM=
 github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240404123425-54f145c97484/go.mod h1:ejPUK2xqh49WTnrLBPJyBAkMn3ZizO9pai39Aufg6C0=
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240403143013-74e2f3cc4015 h1:IYvBU6uEbGb0zXqVjDW2DuXPmQBcEZ8ssc3xAOY2/FY=
@@ -136,8 +136,8 @@ github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240404163736-a2d
 github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240404163736-a2d67e46f9f2/go.mod h1:qTPC7HGMWkxan3Z3YD5/cgw8kWraEW5ikdrKZ76XpBw=
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240404073049-a8b012482299 h1:G53Kd5koCQn0nUfAvEcvkDZ4ik885sXuuG+5nazdQXA=
 github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240404073049-a8b012482299/go.mod h1:EZymlUAhQzGNIAGrpGZ5P6oqfq2IhqY2lNPKLG9iKh8=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240405191225-a61ca8697bf2 h1:bSaKuBQAl1hwcDmDDsygjbMIbnfRXb+5gGSa7NCdMQ8=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240405191225-a61ca8697bf2/go.mod h1:LlYu56B20n7SQPqgKaOsqXb3qNcjtR7Gd7ppYwz60kk=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240409165939-6e7f030b1a88 h1:cmQ5s/qrmWnb9cXEcjj+uVMU9GXrchzafjLgxQYH0MA=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240409165939-6e7f030b1a88/go.mod h1:av9cDGF4mhKDKy0/u9zTAK1253Ubx+LrPrCpE4i16mM=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240403043315-77086641d3fd h1:jqRNpIY3sPV1o/F/SmVzo2FFIkdS64gpMDOn/wTtBE4=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240403043315-77086641d3fd/go.mod h1:EqjDBKsxNSU9p+Cu5XNAr5ETxpDOJ2oV/EaxB8hKj8Q=
 github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240409005731-765fc25c55d9 h1:8Qx/czqE2YAkR3TIFGuluPfVGrQpwtxmlEbxrWbw25M=

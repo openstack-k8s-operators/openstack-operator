@@ -91,12 +91,12 @@ github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240407224322-0
 github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240407224322-0ac0a3eea830/go.mod h1:x1Hya2LM5fP3iD89Es9YDrG4vj+GIULLAdgxmv3NIvY=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240402154848-e5f862707f49 h1:LSbLg+6iwX2jkVKe0ba6GqSO2mpoJlUZyWIWZA6jv6M=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240402154848-e5f862707f49/go.mod h1:opUQY0YZNCyA11FKLToVhaVZTTEMfbnf0ozOLmkKfGs=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240404123425-54f145c97484 h1:P3I3QBjZql8M5XXB/XBUdeM//e3XHtLv4yu7e+QlYQ8=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240404123425-54f145c97484/go.mod h1:gqByVGUdKQB/NkhKV4eD+8NWYkHq961nC96rTCB3ywE=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034 h1:HLI/aUA7KnBK5oLPIWXMasz7zqjal4GhNn1P/fdLI20=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034/go.mod h1:gqByVGUdKQB/NkhKV4eD+8NWYkHq961nC96rTCB3ywE=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240404123425-54f145c97484 h1:0Wmtd+xyvPvU1O6xd2G27XwZfYY2ewhTrbd9ELHlHwg=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240404123425-54f145c97484/go.mod h1:U32T7Jz/vUBbMJVYuGSmhcPT2+WiOr+8zt2G9RPJGMI=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240404123425-54f145c97484 h1:OvNHhOe3C34x9Oh29XPtjcOyGi790vgso4+okxbLs9s=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240404123425-54f145c97484/go.mod h1:/ieOXgiSRmc2LpZ9kCnvtXagh/QM88prKpisVNLwrjg=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240408095526-357d8fffa034 h1:LDWJWy545zW7KsZ2d2d+J5mJJK5eX/pL7mnSqn63PH4=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240408095526-357d8fffa034/go.mod h1:/ieOXgiSRmc2LpZ9kCnvtXagh/QM88prKpisVNLwrjg=
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240403143013-74e2f3cc4015 h1:IYvBU6uEbGb0zXqVjDW2DuXPmQBcEZ8ssc3xAOY2/FY=
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240403143013-74e2f3cc4015/go.mod h1:2xtchrVN1qkQcO2Xa2JkQLqBdYL7GRIUUsoiGLHK3OM=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240403152257-75b048d878bf h1:N0HGTE+WXkaVeCpsJO5QG79uyLhRuNa3/gCTGgfZfGo=

@@ -23,14 +23,14 @@ require (
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240407224322-0ac0a3eea830
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240402154848-e5f862707f49
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240404123425-54f145c97484
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240404123425-54f145c97484
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240404123425-54f145c97484
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240403143013-74e2f3cc4015
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240403152257-75b048d878bf
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240403141351-743a139e74b6
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240404163736-a2d67e46f9f2
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240404073049-a8b012482299
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240405191225-a61ca8697bf2
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240409165939-6e7f030b1a88
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240403043315-77086641d3fd
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240409005731-765fc25c55d9
@@ -83,7 +83,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240404123425-54f145c97484 // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240404123425-54f145c97484 // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240408095526-357d8fffa034 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
