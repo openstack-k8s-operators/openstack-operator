@@ -129,9 +129,6 @@ const (
 	// OpenStackControlPlaneBarbicanReadyCondition Status=True condition which indicates if Barbican is configured and operational
 	OpenStackControlPlaneBarbicanReadyCondition condition.Type = "OpenStackControlPlaneBarbicanReady"
 
-	// OpenStackControlPlaneRedisReadyCondition Status=True condition which indicates if Redis is configured and operational
-	OpenStackControlPlaneRedisReadyCondition condition.Type = "OpenStackControlPlaneRedisReady"
-
 	// OpenStackControlPlaneExposeOctaviaReadyCondition Status=True condition which indicates if Octavia is exposed via a route
 	OpenStackControlPlaneExposeOctaviaReadyCondition condition.Type = "OpenStackControlPlaneExposeOctaviaReady"
 
@@ -402,18 +399,6 @@ const (
 
 	// OpenStackControlPlaneManilaReadyErrorMessage
 	OpenStackControlPlaneManilaReadyErrorMessage = "OpenStackControlPlane Manila error occured %s"
-
-	// OpenStackControlPlaneRedisReadyInitMessage
-	OpenStackControlPlaneRedisReadyInitMessage = "OpenStackControlPlane Redis not started"
-
-	// OpenStackControlPlaneRedisReadyMessage
-	OpenStackControlPlaneRedisReadyMessage = "OpenStackControlPlane Redis completed"
-
-	// OpenStackControlPlaneRedisReadyRunningMessage
-	OpenStackControlPlaneRedisReadyRunningMessage = "OpenStackControlPlane Redis in progress"
-
-	// OpenStackControlPlaneRedisReadyErrorMessage
-	OpenStackControlPlaneRedisReadyErrorMessage = "OpenStackControlPlane Redis error occured %s"
 
 	// OpenStackControlPlaneExposeServiceReadyInitMessage
 	OpenStackControlPlaneExposeServiceReadyInitMessage = "OpenStackControlPlane %s exposing service %s not started"

@@ -15598,28 +15598,6 @@ spec:
                       type: object
                     type: object
                 type: object
-              redis:
-                properties:
-                  enabled:
-                    default: false
-                    type: boolean
-                  templates:
-                    additionalProperties:
-                      properties:
-                        replicas:
-                          default: 1
-                          format: int32
-                          type: integer
-                        tls:
-                          properties:
-                            caBundleSecretName:
-                              type: string
-                            secretName:
-                              type: string
-                          type: object
-                      type: object
-                    type: object
-                type: object
               secret:
                 type: string
               storageClass:
@@ -17322,8 +17300,6 @@ spec:
                   infraDnsmasqImage:
                     type: string
                   infraMemcachedImage:
-                    type: string
-                  infraRedisImage:
                     type: string
                   ironicAPIImage:
                     type: string

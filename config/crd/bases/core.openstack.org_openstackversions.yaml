@@ -121,8 +121,6 @@ spec:
                     type: string
                   infraMemcachedImage:
                     type: string
-                  infraRedisImage:
-                    type: string
                   ironicAPIImage:
                     type: string
                   ironicConductorImage:
@@ -310,8 +308,6 @@ spec:
                       type: string
                     infraMemcachedImage:
                       type: string
-                    infraRedisImage:
-                      type: string
                     ironicAPIImage:
                       type: string
                     ironicConductorImage:
@@ -467,8 +463,6 @@ spec:
                   infraDnsmasqImage:
                     type: string
                   infraMemcachedImage:
-                    type: string
-                  infraRedisImage:
                     type: string
                   ironicAPIImage:
                     type: string
