@@ -49,7 +49,10 @@ func ReconcileGaleras(
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("galera-%s-svc", name),
-			Hostnames:  []string{hostname},
+			Hostnames: []string{
+				hostname,
+				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+			},
 			Usages: []certmgrv1.KeyUsage{
 				"key encipherment",
 				"digital signature",
