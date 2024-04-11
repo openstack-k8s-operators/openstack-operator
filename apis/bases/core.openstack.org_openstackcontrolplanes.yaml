@@ -11058,10 +11058,6 @@ spec:
                             type: object
                           networkAttachment:
                             type: string
-                          networkAttachments:
-                            items:
-                              type: string
-                            type: array
                           nicMappings:
                             additionalProperties:
                               type: string
@@ -15759,8 +15755,8 @@ spec:
                           encryptionEnabled:
                             default: false
                             type: boolean
-                          memcachedServers:
-                            default: ""
+                          memcachedInstance:
+                            default: memcached
                             type: string
                           networkAttachments:
                             items:
@@ -15858,7 +15854,7 @@ spec:
                                 type: string
                             type: object
                         required:
-                        - memcachedServers
+                        - memcachedInstance
                         - rabbitMqClusterName
                         - replicas
                         - secret
@@ -15900,8 +15896,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
-                          memcachedServers:
-                            default: ""
+                          memcachedInstance:
+                            default: memcached
                             type: string
                           networkAttachments:
                             items:
@@ -15919,7 +15915,7 @@ spec:
                             default: 10Gi
                             type: string
                         required:
-                        - memcachedServers
+                        - memcachedInstance
                         - replicas
                         - storageClass
                         - storageRequest
@@ -16338,7 +16334,7 @@ spec:
                                   aodhService:
                                     default: AodhPassword
                                     type: string
-                                  service:
+                                  ceilometerService:
                                     default: CeilometerPassword
                                     type: string
                                 type: object
@@ -16412,12 +16408,12 @@ spec:
                             type: array
                           passwordSelector:
                             default:
-                              service: CeilometerPassword
+                              ceilometerService: CeilometerPassword
                             properties:
                               aodhService:
                                 default: AodhPassword
                                 type: string
-                              service:
+                              ceilometerService:
                                 default: CeilometerPassword
                                 type: string
                             type: object
