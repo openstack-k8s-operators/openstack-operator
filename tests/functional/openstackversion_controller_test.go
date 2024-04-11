@@ -89,6 +89,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.EdpmLogrotateCrondImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmMultipathdImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNeutronMetadataAgentImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.EdpmNeutronSriovAgentImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmOvnBgpAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.GlanceAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.HeatAPIImage).ShouldNot(BeNil())
@@ -131,8 +133,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.SwiftContainerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.SwiftObjectImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.SwiftProxyImage).ShouldNot(BeNil())
-				// same a RELATED_IMAGE_OPENSTACK_EDPM_NODE_EXPORTER_IMAGE
-				g.Expect(version.Status.ContainerImages.TelemetryNodeExporterImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
 
 			}, timeout, interval).Should(Succeed())
 		})

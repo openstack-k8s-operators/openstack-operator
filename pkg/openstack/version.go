@@ -39,15 +39,6 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 			}
 			// format API so we adhere to go linting standards
 			fieldName = strings.Replace(fieldName, "Api", "API", -1)
-			// EDPM variables have OPENSTACK prefixes we drop
-			if strings.Contains(fieldName, "Edpm") {
-				fieldName = strings.Replace(fieldName, "Openstack", "", -1)
-				fieldName += "Image"
-			}
-			// FIXME: RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE is inconsistent with other EDPM image names
-			if fieldName == "EdpmOvnBgpImage" {
-				fieldName = "EdpmOvnBgpAgentImage"
-			}
 		}
 		Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
