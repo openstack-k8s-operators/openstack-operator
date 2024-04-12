@@ -110,7 +110,7 @@ spec:
           serviceUser: aodh
       ceilometer:
         passwordSelector:
-          service: CeilometerPassword
+          ceilometerService: CeilometerPassword
         secret: osp-secret
         serviceUser: ceilometer
   barbican:
