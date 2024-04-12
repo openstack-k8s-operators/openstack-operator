@@ -53,6 +53,9 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
+	// Note(lpiwowar): Please, do not remove! This import is necessary in order
+	// to make the test-operator part of the openstack-operator-index.
+	_ "github.com/openstack-k8s-operators/test-operator/api/v1beta1"
 	rabbitmqclusterv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
