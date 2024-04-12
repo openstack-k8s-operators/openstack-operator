@@ -150,8 +150,14 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, err
 	}
 
+	// Save a copy of the conditions so that we can restore the LastTransitionTime
+	// when a condition's state doesn't change.
+	savedConditions := instance.Status.Conditions.DeepCopy()
+
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
+		condition.RestoreLastTransitionTimes(
+			&instance.Status.Conditions, savedConditions)
 		// update the Ready condition based on the sub conditions
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
