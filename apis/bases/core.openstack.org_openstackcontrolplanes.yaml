@@ -17297,6 +17297,8 @@ spec:
                     type: string
                   edpmLogrotateCrondImage:
                     type: string
+                  edpmMultipathdImage:
+                    type: string
                   edpmNeutronMetadataAgentImage:
                     type: string
                   edpmNeutronSriovAgentImage:

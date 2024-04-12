@@ -96,6 +96,7 @@ type ContainerTemplate struct {
 	EdpmFrrImage                  *string `json:"edpmFrrImage,omitempty"`
 	EdpmIscsidImage               *string `json:"edpmIscsidImage,omitempty"`
 	EdpmLogrotateCrondImage       *string `json:"edpmLogrotateCrondImage,omitempty"`
+	EdpmMultipathdImage           *string `json:"edpmMultipathdImage,omitempty"`
 	EdpmNeutronMetadataAgentImage *string `json:"edpmNeutronMetadataAgentImage,omitempty"`
 	EdpmNeutronSriovAgentImage    *string `json:"edpmNeutronSriovAgentImage,omitempty"`
 	EdpmOvnBgpAgentImage          *string `json:"edpmOvnBgpAgentImage,omitempty"`
