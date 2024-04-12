@@ -163,6 +163,8 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		//condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)))
 	}
 	instance.Status.Conditions.Init(&cl)
+	instance.Status.ObservedGeneration = instance.Generation
+
 	if isNewInstance {
 		// Register overall status immediately to have an early feedback e.g. in the cli
 		return ctrl.Result{}, nil

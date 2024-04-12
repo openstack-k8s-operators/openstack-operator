@@ -159,6 +159,9 @@ type OpenStackVersionStatus struct {
 
 	// where we keep track of the container images for previous versions
 	ContainerImageVersionDefaults map[string]*ContainerDefaults `json:"containerImageVersionDefaults,omitempty"`
+
+	//ObservedGeneration - the most recent generation observed for this object.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 //+kubebuilder:object:root=true
