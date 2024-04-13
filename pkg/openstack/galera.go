@@ -53,6 +53,14 @@ func ReconcileGaleras(
 				hostname,
 				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
 			},
+			// Note (dciabrin) from https://github.com/openstack-k8s-operators/openstack-operator/pull/678#issuecomment-1952459166
+			// the certificate created for galera should populate the 'organization' field,
+			// otherwise this trip the SST transfer setup done by wsrep_sst_rsync. This will not show
+			// at the initial deployment because there is no SST involved when the DB is bootstrapped
+			// as there are no data to be transferred yet.
+			Subject: &certmgrv1.X509Subject{
+				Organizations: []string{fmt.Sprintf("%s.cluster.local", instance.Namespace)},
+			},
 			Usages: []certmgrv1.KeyUsage{
 				"key encipherment",
 				"digital signature",
