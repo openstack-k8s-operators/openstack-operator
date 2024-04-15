@@ -17400,6 +17400,9 @@ spec:
                 type: string
               deployedVersion:
                 type: string
+              observedGeneration:
+                format: int64
+                type: integer
               tls:
                 properties:
                   caBundleSecretName:

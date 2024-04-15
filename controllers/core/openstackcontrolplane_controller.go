@@ -149,9 +149,20 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		Log.Error(err, "unable to acquire helper for OpenStackControlPlane")
 		return ctrl.Result{}, err
 	}
+	//
+	// initialize Conditions
+	//
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+	}
+
+	// Save a copy of the condtions so that we can restore the LastTransitionTime
+	// when a condition's state doesn't change.
+	savedConditions := instance.Status.Conditions.DeepCopy()
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
+		condition.RestoreLastTransitionTimes(&instance.Status.Conditions, savedConditions)
 		// update the Ready condition based on the sub conditions
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
@@ -173,6 +184,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	}()
 
 	instance.InitConditions()
+	instance.Status.ObservedGeneration = instance.Generation
 
 	Log.Info("Looking up the current OpenStackVersion")
 	ctrlResult, version, err := openstack.ReconcileVersion(ctx, instance, helper)

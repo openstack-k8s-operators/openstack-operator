@@ -755,6 +755,9 @@ type OpenStackControlPlaneStatus struct {
 
 	// ContainerImages
 	ContainerImages ContainerImages `json:"containerImages,omitempty"`
+
+	//ObservedGeneration - the most recent generation observed for this object.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 // TLSStatus defines the observed state of TLS
