@@ -40,7 +40,6 @@ import (
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
-	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
@@ -111,7 +110,6 @@ func init() {
 	utilruntime.Must(telemetryv1.AddToScheme(scheme))
 	utilruntime.Must(swiftv1.AddToScheme(scheme))
 	utilruntime.Must(clientv1.AddToScheme(scheme))
-	utilruntime.Must(redisv1.AddToScheme(scheme))
 	utilruntime.Must(routev1.AddToScheme(scheme))
 	utilruntime.Must(certmgrv1.AddToScheme(scheme))
 	utilruntime.Must(barbicanv1.AddToScheme(scheme))

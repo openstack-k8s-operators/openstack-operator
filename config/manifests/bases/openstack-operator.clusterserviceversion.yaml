@@ -346,14 +346,6 @@ spec:
       - description: Templates - Overrides to use when creating the Rabbitmq clusters
         displayName: Templates
         path: rabbitmq.templates
-      - description: Enabled - Whether the Redis service should be deployed and managed
-        displayName: Enabled
-        path: redis.enabled
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Templates - Overrides to use when creating the Redis Resources
-        displayName: Templates
-        path: redis.templates
       - description: 'Secret - FIXME: make this optional'
         displayName: Secret
         path: secret
@@ -379,19 +371,33 @@ spec:
       - description: Template - Overrides to use when creating Swift Resources
         displayName: Template
         path: swift.template
-      - description: APIOverride, provides the ability to override the generated manifest
-          of several child resources.
-        displayName: APIOverride
-        path: telemetry.apiOverride
+      - description: AlertmanagerOverride, provides the ability to override the generated
+          manifest of several child resources.
+        displayName: Alertmanager Override
+        path: telemetry.alertmanagerOverride
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
-        path: telemetry.apiOverride.tls
+        path: telemetry.alertmanagerOverride.tls
+      - description: AodhAPIOverride, provides the ability to override the generated
+          manifest of several child resources.
+        displayName: Aodh APIOverride
+        path: telemetry.aodhApiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: telemetry.aodhApiOverride.tls
       - description: Enabled - Whether OpenStack Telemetry services should be deployed
           and managed
         displayName: Enabled
         path: telemetry.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: PrometheusOverride, provides the ability to override the generated
+          manifest of several child resources.
+        displayName: Prometheus Override
+        path: telemetry.prometheusOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: telemetry.prometheusOverride.tls
       - description: Template - Overrides to use when creating the OpenStack Telemetry
           services
         displayName: Template

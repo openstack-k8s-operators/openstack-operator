@@ -14,7 +14,6 @@ import (
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
-	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
@@ -672,9 +671,6 @@ func SetupServiceOperatorDefaults() {
 
 	// Heat
 	heatv1.SetupDefaults()
-
-	// Redis
-	redisv1.SetupDefaults()
 
 	// DNS
 	networkv1.SetupDefaults()
