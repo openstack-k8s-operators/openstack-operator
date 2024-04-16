@@ -1,3 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keystone-public-route
+spec:
+  duration: 500h0m0s
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keystone-public-svc
+spec:
+  duration: 500h0m0s
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keystone-internal-svc
+spec:
+  duration: 500h0m0s
+---
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
 metadata:
@@ -174,28 +195,28 @@ spec:
         replicas: 1
   tls:
     ingress:
-      ca:
-        duration: 87600h0m0s
-      cert:
-        duration: 43800h0m0s
       enabled: true
+      ca:
+        duration: 1000h0m0s
+      cert:
+        duration: 500h0m0s
     podLevel:
       enabled: true
       internal:
         ca:
-          duration: 87600h0m0s
+          duration: 1000h0m0s
         cert:
-          duration: 43800h0m0s
+          duration:  500h0m0s
       libvirt:
         ca:
-          duration: 87600h0m0s
+          duration: 1000h0m0s
         cert:
-          duration: 43800h0m0s
+          duration:  500h0m0s
       ovn:
         ca:
-          duration: 87600h0m0s
+          duration: 1000h0m0s
         cert:
-          duration: 43800h0m0s
+          duration:  500h0m0s
 status:
   conditions:
   - message: Setup complete

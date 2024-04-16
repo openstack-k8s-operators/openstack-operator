@@ -1,0 +1,13 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  tls:
+    ingress:
+      ca:
+        customIssuer: rootca-ingress-custom
+    podLevel:
+      internal:
+        ca:
+          customIssuer: rootca-internal-custom
