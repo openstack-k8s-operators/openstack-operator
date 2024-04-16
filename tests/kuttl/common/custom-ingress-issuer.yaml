@@ -1,0 +1,26 @@
+# Create a custom Issuer
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: rootca-ingress-custom
+spec:
+  ca:
+    secretName: rootca-ingress-custom
+
+---
+# Create the CA for the custom issuer
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-ingress-custom
+spec:
+  commonName: rootca-ingress-custom
+  isCA: true
+  duration: 87600h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+  secretName: rootca-ingress-custom

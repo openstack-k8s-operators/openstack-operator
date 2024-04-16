@@ -1,0 +1,6 @@
+# Deploy with custom internal and ingress issuers
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      oc kustomize ../../../../config/samples/tls/custom_issuers | oc apply -n $NAMESPACE -f -

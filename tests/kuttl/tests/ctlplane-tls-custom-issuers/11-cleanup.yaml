@@ -3,8 +3,9 @@ kind: TestStep
 delete:
 - apiVersion: core.openstack.org/v1beta1
   kind: OpenStackControlPlane
-  name: openstack-basic
+  name: openstack
 commands:
 - script: |
     oc delete --ignore-not-found=true -n $NAMESPACE pvc \
     srv-swift-storage-0
+    oc delete --ignore-not-found=true -n $NAMESPACE issuer rootca-internal-custom rootca-ingress-custom

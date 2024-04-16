@@ -1,0 +1,15 @@
+# Checks the presence of the ca-custom-kuttl cert data in the combined-ca-bundle secret
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      echo "Checking ca-custom-kuttl.pem is present in combined-ca-bundle..."
+      CUSTOM_CERT_CONTENT=$(oc get secret ca-custom-kuttl -n $NAMESPACE -o jsonpath="{.data['ca-custom-kuttl\.pem']}" | base64 --decode | tr -d '\n')
+      TLS_BUNDLE_CONTENT=$(oc get secret combined-ca-bundle -n $NAMESPACE -o jsonpath="{.data['tls-ca-bundle\.pem']}" | base64 --decode | tr -d '\n')
+      if [[ "$TLS_BUNDLE_CONTENT" == *"$CUSTOM_CERT_CONTENT"* ]]; then
+        echo "OK"
+        exit 0
+      else
+        echo "Not present"
+        exit 1
+      fi
