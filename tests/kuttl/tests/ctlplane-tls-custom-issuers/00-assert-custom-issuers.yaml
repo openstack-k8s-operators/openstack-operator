@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: rootca-internal-custom
+spec:
+  ca:
+    secretName: rootca-internal-custom
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: rootca-ingress-custom
+spec:
+  ca:
+    secretName: rootca-ingress-custom

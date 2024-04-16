@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+  - script: |
+      echo "Checking issuer of internal certificates..."
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_check_cert_issuer.sh "issuer=CN=rootca-internal-custom" "internal"
+
+  - script: |
+      echo "Checking issuer of ingress certificates..."
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_check_cert_issuer.sh "rootca-ingress-custom" "public"

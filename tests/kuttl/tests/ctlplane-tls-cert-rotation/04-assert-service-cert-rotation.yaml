@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 900
+commands:
+  - script: |
+      echo "Get fingerprints of all service certs"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_after
+
+  - script: |
+      echo "Check if all services from before are present in after and have valid fingerprints"
+      bash -s < ../../common/osp_check_fingerprints.sh

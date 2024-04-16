@@ -1,0 +1,105 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  tls:
+    caBundleSecretName: ca-custom-kuttl
+status:
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: OpenStackControlPlane Barbican completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneBarbicanReady
+  - message: OpenStackControlPlane CAs completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCAReadyCondition
+  - message: OpenStackControlPlane Cinder completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCinderReady
+  - message: OpenStackControlPlane Client completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneClientReady
+  - message: OpenStackControlPlane barbican service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeBarbicanReady
+  - message: OpenStackControlPlane cinder service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeCinderReady
+  - message: OpenStackControlPlane glance service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeGlanceReady
+  - message: OpenStackControlPlane keystone service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeKeystoneAPIReady
+  - message: OpenStackControlPlane neutron service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeNeutronReady
+  - message: OpenStackControlPlane nova service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeNovaReady
+  - message: OpenStackControlPlane placement service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposePlacementAPIReady
+  - message: OpenStackControlPlane swift service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeSwiftReady
+  - message: OpenStackControlPlane Glance completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneGlanceReady
+  - message: OpenStackControlPlane KeystoneAPI completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneKeystoneAPIReady
+  - message: OpenStackControlPlane MariaDB completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneMariaDBReady
+  - message: OpenStackControlPlane Memcached completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneMemcachedReady
+  - message: OpenStackControlPlane Neutron completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneNeutronReady
+  - message: OpenStackControlPlane Nova completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneNovaReady
+  - message: OpenStackControlPlane OVN completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneOVNReady
+  - message: OpenStackControlPlane PlacementAPI completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlanePlacementAPIReady
+  - message: OpenStackControlPlane RabbitMQ completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneRabbitMQReady
+  - message: OpenStackControlPlane Swift completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneSwiftReady
+  - message: OpenStackControlPlane Telemetry completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneTelemetryReady
