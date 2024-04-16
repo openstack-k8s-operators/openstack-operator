@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - base/core_v1beta1_openstackcontrolplane.yaml
+patches:
+  - path: core_v1beta1_openstackcontrolplane_tls.yaml
+    target:
+      group: core.openstack.org
+      version: v1beta1
+      kind: OpenStackControlPlane
+      name: openstack-basic

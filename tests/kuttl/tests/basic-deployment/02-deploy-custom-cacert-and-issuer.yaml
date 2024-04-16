@@ -1,0 +1,6 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      oc apply -n $NAMESPACE -f certificates/custom-ca.yaml
+      oc apply -n $NAMESPACE -f certificates/custom-internal-issuer.yaml
