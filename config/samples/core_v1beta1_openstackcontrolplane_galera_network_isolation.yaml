@@ -213,8 +213,6 @@ spec:
           dbType: SB
           storageRequest: 10G
           networkAttachment: internalapi
-      ovnNorthd:
-        networkAttachment: internalapi
       ovnController:
         networkAttachment: tenant
   placement:
