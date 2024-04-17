@@ -563,6 +563,43 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 var _ = Describe("OpenStackOperator Webhook", func() {
 
+	It("Adds default label via defaulting webhook", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+		DeferCleanup(
+			th.DeleteInstance,
+			CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+		)
+
+		OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+		Expect(OSCtlplane.Labels).Should(Not(BeNil()))
+		Expect(OSCtlplane.Labels).Should(HaveKeyWithValue("core.openstack.org/openstackcontrolplane", ""))
+	})
+
+	It("Does not override default label via defaulting webhook when provided", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "openstack",
+				"namespace": namespace,
+				"labels": map[string]interface{}{
+					"core.openstack.org/openstackcontrolplane": "foo",
+				},
+			},
+			"spec": spec,
+		}
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			ctx, k8sClient, unstructuredObj, func() error { return nil })
+
+		Expect(err).ShouldNot(HaveOccurred())
+
+		OSCtlplane := GetOpenStackControlPlane(types.NamespacedName{Name: "openstack", Namespace: namespace})
+		Expect(OSCtlplane.Labels).Should(Not(BeNil()))
+		Expect(OSCtlplane.Labels).Should(HaveKeyWithValue("core.openstack.org/openstackcontrolplane", "foo"))
+	})
+
 	It("calls placement validation webhook", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 		spec["placement"] = map[string]interface{}{
