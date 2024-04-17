@@ -10542,6 +10542,11 @@ spec:
                                 type: object
                               caBundleSecretName:
                                 type: string
+                              ovn:
+                                properties:
+                                  secretName:
+                                    type: string
+                                type: object
                             type: object
                           transportURLSecret:
                             type: string
@@ -10616,10 +10621,6 @@ spec:
                           persistenceDatabaseAccount:
                             default: octavia-persistence
                             type: string
-                          redisHostIPs:
-                            items:
-                              type: string
-                            type: array
                           resources:
                             properties:
                               claims:
@@ -10742,10 +10743,6 @@ spec:
                           persistenceDatabaseAccount:
                             default: octavia-persistence
                             type: string
-                          redisHostIPs:
-                            items:
-                              type: string
-                            type: array
                           resources:
                             properties:
                               claims:
@@ -10868,10 +10865,6 @@ spec:
                           persistenceDatabaseAccount:
                             default: octavia-persistence
                             type: string
-                          redisHostIPs:
-                            items:
-                              type: string
-                            type: array
                           resources:
                             properties:
                               claims:
@@ -16247,9 +16240,6 @@ spec:
                                 additionalProperties:
                                   type: string
                                 type: object
-                              memcachedInstance:
-                                default: memcached
-                                type: string
                               networkAttachmentDefinitions:
                                 items:
                                   type: string
@@ -16347,7 +16337,6 @@ spec:
                                 type: object
                             required:
                             - databaseInstance
-                            - memcachedInstance
                             - secret
                             type: object
                           enabled:
