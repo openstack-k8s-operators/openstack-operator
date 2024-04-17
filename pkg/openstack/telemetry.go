@@ -222,6 +222,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), telemetry, func() error {
 		instance.Spec.Telemetry.Template.TelemetrySpecBase.DeepCopyInto(&telemetry.Spec.TelemetrySpecBase)
 		instance.Spec.Telemetry.Template.Autoscaling.AutoscalingSpecBase.DeepCopyInto(&telemetry.Spec.Autoscaling.AutoscalingSpecBase)
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.DeepCopyInto(&telemetry.Spec.Autoscaling.Aodh.AodhCore)
 		instance.Spec.Telemetry.Template.Ceilometer.CeilometerSpecCore.DeepCopyInto(&telemetry.Spec.Ceilometer.CeilometerSpecCore)
 		instance.Spec.Telemetry.Template.Logging.DeepCopyInto(&telemetry.Spec.Logging)
 		instance.Spec.Telemetry.Template.MetricStorage.DeepCopyInto(&telemetry.Spec.MetricStorage)
