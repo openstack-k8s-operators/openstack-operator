@@ -158,6 +158,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		octavia.Spec.OctaviaWorker.ContainerImage = *version.Status.ContainerImages.OctaviaWorkerImage
 		octavia.Spec.OctaviaHealthManager.ContainerImage = *version.Status.ContainerImages.OctaviaHealthmanagerImage
 		octavia.Spec.OctaviaHousekeeping.ContainerImage = *version.Status.ContainerImages.OctaviaHousekeepingImage
+		octavia.Spec.ApacheContainerImage = *version.Status.ContainerImages.ApacheImage
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), octavia, helper.GetScheme())
 		if err != nil {
@@ -184,6 +185,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Status.ContainerImages.OctaviaWorkerImage = version.Status.ContainerImages.OctaviaWorkerImage
 		instance.Status.ContainerImages.OctaviaHealthmanagerImage = version.Status.ContainerImages.OctaviaHealthmanagerImage
 		instance.Status.ContainerImages.OctaviaHousekeepingImage = version.Status.ContainerImages.OctaviaHousekeepingImage
+		instance.Status.ContainerImages.ApacheImage = version.Status.ContainerImages.ApacheImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOctaviaReadyCondition, corev1beta1.OpenStackControlPlaneOctaviaReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(
