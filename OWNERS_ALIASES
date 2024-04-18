@@ -5,6 +5,8 @@ aliases:
   - lewisdenny
   - frenzyfriday
   - viroel
+  docs-approvers:
+  - igallagh-redhat
   openstack-approvers:
   - abays
   - dprince

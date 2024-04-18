@@ -1,0 +1,137 @@
+= OpenStack Operator
+:toc: left
+:toclevels: 3
+:icons: font
+:compat-mode:
+:doctype: book
+:context: osp
+
+This is the primary operator for OpenStack. It is a "meta" operator, meaning it
+serves to coordinate the other operators for OpenStack by watching and configuring
+their CustomResources (CRs). Additionally installing this operator will automatically
+install all required operator dependencies for installing/managing OpenStack.
+
+== Description
+
+This project is built, modeled, and maintained with https://github.com/operator-framework/operator-sdk[operator-sdk].
+
+== Getting Started
+
+You'll need a Kubernetes cluster to run against. You can use https://sigs.k8s.io/kind[KIND] to get a local cluster for testing, or run against a remote cluster.
+*Note:* Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+
+=== Running on the cluster
+
+. Install Instances of Custom Resources:
+
+[,sh]
+----
+kubectl apply -f config/samples/
+----
+
+. Build and push your image to the location specified by `IMG`:
+
+[,sh]
+----
+make docker-build docker-push IMG=<some-registry>/openstack-operator:tag
+----
+
+. Deploy the controller to the cluster with the image specified by `IMG`:
+
+[,sh]
+----
+make deploy IMG=<some-registry>/openstack-operator:tag
+----
+
+=== Uninstall CRDs
+
+To delete the CRDs from the cluster:
+
+[,sh]
+----
+make uninstall
+----
+
+=== Undeploy controller
+
+UnDeploy the controller to the cluster:
+
+[,sh]
+----
+make undeploy
+----
+
+=== Building your own bundle, index images
+
+The OpenStack operator uses multiple bundles to minimize the number of
+deployment artifacts we have in the OLM catalog while also providing enough
+space for our CRs (this is a big project). As such the build order for local
+bundles is a bit different than normal.
+
+. Run make:bundle. This pins down dependencies to version used in the go.mod and
+ and also string replaces the URL for any dependant bundles (storage, etc) that
+ we will build below. Additionally a dependency.yaml is added to the generated bundle
+ so that we require any dependencies. This sets the stage for everything below.
+
+[,sh]
+----
+make bundle
+----
+
+. Run dep-bundle-build-push. This creates any _dependency_ bundles required by this project.
+It builds and pushes them to a registry as this is required to be able to build the main
+bundle.
+
+[,sh]
+----
+make dep-bundle-build-push
+----
+
+. Run bundle-build. This will execute podman to build the custom-bundle.Dockerfile.
+
+[,sh]
+----
+make bundle-build
+----
+
+. Run bundle-push. This pushes the resulting bundle image to the registry.
+
+[,sh]
+----
+make bundle-push
+----
+
+. Run catalog-build.  At this point you can generate your index image so that it contains both of the above bundle images. Because we use dependencies in the openstack-operator's main bundle it will
+ automatically install the CSV contained in the dependant (storage, etc) bundle.
+
+[,sh]
+----
+make catalog-build
+----
+
+. Run catalog-push. Push the catalog to your registry.
+
+[,sh]
+----
+make catalog-push
+----
+
+=== Uninstall CRDs
+
+To delete the CRDs from the cluster:
+
+[,sh]
+----
+make uninstall
+----
+
+=== Undeploy controller
+
+UnDeploy the controller to the cluster:
+
+[,sh]
+----
+make undeploy
+----
+
+include::assemblies/custom_resources.adoc[leveloffset=-1]

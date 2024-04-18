@@ -76,6 +76,36 @@ DOCKER_BUILD_ARGS ?=
 .PHONY: all
 all: build
 
+##@ Docs
+
+.PHONY: docs-dependencies
+docs-dependencies: .bundle
+
+.PHONY: .bundle
+.bundle:
+	if ! type bundle; then \
+		echo "Bundler not found. On Linux run 'sudo dnf install /usr/bin/bundle' to install it."; \
+		exit 1; \
+	fi
+
+	bundle config set --local path 'local/bundle'; bundle install
+
+.PHONY: docs
+docs: manifests docs-dependencies crd-to-markdown  ## Build docs
+	CRD_MARKDOWN=$(CRD_MARKDOWN) MAKE=$(MAKE) ./docs/build_docs.sh
+
+.PHONY: docs-preview
+docs-preview: docs
+	cd docs; $(MAKE) open-html
+
+.PHONY: docs-watch
+docs-watch: docs-preview
+	cd docs; $(MAKE) watch-html
+
+.PHONY: docs-clean
+docs-clean:
+	rm -r docs_build
+
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -214,11 +244,13 @@ $(LOCALBIN):
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
+CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
 GINKGO ?= $(LOCALBIN)/ginkgo
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v3.8.7
 CONTROLLER_TOOLS_VERSION ?= v0.11.1
+CRD_MARKDOWN_VERSION ?= v0.0.3
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
@@ -235,6 +267,11 @@ controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessar
 $(CONTROLLER_GEN): $(LOCALBIN)
 	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+
+.PHONY: crd-to-markdown
+crd-to-markdown: $(CRD_MARKDOWN) ## Download crd-to-markdown locally if necessary.
+$(CRD_MARKDOWN): $(LOCALBIN)
+	test -s $(LOCALBIN)/crd-to-markdown || GOBIN=$(LOCALBIN) go install github.com/clamoriniere/crd-to-markdown@$(CRD_MARKDOWN_VERSION)
 
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.

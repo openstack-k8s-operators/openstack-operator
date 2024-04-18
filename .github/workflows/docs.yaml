@@ -1,0 +1,57 @@
+name: Build Docs
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/docs*
+      - apis/client/v1beta1/**
+      - apis/core/v1beta1/**
+      - docs/**
+      - Gemfile
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.20.x
+      - uses: actions/checkout@v4
+        with:
+          # this fetches all branches. Needed because we need gh-pages branch for deploy to work
+          fetch-depth: 0
+      - uses: ruby/setup-ruby@v1.160.0
+        with:
+          ruby-version: '3.2'
+
+      - name: Install Asciidoc
+        run: make docs-dependencies
+      - name: Build docs
+        run: |
+          make docs
+
+      - name: Prepare gh-pages branch
+        run: |
+          git restore docs/assemblies/custom_resources.adoc
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git branch -D gh-pages &>/dev/null || true
+          git checkout -b gh-pages 4cd0193fc6c5bc7e76f3a0148d0447fb0d7fbe6a
+
+      - name: Commit asciidoc docs
+        run: |
+          mkdir user dev
+          mv docs_build/ctlplane/index-upstream.html index.html
+          git add index.html
+          git commit -m "Rendered docs"
+
+      - name: Push rendered docs to gh-pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git push --force origin gh-pages
