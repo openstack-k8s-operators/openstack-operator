@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package core
 
 import (
@@ -31,7 +30,7 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1 "k8s.io/api/core/v1"
 
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
@@ -60,6 +59,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -135,7 +135,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, err
 	}
 
-	helper, err := helper.NewHelper(
+	helper, err := common_helper.NewHelper(
 		instance,
 		r.Client,
 		r.Kclient,
@@ -150,7 +150,8 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	//
 	// initialize Conditions
 	//
-	if instance.Status.Conditions == nil {
+	isNewInstance := instance.Status.Conditions == nil
+	if isNewInstance {
 		instance.Status.Conditions = condition.Conditions{}
 	}
 
@@ -185,12 +186,34 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	instance.InitConditions()
 	instance.Status.ObservedGeneration = instance.Generation
 
+	// If we're not deleting this and the service object doesn't have our finalizer, add it.
+	if instance.DeletionTimestamp.IsZero() && controllerutil.AddFinalizer(instance, helper.GetFinalizer()) || isNewInstance {
+		return ctrl.Result{}, nil
+	}
+
 	Log.Info("Looking up the current OpenStackVersion")
 	ctrlResult, version, err := openstack.ReconcileVersion(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
+	}
+
+	versionHelper, err := common_helper.NewHelper(
+		version,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		Log,
+	)
+	if err != nil {
+		Log.Error(err, "unable to create helper")
+		return ctrl.Result{}, err
+	}
+
+	// Handle version delete
+	if !instance.DeletionTimestamp.IsZero() {
+		return r.reconcileDelete(ctx, instance, version, helper, versionHelper)
 	}
 
 	// wait until the version is initialized so we have images on the version.Status
@@ -241,7 +264,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 
 }
 
-func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
 
 	OVNControllerReady, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
 	if err != nil {
@@ -259,7 +282,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Co
 
 }
 
-func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
 
 	ctrlResult, err := openstack.ReconcileCAs(ctx, instance, helper)
 	if err != nil {
@@ -416,6 +439,24 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *OpenStackControlPlaneReconciler) reconcileDelete(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper, versionHelper *common_helper.Helper) (ctrl.Result, error) {
+	helper.GetLogger().Info("reconcile delete")
+	if controllerutil.RemoveFinalizer(version, versionHelper.GetFinalizer()) {
+		err := versionHelper.PatchInstance(ctx, version)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+	helper.GetLogger().Info(fmt.Sprintf("finalizer removed '%s' successfully", versionHelper.GetFinalizer()))
+
+	// remove instance finalizer
+	controllerutil.RemoveFinalizer(instance, helper.GetFinalizer())
+	helper.GetLogger().Info(fmt.Sprintf("finalizer removed '%s' successfully", helper.GetFinalizer()))
+
+	return ctrl.Result{}, nil
+
 }
 
 // fields to index to reconcile when change

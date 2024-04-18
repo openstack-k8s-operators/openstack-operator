@@ -26,6 +26,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -166,7 +167,9 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.ObservedGeneration = instance.Generation
 
-	if isNewInstance {
+	// If we're not deleting this and the service object doesn't have our finalizer, add it.
+	if instance.DeletionTimestamp.IsZero() && isNewInstance {
+		controllerutil.AddFinalizer(instance, versionHelper.GetFinalizer())
 		// Register overall status immediately to have an early feedback e.g. in the cli
 		return ctrl.Result{}, nil
 	}
