@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -67,6 +69,36 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Octavia.Template.OctaviaAPI.TLS = octavia.Spec.OctaviaAPI.TLS
+
+		serviceName := "octavia"
+		// create ovndb client certificate for octavia
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: instance.GetOvnIssuer(),
+			CertName:   fmt.Sprintf("%s-ovndbs", serviceName),
+			Duration:   nil,
+			Hostnames: []string{
+				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
+				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ClusterInternalDomain),
+			},
+			Ips: nil,
+			Usages: []certmgrv1.KeyUsage{
+				certmgrv1.UsageKeyEncipherment,
+				certmgrv1.UsageDigitalSignature,
+				certmgrv1.UsageClientAuth,
+			},
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest,
+			nil)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrl.Result{}, nil
+		}
+
+		instance.Spec.Octavia.Template.OctaviaAPI.TLS.Ovn.SecretName = &certSecret.Name
 	}
 	instance.Spec.Octavia.Template.OctaviaAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
