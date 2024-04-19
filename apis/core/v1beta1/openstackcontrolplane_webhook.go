@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -315,6 +316,7 @@ var _ webhook.Defaulter = &OpenStackControlPlane{}
 func (r *OpenStackControlPlane) Default() {
 	openstackcontrolplanelog.Info("default", "name", r.Name)
 
+	r.DefaultLabel()
 	r.DefaultServices()
 }
 
@@ -419,4 +421,18 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Barbican
 	r.Spec.Barbican.Template.Default()
+}
+
+// DefaultLabel - adding default label to the OpenStackControlPlane
+func (r *OpenStackControlPlane) DefaultLabel() {
+	// adds map[string]string{"core.openstack.org/openstackcontrolplane": r.name>} to the
+	// instance, if not already provided in the CR. With this ctlplane object can be
+	// queried using the default label.
+	typeLabel := strings.ToLower(r.GroupVersionKind().Group + "/" + r.Kind)
+	if _, ok := r.Labels[typeLabel]; !ok {
+		if r.Labels == nil {
+			r.Labels = map[string]string{}
+		}
+		r.Labels[typeLabel] = ""
+	}
 }
