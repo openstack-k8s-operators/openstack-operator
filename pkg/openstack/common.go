@@ -243,10 +243,20 @@ func EnsureEndpointConfig(
 					validateSecret := &tls.GenericService{SecretName: ed.Route.TLS.SecretName}
 					_, ctrlResult, err := validateSecret.ValidateCertSecret(ctx, helper, instance.GetNamespace())
 					if err != nil {
+						instance.Status.Conditions.Set(condition.FalseCondition(
+							corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+							condition.ErrorReason,
+							condition.SeverityWarning,
+							corev1.OpenStackControlPlaneCustomTLSReadyErrorMessage,
+							ingressOverride.TLS.SecretName,
+							err.Error()))
+
 						return endpoints, ctrlResult, err
 					} else if (ctrlResult != ctrl.Result{}) {
 						return endpoints, ctrlResult, nil
 					}
+					instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+						corev1.OpenStackControlPlaneCustomTLSReadyMessage)
 				} else {
 					ed.Route.TLS.IssuerName = instance.GetPublicIssuer()
 				}
