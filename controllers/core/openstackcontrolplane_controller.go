@@ -160,7 +160,6 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
-		condition.RestoreLastTransitionTimes(&instance.Status.Conditions, savedConditions)
 		// update the Ready condition based on the sub conditions
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
@@ -173,6 +172,8 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			instance.Status.Conditions.Set(
 				instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+
+		condition.RestoreLastTransitionTimes(&instance.Status.Conditions, savedConditions)
 
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
