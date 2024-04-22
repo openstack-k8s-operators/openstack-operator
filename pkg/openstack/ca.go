@@ -116,9 +116,26 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			return ctrlResult, nil
 		}
 	} else {
+		customIssuer := *instance.Spec.TLS.Ingress.Ca.CustomIssuer
+
 		// add CA labelselector to issuer
-		caCertSecretName, err := addIssuerLabel(ctx, helper, *instance.Spec.TLS.Ingress.Ca.CustomIssuer, instance.Namespace, issuerLabels)
+		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
 		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1.OpenStackControlPlaneCAReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				"issuer",
+				customIssuer,
+				err.Error()))
+			if k8s_errors.IsNotFound(err) {
+				timeout := time.Second * 10
+				Log.Info(fmt.Sprintf("Custom Issuer %s not found, reconcile in %s", customIssuer, timeout.String()))
+
+				return ctrl.Result{RequeueAfter: timeout}, nil
+			}
+
 			return ctrlResult, err
 		}
 
@@ -131,7 +148,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 		ctrlResult, err = ensureCaBundles(
 			instance,
-			*instance.Spec.TLS.Ingress.Ca.CustomIssuer,
+			customIssuer,
 			caCert,
 			bundle,
 			caOnlyBundle,
@@ -163,9 +180,25 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			return ctrlResult, nil
 		}
 	} else {
+		customIssuer := *instance.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer
 		// add CA labelselector to issuer
-		caCertSecretName, err := addIssuerLabel(ctx, helper, *instance.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer, instance.Namespace, issuerLabels)
+		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
 		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1.OpenStackControlPlaneCAReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				"issuer",
+				customIssuer,
+				err.Error()))
+			if k8s_errors.IsNotFound(err) {
+				timeout := time.Second * 10
+				Log.Info(fmt.Sprintf("Custom Issuer %s not found, reconcile in %s", customIssuer, timeout.String()))
+
+				return ctrl.Result{RequeueAfter: timeout}, nil
+			}
+
 			return ctrlResult, err
 		}
 
@@ -178,7 +211,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 		ctrlResult, err = ensureCaBundles(
 			instance,
-			*instance.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer,
+			customIssuer,
 			caCert,
 			bundle,
 			caOnlyBundle,
@@ -210,9 +243,25 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			return ctrlResult, nil
 		}
 	} else {
+		customIssuer := *instance.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer
 		// add CA labelselector to issuer
-		caCertSecretName, err := addIssuerLabel(ctx, helper, *instance.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer, instance.Namespace, issuerLabels)
+		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
 		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1.OpenStackControlPlaneCAReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				"issuer",
+				customIssuer,
+				err.Error()))
+			if k8s_errors.IsNotFound(err) {
+				timeout := time.Second * 10
+				Log.Info(fmt.Sprintf("Custom Issuer %s not found, reconcile in %s", customIssuer, timeout.String()))
+
+				return ctrl.Result{RequeueAfter: timeout}, nil
+			}
+
 			return ctrlResult, err
 		}
 
@@ -225,7 +274,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 		ctrlResult, err = ensureCaBundles(
 			instance,
-			*instance.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer,
+			customIssuer,
 			caCert,
 			bundle,
 			caOnlyBundle,
