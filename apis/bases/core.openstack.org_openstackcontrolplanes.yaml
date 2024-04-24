@@ -11188,8 +11188,6 @@ spec:
                             default: 1
                             format: int32
                             type: integer
-                          networkAttachment:
-                            type: string
                           nodeSelector:
                             additionalProperties:
                               type: string
