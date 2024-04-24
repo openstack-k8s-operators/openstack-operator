@@ -483,7 +483,10 @@ func (ed *EndpointDetail) CreateRoute(
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	enptRoute.OwnerReferences = append(enptRoute.OwnerReferences, owner)
+	// in EnvTest the UID of the created service CRs are empty
+	if owner.GetUID() != "" {
+		enptRoute.OwnerReferences = append(enptRoute.OwnerReferences, owner)
+	}
 
 	// if route TLS is disabled -> create the route
 	// if TLS is enabled and the route does not yet exist -> create the route
