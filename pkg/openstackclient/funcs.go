@@ -32,7 +32,6 @@ func ClientPodSpec(
 	ctx context.Context,
 	instance *clientv1.OpenStackClient,
 	helper *helper.Helper,
-	labels map[string]string,
 	configHash string,
 ) corev1.PodSpec {
 	envVars := map[string]env.Setter{}

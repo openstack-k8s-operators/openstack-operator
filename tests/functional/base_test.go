@@ -19,7 +19,7 @@ package functional_test
 import (
 	"encoding/base64"
 
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega" //revive:disable:dot-imports
 
 	k8s_corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"

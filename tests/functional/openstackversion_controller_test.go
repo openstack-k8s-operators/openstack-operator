@@ -19,12 +19,14 @@ package functional_test
 import (
 	"os"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	k8s_corev1 "k8s.io/api/core/v1"
+	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
+	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 
+	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
+
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	k8s_corev1 "k8s.io/api/core/v1"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {

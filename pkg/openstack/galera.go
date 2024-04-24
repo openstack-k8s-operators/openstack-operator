@@ -38,8 +38,8 @@ func ReconcileGaleras(
 		return ctrl.Result{}, nil
 	}
 
-	var failures []string = []string{}
-	var inprogress []string = []string{}
+	var failures = []string{}
+	var inprogress = []string{}
 
 	for name, spec := range instance.Spec.Galera.Templates {
 		hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)

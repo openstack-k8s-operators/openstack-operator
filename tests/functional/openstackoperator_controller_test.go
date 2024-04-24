@@ -20,8 +20,12 @@ import (
 	"errors"
 	"os"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
+	. "github.com/onsi/gomega"    //revive:disable:dot-imports
+
+	//revive:disable-next-line:dot-imports
+	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
+
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -30,7 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
-	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
@@ -268,13 +271,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Manila.Enabled).Should(BeTrue())
 
 			// manila exists
+			manila := &manilav1.Manila{}
 			Eventually(func(g Gomega) {
-				manila := &manilav1.Manila{}
-				Eventually(func(g Gomega) {
-					g.Expect(k8sClient.Get(ctx, names.ManilaName, manila)).Should(Succeed())
-					g.Expect(manila).ShouldNot(BeNil())
-				}, timeout, interval).Should(Succeed())
-			})
+				g.Expect(k8sClient.Get(ctx, names.ManilaName, manila)).Should(Succeed())
+				g.Expect(manila).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
 
 			// FIXME add helpers to manila-operator to simulate ready state
 			Eventually(func(g Gomega) {
@@ -305,13 +306,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Manila.Enabled).Should(BeTrue())
 
 			// manila exists
+			manila := &manilav1.Manila{}
 			Eventually(func(g Gomega) {
-				manila := &manilav1.Manila{}
-				Eventually(func(g Gomega) {
-					g.Expect(k8sClient.Get(ctx, names.ManilaName, manila)).Should(Succeed())
-					g.Expect(manila).ShouldNot(BeNil())
-				}, timeout, interval).Should(Succeed())
-			})
+				g.Expect(k8sClient.Get(ctx, names.ManilaName, manila)).Should(Succeed())
+				g.Expect(manila).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
 
 			// FIXME add helpers to manila-operator to simulate ready state
 			Eventually(func(g Gomega) {
@@ -377,13 +376,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Cinder.Enabled).Should(BeTrue())
 
 			// cinder exists
+			cinder := &cinderv1.Cinder{}
 			Eventually(func(g Gomega) {
-				cinder := &cinderv1.Cinder{}
-				Eventually(func(g Gomega) {
-					g.Expect(k8sClient.Get(ctx, names.CinderName, cinder)).Should(Succeed())
-					g.Expect(cinder).ShouldNot(BeNil())
-				}, timeout, interval).Should(Succeed())
-			})
+				g.Expect(k8sClient.Get(ctx, names.CinderName, cinder)).Should(Succeed())
+				g.Expect(cinder).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
 
 			// FIXME add helpers to cinder-operator to simulate ready state
 			Eventually(func(g Gomega) {
@@ -414,14 +411,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 			Expect(OSCtlplane.Spec.Cinder.Enabled).Should(BeTrue())
 
-			// cinder exists
+			cinder := &cinderv1.Cinder{}
 			Eventually(func(g Gomega) {
-				cinder := &cinderv1.Cinder{}
-				Eventually(func(g Gomega) {
-					g.Expect(k8sClient.Get(ctx, names.CinderName, cinder)).Should(Succeed())
-					g.Expect(cinder).ShouldNot(BeNil())
-				}, timeout, interval).Should(Succeed())
-			})
+				g.Expect(k8sClient.Get(ctx, names.CinderName, cinder)).Should(Succeed())
+				g.Expect(cinder).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
 
 			// FIXME add helpers to cinder-operator to simulate ready state
 			Eventually(func(g Gomega) {

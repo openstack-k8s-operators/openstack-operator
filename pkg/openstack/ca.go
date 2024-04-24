@@ -136,6 +136,11 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			bundle,
 			caOnlyBundle,
 		)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
 	}
 
 	// create CA for internal podLevel termination
@@ -178,6 +183,12 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			bundle,
 			caOnlyBundle,
 		)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
 	}
 
 	// create CA for ovn
@@ -219,6 +230,12 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			bundle,
 			caOnlyBundle,
 		)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
 	}
 
 	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
