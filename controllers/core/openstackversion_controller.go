@@ -105,15 +105,6 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
-	isNewInstance := instance.Status.Conditions == nil
-	if isNewInstance {
-		instance.Status.Conditions = condition.Conditions{}
-	}
-
-	// Save a copy of the condtions so that we can restore the LastTransitionTime
-	// when a condition's state doesn't change.
-	savedConditions := instance.Status.Conditions.DeepCopy()
-
 	versionHelper, err := helper.NewHelper(
 		instance,
 		r.Client,
@@ -125,6 +116,15 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		Log.Error(err, "unable to create helper")
 		return ctrl.Result{}, err
 	}
+
+	isNewInstance := instance.Status.Conditions == nil
+	if isNewInstance {
+		instance.Status.Conditions = condition.Conditions{}
+	}
+
+	// Save a copy of the condtions so that we can restore the LastTransitionTime
+	// when a condition's state doesn't change.
+	savedConditions := instance.Status.Conditions.DeepCopy()
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
