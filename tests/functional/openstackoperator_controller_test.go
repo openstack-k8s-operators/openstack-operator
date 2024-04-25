@@ -18,6 +18,7 @@ package functional_test
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
@@ -33,7 +34,10 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	routev1 "github.com/openshift/api/route/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
@@ -49,21 +53,26 @@ var _ = Describe("OpenStackOperator controller", func() {
 		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
 		Expect(err).NotTo(HaveOccurred())
 
+		// create cluster config map which is used to validate if cluster supports fips
+		DeferCleanup(k8sClient.Delete, ctx, CreateClusterConfigCM())
+
 		// (mschuppert) create root CA secrets as there is no certmanager running.
 		// it is not used, just to make sure reconcile proceeds and creates the ca-bundle.
-		DeferCleanup(k8sClient.Delete, ctx, CreatePublicCACertSecret(names.RootCAPublicName))
-		DeferCleanup(k8sClient.Delete, ctx, CreateInternalCACertSecret(names.RootCAInternalName))
-		DeferCleanup(k8sClient.Delete, ctx, CreateOvnCACertSecret(names.RootCAOvnName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAPublicName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAInternalName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAOvnName))
 		// create cert secrets for galera instances
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCertName))
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
 	})
 
-	When("A default OpenStackControlplane instance is created", func() {
+	When("A public TLS OpenStackControlplane instance is created", func() {
 		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
 			DeferCleanup(
 				th.DeleteInstance,
-				CreateOpenStackControlPlane(names.OpenStackControlplaneName, GetDefaultOpenStackControlPlaneSpec()),
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
 			)
 		})
 
@@ -241,9 +250,510 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("A TLSe OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, GetDefaultOpenStackControlPlaneSpec()),
+			)
+		})
+
+		It("should have the Spec fields defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Galera.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Rabbitmq.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Memcached.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Keystone.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+
+			// galera exists
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// memcached exists
+			Eventually(func(g Gomega) {
+				memcached := infra.GetMemcached(names.MemcachedName)
+				g.Expect(memcached).Should(Not(BeNil()))
+				g.Expect(memcached.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
+			}, timeout, interval).Should(Succeed())
+
+			// TODO rabbitmq exists
+
+			// keystone exists
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+		})
+		// Default route timeouts are set
+		It("should have default timeout for the routes set", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
+		})
+
+		It("should create selfsigned issuer and public+internal CA and issuer", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+
+			// creates selfsigned issuer
+			Eventually(func(g Gomega) {
+				crtmgr.GetIssuer(names.SelfSignedIssuerName)
+			}, timeout, interval).Should(Succeed())
+
+			// creates public, internal and ovn root CA and issuer
+			Eventually(func(g Gomega) {
+				// ca cert
+				cert := crtmgr.GetCert(names.RootCAPublicName)
+				g.Expect(cert).Should(Not(BeNil()))
+				g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCAPublicName.Name))
+				g.Expect(cert.Spec.IsCA).Should(BeTrue())
+				g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+				g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCAPublicName.Name))
+				// issuer
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAPublicName.Name))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				// ca cert
+				cert := crtmgr.GetCert(names.RootCAInternalName)
+				g.Expect(cert).Should(Not(BeNil()))
+				g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCAInternalName.Name))
+				g.Expect(cert.Spec.IsCA).Should(BeTrue())
+				g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+				g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCAInternalName.Name))
+				// issuer
+				issuer := crtmgr.GetIssuer(names.RootCAInternalName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAInternalName.Name))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				// ca cert
+				cert := crtmgr.GetCert(names.RootCAOvnName)
+				g.Expect(cert).Should(Not(BeNil()))
+				g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCAOvnName.Name))
+				g.Expect(cert.Spec.IsCA).Should(BeTrue())
+				g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+				g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCAOvnName.Name))
+				// issuer
+				issuer := crtmgr.GetIssuer(names.RootCAOvnName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAOvnName.Name))
+			}, timeout, interval).Should(Succeed())
+
+			th.ExpectCondition(
+				names.OpenStackControlplaneName,
+				ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+				condition.ReadyCondition,
+				k8s_corev1.ConditionFalse,
+			)
+
+			th.ExpectCondition(
+				names.OpenStackControlplaneName,
+				ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+				corev1.OpenStackControlPlaneCAReadyCondition,
+				k8s_corev1.ConditionTrue,
+			)
+		})
+
+		It("should create full ca bundle", func() {
+			crtmgr.GetCert(names.RootCAPublicName)
+			crtmgr.GetIssuer(names.RootCAPublicName)
+			crtmgr.GetCert(names.RootCAInternalName)
+			crtmgr.GetIssuer(names.RootCAInternalName)
+			crtmgr.GetCert(names.RootCAOvnName)
+			crtmgr.GetIssuer(names.RootCAOvnName)
+
+			Eventually(func(g Gomega) {
+				th.GetSecret(names.RootCAPublicName)
+				caBundle := th.GetSecret(names.CABundleName)
+				g.Expect(caBundle.Data).Should(HaveLen(int(2)))
+				g.Expect(caBundle.Data).Should(HaveKey(tls.CABundleKey))
+				g.Expect(caBundle.Data).Should(HaveKey(tls.InternalCABundleKey))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should create an openstackclient", func() {
+			// keystone exists
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			// make keystoneAPI ready and create secrets usually created by keystone-controller
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+			// openstackversion exists
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+
+			// client pod exists
+			Eventually(func(g Gomega) {
+				pod := &k8s_corev1.Pod{}
+				err := th.K8sClient.Get(ctx, names.OpenStackClientName, pod)
+				g.Expect(pod).Should(Not(BeNil()))
+				g.Expect(err).ToNot(HaveOccurred())
+				vols := []string{}
+				for _, x := range pod.Spec.Volumes {
+					vols = append(vols, x.Name)
+				}
+				g.Expect(vols).To(ContainElements("combined-ca-bundle", "openstack-config", "openstack-config-secret"))
+
+				volMounts := map[string]string{}
+				for _, x := range pod.Spec.Containers[0].VolumeMounts {
+					volMounts[x.Name] = x.MountPath
+				}
+				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", "/home/cloud-admin/.config/openstack/clouds.yaml"))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", "/home/cloud-admin/.config/openstack/secure.yaml"))
+
+				// simulate pod being in the ready state
+				th.SimulatePodReady(names.OpenStackClientName)
+			}, timeout, interval).Should(Succeed())
+
+			// openstackclient exists
+			Eventually(func(g Gomega) {
+				osclient := GetOpenStackClient(names.OpenStackClientName)
+				g.Expect(osclient).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackClientName,
+					ConditionGetterFunc(OpenStackClientConditionGetter),
+					clientv1.OpenStackClientReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A TLSe OpenStackControlplane instance with custom public issuer is created", func() {
+		BeforeEach(func() {
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSeCustomIssuerSpec()
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have the Spec fields defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Galera.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Rabbitmq.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Memcached.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Keystone.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+		})
+
+		It("should have OpenStackControlPlaneCAReadyCondition not ready with issuer missing", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.CustomIssuer).Should(Not(BeNil()))
+			Expect(*OSCtlplane.Spec.TLS.Ingress.Ca.CustomIssuer).Should(Equal(names.CustomIssuerName.Name))
+
+			th.ExpectCondition(
+				names.OpenStackControlplaneName,
+				ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+				condition.ReadyCondition,
+				k8s_corev1.ConditionFalse,
+			)
+
+			th.ExpectConditionWithDetails(
+				names.OpenStackControlplaneName,
+				ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+				corev1.OpenStackControlPlaneCAReadyCondition,
+				k8s_corev1.ConditionFalse,
+				condition.ErrorReason,
+				"OpenStackControlPlane CAs issuer custom-issuer error occured Error getting issuer : Issuer.cert-manager.io \"custom-issuer\" not found",
+			)
+		})
+
+		When("The proper custom issuer is provided", func() {
+			BeforeEach(func() {
+				// create custom issuer
+				DeferCleanup(k8sClient.Delete, ctx, crtmgr.CreateIssuer(names.CustomIssuerName))
+				DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.CustomIssuerName))
+			})
+
+			It("should have OpenStackControlPlaneCAReadyCondition ready when custom issuer exist", func() {
+				// creates selfsigned issuer
+				Eventually(func(g Gomega) {
+					crtmgr.GetIssuer(names.SelfSignedIssuerName)
+				}, timeout, interval).Should(Succeed())
+
+				// does not create public CA, as custom issuer is used
+				Eventually(func(g Gomega) {
+					crtmgr.AssertCertDoesNotExist(names.RootCAPublicName)
+				}, timeout, interval).Should(Succeed())
+
+				// creates Internal and OVN CA
+				Eventually(func(g Gomega) {
+					// ca cert
+					cert := crtmgr.GetCert(names.RootCAInternalName)
+					g.Expect(cert).Should(Not(BeNil()))
+					g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCAInternalName.Name))
+					g.Expect(cert.Spec.IsCA).Should(BeTrue())
+					g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+					g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCAInternalName.Name))
+					// issuer
+					issuer := crtmgr.GetIssuer(names.RootCAInternalName)
+					g.Expect(issuer).Should(Not(BeNil()))
+					g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAInternalName.Name))
+				}, timeout, interval).Should(Succeed())
+				Eventually(func(g Gomega) {
+					// ca cert
+					cert := crtmgr.GetCert(names.RootCAOvnName)
+					g.Expect(cert).Should(Not(BeNil()))
+					g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCAOvnName.Name))
+					g.Expect(cert.Spec.IsCA).Should(BeTrue())
+					g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+					g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCAOvnName.Name))
+					// issuer
+					issuer := crtmgr.GetIssuer(names.RootCAOvnName)
+					g.Expect(issuer).Should(Not(BeNil()))
+					g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAOvnName.Name))
+				}, timeout, interval).Should(Succeed())
+
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					condition.ReadyCondition,
+					k8s_corev1.ConditionFalse,
+				)
+
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneCAReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			})
+		})
+	})
+
+	When("A public TLS OpenStackControlplane instance with custom public certificate is created", func() {
+		BeforeEach(func() {
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+
+			DeferCleanup(k8sClient.Delete, ctx,
+				th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")}))
+			DeferCleanup(k8sClient.Delete, ctx,
+				th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+			spec["keystone"] = map[string]interface{}{
+				"enabled": true,
+				"apiOverride": map[string]interface{}{
+					"tls": map[string]interface{}{
+						"secretName": names.CustomServiceCertSecretName.Name,
+					},
+				},
+				"template": map[string]interface{}{
+					"databaseInstance": names.KeystoneAPIName.Name,
+					"secret":           "osp-secret",
+				},
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have the Spec fields defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Galera.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Rabbitmq.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Memcached.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Keystone.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
+		})
+
+		It("should have galera, memcached, rabbit and keystone deployed", func() {
+			// galera exists
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// memcached exists
+			Eventually(func(g Gomega) {
+				memcached := infra.GetMemcached(names.MemcachedName)
+				g.Expect(memcached).Should(Not(BeNil()))
+				g.Expect(memcached.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
+			}, timeout, interval).Should(Succeed())
+
+			// keystone exists
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		When("The keystone k8s service is created", func() {
+			BeforeEach(func() {
+				keystonePublicSvcName := types.NamespacedName{Name: "keystone-public", Namespace: namespace}
+				keystoneInternalSvcName := types.NamespacedName{Name: "keystone-internal", Namespace: namespace}
+
+				th.CreateService(
+					keystonePublicSvcName,
+					map[string]string{
+						"osctlplane-service": "keystone",
+						"osctlplane":         "",
+					},
+					k8s_corev1.ServiceSpec{
+						Ports: []k8s_corev1.ServicePort{
+							{
+								Name:     "keystone-public",
+								Port:     int32(5000),
+								Protocol: k8s_corev1.ProtocolTCP,
+							},
+						},
+					})
+				keystoneSvc := th.GetService(keystonePublicSvcName)
+				if keystoneSvc.Annotations == nil {
+					keystoneSvc.Annotations = map[string]string{}
+				}
+				keystoneSvc.Annotations[service.AnnotationIngressCreateKey] = "true"
+				keystoneSvc.Annotations[service.AnnotationEndpointKey] = "public"
+				Expect(th.K8sClient.Status().Update(th.Ctx, keystoneSvc)).To(Succeed())
+
+				th.CreateService(
+					keystoneInternalSvcName,
+					map[string]string{
+						"osctlplane-service": "keystone",
+						"osctlplane":         "",
+					},
+					k8s_corev1.ServiceSpec{
+						Ports: []k8s_corev1.ServicePort{
+							{
+								Name:     "keystone-internal",
+								Port:     int32(5000),
+								Protocol: k8s_corev1.ProtocolTCP,
+							},
+						},
+					})
+				keystoneSvc = th.GetService(keystoneInternalSvcName)
+				if keystoneSvc.Annotations == nil {
+					keystoneSvc.Annotations = map[string]string{}
+				}
+				keystoneSvc.Annotations[service.AnnotationIngressCreateKey] = "false"
+				keystoneSvc.Annotations[service.AnnotationEndpointKey] = "internal"
+				Expect(th.K8sClient.Status().Update(th.Ctx, keystoneSvc)).To(Succeed())
+
+				// create custom issuer
+				DeferCleanup(k8sClient.Delete, ctx, crtmgr.CreateIssuer(names.CustomIssuerName))
+				DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.CustomIssuerName))
+			})
+
+			It("should have OpenStackControlPlaneCustomTLSReadyCondition not ready with secret missing", func() {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				Expect(OSCtlplane.Spec.Keystone.APIOverride.TLS.SecretName).Should(Equal(names.CustomServiceCertSecretName.Name))
+
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					condition.ReadyCondition,
+					k8s_corev1.ConditionFalse,
+				)
+
+				th.ExpectConditionWithDetails(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+					k8s_corev1.ConditionFalse,
+					condition.ErrorReason,
+					fmt.Sprintf("OpenStackControlPlane custom TLS cert secret custom-service-cert error occured Secret %s/custom-service-cert not found", namespace),
+				)
+			})
+
+			It("should have created keystone with route using custom cert secret", func() {
+				DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.CustomServiceCertSecretName))
+
+				// keystone exists
+				Eventually(func(g Gomega) {
+					keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+					g.Expect(keystoneAPI).Should(Not(BeNil()))
+				}, timeout, interval).Should(Succeed())
+
+				keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+				// expect the ready status to propagate to control plane object
+				Eventually(func(g Gomega) {
+					th.ExpectCondition(
+						names.OpenStackControlplaneName,
+						ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+						corev1.OpenStackControlPlaneKeystoneAPIReadyCondition,
+						k8s_corev1.ConditionTrue,
+					)
+				}, timeout, interval).Should(Succeed())
+
+				Eventually(func(g Gomega) {
+					keystoneRouteName := types.NamespacedName{Name: "keystone-public", Namespace: namespace}
+					keystoneRoute := &routev1.Route{}
+
+					g.Expect(th.K8sClient.Get(th.Ctx, keystoneRouteName, keystoneRoute)).Should(Succeed())
+					g.Expect(keystoneRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
+					g.Expect(keystoneRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
+					g.Expect(keystoneRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))
+				}, timeout, interval).Should(Succeed())
+
+			})
+
+		})
+	})
+
 	When("A Manila OpenStackControlplane instance is created", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
 			spec["manila"] = map[string]interface{}{
 				"enabled": true,
 				"template": map[string]interface{}{
@@ -346,6 +856,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("A Cinder OpenStackControlplane instance is created", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
 			spec["cinder"] = map[string]interface{}{
 				"enabled": true,
 				"template": map[string]interface{}{
@@ -452,6 +963,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("A OVN OpenStackControlplane instance is created", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
 			spec["ovn"] = map[string]interface{}{
 				"enabled": true,
 				"template": map[string]interface{}{
@@ -559,6 +1071,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 
 	It("Adds default label via defaulting webhook", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
+		spec["tls"] = GetTLSPublicSpec()
 		DeferCleanup(
 			th.DeleteInstance,
 			CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
@@ -571,6 +1084,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 
 	It("Does not override default label via defaulting webhook when provided", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
+		spec["tls"] = GetTLSPublicSpec()
 		raw := map[string]interface{}{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
@@ -596,6 +1110,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 
 	It("calls placement validation webhook", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
+		spec["tls"] = GetTLSPublicSpec()
 		spec["placement"] = map[string]interface{}{
 			"template": map[string]interface{}{
 				"defaultConfigOverwrite": map[string]interface{}{

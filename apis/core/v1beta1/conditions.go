@@ -105,6 +105,9 @@ const (
 	// OpenStackControlPlaneCAReadyCondition Status=True condition which indicates if the CAs are configured and operational
 	OpenStackControlPlaneCAReadyCondition condition.Type = "OpenStackControlPlaneCAReadyCondition"
 
+	// OpenStackControlPlaneCustomTLSReadyCondition Status=True condition which indicates if custom TLS certificate secrets are configured and operational
+	OpenStackControlPlaneCustomTLSReadyCondition condition.Type = "OpenStackControlPlaneCustomTLSReadyCondition"
+
 	// OpenStackControlPlaneTelemetryReadyCondition Status=True condition which indicates if OpenStack Telemetry service is configured and operational
 	OpenStackControlPlaneTelemetryReadyCondition condition.Type = "OpenStackControlPlaneTelemetryReady"
 
@@ -420,6 +423,12 @@ const (
 
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCAReadyErrorMessage = "OpenStackControlPlane CAs %s %s error occured %s"
+
+	// OpenStackControlPlaneCAReadyMessage
+	OpenStackControlPlaneCustomTLSReadyMessage = "OpenStackControlPlane custom TLS cert secret available"
+
+	// OpenStackControlPlaneCAReadyErrorMessage
+	OpenStackControlPlaneCustomTLSReadyErrorMessage = "OpenStackControlPlane custom TLS cert secret %s error occured %s"
 )
 
 // Version Conditions used by API objects.

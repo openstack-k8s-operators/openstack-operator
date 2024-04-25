@@ -31,32 +31,39 @@ import (
 )
 
 type Names struct {
-	Namespace                 string
-	OpenStackControlplaneName types.NamespacedName
-	OpenStackVersionName      types.NamespacedName
-	KeystoneAPIName           types.NamespacedName
-	MemcachedName             types.NamespacedName
-	CinderName                types.NamespacedName
-	ManilaName                types.NamespacedName
-	DBName                    types.NamespacedName
-	DBCertName                types.NamespacedName
-	DBCell1Name               types.NamespacedName
-	DBCell1CertName           types.NamespacedName
-	RabbitMQName              types.NamespacedName
-	RabbitMQCell1Name         types.NamespacedName
-	ServiceAccountName        types.NamespacedName
-	RoleName                  types.NamespacedName
-	RoleBindingName           types.NamespacedName
-	RootCAPublicName          types.NamespacedName
-	RootCAInternalName        types.NamespacedName
-	RootCAOvnName             types.NamespacedName
-	SelfSignedIssuerName      types.NamespacedName
-	CABundleName              types.NamespacedName
-	OpenStackClientName       types.NamespacedName
-	OVNNorthdName             types.NamespacedName
-	OVNControllerName         types.NamespacedName
-	OVNDbServerNBName         types.NamespacedName
-	OVNDbServerSBName         types.NamespacedName
+	Namespace                   string
+	OpenStackControlplaneName   types.NamespacedName
+	OpenStackVersionName        types.NamespacedName
+	KeystoneAPIName             types.NamespacedName
+	MemcachedName               types.NamespacedName
+	MemcachedCertName           types.NamespacedName
+	CinderName                  types.NamespacedName
+	ManilaName                  types.NamespacedName
+	DBName                      types.NamespacedName
+	DBCertName                  types.NamespacedName
+	DBCell1Name                 types.NamespacedName
+	DBCell1CertName             types.NamespacedName
+	RabbitMQName                types.NamespacedName
+	RabbitMQCertName            types.NamespacedName
+	RabbitMQCell1Name           types.NamespacedName
+	RabbitMQCell1CertName       types.NamespacedName
+	ServiceAccountName          types.NamespacedName
+	RoleName                    types.NamespacedName
+	RoleBindingName             types.NamespacedName
+	RootCAPublicName            types.NamespacedName
+	RootCAInternalName          types.NamespacedName
+	RootCAOvnName               types.NamespacedName
+	SelfSignedIssuerName        types.NamespacedName
+	CustomIssuerName            types.NamespacedName
+	CustomServiceCertSecretName types.NamespacedName
+	CABundleName                types.NamespacedName
+	OpenStackClientName         types.NamespacedName
+	OVNNorthdName               types.NamespacedName
+	OVNNorthdCertName           types.NamespacedName
+	OVNControllerName           types.NamespacedName
+	OVNControllerCertName       types.NamespacedName
+	OVNDbServerNBName           types.NamespacedName
+	OVNDbServerSBName           types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -79,9 +86,15 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		SelfSignedIssuerName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "selfsigned-issuer"},
+		CustomIssuerName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "custom-issuer"},
 		CABundleName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "combined-ca-bundle"},
+		CustomServiceCertSecretName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "custom-service-cert"},
 		ServiceAccountName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      openstackControlplaneName.Name},
@@ -98,6 +111,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		MemcachedName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "memcached",
+		},
+		MemcachedCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-memcached-svc",
 		},
 		CinderName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -127,9 +144,17 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rabbitmq",
 		},
+		RabbitMQCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-rabbitmq-svc",
+		},
 		RabbitMQCell1Name: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rabbitmq-cell1",
+		},
+		RabbitMQCell1CertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-rabbitmq-cell1-svc",
 		},
 		OpenStackClientName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -138,6 +163,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		OVNNorthdName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "ovnnorthd",
+		},
+		OVNNorthdCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-ovnnorthd-ovndbs",
 		},
 		OVNDbServerNBName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -150,6 +179,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		OVNControllerName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "ovncontroller",
+		},
+		OVNControllerCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-ovncontroller-ovndbs",
 		},
 	}
 }
@@ -230,6 +263,88 @@ func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]inte
 	return th.CreateUnstructured(raw)
 }
 
+func GetTLSPublicSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"ingress": map[string]interface{}{
+			"enabled": true,
+			"ca": map[string]interface{}{
+				"duration": "100h",
+			},
+			"cert": map[string]interface{}{
+				"duration": "10h",
+			},
+		},
+	}
+}
+
+func GetTLSeSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"ingress": map[string]interface{}{
+			"enabled": true,
+			"ca": map[string]interface{}{
+				"duration": "100h",
+			},
+			"cert": map[string]interface{}{
+				"duration": "10h",
+			},
+		},
+		"podLevel": map[string]interface{}{
+			"enabled": true,
+			"internal": map[string]interface{}{
+				"ca": map[string]interface{}{
+					"duration": "100h",
+				},
+				"cert": map[string]interface{}{
+					"duration": "10h",
+				},
+			},
+			"ovn": map[string]interface{}{
+				"ca": map[string]interface{}{
+					"duration": "100h",
+				},
+				"cert": map[string]interface{}{
+					"duration": "10h",
+				},
+			},
+		},
+	}
+}
+
+func GetTLSeCustomIssuerSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"ingress": map[string]interface{}{
+			"enabled": true,
+
+			"ca": map[string]interface{}{
+				"customIssuer": names.CustomIssuerName.Name,
+				"duration":     "100h",
+			},
+			"cert": map[string]interface{}{
+				"duration": "10h",
+			},
+		},
+		"podLevel": map[string]interface{}{
+			"enabled": true,
+			"internal": map[string]interface{}{
+				"ca": map[string]interface{}{
+					"duration": "100h",
+				},
+				"cert": map[string]interface{}{
+					"duration": "10h",
+				},
+			},
+			"ovn": map[string]interface{}{
+				"ca": map[string]interface{}{
+					"duration": "100h",
+				},
+				"cert": map[string]interface{}{
+					"duration": "10h",
+				},
+			},
+		},
+	}
+}
+
 func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	memcachedTemplate := map[string]interface{}{
 		"memcached": map[string]interface{}{
@@ -260,22 +375,10 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"ironicConductors": []interface{}{},
 	}
 
-	tlsTemplate := map[string]interface{}{
-		"ingress": map[string]interface{}{
-			"enabled": true,
-			"ca": map[string]interface{}{
-				"duration": "100h",
-			},
-			"cert": map[string]interface{}{
-				"duration": "10h",
-			},
-		},
-	}
-
 	return map[string]interface{}{
 		"secret":       "osp-secret",
 		"storageClass": "local-storage",
-		"tls":          tlsTemplate,
+		"tls":          GetTLSeSpec(),
 		"galera": map[string]interface{}{
 			"enabled":   true,
 			"templates": galeraTemplate,
@@ -339,7 +442,7 @@ func OpenStackControlPlaneConditionGetter(name types.NamespacedName) condition.C
 	return instance.Status.Conditions
 }
 
-func CreatePublicCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
+func CreateCertSecret(name types.NamespacedName) *k8s_corev1.Secret {
 	certBase64 := "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJlekNDQVNLZ0F3SUJBZ0lRTkhER1lzQnM3OThpYkREN3EvbzJsakFLQmdncWhrak9QUVFEQWpBZU1Sd3cKR2dZRFZRUURFeE55YjI5MFkyRXRhM1YwZEd3dGNIVmliR2xqTUI0WERUSTBNREV4TlRFd01UVXpObG9YRFRNMApNREV4TWpFd01UVXpObG93SGpFY01Cb0dBMVVFQXhNVGNtOXZkR05oTFd0MWRIUnNMWEIxWW14cFl6QlpNQk1HCkJ5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEEwSUFCRDc4YXZYcWhyaEM1dzhzOVdrZDRJcGJlRXUwM0NSK1hYVWQKa0R6T1J5eGE5d2NjSWREaXZiR0pqSkZaVFRjVm1ianExQk1Zc2pyMTJVSUU1RVQzVmxxalFqQkFNQTRHQTFVZApEd0VCL3dRRUF3SUNwREFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQjBHQTFVZERnUVdCQlRLSml6V1VKOWVVS2kxCmRzMGxyNmM2c0Q3RUJEQUtCZ2dxaGtqT1BRUURBZ05IQURCRUFpQklad1lxNjFCcU1KYUI2VWNGb1JzeGVjd0gKNXovek1PZHJPeWUwbU5pOEpnSWdRTEI0d0RLcnBmOXRYMmxvTSswdVRvcEFEU1lJbnJjZlZ1NEZCdVlVM0lnPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
 	keyBase64 := "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUptbGNLUEl1RitFc3RhYkxnVmowZkNhdzFTK09xNnJPU3M0U3pMQkJGYVFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFUHZ4cTllcUd1RUxuRHl6MWFSM2dpbHQ0UzdUY0pINWRkUjJRUE01SExGcjNCeHdoME9LOQpzWW1Na1ZsTk54V1p1T3JVRXhpeU92WFpRZ1RrUlBkV1dnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=="
 
@@ -360,44 +463,19 @@ func CreatePublicCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
 	return s
 }
 
-func CreateInternalCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
-	certBase64 := "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJmekNDQVNhZ0F3SUJBZ0lRUWxlcTNZcDBtU2kwVDNiTm03Q29UVEFLQmdncWhrak9QUVFEQWpBZ01SNHcKSEFZRFZRUURFeFZ5YjI5MFkyRXRhM1YwZEd3dGFXNTBaWEp1WVd3d0hoY05NalF3TVRFMU1URTBOelUwV2hjTgpNelF3TVRFeU1URTBOelUwV2pBZ01SNHdIQVlEVlFRREV4VnliMjkwWTJFdGEzVjBkR3d0YVc1MFpYSnVZV3d3CldUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqT1BRTUJCd05DQUFTRk9rNHJPUldVUGhoTjUrK09EN1I2MW5Gb1lBY0QKenpvUS91SW93NktjeGhwRWNQTDFxb3ZZUGxUYUJabEh3c2FpNE50VHA4aDA1RHVRSGZKOE9JNXFvMEl3UURBTwpCZ05WSFE4QkFmOEVCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXE3TGtFSk1TCm1MOVpKWjBSOUluKzZkclhycEl3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnVlN1K00ydnZ3QlF3eTJHMVlhdkkKQld2RGtSNlRla0I5U0VqdzJIblRSMWtDSUZSNFNkWGFPQkFGWjVHa2RLWCtSY2IzaDFIZm52eFJEVW96bTl2agphenp3Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K=="
-	keyBase64 := "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUV3dlQ2dFZMUWRrVnlXUDV1VnJ3RWRyZ0VLK3drdmttRjFKa0xNYzJCUVFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFaFRwT0t6a1ZsRDRZVGVmdmpnKzBldFp4YUdBSEE4ODZFUDdpS01PaW5NWWFSSER5OWFxTAoyRDVVMmdXWlI4TEdvdURiVTZmSWRPUTdrQjN5ZkRpT2FnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=="
+func CreateClusterConfigCM() client.Object {
+	var cm client.Object
 
-	cert, _ := base64.StdEncoding.DecodeString(certBase64)
-	key, _ := base64.StdEncoding.DecodeString(keyBase64)
-
-	s := &k8s_corev1.Secret{}
 	Eventually(func(g Gomega) {
-		s = th.CreateSecret(
-			name,
-			map[string][]byte{
-				"ca.crt":  []byte(cert),
-				"tls.crt": []byte(cert),
-				"tls.key": []byte(key),
+		cm = th.CreateConfigMap(
+			types.NamespacedName{
+				Name:      "cluster-config-v1",
+				Namespace: "kube-system",
+			},
+			map[string]interface{}{
+				"install-config": "",
 			})
 	}, timeout, interval).Should(Succeed())
 
-	return s
-}
-
-func CreateOvnCACertSecret(name types.NamespacedName) *k8s_corev1.Secret {
-	certBase64 := "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJmekNDQVNhZ0F3SUJBZ0lRUWxlcTNZcDBtU2kwVDNiTm03Q29UVEFLQmdncWhrak9QUVFEQWpBZ01SNHcKSEFZRFZRUURFeFZ5YjI5MFkyRXRhM1YwZEd3dGFXNTBaWEp1WVd3d0hoY05NalF3TVRFMU1URTBOelUwV2hjTgpNelF3TVRFeU1URTBOelUwV2pBZ01SNHdIQVlEVlFRREV4VnliMjkwWTJFdGEzVjBkR3d0YVc1MFpYSnVZV3d3CldUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqT1BRTUJCd05DQUFTRk9rNHJPUldVUGhoTjUrK09EN1I2MW5Gb1lBY0QKenpvUS91SW93NktjeGhwRWNQTDFxb3ZZUGxUYUJabEh3c2FpNE50VHA4aDA1RHVRSGZKOE9JNXFvMEl3UURBTwpCZ05WSFE4QkFmOEVCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXE3TGtFSk1TCm1MOVpKWjBSOUluKzZkclhycEl3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnVlN1K00ydnZ3QlF3eTJHMVlhdkkKQld2RGtSNlRla0I5U0VqdzJIblRSMWtDSUZSNFNkWGFPQkFGWjVHa2RLWCtSY2IzaDFIZm52eFJEVW96bTl2agphenp3Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K=="
-	keyBase64 := "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUV3dlQ2dFZMUWRrVnlXUDV1VnJ3RWRyZ0VLK3drdmttRjFKa0xNYzJCUVFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFaFRwT0t6a1ZsRDRZVGVmdmpnKzBldFp4YUdBSEE4ODZFUDdpS01PaW5NWWFSSER5OWFxTAoyRDVVMmdXWlI4TEdvdURiVTZmSWRPUTdrQjN5ZkRpT2FnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=="
-
-	cert, _ := base64.StdEncoding.DecodeString(certBase64)
-	key, _ := base64.StdEncoding.DecodeString(keyBase64)
-
-	s := &k8s_corev1.Secret{}
-	Eventually(func(g Gomega) {
-		s = th.CreateSecret(
-			name,
-			map[string][]byte{
-				"ca.crt":  []byte(cert),
-				"tls.crt": []byte(cert),
-				"tls.key": []byte(key),
-			})
-	}, timeout, interval).Should(Succeed())
-
-	return s
+	return cm
 }
