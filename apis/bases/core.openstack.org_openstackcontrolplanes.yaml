@@ -17114,6 +17114,11 @@ spec:
                         duration: 43800h
                       cert:
                         duration: 8760h
+                    libvirt:
+                      ca:
+                        duration: 43800h
+                      cert:
+                        duration: 17520h
                     ovn:
                       ca:
                         duration: 43800h
@@ -17148,6 +17153,25 @@ spec:
                       enabled:
                         type: boolean
                       internal:
+                        properties:
+                          ca:
+                            properties:
+                              customIssuer:
+                                type: string
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                          cert:
+                            properties:
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                        type: object
+                      libvirt:
                         properties:
                           ca:
                             properties:

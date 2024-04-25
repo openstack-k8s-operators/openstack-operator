@@ -224,7 +224,71 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	}
 
+	// create CA for libvirt
+	issuerLabels = map[string]string{certmanager.RootCAIssuerLibvirtLabel: ""}
+	if !instance.Spec.TLS.PodLevel.Libvirt.Ca.IsCustomIssuer() {
+		ctrlResult, err = ensureRootCA(
+			ctx,
+			instance,
+			helper,
+			issuerReq,
+			corev1.LibvirtCaName,
+			issuerLabels,
+			bundle,
+			caOnlyBundle,
+			instance.Spec.TLS.PodLevel.Libvirt.Ca.CertConfig,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+	} else {
+		customIssuer := *instance.Spec.TLS.PodLevel.Libvirt.Ca.CustomIssuer
+		// add CA labelselector to issuer
+		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
+		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1.OpenStackControlPlaneCAReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				"issuer",
+				customIssuer,
+				err.Error()))
+			if k8s_errors.IsNotFound(err) {
+				timeout := time.Second * 10
+				Log.Info(fmt.Sprintf("Custom Issuer %s not found, reconcile in %s", customIssuer, timeout.String()))
+
+				return ctrl.Result{RequeueAfter: timeout}, nil
+			}
+
+			return ctrlResult, err
+		}
+
+		caCert, ctrlResult, err := getCAFromSecret(ctx, instance, helper, caCertSecretName)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+
+		ctrlResult, err = ensureCaBundles(
+			instance,
+			customIssuer,
+			caCert,
+			bundle,
+			caOnlyBundle,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+	}
+
 	// create CA for ovn
+	issuerLabels = map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""}
 	if !instance.Spec.TLS.PodLevel.Ovn.Ca.IsCustomIssuer() {
 		ctrlResult, err = ensureRootCA(
 			ctx,
@@ -232,7 +296,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			helper,
 			issuerReq,
 			corev1.OvnDbCaName,
-			map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""},
+			issuerLabels,
 			bundle,
 			caOnlyBundle,
 			instance.Spec.TLS.PodLevel.Ovn.Ca.CertConfig,
@@ -284,7 +348,6 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
-
 	}
 
 	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)

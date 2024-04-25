@@ -435,6 +435,16 @@ spec:
       - description: Cert - defines details for cert config
         displayName: Cert
         path: tls.podLevel.internal.cert
+      - description: Libvirt - CA used for libvirt/qemu services on OpenStackControlPlane
+          and OpenStackDataplane
+        displayName: Libvirt
+        path: tls.podLevel.libvirt
+      - description: Ca - defines details for CA cert config
+        displayName: Ca
+        path: tls.podLevel.libvirt.ca
+      - description: Cert - defines details for cert config
+        displayName: Cert
+        path: tls.podLevel.libvirt.cert
       - description: Ovn - CA used for all OVN services on OpenStackControlPlane and
           OpenStackDataplane
         displayName: Ovn

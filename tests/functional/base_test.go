@@ -53,6 +53,7 @@ type Names struct {
 	RootCAPublicName            types.NamespacedName
 	RootCAInternalName          types.NamespacedName
 	RootCAOvnName               types.NamespacedName
+	RootCALibvirtName           types.NamespacedName
 	SelfSignedIssuerName        types.NamespacedName
 	CustomIssuerName            types.NamespacedName
 	CustomServiceCertSecretName types.NamespacedName
@@ -83,6 +84,9 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		RootCAOvnName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rootca-ovn"},
+		RootCALibvirtName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "rootca-libvirt"},
 		SelfSignedIssuerName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "selfsigned-issuer"},

@@ -61,6 +61,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAPublicName))
 		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAInternalName))
 		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAOvnName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCALibvirtName))
 		// create cert secrets for galera instances
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCertName))
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
@@ -167,6 +168,19 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAOvnName.Name))
 			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				// ca cert
+				cert := crtmgr.GetCert(names.RootCALibvirtName)
+				g.Expect(cert).Should(Not(BeNil()))
+				g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCALibvirtName.Name))
+				g.Expect(cert.Spec.IsCA).Should(BeTrue())
+				g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+				g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCALibvirtName.Name))
+				// issuer
+				issuer := crtmgr.GetIssuer(names.RootCALibvirtName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCALibvirtName.Name))
+			}, timeout, interval).Should(Succeed())
 		})
 
 		It("should create full ca bundle", func() {
@@ -176,6 +190,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 			crtmgr.GetIssuer(names.RootCAInternalName)
 			crtmgr.GetCert(names.RootCAOvnName)
 			crtmgr.GetIssuer(names.RootCAOvnName)
+			crtmgr.GetCert(names.RootCALibvirtName)
+			crtmgr.GetIssuer(names.RootCALibvirtName)
 
 			Eventually(func(g Gomega) {
 				th.GetSecret(names.RootCAPublicName)
@@ -357,6 +373,19 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAOvnName.Name))
 			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				// ca cert
+				cert := crtmgr.GetCert(names.RootCALibvirtName)
+				g.Expect(cert).Should(Not(BeNil()))
+				g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCALibvirtName.Name))
+				g.Expect(cert.Spec.IsCA).Should(BeTrue())
+				g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+				g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCALibvirtName.Name))
+				// issuer
+				issuer := crtmgr.GetIssuer(names.RootCALibvirtName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCALibvirtName.Name))
+			}, timeout, interval).Should(Succeed())
 
 			th.ExpectCondition(
 				names.OpenStackControlplaneName,
@@ -380,6 +409,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 			crtmgr.GetIssuer(names.RootCAInternalName)
 			crtmgr.GetCert(names.RootCAOvnName)
 			crtmgr.GetIssuer(names.RootCAOvnName)
+			crtmgr.GetCert(names.RootCALibvirtName)
+			crtmgr.GetIssuer(names.RootCALibvirtName)
 
 			Eventually(func(g Gomega) {
 				th.GetSecret(names.RootCAPublicName)
@@ -548,6 +579,19 @@ var _ = Describe("OpenStackOperator controller", func() {
 					issuer := crtmgr.GetIssuer(names.RootCAOvnName)
 					g.Expect(issuer).Should(Not(BeNil()))
 					g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAOvnName.Name))
+				}, timeout, interval).Should(Succeed())
+				Eventually(func(g Gomega) {
+					// ca cert
+					cert := crtmgr.GetCert(names.RootCALibvirtName)
+					g.Expect(cert).Should(Not(BeNil()))
+					g.Expect(cert.Spec.CommonName).Should(Equal(names.RootCALibvirtName.Name))
+					g.Expect(cert.Spec.IsCA).Should(BeTrue())
+					g.Expect(cert.Spec.IssuerRef.Name).Should(Equal(names.SelfSignedIssuerName.Name))
+					g.Expect(cert.Spec.SecretName).Should(Equal(names.RootCALibvirtName.Name))
+					// issuer
+					issuer := crtmgr.GetIssuer(names.RootCALibvirtName)
+					g.Expect(issuer).Should(Not(BeNil()))
+					g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCALibvirtName.Name))
 				}, timeout, interval).Should(Succeed())
 
 				th.ExpectCondition(
