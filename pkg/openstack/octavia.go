@@ -75,7 +75,6 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetOvnIssuer(),
 			CertName:   fmt.Sprintf("%s-ovndbs", serviceName),
-			Duration:   nil,
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
 				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ClusterInternalDomain),
@@ -86,6 +85,12 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 				certmgrv1.UsageDigitalSignature,
 				certmgrv1.UsageClientAuth,
 			},
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore.Duration
 		}
 		certSecret, ctrlResult, err := certmanager.EnsureCert(
 			ctx,

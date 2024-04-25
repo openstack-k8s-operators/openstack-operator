@@ -101,7 +101,6 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			certRequest := certmanager.CertificateRequest{
 				IssuerName: instance.GetOvnIssuer(),
 				CertName:   fmt.Sprintf("%s-ovndbs", name),
-				Duration:   nil,
 				// Cert needs to be valid for the individual pods in the statefulset so make this a wildcard cert
 				Hostnames: []string{
 					fmt.Sprintf("*.%s.svc", instance.Namespace),
@@ -114,6 +113,12 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 					certmgrv1.UsageServerAuth,
 					certmgrv1.UsageClientAuth,
 				},
+			}
+			if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
+				certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
+			}
+			if instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore != nil {
+				certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore.Duration
 			}
 			certSecret, ctrlResult, err := certmanager.EnsureCert(
 				ctx,
@@ -210,7 +215,6 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetOvnIssuer(),
 			CertName:   fmt.Sprintf("%s-ovndbs", "ovnnorthd"),
-			Duration:   nil,
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
 				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ovnv1.DNSSuffix),
@@ -222,6 +226,12 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 				certmgrv1.UsageServerAuth,
 				certmgrv1.UsageClientAuth,
 			},
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore.Duration
 		}
 		certSecret, ctrlResult, err := certmanager.EnsureCert(
 			ctx,
@@ -312,7 +322,6 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetOvnIssuer(),
 			CertName:   fmt.Sprintf("%s-ovndbs", "ovncontroller"),
-			Duration:   nil,
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
 				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ovnv1.DNSSuffix),
@@ -324,6 +333,12 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 				certmgrv1.UsageServerAuth,
 				certmgrv1.UsageClientAuth,
 			},
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore.Duration
 		}
 		certSecret, ctrlResult, err := certmanager.EnsureCert(
 			ctx,
