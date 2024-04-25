@@ -314,7 +314,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	op, err := controllerutil.CreateOrPatch(ctx, r.Client, osclient, func() error {
 		isPodUpdate := !osclient.ObjectMeta.CreationTimestamp.IsZero()
 		if !isPodUpdate {
-			osclient.Spec = openstackclient.ClientPodSpec(ctx, instance, helper, clientLabels, configVarsHash)
+			osclient.Spec = openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash)
 		} else {
 			hashupdate := false
 
@@ -544,7 +544,7 @@ func (r *OpenStackClientReconciler) findObjectsForSrc(ctx context.Context, src c
 			FieldSelector: fields.OneTermEqualSelector(field, src.GetName()),
 			Namespace:     src.GetNamespace(),
 		}
-		err := r.List(context.TODO(), crList, listOps)
+		err := r.List(ctx, crList, listOps)
 		if err != nil {
 			return []reconcile.Request{}
 		}

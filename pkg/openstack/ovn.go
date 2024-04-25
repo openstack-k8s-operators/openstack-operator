@@ -270,7 +270,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		Log.Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
 	}
 
-	if OVNNorthd.Status.ObservedGeneration == OVNNorthd.Generation && OVNNorthd.IsReady() {
+	if OVNNorthd.Status.ObservedGeneration == OVNNorthd.Generation && OVNNorthd.IsReady() { //revive:disable:indent-error-flow
 		instance.Status.ContainerImages.OvnNorthdImage = version.Status.ContainerImages.OvnNorthdImage
 		return true, nil
 	} else {

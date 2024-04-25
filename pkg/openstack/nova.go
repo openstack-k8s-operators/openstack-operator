@@ -352,9 +352,9 @@ func cellMetadataLabelMap(name string, cell string) map[string]string {
 }
 
 func metadataEnabled(metadata novav1.NovaMetadataTemplate) bool {
-	return metadata.Enabled != nil && *metadata.Enabled == true
+	return metadata.Enabled != nil && *metadata.Enabled
 }
 
 func noVNCProxyEnabled(vncproxy novav1.NovaNoVNCProxyTemplate) bool {
-	return vncproxy.Enabled != nil && *vncproxy.Enabled == true
+	return vncproxy.Enabled != nil && *vncproxy.Enabled
 }

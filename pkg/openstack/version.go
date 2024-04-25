@@ -70,7 +70,7 @@ func getImg(val1 *string, val2 *string) *string {
 }
 
 // GetContainerImages - initializes OpenStackVersion CR with default container images
-func GetContainerImages(ctx context.Context, defaults *corev1beta1.ContainerDefaults, instance corev1beta1.OpenStackVersion) corev1beta1.ContainerImages {
+func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1beta1.OpenStackVersion) corev1beta1.ContainerImages {
 
 	containerImages := corev1beta1.ContainerImages{
 		CinderVolumeImages: instance.Spec.CustomContainerImages.CinderVolumeImages,

@@ -191,7 +191,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		Log.Info("Target version not found in defaults", "targetVersion", instance.Spec.TargetVersion)
 		return ctrl.Result{}, nil
 	}
-	instance.Status.ContainerImages = openstack.GetContainerImages(ctx, val, *instance)
+	instance.Status.ContainerImages = openstack.GetContainerImages(val, *instance)
 
 	instance.Status.Conditions.MarkTrue(
 		corev1beta1.OpenStackVersionInitialized,
@@ -209,9 +209,8 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if k8s_errors.IsNotFound(err) {
 			Log.Info("No controlplane found.")
 			return ctrl.Result{}, nil
-		} else {
-			return ctrl.Result{}, err
 		}
+		return ctrl.Result{}, err
 	}
 
 	// greenfield deployment //FIXME check dataplane here too

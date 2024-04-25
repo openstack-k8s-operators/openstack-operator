@@ -35,8 +35,8 @@ func ReconcileMemcacheds(
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
-	var failures []string = []string{}
-	var inprogress []string = []string{}
+	var failures = []string{}
+	var inprogress = []string{}
 
 	// We first remove memcacheds no longer owned
 	memcacheds := &memcachedv1.MemcachedList{}
