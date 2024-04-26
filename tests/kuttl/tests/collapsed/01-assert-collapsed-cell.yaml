@@ -127,22 +127,27 @@ spec:
   tls:
     ingress:
       ca:
-        duration: 43800h0m0s
+        duration: 87600h0m0s
       cert:
-        duration: 8760h0m0s
+        duration: 10950h0m0s
       enabled: true
     podLevel:
       enabled: true
       internal:
         ca:
-          duration: 43800h0m0s
+          duration: 87600h0m0s
         cert:
-          duration: 8760h0m0s
+          duration: 10950h0m0s
+      libvirt:
+        ca:
+          duration: 87600h0m0s
+        cert:
+          duration: 43800h0m0s
       ovn:
         ca:
-          duration: 43800h0m0s
+          duration: 87600h0m0s
         cert:
-          duration: 8760h0m0s
+          duration: 10950h0m0s
 status:
   conditions:
   - message: Setup complete

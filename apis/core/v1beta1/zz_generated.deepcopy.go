@@ -1405,6 +1405,7 @@ func (in *TLSIngressConfig) DeepCopy() *TLSIngressConfig {
 func (in *TLSPodLevelConfig) DeepCopyInto(out *TLSPodLevelConfig) {
 	*out = *in
 	in.Internal.DeepCopyInto(&out.Internal)
+	in.Libvirt.DeepCopyInto(&out.Libvirt)
 	in.Ovn.DeepCopyInto(&out.Ovn)
 }
 

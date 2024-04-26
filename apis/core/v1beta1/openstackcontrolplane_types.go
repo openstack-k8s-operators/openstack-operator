@@ -56,6 +56,8 @@ const (
 
 	// OvnDbCaName -
 	OvnDbCaName = tls.DefaultCAPrefix + "ovn"
+	// LibvirtCaName -
+	LibvirtCaName = tls.DefaultCAPrefix + "libvirt"
 )
 
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
@@ -78,7 +80,7 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// +kubebuilder:default={ingress: {enabled: true, ca: {duration: "43800h"}, cert: {duration: "8760h"}}, podLevel: {enabled: true, internal:{ca: {duration: "43800h"}, cert: {duration: "8760h"}}, ovn: {ca: {duration: "43800h"}, cert: {duration: "8760h"}}}}
+	// +kubebuilder:default={ingress: {enabled: true, ca: {duration: "87600h"}, cert: {duration: "10950h"}}, podLevel: {enabled: true, internal:{ca: {duration: "87600h"}, cert: {duration: "10950h"}}, libvirt: {ca: {duration: "87600h"}, cert: {duration: "43800h"}}, ovn: {ca: {duration: "87600h"}, cert: {duration: "10950h"}}}}
 	// TLS - Parameters related to the TLS
 	TLS TLSSection `json:"tls"`
 
@@ -226,6 +228,11 @@ type TLSPodLevelConfig struct {
 	// Internal - default CA used for all OpenStackControlPlane and OpenStackDataplane endpoints,
 	// except OVN related CA and certs
 	Internal CertSection `json:"internal,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Libvirt - CA used for libvirt/qemu services on OpenStackControlPlane and OpenStackDataplane
+	Libvirt CertSection `json:"libvirt,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -881,4 +888,14 @@ func (instance OpenStackControlPlane) GetOvnIssuer() string {
 	}
 
 	return OvnDbCaName
+}
+
+// GetLibvirtIssuer - returns the libvirt CA issuer name or custom if configured
+func (instance OpenStackControlPlane) GetLibvirtIssuer() string {
+	// use custom issuer if set
+	if instance.Spec.TLS.PodLevel.Libvirt.Ca.IsCustomIssuer() {
+		return *instance.Spec.TLS.PodLevel.Libvirt.Ca.CustomIssuer
+	}
+
+	return LibvirtCaName
 }

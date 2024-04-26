@@ -17103,22 +17103,27 @@ spec:
                 default:
                   ingress:
                     ca:
-                      duration: 43800h
+                      duration: 87600h
                     cert:
-                      duration: 8760h
+                      duration: 10950h
                     enabled: true
                   podLevel:
                     enabled: true
                     internal:
                       ca:
-                        duration: 43800h
+                        duration: 87600h
                       cert:
-                        duration: 8760h
+                        duration: 10950h
+                    libvirt:
+                      ca:
+                        duration: 87600h
+                      cert:
+                        duration: 43800h
                     ovn:
                       ca:
-                        duration: 43800h
+                        duration: 87600h
                       cert:
-                        duration: 8760h
+                        duration: 10950h
                 properties:
                   caBundleSecretName:
                     type: string
@@ -17148,6 +17153,25 @@ spec:
                       enabled:
                         type: boolean
                       internal:
+                        properties:
+                          ca:
+                            properties:
+                              customIssuer:
+                                type: string
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                          cert:
+                            properties:
+                              duration:
+                                type: string
+                              renewBefore:
+                                type: string
+                            type: object
+                        type: object
+                      libvirt:
                         properties:
                           ca:
                             properties:
