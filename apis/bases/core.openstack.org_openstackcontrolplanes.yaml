@@ -6741,10 +6741,6 @@ spec:
                         default: rabbitmq
                         type: string
                       rpcTransport:
-                        default: json-rpc
-                        enum:
-                        - oslo
-                        - json-rpc
                         type: string
                       secret:
                         type: string
@@ -6760,7 +6756,6 @@ spec:
                     required:
                     - databaseInstance
                     - ironicAPI
-                    - ironicConductors
                     - ironicInspector
                     - ironicNeutronAgent
                     - secret
@@ -10579,6 +10574,9 @@ spec:
                               - name
                               type: object
                             type: array
+                          amphoraImageOwnerID:
+                            default: ""
+                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -10701,6 +10699,9 @@ spec:
                               - name
                               type: object
                             type: array
+                          amphoraImageOwnerID:
+                            default: ""
+                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -10823,6 +10824,9 @@ spec:
                               - name
                               type: object
                             type: array
+                          amphoraImageOwnerID:
+                            default: ""
+                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -16225,6 +16229,14 @@ spec:
                       autoscaling:
                         properties:
                           aodh:
+                            default:
+                              databaseAccount: aodh
+                              databaseInstance: openstack
+                              passwordSelector:
+                                aodhService: AodhPassword
+                              rabbitMqClusterName: rabbitmq
+                              secret: osp-secret
+                              serviceUser: aodh
                             properties:
                               customServiceConfig:
                                 default: '# add your customization here'
@@ -16233,6 +16245,7 @@ spec:
                                 default: aodh
                                 type: string
                               databaseInstance:
+                                default: openstack
                                 type: string
                               defaultConfigOverwrite:
                                 additionalProperties:
@@ -16311,6 +16324,7 @@ spec:
                                 default: rabbitmq
                                 type: string
                               secret:
+                                default: osp-secret
                                 type: string
                               serviceUser:
                                 default: aodh
@@ -16386,6 +16400,7 @@ spec:
                             default: rabbitmq
                             type: string
                           secret:
+                            default: osp-secret
                             type: string
                           serviceUser:
                             default: ceilometer
