@@ -17103,27 +17103,27 @@ spec:
                 default:
                   ingress:
                     ca:
-                      duration: 43800h
+                      duration: 87600h
                     cert:
-                      duration: 8760h
+                      duration: 10950h
                     enabled: true
                   podLevel:
                     enabled: true
                     internal:
                       ca:
-                        duration: 43800h
+                        duration: 87600h
                       cert:
-                        duration: 8760h
+                        duration: 10950h
                     libvirt:
                       ca:
-                        duration: 43800h
+                        duration: 87600h
                       cert:
-                        duration: 17520h
+                        duration: 43800h
                     ovn:
                       ca:
-                        duration: 43800h
+                        duration: 87600h
                       cert:
-                        duration: 8760h
+                        duration: 10950h
                 properties:
                   caBundleSecretName:
                     type: string
