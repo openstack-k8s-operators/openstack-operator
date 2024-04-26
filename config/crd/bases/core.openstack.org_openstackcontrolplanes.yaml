@@ -17245,6 +17245,8 @@ spec:
                     type: string
                   ceilometerNotificationImage:
                     type: string
+                  ceilometerProxyImage:
+                    type: string
                   ceilometerSgcoreImage:
                     type: string
                   cinderAPIImage:
