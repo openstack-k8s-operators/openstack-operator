@@ -14,7 +14,7 @@ require (
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240423101259-62edc96e695f
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240425145843-86b883b8bb8f
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240425131656-f9f807ba87a0
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240426064845-1441cbce5e69
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240425112656-c92ba51ac5b9
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240424153927-5b4c1b78d319
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240425130031-db26fbb566c2
@@ -28,7 +28,7 @@ require (
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240424092810-87ed196e2fec
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240423084440-ce9687c332d9
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240423000317-4ab0461c4f4c
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240424114254-e29489614c87
+	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240426074346-678d5ccf0cb8
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240425132514-782502386dce
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240424152826-ca1ade1c04a5
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240422041901-293e48aceb9b
