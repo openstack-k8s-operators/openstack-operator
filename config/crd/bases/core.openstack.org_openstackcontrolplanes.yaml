@@ -9921,6 +9921,16 @@ spec:
                                       type: string
                                     secretName:
                                       type: string
+                                    service:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
+                                    vencrypt:
+                                      properties:
+                                        secretName:
+                                          type: string
+                                      type: object
                                   type: object
                               type: object
                             nodeSelector:
