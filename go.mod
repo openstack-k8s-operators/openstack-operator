@@ -4,28 +4,28 @@ go 1.20
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/cert-manager/cert-manager v1.13.5
+	github.com/cert-manager/cert-manager v1.13.6
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.1
 	github.com/google/uuid v1.6.0
 	github.com/imdario/mergo v0.3.16
-	github.com/onsi/ginkgo/v2 v2.17.1
+	github.com/onsi/ginkgo/v2 v2.17.2
 	github.com/onsi/gomega v1.33.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240423101259-62edc96e695f
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240425145843-86b883b8bb8f
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240426223446-fc962463fa39
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240428233151-4c739fb27266
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240425112656-c92ba51ac5b9
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240424153927-5b4c1b78d319
-	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240426130247-b12174f316c8
-	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240424091713-ab71cc2ab988
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240426093115-ba41f87e3ecc
+	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240428220353-a722e6839c66
+	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240428220640-1e2724e9dbcf
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240427071432-31803b8857ac
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240425090517-0bcd2a854a65
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240425052635-07c657049337
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240425065931-fcb08823a660
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240425065931-fcb08823a660
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240425065931-fcb08823a660
-	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240424092810-87ed196e2fec
+	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240428214145-9229b352eb4e
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240423084440-ce9687c332d9
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240426142802-bb32e55d8800
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240426142557-58dd2ab359c3
@@ -63,14 +63,14 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.19.0 // indirect
-	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
+	github.com/google/pprof v0.0.0-20240424215950-a892ee059fd6 // indirect
 	github.com/gophercloud/gophercloud v1.11.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
