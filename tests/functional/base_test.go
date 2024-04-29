@@ -17,6 +17,7 @@ limitations under the License.
 package functional_test
 
 import (
+	"context"
 	"encoding/base64"
 
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
@@ -251,6 +252,12 @@ func GetOpenStackVersion(name types.NamespacedName) *corev1.OpenStackVersion {
 func OpenStackVersionConditionGetter(name types.NamespacedName) condition.Conditions {
 	instance := GetOpenStackVersion(name)
 	return instance.Status.Conditions
+}
+
+func OpenStackVersionRemoveFinalizer(ctx context.Context, name types.NamespacedName) error {
+	instance := GetOpenStackVersion(name)
+	instance.SetFinalizers([]string{})
+	return th.K8sClient.Update(ctx, instance)
 }
 
 func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {

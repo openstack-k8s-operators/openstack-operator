@@ -1109,6 +1109,46 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 		})
 	})
+
+	When("OpenStackControlplane instance is deleted", func() {
+		BeforeEach(func() {
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, GetDefaultOpenStackControlPlaneSpec()),
+			)
+		})
+
+		It("deletes the OpenStackVersion resource", func() {
+
+			// openstackversion exists
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.OwnerReferences).Should(HaveLen(1))
+
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(ctlplane.Finalizers).Should(HaveLen(1))
+				th.DeleteInstance(ctlplane)
+			}, timeout, interval).Should(Succeed())
+
+			// deleting the OpenStackControlPlane should remove the OpenStackVersion finalizer we are good
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion.Finalizers).Should(BeEmpty())
+			}, timeout, interval).Should(Succeed())
+
+		})
+	})
+
 })
 
 var _ = Describe("OpenStackOperator Webhook", func() {

@@ -39,11 +39,17 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 	})
 
-	When("A default OpenStackVersion instance is created", func() {
+	When("A default OpenStackVersion instance is created with no Controlplane", func() {
 		BeforeEach(func() {
 			DeferCleanup(
 				th.DeleteInstance,
 				CreateOpenStackVersion(names.OpenStackVersionName, GetDefaultOpenStackVersionSpec()),
+			)
+			// we remove the finalizer as this is needed without the Controlplane
+			DeferCleanup(
+				OpenStackVersionRemoveFinalizer,
+				ctx,
+				names.OpenStackVersionName,
 			)
 		})
 		It("should initialize container images", func() {
