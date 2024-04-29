@@ -29,6 +29,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -240,7 +241,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 					tls.API{
 						API: tls.APIService{
 							Public: tls.GenericService{
-								SecretName: cellTemplate.NoVNCProxyServiceTemplate.TLS.SecretName,
+								SecretName: cellTemplate.NoVNCProxyServiceTemplate.TLS.Service.SecretName,
 							},
 						},
 					},
@@ -254,8 +255,44 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				routedOverrideSpec := endpointDetails.GetEndpointServiceOverrides()
 				cellTemplate.NoVNCProxyServiceTemplate.Override.Service = ptr.To(routedOverrideSpec[service.EndpointPublic])
 				// update NoVNCProxy cert secret
-				cellTemplate.NoVNCProxyServiceTemplate.TLS.SecretName =
+				cellTemplate.NoVNCProxyServiceTemplate.TLS.Service.SecretName =
 					endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+
+				// create novncproxy vencrypt cert
+				if instance.Spec.TLS.PodLevel.Enabled {
+					serviceName := endpointDetails.EndpointDetails[service.EndpointPublic].Service.Spec.Name
+					certRequest := certmanager.CertificateRequest{
+						IssuerName: instance.GetLibvirtIssuer(),
+						CertName:   nova.Name + "-novncproxy-" + cellName + "-vencrypt",
+						CommonName: ptr.To(fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace)),
+						Subject: &certmgrv1.X509Subject{
+							Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, ClusterInternalDomain)},
+						},
+						Usages: []certmgrv1.KeyUsage{
+							certmgrv1.UsageKeyEncipherment,
+							certmgrv1.UsageDigitalSignature,
+							certmgrv1.UsageServerAuth,
+							certmgrv1.UsageClientAuth,
+						},
+					}
+					if instance.Spec.TLS.PodLevel.Libvirt.Cert.Duration != nil {
+						certRequest.Duration = &instance.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration
+					}
+					if instance.Spec.TLS.PodLevel.Libvirt.Cert.RenewBefore != nil {
+						certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Libvirt.Cert.RenewBefore.Duration
+					}
+					certSecret, ctrlResult, err := certmanager.EnsureCert(
+						ctx,
+						helper,
+						certRequest,
+						nil)
+					if err != nil {
+						return ctrlResult, err
+					} else if (ctrlResult != ctrl.Result{}) {
+						return ctrlResult, nil
+					}
+					cellTemplate.NoVNCProxyServiceTemplate.TLS.Vencrypt.SecretName = &certSecret.Name
+				}
 			}
 		}
 
