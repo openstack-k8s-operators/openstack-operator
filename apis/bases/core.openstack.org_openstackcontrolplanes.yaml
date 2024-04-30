@@ -9919,8 +9919,6 @@ spec:
                                   properties:
                                     caBundleSecretName:
                                       type: string
-                                    secretName:
-                                      type: string
                                     service:
                                       properties:
                                         secretName:
