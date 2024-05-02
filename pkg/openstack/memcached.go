@@ -213,7 +213,7 @@ func reconcileMemcached(
 		Log.Info(fmt.Sprintf("Memcached %s - %s", memcached.Name, op))
 	}
 
-	if memcached.IsReady() { //FIXME ObservedGeneration
+	if memcached.Status.ObservedGeneration == memcached.Generation && memcached.IsReady() {
 		instance.Status.ContainerImages.InfraMemcachedImage = version.Status.ContainerImages.InfraMemcachedImage
 		return memcachedReady, ctrl.Result{}, nil
 	}

@@ -92,6 +92,11 @@ func init() {
 	SchemeBuilder.Register(&OpenStackClient{}, &OpenStackClientList{})
 }
 
+// IsReady - returns true if OpenStackClient is reconciled successfully
+func (instance OpenStackClient) IsReady() bool {
+	return instance.Status.Conditions.IsTrue(OpenStackClientReadyCondition)
+}
+
 // RbacConditionsSet - set the conditions for the rbac object
 func (instance OpenStackClient) RbacConditionsSet(c *condition.Condition) {
 	instance.Status.Conditions.Set(c)

@@ -279,7 +279,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		helper.GetLogger().Info(fmt.Sprintf("%s %s - %s", telemetryName, telemetry.Name, op))
 	}
 
-	if telemetry.IsReady() { //FIXME ObservedGeneration
+	if telemetry.Status.ObservedGeneration == telemetry.Generation && telemetry.IsReady() {
 		instance.Status.ContainerImages.CeilometerCentralImage = version.Status.ContainerImages.CeilometerCentralImage
 		instance.Status.ContainerImages.CeilometerComputeImage = version.Status.ContainerImages.CeilometerComputeImage
 		instance.Status.ContainerImages.CeilometerIpmiImage = version.Status.ContainerImages.CeilometerIpmiImage

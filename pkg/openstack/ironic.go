@@ -176,7 +176,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		Log.Info(fmt.Sprintf("ironic %s - %s", ironic.Name, op))
 	}
 
-	if ironic.IsReady() { //FIXME ObservedGeneration
+	if ironic.Status.ObservedGeneration == ironic.Generation && ironic.IsReady() {
 		instance.Status.ContainerImages.IronicAPIImage = version.Status.ContainerImages.IronicAPIImage
 		instance.Status.ContainerImages.IronicConductorImage = version.Status.ContainerImages.IronicConductorImage
 		instance.Status.ContainerImages.IronicInspectorImage = version.Status.ContainerImages.IronicInspectorImage

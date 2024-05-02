@@ -73,7 +73,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 		Log.Info(fmt.Sprintf("OpenStackClient %s - %s", openstackclient.Name, op))
 	}
 
-	if openstackclient.Status.Conditions.IsTrue(clientv1.OpenStackClientReadyCondition) { //FIXME ObservedGeneration
+	if openstackclient.Status.ObservedGeneration == openstackclient.Generation && openstackclient.IsReady() {
 		Log.Info("OpenStackClient ready condition is true")
 		instance.Status.ContainerImages.OpenstackClientImage = version.Status.ContainerImages.OpenstackClientImage
 		instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneClientReadyCondition, corev1.OpenStackControlPlaneClientReadyMessage)

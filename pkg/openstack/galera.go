@@ -173,7 +173,7 @@ func reconcileGalera(
 		Log.Info(fmt.Sprintf("Galera %s - %s", galera.Name, op))
 	}
 
-	if galera.IsReady() { //FIXME ObservedGeneration
+	if galera.Status.ObservedGeneration == galera.Generation && galera.IsReady() {
 		instance.Status.ContainerImages.MariadbImage = version.Status.ContainerImages.MariadbImage
 		return galeraReady, nil
 	}

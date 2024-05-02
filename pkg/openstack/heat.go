@@ -178,7 +178,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		Log.Info(fmt.Sprintf("heat %s - %s", heat.Name, op))
 	}
 
-	if heat.IsReady() { //FIXME ObservedGeneration
+	if heat.Status.ObservedGeneration == heat.Generation && heat.IsReady() {
 		instance.Status.ContainerImages.HeatAPIImage = version.Status.ContainerImages.HeatAPIImage
 		instance.Status.ContainerImages.HeatCfnapiImage = version.Status.ContainerImages.HeatCfnapiImage
 		instance.Status.ContainerImages.HeatEngineImage = version.Status.ContainerImages.HeatEngineImage
