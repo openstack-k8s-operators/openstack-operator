@@ -17136,17 +17136,28 @@ spec:
                   caBundleSecretName:
                     type: string
                   ingress:
+                    default:
+                      ca:
+                        duration: 87600h
+                      cert:
+                        duration: 10950h
+                      enabled: true
                     properties:
                       ca:
+                        default:
+                          duration: 87600h
                         properties:
                           customIssuer:
                             type: string
                           duration:
+                            default: 87600h
                             type: string
                           renewBefore:
                             type: string
                         type: object
                       cert:
+                        default:
+                          duration: 10950h
                         properties:
                           duration:
                             type: string
@@ -17154,24 +17165,53 @@ spec:
                             type: string
                         type: object
                       enabled:
+                        default: true
                         type: boolean
                     type: object
                   podLevel:
+                    default:
+                      enabled: true
+                      internal:
+                        ca:
+                          duration: 87600h
+                        cert:
+                          duration: 10950h
+                      libvirt:
+                        ca:
+                          duration: 87600h
+                        cert:
+                          duration: 43800h
+                      ovn:
+                        ca:
+                          duration: 87600h
+                        cert:
+                          duration: 10950h
                     properties:
                       enabled:
+                        default: true
                         type: boolean
                       internal:
+                        default:
+                          ca:
+                            duration: 87600h
+                          cert:
+                            duration: 10950h
                         properties:
                           ca:
+                            default:
+                              duration: 87600h
                             properties:
                               customIssuer:
                                 type: string
                               duration:
+                                default: 87600h
                                 type: string
                               renewBefore:
                                 type: string
                             type: object
                           cert:
+                            default:
+                              duration: 10950h
                             properties:
                               duration:
                                 type: string
@@ -17180,17 +17220,27 @@ spec:
                             type: object
                         type: object
                       libvirt:
+                        default:
+                          ca:
+                            duration: 87600h
+                          cert:
+                            duration: 43800h
                         properties:
                           ca:
+                            default:
+                              duration: 87600h
                             properties:
                               customIssuer:
                                 type: string
                               duration:
+                                default: 87600h
                                 type: string
                               renewBefore:
                                 type: string
                             type: object
                           cert:
+                            default:
+                              duration: 10950h
                             properties:
                               duration:
                                 type: string
@@ -17199,17 +17249,27 @@ spec:
                             type: object
                         type: object
                       ovn:
+                        default:
+                          ca:
+                            duration: 87600h
+                          cert:
+                            duration: 10950h
                         properties:
                           ca:
+                            default:
+                              duration: 87600h
                             properties:
                               customIssuer:
                                 type: string
                               duration:
+                                default: 87600h
                                 type: string
                               renewBefore:
                                 type: string
                             type: object
                           cert:
+                            default:
+                              duration: 10950h
                             properties:
                               duration:
                                 type: string

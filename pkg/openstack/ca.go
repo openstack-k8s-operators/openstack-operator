@@ -108,7 +108,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerLabels,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.Ingress.Ca.CertConfig,
+			instance.Spec.TLS.Ingress.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -172,7 +172,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerLabels,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.PodLevel.Internal.Ca.CertConfig,
+			instance.Spec.TLS.PodLevel.Internal.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -236,7 +236,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerLabels,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.PodLevel.Libvirt.Ca.CertConfig,
+			instance.Spec.TLS.PodLevel.Libvirt.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -299,7 +299,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerLabels,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.PodLevel.Ovn.Ca.CertConfig,
+			instance.Spec.TLS.PodLevel.Ovn.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -450,7 +450,7 @@ func ensureRootCA(
 	labels map[string]string,
 	bundle *caBundle,
 	caOnlyBundle *caBundle,
-	caCfg corev1.CertConfig,
+	caCfg corev1.CACertConfig,
 ) (ctrl.Result, error) {
 	// always create a root CA and issuer for the endpoint as we can
 	// not expect that all services are yet configured to be provided with
@@ -518,7 +518,7 @@ func createRootCACertAndIssuer(
 	selfsignedIssuerReq *certmgrv1.Issuer,
 	caName string,
 	labels map[string]string,
-	caCfg corev1.CertConfig,
+	caCfg corev1.CACertConfig,
 ) ([]byte, ctrl.Result, error) {
 	// create RootCA Certificate used to sign certificates
 	caCertReq := certmanager.Cert(

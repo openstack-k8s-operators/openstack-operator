@@ -190,10 +190,12 @@ type OpenStackControlPlaneSpec struct {
 type TLSSection struct {
 	// +kubebuilder:validation:optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={enabled: true, ca: {duration: "87600h"}, cert: {duration: "10950h"}}
 	Ingress TLSIngressConfig `json:"ingress,omitempty"`
 
 	// +kubebuilder:validation:optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={enabled: true, internal:{ca: {duration: "87600h"}, cert: {duration: "10950h"}}, libvirt: {ca: {duration: "87600h"}, cert: {duration: "43800h"}}, ovn: {ca: {duration: "87600h"}, cert: {duration: "10950h"}}}
 	PodLevel TLSPodLevelConfig `json:"podLevel,omitempty"`
 
 	// +kubebuilder:validation:optional
@@ -209,6 +211,7 @@ type TLSIngressConfig struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether TLS should be enabled for endpoint type
+	// +kubebuilder:default=true
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:optional
@@ -221,21 +224,25 @@ type TLSPodLevelConfig struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Enabled - Whether TLS should be enabled for endpoint type
+	// +kubebuilder:default=true
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={ca: {duration: "87600h"}, cert: {duration: "10950h"}}
 	// Internal - default CA used for all OpenStackControlPlane and OpenStackDataplane endpoints,
 	// except OVN related CA and certs
 	Internal CertSection `json:"internal,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={ca: {duration: "87600h"}, cert: {duration: "43800h"}}
 	// Libvirt - CA used for libvirt/qemu services on OpenStackControlPlane and OpenStackDataplane
 	Libvirt CertSection `json:"libvirt,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={ca: {duration: "87600h"}, cert: {duration: "10950h"}}
 	// Ovn - CA used for all OVN services on OpenStackControlPlane and OpenStackDataplane
 	Ovn CertSection `json:"ovn,omitempty"`
 }
@@ -244,20 +251,35 @@ type TLSPodLevelConfig struct {
 type CertSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={duration: "10950h"}
 	// Cert - defines details for cert config
 	Cert CertConfig `json:"cert,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default={duration: "87600h"}
 	// Ca - defines details for CA cert config
 	Ca CACertConfig `json:"ca,omitempty"`
 }
 
 // CACertConfig defines details for ca cert configs
 type CACertConfig struct {
-	// +kubebuilder:validation:optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
-	CertConfig `json:",inline"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="87600h"
+	// The requested 'duration' (i.e. lifetime) of the Certificate.
+	// The Certificate will be renewed either 2/3 through its duration or
+	// `renewBefore` period before its expiry, whichever is later. Minimum
+	// accepted duration is 1 hour. Value must be in units accepted by Go
+	// time.ParseDuration https://golang.org/pkg/time/#ParseDuration
+	Duration *metav1.Duration `json:"duration,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// How long before the currently issued certificate's expiry
+	// cert-manager should renew the certificate. The default is 2/3 of the
+	// issued certificate's duration. Minimum accepted value is 5 minutes.
+	// Value must be in units accepted by Go time.ParseDuration
+	// https://golang.org/pkg/time/#ParseDuration
+	RenewBefore *metav1.Duration `json:"renewBefore,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// CustomIssuer - use pre-created issue for this CA. No CA and issure is being created
@@ -267,20 +289,20 @@ type CACertConfig struct {
 
 // CertConfig defines details for cert configs
 type CertConfig struct {
+	// +kubebuilder:validation:Optional
 	// The requested 'duration' (i.e. lifetime) of the Certificate.
 	// The Certificate will be renewed either 2/3 through its duration or
 	// `renewBefore` period before its expiry, whichever is later. Minimum
 	// accepted duration is 1 hour. Value must be in units accepted by Go
 	// time.ParseDuration https://golang.org/pkg/time/#ParseDuration
-	// +optional
 	Duration *metav1.Duration `json:"duration,omitempty"`
 
+	// +kubebuilder:validation:Optional
 	// How long before the currently issued certificate's expiry
 	// cert-manager should renew the certificate. The default is 2/3 of the
 	// issued certificate's duration. Minimum accepted value is 5 minutes.
 	// Value must be in units accepted by Go time.ParseDuration
 	// https://golang.org/pkg/time/#ParseDuration
-	// +optional
 	RenewBefore *metav1.Duration `json:"renewBefore,omitempty"`
 }
 
