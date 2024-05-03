@@ -276,47 +276,8 @@ func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]inte
 
 func GetTLSPublicSpec() map[string]interface{} {
 	return map[string]interface{}{
-		"ingress": map[string]interface{}{
-			"enabled": true,
-			"ca": map[string]interface{}{
-				"duration": "100h",
-			},
-			"cert": map[string]interface{}{
-				"duration": "10h",
-			},
-		},
-	}
-}
-
-func GetTLSeSpec() map[string]interface{} {
-	return map[string]interface{}{
-		"ingress": map[string]interface{}{
-			"enabled": true,
-			"ca": map[string]interface{}{
-				"duration": "100h",
-			},
-			"cert": map[string]interface{}{
-				"duration": "10h",
-			},
-		},
 		"podLevel": map[string]interface{}{
-			"enabled": true,
-			"internal": map[string]interface{}{
-				"ca": map[string]interface{}{
-					"duration": "100h",
-				},
-				"cert": map[string]interface{}{
-					"duration": "10h",
-				},
-			},
-			"ovn": map[string]interface{}{
-				"ca": map[string]interface{}{
-					"duration": "100h",
-				},
-				"cert": map[string]interface{}{
-					"duration": "10h",
-				},
-			},
+			"enabled": false,
 		},
 	}
 }
@@ -389,7 +350,6 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"secret":       "osp-secret",
 		"storageClass": "local-storage",
-		"tls":          GetTLSeSpec(),
 		"galera": map[string]interface{}{
 			"enabled":   true,
 			"templates": galeraTemplate,
