@@ -40,6 +40,16 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			return res, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneTelemetryReadyCondition)
+		instance.Status.ContainerImages.CeilometerCentralImage = nil
+		instance.Status.ContainerImages.CeilometerComputeImage = nil
+		instance.Status.ContainerImages.CeilometerIpmiImage = nil
+		instance.Status.ContainerImages.CeilometerNotificationImage = nil
+		instance.Status.ContainerImages.CeilometerSgcoreImage = nil
+		instance.Status.ContainerImages.CeilometerProxyImage = nil
+		instance.Status.ContainerImages.AodhAPIImage = nil
+		instance.Status.ContainerImages.AodhEvaluatorImage = nil
+		instance.Status.ContainerImages.AodhNotifierImage = nil
+		instance.Status.ContainerImages.AodhListenerImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -300,4 +310,26 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// TelemetryImageCheck - return true if the telemetry images match on the ControlPlane and Version, or if Telemetry is not enabled
+func TelemetryImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Telemetry.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.CeilometerCentralImage, version.Status.ContainerImages.CeilometerCentralImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.CeilometerComputeImage, version.Status.ContainerImages.CeilometerComputeImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.CeilometerIpmiImage, version.Status.ContainerImages.CeilometerIpmiImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.CeilometerNotificationImage, version.Status.ContainerImages.CeilometerNotificationImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.CeilometerSgcoreImage, version.Status.ContainerImages.CeilometerSgcoreImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.CeilometerProxyImage, version.Status.ContainerImages.CeilometerProxyImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.AodhAPIImage, version.Status.ContainerImages.AodhAPIImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.AodhEvaluatorImage, version.Status.ContainerImages.AodhEvaluatorImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.AodhNotifierImage, version.Status.ContainerImages.AodhNotifierImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.AodhListenerImage, version.Status.ContainerImages.AodhListenerImage) {
+
+			return false
+		}
+	}
+
+	return true
 }

@@ -34,6 +34,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneCinderReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeCinderReadyCondition)
+		instance.Status.ContainerImages.CinderAPIImage = nil
+		instance.Status.ContainerImages.CinderSchedulerImage = nil
+		instance.Status.ContainerImages.CinderBackupImage = nil
+		instance.Status.ContainerImages.CinderVolumeImages = make(map[string]*string)
 		return ctrl.Result{}, nil
 	}
 	Log := GetLogger(ctx)
@@ -182,4 +186,23 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	return ctrl.Result{}, nil
 
+}
+
+// CinderImageCheck - return true if the Cinder images match on the ControlPlane and Version, or if Cinder is not enabled
+func CinderImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Cinder.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.CinderAPIImage, version.Status.ContainerImages.CinderAPIImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.CinderSchedulerImage, version.Status.ContainerImages.CinderSchedulerImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.CinderBackupImage, version.Status.ContainerImages.CinderBackupImage) {
+			return false
+		}
+		for name, img := range version.Status.ContainerImages.CinderVolumeImages {
+			if !compareStringPointers(controlPlane.Status.ContainerImages.CinderVolumeImages[name], img) {
+				return false
+			}
+		}
+	}
+
+	return true
 }

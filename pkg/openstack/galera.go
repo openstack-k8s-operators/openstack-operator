@@ -152,6 +152,7 @@ func reconcileGalera(
 			return galeraFailed, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition)
+		instance.Status.ContainerImages.MariadbImage = nil
 		return galeraReady, nil
 	}
 
@@ -180,4 +181,16 @@ func reconcileGalera(
 	}
 
 	return galeraCreating, nil
+}
+
+// GaleraImageCheck - return true if the Galera images match on the ControlPlane and Version, or if Galera is not enabled
+func GaleraImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Galera.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.MariadbImage, version.Status.ContainerImages.MariadbImage) {
+			return false
+		}
+	}
+
+	return true
 }

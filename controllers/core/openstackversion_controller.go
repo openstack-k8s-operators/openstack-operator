@@ -56,16 +56,6 @@ func SetupVersionDefaults() {
 	envContainerImages = localVars
 }
 
-func compareStringPointers(a, b *string) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-	return *a == *b
-}
-
 // OpenStackVersionReconciler reconciles a OpenStackVersion object
 type OpenStackVersionReconciler struct {
 	client.Client
@@ -226,7 +216,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	// minor update for OVN Controlplane in progress
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerImage, instance.Status.ContainerImages.OvnControllerImage) ||
+		if !openstack.OVNControllerImageCheck(controlPlane, instance) ||
 			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
@@ -241,9 +231,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
 		// minor update for Controlplane in progress
-		// we only check keystone here as it will only get updated during this phase
-		// FIXME: add checks to all images on the Controlplane here once conditions and observedGeneration work are finished
-		if !compareStringPointers(controlPlane.Status.ContainerImages.KeystoneAPIImage, instance.Status.ContainerImages.KeystoneAPIImage) ||
+		if !openstack.ControlplaneContainerImageCheck(controlPlane, instance) ||
 			!controlPlane.IsReady() {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateControlplane,

@@ -35,6 +35,10 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneSwiftReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeSwiftReadyCondition)
+		instance.Status.ContainerImages.SwiftAccountImage = nil
+		instance.Status.ContainerImages.SwiftContainerImage = nil
+		instance.Status.ContainerImages.SwiftObjectImage = nil
+		instance.Status.ContainerImages.SwiftProxyImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -147,4 +151,19 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// SwiftImageCheck - return true if the swift images match on the ControlPlane and Version, or if Swift is not enabled
+func SwiftImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Swift.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.SwiftAccountImage, version.Status.ContainerImages.SwiftAccountImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.SwiftContainerImage, version.Status.ContainerImages.SwiftContainerImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.SwiftObjectImage, version.Status.ContainerImages.SwiftObjectImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.SwiftProxyImage, version.Status.ContainerImages.SwiftProxyImage) {
+			return false
+		}
+	}
+
+	return true
 }

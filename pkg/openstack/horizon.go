@@ -42,6 +42,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneHorizonReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeHorizonReadyCondition)
+		instance.Status.ContainerImages.HorizonImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -168,4 +169,16 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// HorizonImageCheck - return true if horizon images match on the ControlPlane and Version, or if Horizon is not enabled
+func HorizonImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Horizon.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.HorizonImage, version.Status.ContainerImages.HorizonImage) {
+			return false
+		}
+	}
+
+	return true
 }

@@ -204,3 +204,47 @@ func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	return ctrl.Result{}, version, nil
 }
+
+func compareStringPointers(a, b *string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
+}
+
+// ControlplaneContainerImageCheck - function to compare the ContainerImages on the controlPlane to the OpenStackVersion
+// only enabled services are checked
+func ControlplaneContainerImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if BarbicanImageCheck(controlPlane, version) &&
+		CinderImageCheck(controlPlane, version) &&
+		DesignateImageCheck(controlPlane, version) &&
+		DnsmasqImageCheck(controlPlane, version) &&
+		GaleraImageCheck(controlPlane, version) &&
+		GlanceImageCheck(controlPlane, version) &&
+		HeatImageCheck(controlPlane, version) &&
+		HorizonImageCheck(controlPlane, version) &&
+		IronicImageCheck(controlPlane, version) &&
+		KeystoneImageCheck(controlPlane, version) &&
+		ManilaImageCheck(controlPlane, version) &&
+		MemcachedImageCheck(controlPlane, version) &&
+		NeutronImageCheck(controlPlane, version) &&
+		NovaImageCheck(controlPlane, version) &&
+		OctaviaImageCheck(controlPlane, version) &&
+		ClientImageCheck(controlPlane, version) &&
+		OVNControllerImageCheck(controlPlane, version) &&
+		OVNNorthImageCheck(controlPlane, version) &&
+		OVNDbClusterImageCheck(controlPlane, version) &&
+		PlacementImageCheck(controlPlane, version) &&
+		RabbitmqImageCheck(controlPlane, version) &&
+		SwiftImageCheck(controlPlane, version) &&
+		TelemetryImageCheck(controlPlane, version) {
+
+		return true
+	}
+
+	return false
+}

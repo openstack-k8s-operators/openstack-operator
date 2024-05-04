@@ -35,6 +35,9 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneManilaReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeManilaReadyCondition)
+		instance.Status.ContainerImages.ManilaAPIImage = nil
+		instance.Status.ContainerImages.ManilaSchedulerImage = nil
+		instance.Status.ContainerImages.ManilaShareImages = make(map[string]*string)
 		return ctrl.Result{}, nil
 	}
 
@@ -180,4 +183,22 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// ManilaImageCheck - return true if the Manila images match on the ControlPlane and Version, or if Manila is not enabled
+func ManilaImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Manila.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.ManilaAPIImage, version.Status.ContainerImages.ManilaAPIImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.ManilaSchedulerImage, version.Status.ContainerImages.ManilaSchedulerImage) {
+			return false
+		}
+		for name, img := range version.Status.ContainerImages.ManilaShareImages {
+			if !compareStringPointers(controlPlane.Status.ContainerImages.ManilaShareImages[name], img) {
+				return false
+			}
+		}
+	}
+
+	return true
 }

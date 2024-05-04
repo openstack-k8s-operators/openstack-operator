@@ -147,3 +147,15 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 
 	return ctrl.Result{}, nil
 }
+
+// KeystoneImageCheck - return true if the keystone images match on the ControlPlane and Version, or if Keystone is not enabled
+func KeystoneImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Keystone.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.KeystoneAPIImage, version.Status.ContainerImages.KeystoneAPIImage) {
+			return false
+		}
+	}
+
+	return true
+}

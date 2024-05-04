@@ -52,6 +52,12 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOctaviaReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeOctaviaReadyCondition)
+		instance.Status.ContainerImages.OctaviaAPIImage = nil
+		instance.Status.ContainerImages.OctaviaWorkerImage = nil
+		instance.Status.ContainerImages.OctaviaHealthmanagerImage = nil
+		instance.Status.ContainerImages.OctaviaHousekeepingImage = nil
+		//FIXME: (dprince) Octavia should have its own parameter for the apache image (it can share the same image in OpenStackVersion though)
+		instance.Status.ContainerImages.ApacheImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -202,4 +208,20 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// OctaviaImageCheck - return true if the octavia images match on the ControlPlane and Version, or if Octavia is not enabled
+func OctaviaImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Octavia.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.OctaviaAPIImage, version.Status.ContainerImages.OctaviaAPIImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.OctaviaWorkerImage, version.Status.ContainerImages.OctaviaWorkerImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.OctaviaHealthmanagerImage, version.Status.ContainerImages.OctaviaHealthmanagerImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.OctaviaHousekeepingImage, version.Status.ContainerImages.OctaviaHousekeepingImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.ApacheImage, version.Status.ContainerImages.ApacheImage) {
+			return false
+		}
+	}
+
+	return true
 }

@@ -55,6 +55,11 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneNovaReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition)
+		instance.Status.ContainerImages.NovaAPIImage = nil
+		instance.Status.ContainerImages.NovaComputeImage = nil
+		instance.Status.ContainerImages.NovaConductorImage = nil
+		instance.Status.ContainerImages.NovaNovncImage = nil
+		instance.Status.ContainerImages.NovaSchedulerImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -395,4 +400,20 @@ func metadataEnabled(metadata novav1.NovaMetadataTemplate) bool {
 
 func noVNCProxyEnabled(vncproxy novav1.NovaNoVNCProxyTemplate) bool {
 	return vncproxy.Enabled != nil && *vncproxy.Enabled
+}
+
+// NovaImageCheck - return true if the nova images match on the ControlPlane and Version, or if Nova is not enabled
+func NovaImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Nova.Enabled {
+		if !compareStringPointers(controlPlane.Status.ContainerImages.NovaAPIImage, version.Status.ContainerImages.NovaAPIImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.NovaComputeImage, version.Status.ContainerImages.NovaComputeImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.NovaConductorImage, version.Status.ContainerImages.NovaConductorImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.NovaNovncImage, version.Status.ContainerImages.NovaNovncImage) ||
+			!compareStringPointers(controlPlane.Status.ContainerImages.NovaSchedulerImage, version.Status.ContainerImages.NovaSchedulerImage) {
+			return false
+		}
+	}
+
+	return true
 }
