@@ -25,7 +25,6 @@ import (
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 
 	//revive:disable-next-line:dot-imports
-	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 
 	k8s_corev1 "k8s.io/api/core/v1"
@@ -37,6 +36,7 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
@@ -765,7 +765,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
 		})
 
-		It("should create selfsigned issuer and public+internal CA and issuer", func() {
+		It("should create selfsigned issuer and public, internal, libvirt and ovn CA and issuer", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 
 			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
@@ -789,6 +789,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAPublicName.Name))
+				g.Expect(issuer.Labels).Should(HaveKey(certmanager.RootCAIssuerPublicLabel))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				// ca cert
@@ -802,6 +803,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				issuer := crtmgr.GetIssuer(names.RootCAInternalName)
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAInternalName.Name))
+				g.Expect(issuer.Labels).Should(HaveKey(certmanager.RootCAIssuerInternalLabel))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				// ca cert
@@ -815,6 +817,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				issuer := crtmgr.GetIssuer(names.RootCAOvnName)
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCAOvnName.Name))
+				g.Expect(issuer.Labels).Should(HaveKey(certmanager.RootCAIssuerOvnDBLabel))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				// ca cert
@@ -828,6 +831,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				issuer := crtmgr.GetIssuer(names.RootCALibvirtName)
 				g.Expect(issuer).Should(Not(BeNil()))
 				g.Expect(issuer.Spec.CA.SecretName).Should(Equal(names.RootCALibvirtName.Name))
+				g.Expect(issuer.Labels).Should(HaveKey(certmanager.RootCAIssuerLibvirtLabel))
 			}, timeout, interval).Should(Succeed())
 
 			th.ExpectCondition(
@@ -925,6 +929,64 @@ var _ = Describe("OpenStackOperator controller", func() {
 					k8s_corev1.ConditionTrue,
 				)
 			}, timeout, interval).Should(Succeed())
+		})
+
+		When("The TLSe OpenStackControlplane instance switches to use a custom public issuer", func() {
+			BeforeEach(func() {
+				// create custom issuer
+				DeferCleanup(k8sClient.Delete, ctx, crtmgr.CreateIssuer(names.CustomIssuerName))
+				DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.CustomIssuerName))
+
+				// update ctlplane to use the custom isssuer
+				Eventually(func(g Gomega) {
+					OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+					OSCtlplane.Spec.TLS.Ingress.Ca.CustomIssuer = ptr.To(names.CustomIssuerName.Name)
+					g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should remove the certmanager.RootCAIssuerPublicLabel label from the defaultIssuer", func() {
+				Eventually(func(g Gomega) {
+					issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+					g.Expect(issuer).Should(Not(BeNil()))
+					g.Expect(issuer.Labels).Should(Not(HaveKey(certmanager.RootCAIssuerPublicLabel)))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should add the certmanager.RootCAIssuerPublicLabel label to the customIssuer", func() {
+				Eventually(func(g Gomega) {
+					issuer := crtmgr.GetIssuer(names.CustomIssuerName)
+					g.Expect(issuer).Should(Not(BeNil()))
+					g.Expect(issuer.Labels).Should(HaveKey(certmanager.RootCAIssuerPublicLabel))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			When("The TLSe OpenStackControlplane instance switches again back to default public issuer", func() {
+				BeforeEach(func() {
+					// update ctlplane to NOT use the custom isssuer
+					Eventually(func(g Gomega) {
+						OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+						OSCtlplane.Spec.TLS.Ingress.Ca.CustomIssuer = nil
+						g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+					}, timeout, interval).Should(Succeed())
+				})
+
+				It("should remove the certmanager.RootCAIssuerPublicLabel label from the defaultIssuer", func() {
+					Eventually(func(g Gomega) {
+						issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+						g.Expect(issuer).Should(Not(BeNil()))
+						g.Expect(issuer.Labels).Should(HaveKey(certmanager.RootCAIssuerPublicLabel))
+					}, timeout, interval).Should(Succeed())
+				})
+
+				It("should add the certmanager.RootCAIssuerPublicLabel label to the customIssuer", func() {
+					Eventually(func(g Gomega) {
+						issuer := crtmgr.GetIssuer(names.CustomIssuerName)
+						g.Expect(issuer).Should(Not(BeNil()))
+						g.Expect(issuer.Labels).Should(Not(HaveKey(certmanager.RootCAIssuerPublicLabel)))
+					}, timeout, interval).Should(Succeed())
+				})
+			})
 		})
 	})
 
