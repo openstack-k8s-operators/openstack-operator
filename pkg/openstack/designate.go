@@ -177,17 +177,17 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 }
 
-// DesignateImageCheck - return true if the Designate images match on the ControlPlane and Version, or if Designate is not enabled
-func DesignateImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// DesignateImageMatch - return true if the Designate images match on the ControlPlane and Version, or if Designate is not enabled
+func DesignateImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Designate.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.DesignateAPIImage, version.Status.ContainerImages.DesignateAPIImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.DesignateCentralImage, version.Status.ContainerImages.DesignateCentralImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.DesignateMdnsImage, version.Status.ContainerImages.DesignateMdnsImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.DesignateProducerImage, version.Status.ContainerImages.DesignateProducerImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.DesignateWorkerImage, version.Status.ContainerImages.DesignateWorkerImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.DesignateBackendbind9Image, version.Status.ContainerImages.DesignateBackendbind9Image) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.DesignateUnboundImage, version.Status.ContainerImages.DesignateUnboundImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.DesignateAPIImage, version.Status.ContainerImages.DesignateAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateCentralImage, version.Status.ContainerImages.DesignateCentralImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateMdnsImage, version.Status.ContainerImages.DesignateMdnsImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateProducerImage, version.Status.ContainerImages.DesignateProducerImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateWorkerImage, version.Status.ContainerImages.DesignateWorkerImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateBackendbind9Image, version.Status.ContainerImages.DesignateBackendbind9Image) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateUnboundImage, version.Status.ContainerImages.DesignateUnboundImage) {
 			return false
 		}
 	}

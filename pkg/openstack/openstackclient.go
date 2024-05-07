@@ -61,6 +61,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 	})
 
 	if err != nil {
+		Log.Error(err, "Failed to reconcile OpenStackClient")
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1.OpenStackControlPlaneClientReadyCondition,
 			condition.ErrorReason,
@@ -89,9 +90,9 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 	return ctrl.Result{}, nil
 }
 
-// ClientImageCheck - return true if the openstackclient images match on the ControlPlane and Version, or if OpenstackClient is not enabled
-func ClientImageCheck(controlPlane *corev1.OpenStackControlPlane, version *corev1.OpenStackVersion) bool {
+// ClientImageMatch - return true if the openstackclient images match on the ControlPlane and Version, or if OpenstackClient is not enabled
+func ClientImageMatch(controlPlane *corev1.OpenStackControlPlane, version *corev1.OpenStackVersion) bool {
 
 	//FIXME: (dprince) - OpenStackClientSection should have Enabled?
-	return compareStringPointers(controlPlane.Status.ContainerImages.OpenstackClientImage, version.Status.ContainerImages.OpenstackClientImage)
+	return stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackClientImage, version.Status.ContainerImages.OpenstackClientImage)
 }

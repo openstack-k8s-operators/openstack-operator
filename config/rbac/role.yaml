@@ -181,6 +181,14 @@ rules:
   - patch
   - update
 - apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanenodesets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - designate.openstack.org
   resources:
   - designates

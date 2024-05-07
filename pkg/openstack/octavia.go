@@ -210,15 +210,15 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 	return ctrl.Result{}, nil
 }
 
-// OctaviaImageCheck - return true if the octavia images match on the ControlPlane and Version, or if Octavia is not enabled
-func OctaviaImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// OctaviaImageMatch - return true if the octavia images match on the ControlPlane and Version, or if Octavia is not enabled
+func OctaviaImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Octavia.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.OctaviaAPIImage, version.Status.ContainerImages.OctaviaAPIImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.OctaviaWorkerImage, version.Status.ContainerImages.OctaviaWorkerImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.OctaviaHealthmanagerImage, version.Status.ContainerImages.OctaviaHealthmanagerImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.OctaviaHousekeepingImage, version.Status.ContainerImages.OctaviaHousekeepingImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.ApacheImage, version.Status.ContainerImages.ApacheImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaAPIImage, version.Status.ContainerImages.OctaviaAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaWorkerImage, version.Status.ContainerImages.OctaviaWorkerImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHealthmanagerImage, version.Status.ContainerImages.OctaviaHealthmanagerImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHousekeepingImage, version.Status.ContainerImages.OctaviaHousekeepingImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.ApacheImage, version.Status.ContainerImages.ApacheImage) {
 			return false
 		}
 	}

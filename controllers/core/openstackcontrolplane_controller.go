@@ -245,7 +245,9 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			}
 			instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
 			return ctrl.Result{}, nil
-		} else if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
+		} else if version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane) &&
+			!version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
+
 			Log.Info("Minor update on the ControlPlane")
 			ctrlResult, err := r.reconcileNormal(ctx, instance, version, helper)
 			if err != nil {

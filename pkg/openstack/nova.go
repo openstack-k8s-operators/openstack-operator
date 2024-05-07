@@ -402,15 +402,15 @@ func noVNCProxyEnabled(vncproxy novav1.NovaNoVNCProxyTemplate) bool {
 	return vncproxy.Enabled != nil && *vncproxy.Enabled
 }
 
-// NovaImageCheck - return true if the nova images match on the ControlPlane and Version, or if Nova is not enabled
-func NovaImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// NovaImageMatch - return true if the nova images match on the ControlPlane and Version, or if Nova is not enabled
+func NovaImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Nova.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.NovaAPIImage, version.Status.ContainerImages.NovaAPIImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.NovaComputeImage, version.Status.ContainerImages.NovaComputeImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.NovaConductorImage, version.Status.ContainerImages.NovaConductorImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.NovaNovncImage, version.Status.ContainerImages.NovaNovncImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.NovaSchedulerImage, version.Status.ContainerImages.NovaSchedulerImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.NovaAPIImage, version.Status.ContainerImages.NovaAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaComputeImage, version.Status.ContainerImages.NovaComputeImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaConductorImage, version.Status.ContainerImages.NovaConductorImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaNovncImage, version.Status.ContainerImages.NovaNovncImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaSchedulerImage, version.Status.ContainerImages.NovaSchedulerImage) {
 			return false
 		}
 	}

@@ -23,7 +23,7 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 
 	d := reflect.ValueOf(defaults).Elem()
 	for key, val := range envImages {
-		Log.Info(fmt.Sprintf("Initialize OpenStackVersion Image Defaults: %s", key))
+		//Log.Info(fmt.Sprintf("Initialize OpenStackVersion Image Defaults: %s", key))
 
 		r := regexp.MustCompile(`[A-Za-z0-9]+`)
 		matches := r.FindAllString(key, -1)
@@ -40,7 +40,7 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 			// format API so we adhere to go linting standards
 			fieldName = strings.Replace(fieldName, "Api", "API", -1)
 		}
-		Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
+		//Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
 		if field.IsValid() && field.CanSet() {
 			field.Set(reflect.ValueOf(val))
@@ -205,7 +205,7 @@ func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackContro
 	return ctrl.Result{}, version, nil
 }
 
-func compareStringPointers(a, b *string) bool {
+func stringPointersEqual(a, b *string) bool {
 	if a == nil && b == nil {
 		return true
 	}
@@ -215,33 +215,33 @@ func compareStringPointers(a, b *string) bool {
 	return *a == *b
 }
 
-// ControlplaneContainerImageCheck - function to compare the ContainerImages on the controlPlane to the OpenStackVersion
+// ControlplaneContainerImageMatch - function to compare the ContainerImages on the controlPlane to the OpenStackVersion
 // only enabled services are checked
-func ControlplaneContainerImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func ControlplaneContainerImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
-	if BarbicanImageCheck(controlPlane, version) &&
-		CinderImageCheck(controlPlane, version) &&
-		DesignateImageCheck(controlPlane, version) &&
-		DnsmasqImageCheck(controlPlane, version) &&
-		GaleraImageCheck(controlPlane, version) &&
-		GlanceImageCheck(controlPlane, version) &&
-		HeatImageCheck(controlPlane, version) &&
-		HorizonImageCheck(controlPlane, version) &&
-		IronicImageCheck(controlPlane, version) &&
-		KeystoneImageCheck(controlPlane, version) &&
-		ManilaImageCheck(controlPlane, version) &&
-		MemcachedImageCheck(controlPlane, version) &&
-		NeutronImageCheck(controlPlane, version) &&
-		NovaImageCheck(controlPlane, version) &&
-		OctaviaImageCheck(controlPlane, version) &&
-		ClientImageCheck(controlPlane, version) &&
-		OVNControllerImageCheck(controlPlane, version) &&
-		OVNNorthImageCheck(controlPlane, version) &&
-		OVNDbClusterImageCheck(controlPlane, version) &&
-		PlacementImageCheck(controlPlane, version) &&
-		RabbitmqImageCheck(controlPlane, version) &&
-		SwiftImageCheck(controlPlane, version) &&
-		TelemetryImageCheck(controlPlane, version) {
+	if BarbicanImageMatch(controlPlane, version) &&
+		CinderImageMatch(controlPlane, version) &&
+		DesignateImageMatch(controlPlane, version) &&
+		DnsmasqImageMatch(controlPlane, version) &&
+		GaleraImageMatch(controlPlane, version) &&
+		GlanceImageMatch(controlPlane, version) &&
+		HeatImageMatch(controlPlane, version) &&
+		HorizonImageMatch(controlPlane, version) &&
+		IronicImageMatch(controlPlane, version) &&
+		KeystoneImageMatch(controlPlane, version) &&
+		ManilaImageMatch(controlPlane, version) &&
+		MemcachedImageMatch(controlPlane, version) &&
+		NeutronImageMatch(controlPlane, version) &&
+		NovaImageMatch(controlPlane, version) &&
+		OctaviaImageMatch(controlPlane, version) &&
+		ClientImageMatch(controlPlane, version) &&
+		OVNControllerImageMatch(controlPlane, version) &&
+		OVNNorthImageMatch(controlPlane, version) &&
+		OVNDbClusterImageMatch(controlPlane, version) &&
+		PlacementImageMatch(controlPlane, version) &&
+		RabbitmqImageMatch(controlPlane, version) &&
+		SwiftImageMatch(controlPlane, version) &&
+		TelemetryImageMatch(controlPlane, version) {
 
 		return true
 	}

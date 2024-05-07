@@ -211,11 +211,11 @@ func getGlanceAPILabelMap(name string, apiName string, apiType string) map[strin
 	}
 }
 
-// GlanceImageCheck - return true if the glance images match on the ControlPlane and Version, or if Glance is not enabled
-func GlanceImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// GlanceImageMatch - return true if the glance images match on the ControlPlane and Version, or if Glance is not enabled
+func GlanceImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Glance.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.GlanceAPIImage, version.Status.ContainerImages.GlanceAPIImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.GlanceAPIImage, version.Status.ContainerImages.GlanceAPIImage) {
 			return false
 		}
 	}

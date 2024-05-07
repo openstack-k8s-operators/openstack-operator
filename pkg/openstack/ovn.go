@@ -53,6 +53,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 
 	// Expect all services (dbclusters, northd, ovn-controller) ready
 	if OVNDBClustersReady && OVNNorthdReady && OVNControllerReady {
+		Log.Info("OVN is ready")
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
 	} else if !instance.Spec.Ovn.Enabled {
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
@@ -395,6 +396,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 	}
 
 	if OVNController.Status.ObservedGeneration == OVNController.Generation && OVNController.IsReady() {
+		Log.Info("OVN Controller ready condition is true")
 		instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
 		instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
 		return true, nil
@@ -403,35 +405,35 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 	}
 }
 
-// OVNControllerImageCheck - return true if the OVN Controller images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNControllerImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// OVNControllerImageMatch - return true if the OVN Controller images match on the ControlPlane and Version, or if OVN is not enabled
+func OVNControllerImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Ovn.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerImage, version.Status.ContainerImages.OvnControllerImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerOvsImage, version.Status.ContainerImages.OvnControllerOvsImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.OvnControllerImage, version.Status.ContainerImages.OvnControllerImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.OvnControllerOvsImage, version.Status.ContainerImages.OvnControllerOvsImage) {
 			return false
 		}
 	}
 	return true
 }
 
-// OVNDbClusterImageCheck - return true if the OVN DbCluster images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNDbClusterImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// OVNDbClusterImageMatch - return true if the OVN DbCluster images match on the ControlPlane and Version, or if OVN is not enabled
+func OVNDbClusterImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Ovn.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnNbDbclusterImage, version.Status.ContainerImages.OvnNbDbclusterImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.OvnSbDbclusterImage, version.Status.ContainerImages.OvnSbDbclusterImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.OvnNbDbclusterImage, version.Status.ContainerImages.OvnNbDbclusterImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.OvnSbDbclusterImage, version.Status.ContainerImages.OvnSbDbclusterImage) {
 			return false
 		}
 	}
 	return true
 }
 
-// OVNNorthImageCheck - return true if the OVN North images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNNorthImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// OVNNorthImageMatch - return true if the OVN North images match on the ControlPlane and Version, or if OVN is not enabled
+func OVNNorthImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Ovn.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnNorthdImage, version.Status.ContainerImages.OvnNorthdImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.OvnNorthdImage, version.Status.ContainerImages.OvnNorthdImage) {
 			return false
 		}
 	}

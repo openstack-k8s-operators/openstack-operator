@@ -34,6 +34,7 @@ import (
 
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
@@ -160,6 +161,9 @@ var _ = BeforeSuite(func() {
 	telemetryv1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/telemetry-operator/api", "../../go.mod", "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	dataplanev1CRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/dataplane-operator/api", "../../go.mod", "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 	designatev1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/designate-operator/api", "../../go.mod", "bases")
 	Expect(err).ShouldNot(HaveOccurred())
@@ -193,6 +197,7 @@ var _ = BeforeSuite(func() {
 			placementv1CRDs,
 			swiftv1CRDs,
 			telemetryv1CRDs,
+			dataplanev1CRDs,
 			designatev1CRDs,
 			barbicanv1CRDs,
 			rabbitmqv2CRDs,
@@ -250,6 +255,8 @@ var _ = BeforeSuite(func() {
 	err = swiftv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = telemetryv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = dataplanev1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = designatev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())

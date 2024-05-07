@@ -34,6 +34,7 @@ func ReconcileGaleras(
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
+	Log := GetLogger(ctx)
 	if !instance.Spec.Galera.Enabled {
 		return ctrl.Result{}, nil
 	}
@@ -115,12 +116,14 @@ func ReconcileGaleras(
 		return ctrl.Result{}, fmt.Errorf(errors)
 
 	} else if len(inprogress) > 0 {
+		Log.Info("Galera in progress")
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneMariaDBReadyRunningMessage))
 	} else {
+		Log.Info("Galera ready condition is true")
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
 			corev1beta1.OpenStackControlPlaneMariaDBReadyMessage,
@@ -183,11 +186,11 @@ func reconcileGalera(
 	return galeraCreating, nil
 }
 
-// GaleraImageCheck - return true if the Galera images match on the ControlPlane and Version, or if Galera is not enabled
-func GaleraImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// GaleraImageMatch - return true if the Galera images match on the ControlPlane and Version, or if Galera is not enabled
+func GaleraImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Galera.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.MariadbImage, version.Status.ContainerImages.MariadbImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.MariadbImage, version.Status.ContainerImages.MariadbImage) {
 			return false
 		}
 	}

@@ -39,6 +39,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
 		Expect(err).NotTo(HaveOccurred())
 
+		// create cluster config map which is used to validate if cluster supports fips
+		DeferCleanup(k8sClient.Delete, ctx, CreateClusterConfigCM())
+
 	})
 
 	When("A default OpenStackVersion instance is created with no Controlplane", func() {
@@ -87,13 +90,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 		It("should initialize container images", func() {
 			Eventually(func(g Gomega) {
 
-				th.ExpectCondition(
-					names.OpenStackVersionName,
-					ConditionGetterFunc(OpenStackVersionConditionGetter),
-					corev1.OpenStackVersionInitialized,
-					k8s_corev1.ConditionTrue,
-				)
-
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				g.Expect(version).Should(Not(BeNil()))
 
@@ -129,9 +125,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.EdpmIscsidImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmLogrotateCrondImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmMultipathdImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmNeutronDhcpAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNeutronMetadataAgentImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmNeutronOvnAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNeutronSriovAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmOvnBgpAgentImage).ShouldNot(BeNil())

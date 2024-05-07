@@ -188,17 +188,17 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 }
 
-// CinderImageCheck - return true if the Cinder images match on the ControlPlane and Version, or if Cinder is not enabled
-func CinderImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// CinderImageMatch - return true if the Cinder images match on the ControlPlane and Version, or if Cinder is not enabled
+func CinderImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Cinder.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.CinderAPIImage, version.Status.ContainerImages.CinderAPIImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.CinderSchedulerImage, version.Status.ContainerImages.CinderSchedulerImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.CinderBackupImage, version.Status.ContainerImages.CinderBackupImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.CinderAPIImage, version.Status.ContainerImages.CinderAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.CinderSchedulerImage, version.Status.ContainerImages.CinderSchedulerImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.CinderBackupImage, version.Status.ContainerImages.CinderBackupImage) {
 			return false
 		}
 		for name, img := range version.Status.ContainerImages.CinderVolumeImages {
-			if !compareStringPointers(controlPlane.Status.ContainerImages.CinderVolumeImages[name], img) {
+			if !stringPointersEqual(controlPlane.Status.ContainerImages.CinderVolumeImages[name], img) {
 				return false
 			}
 		}

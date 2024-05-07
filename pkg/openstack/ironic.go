@@ -203,15 +203,15 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 }
 
 // IronicImagesCheck - return true if the ironic images match on the ControlPlane and Version, or if Ironic is not enabled
-func IronicImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func IronicImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Ironic.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.IronicAPIImage, version.Status.ContainerImages.IronicAPIImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.IronicConductorImage, version.Status.ContainerImages.IronicConductorImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.IronicInspectorImage, version.Status.ContainerImages.IronicInspectorImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.IronicNeutronAgentImage, version.Status.ContainerImages.IronicNeutronAgentImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.IronicPxeImage, version.Status.ContainerImages.IronicPxeImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.IronicPythonAgentImage, version.Status.ContainerImages.IronicPythonAgentImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.IronicAPIImage, version.Status.ContainerImages.IronicAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicConductorImage, version.Status.ContainerImages.IronicConductorImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicInspectorImage, version.Status.ContainerImages.IronicInspectorImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicNeutronAgentImage, version.Status.ContainerImages.IronicNeutronAgentImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPxeImage, version.Status.ContainerImages.IronicPxeImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPythonAgentImage, version.Status.ContainerImages.IronicPythonAgentImage) {
 			return false
 		}
 	}

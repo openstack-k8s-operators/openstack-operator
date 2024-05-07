@@ -159,13 +159,13 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 	return ctrl.Result{}, nil
 }
 
-// BarbicanImageCheck - return true if the Barbican images match on the ControlPlane and Version, or if Barbican is not enabled
-func BarbicanImageCheck(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+// BarbicanImageMatch - return true if the Barbican images match on the ControlPlane and Version, or if Barbican is not enabled
+func BarbicanImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
 	if controlPlane.Spec.Barbican.Enabled {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.BarbicanAPIImage, version.Status.ContainerImages.BarbicanAPIImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.BarbicanWorkerImage, version.Status.ContainerImages.BarbicanWorkerImage) ||
-			!compareStringPointers(controlPlane.Status.ContainerImages.BarbicanKeystoneListenerImage, version.Status.ContainerImages.BarbicanKeystoneListenerImage) {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.BarbicanAPIImage, version.Status.ContainerImages.BarbicanAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.BarbicanWorkerImage, version.Status.ContainerImages.BarbicanWorkerImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.BarbicanKeystoneListenerImage, version.Status.ContainerImages.BarbicanKeystoneListenerImage) {
 			return false
 		}
 	}
