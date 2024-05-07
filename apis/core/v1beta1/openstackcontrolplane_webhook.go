@@ -184,6 +184,10 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) fie
 	errors = append(errors, r.ValidateServiceDependencies(basePath)...)
 
 	// Call internal validation logic for individual service operators
+	if r.Spec.Keystone.Enabled {
+		errors = append(errors, r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"))...)
+	}
+
 	if r.Spec.Ironic.Enabled {
 		errors = append(errors, r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"))...)
 	}
@@ -196,6 +200,42 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) fie
 		errors = append(errors, r.Spec.Placement.Template.ValidateCreate(basePath.Child("placement").Child("template"))...)
 	}
 
+	if r.Spec.Barbican.Enabled {
+		errors = append(errors, r.Spec.Barbican.Template.ValidateCreate(basePath.Child("barbican").Child("template"))...)
+	}
+
+	if r.Spec.Neutron.Enabled {
+		errors = append(errors, r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template"))...)
+	}
+
+	if r.Spec.Glance.Enabled {
+		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"))...)
+	}
+
+	if r.Spec.Cinder.Enabled {
+		errors = append(errors, r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template"))...)
+	}
+
+	if r.Spec.Heat.Enabled {
+		errors = append(errors, r.Spec.Heat.Template.ValidateCreate(basePath.Child("heat").Child("template"))...)
+	}
+
+	if r.Spec.Manila.Enabled {
+		errors = append(errors, r.Spec.Manila.Template.ValidateCreate(basePath.Child("manila").Child("template"))...)
+	}
+
+	if r.Spec.Swift.Enabled {
+		errors = append(errors, r.Spec.Swift.Template.ValidateCreate(basePath.Child("swift").Child("template"))...)
+	}
+
+	if r.Spec.Octavia.Enabled {
+		errors = append(errors, r.Spec.Octavia.Template.ValidateCreate(basePath.Child("octavia").Child("template"))...)
+	}
+
+	if r.Spec.Designate.Enabled {
+		errors = append(errors, r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"))...)
+	}
+
 	return errors
 }
 
@@ -206,6 +246,10 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 	errors = append(errors, r.ValidateServiceDependencies(basePath)...)
 
 	// Call internal validation logic for individual service operators
+	if r.Spec.Keystone.Enabled {
+		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(old.Keystone.Template, basePath.Child("keystone").Child("template"))...)
+	}
+
 	if r.Spec.Ironic.Enabled {
 		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(old.Ironic.Template, basePath.Child("ironic").Child("template"))...)
 	}
@@ -216,6 +260,42 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 
 	if r.Spec.Placement.Enabled {
 		errors = append(errors, r.Spec.Placement.Template.ValidateUpdate(old.Placement.Template, basePath.Child("placement").Child("template"))...)
+	}
+
+	if r.Spec.Barbican.Enabled {
+		errors = append(errors, r.Spec.Barbican.Template.ValidateUpdate(old.Barbican.Template, basePath.Child("barbican").Child("template"))...)
+	}
+
+	if r.Spec.Neutron.Enabled {
+		errors = append(errors, r.Spec.Neutron.Template.ValidateUpdate(old.Neutron.Template, basePath.Child("neutron").Child("template"))...)
+	}
+
+	if r.Spec.Glance.Enabled {
+		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(old.Glance.Template, basePath.Child("glance").Child("template"))...)
+	}
+
+	if r.Spec.Cinder.Enabled {
+		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(old.Cinder.Template, basePath.Child("cinder").Child("template"))...)
+	}
+
+	if r.Spec.Heat.Enabled {
+		errors = append(errors, r.Spec.Heat.Template.ValidateUpdate(old.Heat.Template, basePath.Child("heat").Child("template"))...)
+	}
+
+	if r.Spec.Manila.Enabled {
+		errors = append(errors, r.Spec.Manila.Template.ValidateUpdate(old.Manila.Template, basePath.Child("manila").Child("template"))...)
+	}
+
+	if r.Spec.Swift.Enabled {
+		errors = append(errors, r.Spec.Swift.Template.ValidateUpdate(old.Swift.Template, basePath.Child("swift").Child("template"))...)
+	}
+
+	if r.Spec.Octavia.Enabled {
+		errors = append(errors, r.Spec.Octavia.Template.ValidateUpdate(old.Octavia.Template, basePath.Child("octavia").Child("template"))...)
+	}
+
+	if r.Spec.Designate.Enabled {
+		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(old.Designate.Template, basePath.Child("designate").Child("template"))...)
 	}
 
 	return errors
