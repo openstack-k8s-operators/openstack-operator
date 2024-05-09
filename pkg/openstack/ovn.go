@@ -96,7 +96,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		}
 		dbcluster.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
-		if OVNDBCluster.Status.Conditions.IsTrue(condition.ExposeServiceReadyCondition) {
+		if instance.Spec.TLS.PodLevel.Enabled {
 			// create certificate for ovndbclusters
 			certRequest := certmanager.CertificateRequest{
 				IssuerName: instance.GetOvnIssuer(),
@@ -131,9 +131,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 				return false, nil
 			}
 
-			if instance.Spec.TLS.PodLevel.Enabled {
-				dbcluster.TLS.SecretName = &certSecret.Name
-			}
+			dbcluster.TLS.SecretName = &certSecret.Name
 		}
 
 		Log.Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
