@@ -195,7 +195,6 @@ func reconcileRabbitMQ(
 
 	hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 	tlsCert := ""
-	tlsCaCert := ""
 
 	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
@@ -224,11 +223,6 @@ func reconcileRabbitMQ(
 		}
 
 		tlsCert = certSecret.Name
-
-		tlsCaCert, err = GetIssuerCertSecret(ctx, helper, instance.GetInternalIssuer(), instance.Namespace)
-		if err != nil {
-			return mqFailed, ctrlResult, err
-		}
 	}
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
@@ -277,7 +271,7 @@ func reconcileRabbitMQ(
 		}
 
 		if tlsCert != "" {
-			rabbitmq.Spec.TLS.CaSecretName = tlsCaCert
+			rabbitmq.Spec.TLS.CaSecretName = tlsCert
 			rabbitmq.Spec.TLS.SecretName = tlsCert
 			// disable non tls listeners
 			rabbitmq.Spec.TLS.DisableNonTLSListeners = true
