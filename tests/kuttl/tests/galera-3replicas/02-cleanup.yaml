@@ -3,7 +3,7 @@ kind: TestStep
 delete:
 - apiVersion: core.openstack.org/v1beta1
   kind: OpenStackControlPlane
-  name: openstack-galera-3replicas
+  name: openstack
 commands:
 - script: |
     oc delete --ignore-not-found=true -n $NAMESPACE pvc \

@@ -3,4 +3,4 @@ kind: TestStep
 delete:
 - apiVersion: core.openstack.org/v1beta1
   kind: OpenStackControlPlane
-  name: openstack-collapsed-cell
+  name: openstack

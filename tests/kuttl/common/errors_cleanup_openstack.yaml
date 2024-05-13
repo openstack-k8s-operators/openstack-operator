@@ -15,37 +15,37 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: openstack-galera
+  name: openstack
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: openstack-galera-0
+  name: openstack
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: openstack-galera-1
+  name: openstack
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: openstack-galera-2
+  name: openstack
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: openstack-galera
+  name: openstack
 ---
 apiVersion: v1
 kind: Endpoints
 metadata:
-  name: openstack-galera
+  name: openstack
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: openstack-config-data
+  name: openstack
 ---
 apiVersion: ovn.openstack.org/v1beta1
 kind: OVNNorthd
