@@ -922,3 +922,21 @@ func (instance OpenStackControlPlane) GetLibvirtIssuer() string {
 
 	return LibvirtCaName
 }
+
+// GetDurationHours - returns the duration in hours
+func (c CertConfig) GetDurationHours() string {
+	if c.Duration != nil {
+		return c.Duration.Duration.String()
+	}
+
+	return ""
+}
+
+// GetRenewBeforeHours - returns the renewBefore in hours
+func (c CertConfig) GetRenewBeforeHours() string {
+	if c.RenewBefore != nil {
+		return c.RenewBefore.Duration.String()
+	}
+
+	return ""
+}
