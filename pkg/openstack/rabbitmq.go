@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -198,11 +199,21 @@ func reconcileRabbitMQ(
 
 	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
+			CommonName: &hostname,
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
 			Hostnames: []string{
 				hostname,
 				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+			},
+			Subject: &certmgrv1.X509Subject{
+				Organizations: []string{fmt.Sprintf("%s.cluster.local", rabbitmq.Namespace)},
+			},
+			Usages: []certmgrv1.KeyUsage{
+				"key encipherment",
+				"digital signature",
+				"server auth",
+				"client auth",
 			},
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
