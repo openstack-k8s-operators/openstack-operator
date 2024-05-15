@@ -10381,6 +10381,10 @@ spec:
                           manageLbMgmtNetworks: true
                           subnetIpVersion: 4
                         properties:
+                          availabilityZones:
+                            items:
+                              type: string
+                            type: array
                           manageLbMgmtNetworks:
                             default: true
                             type: boolean
