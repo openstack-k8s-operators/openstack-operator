@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -195,14 +196,27 @@ func reconcileRabbitMQ(
 
 	hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 	tlsCert := ""
+	commonName := fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain)
 
 	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
+			CommonName: &commonName,
 			Hostnames: []string{
 				hostname,
 				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+			},
+			Subject: &certmgrv1.X509Subject{
+				Organizations: []string{fmt.Sprintf("%s.%s", rabbitmq.Namespace, ClusterInternalDomain)},
+			},
+			Usages: []certmgrv1.KeyUsage{
+				"key encipherment",
+				"data encipherment",
+				"digital signature",
+				"server auth",
+				"client auth",
+				"content commitment",
 			},
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
@@ -267,7 +281,12 @@ func reconcileRabbitMQ(
 			Log.Info("Setting AdditionalConfig")
 			// This is the same situation as RABBITMQ_UPGRADE_LOG above,
 			// except for the "main" rabbitmq log we can just force it to use the console.
-			rabbitmq.Spec.Rabbitmq.AdditionalConfig = "log.console = true"
+			var settings []string
+			settings = append(settings, "log.console = true")
+			if tlsCert != "" {
+				settings = append(settings, "ssl_options.verify = verify_none")
+			}
+			rabbitmq.Spec.Rabbitmq.AdditionalConfig = strings.Join(settings, "\n")
 		}
 
 		if tlsCert != "" {
@@ -275,6 +294,50 @@ func reconcileRabbitMQ(
 			rabbitmq.Spec.TLS.SecretName = tlsCert
 			// disable non tls listeners
 			rabbitmq.Spec.TLS.DisableNonTLSListeners = true
+			// NOTE(dciabrin) RabbitMQ/Erlang needs a specific TLS configuration ordering
+			// in ssl_options.versions for TLS to work with FIPS. We cannot enforce the right
+			// ordering with AdditionalConfig, we have to pass a specific Erlang value via
+			// the AdvancedConfig field. We also add configuration flags which were known to
+			// work with FIPS in previous version of Openstack.
+			rabbitmq.Spec.Rabbitmq.AdvancedConfig = `[
+  {rabbit, [
+    {ssl_options, [
+      {cacertfile,"/etc/rabbitmq-tls/ca.crt"},
+      {certfile,"/etc/rabbitmq-tls/tls.crt"},
+      {keyfile,"/etc/rabbitmq-tls/tls.key"},
+      {depth,1},
+      {secure_renegotiate,true},
+      {reuse_sessions,true},
+      {honor_cipher_order,false},
+      {honor_ecc_order,false},
+      {verify,verify_none},
+      {fail_if_no_peer_cert,false},
+      {versions, ['tlsv1.2','tlsv1.3']}
+    ]}
+  ]},
+  {rabbitmq_management, [
+    {ssl_config, [
+      {cacertfile,"/etc/rabbitmq-tls/ca.crt"},
+      {certfile,"/etc/rabbitmq-tls/tls.crt"},
+      {keyfile,"/etc/rabbitmq-tls/tls.key"},
+      {depth,1},
+      {secure_renegotiate,true},
+      {reuse_sessions,true},
+      {honor_cipher_order,false},
+      {honor_ecc_order,false},
+      {verify,verify_none},
+      {fail_if_no_peer_cert,false},
+      {versions, ['tlsv1.2','tlsv1.3']}
+    ]}
+  ]},
+  {client, [
+    {cacertfile, "/etc/rabbitmq-tls/ca.crt"},
+    {verify,verify_peer},
+    {secure_renegotiate,true},
+    {versions, ['tlsv1.2','tlsv1.3']}
+  ]}
+].
+`
 		}
 
 		// overrides

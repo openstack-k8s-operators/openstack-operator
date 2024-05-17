@@ -530,8 +530,8 @@ func createRootCACertAndIssuer(
 			CommonName: caName,
 			SecretName: caName,
 			PrivateKey: &certmgrv1.CertificatePrivateKey{
-				Algorithm: "ECDSA",
-				Size:      256,
+				Algorithm: "RSA",
+				Size:      3072,
 			},
 			IssuerRef: certmgrmetav1.ObjectReference{
 				Name:  selfsignedIssuerReq.Name,
