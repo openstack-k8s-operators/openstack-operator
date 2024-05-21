@@ -551,6 +551,11 @@ func createRootCACertAndIssuer(
 			},
 			Duration:    caCfg.Duration,
 			RenewBefore: caCfg.RenewBefore,
+			SecretTemplate: &certmgrv1.CertificateSecretTemplate{
+				Labels: map[string]string{
+					caCertSelector: "",
+				},
+			},
 		})
 	cert := certmanager.NewCertificate(caCertReq, 5)
 

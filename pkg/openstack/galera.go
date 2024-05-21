@@ -67,6 +67,7 @@ func ReconcileGaleras(
 				"server auth",
 				"client auth",
 			},
+			Labels: map[string]string{serviceCertSelector: ""},
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
