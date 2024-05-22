@@ -347,7 +347,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		Log.Info(fmt.Sprintf("Nova %s - %s", nova.Name, op))
 	}
 
-	if nova.IsReady() { //FIXME ObservedGeneration
+	if nova.Status.ObservedGeneration == nova.Generation && nova.IsReady() {
 		instance.Status.ContainerImages.NovaAPIImage = version.Status.ContainerImages.NovaAPIImage
 		instance.Status.ContainerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
 		instance.Status.ContainerImages.NovaConductorImage = version.Status.ContainerImages.NovaConductorImage

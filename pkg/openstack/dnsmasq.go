@@ -62,7 +62,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 		Log.Info(fmt.Sprintf("dnsmasq %s - %s", dnsmasq.Name, op))
 	}
 
-	if dnsmasq.IsReady() { // FIXME ObservedGeneration
+	if dnsmasq.Status.ObservedGeneration == dnsmasq.Generation && dnsmasq.IsReady() {
 		instance.Status.ContainerImages.InfraDnsmasqImage = version.Status.ContainerImages.InfraDnsmasqImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneDNSReadyCondition, corev1beta1.OpenStackControlPlaneDNSReadyMessage)
 	} else {

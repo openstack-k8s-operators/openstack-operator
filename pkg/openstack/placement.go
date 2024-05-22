@@ -130,7 +130,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		Log.Info(fmt.Sprintf("placementAPI %s - %s", placementAPI.Name, op))
 	}
 
-	if placementAPI.IsReady() {
+	if placementAPI.Status.ObservedGeneration == placementAPI.Generation && placementAPI.IsReady() {
 		instance.Status.ContainerImages.PlacementAPIImage = version.Status.ContainerImages.PlacementAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, corev1beta1.OpenStackControlPlanePlacementAPIReadyMessage)
 	} else {

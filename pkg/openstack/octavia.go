@@ -186,7 +186,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		helper.GetLogger().Info(fmt.Sprintf("Octavia %s - %s", octavia.Name, op))
 	}
 
-	if octavia.IsReady() { //FIXME ObservedGeneration
+	if octavia.Status.ObservedGeneration == octavia.Generation && octavia.IsReady() {
 		instance.Status.ContainerImages.OctaviaAPIImage = version.Status.ContainerImages.OctaviaAPIImage
 		instance.Status.ContainerImages.OctaviaWorkerImage = version.Status.ContainerImages.OctaviaWorkerImage
 		instance.Status.ContainerImages.OctaviaHealthmanagerImage = version.Status.ContainerImages.OctaviaHealthmanagerImage

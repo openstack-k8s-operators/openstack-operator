@@ -178,7 +178,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		Log.Info(fmt.Sprintf("neutronAPI %s - %s", neutronAPI.Name, op))
 	}
 
-	if neutronAPI.IsReady() { //FIXME ObservedGeneration
+	if neutronAPI.Status.ObservedGeneration == neutronAPI.Generation && neutronAPI.IsReady() {
 		instance.Status.ContainerImages.NeutronAPIImage = version.Status.ContainerImages.NeutronAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneNeutronReadyCondition, corev1beta1.OpenStackControlPlaneNeutronReadyMessage)
 	} else {

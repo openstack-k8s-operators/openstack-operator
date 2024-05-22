@@ -149,7 +149,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		helper.GetLogger().Info(fmt.Sprintf("Designate %s - %s", designate.Name, op))
 	}
 
-	if designate.IsReady() { //FIXME ObservedGeneration
+	if designate.Status.ObservedGeneration == designate.Generation && designate.IsReady() {
 		instance.Status.ContainerImages.DesignateAPIImage = version.Status.ContainerImages.DesignateAPIImage
 		instance.Status.ContainerImages.DesignateCentralImage = version.Status.ContainerImages.DesignateCentralImage
 		instance.Status.ContainerImages.DesignateMdnsImage = version.Status.ContainerImages.DesignateMdnsImage

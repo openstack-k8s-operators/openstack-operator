@@ -131,7 +131,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		Log.Info(fmt.Sprintf("Horizon %s - %s", horizon.Name, op))
 	}
 
-	if horizon.IsReady() { //FIXME ObservedGeneration
+	if horizon.Status.ObservedGeneration == horizon.Generation && horizon.IsReady() {
 		instance.Status.ContainerImages.HorizonImage = version.Status.ContainerImages.HorizonImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneHorizonReadyCondition, corev1beta1.OpenStackControlPlaneHorizonReadyMessage)
 	} else {
