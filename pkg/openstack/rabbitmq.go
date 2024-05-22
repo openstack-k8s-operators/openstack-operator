@@ -211,13 +211,14 @@ func reconcileRabbitMQ(
 				Organizations: []string{fmt.Sprintf("%s.%s", rabbitmq.Namespace, ClusterInternalDomain)},
 			},
 			Usages: []certmgrv1.KeyUsage{
-				"key encipherment",
-				"data encipherment",
-				"digital signature",
-				"server auth",
-				"client auth",
-				"content commitment",
+				certmgrv1.UsageKeyEncipherment,
+				certmgrv1.UsageDataEncipherment,
+				certmgrv1.UsageDigitalSignature,
+				certmgrv1.UsageServerAuth,
+				certmgrv1.UsageClientAuth,
+				certmgrv1.UsageContentCommitment,
 			},
+			Labels: map[string]string{serviceCertSelector: ""},
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration

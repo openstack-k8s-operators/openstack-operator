@@ -22,7 +22,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240429104248-25176c735750
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240430114001-aa12ec2b2ba4
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240429164853-7e1e3b111ee9
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240429052447-09a614506ca6
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240522132119-0d829ccc3fd2
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240429052447-09a614506ca6
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240429052447-09a614506ca6
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240430085856-68c83fbc3041

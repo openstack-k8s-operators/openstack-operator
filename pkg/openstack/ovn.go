@@ -113,6 +113,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 					certmgrv1.UsageServerAuth,
 					certmgrv1.UsageClientAuth,
 				},
+				Labels: map[string]string{serviceCertSelector: ""},
 			}
 			if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
 				certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
@@ -224,6 +225,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 				certmgrv1.UsageServerAuth,
 				certmgrv1.UsageClientAuth,
 			},
+			Labels: map[string]string{serviceCertSelector: ""},
 		}
 		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
@@ -331,6 +333,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 				certmgrv1.UsageServerAuth,
 				certmgrv1.UsageClientAuth,
 			},
+			Labels: map[string]string{serviceCertSelector: ""},
 		}
 		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration

@@ -23,6 +23,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -57,6 +58,12 @@ const (
 
 	// ClusterInternalDomain - cluster internal dns domain
 	ClusterInternalDomain = "cluster.local"
+
+	// serviceCertSelector selector passed to cert-manager to set on the service cert secret
+	serviceCertSelector = "service-cert"
+
+	// caCertSelector selector passed to cert-manager to set on the ca cert secret
+	caCertSelector = "ca-cert"
 )
 
 // GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
@@ -288,7 +295,7 @@ func EnsureEndpointConfig(
 						},
 						Ips:         nil,
 						Annotations: ed.Annotations,
-						Labels:      ed.Labels,
+						Labels:      util.MergeMaps(ed.Labels, map[string]string{serviceCertSelector: ""}),
 						Usages:      nil,
 					}
 					if instance.Spec.TLS.Ingress.Cert.Duration != nil {
@@ -333,7 +340,7 @@ func EnsureEndpointConfig(
 					},
 					Ips:         nil,
 					Annotations: ed.Annotations,
-					Labels:      ed.Labels,
+					Labels:      util.MergeMaps(ed.Labels, map[string]string{serviceCertSelector: ""}),
 					Usages:      nil,
 				}
 				if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
@@ -554,7 +561,7 @@ func (ed *EndpointDetail) CreateRoute(
 				Hostnames:   []string{*ed.Hostname},
 				Ips:         nil,
 				Annotations: ed.Annotations,
-				Labels:      ed.Labels,
+				Labels:      util.MergeMaps(ed.Labels, map[string]string{serviceCertSelector: ""}),
 				Usages:      nil,
 			}
 			if instance.Spec.TLS.Ingress.Cert.Duration != nil {

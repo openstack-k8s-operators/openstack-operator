@@ -25,6 +25,7 @@ import (
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 
 	//revive:disable-next-line:dot-imports
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 
 	k8s_corev1 "k8s.io/api/core/v1"
@@ -66,6 +67,448 @@ var _ = Describe("OpenStackOperator controller", func() {
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCertName))
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
 	})
+
+	//
+	// Validate TLS input settings
+	//
+	When("TLS - A public TLS OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A public TLS OpenStackControlplane instance is created with customized ca duration", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			tlsSpec := GetTLSPublicSpec()
+			tlsSpec["ingress"] = map[string]interface{}{
+				"ca": map[string]interface{}{
+					"duration": "100h",
+				},
+			}
+			spec["tls"] = tlsSpec
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(100)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A public TLS OpenStackControlplane instance is created with customized cert duration", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			tlsSpec := GetTLSPublicSpec()
+			tlsSpec["ingress"] = map[string]interface{}{
+				"cert": map[string]interface{}{
+					"duration": "10h",
+				},
+			}
+			spec["tls"] = tlsSpec
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(10)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "10h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A public TLS OpenStackControlplane instance is created with customized ca and cert duration", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			tlsSpec := GetTLSPublicSpec()
+			tlsSpec["ingress"] = map[string]interface{}{
+				"ca": map[string]interface{}{
+					"duration": "100h",
+				},
+				"cert": map[string]interface{}{
+					"duration": "10h",
+				},
+			}
+			spec["tls"] = tlsSpec
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(100)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(10)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "10h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A public TLS OpenStackControlplane instance is created with customized renewBefore", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			tlsSpec := GetTLSPublicSpec()
+			tlsSpec["ingress"] = map[string]interface{}{
+				"ca": map[string]interface{}{
+					"renewBefore": "100h",
+				},
+				"cert": map[string]interface{}{
+					"renewBefore": "10h",
+				},
+			}
+			spec["tls"] = tlsSpec
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.RenewBefore.Duration.Hours()).Should(Equal(float64(100)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.RenewBefore.Duration.Hours()).Should(Equal(float64(10)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertRenewBeforeAnnotation, "10h0m0s"))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A public TLS OpenStackControlplane instance is created with a custom issuer", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			tlsSpec := GetTLSPublicSpec()
+			tlsSpec["ingress"] = map[string]interface{}{
+				"ca": map[string]interface{}{
+					"customIssuer": "myissuer",
+				},
+			}
+			spec["tls"] = tlsSpec
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.CustomIssuer).Should(Not(BeNil()))
+			Expect(*OSCtlplane.Spec.TLS.Ingress.Ca.CustomIssuer).Should(Equal("myissuer"))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
+		})
+	})
+	When("TLS - A TLSe OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAInternalName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCALibvirtName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAOvnName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A TLSe OpenStackControlplane instance is created with customized internal ca duration", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = map[string]interface{}{
+				"podLevel": map[string]interface{}{
+					"internal": map[string]interface{}{
+						"ca": map[string]interface{}{
+							"duration": "100h",
+						},
+					},
+				},
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Ca.Duration.Duration.Hours()).Should(Equal(float64(100)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAInternalName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCALibvirtName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAOvnName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A TLSe OpenStackControlplane instance is created with customized internal cert duration", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = map[string]interface{}{
+				"podLevel": map[string]interface{}{
+					"internal": map[string]interface{}{
+						"cert": map[string]interface{}{
+							"duration": "10h",
+						},
+					},
+				},
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration.Hours()).Should(Equal(float64(10)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAPublicName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAInternalName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "10h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCALibvirtName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				issuer := crtmgr.GetIssuer(names.RootCAOvnName)
+				g.Expect(issuer).Should(Not(BeNil()))
+				g.Expect(issuer.Annotations).Should(HaveKeyWithValue(certmanager.CertDurationAnnotation, "43800h0m0s"))
+				g.Expect(issuer.Annotations).Should(Not(HaveKey(certmanager.CertRenewBeforeAnnotation)))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+	When("TLS - A TLSe OpenStackControlplane instance is created with an internal custom issuer", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = map[string]interface{}{
+				"podLevel": map[string]interface{}{
+					"internal": map[string]interface{}{
+						"ca": map[string]interface{}{
+							"customIssuer": "myissuer",
+						},
+					},
+				},
+			}
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+			Expect(*OSCtlplane.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer).Should(Equal("myissuer"))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+		})
+	})
+	When("TLS - A TLSe OpenStackControlplane instance is created with an libvirt custom issuer", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = map[string]interface{}{
+				"podLevel": map[string]interface{}{
+					"libvirt": map[string]interface{}{
+						"ca": map[string]interface{}{
+							"customIssuer": "myissuer",
+						},
+						"cert": map[string]interface{}{
+							"duration": "43800h", // can we come up with a single default duration for certs?
+						},
+					},
+				},
+			}
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(*OSCtlplane.Spec.TLS.PodLevel.Libvirt.Ca.CustomIssuer).Should(Equal("myissuer"))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+		})
+	})
+	When("TLS - A TLSe OpenStackControlplane instance is created with an ovn custom issuer", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = map[string]interface{}{
+				"podLevel": map[string]interface{}{
+					"ovn": map[string]interface{}{
+						"ca": map[string]interface{}{
+							"customIssuer": "myissuer",
+						},
+					},
+				},
+			}
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("should have the TLS Spec fields set/defaulted", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.Ingress.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.Ingress.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+			Expect(*OSCtlplane.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer).Should(Equal("myissuer"))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Ca.Duration.Duration.Hours()).Should(Equal(float64(87600)))
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration.Hours()).Should(Equal(float64(43800)))
+		})
+	})
+	//
+	// Validate TLS input settings -END
+	//
 
 	When("A public TLS OpenStackControlplane instance is created", func() {
 		BeforeEach(func() {

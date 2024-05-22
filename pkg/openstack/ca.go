@@ -98,6 +98,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	instance.Status.TLS.CAList = []corev1.TLSCAStatus{}
 	// create CA for ingress and public podLevel termination
 	issuerLabels := map[string]string{certmanager.RootCAIssuerPublicLabel: ""}
+	issuerAnnotations := getIssuerAnnotations(&instance.Spec.TLS.Ingress.Cert)
 	if !instance.Spec.TLS.Ingress.Ca.IsCustomIssuer() {
 		ctrlResult, err = ensureRootCA(
 			ctx,
@@ -106,9 +107,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerReq,
 			tls.DefaultCAPrefix+string(service.EndpointPublic),
 			issuerLabels,
+			issuerAnnotations,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.Ingress.Ca.CertConfig,
+			instance.Spec.TLS.Ingress.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -119,7 +121,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		customIssuer := *instance.Spec.TLS.Ingress.Ca.CustomIssuer
 
 		// add CA labelselector to issuer
-		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
+		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1.OpenStackControlPlaneCAReadyCondition,
@@ -162,6 +164,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	// create CA for internal podLevel termination
 	issuerLabels = map[string]string{certmanager.RootCAIssuerInternalLabel: ""}
+	issuerAnnotations = getIssuerAnnotations(&instance.Spec.TLS.PodLevel.Internal.Cert)
 	if !instance.Spec.TLS.PodLevel.Internal.Ca.IsCustomIssuer() {
 		ctrlResult, err = ensureRootCA(
 			ctx,
@@ -170,9 +173,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerReq,
 			tls.DefaultCAPrefix+string(service.EndpointInternal),
 			issuerLabels,
+			issuerAnnotations,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.PodLevel.Internal.Ca.CertConfig,
+			instance.Spec.TLS.PodLevel.Internal.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -182,7 +186,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	} else {
 		customIssuer := *instance.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer
 		// add CA labelselector to issuer
-		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
+		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1.OpenStackControlPlaneCAReadyCondition,
@@ -226,6 +230,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	// create CA for libvirt
 	issuerLabels = map[string]string{certmanager.RootCAIssuerLibvirtLabel: ""}
+	issuerAnnotations = getIssuerAnnotations(&instance.Spec.TLS.PodLevel.Libvirt.Cert)
 	if !instance.Spec.TLS.PodLevel.Libvirt.Ca.IsCustomIssuer() {
 		ctrlResult, err = ensureRootCA(
 			ctx,
@@ -234,9 +239,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerReq,
 			corev1.LibvirtCaName,
 			issuerLabels,
+			issuerAnnotations,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.PodLevel.Libvirt.Ca.CertConfig,
+			instance.Spec.TLS.PodLevel.Libvirt.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -246,7 +252,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	} else {
 		customIssuer := *instance.Spec.TLS.PodLevel.Libvirt.Ca.CustomIssuer
 		// add CA labelselector to issuer
-		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
+		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1.OpenStackControlPlaneCAReadyCondition,
@@ -289,6 +295,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	// create CA for ovn
 	issuerLabels = map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""}
+	issuerAnnotations = getIssuerAnnotations(&instance.Spec.TLS.PodLevel.Ovn.Cert)
 	if !instance.Spec.TLS.PodLevel.Ovn.Ca.IsCustomIssuer() {
 		ctrlResult, err = ensureRootCA(
 			ctx,
@@ -297,9 +304,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			issuerReq,
 			corev1.OvnDbCaName,
 			issuerLabels,
+			issuerAnnotations,
 			bundle,
 			caOnlyBundle,
-			instance.Spec.TLS.PodLevel.Ovn.Ca.CertConfig,
+			instance.Spec.TLS.PodLevel.Ovn.Ca,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -309,7 +317,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	} else {
 		customIssuer := *instance.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer
 		// add CA labelselector to issuer
-		caCertSecretName, err := addIssuerLabel(ctx, helper, customIssuer, instance.Namespace, issuerLabels)
+		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1.OpenStackControlPlaneCAReadyCondition,
@@ -448,9 +456,10 @@ func ensureRootCA(
 	issuerReq *certmgrv1.Issuer,
 	caName string,
 	labels map[string]string,
+	annotations map[string]string,
 	bundle *caBundle,
 	caOnlyBundle *caBundle,
-	caCfg corev1.CertConfig,
+	caCfg corev1.CACertConfig,
 ) (ctrl.Result, error) {
 	// always create a root CA and issuer for the endpoint as we can
 	// not expect that all services are yet configured to be provided with
@@ -462,6 +471,7 @@ func ensureRootCA(
 		issuerReq,
 		caName,
 		labels,
+		annotations,
 		caCfg,
 	)
 	if err != nil {
@@ -518,7 +528,8 @@ func createRootCACertAndIssuer(
 	selfsignedIssuerReq *certmgrv1.Issuer,
 	caName string,
 	labels map[string]string,
-	caCfg corev1.CertConfig,
+	annotations map[string]string,
+	caCfg corev1.CACertConfig,
 ) ([]byte, ctrl.Result, error) {
 	// create RootCA Certificate used to sign certificates
 	caCertReq := certmanager.Cert(
@@ -540,6 +551,11 @@ func createRootCACertAndIssuer(
 			},
 			Duration:    caCfg.Duration,
 			RenewBefore: caCfg.RenewBefore,
+			SecretTemplate: &certmgrv1.CertificateSecretTemplate{
+				Labels: map[string]string{
+					caCertSelector: "",
+				},
+			},
 		})
 	cert := certmanager.NewCertificate(caCertReq, 5)
 
@@ -570,6 +586,7 @@ func createRootCACertAndIssuer(
 		caCertReq.Name,
 		instance.GetNamespace(),
 		labels,
+		annotations,
 		caCertReq.Name,
 	)
 
@@ -740,12 +757,13 @@ func (cab *caBundle) getBundlePEM() string {
 	return bundleData
 }
 
-func addIssuerLabel(
+func addIssuerLabelAnnotation(
 	ctx context.Context,
 	helper *helper.Helper,
 	name string,
 	namespace string,
 	labels map[string]string,
+	annotations map[string]string,
 ) (string, error) {
 	var caCertSecretName string
 	// get  issuer
@@ -764,6 +782,8 @@ func addIssuerLabel(
 	beforeIssuer := issuer.DeepCopyObject().(client.Object)
 	// merge labels
 	issuer.Labels = util.MergeMaps(issuer.Labels, labels)
+	// merge annotations
+	issuer.Annotations = util.MergeMaps(issuer.Annotations, annotations)
 
 	// patch issuer
 	patch := client.MergeFrom(beforeIssuer)
@@ -790,4 +810,20 @@ func addIssuerLabel(
 	}
 
 	return caCertSecretName, nil
+}
+
+func getIssuerAnnotations(certConfig *corev1.CertConfig) map[string]string {
+	annotations := map[string]string{}
+	certDuration := certConfig.GetDurationHours()
+	if certDuration == "" {
+		certDuration = certmanager.CertDefaultDuration
+	}
+	annotations[certmanager.CertDurationAnnotation] = certDuration
+
+	certRenewBefore := certConfig.GetRenewBeforeHours()
+	if certRenewBefore != "" {
+		annotations[certmanager.CertRenewBeforeAnnotation] = certRenewBefore
+	}
+
+	return annotations
 }
