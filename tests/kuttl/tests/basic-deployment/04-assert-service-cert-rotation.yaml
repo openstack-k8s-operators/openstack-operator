@@ -1,0 +1,22 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      echo "Waiting for OpenStack control plane to be ready..."
+      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=400s -l core.openstack.org/openstackcontrolplane
+
+  - script: |
+      echo "Get fingerprints of all service certs"
+      echo "PWD $PWD"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < tests/kuttl/common/osp_endpoint_finger_prints.sh > /tmp/endpoint_fingerprints_after
+
+  - script: |
+      echo "check fingerprints"
+      while IFS= read -r fp; do
+        if grep -qF "$fp" /tmp/endpoint_fingerprints_before; then
+          echo "cert not rotated - $fp"
+          exit 1
+        fi
+      done < "/tmp/endpoint_fingerprints_after"
+      exit 0
+

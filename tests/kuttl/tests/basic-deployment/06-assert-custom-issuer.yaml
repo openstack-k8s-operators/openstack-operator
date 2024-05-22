@@ -1,0 +1,20 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      echo "Checking issuer of internal certificates..."
+      INTERNAL_CERTS=$(oc get certificates -n $NAMESPACE | grep 'internal' | grep -v 'rootca' | awk '{print $1}')
+      ISSUER_MISMATCHES=""
+      ALL_MATCHED=1
+      for cert in $INTERNAL_CERTS; do
+        ISSUER=$(oc get certificate $cert -n $NAMESPACE -o jsonpath="{.spec.issuerRef.name}")
+        if [ "$ISSUER" != "rootca-internal-custom" ]; then
+          ISSUER_MISMATCHES+="$cert issued by $ISSUER, expected rootca-internal-custom\n"
+          ALL_MATCHED=0
+        fi
+      done
+      if [ "$ALL_MATCHED" -eq 1 ]; then
+        echo "Internal certificates match the custom issuer rootca-internal-custom"
+      else
+        echo -e "Mismatched issuers found:\n$ISSUER_MISMATCHES"
+      fi

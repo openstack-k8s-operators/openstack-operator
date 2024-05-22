@@ -1,0 +1,31 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  tls:
+    ingress:
+      enabled: true
+      ca:
+        duration: 1000h0m0s
+      cert:
+        duration: 500h0m0s
+    podLevel:
+      enabled: true
+      internal:
+        ca:
+          customIssuer: rootca-internal-custom
+          duration: 1000h0m0s
+        cert:
+          duration:  500h0m0s
+      libvirt:
+        ca:
+          duration: 1000h0m0s
+        cert:
+          duration:  500h0m0s
+      ovn:
+        ca:
+          duration: 1000h0m0s
+        cert:
+          duration:  500h0m0s
+    caBundleSecretName: ca-custom-kuttl

@@ -2,4 +2,4 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:
   - script: |
-      oc kustomize ../../../../config/samples/tls | oc apply -n $NAMESPACE -f -
+      oc kustomize ../../../../config/samples/tls/custom_ca_certs | oc apply -n $NAMESPACE -f -

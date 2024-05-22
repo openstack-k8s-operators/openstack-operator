@@ -7,7 +7,6 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: rootca-internal-custom
-  namespace: openstack-kuttl-tests
 spec:
   ca:
     secretName: rootca-internal-custom
