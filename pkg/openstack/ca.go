@@ -17,7 +17,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"golang.org/x/exp/slices"
@@ -100,12 +99,24 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	issuerLabels := map[string]string{certmanager.RootCAIssuerPublicLabel: ""}
 	issuerAnnotations := getIssuerAnnotations(&instance.Spec.TLS.Ingress.Cert)
 	if !instance.Spec.TLS.Ingress.Ca.IsCustomIssuer() {
+		// remove issuerLabels from any custom issuer in the namespace.
+		err := removeIssuerLabel(
+			ctx,
+			helper,
+			corev1.IngressCaName,
+			instance.Namespace,
+			issuerLabels,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
 		ctrlResult, err = ensureRootCA(
 			ctx,
 			instance,
 			helper,
 			issuerReq,
-			tls.DefaultCAPrefix+string(service.EndpointPublic),
+			corev1.IngressCaName,
 			issuerLabels,
 			issuerAnnotations,
 			bundle,
@@ -166,12 +177,24 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	issuerLabels = map[string]string{certmanager.RootCAIssuerInternalLabel: ""}
 	issuerAnnotations = getIssuerAnnotations(&instance.Spec.TLS.PodLevel.Internal.Cert)
 	if !instance.Spec.TLS.PodLevel.Internal.Ca.IsCustomIssuer() {
+		// remove issuerLabels from any custom issuer in the namespace.
+		err := removeIssuerLabel(
+			ctx,
+			helper,
+			corev1.InternalCaName,
+			instance.Namespace,
+			issuerLabels,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
 		ctrlResult, err = ensureRootCA(
 			ctx,
 			instance,
 			helper,
 			issuerReq,
-			tls.DefaultCAPrefix+string(service.EndpointInternal),
+			corev1.InternalCaName,
 			issuerLabels,
 			issuerAnnotations,
 			bundle,
@@ -232,6 +255,18 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	issuerLabels = map[string]string{certmanager.RootCAIssuerLibvirtLabel: ""}
 	issuerAnnotations = getIssuerAnnotations(&instance.Spec.TLS.PodLevel.Libvirt.Cert)
 	if !instance.Spec.TLS.PodLevel.Libvirt.Ca.IsCustomIssuer() {
+		// remove issuerLabels from any custom issuer in the namespace.
+		err := removeIssuerLabel(
+			ctx,
+			helper,
+			corev1.LibvirtCaName,
+			instance.Namespace,
+			issuerLabels,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
 		ctrlResult, err = ensureRootCA(
 			ctx,
 			instance,
@@ -297,6 +332,18 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	issuerLabels = map[string]string{certmanager.RootCAIssuerOvnDBLabel: ""}
 	issuerAnnotations = getIssuerAnnotations(&instance.Spec.TLS.PodLevel.Ovn.Cert)
 	if !instance.Spec.TLS.PodLevel.Ovn.Ca.IsCustomIssuer() {
+		// remove issuerLabels from any custom issuer in the namespace.
+		err := removeIssuerLabel(
+			ctx,
+			helper,
+			corev1.OvnDbCaName,
+			instance.Namespace,
+			issuerLabels,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
 		ctrlResult, err = ensureRootCA(
 			ctx,
 			instance,
@@ -765,8 +812,21 @@ func addIssuerLabelAnnotation(
 	labels map[string]string,
 	annotations map[string]string,
 ) (string, error) {
+	// remove issuer labels from all issuers in the namespace,
+	// except the one passed to the func.
+	err := removeIssuerLabel(
+		ctx,
+		helper,
+		name,
+		namespace,
+		labels,
+	)
+	if err != nil {
+		return "", err
+	}
+
 	var caCertSecretName string
-	// get  issuer
+	// get issuer
 	issuer, err := certmanager.GetIssuerByName(
 		ctx,
 		helper,
@@ -785,31 +845,83 @@ func addIssuerLabelAnnotation(
 	// merge annotations
 	issuer.Annotations = util.MergeMaps(issuer.Annotations, annotations)
 
-	// patch issuer
-	patch := client.MergeFrom(beforeIssuer)
-	diff, err := patch.Data(issuer)
+	err = patchIssuer(ctx, helper, beforeIssuer, issuer)
 	if err != nil {
 		return caCertSecretName, err
 	}
 
+	return caCertSecretName, nil
+}
+
+// remove issuer labels from all issuers in the namespace,
+// except the one passed to the func.
+func removeIssuerLabel(
+	ctx context.Context,
+	helper *helper.Helper,
+	name string,
+	namespace string,
+	labels map[string]string,
+) error {
+	if len(labels) > 0 {
+		issuerList := &certmgrv1.IssuerList{}
+		listOpts := []client.ListOption{
+			client.InNamespace(namespace),
+			client.MatchingLabels(labels),
+		}
+
+		err := helper.GetClient().List(ctx, issuerList, listOpts...)
+		if err != nil {
+			return fmt.Errorf("error getting issuer by label: %w", err)
+		}
+
+		for _, issuer := range issuerList.Items {
+			if issuer.Name != name {
+				beforeIssuer := issuer.DeepCopyObject().(client.Object)
+				for k := range labels {
+					delete(issuer.Labels, k)
+				}
+
+				err = patchIssuer(ctx, helper, beforeIssuer, &issuer)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func patchIssuer(
+	ctx context.Context,
+	helper *helper.Helper,
+	beforeIssuer client.Object,
+	issuer *certmgrv1.Issuer,
+) error {
+	// patch issuer
+	patch := client.MergeFrom(beforeIssuer)
+	diff, err := patch.Data(issuer)
+	if err != nil {
+		return err
+	}
 	// Unmarshal patch data into a local map for logging
 	patchDiff := map[string]interface{}{}
 	if err := json.Unmarshal(diff, &patchDiff); err != nil {
-		return caCertSecretName, err
+		return err
 	}
 
 	if _, ok := patchDiff["metadata"]; ok {
 		err = helper.GetClient().Patch(ctx, issuer, patch)
 		if k8s_errors.IsConflict(err) {
-			return caCertSecretName, fmt.Errorf("error metadata update conflict: %w", err)
+			return fmt.Errorf("error metadata update conflict: %w", err)
 		} else if err != nil && !k8s_errors.IsNotFound(err) {
-			return caCertSecretName, fmt.Errorf("error metadata update failed: %w", err)
+			return fmt.Errorf("error metadata update failed: %w", err)
 		}
 
-		helper.GetLogger().Info(fmt.Sprintf("Issuer %s labels patched - diff %+v", name, patchDiff["metadata"]))
+		helper.GetLogger().Info(fmt.Sprintf("Issuer %s labels patched - diff %+v", issuer.Name, patchDiff["metadata"]))
 	}
 
-	return caCertSecretName, nil
+	return nil
 }
 
 func getIssuerAnnotations(certConfig *corev1.CertConfig) map[string]string {
