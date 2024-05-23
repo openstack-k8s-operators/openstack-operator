@@ -55,7 +55,12 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	// add selector to service overrides
 	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
-		for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
+		eps := []service.Endpoint{service.EndpointPublic, service.EndpointInternal}
+		// An Edge glanceAPI has an internal endpoint only
+		if glanceAPI.Type == glancev1.APIEdge {
+			eps = []service.Endpoint{service.EndpointInternal}
+		}
+		for _, endpointType := range eps {
 			if glanceAPI.Override.Service == nil {
 				glanceAPI.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
 			}
@@ -122,8 +127,11 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			}
 			// set service overrides
 			glanceAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-			// update TLS cert secret
-			glanceAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+			// update TLS cert secret, but skip Public endpoint for Edge
+			// instances
+			if glanceAPI.Type != glancev1.APIEdge {
+				glanceAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+			}
 			glanceAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 
 			// let's keep track of changes for any instance, but return
