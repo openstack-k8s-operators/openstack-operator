@@ -6892,6 +6892,9 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      enableSecureRBAC:
+                        default: true
+                        type: boolean
                       memcachedInstance:
                         default: memcached
                         type: string
@@ -7010,12 +7013,6 @@ spec:
                         type: object
                       secret:
                         type: string
-                      secureRBACEnforceNewDefaults:
-                        default: true
-                        type: boolean
-                      secureRBACEnforceScope:
-                        default: false
-                        type: boolean
                       tls:
                         properties:
                           api:
