@@ -8,15 +8,20 @@ commands:
   - script: |
       echo "Get fingerprints of all service certs"
       echo "PWD $PWD"
-      oc exec -i openstackclient -n $NAMESPACE -- bash -s < tests/kuttl/common/osp_endpoint_finger_prints.sh > /tmp/endpoint_fingerprints_after
+      BASE_DIR=$(pwd)
+      SCRIPT_PATH="$BASE_DIR/out/operator/openstack-operator/tests/kuttl/common/osp_endpoint_finger_prints.sh"
+      echo "Listing current directory contents"
+      ls -l
+      echo "Listing $(dirname $SCRIPT_PATH) directory contents"
+      ls -l $(dirname $SCRIPT_PATH)
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < $SCRIPT_PATH > /tmp/endpoint_fingerprints_after
 
   - script: |
-      echo "check fingerprints"
+      echo "Check fingerprints"
       while IFS= read -r fp; do
         if grep -qF "$fp" /tmp/endpoint_fingerprints_before; then
-          echo "cert not rotated - $fp"
+          echo "Cert not rotated - $fp"
           exit 1
         fi
       done < "/tmp/endpoint_fingerprints_after"
       exit 0
-
