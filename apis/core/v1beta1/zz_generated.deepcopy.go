@@ -363,8 +363,18 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.EdpmNeutronDhcpAgentImage != nil {
+		in, out := &in.EdpmNeutronDhcpAgentImage, &out.EdpmNeutronDhcpAgentImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.EdpmNeutronMetadataAgentImage != nil {
 		in, out := &in.EdpmNeutronMetadataAgentImage, &out.EdpmNeutronMetadataAgentImage
+		*out = new(string)
+		**out = **in
+	}
+	if in.EdpmNeutronOvnAgentImage != nil {
+		in, out := &in.EdpmNeutronOvnAgentImage, &out.EdpmNeutronOvnAgentImage
 		*out = new(string)
 		**out = **in
 	}

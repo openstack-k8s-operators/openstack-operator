@@ -103,7 +103,11 @@ spec:
                     type: string
                   edpmMultipathdImage:
                     type: string
+                  edpmNeutronDhcpAgentImage:
+                    type: string
                   edpmNeutronMetadataAgentImage:
+                    type: string
+                  edpmNeutronOvnAgentImage:
                     type: string
                   edpmNeutronSriovAgentImage:
                     type: string
@@ -294,7 +298,11 @@ spec:
                       type: string
                     edpmMultipathdImage:
                       type: string
+                    edpmNeutronDhcpAgentImage:
+                      type: string
                     edpmNeutronMetadataAgentImage:
+                      type: string
+                    edpmNeutronOvnAgentImage:
                       type: string
                     edpmNeutronSriovAgentImage:
                       type: string
@@ -454,7 +462,11 @@ spec:
                     type: string
                   edpmMultipathdImage:
                     type: string
+                  edpmNeutronDhcpAgentImage:
+                    type: string
                   edpmNeutronMetadataAgentImage:
+                    type: string
+                  edpmNeutronOvnAgentImage:
                     type: string
                   edpmNeutronSriovAgentImage:
                     type: string
