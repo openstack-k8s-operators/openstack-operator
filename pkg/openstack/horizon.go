@@ -22,6 +22,11 @@ import (
 
 // ReconcileHorizon -
 func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+	const (
+		HorizonHSTSHeaderAnnotation      string = "haproxy.router.openshift.io/hsts_header"
+		HorizonHSTSHeaderAnnotationValue string = "max-age=31536000;includeSubDomains;preload"
+	)
+
 	horizon := &horizonv1.Horizon{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "horizon",
@@ -73,6 +78,14 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		return ctrl.Result{}, err
 	}
 
+	// Set HSTS Headers for Horizon Route
+	//
+	apiOverrides := instance.Spec.Horizon.APIOverride
+
+	if _, ok := apiOverrides.Route.Annotations[HorizonHSTSHeaderAnnotation]; !ok {
+		apiOverrides.Route.Annotations[HorizonHSTSHeaderAnnotation] = HorizonHSTSHeaderAnnotationValue
+	}
+
 	// make sure to get to EndpointConfig when all service got created
 	if len(svcs.Items) == 1 {
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
@@ -82,7 +95,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			horizon,
 			svcs,
 			serviceOverrides,
-			instance.Spec.Horizon.APIOverride,
+			apiOverrides,
 			corev1beta1.OpenStackControlPlaneExposeHorizonReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 			tls.API{
@@ -117,7 +130,6 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 		return nil
 	})
-
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneHorizonReadyCondition,
