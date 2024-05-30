@@ -83,7 +83,6 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 	//
 	apiOverrides := instance.Spec.Horizon.APIOverride
 
-	// Initialize Route if nil
 	if apiOverrides.Route == nil {
 		apiOverrides.Route = &route.OverrideSpec{}
 	}
@@ -92,7 +91,6 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		apiOverrides.Route.EmbeddedLabelsAnnotations = &route.EmbeddedLabelsAnnotations{}
 	}
 
-	// Initialize the annotations map if it is nil
 	if apiOverrides.Route.Annotations == nil {
 		apiOverrides.Route.Annotations = map[string]string{}
 	}
