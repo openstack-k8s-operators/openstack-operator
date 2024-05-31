@@ -372,6 +372,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"glance": map[string]interface{}{
 			"enabled": false,
 		},
+		"horizon": map[string]interface{}{
+			"enabled": true,
+		},
 		"cinder": map[string]interface{}{
 			"enabled": false,
 		},

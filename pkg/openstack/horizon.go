@@ -6,6 +6,7 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
@@ -81,6 +82,18 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 	// Set HSTS Headers for Horizon Route
 	//
 	apiOverrides := instance.Spec.Horizon.APIOverride
+
+	if apiOverrides.Route == nil {
+		apiOverrides.Route = &route.OverrideSpec{}
+	}
+
+	if apiOverrides.Route.EmbeddedLabelsAnnotations == nil {
+		apiOverrides.Route.EmbeddedLabelsAnnotations = &route.EmbeddedLabelsAnnotations{}
+	}
+
+	if apiOverrides.Route.Annotations == nil {
+		apiOverrides.Route.Annotations = map[string]string{}
+	}
 
 	if _, ok := apiOverrides.Route.Annotations[HorizonHSTSHeaderAnnotation]; !ok {
 		apiOverrides.Route.Annotations[HorizonHSTSHeaderAnnotation] = HorizonHSTSHeaderAnnotationValue
