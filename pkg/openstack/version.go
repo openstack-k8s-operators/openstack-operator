@@ -153,6 +153,8 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			SwiftObjectImage:              getImg(instance.Spec.CustomContainerImages.SwiftObjectImage, defaults.SwiftObjectImage),
 			SwiftProxyImage:               getImg(instance.Spec.CustomContainerImages.SwiftProxyImage, defaults.SwiftProxyImage),
 			TelemetryNodeExporterImage:    getImg(instance.Spec.CustomContainerImages.TelemetryNodeExporterImage, defaults.TelemetryNodeExporterImage),
+			TestTempestImage:              getImg(instance.Spec.CustomContainerImages.TestTempestImage, defaults.TestTempestImage),
+			TestTobikoImage:               getImg(instance.Spec.CustomContainerImages.TestTobikoImage, defaults.TestTobikoImage),
 		}}
 	if containerImages.CinderVolumeImages == nil {
 		containerImages.CinderVolumeImages = make(map[string]*string)

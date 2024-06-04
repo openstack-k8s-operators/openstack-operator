@@ -201,6 +201,10 @@ spec:
                     type: string
                   telemetryNodeExporterImage:
                     type: string
+                  testTempestImage:
+                    type: string
+                  testTobikoImage:
+                    type: string
                 type: object
               targetVersion:
                 type: string
@@ -394,6 +398,10 @@ spec:
                       type: string
                     telemetryNodeExporterImage:
                       type: string
+                    testTempestImage:
+                      type: string
+                    testTobikoImage:
+                      type: string
                   type: object
                 type: object
               containerImages:
@@ -559,6 +567,10 @@ spec:
                   swiftProxyImage:
                     type: string
                   telemetryNodeExporterImage:
+                    type: string
+                  testTempestImage:
+                    type: string
+                  testTobikoImage:
                     type: string
                 type: object
               deployedVersion:

@@ -95,6 +95,7 @@ var (
 	octaviaCsv     = flag.String("octavia-csv", "", "Octavia CSV filename")
 	designateCsv   = flag.String("designate-csv", "", "Designate CSV filename")
 	barbicanCsv    = flag.String("barbican-csv", "", "Barbican CSV filename")
+	testCsv        = flag.String("test-csv", "", "Test Operator CSV filename")
 	csvOverrides   = flag.String("csv-overrides", "", "CSV like string with punctual changes that will be recursively applied (if possible)")
 	importEnvFiles = flag.String("import-env-files", "", "Comma separated list of file names to read default operator ENVs from. Used for inter-bundle ENV merging.")
 	exportEnvFile  = flag.String("export-env-file", "", "Name the external file to write operator ENVs to. Used for inter-bundle ENV merging.")
@@ -142,6 +143,7 @@ func main() {
 		*octaviaCsv,
 		*designateCsv,
 		*barbicanCsv,
+		*testCsv,
 	}
 
 	csvVersion := os.Getenv("CSV_VERSION")

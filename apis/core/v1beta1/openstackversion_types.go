@@ -145,6 +145,8 @@ type ContainerTemplate struct {
 	SwiftObjectImage              *string `json:"swiftObjectImage,omitempty"`
 	SwiftProxyImage               *string `json:"swiftProxyImage,omitempty"`
 	TelemetryNodeExporterImage    *string `json:"telemetryNodeExporterImage,omitempty"`
+	TestTempestImage              *string `json:"testTempestImage,omitempty"`
+	TestTobikoImage               *string `json:"testTobikoImage,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion

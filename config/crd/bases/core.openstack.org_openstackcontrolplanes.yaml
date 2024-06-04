@@ -17507,6 +17507,10 @@ spec:
                     type: string
                   telemetryNodeExporterImage:
                     type: string
+                  testTempestImage:
+                    type: string
+                  testTobikoImage:
+                    type: string
                 type: object
               deployedOVNVersion:
                 type: string

@@ -242,3 +242,7 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneTelemetryReady
+  - message: OpenStackControlPlane Test Operator CM is available
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneTestCMReadyCondition
