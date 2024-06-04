@@ -140,6 +140,9 @@ const (
 
 	// OpenStackControlPlaneExposeBarbicanReadyCondition Status=True condition which indicates if Barbican is exposed via a route
 	OpenStackControlPlaneExposeBarbicanReadyCondition condition.Type = "OpenStackControlPlaneExposeBarbicanReady"
+
+	// OpenStackControlPlaneTestCMReadyCondition Status=True condition which indicates if Test operator CM is ready
+	OpenStackControlPlaneTestCMReadyCondition condition.Type = "OpenStackControlPlaneTestCMReadyCondition"
 )
 
 // Common Messages used by API objects.
@@ -429,6 +432,12 @@ const (
 
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCustomTLSReadyErrorMessage = "OpenStackControlPlane custom TLS cert secret %s error occured %s"
+
+	// OpenStackControlPlaneTestCMReadyErrorMessage
+	OpenStackControlPlaneTestCMReadyErrorMessage = "OpenStackControlPlane Test Operator CM error occured %s"
+
+	// OpenStackControlPlaneTestCMReadyMessage
+	OpenStackControlPlaneTestCMReadyMessage = "OpenStackControlPlane Test Operator CM is available"
 )
 
 // Version Conditions used by API objects.
