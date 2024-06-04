@@ -52,6 +52,7 @@ bin/csv-merger \
     --octavia-csv=$CSV_DIR/octavia-operator.clusterserviceversion.yaml \
     --designate-csv=$CSV_DIR/designate-operator.clusterserviceversion.yaml \
     --barbican-csv=$CSV_DIR/barbican-operator.clusterserviceversion.yaml \
+    --test-csv=$CSV_DIR/test-operator.clusterserviceversion.yaml \
     --base-csv=config/manifests/bases/openstack-operator.clusterserviceversion.yaml | tee "$EXTRACT_DIR/out.yaml"
 
 # cleanup our temporary dir used for extraction
