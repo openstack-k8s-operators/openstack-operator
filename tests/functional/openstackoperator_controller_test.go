@@ -558,6 +558,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 		It("should have default timeout for the routes set", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
+			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.cinder.openstack.org/timeout", "60s"))
 		})
 
 		It("should create selfsigned issuer and public+internal CA and issuer", func() {

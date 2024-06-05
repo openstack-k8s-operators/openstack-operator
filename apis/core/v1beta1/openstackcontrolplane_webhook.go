@@ -401,10 +401,22 @@ func (r *OpenStackControlPlane) Default() {
 }
 
 // Helper function to initialize overrideSpec object. Could be moved to lib-common.
-func initializeOverrideSpec(override **route.OverrideSpec, anno map[string]string) {
+func initializeOverrideSpec(override **route.OverrideSpec, initAnnotations bool) {
 	if *override == nil {
 		*override = &route.OverrideSpec{}
 	}
+	if initAnnotations {
+		if (*override).EmbeddedLabelsAnnotations == nil {
+			(*override).EmbeddedLabelsAnnotations = &route.EmbeddedLabelsAnnotations{}
+		}
+		if (*override).Annotations == nil {
+			(*override).Annotations = make(map[string]string)
+		}
+	}
+}
+
+func setOverrideSpec(override **route.OverrideSpec, anno map[string]string) {
+	initializeOverrideSpec(override, false)
 	(*override).AddAnnotation(anno)
 }
 
@@ -412,6 +424,8 @@ func initializeOverrideSpec(override **route.OverrideSpec, anno map[string]strin
 func (r *OpenStackControlPlane) DefaultServices() {
 	// Cinder
 	r.Spec.Cinder.Template.Default()
+	initializeOverrideSpec(&r.Spec.Cinder.APIOverride.Route, true)
+	r.Spec.Cinder.Template.SetDefaultRouteAnnotations(r.Spec.Cinder.APIOverride.Route.Annotations)
 
 	// Galera
 	for key, template := range r.Spec.Galera.Templates {
@@ -459,7 +473,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Neutron
 	r.Spec.Neutron.Template.Default()
-	initializeOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
+	setOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
 
 	// Nova
 	r.Spec.Nova.Template.Default()
