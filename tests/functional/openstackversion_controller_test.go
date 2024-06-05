@@ -52,6 +52,18 @@ var _ = Describe("OpenStackOperator controller", func() {
 				names.OpenStackVersionName,
 			)
 		})
+
+		It("should fail to create more than one OpenStackVersion", func() {
+
+			instance := &corev1.OpenStackVersion{}
+			instance.ObjectMeta.Namespace = names.Namespace
+			instance.Name = "foo"
+			Eventually(func(g Gomega) {
+				g.Expect(k8sClient.Create(ctx, instance)).Should(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+		})
+
 		It("should initialize container images", func() {
 			Eventually(func(g Gomega) {
 
