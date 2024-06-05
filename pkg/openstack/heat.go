@@ -154,6 +154,11 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Heat.Template.HeatCfnAPI.DeepCopyInto(&heat.Spec.HeatCfnAPI.HeatCfnAPITemplateCore)
 		instance.Spec.Heat.Template.HeatEngine.DeepCopyInto(&heat.Spec.HeatEngine.HeatEngineTemplateCore)
 
+		if heat.Spec.DatabaseInstance == "" {
+			//heat.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
+			heat.Spec.DatabaseInstance = "openstack" //FIXME: see above
+		}
+
 		heat.Spec.HeatAPI.ContainerImage = *version.Status.ContainerImages.HeatAPIImage
 		heat.Spec.HeatCfnAPI.ContainerImage = *version.Status.ContainerImages.HeatCfnapiImage
 		heat.Spec.HeatEngine.ContainerImage = *version.Status.ContainerImages.HeatEngineImage
