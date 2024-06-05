@@ -4734,6 +4734,7 @@ spec:
                         default: heat
                         type: string
                       databaseInstance:
+                        default: openstack
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
