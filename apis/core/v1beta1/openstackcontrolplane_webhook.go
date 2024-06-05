@@ -479,6 +479,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Manila
 	r.Spec.Manila.Template.Default()
+	initializeOverrideSpec(&r.Spec.Manila.APIOverride.Route, true)
+	r.Spec.Manila.Template.SetDefaultRouteAnnotations(r.Spec.Manila.APIOverride.Route.Annotations)
 
 	// Memcached
 	for key, template := range r.Spec.Memcached.Templates {
