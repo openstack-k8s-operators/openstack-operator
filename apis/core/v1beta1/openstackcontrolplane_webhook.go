@@ -443,6 +443,22 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// Glance
 	r.Spec.Glance.Template.Default()
 
+	// initialize the main APIOverride struct
+	if r.Spec.Glance.APIOverride == nil {
+		r.Spec.Glance.APIOverride = map[string]Override{}
+	}
+	for name, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+		var override Override
+		var ok bool
+
+		if override, ok = r.Spec.Glance.APIOverride[name]; !ok {
+			override = Override{}
+		}
+		initializeOverrideSpec(&override.Route, true)
+		glanceAPI.SetDefaultRouteAnnotations(override.Route.Annotations)
+		r.Spec.Glance.APIOverride[name] = override
+	}
+
 	// Ironic
 	// Default Secret
 	if r.Spec.Ironic.Template.Secret == "" {

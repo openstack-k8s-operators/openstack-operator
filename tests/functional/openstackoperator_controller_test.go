@@ -560,6 +560,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
 			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.cinder.openstack.org/timeout", "60s"))
+			for name := range OSCtlplane.Spec.Glance.Template.GlanceAPIs {
+				Expect(OSCtlplane.Spec.Glance.APIOverride[name].Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+				Expect(OSCtlplane.Spec.Glance.APIOverride[name].Route.Annotations).Should(HaveKeyWithValue("api.glance.openstack.org/timeout", "60s"))
+			}
 		})
 
 		It("should create selfsigned issuer and public+internal CA and issuer", func() {
