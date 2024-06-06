@@ -557,13 +557,18 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// Default route timeouts are set
 		It("should have default timeout for the routes set", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
+			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.cinder.openstack.org/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Glance.Template).Should(Not(BeNil()))
 			for name := range OSCtlplane.Spec.Glance.Template.GlanceAPIs {
 				Expect(OSCtlplane.Spec.Glance.APIOverride[name].Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 				Expect(OSCtlplane.Spec.Glance.APIOverride[name].Route.Annotations).Should(HaveKeyWithValue("api.glance.openstack.org/timeout", "60s"))
 			}
+			Expect(OSCtlplane.Spec.Manila.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.manila.openstack.org/timeout", "60s"))
 		})
@@ -727,6 +732,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			DeferCleanup(
 				th.DeleteInstance,
 				CreateOpenStackControlPlane(names.OpenStackControlplaneName, GetDefaultOpenStackControlPlaneSpec()),
@@ -770,6 +776,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// Default route timeouts are set
 		It("should have default timeout for the routes set", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
 		})
 
@@ -1015,6 +1023,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			spec["tls"] = GetTLSeCustomIssuerSpec()
 			DeferCleanup(
@@ -1141,6 +1150,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			DeferCleanup(k8sClient.Delete, ctx,
 				th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")}))

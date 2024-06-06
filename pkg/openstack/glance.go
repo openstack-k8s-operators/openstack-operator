@@ -47,6 +47,10 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Glance.Template == nil {
+		instance.Spec.Glance.Template = &glancev1.GlanceSpecCore{}
+	}
+
 	// When component services got created check if there is the need to create a route
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "glance", Namespace: instance.Namespace}, glance); err != nil {
 		if !k8s_errors.IsNotFound(err) {

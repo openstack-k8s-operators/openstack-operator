@@ -44,6 +44,10 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Designate.Template == nil {
+		instance.Spec.Designate.Template = &designatev1.DesignateSpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Designate.Template.DesignateAPI.Override.Service == nil {

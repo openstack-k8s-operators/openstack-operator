@@ -22,6 +22,7 @@ import (
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -48,7 +49,11 @@ func ReconcileRabbitMQs(
 	var err error
 	var status mqStatus
 
-	for name, spec := range instance.Spec.Rabbitmq.Templates {
+	if instance.Spec.Rabbitmq.Templates == nil {
+		instance.Spec.Rabbitmq.Templates = ptr.To(map[string]corev1beta1.RabbitmqTemplate{})
+	}
+
+	for name, spec := range *instance.Spec.Rabbitmq.Templates {
 		status, ctrlResult, err = reconcileRabbitMQ(ctx, instance, version, helper, name, spec)
 
 		switch status {

@@ -42,6 +42,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 	Log := GetLogger(ctx)
 
+	if instance.Spec.Cinder.Template == nil {
+		instance.Spec.Cinder.Template = &cinderv1.CinderSpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Cinder.Template.CinderAPI.Override.Service == nil {

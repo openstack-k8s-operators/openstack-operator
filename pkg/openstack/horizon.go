@@ -46,6 +46,10 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Horizon.Template == nil {
+		instance.Spec.Horizon.Template = &horizonv1.HorizonSpecCore{}
+	}
+
 	// add selector to service overrides
 	serviceOverrides := map[service.Endpoint]service.RoutedOverrideSpec{}
 	if instance.Spec.Horizon.Template.Override.Service != nil {

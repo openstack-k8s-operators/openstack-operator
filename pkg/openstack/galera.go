@@ -42,7 +42,11 @@ func ReconcileGaleras(
 	var failures = []string{}
 	var inprogress = []string{}
 
-	for name, spec := range instance.Spec.Galera.Templates {
+	if instance.Spec.Galera.Templates == nil {
+		instance.Spec.Galera.Templates = ptr.To(map[string]mariadbv1.GaleraSpecCore{})
+	}
+
+	for name, spec := range *instance.Spec.Galera.Templates {
 		hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 		hostnameHeadless := fmt.Sprintf("%s-galera.%s.svc", name, instance.Namespace)
 
@@ -65,7 +69,7 @@ func ReconcileGaleras(
 			// at the initial deployment because there is no SST involved when the DB is bootstrapped
 			// as there are no data to be transferred yet.
 			Subject: &certmgrv1.X509Subject{
-				Organizations: []string{fmt.Sprintf("%s.cluster.local", instance.Namespace)},
+				Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, ClusterInternalDomain)},
 			},
 			Usages: []certmgrv1.KeyUsage{
 				"key encipherment",

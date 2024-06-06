@@ -53,6 +53,10 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Telemetry.Template == nil {
+		instance.Spec.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
+	}
+
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "telemetry", Namespace: instance.Namespace}, telemetry); err != nil {
 		if !k8s_errors.IsNotFound(err) {
 			return ctrl.Result{}, err

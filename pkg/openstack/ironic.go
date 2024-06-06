@@ -43,6 +43,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Ironic.Template == nil {
+		instance.Spec.Ironic.Template = &ironicv1.IronicSpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Ironic.Template.IronicAPI.Override.Service == nil {

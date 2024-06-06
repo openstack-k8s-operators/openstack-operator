@@ -41,6 +41,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Manila.Template == nil {
+		instance.Spec.Manila.Template = &manilav1.ManilaSpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Manila.Template.ManilaAPI.Override.Service == nil {

@@ -27,6 +27,9 @@ spec:
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
       specDescriptors:
+      - description: Barbican - Parameters related to the Barbican service
+        displayName: Barbican
+        path: barbican
       - description: APIOverride, provides the ability to override the generated manifest
           of several child resources.
         displayName: APIOverride
@@ -60,6 +63,9 @@ spec:
       - description: Template - Overrides to use when creating Cinder Resources
         displayName: Template
         path: cinder.template
+      - description: Designate - Parameters related to the Designate service
+        displayName: Designate
+        path: designate
       - description: APIOverride, provides the ability to override the generated manifest
           of several child resources.
         displayName: APIOverride
@@ -157,6 +163,9 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: horizon.apiOverride.tls
+      - description: Template - Overrides to use when creating the Horizon services
+        displayName: Template
+        path: horizon.template
       - description: Ironic - Parameters related to the Ironic services
         displayName: Ironic
         path: ironic
@@ -200,6 +209,9 @@ spec:
       - description: Template - Overrides to use when creating the Keystone service
         displayName: Template
         path: keystone.template
+      - description: Manila - Parameters related to the Manila service
+        displayName: Manila
+        path: manila
       - description: APIOverride, provides the ability to override the generated manifest
           of several child resources.
         displayName: APIOverride
@@ -212,6 +224,9 @@ spec:
         path: manila.enabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating Manila Resources
+        displayName: Template
+        path: manila.template
       - description: Memcached - Parameters related to the Memcached service
         displayName: Memcached
         path: memcached
@@ -272,6 +287,9 @@ spec:
       - description: Template - Overrides to use when creating the Nova services
         displayName: Template
         path: nova.template
+      - description: Octavia - Parameters related to the Octavia service
+        displayName: Octavia
+        path: octavia
       - description: APIOverride, provides the ability to override the generated manifest
           of several child resources.
         displayName: APIOverride
@@ -356,6 +374,9 @@ spec:
         path: storageClass
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes:StorageClass
+      - description: Swift - Parameters related to the Swift service
+        displayName: Swift
+        path: swift
       - description: Enabled - Whether Swift service should be deployed and managed
         displayName: Enabled
         path: swift.enabled
@@ -371,6 +392,9 @@ spec:
       - description: Template - Overrides to use when creating Swift Resources
         displayName: Template
         path: swift.template
+      - description: Telemetry - Parameters related to the OpenStack Telemetry services
+        displayName: Telemetry
+        path: telemetry
       - description: AlertmanagerOverride, provides the ability to override the generated
           manifest of several child resources.
         displayName: Alertmanager Override

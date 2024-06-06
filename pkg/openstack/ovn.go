@@ -31,6 +31,10 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 			err.Error()))
 	}
 
+	if instance.Spec.Ovn.Template == nil {
+		instance.Spec.Ovn.Template = &corev1beta1.OvnResources{}
+	}
+
 	OVNDBClustersReady, err := ReconcileOVNDbClusters(ctx, instance, version, helper)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNDBClusters")
