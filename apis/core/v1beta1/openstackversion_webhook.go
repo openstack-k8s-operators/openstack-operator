@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -24,10 +26,14 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	goClient "sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
+
+var versionWebhookClient goClient.Client
 
 // OpenStackVersionDefaults -
 type OpenStackVersionDefaults struct {
@@ -47,12 +53,15 @@ func SetupOpenStackVersionDefaults(defaults OpenStackVersionDefaults) {
 
 // SetupWebhookWithManager - register OpenStackVersion with the controller manager
 func (r *OpenStackVersion) SetupWebhookWithManager(mgr ctrl.Manager) error {
+
+	if versionWebhookClient == nil {
+		versionWebhookClient = mgr.GetClient()
+	}
+
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
 		Complete()
 }
-
-// TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
 //+kubebuilder:webhook:path=/mutate-core-openstack-org-v1beta1-openstackversion,mutating=true,failurePolicy=fail,sideEffects=None,groups=core.openstack.org,resources=openstackversions,verbs=create;update,versions=v1beta1,name=mopenstackversion.kb.io,admissionReviewVersions=v1
 
@@ -87,6 +96,43 @@ func (r *OpenStackVersion) ValidateCreate() (admission.Warnings, error) {
 				Field:    "TargetVersion",
 				BadValue: r.Spec.TargetVersion,
 				Detail:   "Invalid value: " + r.Spec.TargetVersion + " must equal available version.",
+			},
+		)
+	}
+
+	versionList := &OpenStackVersionList{}
+
+	listOpts := []client.ListOption{
+		client.InNamespace(r.Namespace),
+	}
+
+	if err := versionWebhookClient.List(context.TODO(), versionList, listOpts...); err != nil {
+
+		return nil, apierrors.NewForbidden(
+			schema.GroupResource{
+				Group:    GroupVersion.WithKind("OpenStackVersion").Group,
+				Resource: GroupVersion.WithKind("OpenStackVersion").Kind,
+			}, r.GetName(), &field.Error{
+				Type:     field.ErrorTypeForbidden,
+				Field:    "",
+				BadValue: r.Spec.TargetVersion,
+				Detail:   err.Error(),
+			},
+		)
+
+	}
+
+	if len(versionList.Items) >= 1 {
+
+		return nil, apierrors.NewForbidden(
+			schema.GroupResource{
+				Group:    GroupVersion.WithKind("OpenStackVersion").Group,
+				Resource: GroupVersion.WithKind("OpenStackVersion").Kind,
+			}, r.GetName(), &field.Error{
+				Type:     field.ErrorTypeForbidden,
+				Field:    "",
+				BadValue: r.Spec.TargetVersion,
+				Detail:   "Only one OpenStackVersion instance is supported at this time.",
 			},
 		)
 	}
