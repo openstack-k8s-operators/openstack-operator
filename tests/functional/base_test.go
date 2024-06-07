@@ -254,10 +254,13 @@ func OpenStackVersionConditionGetter(name types.NamespacedName) condition.Condit
 	return instance.Status.Conditions
 }
 
-func OpenStackVersionRemoveFinalizer(ctx context.Context, name types.NamespacedName) error {
-	instance := GetOpenStackVersion(name)
-	instance.SetFinalizers([]string{})
-	return th.K8sClient.Update(ctx, instance)
+func OpenStackVersionRemoveFinalizer(ctx context.Context, name types.NamespacedName) {
+	Eventually(func(g Gomega) {
+		instance := GetOpenStackVersion(name)
+		instance.SetFinalizers([]string{})
+		g.Expect(th.K8sClient.Update(ctx, instance)).Should(Succeed())
+
+	}, timeout, interval).Should(Succeed())
 }
 
 func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {
