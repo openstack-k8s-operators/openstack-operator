@@ -5,6 +5,13 @@ metadata:
 spec:
   secret: osp-secret
   storageClass: local-storage
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
+    node-role.kubernetes.io/master: ""
+    node-role.kubernetes.io/control-plane: ""
+    beta.kubernetes.io/os: linux
+    beta.kubernetes.io/arch: amd64
+    kubernetes.io/arch: amd64
   dns:
     template:
       override:
