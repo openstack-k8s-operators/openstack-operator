@@ -566,6 +566,10 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 60
+                        minimum: 10
+                        type: integer
                       cinderAPI:
                         properties:
                           customServiceConfig:
@@ -3501,6 +3505,10 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 60
+                        minimum: 1
+                        type: integer
                       customServiceConfig:
                         type: string
                       customServiceConfigSecrets:
@@ -4281,6 +4289,9 @@ spec:
                       glanceAPIs:
                         additionalProperties:
                           properties:
+                            apiTimeout:
+                              minimum: 1
+                              type: integer
                             containerImage:
                               type: string
                             customServiceConfig:
@@ -7161,6 +7172,10 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 60
+                        minimum: 10
+                        type: integer
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -10377,7 +10392,6 @@ spec:
                       lbMgmtNetwork:
                         default:
                           manageLbMgmtNetworks: true
-                          subnetIpVersion: 4
                         properties:
                           availabilityZones:
                             items:
@@ -10386,9 +10400,6 @@ spec:
                           manageLbMgmtNetworks:
                             default: true
                             type: boolean
-                          subnetIpVersion:
-                            default: 4
-                            type: integer
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -10615,6 +10626,10 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          octaviaProviderSubnetCIDR:
+                            type: string
+                          octaviaProviderSubnetGateway:
+                            type: string
                           passwordSelectors:
                             default:
                               service: OctaviaPassword
@@ -10740,6 +10755,10 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          octaviaProviderSubnetCIDR:
+                            type: string
+                          octaviaProviderSubnetGateway:
+                            type: string
                           passwordSelectors:
                             default:
                               service: OctaviaPassword
@@ -10810,6 +10829,9 @@ spec:
                         - secret
                         - serviceAccount
                         type: object
+                      octaviaNetworkAttachment:
+                        default: octavia
+                        type: string
                       octaviaWorker:
                         properties:
                           amphoraCustomFlavors:
@@ -10865,6 +10887,10 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          octaviaProviderSubnetCIDR:
+                            type: string
+                          octaviaProviderSubnetGateway:
+                            type: string
                           passwordSelectors:
                             default:
                               service: OctaviaPassword
@@ -11004,6 +11030,7 @@ spec:
                     - apacheContainerImage
                     - databaseInstance
                     - octaviaAPI
+                    - octaviaNetworkAttachment
                     - rabbitMqClusterName
                     - secret
                     type: object
