@@ -17,6 +17,7 @@ limitations under the License.
 package functional_test
 
 import (
+	"errors"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
@@ -27,6 +28,7 @@ import (
 
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	k8s_corev1 "k8s.io/api/core/v1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {
@@ -45,6 +47,17 @@ var _ = Describe("OpenStackOperator controller", func() {
 				th.DeleteInstance,
 				CreateOpenStackVersion(names.OpenStackVersionName, GetDefaultOpenStackVersionSpec()),
 			)
+
+			// Ensure that the version instance is not marked new any more
+			// to avoid racing between the below cleanup removing the finalizer
+			// and the controller adding the finalizer to the new instance.
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionInitialized,
+				k8s_corev1.ConditionTrue,
+			)
+
 			// we remove the finalizer as this is needed without the Controlplane
 			DeferCleanup(
 				OpenStackVersionRemoveFinalizer,
@@ -58,9 +71,16 @@ var _ = Describe("OpenStackOperator controller", func() {
 			instance := &corev1.OpenStackVersion{}
 			instance.ObjectMeta.Namespace = names.Namespace
 			instance.Name = "foo"
-			Eventually(func(g Gomega) {
-				g.Expect(k8sClient.Create(ctx, instance)).Should(Not(Succeed()))
-			}, timeout, interval).Should(Succeed())
+			err := k8sClient.Create(ctx, instance)
+
+			Expect(err).Should(HaveOccurred())
+			var statusError *k8s_errors.StatusError
+			Expect(errors.As(err, &statusError)).To(BeTrue())
+			Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackVersion"))
+			Expect(statusError.ErrStatus.Message).To(
+				ContainSubstring(
+					"Forbidden: Only one OpenStackVersion instance is supported at this time."),
+			)
 
 		})
 
