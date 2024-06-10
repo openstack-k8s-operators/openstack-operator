@@ -14,7 +14,7 @@ require (
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240603141403-1ad477d065a2
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240529155246-4afc791bbb82
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240605111219-06b9cbfa8a2e
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240608024258-319ec0e5a28b
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240604124031-77b21b330d86
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240605101720-9531b1fa7924
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240605063719-371c02948c8c
