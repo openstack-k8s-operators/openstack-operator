@@ -167,6 +167,14 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			r.Spec.Ovn.Enabled) {
 			reqs = "Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
 		}
+	case "Telemetry.Autoscaling":
+		if !(r.Spec.Galera.Enabled && r.Spec.Heat.Enabled && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "Galera, Heat, RabbitMQ, Keystone"
+		}
+	case "Telemetry.Ceilometer":
+		if !(r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "RabbitMQ, Keystone"
+		}
 	}
 
 	// If "reqs" is not the empty string, we have missing requirements
@@ -301,6 +309,20 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 	if r.Spec.Barbican.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Barbican"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("barbican").Child("enabled"), r.Spec.Barbican.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+	if r.Spec.Telemetry.Enabled && r.Spec.Telemetry.Template.Ceilometer.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Telemetry.Ceilometer"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("ceilometer").Child("enabled"),
+					     r.Spec.Telemetry.Template.Ceilometer.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+	if r.Spec.Telemetry.Enabled && r.Spec.Telemetry.Template.Autoscaling.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Telemetry.Autoscaling"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("autoscaling").Child("enabled"),
+					     r.Spec.Telemetry.Template.Autoscaling.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
