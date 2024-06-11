@@ -16,6 +16,7 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -227,11 +228,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Logging.DeepCopyInto(&telemetry.Spec.Logging)
 		instance.Spec.Telemetry.Template.MetricStorage.DeepCopyInto(&telemetry.Spec.MetricStorage)
 
-		// FIXME: need to switch telemetry operator enabled defaults to bool pointers to get around webhook defaulting issues
-		telemetry.Spec.Ceilometer.Enabled = instance.Spec.Telemetry.Template.Ceilometer.Enabled
-		telemetry.Spec.Autoscaling.Enabled = instance.Spec.Telemetry.Template.Autoscaling.Enabled
-		telemetry.Spec.Logging.Enabled = instance.Spec.Telemetry.Template.Logging.Enabled
-		telemetry.Spec.MetricStorage.Enabled = instance.Spec.Telemetry.Template.MetricStorage.Enabled
+		telemetry.Spec.Ceilometer.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Ceilometer.Enabled)
+		telemetry.Spec.Autoscaling.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Autoscaling.Enabled)
 
 		telemetry.Spec.Ceilometer.CentralImage = *version.Status.ContainerImages.CeilometerCentralImage
 		telemetry.Spec.Ceilometer.ComputeImage = *version.Status.ContainerImages.CeilometerComputeImage
