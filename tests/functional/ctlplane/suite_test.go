@@ -319,6 +319,8 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = (&corev1.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
+	err = (&dataplanev1beta1.OpenStackDataPlaneNodeSet{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
 
 	core_ctrl.SetupVersionDefaults()
 	openstack.SetupServiceOperatorDefaults()
