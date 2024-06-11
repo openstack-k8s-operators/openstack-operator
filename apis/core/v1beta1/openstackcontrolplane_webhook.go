@@ -401,10 +401,22 @@ func (r *OpenStackControlPlane) Default() {
 }
 
 // Helper function to initialize overrideSpec object. Could be moved to lib-common.
-func initializeOverrideSpec(override **route.OverrideSpec, anno map[string]string) {
+func initializeOverrideSpec(override **route.OverrideSpec, initAnnotations bool) {
 	if *override == nil {
 		*override = &route.OverrideSpec{}
 	}
+	if initAnnotations {
+		if (*override).EmbeddedLabelsAnnotations == nil {
+			(*override).EmbeddedLabelsAnnotations = &route.EmbeddedLabelsAnnotations{}
+		}
+		if (*override).Annotations == nil {
+			(*override).Annotations = make(map[string]string)
+		}
+	}
+}
+
+func setOverrideSpec(override **route.OverrideSpec, anno map[string]string) {
+	initializeOverrideSpec(override, false)
 	(*override).AddAnnotation(anno)
 }
 
@@ -412,6 +424,8 @@ func initializeOverrideSpec(override **route.OverrideSpec, anno map[string]strin
 func (r *OpenStackControlPlane) DefaultServices() {
 	// Cinder
 	r.Spec.Cinder.Template.Default()
+	initializeOverrideSpec(&r.Spec.Cinder.APIOverride.Route, true)
+	r.Spec.Cinder.Template.SetDefaultRouteAnnotations(r.Spec.Cinder.APIOverride.Route.Annotations)
 
 	// Galera
 	for key, template := range r.Spec.Galera.Templates {
@@ -428,6 +442,22 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Glance
 	r.Spec.Glance.Template.Default()
+
+	// initialize the main APIOverride struct
+	if r.Spec.Glance.APIOverride == nil {
+		r.Spec.Glance.APIOverride = map[string]Override{}
+	}
+	for name, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+		var override Override
+		var ok bool
+
+		if override, ok = r.Spec.Glance.APIOverride[name]; !ok {
+			override = Override{}
+		}
+		initializeOverrideSpec(&override.Route, true)
+		glanceAPI.SetDefaultRouteAnnotations(override.Route.Annotations)
+		r.Spec.Glance.APIOverride[name] = override
+	}
 
 	// Ironic
 	// Default Secret
@@ -449,6 +479,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Manila
 	r.Spec.Manila.Template.Default()
+	initializeOverrideSpec(&r.Spec.Manila.APIOverride.Route, true)
+	r.Spec.Manila.Template.SetDefaultRouteAnnotations(r.Spec.Manila.APIOverride.Route.Annotations)
 
 	// Memcached
 	for key, template := range r.Spec.Memcached.Templates {
@@ -459,7 +491,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 
 	// Neutron
 	r.Spec.Neutron.Template.Default()
-	initializeOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
+	setOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
 
 	// Nova
 	r.Spec.Nova.Template.Default()

@@ -80,16 +80,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 	}
 
-	// initialize the main APIOverride struct
-	if instance.Spec.Glance.APIOverride == nil {
-		instance.Spec.Glance.APIOverride = map[string]corev1beta1.Override{}
-	}
-
 	var changed = false
 	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
-		if _, ok := instance.Spec.Glance.APIOverride[name]; !ok {
-			instance.Spec.Glance.APIOverride[name] = corev1beta1.Override{}
-		}
 		// Retrieve the services by Label and filter on glanceAPI: for
 		// each instance we should get **only** the associated `SVCs`
 		// and not the whole list. As per the Glance design doc we know
@@ -109,6 +101,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			return ctrl.Result{}, err
 		}
 		// make sure to get to EndpointConfig when all service got created
+		// Webhook initializes APIOverride and always has at least the timeout override
 		if len(svcs.Items) == len(glanceAPI.Override.Service) {
 			endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 				ctx,
