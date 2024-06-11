@@ -298,6 +298,11 @@ func EnsureEndpointConfig(
 						Labels:      util.MergeMaps(ed.Labels, map[string]string{serviceCertSelector: ""}),
 						Usages:      nil,
 					}
+
+					addSubjNames := util.GetStringListFromMap(svc.Annotations, tls.AdditionalSubjectNamesKey)
+					if len(addSubjNames) > 0 {
+						certRequest.Hostnames = append(certRequest.Hostnames, addSubjNames...)
+					}
 					if instance.Spec.TLS.Ingress.Cert.Duration != nil {
 						certRequest.Duration = &instance.Spec.TLS.Ingress.Cert.Duration.Duration
 					}
@@ -342,6 +347,11 @@ func EnsureEndpointConfig(
 					Annotations: ed.Annotations,
 					Labels:      util.MergeMaps(ed.Labels, map[string]string{serviceCertSelector: ""}),
 					Usages:      nil,
+				}
+
+				addSubjNames := util.GetStringListFromMap(svc.Annotations, tls.AdditionalSubjectNamesKey)
+				if len(addSubjNames) > 0 {
+					certRequest.Hostnames = append(certRequest.Hostnames, addSubjNames...)
 				}
 				if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
 					certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
