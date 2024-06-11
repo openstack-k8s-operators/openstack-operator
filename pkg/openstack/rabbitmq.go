@@ -195,6 +195,8 @@ func reconcileRabbitMQ(
 	}
 
 	hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
+	hostnameHeadless := fmt.Sprintf("%s-nodes.%s.svc", name, instance.Namespace)
+
 	tlsCert := ""
 	commonName := fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain)
 
@@ -206,6 +208,10 @@ func reconcileRabbitMQ(
 			Hostnames: []string{
 				hostname,
 				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+				hostnameHeadless,
+				fmt.Sprintf("%s.%s", hostnameHeadless, ClusterInternalDomain),
+				fmt.Sprintf("*.%s", hostnameHeadless),
+				fmt.Sprintf("*.%s.%s", hostnameHeadless, ClusterInternalDomain),
 			},
 			Subject: &certmgrv1.X509Subject{
 				Organizations: []string{fmt.Sprintf("%s.%s", rabbitmq.Namespace, ClusterInternalDomain)},

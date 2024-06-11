@@ -43,6 +43,7 @@ func ReconcileGaleras(
 
 	for name, spec := range instance.Spec.Galera.Templates {
 		hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
+		hostnameHeadless := fmt.Sprintf("%s-galera.%s.svc", name, instance.Namespace)
 
 		// Galera gets always configured to support TLS connections.
 		// If TLS can/must be used is a per user configuration.
@@ -52,6 +53,10 @@ func ReconcileGaleras(
 			Hostnames: []string{
 				hostname,
 				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+				hostnameHeadless,
+				fmt.Sprintf("%s.%s", hostnameHeadless, ClusterInternalDomain),
+				fmt.Sprintf("*.%s", hostnameHeadless),
+				fmt.Sprintf("*.%s.%s", hostnameHeadless, ClusterInternalDomain),
 			},
 			// Note (dciabrin) from https://github.com/openstack-k8s-operators/openstack-operator/pull/678#issuecomment-1952459166
 			// the certificate created for galera should populate the 'organization' field,
