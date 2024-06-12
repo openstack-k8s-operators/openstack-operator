@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -26,10 +27,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
+
+var ctlplaneWebhookClient client.Client
 
 // OpenStackControlPlaneDefaults -
 type OpenStackControlPlaneDefaults struct {
@@ -49,6 +53,10 @@ func SetupOpenStackControlPlaneDefaults(defaults OpenStackControlPlaneDefaults) 
 
 // SetupWebhookWithManager sets up the Webhook with the Manager.
 func (r *OpenStackControlPlane) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	if ctlplaneWebhookClient == nil {
+		ctlplaneWebhookClient = mgr.GetClient()
+	}
+
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
 		Complete()
@@ -64,6 +72,38 @@ func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
+
+	ctlplaneList := &OpenStackControlPlaneList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(r.Namespace),
+	}
+	if err := ctlplaneWebhookClient.List(context.TODO(), ctlplaneList, listOpts...); err != nil {
+		return nil, apierrors.NewForbidden(
+			schema.GroupResource{
+				Group:    GroupVersion.WithKind("OpenStackControlPlane").Group,
+				Resource: GroupVersion.WithKind("OpenStackControlPlane").Kind,
+			}, r.GetName(), &field.Error{
+				Type:     field.ErrorTypeForbidden,
+				Field:    "",
+				BadValue: r.Name,
+				Detail:   err.Error(),
+			},
+		)
+	}
+	if len(ctlplaneList.Items) >= 1 {
+		return nil, apierrors.NewForbidden(
+			schema.GroupResource{
+				Group:    GroupVersion.WithKind("OpenStackControlPlane").Group,
+				Resource: GroupVersion.WithKind("OpenStackControlPlane").Kind,
+			}, r.GetName(), &field.Error{
+				Type:     field.ErrorTypeForbidden,
+				Field:    "",
+				BadValue: r.Name,
+				Detail:   "Only one OpenStackControlPlane instance per namespace is supported at this time.",
+			},
+		)
+	}
+
 	if err := r.ValidateCreateServices(basePath); err != nil {
 		allErrs = append(allErrs, err...)
 	}

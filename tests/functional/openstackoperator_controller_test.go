@@ -1673,6 +1673,41 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 var _ = Describe("OpenStackOperator Webhook", func() {
 
+	It("Blocks creating multiple ctlplane CRs in the same namespace", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+		spec["tls"] = GetTLSPublicSpec()
+		DeferCleanup(
+			th.DeleteInstance,
+			CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+		)
+
+		OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+		Expect(OSCtlplane.Labels).Should(Not(BeNil()))
+		Expect(OSCtlplane.Labels).Should(HaveKeyWithValue("core.openstack.org/openstackcontrolplane", ""))
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": OSCtlplane.GetNamespace(),
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Forbidden: Only one OpenStackControlPlane instance per namespace is supported at this time."),
+		)
+	})
+
 	It("Adds default label via defaulting webhook", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 		spec["tls"] = GetTLSPublicSpec()
