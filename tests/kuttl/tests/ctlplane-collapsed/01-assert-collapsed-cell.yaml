@@ -27,7 +27,6 @@ spec:
   glance:
     template:
       databaseInstance: openstack
-      storageRequest: 10G
       glanceAPIs:
         default:
           replicas: 1

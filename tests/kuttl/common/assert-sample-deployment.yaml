@@ -36,7 +36,6 @@ spec:
   glance:
     template:
       databaseInstance: openstack
-      storageRequest: 10G
       secret: osp-secret
       glanceAPIs:
         default:
