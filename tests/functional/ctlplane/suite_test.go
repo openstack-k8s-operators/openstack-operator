@@ -100,7 +100,7 @@ const (
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecs(t, "Controller Suite")
+	RunSpecs(t, "CtlPlane Controller Suite")
 }
 
 var _ = BeforeSuite(func() {
@@ -110,76 +110,77 @@ var _ = BeforeSuite(func() {
 	}))
 
 	ctx, cancel = context.WithCancel(context.TODO())
+	const gomod = "../../../go.mod"
 
-	routev1CRDs, err := test.GetOpenShiftCRDDir("route/v1", "../../go.mod")
+	routev1CRDs, err := test.GetOpenShiftCRDDir("route/v1", gomod)
 	Expect(err).ShouldNot(HaveOccurred())
 	mariaDBCRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/mariadb-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/mariadb-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	infraCRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/infra-operator/apis", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/infra-operator/apis", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	cinderv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/cinder-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/cinder-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	glancev1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/glance-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/glance-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	heatv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/heat-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/heat-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	horizonv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/horizon-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/horizon-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	ironicv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/ironic-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/ironic-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	keystonev1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/keystone-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/keystone-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	manilav1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/manila-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/manila-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	neutronv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/neutron-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/neutron-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	novav1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/nova-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/nova-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	octaviav1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/octavia-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/octavia-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	ovnv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/ovn-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/ovn-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	placementv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/placement-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/placement-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	swiftv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/swift-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/swift-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	telemetryv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/telemetry-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/telemetry-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	dataplanev1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/dataplane-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/dataplane-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	designatev1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/designate-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/designate-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	barbicanv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/barbican-operator/api", "../../go.mod", "bases")
+		"github.com/openstack-k8s-operators/barbican-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	rabbitmqv2CRDs, err := test.GetCRDDirFromModule(
-		"github.com/rabbitmq/cluster-operator/v2", "../../go.mod", "config/crd/bases")
+		"github.com/rabbitmq/cluster-operator/v2", gomod, "config/crd/bases")
 	Expect(err).ShouldNot(HaveOccurred())
-	certmgrv1CRDs, err := test.GetOpenShiftCRDDir("cert-manager/v1", "../../go.mod")
+	certmgrv1CRDs, err := test.GetOpenShiftCRDDir("cert-manager/v1", gomod)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "config", "crd", "bases"),
+			filepath.Join("..", "..", "..", "config", "crd", "bases"),
 			routev1CRDs,
 			mariaDBCRDs,
 			infraCRDs,
@@ -205,7 +206,7 @@ var _ = BeforeSuite(func() {
 		},
 		ErrorIfCRDPathMissing: true,
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
-			Paths: []string{filepath.Join("..", "..", "config", "webhook")},
+			Paths: []string{filepath.Join("..", "..", "..", "config", "webhook")},
 			// NOTE(gibi): if localhost is resolved to ::1 (ipv6) then starting
 			// the webhook fails as it try to parse the address as ipv4 and
 			// failing on the colons in ::1
@@ -271,7 +272,7 @@ var _ = BeforeSuite(func() {
 
 	//+kubebuilder:scaffold:scheme
 
-	logger = ctrl.Log.WithName("---Test---")
+	logger = ctrl.Log.WithName("---CtlPlane Test---")
 
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).NotTo(HaveOccurred())
