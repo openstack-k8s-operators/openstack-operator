@@ -45,7 +45,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 
 	Log.Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
-		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec)
+		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec.OpenStackClientSpecCore)
 
 		openstackclient.Spec.ContainerImage = *version.Status.ContainerImages.OpenstackClientImage
 
