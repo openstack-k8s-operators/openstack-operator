@@ -23,7 +23,7 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 
 	d := reflect.ValueOf(defaults).Elem()
 	for key, val := range envImages {
-		Log.Info(fmt.Sprintf("Initialize OpenStackVersion Image Defaults: %s", key))
+		//Log.Info(fmt.Sprintf("Initialize OpenStackVersion Image Defaults: %s", key))
 
 		r := regexp.MustCompile(`[A-Za-z0-9]+`)
 		matches := r.FindAllString(key, -1)
@@ -40,7 +40,7 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 			// format API so we adhere to go linting standards
 			fieldName = strings.Replace(fieldName, "Api", "API", -1)
 		}
-		Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
+		//Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
 		if field.IsValid() && field.CanSet() {
 			field.Set(reflect.ValueOf(val))
@@ -203,4 +203,48 @@ func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	return ctrl.Result{}, version, nil
+}
+
+func stringPointersEqual(a, b *string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
+}
+
+// ControlplaneContainerImageMatch - function to compare the ContainerImages on the controlPlane to the OpenStackVersion
+// only enabled services are checked
+func ControlplaneContainerImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if BarbicanImageMatch(controlPlane, version) &&
+		CinderImageMatch(controlPlane, version) &&
+		DesignateImageMatch(controlPlane, version) &&
+		DnsmasqImageMatch(controlPlane, version) &&
+		GaleraImageMatch(controlPlane, version) &&
+		GlanceImageMatch(controlPlane, version) &&
+		HeatImageMatch(controlPlane, version) &&
+		HorizonImageMatch(controlPlane, version) &&
+		IronicImageMatch(controlPlane, version) &&
+		KeystoneImageMatch(controlPlane, version) &&
+		ManilaImageMatch(controlPlane, version) &&
+		MemcachedImageMatch(controlPlane, version) &&
+		NeutronImageMatch(controlPlane, version) &&
+		NovaImageMatch(controlPlane, version) &&
+		OctaviaImageMatch(controlPlane, version) &&
+		ClientImageMatch(controlPlane, version) &&
+		OVNControllerImageMatch(controlPlane, version) &&
+		OVNNorthImageMatch(controlPlane, version) &&
+		OVNDbClusterImageMatch(controlPlane, version) &&
+		PlacementImageMatch(controlPlane, version) &&
+		RabbitmqImageMatch(controlPlane, version) &&
+		SwiftImageMatch(controlPlane, version) &&
+		TelemetryImageMatch(controlPlane, version) {
+
+		return true
+	}
+
+	return false
 }

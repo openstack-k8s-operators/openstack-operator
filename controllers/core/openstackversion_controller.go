@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/go-logr/logr"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -56,16 +57,6 @@ func SetupVersionDefaults() {
 	envContainerImages = localVars
 }
 
-func compareStringPointers(a, b *string) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-	return *a == *b
-}
-
 // OpenStackVersionReconciler reconciles a OpenStackVersion object
 type OpenStackVersionReconciler struct {
 	client.Client
@@ -79,9 +70,11 @@ func (r *OpenStackVersionReconciler) GetLogger(ctx context.Context) logr.Logger 
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackVersion")
 }
 
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch
+// +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -159,10 +152,10 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	// no minor update conditions unless we have a deployed version
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
 		cl = append(cl, *condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
-			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateControlplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)))
-		// fixme add dataplane conditions here
-		//condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
-		//condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)))
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateControlplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+		)
 	}
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.ObservedGeneration = instance.Generation
@@ -182,13 +175,14 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	instance.Status.AvailableVersion = &envAvailableVersion
 	defaults := openstack.InitializeOpenStackVersionImageDefaults(ctx, envContainerImages)
-	// store the defaults for the currently available version
 	if instance.Status.ContainerImageVersionDefaults == nil {
 		instance.Status.ContainerImageVersionDefaults = make(map[string]*corev1beta1.ContainerDefaults)
 	}
+	// store the defaults for the currently available version
 	instance.Status.ContainerImageVersionDefaults[envAvailableVersion] = defaults
 
 	// calculate the container images for the target version
+	Log.Info("Target version: ", "targetVersion", instance.Spec.TargetVersion)
 	val, ok := instance.Status.ContainerImageVersionDefaults[instance.Spec.TargetVersion]
 	if !ok {
 		Log.Info("Target version not found in defaults", "targetVersion", instance.Spec.TargetVersion)
@@ -208,25 +202,30 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		Name:      instance.Name,
 	}, controlPlane)
 	if err != nil {
-		// we ignore not found
 		if k8s_errors.IsNotFound(err) {
-			Log.Info("No controlplane found.")
+			Log.Info("Controlplane not found:", "instance name", instance.Name)
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
 	}
 
-	// greenfield deployment //FIXME check dataplane here too
-	if controlPlane.Status.DeployedVersion == nil {
-		Log.Info("No controlplane or controlplane is not deployed")
+	// lookup nodesets
+	dataplaneNodesets, err := openstack.GetDataplaneNodesets(ctx, controlPlane, versionHelper)
+	if err != nil {
+		Log.Error(err, "Failed to get dataplane nodesets")
+		return ctrl.Result{}, err
+	}
+
+	// greenfield deployment
+	if controlPlane.Status.DeployedVersion == nil && !openstack.DataplaneNodesetsDeployedVersionIsSet(dataplaneNodesets) {
+		Log.Info("Waiting for controlplane and dataplane nodesets to be deployed.")
 		return ctrl.Result{}, nil
 	}
 
-	// TODO minor update for OVN Dataplane in progress
-
-	// minor update for OVN Controlplane in progress
+	// minor update in progress
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
-		if !compareStringPointers(controlPlane.Status.ContainerImages.OvnControllerImage, instance.Status.ContainerImages.OvnControllerImage) ||
+
+		if !openstack.OVNControllerImageMatch(controlPlane, instance) ||
 			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
@@ -240,10 +239,22 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
+		// minor update for Dataplane OVN
+		if !openstack.DataplaneNodesetsOVNControllerImagesMatch(instance, dataplaneNodesets) {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+			Log.Info("Waiting on OVN Dataplane updates to complete")
+			return ctrl.Result{}, nil
+		}
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
+			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
 		// minor update for Controlplane in progress
-		// we only check keystone here as it will only get updated during this phase
-		// FIXME: add checks to all images on the Controlplane here once conditions and observedGeneration work are finished
-		if !compareStringPointers(controlPlane.Status.ContainerImages.KeystoneAPIImage, instance.Status.ContainerImages.KeystoneAPIImage) ||
+		if !openstack.ControlplaneContainerImageMatch(controlPlane, instance) ||
 			!controlPlane.IsReady() {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateControlplane,
@@ -253,10 +264,22 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			Log.Info("Minor update for Controlplane in progress")
 			return ctrl.Result{}, nil
 		}
-		// TODO minor update for Dataplane in progress goes here
-
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateControlplane,
+			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
+		if !openstack.DataplaneNodesetsDeployed(instance, dataplaneNodesets) {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackVersionMinorUpdateDataplane,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+			Log.Info("Waiting on Dataplane update to complete")
+			return ctrl.Result{}, nil
+		}
+
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackVersionMinorUpdateDataplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 	}
 
@@ -301,6 +324,7 @@ func (r *OpenStackVersionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Watches(&corev1beta1.OpenStackControlPlane{}, versionFunc).
+		Watches(&dataplanev1.OpenStackDataPlaneNodeSet{}, versionFunc).
 		For(&corev1beta1.OpenStackVersion{}).
 		Complete(r)
 }

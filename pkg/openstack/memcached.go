@@ -43,6 +43,7 @@ func ReconcileMemcacheds(
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
 	}
+	Log := GetLogger(ctx)
 	if err := helper.GetClient().List(ctx, memcacheds, listOpts...); err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneMemcachedReadyCondition,
@@ -121,6 +122,7 @@ func ReconcileMemcacheds(
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneMemcachedReadyRunningMessage))
 	} else {
+		Log.Info("Memcached ready condition is true")
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackControlPlaneMemcachedReadyCondition,
 			corev1beta1.OpenStackControlPlaneMemcachedReadyMessage,
@@ -153,6 +155,7 @@ func reconcileMemcached(
 			return memcachedFailed, ctrl.Result{}, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneMemcachedReadyCondition)
+		instance.Status.ContainerImages.InfraMemcachedImage = nil
 		return memcachedReady, ctrl.Result{}, nil
 	}
 
@@ -160,6 +163,7 @@ func reconcileMemcached(
 
 	tlsCert := ""
 	if instance.Spec.TLS.PodLevel.Enabled {
+		Log.Info("Reconciling Memcached TLS", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", memcached.Name),
@@ -220,4 +224,16 @@ func reconcileMemcached(
 	}
 
 	return memcachedCreating, ctrl.Result{}, nil
+}
+
+// MemcachedImageMatch - return true if the memcached images match on the ControlPlane and Version, or if Memcached is not enabled
+func MemcachedImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Memcached.Enabled {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.InfraMemcachedImage, version.Status.ContainerImages.InfraMemcachedImage) {
+			return false
+		}
+	}
+
+	return true
 }

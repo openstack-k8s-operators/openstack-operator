@@ -30,6 +30,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 			return res, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneDNSReadyCondition)
+		instance.Status.ContainerImages.InfraDnsmasqImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -75,4 +76,15 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 
 	return ctrl.Result{}, nil
 
+}
+
+// DnsmasqImageMatch - return true if the Dnsmasq images match on the ControlPlane and Version, or if Dnsmasq is not enabled
+func DnsmasqImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.DNS.Enabled {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.InfraDnsmasqImage, version.Status.ContainerImages.InfraDnsmasqImage) {
+			return false
+		}
+	}
+	return true
 }

@@ -668,7 +668,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(osversion).Should(Not(BeNil()))
 
 				th.ExpectCondition(
-					names.OpenStackControlplaneName,
+					names.OpenStackVersionName,
 					ConditionGetterFunc(OpenStackVersionConditionGetter),
 					corev1.OpenStackVersionInitialized,
 					k8s_corev1.ConditionTrue,
@@ -891,7 +891,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(osversion).Should(Not(BeNil()))
 
 				th.ExpectCondition(
-					names.OpenStackControlplaneName,
+					names.OpenStackVersionName,
 					ConditionGetterFunc(OpenStackVersionConditionGetter),
 					corev1.OpenStackVersionInitialized,
 					k8s_corev1.ConditionTrue,
@@ -1647,7 +1647,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(osversion.OwnerReferences).Should(HaveLen(1))
 
 				th.ExpectCondition(
-					names.OpenStackControlplaneName,
+					names.OpenStackVersionName,
 					ConditionGetterFunc(OpenStackVersionConditionGetter),
 					corev1.OpenStackVersionInitialized,
 					k8s_corev1.ConditionTrue,

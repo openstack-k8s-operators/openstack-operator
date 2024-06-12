@@ -35,6 +35,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeKeystoneAPIReadyCondition)
+		instance.Status.ContainerImages.KeystoneAPIImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -122,6 +123,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	})
 
 	if err != nil {
+		Log.Error(err, "Failed to reconcile KeystoneAPI")
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition,
 			condition.ErrorReason,
@@ -135,6 +137,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	}
 
 	if keystoneAPI.Status.ObservedGeneration == keystoneAPI.Generation && keystoneAPI.IsReady() {
+		Log.Info("KeystoneAPI ready condition is true")
 		instance.Status.ContainerImages.KeystoneAPIImage = version.Status.ContainerImages.KeystoneAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition, corev1beta1.OpenStackControlPlaneKeystoneAPIReadyMessage)
 	} else {
@@ -146,4 +149,16 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// KeystoneImageMatch - return true if the keystone images match on the ControlPlane and Version, or if Keystone is not enabled
+func KeystoneImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Keystone.Enabled {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.KeystoneAPIImage, version.Status.ContainerImages.KeystoneAPIImage) {
+			return false
+		}
+	}
+
+	return true
 }

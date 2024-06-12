@@ -112,6 +112,7 @@ func reconcileRabbitMQ(
 			return mqFailed, ctrl.Result{}, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition)
+		instance.Status.ContainerImages.RabbitmqImage = nil
 		return mqReady, ctrl.Result{}, nil
 	}
 
@@ -368,6 +369,7 @@ func reconcileRabbitMQ(
 			// Forced to hardcode "ClusterAvailable" here because linter will not allow
 			// us to import "github.com/rabbitmq/cluster-operator/internal/status"
 			if string(oldCond.Type) == "ClusterAvailable" && oldCond.Status == corev1.ConditionTrue {
+				Log.Info("RabbitMQ ready condition is true")
 				instance.Status.ContainerImages.RabbitmqImage = version.Status.ContainerImages.RabbitmqImage
 				return mqReady, ctrl.Result{}, nil
 			}
@@ -375,4 +377,16 @@ func reconcileRabbitMQ(
 	}
 
 	return mqCreating, ctrl.Result{}, nil
+}
+
+// RabbitmqImageMatch - return true if the rabbitmq images match on the ControlPlane and Version, or if Rabbitmq is not enabled
+func RabbitmqImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Rabbitmq.Enabled {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.RabbitmqImage, version.Status.ContainerImages.RabbitmqImage) {
+			return false
+		}
+	}
+
+	return true
 }

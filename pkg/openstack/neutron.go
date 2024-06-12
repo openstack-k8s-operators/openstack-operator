@@ -37,6 +37,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneNeutronReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeNeutronReadyCondition)
+		instance.Status.ContainerImages.NeutronAPIImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -191,4 +192,16 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	return ctrl.Result{}, nil
 
+}
+
+// NeutronImageMatch - return true if the neutron images match on the ControlPlane and Version, or if Neutron is not enabled
+func NeutronImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Neutron.Enabled {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.NeutronAPIImage, version.Status.ContainerImages.NeutronAPIImage) {
+			return false
+		}
+	}
+
+	return true
 }

@@ -43,6 +43,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneGlanceReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition)
+		instance.Status.ContainerImages.GlanceAPIImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -201,4 +202,16 @@ func getGlanceAPILabelMap(name string, apiName string, apiType string) map[strin
 	return map[string]string{
 		svcSelector: apiFilter,
 	}
+}
+
+// GlanceImageMatch - return true if the glance images match on the ControlPlane and Version, or if Glance is not enabled
+func GlanceImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Glance.Enabled {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.GlanceAPIImage, version.Status.ContainerImages.GlanceAPIImage) {
+			return false
+		}
+	}
+
+	return true
 }

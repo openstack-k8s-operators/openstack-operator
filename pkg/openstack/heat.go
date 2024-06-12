@@ -37,6 +37,9 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneHeatReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition)
+		instance.Status.ContainerImages.HeatAPIImage = nil
+		instance.Status.ContainerImages.HeatCfnapiImage = nil
+		instance.Status.ContainerImages.HeatEngineImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -192,4 +195,18 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// HeatImageMatch - return true if the heat images match on the ControlPlane and Version, or if Heat is not enabled
+func HeatImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+
+	if controlPlane.Spec.Heat.Enabled {
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.HeatAPIImage, version.Status.ContainerImages.HeatAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.HeatCfnapiImage, version.Status.ContainerImages.HeatCfnapiImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.HeatEngineImage, version.Status.ContainerImages.HeatEngineImage) {
+			return false
+		}
+	}
+
+	return true
 }

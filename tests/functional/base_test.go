@@ -259,7 +259,6 @@ func OpenStackVersionRemoveFinalizer(ctx context.Context, name types.NamespacedN
 		instance := GetOpenStackVersion(name)
 		instance.SetFinalizers([]string{})
 		g.Expect(th.K8sClient.Update(ctx, instance)).Should(Succeed())
-
 	}, timeout, interval).Should(Succeed())
 }
 
