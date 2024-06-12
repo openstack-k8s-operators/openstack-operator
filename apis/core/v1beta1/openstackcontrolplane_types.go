@@ -748,7 +748,7 @@ type OpenStackClientSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the OpenStackClient Resource
-	Template v1beta1.OpenStackClientSpec `json:"template,omitempty"`
+	Template v1beta1.OpenStackClientSpecCore `json:"template,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

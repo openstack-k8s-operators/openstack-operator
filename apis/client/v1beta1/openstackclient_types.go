@@ -29,10 +29,15 @@ const (
 
 // OpenStackClientSpec defines the desired state of OpenStackClient
 type OpenStackClientSpec struct {
+	OpenStackClientSpecCore `json:",inline"`
+
 	// +kubebuilder:validation:Required
 	// ContainerImage for the the OpenstackClient container (will be set to environmental default if empty)
 	ContainerImage string `json:"containerImage"`
+}
 
+// OpenStackClientSpecCore defines the desired state of OpenStackClient
+type OpenStackClientSpecCore struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:default=openstack-config
 	// OpenStackConfigMap is the name of the ConfigMap containing the clouds.yaml

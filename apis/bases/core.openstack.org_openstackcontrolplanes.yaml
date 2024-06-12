@@ -11041,8 +11041,6 @@ spec:
                     properties:
                       caBundleSecretName:
                         type: string
-                      containerImage:
-                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -11054,7 +11052,6 @@ spec:
                         default: openstack-config-secret
                         type: string
                     required:
-                    - containerImage
                     - openStackConfigMap
                     - openStackConfigSecret
                     type: object
