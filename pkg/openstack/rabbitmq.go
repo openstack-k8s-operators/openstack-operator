@@ -9,6 +9,7 @@ import (
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/ocp"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -22,6 +23,7 @@ import (
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -153,17 +155,56 @@ func reconcileRabbitMQ(
 		if err != nil {
 			return mqFailed, ctrl.Result{}, err
 		}
+		clusterNodeTLSArgs := "-proto_dist inet_tls -ssl_dist_optfile /etc/rabbitmq/inter-node-tls.config"
 		if fipsEnabled {
-			fipsModeStr := "-crypto fips_mode true"
-
-			envVars = append(envVars, corev1.EnvVar{
-				Name:  "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS",
-				Value: fipsModeStr,
-			}, corev1.EnvVar{
-				Name:  "RABBITMQ_CTL_ERL_ARGS",
-				Value: fipsModeStr,
-			})
+			clusterNodeTLSArgs += " -crypto fips_mode true"
 		}
+
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS",
+			Value: clusterNodeTLSArgs,
+		}, corev1.EnvVar{
+			Name:  "RABBITMQ_CTL_ERL_ARGS",
+			Value: clusterNodeTLSArgs,
+		})
+	}
+
+	cms := []util.Template{
+		{
+			Name:         fmt.Sprintf("%s-config-data", rabbitmq.Name),
+			Namespace:    rabbitmq.Namespace,
+			Type:         util.TemplateTypeConfig,
+			InstanceType: "rabbitmq",
+			Labels:       map[string]string{},
+			CustomData: map[string]string{
+				"inter_node_tls.config": `[
+  {server, [
+    {cacertfile,"/etc/rabbitmq-tls/ca.crt"},
+    {certfile,"/etc/rabbitmq-tls/tls.crt"},
+    {keyfile,"/etc/rabbitmq-tls/tls.key"},
+    {secure_renegotiate, true},
+    {fail_if_no_peer_cert, true},
+    {verify, verify_peer},
+    {versions, ['tlsv1.2','tlsv1.3']}
+  ]},
+  {client, [
+    {cacertfile,"/etc/rabbitmq-tls/ca.crt"},
+    {certfile,"/etc/rabbitmq-tls/tls.crt"},
+    {keyfile,"/etc/rabbitmq-tls/tls.key"},
+    {secure_renegotiate, true},
+    {verify, verify_peer},
+    {versions, ['tlsv1.2','tlsv1.3']}
+  ]}
+].
+`,
+			},
+		},
+	}
+
+	err := configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
+	if err != nil {
+		Log.Error(err, "Unable to create rabbitmq config maps")
+		return mqFailed, ctrl.Result{}, err
 	}
 
 	defaultStatefulSet := rabbitmqv2.StatefulSet{
@@ -196,6 +237,15 @@ func reconcileRabbitMQ(
 
 	hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 	hostnameHeadless := fmt.Sprintf("%s-nodes.%s.svc", name, instance.Namespace)
+	hostnames := []string{
+		hostname,
+		fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+		hostnameHeadless,
+		fmt.Sprintf("%s.%s", hostnameHeadless, ClusterInternalDomain),
+	}
+	for i := 0; i < int(*spec.Replicas); i++ {
+		hostnames = append(hostnames, fmt.Sprintf("%s-server-%d.%s-nodes.%s", name, i, name, instance.Namespace))
+	}
 
 	tlsCert := ""
 	commonName := fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain)
@@ -205,14 +255,7 @@ func reconcileRabbitMQ(
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
 			CommonName: &commonName,
-			Hostnames: []string{
-				hostname,
-				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
-				hostnameHeadless,
-				fmt.Sprintf("%s.%s", hostnameHeadless, ClusterInternalDomain),
-				fmt.Sprintf("*.%s", hostnameHeadless),
-				fmt.Sprintf("*.%s.%s", hostnameHeadless, ClusterInternalDomain),
-			},
+			Hostnames:  hostnames,
 			Subject: &certmgrv1.X509Subject{
 				Organizations: []string{fmt.Sprintf("%s.%s", rabbitmq.Namespace, ClusterInternalDomain)},
 			},
@@ -345,6 +388,34 @@ func reconcileRabbitMQ(
   ]}
 ].
 `
+
+			rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{
+				{
+					Name: "config-data",
+					VolumeSource: corev1.VolumeSource{
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: fmt.Sprintf("%s-config-data", rabbitmq.Name),
+							},
+							DefaultMode: ptr.To[int32](0o420),
+							Items: []corev1.KeyToPath{
+								{
+									Key:  "inter_node_tls.config",
+									Path: "inter_node_tls.config",
+								},
+							},
+						},
+					},
+				},
+			}
+			rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
+				{
+					MountPath: "/etc/rabbitmq/inter-node-tls.config",
+					ReadOnly:  true,
+					Name:      "config-data",
+					SubPath:   "inter_node_tls.config",
+				},
+			}
 		}
 
 		// overrides
