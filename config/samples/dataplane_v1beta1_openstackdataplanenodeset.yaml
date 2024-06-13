@@ -1,0 +1,72 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm
+spec:
+  tlsEnabled: true
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  services:
+    - bootstrap
+    - download-cache
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - install-certs
+    - ovn
+    - neutron-metadata
+    - libvirt
+    - nova
+    - telemetry
+  preProvisioned: true
+  networkAttachments:
+  - ctlplane
+  nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+          - name: ctlplane
+            subnetName: subnet1
+            defaultRoute: true
+            fixedIP: 192.168.122.100
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansible:
+      ansibleVarsFrom:
+        - prefix: edpm_
+          configMapRef:
+            name: network-config-template
+        - prefix: neutron_
+          configMapRef:
+            name: neutron-edpm
+        # CHANGEME -- see https://access.redhat.com/solutions/253273
+        # - prefix: subscription_manager_
+        #   secretRef:
+        #     name: subscription-manager
+        # - prefix: registry_
+        #   secretRef:
+        #     name: redhat-registry
+      ansibleVars:
+         # CHANGEME -- see https://access.redhat.com/solutions/253273
+         # edpm_bootstrap_command: |
+         #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+         #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+         edpm_nodes_validation_validate_controllers_icmp: false
+         edpm_nodes_validation_validate_gateway_icmp: false
+         gather_facts: false
+         enable_debug: false
+         # edpm firewall, change the allowed CIDR if needed
+         edpm_sshd_allowed_ranges: ['192.168.122.0/24']

@@ -1,0 +1,13 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  labels:
+    app.kubernetes.io/name: openstackdataplaneservice
+    app.kubernetes.io/instance: openstackdataplaneservice-install-certs
+    app.kubernetes.io/part-of: dataplane-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: dataplane-operator
+  name: install-certs
+spec:
+  playbook: osp.edpm.install_certs
+  addCertMounts: True

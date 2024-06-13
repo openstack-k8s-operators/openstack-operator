@@ -1,0 +1,68 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+namespace: openstack
+nameSuffix: -ipam
+
+components:
+- ../base
+
+resources:
+  - values.yaml
+
+replacements:
+# OpenStackDataPlaneNodeSet customizations
+- source:
+    kind: DataPlaneConfig
+    name: edpm-baremetal-values
+    fieldPath: data.nodeset.nodetemplate.ansible.vars.edpm_sshd_allowed_ranges
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.nodeTemplate.ansible.ansibleVars.edpm_sshd_allowed_ranges
+    options:
+      create: true
+- source:
+    kind: DataPlaneConfig
+    name: edpm-baremetal-values
+    fieldPath: data.nodeset.baremetalsettemplate
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.baremetalSetTemplate
+    options:
+      create: true
+- source:
+    kind: DataPlaneConfig
+    name: edpm-baremetal-values
+    fieldPath: data.preProvisioned
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.preProvisioned
+    options:
+      create: true
+- source:
+    kind: DataPlaneConfig
+    name: edpm-baremetal-values
+    fieldPath: data.nodeset.nodetemplate.networks
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.nodeTemplate.networks
+    options:
+      create: true
+
+patches:
+- target:
+    kind: OpenStackDataPlaneNodeSet
+    name: .*
+  patch: |-
+    - op: remove
+      path: /spec/nodes/edpm-compute-0/ansible
+    - op: remove
+      path: /spec/nodes/edpm-compute-0/networks

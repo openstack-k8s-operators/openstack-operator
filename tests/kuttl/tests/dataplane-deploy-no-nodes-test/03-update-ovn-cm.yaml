@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ovncontroller-config
+data:
+  ovsdb-config: test-ovn-config-updated
+---
+# Sleep for 30s, b/c this test is meant to assert that even though we've
+# changed the above CM, the hash on the NodeSet does not change.
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: sleep 30

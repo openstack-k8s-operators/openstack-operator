@@ -5,14 +5,6 @@
 #  -dataplane-operator bundle is cached (in order to merge at build time)
 set -ex
 
-function extract_bundle {
-    local IN_DIR=$1
-    local OUT_DIR=$2
-    for X in $(file ${IN_DIR}/* | grep gzip | cut -f 1 -d ':'); do
-        tar xvf $X -C ${OUT_DIR}/;
-    done
-}
-
 function extract_csv {
     local IN_DIR=$1
     local OUT_DIR=$2
@@ -34,11 +26,7 @@ mkdir -p "$OUT_BUNDLE"
 
 for BUNDLE in $(hack/pin-bundle-images.sh | tr "," " "); do
     skopeo copy "docker://$BUNDLE" dir:${EXTRACT_DIR}/tmp;
-    if echo $BUNDLE | grep dataplane-operator &> /dev/null; then
-        extract_bundle "${EXTRACT_DIR}/tmp" "${OUT_BUNDLE}/"
-    else
-        extract_csv "${EXTRACT_DIR}/tmp" "${EXTRACT_DIR}/csvs"
-    fi
+    extract_csv "${EXTRACT_DIR}/tmp" "${EXTRACT_DIR}/csvs"
 done
 
 # Extract the ENV vars from all the CSVs

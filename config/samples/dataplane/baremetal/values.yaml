@@ -1,0 +1,33 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-baremetal-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  preProvisioned: false
+  nodeset:
+    baremetalsettemplate:
+      bmhLabelSelector:
+        app: openstack
+      ctlplaneInterface: enp1s0
+      cloudUserName: cloud-admin
+    nodetemplate:
+      ansible:
+        vars:
+          # edpm firewall, change the allowed CIDR if needed
+          edpm_sshd_allowed_ranges: ['192.168.111.0/24']
+      networks:
+      - defaultRoute: true
+        name: ctlplane
+        subnetName: subnet1
+      - name: internalapi
+        subnetName: subnet1
+      - name: storage
+        subnetName: subnet1
+      - name: tenant
+        subnetName: subnet1
+    nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0

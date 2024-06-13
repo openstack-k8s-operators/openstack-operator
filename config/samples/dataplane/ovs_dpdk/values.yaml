@@ -1,0 +1,130 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-ovs-dpdk-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  preProvisioned: false
+  nodeset:
+    baremetalsettemplate:
+      bmhLabelSelector:
+        app: openstack
+      ctlplaneInterface: enp1s0
+      cloudUserName: cloud-admin
+    nodetemplate:
+      ansible:
+        vars:
+          # CHANGEME -- see https://access.redhat.com/solutions/253273
+          # edpm_bootstrap_command: |
+          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+          edpm_network_config_hide_sensitive_logs: false
+          edpm_network_config_template: |
+            ---
+            {% set mtu_list = [ctlplane_mtu] %}
+            {% for network in nodeset_networks %}
+            {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+            {%- endfor %}
+            {% set min_viable_mtu = mtu_list | max %}
+            network_config:
+            - type: ovs_bridge
+              name: {{ neutron_physical_bridge_name }}
+              mtu: {{ min_viable_mtu }}
+              use_dhcp: false
+              dns_servers: {{ ctlplane_dns_nameservers }}
+              domain: {{ dns_search_domains }}
+              addresses:
+              - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+              routes: {{ ctlplane_host_routes }}
+              members:
+              - type: interface
+                name: nic1
+                mtu: {{ min_viable_mtu }}
+                # force the MAC address of the bridge to this interface
+                primary: true
+            {% for network in nodeset_networks if network not in ["external", "tenant"] %}
+              - type: vlan
+                mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+                vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+                addresses:
+                - ip_netmask:
+                {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+                    routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+            {% endfor %}
+            - type: ovs_user_bridge
+                name: br-link1
+              use_dhcp: false
+              ovs_extra: "set port br-link1 tag={{ lookup('vars', networks_lower['tenant'] ~ '_vlan_id') }}"
+              addresses:
+              - ip_netmask: {{ lookup('vars', networks_lower['tenant'] ~ '_ip') }}/{{ lookup('vars', networks_lower['tenant'] ~ '_cidr') }}
+
+                mtu: {{ lookup('vars', networks_lower['tenant'] ~ '_mtu') }}
+                members:
+                - type: ovs_dpdk_port
+                  name: dpdk1
+                  members:
+                  - type: interface
+                    name: nic3
+            - type: ovs_user_bridge
+              name: br-link2
+              use_dhcp: false
+              mtu: 9000
+              members:
+              - type: ovs_dpdk_port
+                name: dpdk2
+                members:
+                - type: interface
+                  name: nic4
+
+          neutron_physical_bridge_name: br-ex
+          # edpm_nodes_validation
+          edpm_nodes_validation_validate_controllers_icmp: false
+          edpm_nodes_validation_validate_gateway_icmp: false
+          # edpm nfv ovs dpdk config
+          edpm_kernel_args: "default_hugepagesz=1GB hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on tsx=off isolcpus=2-11,14-23"
+          edpm_tuned_profile: "cpu-partitioning"
+          edpm_nova_libvirt_qemu_group: "hugetlbfs"
+          edpm_tuned_isolated_cores: "2-11,14-23"
+          edpm_ovs_dpdk_pmd_core_list: "1,13,2,14,3,15"
+          edpm_ovs_dpdk_socket_memory: "4096"
+          edpm_ovs_dpdk_memory_channels: "4"
+          edpm_ovs_dpdk_vhost_postcopy_support: "true"
+          edpm_ovn_bridge_mappings: ['dpdk2:br-link2','dpdk1:br-link1']
+          gather_facts: false
+          enable_debug: false
+          edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+      networks:
+      - defaultRoute: true
+        name: ctlplane
+        subnetName: subnet1
+      - name: internalapi
+        subnetName: subnet1
+      - name: storage
+        subnetName: subnet1
+      - name: tenant
+        subnetName: subnet1
+    nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0
+      edpm-compute-1:
+        hostName: edpm-compute-1
+    services:
+    - bootstrap
+    - download-cache
+    - reboot-os
+    - configure-ovs-dpdk
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - install-certs
+    - ovn
+    - neutron-ovn
+    - neutron-metadata
+    - libvirt
+    - nova
+    - telemetry

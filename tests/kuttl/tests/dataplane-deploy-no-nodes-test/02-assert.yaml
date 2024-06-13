@@ -1,0 +1,70 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: custom-svc-edpm-compute-no-nodes-ovrd-edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-no-nodes-ovrd
+spec:
+  backoffLimit: 6
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  envConfigMapName: openstack-aee-default-env
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-no-nodes
+  name: openstackansibleee
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+  preserveJobs: true
+  restartPolicy: Never
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Job completed
+    reason: Ready
+    status: "True"
+    type: JobReady

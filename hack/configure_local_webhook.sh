@@ -140,6 +140,174 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: vopenstackdataplanenodeset.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: vopenstackdataplanenodeset.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mopenstackdataplanenodeset.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: mopenstackdataplanenodeset.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: vopenstackdataplanedeployment.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: vopenstackdataplanedeployment.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mopenstackdataplanedeployment.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/mutate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: mopenstackdataplanedeployment.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: vopenstackdataplaneservice.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/validate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: vopenstackdataplaneservice.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mopenstackdataplaneservice.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/mutate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: mopenstackdataplaneservice.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
 EOF_CAT
 
 oc apply -n openstack -f ${TMPDIR}/patch_webhook_configurations.yaml

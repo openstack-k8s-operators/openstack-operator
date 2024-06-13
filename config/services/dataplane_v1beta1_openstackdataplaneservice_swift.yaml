@@ -1,0 +1,11 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: swift
+spec:
+  playbook: osp.edpm.swift
+  secrets:
+  - swift-conf
+  configMaps:
+  - swift-storage-config-data
+  - swift-ring-files

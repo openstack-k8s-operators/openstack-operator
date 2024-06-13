@@ -1,0 +1,104 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-bgp-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    nodetemplate:
+      ansible:
+        vars:
+          # CHANGEME -- see https://access.redhat.com/solutions/253273
+          # edpm_bootstrap_command: |
+          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+          timesync_ntp_servers:
+            - hostname: pool.ntp.org
+          # edpm_network_config
+          # Default nic config template for a EDPM compute node
+          # These vars are edpm_network_config role vars
+          edpm_network_config_hide_sensitive_logs: false
+          edpm_network_config_template: |
+            ---
+            {% set mtu_list = [ctlplane_mtu] %}
+            {% for network in nodeset_networks %}
+            {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+            {%- endfor %}
+            {% set min_viable_mtu = mtu_list | max %}
+            network_config:
+            - type: interface
+              name: nic1
+              mtu: {{ ctlplane_mtu }}
+              dns_servers: {{ ctlplane_dns_nameservers }}
+              domain: {{ dns_search_domains }}
+              use_dhcp: false
+              addresses:
+              - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+            {% for network in nodeset_networks %}
+            {% if lookup('vars', networks_lower[network] ~ '_vlan_id', default='') %}
+            - type: vlan
+              device: nic1
+              mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+              vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+              addresses:
+              - ip_netmask:
+                  {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+              routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+            {% endif %}
+            {%- endfor %}
+            - type: ovs_bridge
+              name: {{ neutron_physical_bridge_name }}
+              use_dhcp: false
+            - type: interface
+              name: nic2
+              use_dhcp: false
+              addresses:
+              - ip_netmask: {{ lookup('vars', 'bgpnet1_ip') }}/30
+            - type: interface
+              name: nic3
+              use_dhcp: false
+              addresses:
+              - ip_netmask: {{ lookup('vars', 'bgpnet2_ip') }}/30
+            - type: interface
+              name: lo
+              addresses:
+              - ip_netmask: {{ lookup('vars', 'bgpmainnet_ip') }}/32
+              - ip_netmask: {{ lookup('vars', 'bgpmainnet6_ip') }}/128
+
+          # These vars are for the network config templates themselves and are
+          # considered EDPM network defaults.
+          neutron_physical_bridge_name: br-ex
+          neutron_public_interface_name: eth0
+          # edpm_nodes_validation
+          edpm_nodes_validation_validate_controllers_icmp: false
+          edpm_nodes_validation_validate_gateway_icmp: false
+          ctlplane_dns_nameservers:
+          - 192.168.122.1
+          dns_search_domains: []
+          # edpm firewall, change the allowed CIDR if needed
+          edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+          edpm_frr_bgp_uplinks: ['nic2', 'nic3']
+          edpm_frr_bgp_neighbor_password: f00barZ
+          edpm_frr_bgp_ipv4_src_network: bgpmainnet
+          edpm_frr_bgp_ipv6_src_network: bgpmainnet6
+          edpm_ovn_bgp_agent_expose_tenant_networks: true
+    services:
+    - download-cache
+    - bootstrap
+    - configure-network
+    - validate-network
+    - frr
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - install-certs
+    - ovn
+    - neutron-metadata
+    - ovn-bgp-agent
+    - libvirt
+    - nova
+    - telemetry

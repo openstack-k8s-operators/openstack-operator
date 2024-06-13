@@ -1,0 +1,11 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: neutron-dhcp
+spec:
+  playbook: osp.edpm.neutron_dhcp
+  secrets:
+  - neutron-dhcp-agent-neutron-config
+  caCerts: combined-ca-bundle
+  containerImageFields:
+  - EdpmNeutronDhcpAgentImage

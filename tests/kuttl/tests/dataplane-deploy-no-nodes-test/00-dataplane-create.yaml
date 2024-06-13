@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nova-cell1-compute-config
+data:
+  nova-blank.conf: Zm9vCg==
+  01-nova.conf: Zm9vCg==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ovncontroller-config
+data:
+  ovsdb-config: test-ovn-config
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neutron-ovn-metadata-agent-neutron-config
+data:
+  10-neutron-metadata.conf: dGVzdC1uZXV0cm9uLW92bi1tZXRhZGF0YS1hZ2VudC1jb25maWc=
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nova-metadata-neutron-config
+data:
+  05-nova-metadata.conf: dGVzdC1ub3ZhLW1ldGFkYXRhLWNvbXB1dGUtY29uZmln
+  httpd.conf: dGVzdC1ub3ZhLW1ldGFkYXRhLWNvbXB1dGUtY29uZmln
+  nova-metadata-config.json: dGVzdC1ub3ZhLW1ldGFkYXRhLWNvbXB1dGUtY29uZmln
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neutron-ovn-agent-neutron-config
+data:
+  10-neutron-ovn.conf: dGVzdC1uZXV0cm9uLW92bi1hZ2VudC1jb25maWc=
+---
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neutron-sriov-agent-neutron-config
+data:
+  10-neutron-sriov.conf: dGVzdC1uZXV0cm9uLXNyaW92LWFnZW50LXNlY3JldC1jb25maWcK
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neutron-dhcp-agent-neutron-config
+data:
+  10-neutron-dhcp.conf: dGVzdC1uZXV0cm9uLWRoY3AtYWdlbnQtc2VjcmV0LWNvbmZpZwo=
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nova-migration-ssh-key
+data:
+  ssh-privatekey: ZmFrZQo=
+  ssh-publickey: ZmFrZQo=
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: libvirt-secret
+data:
+  LibvirtPassword: ZmFrZQo=
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  preProvisioned: true
+  tlsEnabled: false
+  services:
+  - download-cache
+  - bootstrap
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - install-certs
+  - ovn
+  - neutron-metadata
+  - neutron-ovn
+  - neutron-sriov
+  - neutron-dhcp
+  - libvirt
+  - nova
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

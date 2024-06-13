@@ -1,0 +1,60 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-networker-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    nodetemplate:
+      ansible:
+        vars:
+          # CHANGEME -- see https://access.redhat.com/solutions/253273
+          # edpm_bootstrap_command: |
+          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+          edpm_enable_chassis_gw: true
+    nodes:
+      edpm-networker-0:
+        hostName: edpm-networker-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+          - name: ctlplane
+            subnetName: subnet1
+            defaultRoute: true
+            fixedIP: 192.168.122.100
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
+      edpm-networker-1:
+        hostName: edpm-networker-1
+        ansible:
+          ansibleHost: 192.168.122.101
+        networks:
+          - name: ctlplane
+            subnetName: subnet1
+            defaultRoute: true
+            fixedIP: 192.168.122.101
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
+    services:
+    - download-cache
+    - bootstrap
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - install-certs
+    - ovn

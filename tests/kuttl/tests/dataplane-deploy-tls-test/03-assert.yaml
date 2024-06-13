@@ -1,0 +1,315 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-tls-dns-ips-default-edpm-compute-0
+  annotations:
+    cert-manager.io/alt-names: edpm-compute-0.ctlplane.example.com
+    cert-manager.io/certificate-name: tls-dns-ips-default-edpm-compute-0
+    cert-manager.io/ip-sans: 192.168.122.100
+    cert-manager.io/issuer-group: cert-manager.io
+    cert-manager.io/issuer-kind: Issuer
+    cert-manager.io/issuer-name: rootca-internal
+  labels:
+    hostname: edpm-compute-0
+    osdp-service: tls-dns-ips
+    osdp-service-cert-key: default
+    osdpns: openstack-edpm-tls
+type: kubernetes.io/tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    hostname: edpm-compute-0
+    osdp-service: tls-dns-ips
+    osdp-service-cert-key: default
+    osdpns: openstack-edpm-tls
+  name: tls-dns-ips-default-edpm-compute-0
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+spec:
+  dnsNames:
+  - edpm-compute-0.ctlplane.example.com
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: rootca-internal
+  secretName: cert-tls-dns-ips-default-edpm-compute-0
+  secretTemplate:
+    labels:
+      hostname: edpm-compute-0
+      osdp-service: tls-dns-ips
+      osdp-service-cert-key: default
+      osdpns: openstack-edpm-tls
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-custom-tls-dns-default-edpm-compute-0
+  annotations:
+    cert-manager.io/certificate-name: custom-tls-dns-default-edpm-compute-0
+    cert-manager.io/issuer-group: cert-manager.io
+    cert-manager.io/issuer-kind: Issuer
+    cert-manager.io/issuer-name: rootca-internal
+  labels:
+    hostname: edpm-compute-0
+    osdp-service: custom-tls-dns
+    osdp-service-cert-key: default
+    osdpns: openstack-edpm-tls
+type: kubernetes.io/tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    hostname: edpm-compute-0
+    osdp-service: custom-tls-dns
+    osdp-service-cert-key: default
+    osdpns: openstack-edpm-tls
+  name: custom-tls-dns-default-edpm-compute-0
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+spec:
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: rootca-internal
+  secretName: cert-custom-tls-dns-default-edpm-compute-0
+  secretTemplate:
+    labels:
+      hostname: edpm-compute-0
+      osdp-service: custom-tls-dns
+      osdp-service-cert-key: default
+      osdpns: openstack-edpm-tls
+---
+# validate the alt-names and usages - which is a list with elements that can be in any order
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      template='{{index .spec.dnsNames }}'
+      names=$(oc get certificate custom-tls-dns-default-edpm-compute-0 -n openstack-kuttl-tests -o go-template="$template")
+      echo $names > test123.data
+      regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
+      matches=$(grep -P "$regex" test123.data)
+      rm test123.data
+      if [ -z "$matches" ]; then
+         echo "bad dnsnames match: $names"
+         exit 1
+      else
+         exit 0
+      fi
+  - script: |
+      template='{{index .spec.usages }}'
+      usages=$(oc get certificate custom-tls-dns-default-edpm-compute-0 -n openstack-kuttl-tests -o go-template="$template")
+      echo $usages > test123.data
+      regex="(?=.*(key encipherment))(?=.*(digital signature))(?=.*(server auth))(?=.*(client auth))"
+      matches=$(grep -P "$regex" test123.data)
+      rm test123.data
+      if [ -z "$matches" ]; then
+         echo "bad usages match: $usages"
+         exit 1
+      else
+         exit 0
+      fi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-tls-dns-ips-default-certs-0
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-custom-tls-dns-default-certs-0
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+type: Opaque
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: install-certs-ovrd-openstack-edpm-tls-ovrd-openstack-edpm-tls
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: openstack-edpm-tls-ovrd
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/certs/tls-dns-ips/default
+      name: openstack-edpm-tls-tls-dns-ips-default-certs-0
+    volumes:
+    - name: openstack-edpm-tls-tls-dns-ips-default-certs-0
+      projected:
+        sources:
+        - secret:
+            name: openstack-edpm-tls-tls-dns-ips-default-certs-0
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/tls-dns-ips
+      name: tls-dns-ips-combined-ca-bundle
+    volumes:
+    - name: tls-dns-ips-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /var/lib/openstack/certs/custom-tls-dns/default
+      name: openstack-edpm-tls-custom-tls-dns-default-certs-0
+    volumes:
+    - name: openstack-edpm-tls-custom-tls-dns-default-certs-0
+      projected:
+        sources:
+        - secret:
+            name: openstack-edpm-tls-custom-tls-dns-default-certs-0
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/custom-tls-dns
+      name: custom-tls-dns-combined-ca-bundle
+    volumes:
+    - name: custom-tls-dns-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-openstack-edpm-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Job completed
+    reason: Ready
+    status: "True"
+    type: JobReady
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneDeployment
+    name: openstack-edpm-tls-ovrd
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-openstack-edpm-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Job completed
+    reason: Ready
+    status: "True"
+    type: JobReady
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneDeployment
+    name: openstack-edpm-tls-ovrd
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-openstack-edpm-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Job completed
+    reason: Ready
+    status: "True"
+    type: JobReady

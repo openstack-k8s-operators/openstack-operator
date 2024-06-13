@@ -1,0 +1,90 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-nmstate-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    nodetemplate:
+      ansible:
+        vars:
+          # CHANGEME -- see https://access.redhat.com/solutions/253273
+          # edpm_bootstrap_command: |
+          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+          edpm_network_config_hide_sensitive_logs: false
+          edpm_network_config_template: |
+            ---
+            {% set mtu_list = [ctlplane_mtu] %}
+            {% for network in nodeset_networks %}
+            {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+            {%- endfor %}
+            {% set min_viable_mtu = mtu_list | max %}
+            dns-resolver:
+              config:
+                search: {{ dns_search_domains }}
+                server: {{ ctlplane_dns_nameservers }}
+            interfaces:
+              - name: {{ neutron_public_interface_name }}
+                type: ethernet
+                state: up
+              - name: {{ neutron_physical_bridge_name }}
+                type: ovs-interface
+                state: up
+                mtu: {{ min_viable_mtu }}
+                ipv4:
+                  enabled: true
+                  address:
+                    - ip: {{ ctlplane_ip }}
+                      prefix-length: {{ ctlplane_cidr }}
+            {% for network in nodeset_networks %}
+              - name: {{ "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+                type: ovs-interface
+                state: up
+                mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+                ipv4:
+                  enabled: true
+                  address:
+                    - ip: {{ lookup('vars', networks_lower[network] ~ '_ip') }}
+                      prefix-length: {{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+            {% endfor %}
+              - name: {{ neutron_physical_bridge_name }}
+                type: ovs-bridge
+                bridge:
+                  options:
+                    fail-mode: standalone
+                  port:
+                  - name: {{ neutron_public_interface_name }}
+                  - name: {{ neutron_physical_bridge_name }}
+            {% for network in nodeset_networks %}
+                  - name: {{ "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+                    vlan:
+                      mode: access
+                      tag: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+            {% endfor %}
+            routes:
+              config:
+              - destination: {{ ctlplane_host_routes.ip_netmask }}
+                next-hop-address: {{ ctlplane_host_routes.next_hop }}
+                next-hop-interface: {{ neutron_physical_bridge_name }}
+          # edpm_network_config - nmstate
+          edpm_network_config_tool: 'nmstate'
+          # These vars are for the network config templates themselves and are
+          # considered EDPM network defaults.
+          neutron_physical_bridge_name: br-ex
+          neutron_public_interface_name: eth0
+          # edpm_nodes_validation
+          edpm_nodes_validation_validate_controllers_icmp: false
+          edpm_nodes_validation_validate_gateway_icmp: false
+          ctlplane_dns_nameservers:
+          - 192.168.122.1
+          dns_search_domains: []
+          gather_facts: false
+          enable_debug: false
+          # edpm firewall, change the allowed CIDR if needed
+          edpm_sshd_configure_firewall: true
+          edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+          # SELinux module
+          edpm_selinux_mode: enforcing

@@ -31,14 +31,12 @@ USER root
 # local operator manifests
 COPY bundle/manifests /manifests/
 COPY bundle_extra_data /bundle_extra_data
-RUN cp -a /bundle_extra_data/manifests/* /manifests/
 
 # Merge things into our openstack-operator CSV:
 #  -dataplane-operator CSV
 #  -ENV vars from all operators (for webhooks)
 RUN /workspace/csv-merger \
 	--import-env-files=/bundle_extra_data/env-vars.yaml \
-	--dataplane-csv=/bundle_extra_data/manifests/dataplane-operator.clusterserviceversion.yaml \
 	--base-csv=/manifests/openstack-operator.clusterserviceversion.yaml | tee /openstack-operator.clusterserviceversion.yaml.new
 
 # remove all individual operator CSV's

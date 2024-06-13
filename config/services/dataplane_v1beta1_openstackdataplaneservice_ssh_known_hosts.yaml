@@ -1,0 +1,7 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: ssh-known-hosts
+spec:
+  playbook: osp.edpm.ssh_known_hosts
+  deployOnAllNodeSets: true

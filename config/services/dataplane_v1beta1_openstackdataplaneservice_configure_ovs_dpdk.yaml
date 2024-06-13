@@ -1,0 +1,12 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  labels:
+    app.kubernetes.io/name: openstackdataplaneservice
+    app.kubernetes.io/instance: openstackdataplaneservice-configure-ovs-dpdk
+    app.kubernetes.io/part-of: dataplane-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: dataplane-operator
+  name: configure-ovs-dpdk
+spec:
+  playbook: osp.edpm.configure_ovs_dpdk

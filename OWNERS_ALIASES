@@ -5,8 +5,18 @@ aliases:
   - lewisdenny
   - frenzyfriday
   - viroel
+  docs-approvers:
+  - igallagh-redhat
   openstack-approvers:
   - abays
   - dprince
   - olliewalsh
   - stuggi
+  dataplane-approvers:
+  - fao89
+  - fultonj
+  - rebtoor
+  - slagle
+  - bshephar
+  - rabi
+  - jpodivin

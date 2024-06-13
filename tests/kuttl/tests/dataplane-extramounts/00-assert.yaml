@@ -1,0 +1,71 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-extramounts
+spec:
+  preProvisioned: true
+  services:
+    - test-service
+  nodes: {}
+  nodeTemplate:
+    extraMounts:
+    - extraVolType: edpm-ansible
+      mounts:
+      - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
+        name: edpm-ansible
+      volumes:
+      - name: edpm-ansible
+        persistentVolumeClaim:
+          claimName: edpm-ansible
+          readOnly: true
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: test-service-edpm-extramounts-edpm-extramounts
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-extramounts
+spec:
+  extraMounts:
+  - extraVolType: edpm-ansible
+    mounts:
+    - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
+      name: edpm-ansible
+    volumes:
+    - name: edpm-ansible
+      persistentVolumeClaim:
+        claimName: edpm-ansible
+        readOnly: true
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-extramounts

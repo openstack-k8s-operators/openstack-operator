@@ -1,0 +1,6 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: ceph-client
+spec:
+  playbook: osp.edpm.ceph_client

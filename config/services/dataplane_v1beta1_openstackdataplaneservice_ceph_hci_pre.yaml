@@ -1,0 +1,6 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: ceph-hci-pre
+spec:
+  playbook: osp.edpm.ceph_hci_pre

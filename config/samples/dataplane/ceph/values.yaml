@@ -1,0 +1,51 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-ceph-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    # Create a nova-custom-ceph service which uses a ConfigMap
+    # containing libvirt overrides for Ceph RBD.
+    services:
+    - bootstrap
+    - download-cache
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - ceph-client
+    - install-certs
+    - ovn
+    - neutron-metadata
+    - libvirt
+    - nova-custom-ceph
+  nodetemplate:
+    # Create a secret called ceph-conf-files with the cephx key and
+    # ceph.conf file and mount it so the ceph-client service can copy
+    # those files to the EDPM nodes.
+    extramounts:
+      - extraVolType: Logs
+        mounts:
+        - mountPath: /runner/artifacts
+          name: ansible-logs
+        volumes:
+        - name: ansible-logs
+          persistentVolumeClaim:
+            claimName: ansible-ee-logs
+      - extraVolType: Ceph
+        mounts:
+        - mountPath: /etc/ceph
+          name: ceph
+          readOnly: true
+        volumes:
+        - name: ceph
+          projected:
+            sources:
+            - secret:
+                name: ceph-conf-files

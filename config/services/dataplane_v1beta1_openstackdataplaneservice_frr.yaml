@@ -1,0 +1,8 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: frr
+spec:
+  playbook: osp.edpm.frr
+  containerImageFields:
+  - EdpmFrrImage

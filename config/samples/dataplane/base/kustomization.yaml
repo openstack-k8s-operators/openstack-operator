@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+- ../../dataplane_v1beta1_openstackdataplanenodeset.yaml
+- ../../dataplane_v1beta1_openstackdataplanedeployment.yaml
+
+namespace: openstack
+
+configMapGenerator:
+- name: network-config-template
+  files:
+    - network_config_template=files/nic-config.j2
+  options:
+    disableNameSuffixHash: true
+- name: neutron-edpm
+  literals:
+    - physical_bridge_name=br-ex
+    - public_interface_name=eth0
+  options:
+    disableNameSuffixHash: true
+
+configurations:
+- config/nodesetname.yaml
+- config/varsfromname.yaml

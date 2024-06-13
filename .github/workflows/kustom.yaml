@@ -1,0 +1,36 @@
+name: Kustomize Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - config/samples/**
+jobs:
+  kustomize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.20.x
+      - uses: actions/checkout@v4
+        with:
+          # this fetches all branches. Needed because we need gh-pages branch for deploy to work
+          fetch-depth: 0
+      - name: download kustomize
+        run: |
+          mkdir bin
+          LINK=https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh
+          curl -Ss $LINK | bash -s -- 5.0.1 ./bin
+      - name: kustomize build
+        run: |
+          cd config/samples/dataplane
+
+          for d in */ ; do
+              echo "=============== $d ==============="
+              ../../../bin/kustomize build --load-restrictor LoadRestrictionsNone "$d"
+          done

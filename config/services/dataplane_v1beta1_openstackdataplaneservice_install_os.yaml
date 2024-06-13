@@ -1,0 +1,6 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: install-os
+spec:
+  playbook: osp.edpm.install_os

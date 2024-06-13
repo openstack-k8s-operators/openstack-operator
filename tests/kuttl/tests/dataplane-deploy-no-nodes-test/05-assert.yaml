@@ -1,0 +1,218 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+spec:
+  services:
+  - download-cache
+  - bootstrap
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - install-certs
+  - ovn
+  - neutron-metadata
+  - neutron-ovn
+  - neutron-sriov
+  - neutron-dhcp
+  - libvirt
+  - nova
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+status:
+  observedGeneration: 1
+  conditions:
+  - message: Deployment error occurred in this-service-does-not-exist service error
+      OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist"
+      not found
+    reason: Error
+    severity: Error
+    status: "False"
+    type: Ready
+  - message: Deployment error occurred in this-service-does-not-exist service error
+      OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist"
+      not found
+    reason: Error
+    severity: Error
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+  deploymentStatuses:
+    edpm-compute-no-nodes:
+    - message: Deployment completed
+      reason: Ready
+      status: "True"
+      type: NodeSetDeploymentReady
+    - message: Deployment ready for bootstrap service
+      reason: Ready
+      status: "True"
+      type: ServiceBootstrapDeploymentReady
+    - message: Deployment ready for configure-network service
+      reason: Ready
+      status: "True"
+      type: ServiceConfigureNetworkDeploymentReady
+    - message: Deployment ready for configure-os service
+      reason: Ready
+      status: "True"
+      type: ServiceConfigureOsDeploymentReady
+    - message: Deployment ready for download-cache service
+      reason: Ready
+      status: "True"
+      type: ServiceDownloadCacheDeploymentReady
+    - message: Deployment ready for install-certs service
+      reason: Ready
+      status: "True"
+      type: ServiceInstallCertsDeploymentReady
+    - message: Deployment ready for install-os service
+      reason: Ready
+      status: "True"
+      type: ServiceInstallOsDeploymentReady
+    - message: Deployment ready for libvirt service
+      reason: Ready
+      status: "True"
+      type: ServiceLibvirtDeploymentReady
+    - message: Deployment ready for neutron-dhcp service
+      reason: Ready
+      status: "True"
+      type: ServiceNeutronDhcpDeploymentReady
+    - message: Deployment ready for neutron-metadata service
+      reason: Ready
+      status: "True"
+      type: ServiceNeutronMetadataDeploymentReady
+    - message: Deployment ready for neutron-ovn service
+      reason: Ready
+      status: "True"
+      type: ServiceNeutronOvnDeploymentReady
+    - message: Deployment ready for neutron-sriov service
+      reason: Ready
+      status: "True"
+      type: ServiceNeutronSriovDeploymentReady
+    - message: Deployment ready for nova service
+      reason: Ready
+      status: "True"
+      type: ServiceNovaDeploymentReady
+    - message: Deployment ready for ovn service
+      reason: Ready
+      status: "True"
+      type: ServiceOvnDeploymentReady
+    - message: Deployment ready for run-os service
+      reason: Ready
+      status: "True"
+      type: ServiceRunOsDeploymentReady
+    - message: Deployment ready for validate-network service
+      reason: Ready
+      status: "True"
+      type: ServiceValidateNetworkDeploymentReady
+    edpm-compute-no-nodes-non-existent-service:
+    - message: Deployment error occurred in this-service-does-not-exist service error
+        OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist"
+        not found
+      reason: Error
+      severity: Error
+      status: "False"
+      type: NodeSetDeploymentReady
+    - message: Deployment error occurred in this-service-does-not-exist service error
+        OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist"
+        not found
+      reason: Error
+      severity: Error
+      status: "False"
+      type: ServiceThisServiceDoesNotExistDeploymentReady
+    edpm-compute-no-nodes-ovrd:
+    - message: Deployment completed
+      reason: Ready
+      status: "True"
+      type: NodeSetDeploymentReady
+    - message: Deployment ready for custom-svc service
+      reason: Ready
+      status: "True"
+      type: ServiceCustomSvcDeploymentReady
+    edpm-compute-no-nodes-updated-ovn-cm:
+    - message: Deployment completed
+      reason: Ready
+      status: "True"
+      type: NodeSetDeploymentReady
+    - message: Deployment ready for ovn service
+      reason: Ready
+      status: "True"
+      type: ServiceOvnDeploymentReady
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes-non-existent-service
+  namespace: openstack-kuttl-tests
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  servicesOverride:
+    - this-service-does-not-exist
+status:
+  observedGeneration: 1
+  conditions:
+  - message: 'Deployment error occurred nodeSet: edpm-compute-no-nodes error: OpenStackDataPlaneService.dataplane.openstack.org
+         "this-service-does-not-exist" not found'
+    reason: Error
+    severity: Warning
+    status: "False"
+    type: Ready
+  - message: 'Deployment error occurred nodeSet: edpm-compute-no-nodes error: OpenStackDataPlaneService.dataplane.openstack.org
+         "this-service-does-not-exist" not found'
+    reason: Error
+    severity: Warning
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  nodeSetConditions:
+    edpm-compute-no-nodes:
+    - message: Deployment error occurred in this-service-does-not-exist service error
+        OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist"
+        not found
+      reason: Error
+      severity: Error
+      status: "False"
+      type: NodeSetDeploymentReady
+    - message: Deployment error occurred in this-service-does-not-exist service error
+        OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist"
+        not found
+      reason: Error
+      severity: Error
+      status: "False"
+      type: ServiceThisServiceDoesNotExistDeploymentReady

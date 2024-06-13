@@ -1,0 +1,17 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: telemetry
+spec:
+  secrets:
+    - ceilometer-compute-config-data
+  playbook: osp.edpm.telemetry
+  tlsCerts:
+    default:
+      contents:
+      - ips
+  caCerts: combined-ca-bundle
+  containerImageFields:
+  - CeilometerComputeImage
+  - CeilometerIpmiImage
+  - EdpmNodeExporterImage

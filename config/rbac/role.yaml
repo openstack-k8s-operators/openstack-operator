@@ -8,6 +8,54 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - imagestreamimages
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - imagestreammappings
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - imagestreams
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - imagestreams/layers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - imagestreamtags
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - imagetags
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - pods
   verbs:
   - create
@@ -20,6 +68,12 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - projects
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - serviceaccounts
   verbs:
   - create
@@ -28,9 +82,57 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ansibleee.openstack.org
+  resources:
+  - openstackansibleees
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - barbican.openstack.org
   resources:
   - barbicans
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - baremetal.openstack.org
+  resources:
+  - openstackbaremetalsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - baremetal.openstack.org
+  resources:
+  - openstackbaremetalsets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - baremetal.openstack.org
+  resources:
+  - openstackbaremetalsets/status
+  verbs:
+  - get
+- apiGroups:
+  - batch
+  resources:
+  - jobs
   verbs:
   - create
   - delete
@@ -106,8 +208,12 @@ rules:
   resources:
   - configmaps
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - ""
@@ -126,8 +232,13 @@ rules:
   resources:
   - services
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - core.openstack.org
   resources:
@@ -183,15 +294,86 @@ rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
-  - openstackdataplanenodesets
+  - openstackdataplanedeployments
   verbs:
+  - create
+  - delete
   - get
   - list
   - watch
 - apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanedeployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanedeployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanenodesets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanenodesets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanenodesets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplaneservices
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplaneservices/finalizers
+  verbs:
+  - update
+- apiGroups:
   - designate.openstack.org
   resources:
   - designates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
   verbs:
   - create
   - delete
@@ -237,6 +419,52 @@ rules:
   - update
   - watch
 - apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreamimages
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreammappings
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreams
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreams/layers
+  verbs:
+  - get
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreamtags
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagetags
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - ironic.openstack.org
   resources:
   - ironics
@@ -247,6 +475,14 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - k8s.cni.cncf.io
+  resources:
+  - network-attachment-definitions
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - keystone.openstack.org
@@ -299,6 +535,30 @@ rules:
 - apiGroups:
   - network.openstack.org
   resources:
+  - dnsdata
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsdata/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsdata/status
+  verbs:
+  - get
+- apiGroups:
+  - network.openstack.org
+  resources:
   - dnsmasqs
   verbs:
   - create
@@ -307,6 +567,44 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsmasqs/status
+  verbs:
+  - get
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - ipsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - ipsets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - ipsets/status
+  verbs:
+  - get
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - netconfigs
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - neutron.openstack.org
@@ -393,6 +691,12 @@ rules:
   - update
   - watch
 - apiGroups:
+  - project.openshift.io
+  resources:
+  - projects
+  verbs:
+  - get
+- apiGroups:
   - rabbitmq.com
   resources:
   - rabbitmqclusters
@@ -412,6 +716,7 @@ rules:
   - create
   - get
   - list
+  - patch
   - update
   - watch
 - apiGroups:

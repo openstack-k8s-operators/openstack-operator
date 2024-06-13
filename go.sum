@@ -63,6 +63,8 @@ github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gophercloud/gophercloud v1.12.0 h1:Jrz16vPAL93l80q16fp8NplrTCp93y7rZh2P3Q4Yq7g=
 github.com/gophercloud/gophercloud v1.12.0/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
+github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
+github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/imdario/mergo v0.3.16 h1:wwQJbIsHYGMUyLSPrEq1CT16AhnhNJQ51+4fdHUnCl4=
 github.com/imdario/mergo v0.3.16/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
@@ -100,8 +102,6 @@ github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240603141403-1
 github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240603141403-1ad477d065a2/go.mod h1:FBMttmFnsXleh/Gohxvgaz5c5HdF7Gsc6/ySC9TU770=
 github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240610101558-1ab6bba3433c h1:SaPzqQ3alJfoQunjFZrxJWFgfO9v3MWqSkn/2NoSp+M=
 github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240610101558-1ab6bba3433c/go.mod h1:8Wn6ZAPaJshxozJVPI7uq4qrcUXZmECGAPJK7Ed+uGQ=
-github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240608024258-319ec0e5a28b h1:VRAXcHzieo0mYoXLwkZD1nrfqXyk0a/ok085KKiJDo0=
-github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240608024258-319ec0e5a28b/go.mod h1:ESTcEmtCGEvlrMPzdbNDeIUozxfKA4zEqhYt/rxJxmE=
 github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240604124031-77b21b330d86 h1:pE/BD9Qg5A2CFQHiKJfqZ8Os7obIoTsy8UYNI3sDblc=
 github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240604124031-77b21b330d86/go.mod h1:u53p2KRT083miTWA5oQlU4zITB4FXJOzI/eao51CkbE=
 github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240610071145-9fc8ef9f3c7c h1:MvciJWQenAmUjAL5p3TkSlgZ45VUc0nzCWJpW+2VLME=
@@ -116,6 +116,8 @@ github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240607124904-2
 github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240607124904-2f2e4f3dd090/go.mod h1:Xq0M+QuVsTmoyQFcSn0Kyp2Wj/7nNJfB2jydUt/Q/LU=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240605055850-8ee0ece70906 h1:sq7CD7w44uAs+5Yd5wX1TgZR2vyMKY3YN6iddCJwz8M=
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240605055850-8ee0ece70906/go.mod h1:GWJdAtjPUEwNFbRKwlXkeTHMiGCqySE4qJo0fKZSayo=
+github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240606071226-62abb00585ce h1:WPkI7OrKcojZQiWB2vflbG6wPTJ4dKSg9u7XEBK3nFs=
+github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240606071226-62abb00585ce/go.mod h1:tP+nxk95PisCKJaXE/an2igG9lluxuOVhdmV9WtkR2s=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240606071226-62abb00585ce h1:3ufbd5r8M1B2d94cHml3g+0gjFa41QQG7Ra5yuO67eI=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240606071226-62abb00585ce/go.mod h1:f7idGLPDLGerFTLB1W8R+eb68GjI3105VoqtzKH77LI=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240606071226-62abb00585ce h1:3+BwULpV9ooBYtZ3CVnOXsO40gu/w76a8tqvM45qLYk=

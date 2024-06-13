@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+namespace: openstack
+
+components:
+- ../preprovisioned # for baremetal nodes, replace with baremetal
+
+resources:
+- ../../../services/dataplane_v1beta1_openstackdataplaneservice_nova.yaml
+
+configMapGenerator:
+- name: nova-extra-config
+  files:
+    - 25-nova-extra.conf=nova-extra.conf
+  options:
+    disableNameSuffixHash: true
+
+patches:
+- target:
+    kind: OpenStackDataPlaneService
+    name: nova
+  patch: |-
+    - op: replace
+      path: /metadata/name
+      value: nova-cell-custom
+    - op: add
+      path: /spec/configMaps
+      value:
+        - nova-extra-config
+
+configurations:
+- servicename.yaml

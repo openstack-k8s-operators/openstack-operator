@@ -1,0 +1,7 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: fips-status
+spec:
+  label: fips-status
+  playbook: osp.edpm.fips_status

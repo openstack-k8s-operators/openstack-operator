@@ -1,0 +1,76 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuttl-service-cm-0
+data:
+  00-kuttl-service.conf: |
+    a=b
+    c=d
+  01-kuttl-service.conf: |
+    e=f
+    g=h
+  00-ansibleVars: |
+    foo: bar
+    baz: blippy
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuttl-service-cm-1
+data:
+  10-kuttl-service.conf: |
+    i=j
+  20-kuttl-service.conf: |
+    k=l
+  01-ansibleVars: |
+    baz: blippy
+    zed: zod
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuttl-service-cm-2
+binaryData:
+  30-kuttl-service.conf: Cg==
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: kuttl-service
+spec:
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep infinity
+          delegate_to: localhost
+  configMaps:
+    - kuttl-service-cm-0
+    - kuttl-service-cm-1
+    - kuttl-service-cm-2
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  preProvisioned: true
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+  services:
+    - kuttl-service
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes

@@ -1,0 +1,164 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-ceph-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    nodetemplate:
+      ansible:
+        vars:
+          timesync_ntp_servers:
+            - hostname: clock.redhat.com
+          # CHANGEME -- see https://access.redhat.com/solutions/253273
+          # edpm_bootstrap_command: |
+          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+          edpm_iscsid_image: '{{ registry_url }}/openstack-iscsid:{{ image_tag }}'
+          edpm_logrotate_crond_image: '{{ registry_url }}/openstack-cron:{{ image_tag }}'
+          edpm_network_config_hide_sensitive_logs: false
+          edpm_network_config_os_net_config_mappings:
+            edpm-compute:
+              nic2: enp7s0
+          edpm_network_config_template: |
+            ---
+            {% set mtu_list = [ctlplane_mtu] %}
+            {% for network in nodeset_networks %}
+            {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+            {%- endfor %}
+            {% set min_viable_mtu = mtu_list | max %}
+            network_config:
+            - type: ovs_bridge
+              name: {{ neutron_physical_bridge_name }}
+              mtu: {{ min_viable_mtu }}
+              use_dhcp: false
+              dns_servers: {{ ctlplane_dns_nameservers }}
+              domain: {{ dns_search_domains }}
+              addresses:
+              - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+              routes: {{ ctlplane_host_routes }}
+              members:
+              - type: interface
+                name: nic2
+                mtu: {{ min_viable_mtu }}
+                # force the MAC address of the bridge to this interface
+                primary: true
+            {% for network in nodeset_networks %}
+              - type: vlan
+                mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+                vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+                addresses:
+                - ip_netmask:
+                    {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+                routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+            {% endfor %}
+          edpm_neutron_metadata_agent_image: '{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}'
+          edpm_nodes_validation_validate_controllers_icmp: false
+          edpm_nodes_validation_validate_gateway_icmp: false
+          edpm_nova_compute_container_image: '{{ registry_url }}/openstack-nova-compute:{{ image_tag }}'
+          edpm_nova_libvirt_container_image: '{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}'
+          edpm_ovn_controller_agent_image: '{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}'
+          edpm_selinux_mode: enforcing
+          edpm_sshd_allowed_ranges:
+            - 192.168.122.0/24
+          edpm_sshd_configure_firewall: true
+          enable_debug: false
+          gather_facts: false
+          image_tag: current-podified
+          neutron_physical_bridge_name: br-ex
+          neutron_public_interface_name: eth0
+          registry_url: quay.io/podified-antelope-centos9
+          edpm_ceph_hci_pre_enabled_services:
+            - ceph_mon
+            - ceph_mgr
+            - ceph_osd
+            - ceph_rgw
+            - ceph_nfs
+            - ceph_rgw_frontend
+            - ceph_nfs_frontend
+          storage_mtu: 9000
+          storage_mgmt_mtu: 9000
+          storage_mgmt_vlan_id: 23
+          storage_mgmt_cidr: "24"
+          storage_mgmt_host_routes: []
+      extramounts:
+        - extraVolType: Logs
+          mounts:
+          - mountPath: /runner/artifacts
+            name: ansible-logs
+          volumes:
+          - name: ansible-logs
+            persistentVolumeClaim:
+              claimName: ansible-ee-logs
+        - extraVolType: Ceph
+          mounts:
+          - mountPath: /etc/ceph
+            name: ceph
+            readOnly: true
+          volumes:
+          - name: ceph
+            projected:
+              sources:
+              - secret:
+                  name: ceph-conf-files
+    nodes:
+      edpm-compute-0:
+        ansible:
+          ansibleHost: 192.168.122.100
+        hostName: edpm-compute-0
+        networks:
+        - defaultRoute: true
+          fixedIP: 192.168.122.100
+          name: ctlplane
+          subnetName: subnet1
+        - name: internalapi
+          subnetName: subnet1
+        - name: storage
+          subnetName: subnet1
+        - name: storagemgmt
+          subnetName: subnet1
+        - name: tenant
+          subnetName: subnet1
+      edpm-compute-1:
+        ansible:
+          ansibleHost: 192.168.122.101
+        hostName: edpm-compute-1
+        networks:
+        - defaultRoute: true
+          fixedIP: 192.168.122.101
+          name: ctlplane
+          subnetName: subnet1
+        - name: internalapi
+          subnetName: subnet1
+        - name: storage
+          subnetName: subnet1
+        - name: storagemgmt
+          subnetName: subnet1
+        - name: tenant
+          subnetName: subnet1
+      edpm-compute-2:
+        ansible:
+          ansibleHost: 192.168.122.102
+        hostName: edpm-compute-2
+        networks:
+        - defaultRoute: true
+          fixedIP: 192.168.122.102
+          name: ctlplane
+          subnetName: subnet1
+        - name: internalapi
+          subnetName: subnet1
+        - name: storage
+          subnetName: subnet1
+        - name: storagemgmt
+          subnetName: subnet1
+        - name: tenant
+          subnetName: subnet1
+  deployment:
+    name: edpm-deployment-ipam-post-ceph
+    services:
+    - ceph-client
+    - ovn
+    - libvirt
+    - nova-custom-ceph

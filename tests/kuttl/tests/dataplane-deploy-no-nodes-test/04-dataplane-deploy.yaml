@@ -1,0 +1,9 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes-updated-ovn-cm
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  servicesOverride:
+    - ovn

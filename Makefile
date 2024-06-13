@@ -76,6 +76,36 @@ DOCKER_BUILD_ARGS ?=
 .PHONY: all
 all: build
 
+##@ Docs
+
+.PHONY: docs-dependencies
+docs-dependencies: .bundle
+
+.PHONY: .bundle
+.bundle:
+	if ! type bundle; then \
+		echo "Bundler not found. On Linux run 'sudo dnf install /usr/bin/bundle' to install it."; \
+		exit 1; \
+	fi
+
+	bundle config set --local path 'local/bundle'; bundle install
+
+.PHONY: docs
+docs: manifests docs-dependencies crd-to-markdown  ## Build docs
+	CRD_MARKDOWN=$(CRD_MARKDOWN) MAKE=$(MAKE) ./docs/build_docs.sh
+
+.PHONY: docs-preview
+docs-preview: docs
+	cd docs; $(MAKE) open-html
+
+.PHONY: docs-watch
+docs-watch: docs-preview
+	cd docs; $(MAKE) watch-html
+
+.PHONY: docs-clean
+docs-clean:
+	rm -r docs_build
+
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -133,11 +163,21 @@ golangci-lint:
 	$(LOCALBIN)/golangci-lint run --fix
 
 .PHONY: test
-test: manifests generate gowork fmt vet envtest ginkgo ## Run tests.
+test: manifests generate gowork fmt vet envtest ginkgo ginkgo-run ## Run ginkgo tests with dependencies.
+
+.PHONY: ginkgo-run
+ginkgo-run: ## Run ginkgo.
 	source hack/export_related_images.sh && \
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) -v debug --bin-dir $(LOCALBIN) use $(ENVTEST_K8S_VERSION) -p path)" \
 	OPERATOR_TEMPLATES="$(PWD)/templates" \
-	$(GINKGO) --trace --cover --coverpkg=../../pkg/openstack,../../pkg/openstackclient,../../pkg/util,../../controllers,../../apis/client/v1beta1,../../apis/core/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) ./tests/... ./apis/client/...
+	$(GINKGO) --trace --cover --coverpkg=../../pkg/openstack,../../pkg/openstackclient,../../pkg/util,../../controllers,../../apis/client/v1beta1,../../apis/core/v1beta1,../../apis/dataplane/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) ./tests/... ./apis/client/...
+
+.PHONY: test-all
+test-all: test golint golangci golangci-lint ## Run all tests.
+
+.PHONY: cover
+cover: test ## Run tests and display functional test coverage
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go tool cover -html=cover.out
 
 ##@ Build
 
@@ -176,7 +216,7 @@ docker-buildx:  ## Build and push docker image for the manager for cross-platfor
 	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
 	- docker buildx create --name project-v3-builder
 	docker buildx use project-v3-builder
-	- docker buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross
+	- docker buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
 	- docker buildx rm project-v3-builder
 	rm Dockerfile.cross
 
@@ -214,11 +254,15 @@ $(LOCALBIN):
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
+CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
 GINKGO ?= $(LOCALBIN)/ginkgo
+KUTTL ?= $(LOCALBIN)/kubectl-kuttl
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v3.8.7
 CONTROLLER_TOOLS_VERSION ?= v0.11.1
+CRD_MARKDOWN_VERSION ?= v0.0.3
+KUTTL_VERSION ?= 0.15.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
@@ -236,6 +280,11 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
+.PHONY: crd-to-markdown
+crd-to-markdown: $(CRD_MARKDOWN) ## Download crd-to-markdown locally if necessary.
+$(CRD_MARKDOWN): $(LOCALBIN)
+	test -s $(LOCALBIN)/crd-to-markdown || GOBIN=$(LOCALBIN) go install github.com/clamoriniere/crd-to-markdown@$(CRD_MARKDOWN_VERSION)
+
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(LOCALBIN)
@@ -245,6 +294,16 @@ $(ENVTEST): $(LOCALBIN)
 ginkgo: $(GINKGO) ## Download ginkgo locally if necessary.
 $(GINKGO): $(LOCALBIN)
 	test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo
+
+.PHONY: kuttl-test
+kuttl-test: ## Run kuttl tests
+	$(LOCALBIN)/kubectl-kuttl test --config kuttl-test.yaml tests/kuttl/tests $(KUTTL_ARGS)
+
+.PHONY: kuttl
+kuttl: $(KUTTL) ## Download kubectl-kuttl locally if necessary.
+$(KUTTL): $(LOCALBIN)
+	test -s $(LOCALBIN)/kubectl-kuttl || curl -L -o $(LOCALBIN)/kubectl-kuttl https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_linux_x86_64
+	chmod +x $(LOCALBIN)/kubectl-kuttl
 
 .PHONY: operator-sdk
 OPERATOR_SDK ?= $(LOCALBIN)/operator-sdk
@@ -295,6 +354,12 @@ else
 OPM = $(shell which opm)
 endif
 endif
+
+.PHONY: yq
+yq: ## Download and install yq in local env
+	test -s $(LOCALBIN)/yq || ( cd $(LOCALBIN) &&\
+	wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64.tar.gz -O - |\
+	tar xz && mv yq_linux_amd64 $(LOCALBIN)/yq )
 
 # Build make variables to export for shell
 MAKE_ENV := $(shell echo '$(.VARIABLES)' | awk -v RS=' ' '/^(IMAGE)|.*?(REGISTRY)$$/')
@@ -393,6 +458,10 @@ run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/configure_local_webhook.sh
 	source hack/export_related_images.sh && \
 	go run ./main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)"
+
+.PHONY: webhook-cleanup
+webhook-cleanup:
+	/bin/bash hack/clean_local_webhook.sh
 
 # refresh the bundle extra data based on go.mod entries
 # bundle extra data includes:

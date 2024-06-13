@@ -1,0 +1,202 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  labels:
+    openstackdataplanedeployment: edpm-compute-no-nodes
+    openstackdataplanenodeset: edpm-compute-no-nodes
+    openstackdataplaneservice: failed-service
+  name: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 3
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  envConfigMapName: openstack-aee-default-env
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-no-nodes
+  extraVars:
+    edpm_override_hosts: edpm-compute-no-nodes
+    edpm_service_type: failed-service
+  name: openstackansibleee
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Copy absent file
+          ansible.builtin.shell: |
+              set -euxo pipefail
+              cp absent failed_op
+  preserveJobs: true
+  restartPolicy: Never
+  serviceAccountName: edpm-compute-no-nodes
+  uid: 1001
+status:
+  JobStatus: Failed
+  conditions:
+  - message: 'Job error occurred Internal error occurred: Job has reached the specified
+      backoff limit. Check job logs'
+    reason: BackoffLimitExceeded
+    severity: Error
+    status: "False"
+    type: Ready
+  - message: 'Job error occurred Internal error occurred: Job has reached the specified
+      backoff limit. Check job logs'
+    reason: BackoffLimitExceeded
+    severity: Error
+    status: "False"
+    type: JobReady
+  observedGeneration: 1
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  generation: 1
+  name: edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+spec:
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    managementNetwork: ctlplane
+  nodes: {}
+  preProvisioned: true
+  services:
+  - failed-service
+  tlsEnabled: true
+status:
+  conditions:
+  - message: 'Deployment error occurred in failed-service service error backoff limit
+      reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+      execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+    reason: Error
+    severity: Error
+    status: "False"
+    type: Ready
+  - message: 'Deployment error occurred in failed-service service error backoff limit
+      reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+      execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+    reason: Error
+    severity: Error
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+  deploymentStatuses:
+    edpm-compute-no-nodes:
+    - message: 'Deployment error occurred in failed-service service error backoff
+        limit reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+      reason: BackoffLimitExceeded
+      severity: Error
+      status: "False"
+      type: NodeSetDeploymentReady
+    - message: 'Deployment error occurred in failed-service service error backoff
+        limit reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+      reason: BackoffLimitExceeded
+      severity: Error
+      status: "False"
+      type: ServiceFailedServiceDeploymentReady
+  observedGeneration: 1
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  generation: 1
+  name: edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+spec:
+  backoffLimit: 3
+  deploymentRequeueTime: 15
+  nodeSets:
+  - edpm-compute-no-nodes
+status:
+  conditions:
+  - message: 'Deployment error occurred nodeSet: edpm-compute-no-nodes error: backoff
+      limit reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+      execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+    reason: BackoffLimitExceeded
+    severity: Error
+    status: "False"
+    type: Ready
+  - message: 'Deployment error occurred nodeSet: edpm-compute-no-nodes error: backoff
+      limit reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+      execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+    reason: BackoffLimitExceeded
+    severity: Error
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  nodeSetConditions:
+    edpm-compute-no-nodes:
+    - message: 'Deployment error occurred in failed-service service error backoff
+        limit reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+      reason: BackoffLimitExceeded
+      severity: Error
+      status: "False"
+      type: NodeSetDeploymentReady
+    - message: 'Deployment error occurred in failed-service service error backoff
+        limit reached for execution.name failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        execution.namespace openstack-kuttl-tests execution.status.jobstatus: Failed'
+      reason: BackoffLimitExceeded
+      severity: Error
+      status: "False"
+      type: ServiceFailedServiceDeploymentReady
+  observedGeneration: 1

@@ -1,0 +1,202 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-multinode
+status:
+  allHostnames:
+    edpm-compute-0:
+      ctlplane: edpm-compute-0.ctlplane.example.com
+      internalapi: edpm-compute-0.internalapi.example.com
+      storage: edpm-compute-0.storage.example.com
+      tenant: edpm-compute-0.tenant.example.com
+    edpm-compute-1:
+      ctlplane: edpm-compute-1.ctlplane.example.com
+      internalapi: edpm-compute-1.internalapi.example.com
+      storage: edpm-compute-1.storage.example.com
+      tenant: edpm-compute-1.tenant.example.com
+  allIPs:
+    edpm-compute-0:
+      ctlplane: 192.168.122.100
+      internalapi: 172.17.0.100
+      storage: 172.18.0.100
+      tenant: 172.19.0.100
+    edpm-compute-1:
+      ctlplane: 192.168.122.101
+      internalapi: 172.17.0.101
+      storage: 172.18.0.101
+      tenant: 172.19.0.101
+  observedGeneration: 1
+  ctlplaneSearchDomain: ctlplane.example.com
+  conditions:
+  - message: Deployment not started
+    reason: Requested
+    status: "False"
+    type: Ready
+  - message: Deployment not started
+    reason: Requested
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+---
+apiVersion: network.openstack.org/v1beta1
+kind: IPSet
+metadata:
+  name: edpm-compute-0
+status:
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: Reservation successful
+    reason: Ready
+    status: "True"
+    type: ReservationReady
+  reservations:
+  - address: 192.168.122.100
+    cidr: 192.168.122.0/24
+    dnsDomain: ctlplane.example.com
+    gateway: 192.168.122.1
+    mtu: 1500
+    network: ctlplane
+    routes:
+    - destination: 0.0.0.0/0
+      nexthop: 192.168.122.1
+    subnet: subnet1
+  - address: 172.17.0.100
+    cidr: 172.17.0.0/24
+    dnsDomain: internalapi.example.com
+    mtu: 1500
+    network: internalapi
+    subnet: subnet1
+    vlan: 20
+  - address: 172.18.0.100
+    cidr: 172.18.0.0/24
+    dnsDomain: storage.example.com
+    mtu: 1500
+    network: storage
+    subnet: subnet1
+    vlan: 21
+  - address: 172.19.0.100
+    cidr: 172.19.0.0/24
+    dnsDomain: tenant.example.com
+    mtu: 1500
+    network: tenant
+    subnet: subnet1
+    vlan: 22
+---
+apiVersion: network.openstack.org/v1beta1
+kind: IPSet
+metadata:
+  name: edpm-compute-1
+status:
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: Reservation successful
+    reason: Ready
+    status: "True"
+    type: ReservationReady
+  reservations:
+  - address: 192.168.122.101
+    cidr: 192.168.122.0/24
+    dnsDomain: ctlplane.example.com
+    gateway: 192.168.122.1
+    mtu: 1500
+    network: ctlplane
+    routes:
+    - destination: 0.0.0.0/0
+      nexthop: 192.168.122.1
+    subnet: subnet1
+  - address: 172.17.0.101
+    cidr: 172.17.0.0/24
+    dnsDomain: internalapi.example.com
+    mtu: 1500
+    network: internalapi
+    subnet: subnet1
+    vlan: 20
+  - address: 172.18.0.101
+    cidr: 172.18.0.0/24
+    dnsDomain: storage.example.com
+    mtu: 1500
+    network: storage
+    subnet: subnet1
+    vlan: 21
+  - address: 172.19.0.101
+    cidr: 172.19.0.0/24
+    dnsDomain: tenant.example.com
+    mtu: 1500
+    network: tenant
+    subnet: subnet1
+    vlan: 22
+---
+apiVersion: network.openstack.org/v1beta1
+kind: DNSData
+metadata:
+  name: openstack-edpm-multinode
+spec:
+  dnsDataLabelSelectorValue: dnsdata
+  hosts:
+  - hostnames:
+    - edpm-compute-0.ctlplane.example.com
+    ip: 192.168.122.100
+  - hostnames:
+    - edpm-compute-0.internalapi.example.com
+    ip: 172.17.0.100
+  - hostnames:
+    - edpm-compute-0.storage.example.com
+    ip: 172.18.0.100
+  - hostnames:
+    - edpm-compute-0.tenant.example.com
+    ip: 172.19.0.100
+  - hostnames:
+    - edpm-compute-1.ctlplane.example.com
+    ip: 192.168.122.101
+  - hostnames:
+    - edpm-compute-1.internalapi.example.com
+    ip: 172.17.0.101
+  - hostnames:
+    - edpm-compute-1.storage.example.com
+    ip: 172.18.0.101
+  - hostnames:
+    - edpm-compute-1.tenant.example.com
+    ip: 172.19.0.101
+status:
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: ServiceConfigReady

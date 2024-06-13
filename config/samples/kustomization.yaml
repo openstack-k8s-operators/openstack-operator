@@ -5,4 +5,7 @@ resources:
 - core_v1beta1_openstackcontrolplane_network_isolation.yaml
 - client_v1beta1_openstackclient.yaml
 - core_v1beta1_openstackversion.yaml
+- dataplane_v1beta1_openstackdataplanenodeset.yaml
+- dataplane_v1beta1_openstackdataplaneservice.yaml
+- dataplane_v1beta1_openstackdataplanedeployment.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
