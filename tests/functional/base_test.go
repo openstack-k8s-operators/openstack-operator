@@ -29,6 +29,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 )
 
 type Names struct {
@@ -454,4 +455,12 @@ func CreateClusterConfigCM() client.Object {
 	}, timeout, interval).Should(Succeed())
 
 	return cm
+}
+
+func GetRabbitMQCluster(name types.NamespacedName) *rabbitmqv2.RabbitmqCluster {
+	instance := &rabbitmqv2.RabbitmqCluster{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
 }
