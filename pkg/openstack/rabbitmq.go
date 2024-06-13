@@ -50,7 +50,11 @@ func ReconcileRabbitMQs(
 	var err error
 	var status mqStatus
 
-	for name, spec := range instance.Spec.Rabbitmq.Templates {
+	if instance.Spec.Rabbitmq.Templates == nil {
+		instance.Spec.Rabbitmq.Templates = ptr.To(map[string]corev1beta1.RabbitmqTemplate{})
+	}
+
+	for name, spec := range *instance.Spec.Rabbitmq.Templates {
 		status, ctrlResult, err = reconcileRabbitMQ(ctx, instance, version, helper, name, spec)
 
 		switch status {

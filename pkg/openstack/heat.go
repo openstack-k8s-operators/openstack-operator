@@ -43,6 +43,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Heat.Template == nil {
+		instance.Spec.Heat.Template = &heatv1.HeatSpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Heat.Template.HeatAPI.Override.Service == nil {

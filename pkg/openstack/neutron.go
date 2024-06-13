@@ -41,6 +41,10 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Neutron.Template == nil {
+		instance.Spec.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Neutron.Template.Override.Service == nil {

@@ -54,6 +54,10 @@ func ReconcileMemcacheds(
 		return ctrl.Result{}, err
 	}
 
+	if instance.Spec.Memcached.Templates == nil {
+		instance.Spec.Memcached.Templates = ptr.To(map[string]memcachedv1.MemcachedSpecCore{})
+	}
+
 	for _, memcached := range memcacheds.Items {
 		for _, ref := range memcached.GetOwnerReferences() {
 			// Check owner UID to ensure the memcached instance is owned by this OpenStackControlPlane instance
@@ -61,7 +65,7 @@ func ReconcileMemcacheds(
 				owned := false
 
 				// Check whether the name appears in spec
-				for name := range instance.Spec.Memcached.Templates {
+				for name := range *instance.Spec.Memcached.Templates {
 					if name == memcached.GetName() {
 						owned = true
 						break
@@ -89,7 +93,7 @@ func ReconcileMemcacheds(
 	var ctrlResult ctrl.Result
 	var err error
 	var status memcachedStatus
-	for name, spec := range instance.Spec.Memcached.Templates {
+	for name, spec := range *instance.Spec.Memcached.Templates {
 		status, ctrlResult, err = reconcileMemcached(ctx, instance, version, helper, name, &spec)
 
 		switch status {

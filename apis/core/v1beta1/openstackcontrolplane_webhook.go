@@ -21,16 +21,36 @@ import (
 	"fmt"
 	"strings"
 
+	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
+	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
+	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
+	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
+	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
+	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
+	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
+	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
+	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 )
 
 var ctlplaneWebhookClient client.Client
@@ -158,8 +178,8 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 
 	switch name {
 	case "Keystone":
-		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled) {
-			reqs = "Galera, Memcached"
+		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled) {
+			reqs = "Galera, Memcached, RabbitMQ"
 		}
 	case "Glance":
 		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Keystone.Enabled) {
@@ -287,55 +307,94 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 
 	// Call internal validation logic for individual service operators
 	if r.Spec.Keystone.Enabled {
-		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(old.Keystone.Template, basePath.Child("keystone").Child("template"))...)
+		if old.Keystone.Template == nil {
+			old.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
+		}
+		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"))...)
 	}
 
 	if r.Spec.Ironic.Enabled {
-		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(old.Ironic.Template, basePath.Child("ironic").Child("template"))...)
+		if old.Ironic.Template == nil {
+			old.Ironic.Template = &ironicv1.IronicSpecCore{}
+		}
+		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(*old.Ironic.Template, basePath.Child("ironic").Child("template"))...)
 	}
 
 	if r.Spec.Nova.Enabled {
-		errors = append(errors, r.Spec.Nova.Template.ValidateUpdate(old.Nova.Template, basePath.Child("nova").Child("template"))...)
+		if old.Nova.Template == nil {
+			old.Nova.Template = &novav1.NovaSpec{}
+		}
+		errors = append(errors, r.Spec.Nova.Template.ValidateUpdate(*old.Nova.Template, basePath.Child("nova").Child("template"))...)
 	}
 
 	if r.Spec.Placement.Enabled {
-		errors = append(errors, r.Spec.Placement.Template.ValidateUpdate(old.Placement.Template, basePath.Child("placement").Child("template"))...)
+		if old.Placement.Template == nil {
+			old.Placement.Template = &placementv1.PlacementAPISpecCore{}
+		}
+		errors = append(errors, r.Spec.Placement.Template.ValidateUpdate(*old.Placement.Template, basePath.Child("placement").Child("template"))...)
 	}
 
 	if r.Spec.Barbican.Enabled {
-		errors = append(errors, r.Spec.Barbican.Template.ValidateUpdate(old.Barbican.Template, basePath.Child("barbican").Child("template"))...)
+		if old.Barbican.Template == nil {
+			old.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
+		}
+		errors = append(errors, r.Spec.Barbican.Template.ValidateUpdate(*old.Barbican.Template, basePath.Child("barbican").Child("template"))...)
 	}
 
 	if r.Spec.Neutron.Enabled {
-		errors = append(errors, r.Spec.Neutron.Template.ValidateUpdate(old.Neutron.Template, basePath.Child("neutron").Child("template"))...)
+		if old.Neutron.Template == nil {
+			old.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
+		}
+		errors = append(errors, r.Spec.Neutron.Template.ValidateUpdate(*old.Neutron.Template, basePath.Child("neutron").Child("template"))...)
 	}
 
 	if r.Spec.Glance.Enabled {
-		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(old.Glance.Template, basePath.Child("glance").Child("template"))...)
+		if old.Glance.Template == nil {
+			old.Glance.Template = &glancev1.GlanceSpecCore{}
+		}
+		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"))...)
 	}
 
 	if r.Spec.Cinder.Enabled {
-		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(old.Cinder.Template, basePath.Child("cinder").Child("template"))...)
+		if old.Cinder.Template == nil {
+			old.Cinder.Template = &cinderv1.CinderSpecCore{}
+		}
+		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(*old.Cinder.Template, basePath.Child("cinder").Child("template"))...)
 	}
 
 	if r.Spec.Heat.Enabled {
-		errors = append(errors, r.Spec.Heat.Template.ValidateUpdate(old.Heat.Template, basePath.Child("heat").Child("template"))...)
+		if old.Heat.Template == nil {
+			old.Heat.Template = &heatv1.HeatSpecCore{}
+		}
+		errors = append(errors, r.Spec.Heat.Template.ValidateUpdate(*old.Heat.Template, basePath.Child("heat").Child("template"))...)
 	}
 
 	if r.Spec.Manila.Enabled {
-		errors = append(errors, r.Spec.Manila.Template.ValidateUpdate(old.Manila.Template, basePath.Child("manila").Child("template"))...)
+		if old.Manila.Template == nil {
+			old.Manila.Template = &manilav1.ManilaSpecCore{}
+		}
+		errors = append(errors, r.Spec.Manila.Template.ValidateUpdate(*old.Manila.Template, basePath.Child("manila").Child("template"))...)
 	}
 
 	if r.Spec.Swift.Enabled {
-		errors = append(errors, r.Spec.Swift.Template.ValidateUpdate(old.Swift.Template, basePath.Child("swift").Child("template"))...)
+		if old.Swift.Template == nil {
+			old.Swift.Template = &swiftv1.SwiftSpecCore{}
+		}
+		errors = append(errors, r.Spec.Swift.Template.ValidateUpdate(*old.Swift.Template, basePath.Child("swift").Child("template"))...)
 	}
 
 	if r.Spec.Octavia.Enabled {
-		errors = append(errors, r.Spec.Octavia.Template.ValidateUpdate(old.Octavia.Template, basePath.Child("octavia").Child("template"))...)
+		if old.Octavia.Template == nil {
+			old.Octavia.Template = &octaviav1.OctaviaSpecCore{}
+		}
+		errors = append(errors, r.Spec.Octavia.Template.ValidateUpdate(*old.Octavia.Template, basePath.Child("octavia").Child("template"))...)
 	}
 
 	if r.Spec.Designate.Enabled {
-		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(old.Designate.Template, basePath.Child("designate").Child("template"))...)
+		if old.Designate.Template == nil {
+			old.Designate.Template = &designatev1.DesignateSpecCore{}
+		}
+		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"))...)
 	}
 
 	return errors
@@ -463,116 +522,221 @@ func setOverrideSpec(override **route.OverrideSpec, anno map[string]string) {
 // DefaultServices - common function for calling individual services' defaulting functions
 func (r *OpenStackControlPlane) DefaultServices() {
 	// Cinder
-	r.Spec.Cinder.Template.Default()
-	initializeOverrideSpec(&r.Spec.Cinder.APIOverride.Route, true)
-	r.Spec.Cinder.Template.SetDefaultRouteAnnotations(r.Spec.Cinder.APIOverride.Route.Annotations)
+	if r.Spec.Cinder.Enabled || r.Spec.Cinder.Template != nil {
+		if r.Spec.Cinder.Template == nil {
+			r.Spec.Cinder.Template = &cinderv1.CinderSpecCore{}
+		}
+		r.Spec.Cinder.Template.Default()
+		initializeOverrideSpec(&r.Spec.Cinder.APIOverride.Route, true)
+		r.Spec.Cinder.Template.SetDefaultRouteAnnotations(r.Spec.Cinder.APIOverride.Route.Annotations)
+	}
 
 	// Galera
-	for key, template := range r.Spec.Galera.Templates {
-		if template.StorageClass == "" {
-			template.StorageClass = r.Spec.StorageClass
+	if r.Spec.Galera.Enabled || r.Spec.Galera.Templates != nil {
+		if r.Spec.Galera.Templates == nil {
+			r.Spec.Galera.Templates = ptr.To(map[string]mariadbv1.GaleraSpecCore{})
 		}
-		if template.Secret == "" {
-			template.Secret = r.Spec.Secret
+
+		for key, template := range *r.Spec.Galera.Templates {
+			if template.StorageClass == "" {
+				template.StorageClass = r.Spec.StorageClass
+			}
+			if template.Secret == "" {
+				template.Secret = r.Spec.Secret
+			}
+			template.Default()
+			// By-value copy, need to update
+			(*r.Spec.Galera.Templates)[key] = template
 		}
-		template.Default()
-		// By-value copy, need to update
-		r.Spec.Galera.Templates[key] = template
 	}
 
 	// Glance
-	r.Spec.Glance.Template.Default()
-
-	// initialize the main APIOverride struct
-	if r.Spec.Glance.APIOverride == nil {
-		r.Spec.Glance.APIOverride = map[string]Override{}
-	}
-	for name, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
-		var override Override
-		var ok bool
-
-		if override, ok = r.Spec.Glance.APIOverride[name]; !ok {
-			override = Override{}
+	if r.Spec.Glance.Enabled || r.Spec.Glance.Template != nil {
+		if r.Spec.Glance.Template == nil {
+			r.Spec.Glance.Template = &glancev1.GlanceSpecCore{}
 		}
-		initializeOverrideSpec(&override.Route, true)
-		glanceAPI.SetDefaultRouteAnnotations(override.Route.Annotations)
-		r.Spec.Glance.APIOverride[name] = override
+		r.Spec.Glance.Template.Default()
+		// initialize the main APIOverride struct
+		if r.Spec.Glance.APIOverride == nil {
+			r.Spec.Glance.APIOverride = map[string]Override{}
+		}
+		for name, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+			var override Override
+			var ok bool
+
+			if override, ok = r.Spec.Glance.APIOverride[name]; !ok {
+				override = Override{}
+			}
+			initializeOverrideSpec(&override.Route, true)
+			glanceAPI.SetDefaultRouteAnnotations(override.Route.Annotations)
+			r.Spec.Glance.APIOverride[name] = override
+		}
 	}
 
 	// Ironic
-	// Default Secret
-	if r.Spec.Ironic.Template.Secret == "" {
-		r.Spec.Ironic.Template.Secret = r.Spec.Secret
+	if r.Spec.Ironic.Enabled || r.Spec.Ironic.Template != nil {
+		if r.Spec.Ironic.Template == nil {
+			r.Spec.Ironic.Template = &ironicv1.IronicSpecCore{}
+		}
+
+		// Default Secret
+		if r.Spec.Ironic.Template.Secret == "" {
+			r.Spec.Ironic.Template.Secret = r.Spec.Secret
+		}
+		// Default DatabaseInstance
+		if r.Spec.Ironic.Template.DatabaseInstance == "" {
+			r.Spec.Ironic.Template.DatabaseInstance = "openstack"
+		}
+		// Default StorageClass
+		if r.Spec.Ironic.Template.StorageClass == "" {
+			r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
+		}
+		r.Spec.Ironic.Template.Default()
 	}
-	// Default DatabaseInstance
-	if r.Spec.Ironic.Template.DatabaseInstance == "" {
-		r.Spec.Ironic.Template.DatabaseInstance = "openstack"
-	}
-	// Default StorageClass
-	if r.Spec.Ironic.Template.StorageClass == "" {
-		r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
-	}
-	r.Spec.Ironic.Template.Default()
 
 	// Keystone
-	r.Spec.Keystone.Template.Default()
+	if r.Spec.Keystone.Enabled || r.Spec.Keystone.Template != nil {
+		if r.Spec.Keystone.Template == nil {
+			r.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
+		}
+		r.Spec.Keystone.Template.Default()
+	}
 
 	// Manila
-	r.Spec.Manila.Template.Default()
-	initializeOverrideSpec(&r.Spec.Manila.APIOverride.Route, true)
-	r.Spec.Manila.Template.SetDefaultRouteAnnotations(r.Spec.Manila.APIOverride.Route.Annotations)
+	if r.Spec.Manila.Enabled || r.Spec.Manila.Template != nil {
+		if r.Spec.Manila.Template == nil {
+			r.Spec.Manila.Template = &manilav1.ManilaSpecCore{}
+		}
+		r.Spec.Manila.Template.Default()
+		initializeOverrideSpec(&r.Spec.Manila.APIOverride.Route, true)
+		r.Spec.Manila.Template.SetDefaultRouteAnnotations(r.Spec.Manila.APIOverride.Route.Annotations)
+	}
 
 	// Memcached
-	for key, template := range r.Spec.Memcached.Templates {
-		template.Default()
-		// By-value copy, need to update
-		r.Spec.Memcached.Templates[key] = template
+	if r.Spec.Memcached.Enabled || r.Spec.Memcached.Templates != nil {
+		if r.Spec.Memcached.Templates == nil {
+			r.Spec.Memcached.Templates = ptr.To(map[string]memcachedv1.MemcachedSpecCore{})
+		}
+
+		for key, template := range *r.Spec.Memcached.Templates {
+			template.Default()
+			// By-value copy, need to update
+			(*r.Spec.Memcached.Templates)[key] = template
+		}
 	}
 
 	// Neutron
-	r.Spec.Neutron.Template.Default()
-	setOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
+	if r.Spec.Neutron.Enabled || r.Spec.Neutron.Template != nil {
+		if r.Spec.Neutron.Template == nil {
+			r.Spec.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
+		}
+		r.Spec.Neutron.Template.Default()
+		setOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
+	}
 
 	// Nova
-	r.Spec.Nova.Template.Default()
+	if r.Spec.Nova.Enabled || r.Spec.Nova.Template != nil {
+		if r.Spec.Nova.Template == nil {
+			r.Spec.Nova.Template = &novav1.NovaSpec{}
+		}
+		r.Spec.Nova.Template.Default()
+	}
 
 	// OVN
-	for key, template := range r.Spec.Ovn.Template.OVNDBCluster {
-		template.Default()
-		// By-value copy, need to update
-		r.Spec.Ovn.Template.OVNDBCluster[key] = template
-	}
+	if r.Spec.Ovn.Enabled || r.Spec.Ovn.Template != nil {
+		if r.Spec.Ovn.Template == nil {
+			r.Spec.Ovn.Template = &OvnResources{}
+		}
 
-	r.Spec.Ovn.Template.OVNNorthd.Default()
-	r.Spec.Ovn.Template.OVNController.Default()
+		for key, template := range r.Spec.Ovn.Template.OVNDBCluster {
+			template.Default()
+			// By-value copy, need to update
+			r.Spec.Ovn.Template.OVNDBCluster[key] = template
+		}
+
+		r.Spec.Ovn.Template.OVNNorthd.Default()
+		r.Spec.Ovn.Template.OVNController.Default()
+	}
 
 	// Placement
-	r.Spec.Placement.Template.Default()
-
-	// DNS
-	r.Spec.DNS.Template.Default()
-
-	// Telemetry
-	r.Spec.Telemetry.Template.Default()
-
-	// Heat
-	r.Spec.Heat.Template.Default()
-
-	// Swift
-	if r.Spec.Swift.Template.SwiftStorage.StorageClass == "" {
-		r.Spec.Swift.Template.SwiftStorage.StorageClass = r.Spec.StorageClass
+	if r.Spec.Placement.Enabled || r.Spec.Placement.Template != nil {
+		if r.Spec.Placement.Template == nil {
+			r.Spec.Placement.Template = &placementv1.PlacementAPISpecCore{}
+		}
+		r.Spec.Placement.Template.Default()
 	}
 
-	r.Spec.Swift.Template.Default()
+	// DNS
+	if r.Spec.DNS.Enabled || r.Spec.DNS.Template != nil {
+		if r.Spec.DNS.Template == nil {
+			r.Spec.DNS.Template = &networkv1.DNSMasqSpec{}
+		}
+
+		r.Spec.DNS.Template.Default()
+	}
+
+	// Telemetry
+	if r.Spec.Telemetry.Enabled || r.Spec.Telemetry.Template != nil {
+		if r.Spec.Telemetry.Template == nil {
+			r.Spec.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
+		}
+		r.Spec.Telemetry.Template.Default()
+	}
+
+	// Heat
+	if r.Spec.Heat.Enabled || r.Spec.Heat.Template != nil {
+		if r.Spec.Heat.Template == nil {
+			r.Spec.Heat.Template = &heatv1.HeatSpecCore{}
+		}
+		r.Spec.Heat.Template.Default()
+	}
+
+	// Swift
+	if r.Spec.Swift.Enabled || r.Spec.Swift.Template != nil {
+		if r.Spec.Swift.Template == nil {
+			r.Spec.Swift.Template = &swiftv1.SwiftSpecCore{}
+		}
+
+		if r.Spec.Swift.Template.SwiftStorage.StorageClass == "" {
+			r.Spec.Swift.Template.SwiftStorage.StorageClass = r.Spec.StorageClass
+		}
+
+		r.Spec.Swift.Template.Default()
+	}
 
 	// Horizon
-	r.Spec.Horizon.Template.Default()
+	if r.Spec.Horizon.Enabled || r.Spec.Horizon.Template != nil {
+		if r.Spec.Horizon.Template == nil {
+			r.Spec.Horizon.Template = &horizonv1.HorizonSpecCore{}
+		}
+
+		r.Spec.Horizon.Template.Default()
+	}
 
 	// Octavia
-	r.Spec.Octavia.Template.Default()
+	if r.Spec.Octavia.Enabled || r.Spec.Octavia.Template != nil {
+		if r.Spec.Octavia.Template == nil {
+			r.Spec.Octavia.Template = &octaviav1.OctaviaSpecCore{}
+		}
+
+		r.Spec.Octavia.Template.Default()
+	}
 
 	// Barbican
-	r.Spec.Barbican.Template.Default()
+	if r.Spec.Barbican.Enabled || r.Spec.Barbican.Template != nil {
+		if r.Spec.Barbican.Template == nil {
+			r.Spec.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
+		}
+		r.Spec.Barbican.Template.Default()
+	}
+
+	// Designate
+	if r.Spec.Designate.Enabled || r.Spec.Designate.Template != nil {
+		if r.Spec.Designate.Template == nil {
+			r.Spec.Designate.Template = &designatev1.DesignateSpecCore{}
+		}
+		r.Spec.Designate.Template.Default()
+	}
 }
 
 // DefaultLabel - adding default label to the OpenStackControlPlane

@@ -39,6 +39,10 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Keystone.Template == nil {
+		instance.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Keystone.Template.Override.Service == nil {

@@ -67,6 +67,7 @@ type Names struct {
 	OVNControllerCertName       types.NamespacedName
 	OVNDbServerNBName           types.NamespacedName
 	OVNDbServerSBName           types.NamespacedName
+	NeutronOVNCertName          types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -189,6 +190,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		OVNControllerCertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cert-ovncontroller-ovndbs",
+		},
+		NeutronOVNCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-neutron-ovndbs",
 		},
 	}
 }
@@ -373,19 +378,19 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"enabled": false,
 		},
 		"glance": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"horizon": map[string]interface{}{
 			"enabled": true,
 		},
 		"cinder": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"ovn": map[string]interface{}{
 			"enabled": false,
 		},
 		"neutron": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"swift": map[string]interface{}{
 			"enabled": false,
@@ -402,6 +407,12 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		},
 		"barbican": map[string]interface{}{
 			"enabled": false,
+		},
+		"openstackclient": map[string]interface{}{
+			"enabled": true,
+		},
+		"manila": map[string]interface{}{
+			"enabled": true,
 		},
 	}
 }

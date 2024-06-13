@@ -39,6 +39,10 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.Barbican.Template == nil {
+		instance.Spec.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Barbican.Template.BarbicanAPI.Override.Service == nil {

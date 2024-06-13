@@ -43,6 +43,10 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 	}
 	Log := GetLogger(ctx)
 
+	if !instance.Spec.Keystone.Enabled {
+		return ctrl.Result{}, nil
+	}
+
 	Log.Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
 		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec.OpenStackClientSpecCore)

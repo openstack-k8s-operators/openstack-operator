@@ -128,10 +128,12 @@ type OpenStackControlPlaneSpec struct {
 	// Memcached - Parameters related to the Memcached service
 	Memcached MemcachedSection `json:"memcached,omitempty"`
 
+	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Ovn - Overrides to use when creating the OVN Services
 	Ovn OvnSection `json:"ovn,omitempty"`
 
+	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Neutron - Overrides to use when creating the Neutron Service
 	Neutron NeutronSection `json:"neutron,omitempty"`
@@ -151,6 +153,8 @@ type OpenStackControlPlaneSpec struct {
 	// Ironic - Parameters related to the Ironic services
 	Ironic IronicSection `json:"ironic,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Manila - Parameters related to the Manila service
 	Manila ManilaSection `json:"manila,omitempty"`
 
@@ -160,18 +164,27 @@ type OpenStackControlPlaneSpec struct {
 	Horizon HorizonSection `json:"horizon,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Telemetry - Parameters related to the OpenStack Telemetry services
 	Telemetry TelemetrySection `json:"telemetry,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Swift - Parameters related to the Swift service
 	Swift SwiftSection `json:"swift,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Octavia - Parameters related to the Octavia service
 	Octavia OctaviaSection `json:"octavia,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Designate - Parameters related to the Designate service
 	Designate DesignateSection `json:"designate,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Barbican - Parameters related to the Barbican service
 	Barbican BarbicanSection `json:"barbican,omitempty"`
 
@@ -322,7 +335,7 @@ type DNSMasqSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the DNSMasq service
-	Template networkv1.DNSMasqSpec `json:"template,omitempty"`
+	Template *networkv1.DNSMasqSpec `json:"template,omitempty"`
 }
 
 // KeystoneSection defines the desired state of Keystone service
@@ -336,7 +349,7 @@ type KeystoneSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Keystone service
-	Template keystonev1.KeystoneAPISpecCore `json:"template,omitempty"`
+	Template *keystonev1.KeystoneAPISpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -376,7 +389,7 @@ type PlacementSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Placement API
-	Template placementv1.PlacementAPISpecCore `json:"template,omitempty"`
+	Template *placementv1.PlacementAPISpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -395,7 +408,7 @@ type GlanceSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Glance Service
-	Template glancev1.GlanceSpecCore `json:"template,omitempty"`
+	Template *glancev1.GlanceSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -414,7 +427,7 @@ type CinderSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Cinder Resources
-	Template cinderv1.CinderSpecCore `json:"template,omitempty"`
+	Template *cinderv1.CinderSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -433,7 +446,7 @@ type GaleraSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Galera databases
-	Templates map[string]mariadbv1.GaleraSpecCore `json:"templates,omitempty"`
+	Templates *map[string]mariadbv1.GaleraSpecCore `json:"templates,omitempty"`
 }
 
 // RabbitmqSection defines the desired state of RabbitMQ service
@@ -447,7 +460,7 @@ type RabbitmqSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Rabbitmq clusters
-	Templates map[string]RabbitmqTemplate `json:"templates"`
+	Templates *map[string]RabbitmqTemplate `json:"templates"`
 }
 
 // MemcachedSection defines the desired state of Memcached services
@@ -461,7 +474,7 @@ type MemcachedSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Memcached databases
-	Templates map[string]memcachedv1.MemcachedSpecCore `json:"templates,omitempty"`
+	Templates *map[string]memcachedv1.MemcachedSpecCore `json:"templates,omitempty"`
 }
 
 // RabbitmqTemplate definition
@@ -483,7 +496,7 @@ type OvnSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the OVN services
-	Template OvnResources `json:"template,omitempty"`
+	Template *OvnResources `json:"template,omitempty"`
 }
 
 // OvnResources defines the desired state of OVN services
@@ -515,7 +528,7 @@ type NeutronSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Neutron Service
-	Template neutronv1.NeutronAPISpecCore `json:"template,omitempty"`
+	Template *neutronv1.NeutronAPISpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -534,7 +547,7 @@ type NovaSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Nova services
-	Template novav1.NovaSpec `json:"template,omitempty"`
+	Template *novav1.NovaSpec `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -566,7 +579,7 @@ type HeatSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Heat services
-	Template heatv1.HeatSpecCore `json:"template,omitempty"`
+	Template *heatv1.HeatSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -590,7 +603,7 @@ type IronicSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Ironic services
-	Template ironicv1.IronicSpecCore `json:"template,omitempty"`
+	Template *ironicv1.IronicSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -612,8 +625,9 @@ type ManilaSection struct {
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Manila Resources
-	Template manilav1.ManilaSpecCore `json:"template,omitempty"`
+	Template *manilav1.ManilaSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -629,8 +643,9 @@ type HorizonSection struct {
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Horizon services
-	Template horizonv1.HorizonSpecCore `json:"template,omitempty"`
+	Template *horizonv1.HorizonSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -649,7 +664,7 @@ type TelemetrySection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the OpenStack Telemetry services
-	Template telemetryv1.TelemetrySpecCore `json:"template,omitempty"`
+	Template *telemetryv1.TelemetrySpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -678,7 +693,7 @@ type SwiftSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Swift Resources
-	Template swiftv1.SwiftSpecCore `json:"template,omitempty"`
+	Template *swiftv1.SwiftSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -697,7 +712,7 @@ type OctaviaSection struct {
 	// +kubebuilder:valdiation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Octavia Resources
-	Template octaviav1.OctaviaSpecCore `json:"template,omitempty"`
+	Template *octaviav1.OctaviaSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -716,7 +731,7 @@ type DesignateSection struct {
 	// +kubebuilder:valdiation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating Designate Resources
-	Template designatev1.DesignateSpecCore `json:"template,omitempty"`
+	Template *designatev1.DesignateSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
@@ -735,7 +750,7 @@ type BarbicanSection struct {
 	// +kubebuilder:validation:Optional
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Barbican Service
-	Template barbicanv1.BarbicanSpecCore `json:"template,omitempty"`
+	Template *barbicanv1.BarbicanSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
