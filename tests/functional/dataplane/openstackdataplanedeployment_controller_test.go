@@ -18,6 +18,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 )
 
 var _ = Describe("Dataplane Deployment Test", func() {
@@ -36,6 +37,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	var dataplaneServiceName types.NamespacedName
 	var dataplaneUpdateServiceName types.NamespacedName
 	var dataplaneGlobalServiceName types.NamespacedName
+	var controlPlaneName types.NamespacedName
 
 	BeforeEach(func() {
 		dnsMasqName = types.NamespacedName{
@@ -96,6 +98,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		}
 		dataplaneGlobalServiceName = types.NamespacedName{
 			Name:      "global-service",
+			Namespace: namespace,
+		}
+		controlPlaneName = types.NamespacedName{
+			Name:      "mock-control-plane",
 			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_SERVICES", "../../../config/services")
@@ -719,4 +725,208 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			)
 		})
 	})
+
+	When("A user sets TLSEnabled to true with control plane TLS disabled", func() {
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaNeutronMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			// DefaultDataPlanenodeSetSpec comes with two mock services, one marked for deployment on all nodesets
+			DeferCleanup(th.DeleteInstance, CreateDataplaneService(dataplaneServiceName, false))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneService(dataplaneGlobalServiceName, true))
+
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(controlPlaneName, GetDefaultOpenStackControlPlaneSpec(false)))
+		})
+
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:              []string{"edpm-compute-nodeset"},
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				DeploymentRequeueTime: 15,
+				ServicesOverride:      nil,
+				BackoffLimit:          ptr.To(int32(6)),
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+		})
+
+		It("should have ready condiction set to false and input condition set to unknown", func() {
+
+			nodeSet := dataplanev1.OpenStackDataPlaneNodeSet{}
+			baremetal := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      nodeSet.Name,
+					Namespace: nodeSet.Namespace,
+				},
+			}
+			// Create config map for OVN service
+			ovnConfigMapName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "ovncontroller-config",
+			}
+			mapData := map[string]interface{}{
+				"ovsdb-config": "test-ovn-config",
+			}
+			th.CreateConfigMap(ovnConfigMapName, mapData)
+
+			nodeSet = *GetDataplaneNodeSet(dataplaneNodeSetName)
+
+			// Set baremetal provisioning conditions to True
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName, &baremetal)).To(Succeed())
+				baremetal.Status.Conditions.MarkTrue(
+					condition.ReadyCondition,
+					condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionUnknown,
+			)
+		})
+
+	})
+
+	When("A user sets TLSEnabled to true with control plane TLS enabled", func() {
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaNeutronMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			// DefaultDataPlanenodeSetSpec comes with two mock services, one marked for deployment on all nodesets
+			DeferCleanup(th.DeleteInstance, CreateDataplaneService(dataplaneServiceName, false))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneService(dataplaneUpdateServiceName, false))
+			CreateDataplaneService(dataplaneGlobalServiceName, true)
+
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(controlPlaneName, GetDefaultOpenStackControlPlaneSpec(true)))
+		})
+
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:              []string{"edpm-compute-nodeset"},
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				DeploymentRequeueTime: 15,
+				ServicesOverride:      nil,
+				BackoffLimit:          ptr.To(int32(6)),
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+		})
+
+		It("should have ready condiction set to false, input condition set to true and nodeset setup ready condition set to true", func() {
+
+			nodeSet := dataplanev1.OpenStackDataPlaneNodeSet{}
+			baremetal := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      nodeSet.Name,
+					Namespace: nodeSet.Namespace,
+				},
+			}
+			// Create config map for OVN service
+			ovnConfigMapName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "ovncontroller-config",
+			}
+			mapData := map[string]interface{}{
+				"ovsdb-config": "test-ovn-config",
+			}
+			th.CreateConfigMap(ovnConfigMapName, mapData)
+
+			nodeSet = *GetDataplaneNodeSet(dataplaneNodeSetName)
+
+			// Set baremetal provisioning conditions to True
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName, &baremetal)).To(Succeed())
+				baremetal.Status.Conditions.MarkTrue(
+					condition.ReadyCondition,
+					condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.SetupReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionTrue,
+			)
+		})
+
+	})
+
 })

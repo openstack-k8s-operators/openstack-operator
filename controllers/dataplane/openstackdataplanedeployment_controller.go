@@ -62,6 +62,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) GetLogger(ctx context.Context) 
 //+kubebuilder:rbac:groups=discovery.k8s.io,resources=endpointslices,verbs=get;list;watch;create;update;patch;delete;
 //+kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;
 //+kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
+//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch;
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -163,6 +164,16 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				dataplanev1.DataPlaneNodeSetErrorMessage,
 				err.Error())
 			// Error reading the object - requeue the request.
+			return ctrl.Result{}, err
+		}
+		if err = nodeSetInstance.Spec.ValidateTLS(instance.GetNamespace(), r.Client, ctx); err != nil {
+			Log.Info("error while comparing TLS settings of nodeset %s with control plane: %w", nodeSet, err)
+			instance.Status.Conditions.MarkFalse(
+				dataplanev1.SetupReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				dataplanev1.DataPlaneNodeSetErrorMessage,
+				err.Error())
 			return ctrl.Result{}, err
 		}
 		nodeSets.Items = append(nodeSets.Items, *nodeSetInstance)
