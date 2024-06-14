@@ -1,0 +1,55 @@
+---
+{% set mtu_list = [ctlplane_mtu] %}
+{% for network in nodeset_networks %}
+{{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+{%- endfor %}
+{% set min_viable_mtu = mtu_list | max %}
+network_config:
+- type: interface
+  name: nic1
+  mtu: {{ ctlplane_mtu }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+  routes: {{ ctlplane_host_routes }}
+- type: linux_bond
+  name: bond_api
+  mtu: {{ min_viable_mtu }}
+  bonding_options: {{ edpm_bond_interface_ovs_options }}
+  use_dhcp: false
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  members:
+  - type: interface
+    name: nic2
+    mtu: {{ min_viable_mtu }}
+    primary: true
+  - type: interface
+    name: nic3
+    mtu: {{ min_viable_mtu }}
+{% for network in nodeset_networks %}
+- type: vlan
+  device: bond_api
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+  addresses:
+  - ip_netmask: {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+  routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+{% endfor %}
+{# Used as a provider network with external DHCP #}
+- type: ovs_user_bridge
+  name: br-dpdk0
+  members:
+  - type: ovs_dpdk_bond
+    name: dpdkbond0
+    rx_queue: {{ num_dpdk_interface_rx_queues }}
+    members:
+    - type: ovs_dpdk_port
+      name: dpdk0
+      members:
+      - type: interface
+        name: nic4
+    - type: ovs_dpdk_port
+      name: dpdk1
+      members:
+      - type: interface
+        name: nic5

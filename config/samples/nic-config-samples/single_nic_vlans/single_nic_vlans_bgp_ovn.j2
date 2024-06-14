@@ -1,0 +1,57 @@
+---
+{% set mtu_list = [ctlplane_mtu] %}
+{% for network in nodeset_networks %}
+{{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+{%- endfor %}
+{% set min_viable_mtu = mtu_list | max %}
+network_config:
+- type: interface
+  name: nic1
+  mtu: {{ ctlplane_mtu }}
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  domain: {{ dns_search_domains }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+{% for network in nodeset_networks %}
+- type: vlan
+  device: nic1
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+  addresses:
+  - ip_netmask:
+      {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+  routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+{% endfor %}
+- type: ovs_bridge
+  name: br-provider
+  use_dhcp: false
+- type: ovs_bridge
+  name: {{ neutron_physical_bridge_name }}
+  mtu: {{ min_viable_mtu }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask: {{ lookup('vars', 'bgp_net1_ip') }}/30
+  members:
+  - type: interface
+    name: nic2
+    mtu: {{ min_viable_mtu }}
+    # force the MAC address of the bridge to this interface
+    primary: true
+- type: ovs_bridge
+  name: {{ neutron_physical_bridge_name }}-2
+  mtu: {{ min_viable_mtu }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask: {{ lookup('vars', 'bgp_net2_ip') }}/30
+  members:
+  - type: interface
+    name: nic3
+    mtu: {{ min_viable_mtu }}
+    # force the MAC address of the bridge to this interface
+    primary: true
+- type: interface
+  name: lo
+  addresses:
+  - ip_netmask: {{ lookup('vars', 'bgp_main_net_ip') }}/32
+  - ip_netmask: {{ lookup('vars', 'bgp_main_net6_ip') }}/128

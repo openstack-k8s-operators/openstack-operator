@@ -1,0 +1,31 @@
+---
+{% set mtu_list = [ctlplane_mtu] %}
+{% for network in nodeset_networks %}
+{{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+{%- endfor %}
+{% set min_viable_mtu = mtu_list | max %}
+network_config:
+- type: ovs_bridge
+  name: {{ neutron_physical_bridge_name }}
+  mtu: {{ min_viable_mtu }}
+  use_dhcp: false
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  domain: {{ dns_search_domains }}
+  addresses:
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+  routes: {{ ctlplane_host_routes }}
+  members:
+  - type: interface
+    name: nic1
+    mtu: {{ min_viable_mtu }}
+    # force the MAC address of the bridge to this interface
+    primary: true
+{% for network in nodeset_networks if network != 'external' %}
+  - type: vlan
+    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+    vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+    addresses:
+    - ip_netmask:
+        {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+    routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+{% endfor %}
