@@ -102,7 +102,7 @@ func AnsibleExecution(
 		}
 
 		if len(service.Spec.PlaybookContents) > 0 {
-			ansibleEE.Spec.Play = service.Spec.PlaybookContents
+			ansibleEE.Spec.PlaybookContents = service.Spec.PlaybookContents
 		}
 		if len(service.Spec.Playbook) > 0 {
 			ansibleEE.Spec.Playbook = service.Spec.Playbook

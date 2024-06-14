@@ -100,7 +100,7 @@ spec:
           path: inventory
         secretName: dataplanenodeset-edpm-compute-no-nodes
   name: openstackansibleee
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play

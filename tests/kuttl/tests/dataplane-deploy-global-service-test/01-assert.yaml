@@ -112,7 +112,7 @@ spec:
   extraVars:
     edpm_override_hosts: all
   name: openstackansibleee
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: global kuttl play
