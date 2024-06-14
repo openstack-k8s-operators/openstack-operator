@@ -1,0 +1,69 @@
+---
+network_config:
+- type: interface
+  name: nic1
+  mtu: {{ ctlplane_mtu }}
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  domain: {{ dns_search_domains }}
+  routes: {{ ctlplane_host_routes }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+{% set nics_used = [1] %}
+{% for network in nodeset_networks %}
+{% if network not in ["external", "tenant"] %}
+- type: interface
+  name: nic{{ loop.index + 1 }}
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  use_dhcp: false
+- type: vlan
+  device: nic{{ loop.index + 1 }}
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+  addresses:
+  - ip_netmask:
+      {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+  routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+{% elif 'external_bridge' in nodeset_tags|default([]) %}
+- type: ovs_bridge
+{% if network == 'external' %}
+  name: {{ neutron_physical_bridge_name }}
+{% else %}
+  name: {{ 'br-' ~ networks_lower[network] }}
+{% endif %}
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  use_dhcp: false
+  members:
+  - type: interface
+    name: nic{{ loop.index + 1 }}
+    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+    use_dhcp: false
+    primary: true
+  - type: vlan
+    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+    vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+    addresses:
+    - ip_netmask:
+        {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+    routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+{% endif %}
+{% set _ = nics_used.append(loop.index) %}
+{% endfor %}
+- type: ovs_user_bridge
+  name: br-dpdk0
+  members:
+  - type: ovs_dpdk_bond
+    name: dpdkbond0
+    rx_queue: {{ num_dpdk_interface_rx_queues }}
+    members:
+    - type: ovs_dpdk_port
+      name: dpdk0
+      members:
+      - type: interface
+        name: nic{{nics_used[-1] + 1}}
+    - type: ovs_dpdk_port
+      name: dpdk1
+      members:
+      - type: interface
+        name: nic{{nics_used[-1] + 2}}

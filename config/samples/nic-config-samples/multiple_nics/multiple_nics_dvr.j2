@@ -1,0 +1,56 @@
+---
+network_config:
+- type: interface
+  name: nic1
+  mtu: {{ ctlplane_mtu }}
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  domain: {{ dns_search_domains }}
+  routes: {{ ctlplane_host_routes }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+{% for network in nodeset_networks %}
+{% if network == 'external' %}
+- type: ovs_bridge
+  name: {{ neutron_physical_bridge_name }}
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  use_dhcp: false
+{% else %}
+  addresses:
+  - ip_netmask:
+      {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+  routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+{% endif %}
+  members:
+  - type: interface
+    name:  nic{{ loop.index +1 }}
+    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+    primary: true
+{% if network not in ["external", "tenant"] %}
+- type: interface
+  name: nic{{ loop.index +1 }}
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask:
+      {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+  routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+{% elif network == 'tenant' %}
+- type: ovs_bridge
+  name: {{ 'br-' ~ networks_lower[network] }}
+  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+  dns_servers: {{ ctlplane_dns_nameservers }}
+  use_dhcp: false
+  addresses:
+  - ip_netmask:
+      {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+  routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+  members:
+  - type: interface
+    name: nic{{loop.index + 1}}
+    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+    use_dhcp: false
+    primary: true
+{% endif %}
+{% endfor %}
