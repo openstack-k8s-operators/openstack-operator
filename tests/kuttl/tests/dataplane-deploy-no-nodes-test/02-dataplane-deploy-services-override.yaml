@@ -1,0 +1,25 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-svc
+spec:
+  label: custom-svc
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes-ovrd
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  servicesOverride:
+    - custom-svc

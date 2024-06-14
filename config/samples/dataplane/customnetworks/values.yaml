@@ -1,0 +1,39 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-custom-networks-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    nodetemplate:
+      ansible:
+        vars:
+          # CHANGEME -- see https://access.redhat.com/solutions/253273
+          # edpm_bootstrap_command: |
+          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+
+          neutron_public_interface_name: enp7s0
+          ctlplane_dns_nameservers:
+          - 192.168.1.254
+          edpm_ovn_dbs:
+          - 192.168.24.1
+          edpm_sshd_allowed_ranges: ['192.168.0.0/24', '172.20.0.0/16']
+    nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0
+        ansible:
+          ansibleHost: 192.168.1.5
+        networks:
+          - name: ctlplane
+            subnetName: subnet1
+            defaultRoute: true
+            fixedIP: 192.168.1.5
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1

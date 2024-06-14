@@ -1,0 +1,6 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: ddp-package-option
+spec:
+  playbook: osp.edpm.select_kernel_ddp_package

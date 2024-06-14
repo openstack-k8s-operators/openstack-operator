@@ -1,0 +1,32 @@
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+commands:
+  - script: |
+      PNAME=`oc get pod -l job-name=install-certs-ovrd-certs-refresh-openstack-edpm-tls --field-selector status.phase=Succeeded  -n openstack-kuttl-tests -o name`
+      echo $PNAME
+      if [ -z "$PNAME" ]; then
+          echo "Waiting for successful ansibleee pod"
+          exit 1
+      fi
+
+      serial1=`oc get secret cert-custom-tls-dns-default-edpm-compute-0 -n openstack-kuttl-tests -o json|jq -r '.data."tls.crt"'|base64 -d |openssl x509 -noout -serial`
+      echo "serial1:" $serial1
+      serial2=`oc debug $PNAME -n openstack-kuttl-tests  -- cat /var/lib/openstack/certs/custom-tls-dns/default/edpm-compute-0.ctlplane.example.com-tls.crt |openssl x509 -noout -serial`
+      echo "serial2:" $serial2
+      if [ $serial1 != $serial2 ]; then
+          echo "serials for cert-custom-tls-dns-default-edpm-compute-0 not equal"
+          exit 1
+      fi
+
+      serial1=`oc get secret cert-tls-dns-ips-default-edpm-compute-0 -n openstack-kuttl-tests -o json|jq -r '.data."tls.crt"'|base64 -d |openssl x509 -noout -serial`
+      echo "serial1:" $serial1
+      serial2=`oc debug $PNAME -n openstack-kuttl-tests -- cat /var/lib/openstack/certs/tls-dns-ips/default/edpm-compute-0.ctlplane.example.com-tls.crt |openssl x509 -noout -serial`
+      echo "serial2:" $serial2
+      if [ $serial1 != $serial2 ]; then
+          echo "serials for cert-tls-dns-ips-default-edpm-compute-0 not equal"
+          exit 1
+      fi
+
+      exit 0

@@ -1,0 +1,126 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-no-nodes
+spec:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  backoffLimit: 6
+  envConfigMapName: openstack-aee-default-env
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/kuttl-service/00-ansibleVars
+      subPath: 00-ansibleVars
+    - mountPath: /var/lib/openstack/configs/kuttl-service/00-kuttl-service.conf
+      subPath: 00-kuttl-service.conf
+    - mountPath: /var/lib/openstack/configs/kuttl-service/01-kuttl-service.conf
+      subPath: 01-kuttl-service.conf
+    volumes:
+    - configMap:
+        items:
+        - key: 00-ansibleVars
+          path: 00-ansibleVars
+        name: kuttl-service-cm-0
+    - configMap:
+        items:
+        - key: 00-kuttl-service.conf
+          path: 00-kuttl-service.conf
+        name: kuttl-service-cm-0
+    - configMap:
+        items:
+        - key: 01-kuttl-service.conf
+          path: 01-kuttl-service.conf
+        name: kuttl-service-cm-0
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/kuttl-service/01-ansibleVars
+      subPath: 01-ansibleVars
+    - mountPath: /var/lib/openstack/configs/kuttl-service/10-kuttl-service.conf
+      subPath: 10-kuttl-service.conf
+    - mountPath: /var/lib/openstack/configs/kuttl-service/20-kuttl-service.conf
+      subPath: 20-kuttl-service.conf
+    volumes:
+    - configMap:
+        items:
+        - key: 01-ansibleVars
+          path: 01-ansibleVars
+        name: kuttl-service-cm-1
+    - configMap:
+        items:
+        - key: 10-kuttl-service.conf
+          path: 10-kuttl-service.conf
+        name: kuttl-service-cm-1
+    - configMap:
+        items:
+        - key: 20-kuttl-service.conf
+          path: 20-kuttl-service.conf
+        name: kuttl-service-cm-1
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/kuttl-service/30-kuttl-service.conf
+      subPath: 30-kuttl-service.conf
+    volumes:
+    - configMap:
+        items:
+        - key: 30-kuttl-service.conf
+          path: 30-kuttl-service.conf
+        name: kuttl-service-cm-2
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-no-nodes
+  name: openstackansibleee
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep infinity
+          delegate_to: localhost
+  preserveJobs: true
+  restartPolicy: Never
+  uid: 1001
+status:
+  JobStatus: Running
+  conditions:
+  - message: Job in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Job in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: JobReady

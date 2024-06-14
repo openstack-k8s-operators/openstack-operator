@@ -1,0 +1,13 @@
+# This file is for teaching kustomize how to substitute ansibleVarsFrom name reference in OpenStackDataPlaneNodeSet
+nameReference:
+- kind: ConfigMap
+  version: v1
+  fieldSpecs:
+  - kind: OpenStackDataPlaneNodeSet
+    version: v1beta1
+    group: dataplane.openstack.org
+    path: spec/nodeTemplate/ansible/ansibleVarsFrom/configMapRef/name
+  - kind: OpenStackDataPlaneNodeSet
+    version: v1beta1
+    group: dataplane.openstack.org
+    path: spec/nodeTemplate/ansible/ansibleVarsFrom/secretRef/name

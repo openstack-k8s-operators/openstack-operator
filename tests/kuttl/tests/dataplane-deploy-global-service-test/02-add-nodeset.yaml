@@ -1,0 +1,42 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-beta-nodeset
+spec:
+  baremetalSetTemplate:
+    automatedCleaningMode: metadata
+    bmhNamespace: openshift-machine-api
+    cloudUserName: ""
+    ctlplaneInterface: ""
+    ctlplaneNetmask: 255.255.255.0
+    deploymentSSHSecret: ""
+    hardwareReqs:
+      cpuReqs:
+        countReq: {}
+        mhzReq: {}
+      diskReqs:
+        gbReq: {}
+        ssdReq: {}
+      memReqs:
+        gbReq: {}
+  preProvisioned: true
+  services:
+  - download-cache
+  - bootstrap
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansible:
+      ansibleUser: cloud-admin
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-multinodeset
+spec:
+  nodeSets:
+    - edpm-compute-global
+    - edpm-compute-beta-nodeset

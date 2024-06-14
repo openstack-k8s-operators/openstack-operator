@@ -1,0 +1,38 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: failed-service
+spec:
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Copy absent file
+          ansible.builtin.shell: |
+              set -euxo pipefail
+              cp absent failed_op
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  preProvisioned: true
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+  services:
+    - failed-service
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 3
+  nodeSets:
+    - edpm-compute-no-nodes

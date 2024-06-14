@@ -495,6 +495,92 @@ spec:
         displayName: TLS
         path: tls
       version: v1beta1
+    - description: OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments
+        API OpenStackDataPlaneDeployment name must be a valid RFC1123 as it is used
+        in labels
+      displayName: OpenStack Data Plane Deployments
+      kind: OpenStackDataPlaneDeployment
+      name: openstackdataplanedeployments.dataplane.openstack.org
+      specDescriptors:
+      - description: BackoffLimit allows to define the maximum number of retried executions
+          (defaults to 6).
+        displayName: Backoff Limit
+        path: backoffLimit
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:number
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
+      - description: Deployed
+        displayName: Deployed
+        path: deployed
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      version: v1beta1
+    - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets
+        API OpenStackDataPlaneNodeSet name must be a valid RFC1123 as it is used in
+        labels
+      displayName: OpenStack Data Plane NodeSet
+      kind: OpenStackDataPlaneNodeSet
+      name: openstackdataplanenodesets.dataplane.openstack.org
+      specDescriptors:
+      - description: AnsiblePort SSH port for Ansible connection
+        displayName: Ansible Port
+        path: nodeTemplate.ansible.ansiblePort
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:number
+      - description: 'AnsibleSSHPrivateKeySecret Name of a private SSH key secret
+          containing private SSH key for connecting to node. The named secret must
+          be of the form: Secret.data.ssh-privatekey: <base64 encoded private key
+          contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
+        displayName: Ansible SSHPrivate Key Secret
+        path: nodeTemplate.ansibleSSHPrivateKeySecret
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes:Secret
+      - description: AnsiblePort SSH port for Ansible connection
+        displayName: Ansible Port
+        path: nodes.ansible.ansiblePort
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:number
+      - description: PreProvisioned - Set to true if the nodes have been Pre Provisioned.
+        displayName: Pre Provisioned
+        path: preProvisioned
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: TLSEnabled - Whether the node set has TLS enabled.
+        displayName: TLSEnabled
+        path: tlsEnabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
+      version: v1beta1
+    - description: OpenStackDataPlaneService is the Schema for the openstackdataplaneservices
+        API OpenStackDataPlaneService name must be a valid RFC1123 as it is used in
+        labels
+      displayName: OpenStack Data Plane Service
+      kind: OpenStackDataPlaneService
+      name: openstackdataplaneservices.dataplane.openstack.org
+      specDescriptors:
+      - description: AddCertMounts - Whether to add cert mounts
+        displayName: Add Cert Mounts
+        path: addCertMounts
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
+      version: v1beta1
     - description: OpenStackVersion is the Schema for the openstackversionupdates
         API
       displayName: OpenStack Version

@@ -1,0 +1,4 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - command: oc delete -n openstack-kuttl-tests secrets cert-custom-tls-dns-default-edpm-compute-0 cert-tls-dns-ips-default-edpm-compute-0

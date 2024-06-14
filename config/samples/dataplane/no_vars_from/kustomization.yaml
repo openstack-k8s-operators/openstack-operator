@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+components:
+- ../preprovisioned # for baremetal nodes, replace with baremetal
+
+replacements:
+# OpenStackDataPlaneNodeSet customizations
+- source:
+    kind: ConfigMap
+    name: neutron-edpm
+    fieldPath: data.physical_bridge_name
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.nodeTemplate.ansible.ansibleVars.neutron_physical_bridge_name
+    options:
+      create: true
+- source:
+    kind: ConfigMap
+    name: neutron-edpm
+    fieldPath: data.public_interface_name
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.nodeTemplate.ansible.ansibleVars.neutron_public_interface_name
+    options:
+      create: true
+- source:
+    kind: ConfigMap
+    name: network-config-template
+    fieldPath: data.network_config_template
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.nodeTemplate.ansible.ansibleVars.edpm_network_config_template
+    options:
+      create: true
+
+
+patches:
+- target:
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm
+  patch: |-
+    - op: remove
+      path: /spec/nodeTemplate/ansible/ansibleVarsFrom
+    - op: add
+      path: /spec/nodeTemplate/ansible/ansibleUser
+      value: cloud-admin

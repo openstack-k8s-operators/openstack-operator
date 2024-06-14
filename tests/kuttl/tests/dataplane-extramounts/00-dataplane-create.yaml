@@ -1,0 +1,37 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: test-service
+spec:
+  label: test-service
+  playbook: test.yml
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-extramounts
+spec:
+  preProvisioned: true
+  services:
+    - test-service
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    extraMounts:
+      - extraVolType: edpm-ansible
+        mounts:
+        - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
+          name: edpm-ansible
+        volumes:
+        - name: edpm-ansible
+          persistentVolumeClaim:
+            claimName: edpm-ansible
+            readOnly: true
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-extramounts
+spec:
+  nodeSets:
+    - edpm-extramounts

@@ -5,6 +5,9 @@ resources:
 - bases/core.openstack.org_openstackcontrolplanes.yaml
 - bases/core.openstack.org_openstackversions.yaml
 - bases/client.openstack.org_openstackclients.yaml
+- bases/dataplane.openstack.org_openstackdataplanenodesets.yaml
+- bases/dataplane.openstack.org_openstackdataplaneservices.yaml
+- bases/dataplane.openstack.org_openstackdataplanedeployments.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

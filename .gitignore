@@ -37,3 +37,9 @@ CI_TOOLS_REPO
 # generated workspace file
 go.work
 go.work.sum
+
+# docs
+.bundle/
+docs_build/
+Gemfile.lock
+local/

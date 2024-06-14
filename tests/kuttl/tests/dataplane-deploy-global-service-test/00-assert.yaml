@@ -1,0 +1,138 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc get OpenStackDataPlaneDeployment -n openstack-kuttl-tests edpm-compute-global -o yaml
+  name: edpm-compute-global-deployment
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-global
+  namespace: openstack-kuttl-tests
+spec:
+  preProvisioned: true
+  services:
+  - download-cache
+  - bootstrap
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - install-certs
+  - ovn
+  - neutron-metadata
+  - neutron-ovn
+  - neutron-sriov
+  - neutron-dhcp
+  - libvirt
+  - nova
+  - custom-global-service
+  tlsEnabled: false
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    managementNetwork: ctlplane
+    ansible:
+      ansibleUser: cloud-admin
+      ansiblePort: 22
+      ansibleVarsFrom:
+        - prefix: edpm_
+          configMapRef:
+            name: network-config-template
+      ansibleVars:
+         timesync_ntp_servers:
+           - hostname: clock.redhat.com
+         # edpm_network_config
+         # Default nic config template for a EDPM compute node
+         # These vars are edpm_network_config role vars
+         edpm_network_config_hide_sensitive_logs: false
+         # These vars are for the network config templates themselves and are
+         # considered EDPM network defaults.
+         neutron_physical_bridge_name: br-ex
+         neutron_public_interface_name: eth0
+         ctlplane_mtu: 1500
+         ctlplane_cidr: 24
+         ctlplane_gateway_ip: 192.168.122.1
+         ctlplane_host_routes:
+         - ip_netmask: 0.0.0.0/0
+           next_hop: 192.168.122.1
+         external_mtu: 1500
+         external_vlan_id: 44
+         external_cidr: '24'
+         external_host_routes: []
+         internalapi_mtu: 1500
+         internalapi_vlan_id: 20
+         internalapi_cidr: '24'
+         internalapi_host_routes: []
+         storage_mtu: 1500
+         storage_vlan_id: 21
+         storage_cidr: '24'
+         storage_host_routes: []
+         tenant_mtu: 1500
+         tenant_vlan_id: 22
+         tenant_cidr: '24'
+         tenant_host_routes: []
+         nodeset_networks:
+         - InternalApi
+         - Storage
+         - Tenant
+         networks_lower:
+           External: external
+           InternalApi: internalapi
+           Storage: storage
+           Tenant: tenant
+         # edpm_nodes_validation
+         edpm_nodes_validation_validate_controllers_icmp: false
+         edpm_nodes_validation_validate_gateway_icmp: false
+         ctlplane_dns_nameservers:
+         - 192.168.122.1
+         dns_search_domains: []
+         gather_facts: false
+         enable_debug: false
+         # edpm firewall, change the allowed CIDR if needed
+         edpm_sshd_configure_firewall: true
+         edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+         # SELinux module
+         edpm_selinux_mode: enforcing
+status:
+  observedGeneration: 1
+  conditions:
+  - message: Deployment not started
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Deployment not started
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady

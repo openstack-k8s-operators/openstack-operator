@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: network-config-template
+data:
+  network_config_template: |
+    ---
+    {% set mtu_list = [ctlplane_mtu] %}
+    {% for network in nodeset_networks %}
+    {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+    {%- endfor %}
+    {% set min_viable_mtu = mtu_list | max %}
+    network_config:
+    - type: ovs_bridge
+      name: {{ neutron_physical_bridge_name }}
+      mtu: {{ min_viable_mtu }}
+      use_dhcp: false
+      dns_servers: {{ ctlplane_dns_nameservers }}
+      domain: {{ dns_search_domains }}
+      addresses:
+      - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+      routes: {{ ctlplane_host_routes }}
+      members:
+      - type: interface
+        name: nic1
+        mtu: {{ min_viable_mtu }}
+        # force the MAC address of the bridge to this interface
+        primary: true
+    {% for network in nodeset_networks %}
+      - type: vlan
+        mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+        vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+        addresses:
+        - ip_netmask:
+            {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+        routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+    {% endfor %}
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-ipam
+spec:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  services:
+    - download-cache
+    - bootstrap
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - install-certs
+    - ovn
+    - neutron-metadata
+    - libvirt
+    - nova
+  preProvisioned: true
+  nodes:
+    edpm-compute-0:
+      hostName: edpm-compute-0
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+        fixedIP: 192.168.122.100
+      - name: internalapi
+        subnetName: subnet1
+      - name: storage
+        subnetName: subnet1
+      - name: tenant
+        subnetName: subnet1
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansible:
+      ansibleUser: cloud-admin
+      ansiblePort: 22
+      ansibleVarsFrom:
+        - prefix: edpm_
+          configMapRef:
+            name: network-config-template
+      ansibleVars:
+         timesync_ntp_servers:
+           - hostname: clock.redhat.com
+         # edpm_network_config
+         # Default nic config template for a EDPM compute node
+         # These vars are edpm_network_config role vars
+         edpm_network_config_hide_sensitive_logs: false
+         edpm_nodes_validation_validate_controllers_icmp: false
+         edpm_nodes_validation_validate_gateway_icmp: false
+         gather_facts: false
+         enable_debug: false
+         # edpm firewall, change the allowed CIDR if needed
+         edpm_sshd_configure_firewall: true
+         edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+         # SELinux module
+         edpm_selinux_mode: enforcing

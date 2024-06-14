@@ -1,0 +1,74 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: tls-dns-ips
+spec:
+  caCerts: combined-ca-bundle
+  tlsCerts:
+    default:
+      contents:
+      - dnsnames
+      - ips
+      issuer: osp-rootca-issuer-internal
+      networks:
+      - ctlplane
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-tls-dns
+spec:
+  caCerts: combined-ca-bundle
+  tlsCerts:
+    default:
+      contents:
+      - dnsnames
+      keyUsages:
+      - key encipherment
+      - digital signature
+      - server auth
+      - client auth
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: install-certs-ovrd
+spec:
+  addCertMounts: True
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-edpm-tls-ovrd
+spec:
+  nodeSets:
+    - openstack-edpm-tls
+  servicesOverride:
+    - install-certs-ovrd
+    - tls-dns-ips
+    - custom-tls-dns

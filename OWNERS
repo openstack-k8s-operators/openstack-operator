@@ -2,7 +2,9 @@
 approvers:
   - ci-approvers
   - openstack-approvers
+  - dataplane-approvers
 
 reviewers:
   - ci-approvers
   - openstack-approvers
+  - dataplane-approvers

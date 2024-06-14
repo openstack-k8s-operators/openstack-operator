@@ -27,6 +27,8 @@ RUN if [ ! -f $CACHITO_ENV_FILE ]; then go mod download ; fi
 # Build manager
 RUN if [ -f $CACHITO_ENV_FILE ] ; then source $CACHITO_ENV_FILE ; fi ; env ${GO_BUILD_EXTRA_ENV_ARGS} go build ${GO_BUILD_EXTRA_ARGS} -a -o ${DEST_ROOT}/manager main.go
 
+RUN cp -r config/services ${DEST_ROOT}/services
+
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM $OPERATOR_BASE_IMAGE
@@ -56,12 +58,16 @@ LABEL com.redhat.component="${IMAGE_COMPONENT}" \
 	io.openshift.tags="${IMAGE_TAGS}"
 ### DO NOT EDIT LINES ABOVE
 
-ENV USER_UID=$USER_ID
+ENV USER_UID=$USER_ID \
+	OPERATOR_SERVICES=/usr/share/openstack-operator/services/
 
 WORKDIR /
 
 # Install operator binary to WORKDIR
 COPY --from=builder ${DEST_ROOT}/manager .
+
+# Install services
+COPY --from=builder ${DEST_ROOT}/services ${OPERATOR_SERVICES}
 
 USER $USER_ID
 

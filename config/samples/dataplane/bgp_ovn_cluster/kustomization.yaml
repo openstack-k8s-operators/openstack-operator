@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+namespace: openstack
+
+components:
+- ../preprovisioned # for baremetal nodes, replace with baremetal
+
+resources:
+  - values.yaml
+
+replacements:
+# OpenStackDataPlaneNodeSet customizations
+- source:
+    kind: DataPlaneConfig
+    name: edpm-bgp-ovn-cluster-values
+    fieldPath: data.nodeset.nodetemplate.ansible.vars
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.nodeTemplate.ansible.ansibleVars
+    options:
+      create: true
+- source:
+    kind: DataPlaneConfig
+    name: edpm-bgp-ovn-cluster-values
+    fieldPath: data.nodeset.services
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.services
+    options:
+      create: true
+
+patches:
+- target:
+    kind: OpenStackDataPlaneNodeSet
+    name: .*
+  patch: |-
+    - op: copy
+      from: /spec/nodes/edpm-compute-0
+      path: /spec/nodes/edpm-compute-1
+    - op: replace
+      path: /spec/nodes/edpm-compute-1/ansible/ansibleHost
+      value: 192.168.122.101
+    - op: replace
+      path: /spec/nodes/edpm-compute-1/hostName
+      value: edpm-compute-1
+    - op: replace
+      path: /spec/nodes/edpm-compute-1/networks/0/fixedIP
+      value: 192.168.122.101

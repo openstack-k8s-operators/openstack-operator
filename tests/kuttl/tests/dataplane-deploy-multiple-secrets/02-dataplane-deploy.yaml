@@ -1,0 +1,10 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-edpm-tls
+spec:
+  nodeSets:
+    - openstack-edpm-tls
+  services:
+    - generic-service1

@@ -1,0 +1,107 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-no-nodes-custom-svc
+spec:
+  preProvisioned: true
+  services:
+    - custom-img-svc
+  nodes: {}
+  nodeTemplate:
+    ansible:
+      ansibleUser: cloud-admin
+      ansiblePort: 22
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+status:
+  observedGeneration: 1
+  conditions:
+  - message: Deployment in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Deployment in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-no-nodes-custom-svc
+  image: example.com/repo/runner-image:latest
+  name: openstackansibleee
+  restartPolicy: Never
+  uid: 1001
+status:
+  JobStatus: Running
+  conditions:
+  - message: Job in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Job in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: JobReady

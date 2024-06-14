@@ -1,0 +1,172 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-beta-nodeset
+  namespace: openstack-kuttl-tests
+spec:
+  services:
+  - download-cache
+  - bootstrap
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+status:
+  conditions:
+  - message: NodeSet Ready
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Deployment completed
+    reason: Ready
+    status: "True"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+  configMapHashes:
+    ovncontroller-config: n56h54bh9bhcbh65ch9fhdh66dh95h5dch569h678h7fh599h7ch84h597h59h54dh58dhf6h66bh565h4hc4h587h645hd7hcch5d8h5f4h55cq
+  secretHashes:
+    neutron-dhcp-agent-neutron-config: n68h676h98h689hd4h575h5dbh694h6fh688h57h665h5c5h56dh5ddh65bh5d7h5cdh644hb8h8fh5d9h5b9h555h9ch56dh5fh6chd4h5c5h5c5h68q
+    neutron-ovn-agent-neutron-config: n5f4h89hb8h645h55bh657h9fh5d9h5c6h595h9dh667h5f4hfhffh7fh685h56ch57fh679h5ddh5ddh95h696hbch5c7h669h84h54dh685hfh85q
+    neutron-ovn-metadata-agent-neutron-config: n68dh585h666h5c4h568hf7h65fh695h649hb9h657h5f6h548h679h77h5b4h664h8h5b8h654h5hf5h674h664h545h74h58ch57ch8ch56h54fh5ddq
+    neutron-sriov-agent-neutron-config: n685h567h697h5bch8ch5cfh87h698h658h684h8h99h5dch5c5h699h79hb5h87h66dh664h546h586h7bh56fh5d6h5d4h566h56bh87h678h696h56cq
+    nova-cell1-compute-config: n89hd6h5h545h644h58h556hd9h5c5h598hd4h7bh5f9h5bdh649hb5h99h686h677h8ch575h665h574h587h5b6h5ddh8fh687h9bh657h675h97q
+    nova-metadata-neutron-config: n7fh696h674h5b9h68dh77h677h5c5hd9h5dbh89h646h696h65ch64bh86hd8h56h78h558h5h5c7h87h86h5bh5bch78h6ch5cbh54fh56fhfdq
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-multinodeset
+  namespace: openstack-kuttl-tests
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+    - edpm-compute-beta-nodeset
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-multinodeset
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-beta-nodeset
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.download_cache
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Job completed
+    reason: Ready
+    status: "True"
+    type: JobReady
+---
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+  namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-multinodeset
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-beta-nodeset
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.bootstrap
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Job completed
+    reason: Ready
+    status: "True"
+    type: JobReady

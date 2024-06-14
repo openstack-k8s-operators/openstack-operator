@@ -1,0 +1,119 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: generic-service1
+spec:
+  caCerts: combined-ca-bundle
+  tlsCerts:
+    default:
+      contents:
+      - dnsnames
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: install-certs-ovr
+spec:
+  addCertMounts: True
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-tls
+spec:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  services:
+    - install-certs-ovr
+    - generic-service1
+  preProvisioned: true
+  tlsEnabled: true
+  secretMaxSize: 2880
+  nodes:
+    edpm-compute-0:
+      hostName: edpm-compute-0
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+        fixedIP: 192.168.122.100
+      - name: internalapi
+        subnetName: subnet1
+        fixedIP: 172.17.0.100
+      - name: storage
+        subnetName: subnet1
+        fixedIP: 172.18.0.100
+      - name: tenant
+        subnetName: subnet1
+        fixedIP: 172.19.0.100
+    edpm-compute-1:
+      hostName: edpm-compute-1
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+        fixedIP: 192.168.122.101
+      - name: internalapi
+        subnetName: subnet1
+        fixedIP: 172.17.0.101
+      - name: storage
+        subnetName: subnet1
+        fixedIP: 172.18.0.101
+      - name: tenant
+        subnetName: subnet1
+        fixedIP: 172.19.0.101
+    edpm-compute-2:
+      hostName: edpm-compute-2
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+        fixedIP: 192.168.122.102
+      - name: internalapi
+        subnetName: subnet1
+        fixedIP: 172.17.0.102
+      - name: storage
+        subnetName: subnet1
+        fixedIP: 172.18.0.102
+      - name: tenant
+        subnetName: subnet1
+        fixedIP: 172.19.0.102
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansible:
+      ansibleUser: cloud-admin
+      ansiblePort: 22
+      ansibleVars:
+         timesync_ntp_servers:
+           - hostname: clock.redhat.com
+         # edpm_network_config
+         # Default nic config template for a EDPM compute node
+         # These vars are edpm_network_config role vars
+         edpm_network_config_hide_sensitive_logs: false
+         edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+         edpm_nodes_validation_validate_controllers_icmp: false
+         edpm_nodes_validation_validate_gateway_icmp: false
+         gather_facts: false
+         enable_debug: false
+         # edpm firewall, change the allowed CIDR if needed
+         edpm_sshd_configure_firewall: true
+         edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+         # SELinux module
+         edpm_selinux_mode: enforcing

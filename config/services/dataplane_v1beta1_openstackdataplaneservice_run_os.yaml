@@ -1,0 +1,9 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: run-os
+spec:
+  playbook: osp.edpm.run_os
+  containerImageFields:
+  - EdpmLogrotateCrondImage
+  - EdpmIscsidImage

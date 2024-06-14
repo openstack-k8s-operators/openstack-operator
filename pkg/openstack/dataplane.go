@@ -6,7 +6,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 
-	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 

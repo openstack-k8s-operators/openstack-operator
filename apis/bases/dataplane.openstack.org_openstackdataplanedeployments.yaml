@@ -1,0 +1,155 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: openstackdataplanedeployments.dataplane.openstack.org
+spec:
+  group: dataplane.openstack.org
+  names:
+    kind: OpenStackDataPlaneDeployment
+    listKind: OpenStackDataPlaneDeploymentList
+    plural: openstackdataplanedeployments
+    shortNames:
+    - osdpd
+    - osdpdeployment
+    - osdpdeployments
+    singular: openstackdataplanedeployment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: NodeSets
+      jsonPath: .spec.nodeSets
+      name: NodeSets
+      type: string
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              ansibleExtraVars:
+                x-kubernetes-preserve-unknown-fields: true
+              ansibleLimit:
+                type: string
+              ansibleSkipTags:
+                type: string
+              ansibleTags:
+                type: string
+              backoffLimit:
+                default: 6
+                format: int32
+                type: integer
+              deploymentRequeueTime:
+                default: 15
+                minimum: 1
+                type: integer
+              nodeSets:
+                items:
+                  type: string
+                minItems: 1
+                type: array
+              servicesOverride:
+                items:
+                  type: string
+                type: array
+            required:
+            - deploymentRequeueTime
+            - nodeSets
+            type: object
+            x-kubernetes-validations:
+            - message: OpenStackDataPlaneDeployment Spec is immutable
+              rule: self == oldSelf
+          status:
+            properties:
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    severity:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              configMapHashes:
+                additionalProperties:
+                  type: string
+                type: object
+              containerImages:
+                additionalProperties:
+                  type: string
+                type: object
+              deployed:
+                type: boolean
+              deployedVersion:
+                type: string
+              nodeSetConditions:
+                additionalProperties:
+                  items:
+                    properties:
+                      lastTransitionTime:
+                        format: date-time
+                        type: string
+                      message:
+                        type: string
+                      reason:
+                        type: string
+                      severity:
+                        type: string
+                      status:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - lastTransitionTime
+                    - status
+                    - type
+                    type: object
+                  type: array
+                type: object
+              nodeSetHashes:
+                additionalProperties:
+                  type: string
+                type: object
+              observedGeneration:
+                format: int64
+                type: integer
+              secretHashes:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

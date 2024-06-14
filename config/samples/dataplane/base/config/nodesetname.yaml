@@ -1,0 +1,10 @@
+# This file is for teaching kustomize how to substitute OpenStackDataPlaneNodeSet name reference in OpenStackDataPlaneDeployment
+nameReference:
+- kind: OpenStackDataPlaneNodeSet
+  version: v1beta1
+  group: dataplane.openstack.org
+  fieldSpecs:
+  - kind: OpenStackDataPlaneDeployment
+    version: v1beta1
+    group: dataplane.openstack.org
+    path: spec/nodeSets

@@ -1,0 +1,12 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: certs-refresh
+spec:
+  nodeSets:
+    - openstack-edpm-tls
+  servicesOverride:
+    - install-certs-ovrd
+    - tls-dns-ips
+    - custom-tls-dns

@@ -1,0 +1,65 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-swift-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    networkattachments:
+    - ctlplane
+    - storage
+    nodetemplate:
+      ansible:
+        vars:
+          # Swift disks defined here apply to all nodes. Node-specific disks
+          # might be defined in the nodes: section below
+          #
+          # weight, region and zone are not used in the playbook, but
+          # in swift-operator itself to determine Swift ring values. weight
+          # should be usually set to the GiB of the disk; region and
+          # zone are optional and might be used to enforce distribution of
+          # replicas
+          edpm_swift_disks:
+            - device: /dev/vdb
+              path: /srv/node/vdb
+              weight: 4000
+              region: 0
+              zone: 0
+    nodes:
+      edpm-swift-0:
+        ansible:
+          ansibleHost: 192.168.122.100
+          ansibleVars:
+            # Same options as above for all nodes, this time for an individual
+            # node with a different disk. This node will use only vdc. It would
+            # use vdb from parent section if not defined
+            edpm_swift_disks:
+              - device: /dev/vdc
+                path: /srv/node/vdc
+                weight: 1000
+        hostName: edpm-swift-0
+        networks:
+        - defaultRoute: true
+          fixedIP: 192.168.122.100
+          name: ctlplane
+          subnetName: subnet1
+        - name: internalapi
+          subnetName: subnet1
+        - name: storage
+          subnetName: subnet1
+        - name: tenant
+          subnetName: subnet1
+    services:
+    - bootstrap
+    - download-cache
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - install-certs
+    - swift

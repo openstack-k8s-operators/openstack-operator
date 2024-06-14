@@ -1,0 +1,26 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-sriov-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    services:
+    - bootstrap
+    - download-cache
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - install-certs
+    - ovn
+    - neutron-ovn
+    - neutron-sriov
+    - libvirt
+    - nova
+    - telemetry

@@ -1,0 +1,165 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: openstackdataplaneservices.dataplane.openstack.org
+spec:
+  group: dataplane.openstack.org
+  names:
+    kind: OpenStackDataPlaneService
+    listKind: OpenStackDataPlaneServiceList
+    plural: openstackdataplaneservices
+    shortNames:
+    - osdps
+    - osdpservice
+    - osdpservices
+    singular: openstackdataplaneservice
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              addCertMounts:
+                default: false
+                type: boolean
+              caCerts:
+                type: string
+              certsFrom:
+                type: string
+              configMaps:
+                items:
+                  type: string
+                type: array
+              containerImageFields:
+                items:
+                  type: string
+                type: array
+              dataSources:
+                items:
+                  properties:
+                    configMapRef:
+                      properties:
+                        name:
+                          type: string
+                        optional:
+                          type: boolean
+                      type: object
+                      x-kubernetes-map-type: atomic
+                    prefix:
+                      type: string
+                    secretRef:
+                      properties:
+                        name:
+                          type: string
+                        optional:
+                          type: boolean
+                      type: object
+                      x-kubernetes-map-type: atomic
+                  type: object
+                type: array
+              deployOnAllNodeSets:
+                type: boolean
+              edpmServiceType:
+                type: string
+              openStackAnsibleEERunnerImage:
+                type: string
+              playbook:
+                type: string
+              playbookContents:
+                type: string
+              secrets:
+                items:
+                  type: string
+                type: array
+              tlsCerts:
+                additionalProperties:
+                  properties:
+                    contents:
+                      items:
+                        type: string
+                      minItems: 1
+                      type: array
+                    edpmRoleServiceName:
+                      type: string
+                    issuer:
+                      type: string
+                    keyUsages:
+                      items:
+                        enum:
+                        - signing
+                        - digital signature
+                        - content commitment
+                        - key encipherment
+                        - key agreement
+                        - data encipherment
+                        - cert sign
+                        - crl sign
+                        - encipher only
+                        - decipher only
+                        - any
+                        - server auth
+                        - client auth
+                        - code signing
+                        - email protection
+                        - s/mime
+                        - ipsec end system
+                        - ipsec tunnel
+                        - ipsec user
+                        - timestamping
+                        - ocsp signing
+                        - microsoft sgc
+                        - netscape sgc
+                        type: string
+                      type: array
+                    networks:
+                      items:
+                        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                        type: string
+                      type: array
+                  required:
+                  - contents
+                  type: object
+                type: object
+            type: object
+          status:
+            properties:
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    severity:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

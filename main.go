@@ -32,7 +32,6 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
@@ -74,9 +73,11 @@ import (
 
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
+	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	//+kubebuilder:scaffold:imports
 )
@@ -89,6 +90,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(corev1.AddToScheme(scheme))
+	utilruntime.Must(dataplanev1.AddToScheme(scheme))
 	utilruntime.Must(keystonev1.AddToScheme(scheme))
 	utilruntime.Must(mariadbv1.AddToScheme(scheme))
 	utilruntime.Must(memcachedv1.AddToScheme(scheme))
@@ -104,7 +106,6 @@ func init() {
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
 	utilruntime.Must(octaviav1.AddToScheme(scheme))
 	utilruntime.Must(designatev1.AddToScheme(scheme))
-	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
 	utilruntime.Must(manilav1.AddToScheme(scheme))
@@ -217,6 +218,24 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackVersion")
 		os.Exit(1)
 	}
+
+	if err = (&dataplanecontrollers.OpenStackDataPlaneNodeSetReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Kclient: kclient,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNodeSet")
+		os.Exit(1)
+	}
+
+	if err = (&dataplanecontrollers.OpenStackDataPlaneDeploymentReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Kclient: kclient,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneDeployment")
+		os.Exit(1)
+	}
 	corecontrollers.SetupVersionDefaults()
 
 	// Defaults for service operators
@@ -224,6 +243,9 @@ func main() {
 
 	// Defaults for OpenStackClient
 	clientv1.SetupDefaults()
+
+	// Defaults for Dataplane
+	dataplanev1.SetupDefaults()
 
 	// Defaults for anything else that was not covered by OpenStackClient nor service operator defaults
 	corev1.SetupDefaults()
@@ -243,6 +265,18 @@ func main() {
 		}
 		if err = (&corev1.OpenStackVersion{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackVersion")
+			os.Exit(1)
+		}
+		if err = (&dataplanev1.OpenStackDataPlaneNodeSet{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneNodeSet")
+			os.Exit(1)
+		}
+		if err = (&dataplanev1.OpenStackDataPlaneDeployment{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneDeployment")
+			os.Exit(1)
+		}
+		if err = (&dataplanev1.OpenStackDataPlaneService{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneService")
 			os.Exit(1)
 		}
 		checker = mgr.GetWebhookServer().StartedChecker()

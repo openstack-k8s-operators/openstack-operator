@@ -1,0 +1,8 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: logging
+spec:
+  secrets:
+    - logging-compute-config-data
+  playbook: osp.edpm.telemetry_logging
