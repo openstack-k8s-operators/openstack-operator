@@ -53,7 +53,7 @@ spec:
     edpm_override_hosts: edpm-compute-no-nodes
     edpm_service_type: failed-service
   name: openstackansibleee
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play
