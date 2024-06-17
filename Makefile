@@ -91,7 +91,7 @@ docs-dependencies: .bundle
 	bundle config set --local path 'local/bundle'; bundle install
 
 .PHONY: docs
-docs: manifests docs-dependencies crd-to-markdown  ## Build docs
+docs: manifests docs-dependencies crd-to-markdown  docs-kustomize-examples ## Build docs
 	CRD_MARKDOWN=$(CRD_MARKDOWN) MAKE=$(MAKE) ./docs/build_docs.sh
 
 .PHONY: docs-preview
@@ -105,6 +105,11 @@ docs-watch: docs-preview
 .PHONY: docs-clean
 docs-clean:
 	rm -r docs_build
+
+.PHONY: docs-examples
+docs-kustomize-examples: export KUSTOMIZE_VERSION=v5.0.1
+docs-kustomize-examples: yq kustomize ## Generate updated docs from examples using kustomize
+	KUSTOMIZE=$(KUSTOMIZE) LOCALBIN=$(LOCALBIN) ./docs/kustomize_to_docs.sh
 
 ##@ General
 

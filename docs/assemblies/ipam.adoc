@@ -1,0 +1,73 @@
+= Using IPAM and Internal DNS Service
+
+To use IPAM and DNS Service with dataplane a `NetConfig` CR should exist with the
+required networks, subnets and their allocation pools and `dns` service should be
+enabled in `OpenStackControlPlane` CR.
+
+When using IPAM, networks for the Node/NodeSet can be defined in the
+`OpenStackDataPlaneNodeSet` CR either in the `nodes` or `nodeTemplate` section.
+
+For predictable IP, networks should be added in the `nodes` section with desired
+predictable IP as `fixedIP`.
+
+[,console]
+----
+<snip>
+    nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+        - name: ctlplane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.100
+        - name: internalapi
+          subnetName: subnet1
+        - name: storage
+          subnetName: subnet1
+        - name: tenant
+          subnetName: subnet1
+<snip>
+-------
+<snip>
+    nodeTemplate:
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+      - name: internalapi
+        subnetName: subnet1
+      - name: storage
+        subnetName: subnet1
+      - name: tenant
+        subnetName: subnet1
+<snip>
+----
+
+== Relevant Status Conditions
+
+`NodeSetIPReservationReady` and `NodeSetDNSDataReady` conditions in status condtions reflects the status of
+IPReservation and DNSData as shown below.
+
+[,console]
+----
+$ oc get openstackdataplanenodeset openstack-edpm -o json | jq '.status.conditions[] | select(.type=="NodeSetIPReservationReady")'
+{
+  "lastTransitionTime": "2024-01-31T12:16:21Z",
+  "message": "NodeSetIPReservationReady ready",
+  "reason": "Ready",
+  "status": "True",
+  "type": "NodeSetIPReservationReady"
+}
+
+$ oc get openstackdataplanenodeset openstack-edpm-ipam -o json | jq '.status.conditions[] | select(.type=="NodeSetDNSDataReady")'
+{
+  "lastTransitionTime": "2024-01-31T12:16:21Z",
+  "message": "NodeSetDNSDataReady ready",
+  "reason": "Ready",
+  "status": "True",
+  "type": "NodeSetDNSDataReady"
+}
+----

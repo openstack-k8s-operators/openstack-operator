@@ -1,0 +1,83 @@
+= Data Plane Design
+
+The dataplane-operator provisions and configures nodes that make up the
+OpenStack data plane. The data plane consists of nodes that host end-user
+workloads and applications. Depending on the OpenStack deployment, these data
+plane nodes are often compute nodes, but may also be storage nodes, networker
+nodes, or other types of nodes.
+
+The dataplane-operator provides a Kubernetes like abstraction and API for
+deploying the data plane. It uses the
+https://github.com/openstack-k8s-operators/openstack-baremetal-operator[openstack-baremetal-operator]
+to optionally provision baremetal. It then uses the
+https://github.com/openstack-k8s-operators/openstack-ansibleee-operator[openstack-ansibleee-operator]
+to execute Ansible to deploy, configure, and orchestrate software on the nodes.
+The software is typically RPM or container based using the `podman` container
+runtime.
+
+External Data Plane Management (EDPM) is the concept of using Ansible in this
+manner to configure software on data plane nodes. Ansible is used instead of
+using native Kubernetes Workload API's (Deployment, Job, Pod, etc) and kubelet.
+While the Ansible executions themselves run on the Kubernetes cluster as native
+Kubernetes workloads, they communicate using SSH with data plane nodes and use
+various Ansible modules to deploy software on data plane nodes.
+
+== dataplane-operator CRD Design and Resources
+
+The dataplane-operator exposes the concepts of `OpenStackDataPlaneNodeSets`,
+`OpenStackDataPlaneServices`, and `OpenStackDataPlaneDeployments` as CRD's:
+
+* <<openstackdataplanenodeset>>
+* <<openstackdataplaneservice>>
+* <<openstackdataplanedeployment>>
+
+The `OpenStackDataPlaneNodeSet` CRD is used to describe a logical grouping of
+nodes of a similar type. A node can only be defined in one NodeSet. This is
+analogous to the concept of "roles" in TripleO. An OpenStack data plane is
+likely to consist of multiple `OpenStackDataPlaneNodeSet` resources to describe
+groups of nodes that are configured differently.
+
+Similarities within a `OpenStackDataPlaneNodeSet` are defined by the user, and
+could be of a small scope (ansible port), or a large scope (same network
+config, nova config, provisioning config, etc). The properties that all nodes
+in a `OpenStackDataPlaneNodeSet` share are set in the `nodeTemplate` field of
+the `OpenStackDataPlaneNodeSet` spec. Node specific parameters are then defined
+under the `nodeTemplate.nodes` section specific to that node. Options defined
+here will override the inherited values from the `NodeSet`.
+
+Dividing and assigning nodes to different `OpenStackDataPlaneNodeSets` is a
+design decision by the user. Nodes that are configured mostly the same, are of
+the same hardware, and serving the same purpose are likely candidates for being
+in the same `OpenStackDataPlaneNodeSet`. While hardware differences or
+differences in purposes (compute vs. netwoker) would lend themselves to nodes
+being in different `OpenStackDataPlaneNodeSets`.
+
+`OpenStackDataPlaneNodeSet` implements a baremetal provisioning interface to
+provision the nodes if requested. The `baremetalSetTemplate` field is used to
+describe the baremetal configuration of the nodes and is used to provision the
+initial OS on the set of nodes.
+
+The `OpenStackDataPlaneService` CRD for is an abstraction which combines
+Ansible content and configuration from Kubernetes ConfigMaps and Secrets. The
+Ansible content is typically a playbook from
+https://github.com/openstack-k8s-operators/edpm-ansible[edpm-ansible], but can
+be any Ansible play content. The ConfigMaps and Secrets are typically generated
+from OpenStack control plane operators, but could be any configuration data
+that needs to be consumed by the Ansible content.
+
+An `OpenStackDataPlaneNodeSet` has a list of services that contain the
+`OpenStackDataPlaneService` resources for the nodes in that
+`OpenStackDataPlaneNodeSet`. Using the services list, users can customize the
+software that is deployed on the `OpenStackDataPlaneNodeSet` nodes.
+
+The `OpenStackDataPlaneDeployment` CRD is used to start an Ansible execution
+for the list of `OpenStackDataPlaneNodeSets` on the
+`OpenStackDataPlaneDeployment`. Each `OpenStackDataPlaneDeployment` models a
+single Ansible execution, and once the execution is successful, the
+`OpenStackDataPlaneDeployment` does not automatically execute Ansible again,
+even if the `OpenStackDataPlaneDeployment` or related
+`OpenStackDataPlaneNodeSet` resources are changed. In order to start another
+Ansible execution, another `OpenStackDataPlaneDeployment` resource needs to be
+created. In this manner, the user maintains explicit control over when Ansible
+actually executes through the creation of `OpenStackDataPlaneDeployment`
+resources.

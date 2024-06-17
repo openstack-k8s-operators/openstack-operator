@@ -1,0 +1,30 @@
+[id="proc_hotfixing-the-data-plane-container-content-images-{context}"]
+= Hotfixing the data plane container content with images
+
+[role="_abstract"]
+
+When container hotfix content is delivered as images, the container processes need to be restarted to use the new images. This will be accomplished by creating a new `OpenStackDataPlaneDeployment`.
+
+.Procedure
+
+. Optional: Prepare the container hotfix image in a container registry where the image can be pulled by affected data plane nodes:
++
+----
+$ podman pull <container_registry>/<container_project>/<container_image>:<container_tag>
+$ podman tag <container_registry>/<container_project>/<container_image>:<container_tag> <updated_container_registry>/<updated_container_project>/<container_image>:<container_tag>
+$ podman push <updated_container_registry>/<updated_container_project>/<container_image>:<container_tag>
+----
++
+* Replace `<container_registry>` with the source registry for the hotfixed container image.
+* Replace `<container_project>` with the source project for the hotfixed container image.
+* Replace `<container_image>` with the hotfixed container image.
+* Replace `<container_tag>` with the tag for the hotfixed container image.
+* Replace `<updated_container_registry>` with a container registry to serve the hotfixed container image. You can use the OpenShift internal container image registry.
+* Replace `<updated_container_project>` with a container project to use for the hotfixed container image.
+
+. Update the affected `OpenStackDataPlaneNodeSet` resources by customizing the container locations to the hotfixed container locations. For more information about how to set the hotfixed container locations, see <<_customizing_container_image_locations>>.
+
+. Create a new `OpenStackDataPlaneDeployment` resource that deploys the affected `OpenStackDataPlaneNodeSet` resources. For more information about how to create `OpenStackDataPlaneDeployment` resources, see <<proc_deploying-the-data-plane_{context}>>.
++
+[NOTE]
+You can restrict the list of services for the `OpenStackDataPlaneDeployment` to only those affected by the hotfix by using the `servicesOverride` field. For more information, see <<_overriding_services_for_the_deployment>>.

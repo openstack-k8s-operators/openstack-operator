@@ -1,0 +1,68 @@
+[id="assembly_creating-the-data-plane"]
+= Creating the data plane
+
+:context: dataplane
+
+[role="_abstract"]
+ifeval::["{build}" != "downstream"]
+The OpenStack DataPlane consists of CentOS nodes. Use the `OpenStackDataPlaneNodeSet` custom resource definition (CRD) to create the custom resources (CRs) that define the nodes and the layout of the data plane. You can use pre-provisioned nodes, or provision bare metal nodes as part of the data plane creation and deployment process.
+endif::[]
+ifeval::["{build}" == "downstream"]
+The OpenStack DataPlane consists of RHEL nodes. Use the `OpenStackDataPlaneNodeSet` custom resource definition (CRD) to create the custom resources (CRs) that define the nodes and the layout of the data plane. You can use pre-provisioned nodes, or provision bare metal nodes as part of the data plane creation and deployment process.
+endif::[]
+
+To create and deploy a data plane, you must perform the following tasks:
+
+. Create a `Secret` CR for Ansible to use to execute commands on the data plane nodes.
+. Create the `OpenStackDataPlaneNodeSet` CRs that define the nodes and layout of the data plane.
+. Create the `OpenStackDataPlaneDeployment` CRs that trigger the Ansible execution to deploy and configure software.
+
+== Prerequisites
+
+* A functional control plane, created with the OpenStack Operator.
+* Pre-provisioned nodes must be configured with an SSH public key in the `$HOME/.ssh/authorized_keys` file for a user with passwordless `sudo` privileges.
+* For bare metal nodes that are not pre-provisioned and must be provisioned when creating the `OpenStackDataPlaneNodeSet` resource:
+** CBO is installed and configured for provisioning.
+** `BareMetalHosts` registered, inspected, and have the label `app:openstack`.
+* You are logged on to a workstation that has access to the RHOCP cluster as a user with `cluster-admin` privileges.
+* https://docs.openshift.com/container-platform/4.14/cli_reference/openshift_cli/getting-started-cli.html#installing-openshift-cli[OpenShift CLI] (oc) 4.14 or higher
+
+include::proc_creating-the-SSH-key-secrets.adoc[leveloffset=+1]
+
+include::proc_creating-a-set-of-data-plane-nodes.adoc[leveloffset=+1]
+
+include::con_data-plane-services.adoc[leveloffset=+1]
+include::proc_creating-a-custom-service.adoc[leveloffset=+2]
+include::proc_configuring-a-node-set-for-a-Compute-feature-or-workload.adoc[leveloffset=+2]
+include::proc_building-a-custom-ansible-runner-image.adoc[leveloffset=+2]
+
+include::ref_example-OpenStackDataPlaneNodeSet-CR-for-preprovisioned-nodes.adoc[leveloffset=+1]
+include::ref_example-OpenStackDataPlaneNodeSet-CR-for-bare-metal-nodes.adoc[leveloffset=+1]
+
+include::ref_data-plane-conditions-and-states.adoc[leveloffset=+1]
+
+include::con_provisioning-bare-metal-data-plane-nodes.adoc[leveloffset=+1]
+
+include::proc_deploying-the-data-plane.adoc[leveloffset=+1]
+
+include::logs.adoc[leveloffset=+1]
+
+include::proc_troubleshooting-data-plane-creation-and-deployment.adoc[leveloffset=+1]
+
+include::tls.adoc[leveloffset=+1]
+
+include::scaling.adoc[leveloffset=+1]
+
+include::ansible.adoc[leveloffset=+1]
+
+include::common_configurations.adoc[leveloffset=+1]
+
+include::interacting_with_ansible.adoc[leveloffset=+1]
+
+include::hashes.adoc[leveloffset=+1]
+
+include::ipam.adoc[leveloffset=+1]
+
+include::hotfixing-the-data-plane.adoc[leveloffset=+1]
+
+include::updating-the-data-plane.adoc[leveloffset=+1]

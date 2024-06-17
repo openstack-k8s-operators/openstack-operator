@@ -1,0 +1,64 @@
+[id="proc_configuring-a-node-set-for-a-Compute-feature-or-workload_{context}"]
+= Configuring a node set for a Compute feature or workload
+
+You can designate a node set for a particular Compute feature or workload. To designate and configure a node set for a feature, complete the following tasks:
+
+. Create a `ConfigMap` CR to configure the Compute nodes.
+. Create a custom `nova` service for the feature that runs the `osp.edpm.nova` playbook.
+. Include the `ConfigMap` CR in the custom `nova` service.
+
+.Procedure
+
+. Create `ConfigMap` CR to configure the Compute nodes. For example, to enable CPU pinning on the Compute nodes, create the following `ConfigMap` object:
++
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nova-cpu-pinning-configmap
+  namespace: openstack
+data:
+  25-nova-cpu-pinning.conf: |
+    [compute]
+    cpu_shared_set = 2,6
+    cpu_dedicated_set = 1,3,5,7
+----
++
+When the service is deployed it adds the configuration to `etc/nova/nova.conf.d/` in the `nova_compute` container.
++
+For more information on creating `ConfigMap` objects, see link:https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/[Creating and using config maps].
+
++
+TIP: You can use a `Secret` to create the custom configuration instead if the configuration includes sensitive information, such as passwords or certificates that are required for certification.
+
+. Create a custom `nova` service for the feature. For information about how to create a custom service, see xref:proc_creating-a-custom-service_dataplane[Creating a custom service].
+
+. Add the `ConfigMap` CR to the custom `nova` service:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: nova-cpu-pinning-service
+spec:
+  label: dataplane-deployment-custom-service
+    playbook: osp.edpm.nova
+  configMaps:
+    - nova-cpu-pinning-configmap
+----
+
+. Specify the `Secret` CR for the cell that the node set that runs this service connects to:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: nova-cpu-pinning-service
+spec:
+  label: dataplane-deployment-custom-service
+    playbook: osp.edpm.nova
+  configMaps:
+    - nova-cpu-pinning-configmap
+  secrets:
+    - nova-cell1-compute-config
+----

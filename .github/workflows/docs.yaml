@@ -35,21 +35,22 @@ jobs:
       - name: Build docs
         run: |
           make docs
+          cp docs/index.html index.html
 
       - name: Prepare gh-pages branch
         run: |
-          git restore docs/assemblies/custom_resources.adoc
           git config user.name github-actions
           git config user.email github-actions@github.com
 
           git branch -D gh-pages &>/dev/null || true
-          git checkout -b gh-pages 4cd0193fc6c5bc7e76f3a0148d0447fb0d7fbe6a
+          git checkout --orphan gh-pages
 
       - name: Commit asciidoc docs
         run: |
-          mkdir user dev
-          mv docs_build/ctlplane/index-upstream.html index.html
-          git add index.html
+          mkdir ctlplane dataplane
+          mv docs_build/openstack/ctlplane-upstream.html ctlplane/index.html
+          mv docs_build/openstack/dataplane-upstream.html dataplane/index.html
+          git add index.html ctlplane/index.html dataplane/index.html
           git commit -m "Rendered docs"
 
       - name: Push rendered docs to gh-pages

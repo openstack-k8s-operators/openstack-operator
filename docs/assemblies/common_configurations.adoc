@@ -1,0 +1,203 @@
+= Common Configurations
+
+This page documents some of the common configurations that can be enabled
+through ansible variables. The ansible variables that affect the configuration
+of the ansible executions are set in the `ansibleVars` field on the dataplane
+resources.
+
+The full set of ansible variables available for configuration are documented
+within each role in the
+https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles[edpm-ansible]
+repository.
+
+== Initial bootstrap command
+
+*Variable*: `edpm_bootstrap_command`
+*Type*: `string`
+*Role*: https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_bootstrap[edpm_bootstrap]
+
+The `edpm_bootstrap_command` variable can be used to pass a shell command(s) that
+will be executed as early as possible in the deployment as part of the
+`configure-network` service. If the `services` list is customized with services
+that execute prior to `configure-network` then the command(s) specified by
+`edpm_bootstrap_command` would run after the custom services.
+
+The string value for `edpm_bootstrap_command` is passed directly to the ansible
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html[shell].
+As such, when using multiple shell commands, the `|` character must be used to
+preserve new lines in the `YAML` value:
+
+ edpm_bootstrap_command: |
+     command 1
+     command 2
+     etc.
+
+=== Using `edpm_bootstrap_command` for system registration
+
+`edpm_bootstrap_command` can be used to perform system registration in order to
+enable needed package repositories. Choose a registration method (either Portal
+or Satellite) and refer to the provided links below for instructions to create
+the registration commands.
+
+==== Red Hat Customer Portal registration
+
+The registration commands for the Red Hat Customer Portal are documented at
+https://access.redhat.com/solutions/253273.
+
+==== Red Hat Satellite registration
+
+The registration commands for Red Hat Satellite version 6.13 are documented at
+https://access.redhat.com/documentation/en-us/red_hat_satellite/6.13/html-single/managing_hosts/index#Registering_Hosts_to_Server_managing-hosts.
+
+If not using Satellite version 6.13, then refer to the specific version of the
+documentation for the version of Satellite that is in use.
+
+=== Customizing container image locations
+
+The container images used by the various roles from edpm-ansible can pull from
+customized locations. The ansible variables used to set the locations and their
+default values are:
+
+ifeval::["{build}" != "downstream"]
+        edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid
+        edpm_logrotate_crond_image: "quay.io/podified-antelope-centos9/openstack-cron
+        edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller
+        edpm_frr_image: "quay.io/podified-antelope-centos9/openstack-frr
+        edpm_ovn_bgp_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent
+        edpm_ovn_bgp_agent_local_ovn_nb_db_image: "quay.io/podified-antelope-centos9/openstack-ovn-nb-db-server
+        edpm_ovn_bgp_agent_local_ovn_sb_db_image: "quay.io/podified-antelope-centos9/openstack-ovn-sb-db-server
+        edpm_ovn_bgp_agent_local_ovn_northd_image: "quay.io/podified-antelope-centos9/openstack-ovn-northd
+        edpm_ovn_bgp_agent_local_ovn_controller_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller
+        edpm_telemetry_node_exporter_image: quay.io/prometheus/node-exporter
+        edpm_telemetry_ceilometer_compute_image: quay.io/podified-antelope-centos9/openstack-ceilometer-compute
+        edpm_telemetry_ceilometer_ipmi_image: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi
+        edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute
+        edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent
+        edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd
+        edpm_neutron_dhcp_image: "quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent
+        edpm_neutron_metadata_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn
+        edpm_neutron_ovn_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent
+        edpm_swift_proxy_image: "quay.io/podified-antelope-centos9/openstack-swift-proxy-server
+        edpm_swift_account_image: "quay.io/podified-antelope-centos9/openstack-swift-account
+        edpm_swift_container_image: "quay.io/podified-antelope-centos9/openstack-swift-container
+        edpm_swift_object_image: "quay.io/podified-antelope-centos9/openstack-swift-object
+endif::[]
+ifeval::["{build}" == "downstream"]
+        edpm_iscsid_image: "redhat.registry.io/rhoso-beta/openstack-iscsid-rhel9:18.0.0
+        edpm_logrotate_crond_image: "redhat.registry.io/rhoso-beta/openstack-cron-rhel9:18.0.0
+        edpm_ovn_controller_agent_image: "redhat.registry.io/rhoso-beta/openstack-ovn-controller-rhel9:18.0.0
+        edpm_frr_image: "redhat.registry.io/rhoso-beta/openstack-frr-rhel9:18.0.0
+        edpm_ovn_bgp_agent_image: "redhat.registry.io/rhoso-beta/openstack-ovn-bgp-agent-rhel9:18.0.0
+        edpm_ovn_bgp_agent_local_ovn_nb_db_image: "redhat.registry.io/rhoso-beta/openstack-ovn-nb-db-server-rhel9:18.0.0
+        edpm_ovn_bgp_agent_local_ovn_sb_db_image: "redhat.registry.io/rhoso-beta/openstack-ovn-sb-db-server-rhel9:18.0.0
+        edpm_ovn_bgp_agent_local_ovn_northd_image: "redhat.registry.io/rhoso-beta/openstack-ovn-northd-rhel9:18.0.0
+        edpm_ovn_bgp_agent_local_ovn_controller_image: "redhat.registry.io/rhoso-beta/openstack-ovn-controller-rhel9:18.0.0
+        edpm_telemetry_node_exporter_image: redhat.registry.io/prometheus/node-exporter-rhel9:18.0.0
+        edpm_telemetry_ceilometer_compute_image: redhat.registry.io/rhoso-beta/openstack-ceilometer-compute-rhel9:18.0.0
+        edpm_telemetry_ceilometer_ipmi_image: redhat.registry.io/rhoso-beta/openstack-ceilometer-ipmi-rhel9:18.0.0
+        edpm_nova_compute_image: "redhat.registry.io/rhoso-beta/openstack-nova-compute-rhel9:18.0.0
+        edpm_neutron_sriov_image: "redhat.registry.io/rhoso-beta/openstack-neutron-sriov-agent-rhel9:18.0.0
+        edpm_multipathd_image: "redhat.registry.io/rhoso-beta/openstack-multipathd-rhel9:18.0.0
+        edpm_neutron_dhcp_image: "redhat.registry.io/rhoso-beta/openstack-neutron-dhcp-agent-rhel9:18.0.0
+        edpm_neutron_metadata_agent_image: "redhat.registry.io/rhoso-beta/openstack-neutron-metadata-agent-ovn-rhel9:18.0.0
+        edpm_neutron_ovn_agent_image: "redhat.registry.io/rhoso-beta/openstack-neutron-ovn-agent-rhel9:18.0.0
+        edpm_swift_proxy_image: "redhat.registry.io/rhoso-beta/openstack-swift-proxy-server-rhel9:18.0.0
+        edpm_swift_account_image: "redhat.registry.io/rhoso-beta/openstack-swift-account-rhel9:18.0.0
+        edpm_swift_container_image: "redhat.registry.io/rhoso-beta/openstack-swift-container-rhel9:18.0.0
+        edpm_swift_object_image: "redhat.registry.io/rhoso-beta/openstack-swift-object-rhel9:18.0.0
+endif::[]
+
+Set any of the above ansible variables within the `ansibleVars` sections of
+`OpenStackDataPlaneNodeSet` to customize the container image locations.
+
+== Network Isolation
+
+Network Isolation refers to the practice of separating network traffic by
+function, and configuring the networks on dataplane nodes. Nodes will need
+connectivity to various control plane services running on OCP. These services
+may be bound to different networks. Each of those networks needs to be
+configured as required on dataplane nodes.
+
+For further details on the network architecture of the control plane, see
+https://github.com/openstack-k8s-operators/docs/blob/main/networking.md.
+
+=== Configuring networking with edpm_network_config
+
+The
+https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_network_config[edpm_network_config]
+ansible role is responsible for configuring networking on dataplane nodes.
+
+The `edpm_network_config_template` variable specifies the contents of a jinja2
+template that describes the networking configuration to be applied. The
+template itself also contains variables that can be used to customize the
+networking configuration for a specific node (IP addresses, interface names,
+routes, etc). See template examples provided in the nic-config-samples directory:
+https://github.com/openstack-k8s-operators/openstack-operator/tree/main/config/samples/nic-config-samples.
+
+These samples can be used inline within the `OpenStackDataPlaneNodeSet` CR
+under then `ansibleVars` section (see our current sample files for examples
+of the inline implementation).
+
+The following is an example
+<<ansibleopts,ansibleVars>>
+field that shows defining the variables that configure the
+`edpm_network_config` role.
+
+ ansibleVars:
+   ctlplane_ip: 192.168.122.100
+   internalapi_ip: 172.17.0.100
+   storage_ip: 172.18.0.100
+   tenant_ip: 172.19.0.100
+   fqdn_internalapi: edpm-compute-0.example.com
+   edpm_network_config_template: |
+ 	 ---
+ 	 {% set mtu_list = [ctlplane_mtu] %}
+ 	 {% for network in nodeset_networks %}
+ 	 {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+ 	 {%- endfor %}
+ 	 {% set min_viable_mtu = mtu_list | max %}
+ 	 network_config:
+ 	 - type: ovs_bridge
+ 	 name: {{ neutron_physical_bridge_name }}
+ 	 mtu: {{ min_viable_mtu }}
+ 	 use_dhcp: false
+ 	 dns_servers: {{ ctlplane_dns_nameservers }}
+ 	 domain: {{ dns_search_domains }}
+ 	 addresses:
+ 	 - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+ 	 routes: {{ ctlplane_host_routes }}
+ 	 members:
+ 	 - type: interface
+ 	 	name: nic1
+ 	 	mtu: {{ min_viable_mtu }}
+ 	 	# force the MAC address of the bridge to this interface
+ 	 	primary: true
+ 	 {% for network in nodeset_networks %}
+ 	 - type: vlan
+ 	 	mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+ 	 	vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+ 	 	addresses:
+ 	 	- ip_netmask:
+ 	 		{{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+ 	 	routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+ 	 {% endfor %}
+
+This configuration would be applied by the
+<<_dataplane_operator_provided_services,configure-network>> service when
+it's executed.
+
+=== Network attachment definitions
+
+The
+https://github.com/openstack-k8s-operators/docs/blob/main/networking.md#network-attachment-definitions[`NetworkAttachmentDefinition`]
+resource is used to describe how pods can be attached to different networks.
+Network attachment definitions can be specified on the
+xref:openstack_dataplanenodeset.adoc[`OpenStackDataPlaneNodeSet`] resource using the
+`NetworkAttachments` field.
+
+The network attachments are used to describe which networks will be connected
+to the pod that is running ansible-runner. They do not enable networks on the
+dataplane nodes themselves. For example, adding the `internalapi` network
+attachment to `NetworkAttachments` means the ansible-runner pod will be
+connected to the `internalapi` network. This can enable scenarios where ansible
+needs to connect to different networks.

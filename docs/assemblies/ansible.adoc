@@ -1,0 +1,82 @@
+= AnsibleEE runner variables
+
+Number of variables can be used to modify behavior of the AnsibleEE runner
+executing given job, such as timeouts and caching.
+These are expanded in the `env/settings` link:https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/openstack_ansibleee/settings[file].
+And further documented in Ansible Runner link:https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself[docs].
+
+All of these variables are left set to sensible defaults, nevertheless, some changes may be necessary,
+depending on particulars of individual deployments.
+
+= Ansible variables
+
+The list of ansible variables that can be set under `ansibleVars` is extensive.
+To understand what variables are available for each service, see the
+documentation in the <<create-openstackdataplaneservices,Create
+OpenStackDataPlaneServices>> section.
+
+Common configurations that can be enabled with `ansibleVars` are also
+documented at xref:common_configurations.adoc[Common Configurations].
+
+[NOTE]
+====
+In the case of `ansibleVars`, the value is merged with that of the value from
+the nodeTemplate. This makes it so that the entire value of `ansibleVars` from
+the nodeTemplate does not need to be reproduced for each node just to set a few
+node specific values.
+====
+
+== Importing ansible variables
+
+`ansibleVarsFrom` allows you to set ansible variables for an `OpenStackDataPlaneNodeSet` by
+referencing either a ConfigMap or a Secret. When you use `ansibleVarsFrom`, all the key-value
+pairs in the referenced ConfigMap or Secret are set as environment variables for the `OpenStackDataPlaneNodeSet`.
+You can also specify a common prefix string.
+
+.Example:
+Adding ansible variables from ConfigMap:
+
+. Create a ConfigMap containing the ansible variables
+
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: common-edpm-vars
+    data:
+      edpm_config_var1: value1
+      edpm_config_var2: value2
+
+. Update the `ansibleVarsFrom` with the ConfigMap name
+
+    ansibleVarsFrom:
+      - configMapRef:
+            name: common-edpm-vars
+
+.Example:
+Execute `subscription-manager register` from corresponding Secret
+
+. Create a Secret containing the credentials
+
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: subscription-manager
+    data:
+      username: <base64 encoded username>
+      password: <base64 encoded password>
+
+. Update the `ansibleVarsFrom` with the Secret name, and `ansibleVars` with the variables generated from the Secret
+
+    ansibleVarsFrom:
+      - prefix: subscription_manager_
+        secretRef:
+          name: subscription-manager
+    ansibleVars:
+        edpm_bootstrap_command: |
+          subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+
++
+[NOTE]
+====
+Values defined by an ansibleVars with a duplicate key take precedence
+====

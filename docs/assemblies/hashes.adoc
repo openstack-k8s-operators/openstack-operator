@@ -1,0 +1,56 @@
+= Hashes
+
+== NodeSet Config Changes
+We create a Hash of the inputs located in the OpenStackDataPlaneNodeSet Spec Nodes and NodeTemplate sections.
+This hash is then stored in the `status.configHash` field. If the current value of the configHash is different
+to the deployedConfigHash, then it is necessary to recreate the `OpenStackDataPlaneDeployment` to roll out
+the new changes:
+
+```
+$ oc get osdpns -o yaml | yq '.items[0].status.configHash'
+"n648hd6h88hc7h86hc7h568h585h79h5"
+
+```
+This field can be used to inform user decisions around when a new deploy is needed to reconclie the changes to the NodeSet.
+
+== OpenStackDataPlaneNodeSet deployment hashes
+
+Each `OpenStackDataPlaneService` can optionally have an associated list of
+`ConfigMaps` and `Secrets` that are mounted as file data into the
+`OpenStackAnsibleEE` job started to deploy that service. The ansible content
+then is able to consume those files as necessary. See xref:proc_creating-a-custom-service_dataplane[Configuring a custom
+service] for more details.
+
+When an `OpenStackDataPlaneDeployment` succeeds, the computed hash of each
+`ConfigMap` and `Secret` for each `OpenStackDataPlaneService` that was deployed
+is saved on the status of each `OpenStackDataPlaneNodeSet` referenced by the
+`OpenStackDataPlaneDeployment`.
+
+These hashes can be compared against the current hash of the `ConfigMap` or
+`Secret` to see if there is newer input data that has not been deployed to the
+`OpenStackDataPlaneNodeSet`. For example if the hash of
+`nova-cell1-compute-config` `Secret` in the `OpenStackDataPlaneNodeSet` status
+is different from the hash of `nova-cell1-compute-config` in the
+`novacell/nova-cell1` status, then there is nova-compute control plane configuration
+data the needs to be deployed to the EDPM compute nodes.
+
+For example, the following hashes are saved on the `OpenStackDataPlaneNodeSet`
+status after a typical deployment:
+
+[,console]
+----
+$ oc get openstackdataplanenodeset openstack-edpm -o yaml
+
+<snip>
+status:
+  conditions:
+	<snip>
+  configMapHashes:
+    ovncontroller-config: n655h5...
+  secretHashes:
+    neutron-dhcp-agent-neutron-config: n9ch5...
+    neutron-ovn-metadata-agent-neutron-config: n588h...
+    neutron-sriov-agent-neutron-config: n648h...
+    nova-cell1-compute-config: n576h...
+    nova-metadata-neutron-config: n56fh...
+----

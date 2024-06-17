@@ -1,0 +1,66 @@
+[id="proc_updating-the-data-plane-{context}"]
+= Updating other services on the data plane
+
+[role="_abstract"]
+
+Once OVN has been updated on the control plane and data plane, and the rest of the control plane has completed updating, you update the rest of the services on the data plane.
+
+.Procedure
+
+. Validate that the rest of the minor update has completed on the control plane.
++
+----
+$ oc wait openstackversion <openstack_ctlplane_name> --for=condition=MinorUpdateControlplane
+----
++
+* Replace `<openstack_ctlplane_name>` with the name of the OpenStack control plane resource.
++
+The following example output shows the condition has been met:
++
+----
+openstackversion.core.openstack.org/openstack-galera-network-isolation condition met
+----
+
+. Create an `OpenStackDataPlaneDeployment` CR and save it to a file named `openstack-edpm-update-services.yaml` on your workstation.
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-deployment-ipam-update-services
+spec:
+  nodeSets:
+    - openstack-edpm-ipam
+    - <nodeSet_name>
+    - ...
+    - <nodeSet_name>
+  servicesOverride:
+    - update
+----
++
+* Replace `<nodeSet_name>` with the names of the `OpenStackDataPlaneNodeSet` CRs that you want to include in your data plane minor update.
++
+[NOTE]
+The `servicesOverride` field is set to include only `update`. The `update` service applies only the tasks needed to update the packages and containers on the EDPM nodes. When using custom services, include those here as well, or their equivalent custom services that apply the needed update tasks.
+
+. Save the `openstack-edpm-update-services.yaml` deployment file.
+
+. Update the data plane:
++
+----
+$ oc create -f openstack-edpm-update-services.yaml
+----
+
+. Verify that the data plane update deployment succeeded:
++
+----
+$ oc get openstackdataplanedeployment
+NAME             						STATUS   MESSAGE
+edpm-deployment-ipam   					True     Setup Complete
+edpm-deployment-ipam-update 			True     Setup Complete
+edpm-deployment-ipam-update-services 	True     Setup Complete
+----
+
+.Troubleshooting
+
+See <<proc_troubleshooting-data-plane-creation-and-deployment_{context}>> for troubleshooting any deployment failures.

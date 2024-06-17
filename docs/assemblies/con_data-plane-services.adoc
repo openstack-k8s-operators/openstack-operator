@@ -1,0 +1,146 @@
+= Composable services
+
+Composable services with dataplane-operator provide a way for users to
+customize services that are deployed on dataplane nodes. It is possible to
+"compose" a set of services such that the dataplane deployment can be
+customized in whichever ways are needed.
+
+Composing services can take different forms. The interfaces in
+dataplane-operator allow for:
+
+* Enabling/disabling services
+* Ordering services
+* Developing custom services
+
+For the purposes of the interfaces in dataplane-operator, a service is an
+ansible execution that manages a software deployment (installation,
+configuration, execution, etc) on dataplane nodes. The ansible content that
+makes up each service is defined by the service itself. Each service is a
+resource instance of the
+xref:openstack_dataplaneservice.adoc[`OpenStackDataPlaneService`] CRD.
+
+== dataplane-operator provided services
+
+dataplane-operator provides a default list of services that will be deployed on
+dataplane nodes. The services list is set on the
+<<openstackdataplanenodesetspec,OpenStackDataPlaneNodeSet>> CRD.
+
+The default list of services as they will appear on the `services` field on an
+`OpenStackDataPlaneNodeSet` spec is:
+
+----
+services:
+  - download-cache
+  - bootstrap
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - libvirt
+  - nova
+  - ovn
+  - neutron-metadata
+  - telemetry
+----
+
+If the `services` field is omitted from the `OpenStackDataPlaneNodeSet` spec,
+then the above list will be used.
+
+The associated `OpenStackDataPlaneService` resources are reconciled during
+`OpenStackDataPlaneNodeSet` reconciliation if the service is in the NodeSets'
+service list.
+
+The DataPlane Operator also includes the following services that are not enabled by default:
+
+[cols="40%a,60%a",options="header",]
+|===
+|Service |Description
+|`ceph-client` |Include this service to configure data plane nodes as clients of a Red Hat Ceph Storage server. Include between the `install-os` and `configure-os` services. The `OpenStackDataPlaneNodeSet` CR must include the following configuration to access the Red Hat Ceph Storage secrets:
+
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+spec:
+  ...
+  nodeTemplate:
+    extraMounts:
+    - extraVolType: Ceph
+      volumes:
+      - name: ceph
+        secret:
+          secretName: ceph-conf-files
+      mounts:
+      - name: ceph
+        mountPath: "/etc/ceph"
+        readOnly: true
+----
+
+|`ceph-hci-pre` |Include this service to prepare data plane nodes to host Red Hat Ceph Storage in an HCI configuration. For more information, see xref:assembly_configuring-a-hyperconverged-infrastructure-environment[Configuring a Hyperconverged Infrastructure environment].
+|`configure-ovs-dpdk` |Include this service to configure OvS DPDK configuration on EDPM nodes. This service is needed to enable OvS DPDK on the compute nodes.
+|`neutron-sriov` |Include this service to run a Neutron SR-IOV NIC agent on the data plane nodes.
+|`neutron-metadata` |Include this service to run the Neutron OVN Metadata agent on the data plane nodes. This agent is required to provide metadata services to the Compute nodes.
+|`neutron-ovn` |Include this service to run the Neutron OVN agent on the data plane nodes. This agent is required to provide QoS to hardware offloaded ports on the Compute nodes.
+|`neutron-dhcp` |Include this service to run a Neutron DHCP agent on the data plane nodes.
+|===
+
+For more information about the available default services, see https://github.com/openstack-k8s-operators/openstack-operator/tree/main/config/services.
+
+You can enable and disable services for an `OpenStackDataPlaneNodeSet` resource.
+
+[NOTE]
+Do not change the order of the default service deployments.
+
+You can use the `OpenStackDataPlaneService` CRD to create custom services that you can deploy on your data plane nodes. You add your custom services to the default list of services where the service must be executed. For more information, see xref:proc_creating-a-custom-service_dataplane[Creating a custom service].
+
+You can view the details of a service by viewing the YAML representation of the resource:
+
+----
+$ oc get openstackdataplaneservice configure-network -o yaml
+----
+
+== Overriding services for the deployment
+
+The list of services that will be deployed when an
+`OpenStackDataPlaneDeployment` is created is set on each
+`OpenStackDataPlaneNodeSet` that is included in the `nodeSets` list on the
+`OpenStackDataPlaneDeployment`.
+
+This allows for deploying a different set of services on different
+`OpenStackDataPlaneNodeSets` using the same `OpenStackDataPlaneDeployment`
+resource simultaneously. It also maintains the association between services and
+nodeSets on the nodeSet itself. This association is important when nodeSets are
+used to group nodes with hardware and configuration differences that require
+the need for deploying different services on different nodeSets.
+
+In some specific cases, it may be needed to override what services are deployed
+on all nodeSets included in an `OpenStackDataPlaneDeployment`. These cases can
+vary, but are often related to day 2 workflows such as update, upgrade, and
+scale out. In these cases, it may be needed to execute a smaller subset of
+services, or just a single service, across all nodeSets in the
+`OpenStackDataPlaneDeployment`.
+
+The `servicesOverride` field on `OpenStackDataPlaneDeployment` allow for this
+behavior. Setting this field changes what services are deployed when the
+`OpenStackDataPlaneDeployment` is created. If the field is set, only the
+services listed in the field will be deployed on all nodeSets.
+
+The following example `OpenStackDataPlaneDeployment` resource illustrates using
+`servicesOverride` to perform a pre-upgrade task of executing just the ovn
+service.
+
+....
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-edpm-pre-upgrade-ovn
+spec:
+
+  nodeSets:
+    - openstack-edpm
+
+  // Only the services here will be executed. Overriding any services value
+  // on the openstack-edpm nodeSet.
+  servicesOverride:
+    - ovn
+....

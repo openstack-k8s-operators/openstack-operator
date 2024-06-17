@@ -1,0 +1,32 @@
+= OpenStack Data Plane Operator
+:toc: left
+:toclevels: 3
+:icons: font
+:compat-mode:
+:doctype: book
+:context: osp
+
+The dataplane-operator automates the deployment of an OpenStack dataplane. A
+dataplane is a collection of nodes that will be used for hosting OpenStack
+workloads. The dataplane-operator prepares the nodes with enough operating
+system configuration so that they are ready for hosting other required
+OpenStack services and workloads.
+
+See https://github.com/openstack-k8s-operators/dev-docs[contributing] for notes for developers and
+contributors, running the operator, building the documentation, etc.
+
+See <<_data_plane_design,design>> for details about the dataplane design.
+
+<<assembly_creating-the-data-plane,Creating a DataPlane>> documents how to create a dataplane.
+
+The documentation source is kept within the openstack-operator repo in the
+https://github.com/openstack-k8s-operators/openstack-operator/tree/main/docs[docs] directory. The full
+generated documentation from that source is available at
+https://openstack-k8s-operators.github.io/openstack-operator/.
+
+
+include::assemblies/design.adoc[leveloffset=+1]
+
+include::assemblies/creating-the-data-plane.adoc[leveloffset=+1]
+
+include::assemblies/dataplane_resources.adoc[leveloffset=-1]

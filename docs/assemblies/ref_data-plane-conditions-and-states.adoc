@@ -1,0 +1,64 @@
+[id="ref_data-plane-conditions-and-states_{context}"]
+= Data plane conditions and states
+
+[role="_abstract"]
+Each data plane resource has a series of conditions within their `status` subresource that indicates the overall state of the resource, including its deployment progress.
+
+For an `OpenStackDataPlaneNodeSet`, until an `OpenStackDataPlaneDeployment` has been started and finished successfully, the `Ready` condition is `False`. When the deployment  succeeds, the `Ready` condition is set to `True`. A subsequent deployment sets the `Ready` condition to `False` until the deployment succeeds, when the `Ready` condition is set to `True`.
+
+.`OpenStackDataPlaneNodeSet` CR conditions
+[cols="40%a,60%a",options="header",]
+|===
+|Condition |Description
+|`Ready` |
+* "True": The `OpenStackDataPlaneNodeSet` CR is successfully deployed.
+* "False": The deployment is not yet requested or has failed, or there are other failed conditions.
+|`SetupReady` |"True": All setup tasks for a resource are complete. Setup tasks include verifying the SSH key secret, verifying other fields on the resource, and creating the Ansible inventory for each resource. Each service-specific condition is set to "True" when that service completes deployment. You can check the service conditions to see which services have completed their deployment, or which services failed.
+|`DeploymentReady` |"True":  The NodeSet has been successfully deployed.
+|`InputReady` |"True": The required inputs are available and ready.
+|`NodeSetDNSDataReady` |"True": DNSData resources are ready.
+|`NodeSetIPReservationReady` |"True": The IPSet resources are ready.
+|`NodeSetBaremetalProvisionReady` |"True": Bare metal nodes are provisioned and ready.
+|===
+
+.`OpenStackDataPlaneNodeSet` status fields
+[cols="40%a,60%a",options="header",]
+|===
+|Status field |Description
+|`Deployed` |
+* "True": The `OpenStackDataPlaneNodeSet` CR is successfully deployed.
+* "False": The deployment is not yet requested or has failed, or there are other failed conditions.
+|`DNSClusterAddresses` |
+|`CtlplaneSearchDomain` |
+|===
+
+.`OpenStackDataPlaneDeployment` CR conditions
+[cols="40%a,60%a",options="header",]
+|===
+|Condition |Description
+|`Ready` |
+* "True": The data plane is successfully deployed.
+* "False": The data plane deployment failed, or there are other failed conditions.
+|`DeploymentReady` | "True": The data plane is successfully deployed.
+|`InputReady` |"True": The required inputs are available and ready.
+|`<NodeSet> Deployment Ready` |"True": The deployment has succeeded for the named `NodeSet`, indicating all services for the `NodeSet` have succeeded.
+|`<NodeSet> <Service> Deployment Ready` |"True": The deployment has succeeded for the named `NodeSet` and `Service`. Each `<NodeSet> <Service> Deployment Ready` specific condition is set to "True" as that service completes successfully for the named `NodeSet`. Once all services are complete for a `NodeSet`, the `<NodeSet> Deployment Ready` condition is set to "True". The service conditions indicate which services have completed their deployment, or which services failed and for which `NodeSets`.
+|===
+
+.`OpenStackDataPlaneDeployment` status fields
+[cols="40%a,60%a",options="header",]
+|===
+|Status field |Description
+|`Deployed` |
+* "True": The data plane is successfully deployed. All Services for all NodeSets have succeeded.
+* "False": The deployment is not yet requested or has failed, or there are other failed conditions.
+|===
+
+.`OpenStackDataPlaneService` CR conditions
+[cols="40%a,60%a",options="header",]
+|===
+|Condition |Description
+|`Ready` |
+"True": The service has been created and is ready for use.
+"False": The service has failed to be created.
+|===

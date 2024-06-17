@@ -1,0 +1,121 @@
+[id="con_provisioning-bare-metal-data-plane-nodes_{context}"]
+= Provisioning bare metal data plane nodes
+
+[role="_abstract"]
+Provisioning bare metal nodes on the data plane is supported with the Red Hat OpenShift
+Container Platform (RHOCP) Cluster Baremetal Operator (CBO). The CBO is a RHOCP Operator
+responsible for deploying all the components that are required to provision bare metal
+nodes within the RHOCP cluster, including the Bare Metal Operator (BMO) and Ironic
+containers.
+
+== Installer-Provisioned Infrastructure
+
+CBO is enabled by default on RHOCP clusters that are installed with the baremetal
+installer-provisioned infrastructure. You can configure installer-provisioned clusters
+with a provisioning network to enable both virtual media and network boot installations.
+You can alternatively configure an installer-provisioned cluster without a provisioning
+network so that only virtual media provisioning is possible.
+
+== Assisted Installer Provisioned Infrastructure
+
+You can enable CBO on clusters installed with the Assisted Installer, and you can manually
+add the provisioning network to the Assisted Installer cluster after installation.
+
+== User Provisioned Infrastructure
+
+You can activate CBO on RHOCP clusters installed with user-provisioned infrastructure by
+creating a Provisioning CR. You cannot add a provisioning network to a user-provisioned
+cluster.
+
+For user-provisioned insfrastructure a provisioning CR has to be created manually as below:
+
+ apiVersion: metal3.io/v1alpha1
+ kind: Provisioning
+ metadata:
+   name: provisioning-configuration
+ spec:
+ provisioningNetwork: "Disabled"
+ watchAllNamespaces: false
+
+BMO manages the available hosts on clusters and performs the following operations:
+
+* Inspects node hardware details and reports them to the corresponding BareMetalHost CR.
+This includes information about CPUs, RAM, disks and NICs.
+* Provisions nodes with a specific image.
+* Cleans node disk contents before and after provisioning.
+
+== Provisioning Nodes with OpenStackDataPlaneNodeSet
+
+Before deploying dataplane nodes on baremetal, ensure that CBO has been enabled/activated
+with clusters installed with the different installers mentioned above.
+
+Sufficient number of edpm node BareMetalHost(BMH) CRs should be created and be in
+`Available` state (after inspection).By default baremetal-operator would be looking
+for BMHs in the `openshift-machine-api` namespace.
+
+If BMHs in other namesapces are expected to be managed, `Provisioning` resource should
+be patched to watch all namespaces with `watchAllNamesapces: true`.
+
+[,console]
+----
+$ oc patch provisioning provisioning-configuration --type merge -p '{"spec":{"watchAllNamespaces": true }}'
+----
+
+Sample BMH spec:
+
+ apiVersion: metal3.io/v1alpha1
+ kind: BareMetalHost
+ metadata:
+ name: edpm-compute-01
+ namespace: openstack
+ labels:
+   app: openstack
+   workload: compute
+ spec:
+   bmc:
+     address: redfish+http://192.168.111.1:8000/redfish/v1/Systems/e8efd888-f844-4fe0-9e2e-498f4ab7806d
+     credentialsName: node-bmc-secret
+   bootMACAddress: 00:c7:e4:a7:e7:f3
+   bootMode: UEFI
+   online: false
+
+BMH `labels` should be set appropriately for the desired nodes so that it can be used
+by the `bmhLabelSelector` in the `OpenStackDataPlaneNodeSet` spec.
+
+For virtual-media provisioning BMC address should use virtual-media as below.
+
+ bmc:
+   address: redfish-virtualmedia+http://192.168.111.1:8000/redfish/v1/Systems/e8efd888-f844-4fe0-9e2e-498f4ab7806d
+
+To provision the baremetal nodes for edpm, OpenStackDataPlaneNodeSet spec should have the
+`baremetalSetTemplate` section as show below. Other than `bmhLabelSelector`, `hardwareReqs`
+field can also be provided for appropriate BMH selection.
+
+ apiVersion: dataplane.openstack.org/v1beta1
+ kind: OpenStackDataPlaneNodeSet
+ metadata:
+   name: openstack-edpm
+ spec:
+   baremetalSetTemplate:
+     bmhLabelSelector:
+       app: openstack
+       workload: compute
+     ctlplaneInterface: enp1s0
+     cloudUserName: cloud-admin
+
+=== Relevant Status Condition
+
+`NodeSetBaremetalProvisionReady` condition in status condtions reflects the status of
+baremetal provisioning as shown below.
+
+[,console]
+----
+$ oc get openstackdataplanenodeset openstack-edpm-ipam -o json | jq '.status.conditions[] | select(.type=="NodeSetBaremetalProvisionReady")'
+{
+  "lastTransitionTime": "2024-02-01T04:41:58Z",
+  "message": "NodeSetBaremetalProvisionReady ready",
+  "reason": "Ready",
+  "status": "True",
+  "type": "NodeSetBaremetalProvisionReady"
+}
+----
