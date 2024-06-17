@@ -44,6 +44,7 @@ jobs:
 
           git branch -D gh-pages &>/dev/null || true
           git checkout --orphan gh-pages
+          git reset
 
       - name: Commit asciidoc docs
         run: |
