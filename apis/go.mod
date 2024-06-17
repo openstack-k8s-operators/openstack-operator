@@ -4,20 +4,20 @@ go 1.20
 
 require (
 	github.com/cert-manager/cert-manager v1.13.6
-	github.com/go-playground/validator/v10 v10.21.0
+	github.com/go-playground/validator/v10 v10.22.0
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240603141403-1ad477d065a2
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240612161940-604036e71c7f
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240611223414-c013696ad9cc
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240610071145-9fc8ef9f3c7c
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240616104609-e296d336e2d0
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240614091021-67d1c605b0e8
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240604091541-cdb648f9a7ac
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240604144138-996e41d1af19
-	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240607124904-2f2e4f3dd090
+	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240617020728-dd4e276ed9f2
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240605055850-8ee0ece70906
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240612061748-03d1fc5e2fbe
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240612061748-03d1fc5e2fbe
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240615134235-24529fcff658
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240615134235-24529fcff658
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240610185533-3683da06b8eb
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240613130956-7d997dc5d972
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240612151610-3a231baf6d66
@@ -25,7 +25,7 @@ require (
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240614142111-2787761a35ad
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240604070904-cdec81ca1825
 	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240614143745-cbe8d2bba3e4
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240614120333-5d0e0dfb84d1
+	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240615152009-519b43078659
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240612111911-209ad35b5db7
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240614144556-940a48eaf688
 	github.com/rabbitmq/cluster-operator/v2 v2.6.0
@@ -35,9 +35,9 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
 	golang.org/x/tools v0.21.0 // indirect
-	k8s.io/api v0.28.10
-	k8s.io/apimachinery v0.28.10
-	k8s.io/client-go v0.28.10
+	k8s.io/api v0.28.11
+	k8s.io/apimachinery v0.28.11
+	k8s.io/client-go v0.28.11
 	sigs.k8s.io/controller-runtime v0.16.6
 )
 
@@ -79,7 +79,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240612061748-03d1fc5e2fbe // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240615134235-24529fcff658 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
@@ -100,8 +100,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.28.10 // indirect
-	k8s.io/component-base v0.28.10 // indirect
+	k8s.io/apiextensions-apiserver v0.28.11 // indirect
+	k8s.io/component-base v0.28.11 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	sigs.k8s.io/gateway-api v0.8.0 // indirect
