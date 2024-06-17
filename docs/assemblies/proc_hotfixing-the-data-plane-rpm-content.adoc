@@ -1,0 +1,44 @@
+[id="proc_hotfixing-the-data-plane-rpm-content-{context}"]
+= Hotfixing the data plane RPM content
+
+[role="_abstract"]
+
+You install RPM hotfix content directly on to the data plane nodes.
+
+.Procedure
+
+. Obtain the RPM hotfix content from the source and store it locally:
++
+----
+$ mkdir -p <hotfix_id>/rpms
+$ cp /path/to/hotfix/*.rpm <hotfix_id>/rpms
+----
++
+* Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`.
+
+. Copy the RPM hotfix content to the affected data plane nodes:
++
+----
+$ ssh <ssh_user>@<data_plane_node> mkdir -p /tmp/<hotfix_id>/rpms
+$ scp <hotfix_id>/rpms/*.rpm <ssh_user>@<data_plane_node>:/tmp/<hotfix_id>/rpms
+----
++
+* Replace `<ssh_user>` with the SSH user name.
+* Replace `<data_plane_node>` with the hostname or IP for the data plane node.
+* Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`.
+
++
+Repeat this step for each data plane node that the hotfix must be applied to.
+
+. Update the RPM hotfix content on the affected data plane nodes.
++
+----
+$ ssh <ssh_user>@<data_plane_node>
+$ sudo dnf in -y /tmp/<hotfix_id>/rpms/*.rpm
+----
++
+* Replace `<ssh_user>` with the SSH user name.
+* Replace `<data_plane_node>` with the hostname or IP for the data plane node.
+* Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`.
+
+. Perform any additional custom steps that are detailed in the hotfix instructions to complete the application of the RPM hotfix content.

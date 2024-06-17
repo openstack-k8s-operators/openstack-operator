@@ -1,0 +1,64 @@
+= Persistent logs
+
+For enabling persistent logging:
+
+. Create a https://docs.openshift.com/container-platform/4.14/storage/understanding-persistent-storage.html#persistent-volumes_understanding-persistent-storage[PersistentVolume] and a https://docs.openshift.com/container-platform/4.14/storage/understanding-persistent-storage.html#persistent-volume-claims_understanding-persistent-storage[PersistentVolumeClaim]
+
+. Mount `/runner/artifacts` into the PersistentVolume through `extraMounts` field
+
+[discrete]
+==== Example:
+
+[,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+spec:
+  ...
+  nodeTemplate:
+    extraMounts:
+      - extraVolType: Logs
+        volumes:
+        - name: ansible-logs
+          persistentVolumeClaim:
+            claimName: <PersistentVolumeClaim name>
+        mounts:
+        - name: ansible-logs
+          mountPath: "/runner/artifacts"
+----
+
+== Accessing the logs
+
+. Query for pods with the OpenStackAnsibleEE label
+
+ oc get pods -l app=openstackansibleee
++
+Sample output:
++
+ configure-network-edpm-compute-j6r4l   0/1     Completed           0          3m36s
+ validate-network-edpm-compute-6g7n9    0/1     Pending             0          0s
+ validate-network-edpm-compute-6g7n9    0/1     ContainerCreating   0          11s
+ validate-network-edpm-compute-6g7n9    1/1     Running             0          13s
+
+. SSH into a pod
++
+When a pod is running:
++
+ oc rsh validate-network-edpm-compute-6g7n9
++
+When a pod is *not* running:
++
+ oc debug configure-network-edpm-compute-j6r4l
+
+. List the directories under `/runner/artifacts`
+
+ ls /runner/artifacts
++
+Sample output:
++
+ configure-network-edpm-compute
+ validate-network-edpm-compute
+
+. Get the stdout of the desired artifact
+
+ cat /runner/artifacts/configure-network-edpm-compute/stdout

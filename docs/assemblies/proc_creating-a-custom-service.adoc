@@ -1,0 +1,199 @@
+[id="proc_creating-a-custom-service_{context}"]
+= Creating a custom service
+
+[role="_abstract"]
+You can use the `OpenStackDataPlaneService` CRD to create custom services to deploy on your data plane nodes.
+
+[NOTE]
+Do not create a custom service with the same name as one of the default services. If a custom service name matches a default service name, the default service values overwrite the custom service values during `OpenStackDataPlaneNodeSet` reconciliation.
+
+You specify the Ansible execution for your service with either an Ansible playbook or by including the free-form play contents directly in the `spec` section of the service.
+
+[NOTE]
+You cannot use both an Ansible playbook and an Ansible play in the same service.
+
+.Procedure
+
+. Create an `OpenStackDataPlaneService` CR and save it to a YAML file on your workstation, for example `custom-service.yaml`:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  label: dataplane-deployment-custom-service
+----
+
+. Specify the Ansible commands to create the custom service, by referencing an Ansible playbook or by including the Ansible play in the `spec`:
+
+* Specify the Ansible playbook to use:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  label: dataplane-deployment-custom-service
+  playbook: osp.edpm.configure_os
+----
+
++
+For information about how to create an Ansible playbook, see link:https://docs.ansible.com/ansible-core/devel/getting_started/get_started_playbook.html[Creating a playbook].
+
+* Specify the Ansible play as a string that uses Ansible playbook syntax:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  label: dataplane-deployment-custom-service
+  playbookContents: |
+    hosts: all
+    tasks:
+      - name: Hello World!
+        shell: "echo Hello World!"
+        register: output
+      - name: Show output
+        debug:
+          msg: "{{ output.stdout }}"
+      - name: Hello World role
+        import_role: hello_world
+----
+
+. Optional: To override the default container image used by the `ansible-runner` execution environment with a custom image that uses additional Ansible content for a custom service, build and include a custom `ansible-runner` image. For information, see xref:proc_building-a-custom-ansible-runner-image_{context}[Building a custom `ansible-runner` image].
+
+. Optional: Designate and configure a node set for a Compute feature or workload. For more information, see xref:proc_configuring-a-node-set-for-a-Compute-feature-or-workload_dataplane[Configuring a node set for a Compute feature or workload].
+
+. Optional: Specify <<datasource>> resources to use to pass `ConfigMaps` or `Secrets` into the `OpenStackAnsibleEE` job. When the `optional` field is true on a <<datasource>> `configMapRef` or `secretRef`, the resource is optional, and an error won't occur when it doesn't exist.
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  ...
+  playbookContents: |
+    ...
+  dataSources:
+	  - configMapRef:
+		    name: hello-world-cm-0
+    - secretRef:
+	      name: hello-world-secret-0
+    - secretRef:
+        name: hello-world-secret-1
+		    # This secret is optional, it does not need to exist.
+        optional: true
+----
++
+A mount is created for each `ConfigMap` and `Secret` in the `OpenStackAnsibleEE` pod with a filename that matches the resource value. The mounts are created under `/var/lib/openstack/configs/<service name>`.
+
+. Optional: It may be necessary to run some services on all nodesets at the same time. These services need to have their `deployOnAllNodeSets` field set to true.
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-global-service
+spec:
+  label: custom-global-service
+  playbookContents: |
+    - hosts: localhost
+      gather_facts: no
+      name: global play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+  deployOnAllNodeSets: true
+----
+
+. Optional: Specify the `edpmServiceType` field for the service. Different custom services may use the same ansible content to manage the same EDPM service (such as `ovn` or `nova`). The `DataSources`, TLS certificates, and CA certificates need to be mounted at the same locations so they can be found by the ansible content even when using a custom service. `edpmServiceType` is used to create this association. The value is the name of the default service that uses the same ansible content as the custom service.
++
+For example, a custom service that uses the `edpm_ovn` ansible content from `edpm-ansible` would set `edpmServiceType` to `ovn`, which matches the default `ovn` service name provided by `dataplane-operator`.
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-ovn-service
+spec:
+  edpmServiceType: ovn
+----
+
+. Create the custom service:
++
+----
+$ oc apply -f custom-service.yaml
+----
+
+. Verify that the custom service is created:
++
+----
+$ oc get openstackdataplaneservice <custom_service_name> -o yaml
+----
+
+== Enabling a custom service
+
+To add a custom service to be executed as part of an `OpenStackDataPlaneNodeSet`
+deployment, add the service name to the `services` field list on the `NodeSet`. Add
+the service name in the order that it should be executed relative to the other
+services. This example shows adding the `hello-world` service as the first
+service to execute for the `edpm-compute` `NodeSet`.
+
+
+ apiVersion: dataplane.openstack.org/v1beta1
+ kind: OpenStackDataPlaneNodeSet
+ metadata:
+   name: openstack-edpm
+ spec:
+   services:
+     - hello-world
+     - download-cache
+     - bootstrap
+     - configure-network
+     - validate-network
+     - install-os
+     - configure-os
+     - run-os
+     - ovn
+     - neutron-metadata
+     - libvirt
+     - nova
+   nodes:
+     edpm-compute:
+       ansible:
+         ansibleHost: 172.20.12.67
+         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+         ansibleUser: cloud-admin
+         ansibleVars:
+           ansible_ssh_transfer_method: scp
+           ctlplane_ip: 172.20.12.67
+           external_ip: 172.20.12.76
+           fqdn_internalapi: edpm-compute-1.example.com
+           internalapi_ip: 172.17.0.101
+           storage_ip: 172.18.0.101
+           tenant_ip: 172.10.0.101
+       hostName: edpm-compute-0
+       networkConfig: {}
+       nova:
+         cellName: cell1
+         deploy: true
+         novaInstance: nova
+   nodeTemplate: {}
+
+
+When customizing the services list, the default list of services must be
+reproduced and then customized if the intent is to still deploy those services.
+If just the `hello-world` service was listed in the list, then that is the only
+service that would be deployed.
+
+[NOTE]
+====
+Exercise caution when including a service that is meant to be exectured on every `NodeSet` in the list.
+Some services may behave in unexpected ways when executed multiple times on the same node.
+====

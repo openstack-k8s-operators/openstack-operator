@@ -1,16 +1,18 @@
 BUILD = upstream
 BUILD_DIR = ../docs_build
 ROOTDIR = $(realpath .)
-NAME = ctlplane
+NAME = openstack
 DEST_DIR = $(BUILD_DIR)/$(NAME)
-DEST_HTML = $(DEST_DIR)/index-$(BUILD).html
+CTLPLANE_HTML = $(DEST_DIR)/ctlplane-$(BUILD).html
+DATAPLANE_HTML = $(DEST_DIR)/dataplane-$(BUILD).html
 DEST_PDF = $(BUILD_DIR)/$(NAME)-$(BUILD).pdf
 IMAGES_DIR = $(DEST_DIR)/images
 IMAGES_TS = $(DEST_DIR)/.timestamp-images
-MAIN_SOURCE = user.adoc
+CTLPLANE_SOURCE = ctlplane.adoc
+DATAPLANE_SOURCE = dataplane.adoc
 OTHER_SOURCES = $(shell find ./assemblies -type f)
 IMAGES = $(shell find ./images -type f)
-ALL_SOURCES = $(MAIN_SOURCE) $(OTHER_SOURCES) $(IMAGES)
+ALL_SOURCES = $(CTLPLANE_SOURCE) $(OTHER_SOURCES) $(IMAGES)
 UNAME = $(shell uname)
 BUNDLE_EXEC ?= bundle exec
 
@@ -25,7 +27,7 @@ all: html
 
 html: html-latest
 
-html-latest: prepare $(IMAGES_TS) $(DEST_HTML)
+html-latest: prepare $(IMAGES_TS) $(CTLPLANE_HTML) $(DATAPLANE_HTML)
 
 pdf: prepare $(DEST_PDF)
 
@@ -45,7 +47,7 @@ watch-html:
 	done
 
 open-html: html
-	${BROWSER_OPEN} "file://$(realpath $(ROOTDIR)/$(DEST_HTML))"
+	${BROWSER_OPEN} "file://$(realpath $(ROOTDIR)/$(CTLPLANE_HTML))"
 
 open-pdf: pdf
 	${BROWSER_OPEN} "$(realpath $(ROOTDIR)/$(DEST_PDF))"
@@ -54,8 +56,11 @@ $(IMAGES_TS): $(IMAGES)
 	cp $? $(IMAGES_DIR)
 	touch $(IMAGES_TS)
 
-$(DEST_HTML): $(ALL_SOURCES)
-	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" -a build=$(BUILD) -b xhtml5 -d book -o $@ $(MAIN_SOURCE)
+$(CTLPLANE_HTML): $(ALL_SOURCES)
+	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" -a build=$(BUILD) -b xhtml5 -d book -o $@ $(CTLPLANE_SOURCE)
+
+$(DATAPLANE_HTML): $(ALL_SOURCES)
+	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" --failure-level WARN -a build=$(BUILD) -b xhtml5 -d book -o $@ $(DATAPLANE_SOURCE)
 
 $(DEST_PDF): $(ALL_SOURCES)
-	$(BUNDLE_EXEC) asciidoctor-pdf -a build=$(BUILD) -d book -o $@ $(MAIN_SOURCE) $(IMAGES)
+	$(BUNDLE_EXEC) asciidoctor-pdf -a build=$(BUILD) -d book -o $@ $(CTLPLANE_SOURCE) $(IMAGES)

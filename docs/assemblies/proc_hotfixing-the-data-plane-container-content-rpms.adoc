@@ -1,0 +1,47 @@
+[id="proc_hotfixing-the-data-plane-container-content-rpms-{context}"]
+= Hotfixing the data plane container content with RPM's
+
+[role="_abstract"]
+
+When container hotfix content is delivered as RPM's, you must update the container images manually.
+
+.Procedure
+
+. From a RHEL workstation, server, or virtual machine, ensure the following packages are installed:
++
+* buildah
+* podman
+
+. From a RHEL workstation, server, or virtual machine, collect the hotfix RPMs into a new directory:
++
+----
+$ mkdir -p <hotfix_id>/rpms
+$ cp /path/to/hotfix/*.rpm <hotfix_id>/rpms
+----
++
+* Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`.
+
+. Create a container image tagged with your registry account details and a hotfix identifier:
++
+----
+$ updated_container="<updated_container_registry>/<updated_container_project>/<container_image>:<hotfix_id>"
+$ container=$(buildah from <container_registry>/<container_project>/<container_image>:<container_tag>)
+$ buildah run --user root $container mkdir -p /<hotfix_id>/rpms
+$ buildah copy --user root $container <hotfix_id>/rpms/*.rpm /hotfix_id/rpms
+$ buildah run --user root rpm -F /<hotfix_id/rpms/*.rpm
+$ buildah commit $container $updated_container
+$ buildah push $updated_container
+----
++
+* Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`.
+* Replace `<updated_container_registry>` with a container registry to serve the updated container image. The OCP internal container image registry can be used.
+* Replace `<updated_container_project>` with a container project to use for the updated container image.
+* Replace `<container_project>` with the container project for the container being updated.
+* Replace `<container_registry>` with the container registry for the container being updated.
+* Replace `<container_image>` with the container image being updated.
+* Replace `<container_tag>` with the container tag being updated.
++
+[NOTE]
+The values for `<updated_container_registry>` and `<container_registry>` can be the same. The values for `<updated_container_project>` and `<container_project>` can be the same. The container images will be differentiated based on the value of their tags.
+
+. Hotfix the updated container image on the affected data plane nodes. Use the <<proc_hotfixing-the-data-plane-container-content-images,Hotfixing the data plane container content with images>> procedure to apply the hotfixed container image.

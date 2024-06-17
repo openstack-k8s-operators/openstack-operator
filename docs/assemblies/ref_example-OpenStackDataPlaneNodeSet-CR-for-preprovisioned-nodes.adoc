@@ -1,0 +1,110 @@
+[id="ref_example-OpenStackDataPlaneNodeSet-CR-for-preprovisioned-nodes_{context}"]
+= Example `OpenStackDataPlaneNodeSet` CR for pre-provisioned nodes
+
+[role="_abstract"]
+The following example `OpenStackDataPlaneNodeSet` CR creates a set of generic Compute nodes with some node-specific configuration.
+
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-ipam
+  namespace: openstack
+spec:
+  env: #<1>
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  networkAttachments: #<2>
+    - ctlplane
+  nodeTemplate: #<3>
+    ansible:
+      ansibleUser: cloud-admin #<4>
+      ansibleVars: #<5>
+        edpm_network_config_template: | #<6>
+          ---
+          {% set mtu_list = [ctlplane_mtu] %}
+          {% for network in nodeset_networks %}
+          {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+          {%- endfor %}
+          {% set min_viable_mtu = mtu_list | max %}
+          network_config:
+          - type: ovs_bridge
+            name: {{ neutron_physical_bridge_name }}
+            mtu: {{ min_viable_mtu }}
+            use_dhcp: false
+            dns_servers: {{ ctlplane_dns_nameservers }}
+            domain: {{ dns_search_domains }}
+            addresses:
+            - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+            routes: {{ ctlplane_host_routes }}
+            members:
+            - type: interface
+              name: nic1
+              mtu: {{ min_viable_mtu }}
+              # force the MAC address of the bridge to this interface
+              primary: true
+          {% for network in nodeset_networks %}
+            - type: vlan
+              mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+              vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+              addresses:
+              - ip_netmask:
+                  {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+              routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+          {% endfor %}
+        edpm_nodes_validation_validate_controllers_icmp: false
+        edpm_nodes_validation_validate_gateway_icmp: false
+        edpm_sshd_allowed_ranges:
+          - 192.168.122.0/24
+        enable_debug: false
+        gather_facts: false
+        neutron_physical_bridge_name: br-ex
+        neutron_public_interface_name: eth0
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret #<7>
+  nodes:
+    edpm-compute-0: #<8>
+      ansible:
+        ansibleHost: 192.168.122.100
+      hostName: edpm-compute-0
+      networks:
+        - defaultRoute: true
+          fixedIP: 192.168.122.100
+          name: ctlplane
+          subnetName: subnet1
+        - name: internalapi
+          subnetName: subnet1
+        - name: storage
+          subnetName: subnet1
+        - name: tenant
+          subnetName: subnet1
+  preProvisioned: true #<9>
+  services: #<10>
+    - bootstrap
+    - download-cache
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - install-certs
+    - ovn
+    - neutron-metadata
+    - libvirt
+    - nova
+    - telemetry
+  tlsEnabled: true
+----
+
+<1> Optional: A list of environment variables to pass to the pod.
+<2> The networks the `ansibleee-runner` connects to, specified as a list of `netattach` resource names.
+<3> The common configuration to apply to all nodes in this set of nodes.
+<4> The user associated with the secret you created in xref:proc_creating-the-SSH-key-secrets_{context}[Creating the SSH key secrets].
+<5> The Ansible variables that customize the set of nodes. For a complete list of Ansible variables, see https://openstack-k8s-operators.github.io/edpm-ansible/.
+<6> The network configuration template to apply to nodes in the set. For sample templates, see https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_network_config/templates.
+<7> The name of the secret that you created in xref:proc_creating-the-SSH-key-secrets_{context}[Creating the SSH key secrets].
+<8> The node definition reference, for example, `edpm-compute-0`. Each node in the node set must have a node definition.
+<9> Specify if the nodes in this set are pre-provisioned, or if they must be provisioned when creating the resource.
+//For information on how to configure your `OpenStackDataPlane` CR to provision bare metal nodes, see Provisioning bare metal nodes.
+<10> The services that are deployed on the data plane nodes in this `OpenStackDataPlaneNodeSet` CR.

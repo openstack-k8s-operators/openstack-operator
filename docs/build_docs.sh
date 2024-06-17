@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -ex pipefail
 
-FILES=()
-PATHS=(
+CTLPLANE_FILES=()
+CTLPLANE_PATHS=(
     "apis/client/v1beta1/openstackclient_types.go"
     "apis/core/v1beta1/openstackcontrolplane_types.go"
     "apis/core/v1beta1/openstackversion_types.go"
 )
+DATAPLANE_FILES=()
 DATAPLANE_PATHS=(
     "apis/dataplane/v1beta1/openstackdataplanedeployment_types.go"
     "apis/dataplane/v1beta1/openstackdataplanenodeset_types.go"
@@ -17,7 +18,7 @@ DATAPLANE_PATHS=(
 # Getting APIs from Services
 SERVICE_PATH=($(MODCACHE=$(go env GOMODCACHE) awk '/openstack-k8s-operators/ && ! /lib-common/ && ! /openstack-operator/ && ! /infra/ && ! /replace/ {print ENVIRON["MODCACHE"] "/" $1 "@" $2 "/v1beta1/*_types.go"}' apis/go.mod))
 for SERVICE in ${SERVICE_PATH[@]};do
-    PATHS+=($(ls ${SERVICE}))
+    CTLPLANE_PATHS+=($(ls ${SERVICE}))
 done
 
 # Getting APIs from Infra
@@ -25,21 +26,27 @@ INFRA_PATH=($(MODCACHE=$(go env GOMODCACHE) awk '/openstack-k8s-operators/ && /i
 PATTERNS=("memcached/v1beta1/*_types.go"  "network/v1beta1/*_types.go"  "rabbitmq/v1beta1/*_types.go")
 for INFRA in ${PATTERNS[@]};do
     ls ${INFRA_PATH}${INFRA}
-    PATHS+=($(ls ${INFRA_PATH}${INFRA}))
+    CTLPLANE_PATHS+=($(ls ${INFRA_PATH}${INFRA}))
 done
 
 # Adding -f to all API paths
-for API_PATH in ${PATHS[@]};do
-    FILES+=$(echo " -f $API_PATH")
+for API_PATH in ${CTLPLANE_PATHS[@]};do
+    CTLPLANE_FILES+=$(echo " -f $API_PATH")
 done
 for API_PATH in ${DATAPLANE_PATHS[@]};do
-    FILES+=$(echo " -f $API_PATH")
+    DATAPLANE_FILES+=$(echo " -f $API_PATH")
 done
 
-# Build docs from APIs
-${CRD_MARKDOWN} $FILES -n OpenStackClient -n OpenStackControlPlane -n OpenStackVersion -n OpenStackDataPlaneDeployment -n OpenStackDataPlaneNodeSet -n OpenStackDataPlaneService > docs/assemblies/custom_resources.md
-bundle exec kramdoc --auto-ids docs/assemblies/custom_resources.md && rm docs/assemblies/custom_resources.md
-sed -i "s/=== Custom/== Custom/g" docs/assemblies/custom_resources.adoc
+# Build ctlplane docs from APIs
+${CRD_MARKDOWN} $CTLPLANE_FILES -n OpenStackClient -n OpenStackControlPlane -n OpenStackVersion > docs/assemblies/ctlplane_resources.md
+bundle exec kramdoc --auto-ids docs/assemblies/ctlplane_resources.md && rm docs/assemblies/ctlplane_resources.md
+sed -i "s/=== Custom/== Custom/g" docs/assemblies/ctlplane_resources.adoc
+
+# Build dataplane docs from APIs
+${CRD_MARKDOWN} $DATAPLANE_FILES -n OpenStackDataPlaneDeployment -n OpenStackDataPlaneNodeSet -n OpenStackDataPlaneService > docs/assemblies/dataplane_resources.md
+bundle exec kramdoc --auto-ids docs/assemblies/dataplane_resources.md && rm docs/assemblies/dataplane_resources.md
+sed -i "s/=== Custom/== Custom/g" docs/assemblies/dataplane_resources.adoc
+
 
 # Render HTML
 cd docs

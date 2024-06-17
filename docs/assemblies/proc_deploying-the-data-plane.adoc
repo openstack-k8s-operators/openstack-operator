@@ -1,0 +1,72 @@
+[id="proc_deploying-the-data-plane_{context}"]
+= Deploying the data plane
+
+[role="_abstract"]
+You use the `OpenStackDataPlaneDeployment` CRD to configure the services on the data plane nodes and deploy the data plane. Create an `OpenStackDataPlaneDeployment` custom resource (CR) that deploys each of your `OpenStackDataPlaneNodeSet` CRs.
+
+.Procedure
+
+. Create an `OpenStackDataPlaneDeployment` CR and save it to a file named `openstack-edpm-deploy.yaml` on your workstation.
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-deployment-ipam
+spec:
+  nodeSets:
+    - openstack-edpm-ipam
+    - <nodeSet_name>
+    - ...
+    - <nodeSet_name>
+----
++
+* Replace `<nodeSet_name>` with the names of the `OpenStackDataPlaneNodeSet` CRs that you want to include in your data plane deployment.
+
+. Save the `openstack-edpm-deploy.yaml` deployment file.
+
+. Deploy the data plane:
++
+----
+$ oc create -f openstack-edpm-deploy.yaml
+----
++
+You can view the Ansible logs while the deployment executes:
++
+----
+$ oc get pod -l app=openstackansibleee -w
+$ oc logs -l app=openstackansibleee -f --max-log-requests 20
+----
+
+. Verify that the data plane is deployed:
++
+----
+$ oc get openstackdataplanedeployment
+NAME             	STATUS   MESSAGE
+edpm-deployment-ipam   True     Setup Complete
+
+
+$ oc get openstackdataplanenodeset
+NAME             	STATUS   MESSAGE
+openstack-edpm-ipam   True     NodeSet Ready
+----
++
+For information on the meaning of the returned status, see xref:ref_data-plane-conditions-and-states_dataplane[Data plane conditions and states].
+
++
+If the status indicates that the data plane has not been deployed, then troubleshoot the deployment. For information, see xref:proc_troubleshooting-data-plane-creation-and-deployment_dataplane[Troubleshooting the data plane creation and deployment].
+
+. Map the Compute nodes to the Compute cell that they are connected to:
++
+----
+$ oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
+----
++
+If you did not create additional cells, this command maps the Compute nodes to `cell1`.
+
+. Access the remote shell for the `openstackclient` pod and verify that the deployed Compute nodes are visible on the control plane:
++
+----
+$ oc rsh -n openstack openstackclient
+$ openstack hypervisor list
+----

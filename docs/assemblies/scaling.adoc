@@ -1,0 +1,232 @@
+= Scaling DataPlane
+
+== Scaling Out
+
+Scale out of an existing dataplane with more edpm nodes can be achieved by adding new
+nodes to the `nodes` section of the `OpenStackDataPlaneNodeSet` spec. Ensure that
+there are enough BMHs in `Available` state in the required namespace with the desired
+labels for baremetal nodes.
+
+.Pre-Provisioned:
+
+ apiVersion: dataplane.openstack.org/v1beta1
+ kind: OpenStackDataPlaneNodeSet
+ metadata:
+   name: openstack-edpm-ipam
+ spec:
+   preProvisioned: True
+   nodes:
+   ...
+     edpm-compute-2:
+       hostName: edpm-compute-2
+       ansible:
+         ansibleHost: 192.168.122.102
+       networks:
+       - name: CtlPlane
+         subnetName: subnet1
+         defaultRoute: true
+         fixedIP: 192.168.122.102
+       - name: InternalApi
+         subnetName: subnet1
+       - name: Storage
+         subnetName: subnet1
+       - name: Tenant
+         subnetName: subnet1
+   ...
+
+.Baremetal:
+
+ apiVersion: dataplane.openstack.org/v1beta1
+ kind: OpenStackDataPlaneNodeSet
+ metadata:
+   name: openstack-edpm-ipam
+ spec:
+   nodes:
+   ...
+     edpm-compute-2:
+       hostName: edpm-compute-2
+   ...
+
+WARNING: To deploy on the additional nodes, a *new* `OpenStackDataPlaneDeployment` CR should be
+created with the `OpenStackDataPlaneNodeSet` in the `nodeSets` section.
+
+.New OpenStackDataPlaneDeployment:
+
+ apiVersion: dataplane.openstack.org/v1beta1
+ kind: OpenStackDataPlaneDeployment
+ metadata:
+   name: new-deployment # Do not re-use the name from previous OpenStackDataPlaneDeployment
+ spec:
+  nodeSets:
+    - openstack-edpm-ipam # scaled out nodeset name
+
+
+Once deployment completes `OpenStackDataPlaneNodeSet` would be ready as shown below.
+
+[,console]
+----
+$ oc get openstackdataplanenodeset openstack-edpm-ipam
+NAME                  STATUS   MESSAGE
+openstack-edpm-ipam   True     NodeSet Ready
+----
+
+If the scaled out nodes are compute nodes, once the `OpenStackDataPlaneNodeSet` reaches
+`NodeSet Ready`, `nova-manage cell_v2 discover_hosts` should be run to make the new
+compute nodes show-up in hypervisor list and become usable.
+
+[,console]
+----
+$ oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
+Found 2 cell mappings.
+Skipping cell0 since it does not contain hosts.
+Getting computes from cell 'cell1': 75f666d2-922d-45af-8bdb-d897a1bc9b1c
+Checking host mapping for compute host 'edpm-compute-2': 6afda7af-2953-4400-842c-a327a0e43a74
+Creating host mapping for compute host 'edpm-compute-2': 6afda7af-2953-4400-842c-a327a0e43a74
+Found 1 unmapped computes in cell: 75f666d2-922d-45af-8bdb-d897a1bc9b1c
+
+$ oc rsh openstackclient openstack hypervisor list
++--------------------------------------+-------------------------------------+-----------------+-----------------+-------+
+| ID                                   | Hypervisor Hostname                 | Hypervisor Type | Host IP         | State |
++--------------------------------------+-------------------------------------+-----------------+-----------------+-------+
+| cc05372a-27bd-4b33-985e-b0009c9e515e | edpm-compute-1.ctlplane.example.com | QEMU            | 192.168.221.101 | up    |
+| 5e3f7b5d-39fd-430c-80d1-084086bdccde | edpm-compute-0.ctlplane.example.com | QEMU            | 192.168.221.100 | up    |
+| 6afda7af-2953-4400-842c-a327a0e43a74 | edpm-compute-2.ctlplane.example.com | QEMU            | 192.168.221.102 | up    |
++--------------------------------------+-------------------------------------+-----------------+-----------------+-------+
+----
+
+== Scaling Out with different configuration
+
+If the deployment needs to be scaled out to nodes that require different
+configuration (e.g. different kernel args, network config, or openstack config)
+compared to the configuration in the current `OpenStackDataPlaneNodeSet`
+then the new nodes cannot be added to the existing `OpenStackDataPlaneNodeSet`
+but a new `OpenStackDataPlaneNodeSet` needs to be created that contains the
+new nodes and the new configuration for those nodes. Then a new
+`OpenStackDataPlaneDeployment` needs to be created that points to *both the
+existing and the new `OpenStackDataPlaneNodeSets`* to trigger the scale out.
+
+WARNING: The existing `OpenStackDataPlaneNodeSet` has the `ssh-known-hosts`
+service. That service is global for the whole deployment so it should not be
+listed on the new `OpenStackDataPlaneNodeSet`.
+
+WARNING: If only the new `OpenStackDataPlaneNodeSet` is included into the new
+`OpenStackDataPlaneDeployment` then the scale out seems to succeed but will
+be incomplete causing that VM move operations will fail between nodes
+in the different `OpenStackDataPlaneNodeSets`.
+
+== Scaling In
+
+The procedure for removing edpm nodes from dataplane involves some manual cleanup steps
+after evacuation of workload.
+
+For edpm compute nodes removal following steps should be performed.
+
+=== Disable nova-compute service
+
+[,console]
+----
+
+$ oc rsh openstackclient openstack compute service list
++--------------------------------------+----------------+------------------------+----------+---------+-------+----------------------------+
+| ID                                   | Binary         | Host                   | Zone     | Status  | State | Updated At                 |
++--------------------------------------+----------------+------------------------+----------+---------+-------+----------------------------+
+| 11105d9b-9ef7-4d6f-8d17-6eb8db175d76 | nova-conductor | nova-cell1-conductor-0 | internal | enabled | up    | 2024-02-01T03:59:42.000000 |
+| 31e2ee14-a124-4e02-b11d-87c2cdca3c56 | nova-compute   | edpm-compute-1         | nova     | enabled | up    | 2024-02-01T03:59:38.000000 |
+| bd031e6e-89d8-4839-b345-5f124ec4c07e | nova-compute   | edpm-compute-0         | nova     | enabled | up    | 2024-02-01T03:59:37.000000 |
+| f70912f9-eaaa-4caa-906f-a38e20667af4 | nova-compute   | edpm-compute-2         | nova     | enabled | up    | 2024-02-01T03:59:38.000000 |
+| 8a4622c3-0fb8-498a-81d8-a9c23c0be5fc | nova-conductor | nova-cell0-conductor-0 | internal | enabled | up    | 2024-02-01T03:59:37.000000 |
+| 5ad386ec-ac2d-4238-a671-d9402432d326 | nova-scheduler | nova-scheduler-0       | internal | enabled | up    | 2024-02-01T03:59:38.000000 |
++--------------------------------------+----------------+------------------------+----------+---------+-------+----------------------------+
+
+$ oc rsh openstackclient openstack compute service set edpm-compute-2 nova-compute --disable
+----
+
+=== Stop ovn and nova-compute containers
+
+ssh to the edpm node to be removed and stop the containers.
+
+[,console]
+----
+
+$ ssh -i out/edpm/ansibleee-ssh-key-id_rsa cloud-admin@192.168.221.102
+
+[cloud-admin@edpm-compute-2 ~]$ sudo systemctl stop edpm_ovn_controller
+
+[cloud-admin@edpm-compute-2 ~]$ sudo systemctl stop edpm_ovn_metadata_agent
+
+[cloud-admin@edpm-compute-2 ~]$ sudo systemctl stop edpm_nova_compute
+----
+
+=== Delete network agents
+
+Delete the agents for the compute nodes to be removed.
+
+[,console]
+----
+
+$ oc rsh openstackclient openstack network agent list
+
++--------------------------------------+------------------------------+----------------+-------------------+-------+-------+----------------+
+| ID                                   | Agent Type                   | Host           | Availability Zone | Alive | State | Binary         |
++--------------------------------------+------------------------------+----------------+-------------------+-------+-------+----------------+
+| d2b9e5d0-a406-41c2-9bc3-e74aaf113450 | OVN Controller Gateway agent | worker-0       |                   | :-)   | UP    | ovn-controller |
+| 9529e28e-522e-48f6-82e2-c5caf1cf5a14 | OVN Controller Gateway agent | worker-1       |                   | :-)   | UP    | ovn-controller |
+| 91bd4981-1e81-4fe8-b628-8581add36f13 | OVN Controller agent         | edpm-compute-1 |                   | :-)   | UP    | ovn-controller |
+| bdc1dd13-586f-4553-90d6-14348f6be150 | OVN Controller agent         | edpm-compute-0 |                   | :-)   | UP    | ovn-controller |
+| f7bb5520-27df-470b-9566-0aa7e5fef583 | OVN Controller agent         | edpm-compute-2 |                   | :-)   | UP    | ovn-controller |
++--------------------------------------+------------------------------+----------------+-------------------+-------+-------+----------------+
+
+$ oc rsh openstackclient openstack network agent delete f7bb5520-27df-470b-9566-0aa7e5fef583
+----
+
+=== Delete nova-compute service
+
+Delete `nova-compute` service for the removed node.
+
+[,console]
+----
+
+$ oc rsh openstackclient openstack compute service delete f70912f9-eaaa-4caa-906f-a38e20667af4
+
+$ oc rsh openstackclient openstack hypervisor list
++--------------------------------------+-------------------------------------+-----------------+-----------------+-------+
+| ID                                   | Hypervisor Hostname                 | Hypervisor Type | Host IP         | State |
++--------------------------------------+-------------------------------------+-----------------+-----------------+-------+
+| cc05372a-27bd-4b33-985e-b0009c9e515e | edpm-compute-1.ctlplane.example.com | QEMU            | 192.168.221.101 | up    |
+| 5e3f7b5d-39fd-430c-80d1-084086bdccde | edpm-compute-0.ctlplane.example.com | QEMU            | 192.168.221.100 | up    |
++--------------------------------------+-------------------------------------+-----------------+-----------------+-------+
+----
+
+=== Patch OpenStackDataPlaneNodeSet to remove node
+
+Once the cleanup is complete, patch `OpenStackDataPlaneNodeSet` CR to remove the
+nodes from the `nodes` section.
+
+[,console]
+----
+
+$ oc patch openstackdataplanenodeset/openstack-edpm --type json --patch '[{ "op": "remove", "path": "/spec/nodes/edpm-compute-2" }]'
+openstackdataplanenodeset.dataplane.openstack.org/openstack-edpm patched
+----
+
+For baremetal provisioned node this would start de-provisioning the removed node.
+
+[,console]
+----
+
+$ oc get bmh
+NAME         STATE            CONSUMER              ONLINE   ERROR   AGE
+compute-01   provisioned      openstack-edpm        true             2d21h
+compute-02   provisioned      openstack-edpm        true             2d21h
+compute-03   deprovisioning                         false            43h
+----
+
+== Scaling In by removing a NodeSet
+
+If the scale in would remove the last node from a `OpenStackDataPlaneNodeSet`
+then the `OpenStackDataPlaneNodeSet` resource should deleted as well. If this
+was the one that listed the `ssh-known-hosts` service then that service needs
+to be added to exactly one of the remaining `OpenStackDataPlaneNodeSets`. To
+remove the ssh host keys of the removed nodes from the remaining nodes a new
+`OpenStackDataPlaneDeployment` needs to be created that points to all the
+remaining `OpenStackDataPlaneNodeSets`.

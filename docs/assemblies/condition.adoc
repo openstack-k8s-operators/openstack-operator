@@ -1,0 +1,127 @@
+= Understanding dataplane conditions
+
+Each dataplane resource has a series of conditions within their `status`
+subresource that indicate the overall state of the resource, including its
+deployment progress.
+
+Example `OpenStackDataPlaneNodeSet` resource conditions:
+
+[,console]
+----
+$ oc get openstackdataplanenodeset openstack-edpm -o json | jq .status.conditions[].type
+"Ready"
+"DeploymentReady"
+"SetupReady"
+----
+
+== Condition Progress
+
+The `Ready` condition reflects the latest condition state that has changed.
+For an `OpenStackDataPlaneNodeSet`, until an `OpenStackDataPlaneDeployment` has
+been started and finished successfully, the `Ready` condition will be `False`.
+When the deployment succeeds, it will be set to `True`. A subsequent deployment
+that is started will set the condition back to `False` until the deployment
+succeeds when it will be set back to `True`.
+
+`SetupReady` will be set to `True` once all setup related tasks for a resource
+are complete. Setup related tasks include verifying the SSH key secret and
+verifying other fields on the resource, as well as creating the Ansible
+inventory for each resource.
+
+The conditions are futher detailed below.
+
+== OpenStackDataPlaneNodeSet Conditions and Status
+
+OpenStackDataPlaneNodeSet uses the following conditions:
+
+|===
+| Condition Type | Description
+
+| Ready
+| True when the NodeSet has been deployed successfully. False when the deployment is not yet requested or failed, or there are other failed conditions.
+
+| DeploymentReady
+| True when the the NodeSet has been deployed successfully
+
+| InputReady
+| True when the required inputs are available and ready
+
+| SetupReady
+| True when all related setup tasks are completed
+
+| NodeSetIPReservationReady
+| True when the IPSet resources are ready
+
+| NodeSetDNSDataReady
+| True when DNSData resources are ready
+
+| NodeSetBaremetalProvisionReady
+| True when baremetal hosts are provisioned and ready
+|===
+
+OpenStackDataPlaneNodeSet has the following status fields:
+
+|===
+| Status Field | Description
+
+| Deployed
+| Boolean indicating successful deployment
+
+| DNSClusterAddresses
+|
+
+| CtlplaneSearchDomain
+|
+|===
+
+== OpenStackDataPlaneDeployment Conditions and Status
+
+|===
+| Condition Type | Description
+
+| Ready
+| True when the deployment has succeeded. False when the deployment has failed, or there are other failed conditions.
+
+| DeploymentReady
+| True when the deployment has succeeded
+
+| InputReady
+| True when the required inputs are available and ready
+
+| +++<NodeSet>+++Deployment Ready+++</NodeSet>+++
+| True when the deployment has succeeded for the named +++<NodeSet>+++, indicating all services for the +++<NodeSet>+++have succeeded+++</NodeSet>++++++</NodeSet>+++
+
+| +++<NodeSet>++++++<Service>+++Deployment Ready+++</Service>++++++</NodeSet>+++
+| True when the deployment has succeeded for the named +++<NodeSet>+++and +++<Service>++++++</Service>++++++</NodeSet>+++
+|===
+
+Each `<NodeSet> <Service> Deployment Ready` specific condition will be set to
+`True` as that service completes successfully for the named `<NodeSet>`. Once
+all services are complete for a `<NodeSet>`, the `<NodeSet> Deployment Ready`
+will be set to `True`.  Looking at the service conditions will indicate which
+services have completed their deployment, or in failure cases, which services
+failed and for which NodeSets.
+
+OpenStackDataPlaneDeployment has the following status fields:
+
+|===
+| Status Field | Description
+
+| Deployed
+| Boolean indicating successful deployment. All Services for all NodeSets have succeeded.
+|===
+
+== OpenStackDataPlaneService Conditions and Status
+
+|===
+| Condition Type | Description
+
+| Ready
+| True when the service has been created and is ready for use
+|===
+
+OpenStackDataPlaneService has no additional Status fields.
+
+Each service specific condition will be set to `True` as that service completes
+successfully. Looking at the service conditions will indicate which services
+have completed their deployment, or in failure cases, which services failed.

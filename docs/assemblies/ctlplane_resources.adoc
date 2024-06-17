@@ -4,9 +4,6 @@
 * <<openstackclient,OpenStackClient>>
 * <<openstackcontrolplane,OpenStackControlPlane>>
 * <<openstackversion,OpenStackVersion>>
-* <<openstackdataplanedeployment,OpenStackDataPlaneDeployment>>
-* <<openstackdataplanenodeset,OpenStackDataPlaneNodeSet>>
-* <<openstackdataplaneservice,OpenStackDataPlaneService>>
 
 [#sub-resources]
 === Sub Resources
@@ -528,24 +525,6 @@
 * <<transporturllist,TransportURLList>>
 * <<transporturlspec,TransportURLSpec>>
 * <<transporturlstatus,TransportURLStatus>>
-* <<openstackdataplanedeploymentlist,OpenStackDataPlaneDeploymentList>>
-* <<openstackdataplanedeploymentspec,OpenStackDataPlaneDeploymentSpec>>
-* <<openstackdataplanedeploymentstatus,OpenStackDataPlaneDeploymentStatus>>
-* <<openstackdataplanenodesetlist,OpenStackDataPlaneNodeSetList>>
-* <<openstackdataplanenodesetspec,OpenStackDataPlaneNodeSetSpec>>
-* <<openstackdataplanenodesetstatus,OpenStackDataPlaneNodeSetStatus>>
-* <<openstackdataplaneservicelist,OpenStackDataPlaneServiceList>>
-* <<openstackdataplaneservicespec,OpenStackDataPlaneServiceSpec>>
-* <<openstackdataplaneservicestatus,OpenStackDataPlaneServiceStatus>>
-* <<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
-* <<ansibleeespec,AnsibleEESpec>>
-* <<ansibleopts,AnsibleOpts>>
-* <<configmapenvsource,ConfigMapEnvSource>>
-* <<datasource,DataSource>>
-* <<localobjectreference,LocalObjectReference>>
-* <<nodesection,NodeSection>>
-* <<nodetemplate,NodeTemplate>>
-* <<secretenvsource,SecretEnvSource>>
 
 [#openstackclient]
 ==== OpenStackClient
@@ -10382,6 +10361,11 @@ NovaAPIStatus defines the observed state of NovaAPI
 | NetworkAttachments status of the deployment pods
 | map[string][]string
 | false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10648,6 +10632,11 @@ NovaCellStatus defines the observed state of NovaCell
 | NovaComputesStatus is a map with format cell_name: NovaComputeCellStatus where NovaComputeCellStatus tell if compute with selected name deployed successfully and indicates if the compute is successfully mapped to the cell in the nova_api database. When a compute is removed from the Spec the operator will delete the related NovaCompute CR and then remove the compute from this Status field.
 | map[string]<<novacomputecellstatus,NovaComputeCellStatus>>
 | false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10869,6 +10858,11 @@ NovaComputeStatus defines the observed state of NovaCompute
 | NetworkAttachments status of the deployment pods
 | map[string][]string
 | false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -11068,6 +11062,11 @@ NovaConductorStatus defines the observed state of NovaConductor
 | networkAttachments
 | NetworkAttachments status of the deployment pods
 | map[string][]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
 | false
 |===
 
@@ -11280,6 +11279,11 @@ NovaMetadataStatus defines the observed state of NovaMetadata
 | NetworkAttachments status of the deployment pods
 | map[string][]string
 | false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -11474,6 +11478,11 @@ NovaNoVNCProxyStatus defines the observed state of NovaNoVNCProxy
 | networkAttachments
 | NetworkAttachments status of the deployment pods
 | map[string][]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
 | false
 |===
 
@@ -11706,6 +11715,11 @@ NovaSchedulerStatus defines the observed state of NovaScheduler
 | networkAttachments
 | NetworkAttachments status of the deployment pods
 | map[string][]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
 | false
 |===
 
@@ -15397,7 +15411,7 @@ AutoscalingSection defines the desired state of the autoscaling service
 
 | enabled
 | Enabled - Whether OpenStack autoscaling service should be deployed and managed
-| bool
+| *bool
 | true
 |===
 
@@ -15413,7 +15427,7 @@ AutoscalingSectionCore defines the desired state of the autoscaling service
 
 | enabled
 | Enabled - Whether OpenStack autoscaling service should be deployed and managed
-| bool
+| *bool
 | true
 |===
 
@@ -15429,7 +15443,7 @@ CeilometerSection defines the desired state of the ceilometer service
 
 | enabled
 | Enabled - Whether OpenStack Ceilometer service should be deployed and managed
-| bool
+| *bool
 | true
 |===
 
@@ -15445,7 +15459,7 @@ CeilometerSectionCore defines the desired state of the ceilometer service
 
 | enabled
 | Enabled - Whether OpenStack Ceilometer service should be deployed and managed
-| bool
+| *bool
 | true
 |===
 
@@ -15461,7 +15475,7 @@ LoggingSection defines the desired state of the logging service
 
 | enabled
 | Enabled - Whether OpenStack logging service should be deployed and managed
-| bool
+| *bool
 | true
 |===
 
@@ -15477,7 +15491,7 @@ MetricStorageSection defines the desired state of the MetricStorage
 
 | enabled
 | Enabled - Whether a MetricStorage should be deployed and managed
-| bool
+| *bool
 | true
 |===
 
@@ -16608,787 +16622,6 @@ TransportURLStatus defines the observed state of TransportURL
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanedeployment]
-==== OpenStackDataPlaneDeployment
-
-OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API OpenStackDataPlaneDeployment name must be a valid RFC1123 as it is used in labels
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<openstackdataplanedeploymentspec,OpenStackDataPlaneDeploymentSpec>>
-| false
-
-| status
-|
-| <<openstackdataplanedeploymentstatus,OpenStackDataPlaneDeploymentStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanedeploymentlist]
-==== OpenStackDataPlaneDeploymentList
-
-OpenStackDataPlaneDeploymentList contains a list of OpenStackDataPlaneDeployment
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<openstackdataplanedeployment,OpenStackDataPlaneDeployment>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanedeploymentspec]
-==== OpenStackDataPlaneDeploymentSpec
-
-OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlaneDeployment
-
-|===
-| Field | Description | Scheme | Required
-
-| nodeSets
-| NodeSets is the list of NodeSets deployed
-| []string
-| true
-
-| backoffLimit
-| BackoffLimit allows to define the maximum number of retried executions (defaults to 6).
-| *int32
-| false
-
-| ansibleTags
-| AnsibleTags for ansible execution
-| string
-| false
-
-| ansibleLimit
-| AnsibleLimit for ansible execution
-| string
-| false
-
-| ansibleSkipTags
-| AnsibleSkipTags for ansible execution
-| string
-| false
-
-| ansibleExtraVars
-| AnsibleExtraVars for ansible execution
-| map[string]json.RawMessage
-| false
-
-| servicesOverride
-| ServicesOverride list
-| []string
-| false
-
-| deploymentRequeueTime
-| Time before the deployment is requeued in seconds
-| int
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanedeploymentstatus]
-==== OpenStackDataPlaneDeploymentStatus
-
-OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
-
-|===
-| Field | Description | Scheme | Required
-
-| nodeSetConditions
-| NodeSetConditions
-| map[string]condition.Conditions
-| false
-
-| configMapHashes
-| ConfigMapHashes
-| map[string]string
-| false
-
-| secretHashes
-| SecretHashes
-| map[string]string
-| false
-
-| nodeSetHashes
-| NodeSetHashes
-| map[string]string
-| false
-
-| containerImages
-| ContainerImages
-| map[string]string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
-| int64
-| false
-
-| deployedVersion
-| DeployedVersion
-| string
-| false
-
-| deployed
-| Deployed
-| bool
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanenodeset]
-==== OpenStackDataPlaneNodeSet
-
-OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API OpenStackDataPlaneNodeSet name must be a valid RFC1123 as it is used in labels
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<openstackdataplanenodesetspec,OpenStackDataPlaneNodeSetSpec>>
-| false
-
-| status
-|
-| <<openstackdataplanenodesetstatus,OpenStackDataPlaneNodeSetStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanenodesetlist]
-==== OpenStackDataPlaneNodeSetList
-
-OpenStackDataPlaneNodeSetList contains a list of OpenStackDataPlaneNodeSets
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<openstackdataplanenodeset,OpenStackDataPlaneNodeSet>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanenodesetspec]
-==== OpenStackDataPlaneNodeSetSpec
-
-OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNodeSet
-
-|===
-| Field | Description | Scheme | Required
-
-| baremetalSetTemplate
-| BaremetalSetTemplate Template for BaremetalSet for the NodeSet
-| baremetalv1.OpenStackBaremetalSetSpec
-| false
-
-| nodeTemplate
-| NodeTemplate - node attributes specific to nodes defined by this resource. These attributes can be overriden at the individual node level, else take their defaults from valus in this section.
-| <<nodetemplate,NodeTemplate>>
-| true
-
-| nodes
-| Nodes - Map of Node Names and node specific data. Values here override defaults in the upper level section.
-| map[string]<<nodesection,NodeSection>>
-| true
-
-| env
-| Env is a list containing the environment variables to pass to the pod Variables modifying behavior of AnsibleEE can be specified here.
-| []corev1.EnvVar
-| false
-
-| networkAttachments
-| NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network
-| []string
-| false
-
-| services
-| Services list
-| []string
-| true
-
-| tags
-| Tags - Additional tags for NodeSet
-| []string
-| false
-
-| secretMaxSize
-| SecretMaxSize - Maximum size in bytes of a Kubernetes secret. This size is currently situated around 1 MiB (nearly 1 MB).
-| int
-| true
-
-| preProvisioned
-| \n\nPreProvisioned - Set to true if the nodes have been Pre Provisioned.
-| bool
-| false
-
-| tlsEnabled
-| TLSEnabled - Whether the node set has TLS enabled.
-| bool
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplanenodesetstatus]
-==== OpenStackDataPlaneNodeSetStatus
-
-OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlaneNodeSet
-
-|===
-| Field | Description | Scheme | Required
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| deploymentStatuses
-| DeploymentStatuses
-| map[string]condition.Conditions
-| false
-
-| allHostnames
-| AllHostnames
-| map[string]map[infranetworkv1.NetNameStr]string
-| false
-
-| allIPs
-| AllIPs
-| map[string]map[infranetworkv1.NetNameStr]string
-| false
-
-| configMapHashes
-| ConfigMapHashes
-| map[string]string
-| false
-
-| secretHashes
-| SecretHashes
-| map[string]string
-| false
-
-| dnsClusterAddresses
-| DNSClusterAddresses
-| []string
-| false
-
-| containerImages
-| ContainerImages
-| map[string]string
-| false
-
-| ctlplaneSearchDomain
-| CtlplaneSearchDomain
-| string
-| false
-
-| configHash
-| ConfigHash - holds the curret hash of the NodeTemplate and Node sections of the struct. This hash is used to determine when new Ansible executions are required to roll out config changes.
-| string
-| false
-
-| deployedConfigHash
-| DeployedConfigHash - holds the hash of the NodeTemplate and Node sections of the struct that was last deployed. This hash is used to determine when new Ansible executions are required to roll out config changes.
-| string
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this NodeSet. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
-| int64
-| false
-
-| deployedVersion
-| DeployedVersion
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplaneservice]
-==== OpenStackDataPlaneService
-
-OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API OpenStackDataPlaneService name must be a valid RFC1123 as it is used in labels
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<openstackdataplaneservicespec,OpenStackDataPlaneServiceSpec>>
-| false
-
-| status
-|
-| <<openstackdataplaneservicestatus,OpenStackDataPlaneServiceStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplaneservicelist]
-==== OpenStackDataPlaneServiceList
-
-OpenStackDataPlaneServiceList contains a list of OpenStackDataPlaneService
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<openstackdataplaneservice,OpenStackDataPlaneService>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplaneservicespec]
-==== OpenStackDataPlaneServiceSpec
-
-OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
-
-|===
-| Field | Description | Scheme | Required
-
-| configMaps
-| ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE
-| []string
-| false
-
-| secrets
-| Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE
-| []string
-| false
-
-| dataSources
-| DataSources list of DataSource objects to mount as ExtraMounts for the OpenStackAnsibleEE
-| []<<datasource,DataSource>>
-| false
-
-| tlsCerts
-| TLSCerts tls certs to be generated
-| map[string]<<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
-| false
-
-| playbookContents
-| PlaybookContents is an inline playbook contents that ansible will run on execution.
-| string
-| false
-
-| playbook
-| Playbook is a path to the playbook that ansible will run on this execution
-| string
-| false
-
-| caCerts
-| CACerts - Secret containing the CA certificate chain
-| string
-| false
-
-| openStackAnsibleEERunnerImage
-| OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
-| string
-| false
-
-| certsFrom
-| CertsFrom - Service name used to obtain TLSCert and CACerts data. If both CertsFrom and either TLSCert or CACerts is set, then those fields take precedence.
-| string
-| false
-
-| addCertMounts
-| AddCertMounts - Whether to add cert mounts
-| bool
-| true
-
-| deployOnAllNodeSets
-| DeployOnAllNodeSets - should the service be deploy across all nodesets This will override default target of a service play, setting it to 'all'.
-| bool
-| false
-
-| containerImageFields
-| ContainerImageFields - list of container image fields names that this service deploys. The field names should match the ContainerImages struct field names from github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
-| []string
-| false
-
-| edpmServiceType
-| EDPMServiceType - service type, which typically corresponds to one of the default service names (such as nova, ovn, etc). Also typically corresponds to the ansible role name (without the "edpm_" prefix) used to manage the service. If not set, will default to the OpenStackDataPlaneService name.
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplaneservicestatus]
-==== OpenStackDataPlaneServiceStatus
-
-OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
-
-|===
-| Field | Description | Scheme | Required
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#openstackdataplaneservicecert]
-==== OpenstackDataPlaneServiceCert
-
-OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a dataplane service
-
-|===
-| Field | Description | Scheme | Required
-
-| contents
-| Contents of the certificate This is a list of strings for properties that are needed in the cert
-| []string
-| true
-
-| networks
-| Networks to include in SNI for the cert
-| []infranetworkv1.NetNameStr
-| false
-
-| issuer
-| Issuer is the label for the issuer to issue the cert Only one issuer should have this label
-| string
-| false
-
-| keyUsages
-| KeyUsages to be added to the issued cert
-| []certmgrv1.KeyUsage
-| false
-
-| edpmRoleServiceName
-| EDPMRoleServiceName is the value of the +++<role>+++_service_name variable from the edpm-ansible role where this certificate is used. For example if the certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be ovn, which matches the edpm_ovn_service_name variable from the role. If not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then OpenStackDataPlaneService.Name is used.+++</role>+++
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ansibleeespec]
-==== AnsibleEESpec
-
-AnsibleEESpec is a specification of the ansible EE attributes
-
-|===
-| Field | Description | Scheme | Required
-
-| extraMounts
-| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-| []storage.VolMounts
-| false
-
-| env
-| Env is a list containing the environment variables to pass to the pod
-| []corev1.EnvVar
-| false
-
-| extraVars
-| ExtraVars for ansible execution
-| map[string]json.RawMessage
-| false
-
-| dnsConfig
-| DNSConfig for setting dnsservers
-| *corev1.PodDNSConfig
-| false
-
-| networkAttachments
-| NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network
-| []string
-| true
-
-| openStackAnsibleEERunnerImage
-| OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
-| string
-| false
-
-| ansibleTags
-| AnsibleTags for ansible execution
-| string
-| false
-
-| ansibleLimit
-| AnsibleLimit for ansible execution
-| string
-| false
-
-| ansibleSkipTags
-| AnsibleSkipTags for ansible execution
-| string
-| false
-
-| ServiceAccountName
-| ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ansibleopts]
-==== AnsibleOpts
-
-AnsibleOpts defines a logical grouping of Ansible related configuration options.
-
-|===
-| Field | Description | Scheme | Required
-
-| ansibleUser
-| AnsibleUser SSH user for Ansible connection
-| string
-| true
-
-| ansibleHost
-| AnsibleHost SSH host for Ansible connection
-| string
-| false
-
-| ansibleVars
-| AnsibleVars for configuring ansible
-| map[string]json.RawMessage
-| false
-
-| ansibleVarsFrom
-| AnsibleVarsFrom is a list of sources to populate ansible variables from. Values defined by an AnsibleVars with a duplicate key take precedence.
-| []<<datasource,DataSource>>
-| false
-
-| ansiblePort
-| AnsiblePort SSH port for Ansible connection
-| int
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#configmapenvsource]
-==== ConfigMapEnvSource
-
-ConfigMapEnvSource selects a ConfigMap to populate the environment variables with.\n\nThe contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.
-
-|===
-| Field | Description | Scheme | Required
-
-| optional
-| Specify whether the ConfigMap must be defined
-| *bool
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#datasource]
-==== DataSource
-
-DataSource represents the source of a set of ConfigMaps/Secrets
-
-|===
-| Field | Description | Scheme | Required
-
-| prefix
-| An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.
-| string
-| false
-
-| configMapRef
-| The ConfigMap to select from
-| *<<configmapenvsource,ConfigMapEnvSource>>
-| false
-
-| secretRef
-| The Secret to select from
-| *<<secretenvsource,SecretEnvSource>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#localobjectreference]
-==== LocalObjectReference
-
-LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
-
-|===
-| Field | Description | Scheme | Required
-
-| name
-| Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#nodesection]
-==== NodeSection
-
-NodeSection defines the top level attributes inherited by nodes in the CR.
-
-|===
-| Field | Description | Scheme | Required
-
-| extraMounts
-| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-| []storage.VolMounts
-| false
-
-| networks
-| Networks - Instance networks
-| []infranetworkv1.IPSetNetwork
-| false
-
-| userData
-| UserData  node specific user-data
-| *corev1.SecretReference
-| false
-
-| networkData
-| NetworkData  node specific network-data
-| *corev1.SecretReference
-| false
-
-| ansible
-| Ansible is the group of Ansible related configuration options.
-| <<ansibleopts,AnsibleOpts>>
-| false
-
-| hostName
-| HostName - node name
-| string
-| false
-
-| managementNetwork
-| ManagementNetwork - Name of network to use for management (SSH/Ansible)
-| string
-| false
-
-| preprovisioningNetworkDataName
-| PreprovisioningNetworkDataName - NetworkData secret name in the local namespace for pre-provisioing
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#nodetemplate]
-==== NodeTemplate
-
-NodeTemplate is a specification of the node attributes that override top level attributes.
-
-|===
-| Field | Description | Scheme | Required
-
-| extraMounts
-| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-| []storage.VolMounts
-| false
-
-| networks
-| Networks - Instance networks
-| []infranetworkv1.IPSetNetwork
-| false
-
-| userData
-| UserData  node specific user-data
-| *corev1.SecretReference
-| false
-
-| networkData
-| NetworkData  node specific network-data
-| *corev1.SecretReference
-| false
-
-| ansibleSSHPrivateKeySecret
-| AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: +++<base64 encoded="" private="" key="" contents="">+++<https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>+++</base64>+++
-| string
-| true
-
-| managementNetwork
-| ManagementNetwork - Name of network to use for management (SSH/Ansible)
-| string
-| true
-
-| ansible
-| Ansible is the group of Ansible related configuration options.
-| <<ansibleopts,AnsibleOpts>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#secretenvsource]
-==== SecretEnvSource
-
-SecretEnvSource selects a Secret to populate the environment variables with.\n\nThe contents of the target Secret's Data field will represent the key-value pairs as environment variables.
-
-|===
-| Field | Description | Scheme | Required
-
-| optional
-| Specify whether the Secret must be defined
-| *bool
 | false
 |===
 

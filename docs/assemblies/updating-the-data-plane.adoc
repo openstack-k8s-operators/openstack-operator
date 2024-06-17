@@ -1,0 +1,23 @@
+[id="assembly_updating-the-data-plane"]
+= Updating the data plane
+
+:context: dataplane
+
+[role="_abstract"]
+You can perform a minor update of your OpenStack data plane environment to keep
+it updated with the latest packages and containers.
+
+You must coordinate the minor update of the OpenStack data plane environment
+with a minor update of the control plane. OVN containers on the data plane
+nodes should not be updated until OVN containers on the control plane have been
+updated.
+
+See
+https://github.com/openstack-k8s-operators/dev-docs/blob/main/version_updates.md[OpenStackVersion]
+and
+https://github.com/openstack-k8s-operators/dev-docs/blob/main/ovs-update.md[Open
+vSwitch update] for more information.
+
+include::proc_updating-the-data-plane-ovn.adoc[leveloffset=+1]
+
+include::proc_updating-the-data-plane.adoc[leveloffset=+1]
