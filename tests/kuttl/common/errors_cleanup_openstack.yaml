@@ -51,28 +51,28 @@ apiVersion: ovn.openstack.org/v1beta1
 kind: OVNNorthd
 metadata:
   finalizers:
-  - OVNNorthd
+  - openstack.org/ovnnorthd
   name: ovnnorthd-sample
 ---
 apiVersion: ovn.openstack.org/v1beta1
 kind: OVNDBCluster
 metadata:
   finalizers:
-  - OVNDBCluster
+  - openstack.org/ovndbcluster
   name: ovndbcluster-nb-sample
 ---
 apiVersion: ovn.openstack.org/v1beta1
 kind: OVNDBCluster
 metadata:
   finalizers:
-  - OVNDBCluster
+  - openstack.org/ovndbcluster
   name: ovndbcluster-sb-sample
 ---
 apiVersion: ovn.openstack.org/v1beta1
 kind: OVNController
 metadata:
   finalizers:
-  - OVNController
+  - openstack.org/ovncontroller
   name: ovncontroller-sample
 ---
 apiVersion: apps/v1
