@@ -112,7 +112,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: Setup complete
+  - message: Job completed
     reason: Ready
     status: "True"
     type: Ready
@@ -162,7 +162,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: Setup complete
+  - message: Job completed
     reason: Ready
     status: "True"
     type: Ready
