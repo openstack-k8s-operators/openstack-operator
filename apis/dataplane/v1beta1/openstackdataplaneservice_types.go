@@ -168,3 +168,20 @@ func (instance OpenStackDataPlaneService) InitConditions() {
 	// initialize conditions used later as Status=Unknown
 	instance.Status.Conditions.Init(&cl)
 }
+
+// DefaultLabel - adding default label to the OpenStackDataPlaneService
+func (r *OpenStackDataPlaneService) DefaultLabels() {
+	labels := map[string]string{
+		"app.kubernetes.io/name":     "openstackdataplaneservice",
+		"app.kubernetes.io/instance": r.Name,
+		"app.kubernetes.io/part-of":  "openstack-operator",
+	}
+
+	if r.Labels == nil {
+		r.Labels = labels
+	} else {
+		for k, v := range labels {
+			r.Labels[k] = v
+		}
+	}
+}
