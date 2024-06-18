@@ -4,8 +4,10 @@ metadata:
   name: swift
 spec:
   playbook: osp.edpm.swift
-  secrets:
-  - swift-conf
-  configMaps:
-  - swift-storage-config-data
-  - swift-ring-files
+  dataSources:
+    - secretRef:
+        name: swift-conf
+    - configMapRef:
+        name: swift-storage-config-data
+    - configMapRef:
+        name: swift-ring-files

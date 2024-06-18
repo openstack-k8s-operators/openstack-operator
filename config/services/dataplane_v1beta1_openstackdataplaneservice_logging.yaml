@@ -3,6 +3,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: logging
 spec:
-  secrets:
-    - logging-compute-config-data
+  dataSources:
+    - secretRef:
+        name: logging-compute-config-data
   playbook: osp.edpm.telemetry_logging

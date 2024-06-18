@@ -4,8 +4,9 @@ metadata:
   name: ovn-bgp-agent
 spec:
   playbook: osp.edpm.ovn_bgp_agent
-  secrets:
-  - neutron-ovn-agent-neutron-config
+  dataSources:
+    - secretRef:
+        name: neutron-ovn-agent-neutron-config
   tlsCerts:
     default:
       contents:

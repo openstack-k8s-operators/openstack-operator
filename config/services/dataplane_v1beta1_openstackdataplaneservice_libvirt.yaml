@@ -4,10 +4,11 @@ metadata:
   name: libvirt
 spec:
   playbook: osp.edpm.libvirt
-  secrets:
+  dataSources:
     # NOTE: this Secret needs to be created before deploying the data plane.
     # It should contain the libvirt sasl auth password using the key LibvirtPassword
-    - libvirt-secret
+    - secretRef:
+        name: libvirt-secret
   tlsCerts:
     default:
       contents:

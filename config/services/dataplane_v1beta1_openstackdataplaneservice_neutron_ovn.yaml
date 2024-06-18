@@ -4,8 +4,9 @@ metadata:
   name: neutron-ovn
 spec:
   playbook: osp.edpm.neutron_ovn
-  secrets:
-  - neutron-ovn-agent-neutron-config
+  dataSources:
+    - secretRef:
+        name: neutron-ovn-agent-neutron-config
   tlsCerts:
     default:
       contents:

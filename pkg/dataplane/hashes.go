@@ -70,40 +70,6 @@ func GetDeploymentHashesForService(
 		}
 	}
 
-	for _, cmName := range service.Spec.ConfigMaps {
-		namespacedName := types.NamespacedName{
-			Name:      cmName,
-			Namespace: namespace,
-		}
-		cm := &corev1.ConfigMap{}
-		err := helper.GetClient().Get(context.Background(), namespacedName, cm)
-		if err != nil {
-			helper.GetLogger().Error(err, "Unable to retrieve ConfigMap %v")
-			return err
-		}
-		configMapHashes[cmName], err = configmap.Hash(cm)
-		if err != nil {
-			helper.GetLogger().Error(err, "Unable to hash ConfigMap %v")
-		}
-
-	}
-	for _, secretName := range service.Spec.Secrets {
-		namespacedName := types.NamespacedName{
-			Name:      secretName,
-			Namespace: namespace,
-		}
-		sec := &corev1.Secret{}
-		err := helper.GetClient().Get(ctx, namespacedName, sec)
-		if err != nil {
-			helper.GetLogger().Error(err, "Unable to retrieve Secret %v")
-			return err
-		}
-		secretHashes[secretName], err = secret.Hash(sec)
-		if err != nil {
-			helper.GetLogger().Error(err, "Unable to hash Secret %v")
-		}
-	}
-
 	if service.Spec.TLSCerts != nil {
 		for certKey := range service.Spec.TLSCerts {
 			var secrets *corev1.SecretList

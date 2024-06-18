@@ -58,14 +58,6 @@ type OpenstackDataPlaneServiceCert struct {
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceSpec struct {
-	// ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE
-	// +kubebuilder:validation:Optional
-	ConfigMaps []string `json:"configMaps,omitempty" yaml:"configMaps,omitempty"`
-
-	// Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE
-	// +kubebuilder:validation:Optional
-	Secrets []string `json:"secrets,omitempty"`
-
 	// DataSources list of DataSource objects to mount as ExtraMounts for the
 	// OpenStackAnsibleEE
 	DataSources []DataSource `json:"dataSources,omitempty" yaml:"dataSources,omitempty"`

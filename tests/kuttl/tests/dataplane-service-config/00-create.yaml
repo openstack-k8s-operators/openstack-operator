@@ -47,10 +47,13 @@ spec:
         - name: Sleep
           command: sleep infinity
           delegate_to: localhost
-  configMaps:
-    - kuttl-service-cm-0
-    - kuttl-service-cm-1
-    - kuttl-service-cm-2
+  dataSources:
+    - configMapRef:
+        name: kuttl-service-cm-0
+    - configMapRef:
+        name: kuttl-service-cm-1
+    - configMapRef:
+        name: kuttl-service-cm-2
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet

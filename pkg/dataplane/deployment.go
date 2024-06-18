@@ -368,7 +368,6 @@ func (d *Deployer) addCertMounts(
 func (d *Deployer) addServiceExtraMounts(
 	service dataplanev1.OpenStackDataPlaneService,
 ) (*dataplanev1.AnsibleEESpec, error) {
-	client := d.Helper.GetClient()
 	baseMountPath := path.Join(ConfigPaths, service.Name)
 
 	var configMaps []*corev1.ConfigMap
@@ -386,24 +385,6 @@ func (d *Deployer) addServiceExtraMounts(
 		if _secret != nil {
 			secrets = append(secrets, _secret)
 		}
-	}
-
-	for _, cmName := range service.Spec.ConfigMaps {
-		cm := &corev1.ConfigMap{}
-		err := client.Get(d.Ctx, types.NamespacedName{Name: cmName, Namespace: service.Namespace}, cm)
-		if err != nil {
-			return d.AeeSpec, err
-		}
-		configMaps = append(configMaps, cm)
-	}
-
-	for _, secretName := range service.Spec.Secrets {
-		sec := &corev1.Secret{}
-		err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
-		if err != nil {
-			return d.AeeSpec, err
-		}
-		secrets = append(secrets, sec)
 	}
 
 	for _, cm := range configMaps {

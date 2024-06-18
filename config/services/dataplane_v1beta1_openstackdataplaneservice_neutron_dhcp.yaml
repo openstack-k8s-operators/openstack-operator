@@ -4,8 +4,9 @@ metadata:
   name: neutron-dhcp
 spec:
   playbook: osp.edpm.neutron_dhcp
-  secrets:
-  - neutron-dhcp-agent-neutron-config
+  dataSources:
+    - secretRef:
+        name: neutron-dhcp-agent-neutron-config
   caCerts: combined-ca-bundle
   containerImageFields:
   - EdpmNeutronDhcpAgentImage
