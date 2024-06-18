@@ -1,12 +1,12 @@
 = Data Plane Design
 
-The dataplane-operator provisions and configures nodes that make up the
+The openstack-operator provisions and configures nodes that make up the
 OpenStack data plane. The data plane consists of nodes that host end-user
 workloads and applications. Depending on the OpenStack deployment, these data
 plane nodes are often compute nodes, but may also be storage nodes, networker
 nodes, or other types of nodes.
 
-The dataplane-operator provides a Kubernetes like abstraction and API for
+The openstack-operator provides a Kubernetes like abstraction and API for
 deploying the data plane. It uses the
 https://github.com/openstack-k8s-operators/openstack-baremetal-operator[openstack-baremetal-operator]
 to optionally provision baremetal. It then uses the
@@ -22,9 +22,9 @@ While the Ansible executions themselves run on the Kubernetes cluster as native
 Kubernetes workloads, they communicate using SSH with data plane nodes and use
 various Ansible modules to deploy software on data plane nodes.
 
-== dataplane-operator CRD Design and Resources
+== CRD Design and Resources
 
-The dataplane-operator exposes the concepts of `OpenStackDataPlaneNodeSets`,
+The openstack-operator exposes the concepts of `OpenStackDataPlaneNodeSets`,
 `OpenStackDataPlaneServices`, and `OpenStackDataPlaneDeployments` as CRD's:
 
 * <<openstackdataplanenodeset>>

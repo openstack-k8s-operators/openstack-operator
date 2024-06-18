@@ -471,7 +471,6 @@ webhook-cleanup:
 # refresh the bundle extra data based on go.mod entries
 # bundle extra data includes:
 #  - extracted ENV vars from all operators (required for webhooks)
-#  - dataplane-operator bundle (this gets merged into openstack-operator's bundle)
 .PHONY: bundle-cache-extra-data
 bundle-cache-extra-data: build
 	bash hack/bundle-cache-data.sh

@@ -2,7 +2,6 @@
 
 # extract select data from bundles:
 #  -env vars from all service operators
-#  -dataplane-operator bundle is cached (in order to merge at build time)
 set -ex
 
 function extract_csv {

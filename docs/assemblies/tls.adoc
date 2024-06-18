@@ -4,7 +4,7 @@ When an OpenStackDataPlaneNodeSet is deployed with TLS Enabled, communications
 between dataplane services and with control plane services can be encrypted using
 TLS connections.
 
-Functionality has been added to the dataplane-operator to generate the needed
+Functionality has been added to the openstack-operator to generate the needed
 certificates for all compute nodes in the nodeset.  The details on how to enable
 this functionality and how dataplane services (including custom services) can take
 advantage of this functionality is provided here.
