@@ -56,12 +56,6 @@
 * <<openstackversionlist,OpenStackVersionList>>
 * <<openstackversionspec,OpenStackVersionSpec>>
 * <<openstackversionstatus,OpenStackVersionStatus>>
-* <<barbican,Barbican>>
-* <<barbicanlist,BarbicanList>>
-* <<barbicanspec,BarbicanSpec>>
-* <<barbicanspecbase,BarbicanSpecBase>>
-* <<barbicanspeccore,BarbicanSpecCore>>
-* <<barbicanstatus,BarbicanStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<barbicanapi,BarbicanAPI>>
 * <<barbicanapilist,BarbicanAPIList>>
@@ -74,6 +68,12 @@
 * <<barbicankeystonelistenerspec,BarbicanKeystoneListenerSpec>>
 * <<barbicankeystonelistenerstatus,BarbicanKeystoneListenerStatus>>
 * <<barbicankeystonelistenertemplate,BarbicanKeystoneListenerTemplate>>
+* <<barbican,Barbican>>
+* <<barbicanlist,BarbicanList>>
+* <<barbicanspec,BarbicanSpec>>
+* <<barbicanspecbase,BarbicanSpecBase>>
+* <<barbicanspeccore,BarbicanSpecCore>>
+* <<barbicanstatus,BarbicanStatus>>
 * <<barbicanworker,BarbicanWorker>>
 * <<barbicanworkerlist,BarbicanWorkerList>>
 * <<barbicanworkerspec,BarbicanWorkerSpec>>
@@ -82,14 +82,6 @@
 * <<barbicancomponenttemplate,BarbicanComponentTemplate>>
 * <<barbicantemplate,BarbicanTemplate>>
 * <<passwordselector,PasswordSelector>>
-* <<cinder,Cinder>>
-* <<cinderextravolmounts,CinderExtraVolMounts>>
-* <<cinderlist,CinderList>>
-* <<cinderspec,CinderSpec>>
-* <<cinderspecbase,CinderSpecBase>>
-* <<cinderspeccore,CinderSpecCore>>
-* <<cinderstatus,CinderStatus>>
-* <<dbpurge,DBPurge>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<cinderapi,CinderAPI>>
 * <<cinderapilist,CinderAPIList>>
@@ -109,6 +101,14 @@
 * <<cinderschedulerstatus,CinderSchedulerStatus>>
 * <<cinderschedulertemplate,CinderSchedulerTemplate>>
 * <<cinderschedulertemplatecore,CinderSchedulerTemplateCore>>
+* <<cinder,Cinder>>
+* <<cinderextravolmounts,CinderExtraVolMounts>>
+* <<cinderlist,CinderList>>
+* <<cinderspec,CinderSpec>>
+* <<cinderspecbase,CinderSpecBase>>
+* <<cinderspeccore,CinderSpecCore>>
+* <<cinderstatus,CinderStatus>>
+* <<dbpurge,DBPurge>>
 * <<cindervolume,CinderVolume>>
 * <<cindervolumelist,CinderVolumeList>>
 * <<cindervolumespec,CinderVolumeSpec>>
@@ -122,13 +122,6 @@
 * <<designateservicetemplatecore,DesignateServiceTemplateCore>>
 * <<designatetemplate,DesignateTemplate>>
 * <<passwordselector,PasswordSelector>>
-* <<designate,Designate>>
-* <<designateextravolmounts,DesignateExtraVolMounts>>
-* <<designatelist,DesignateList>>
-* <<designatespec,DesignateSpec>>
-* <<designatespecbase,DesignateSpecBase>>
-* <<designatespeccore,DesignateSpecCore>>
-* <<designatestatus,DesignateStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<designateapi,DesignateAPI>>
 * <<designateapilist,DesignateAPIList>>
@@ -150,6 +143,13 @@
 * <<designateproducerlist,DesignateProducerList>>
 * <<designateproducerspecbase,DesignateProducerSpecBase>>
 * <<designateproducerstatus,DesignateProducerStatus>>
+* <<designate,Designate>>
+* <<designateextravolmounts,DesignateExtraVolMounts>>
+* <<designatelist,DesignateList>>
+* <<designatespec,DesignateSpec>>
+* <<designatespecbase,DesignateSpecBase>>
+* <<designatespeccore,DesignateSpecCore>>
+* <<designatestatus,DesignateStatus>>
 * <<designateunbound,DesignateUnbound>>
 * <<designateunboundlist,DesignateUnboundList>>
 * <<designateunboundspecbase,DesignateUnboundSpecBase>>
@@ -161,6 +161,10 @@
 * <<apioverridespec,APIOverrideSpec>>
 * <<glanceapitemplate,GlanceAPITemplate>>
 * <<imagecache,ImageCache>>
+* <<glanceapi,GlanceAPI>>
+* <<glanceapilist,GlanceAPIList>>
+* <<glanceapispec,GlanceAPISpec>>
+* <<glanceapistatus,GlanceAPIStatus>>
 * <<dbpurge,DBPurge>>
 * <<glance,Glance>>
 * <<glanceextravolmounts,GlanceExtraVolMounts>>
@@ -170,20 +174,10 @@
 * <<glancestatus,GlanceStatus>>
 * <<passwordselector,PasswordSelector>>
 * <<quotalimits,QuotaLimits>>
-* <<glanceapi,GlanceAPI>>
-* <<glanceapilist,GlanceAPIList>>
-* <<glanceapispec,GlanceAPISpec>>
-* <<glanceapistatus,GlanceAPIStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<heatservicetemplate,HeatServiceTemplate>>
 * <<heattemplate,HeatTemplate>>
 * <<passwordselector,PasswordSelector>>
-* <<heat,Heat>>
-* <<heatlist,HeatList>>
-* <<heatspec,HeatSpec>>
-* <<heatspecbase,HeatSpecBase>>
-* <<heatspeccore,HeatSpecCore>>
-* <<heatstatus,HeatStatus>>
 * <<heatapi,HeatAPI>>
 * <<heatapilist,HeatAPIList>>
 * <<heatapispec,HeatAPISpec>>
@@ -201,6 +195,12 @@
 * <<heatenginespec,HeatEngineSpec>>
 * <<heatenginestatus,HeatEngineStatus>>
 * <<heatenginetemplate,HeatEngineTemplate>>
+* <<heat,Heat>>
+* <<heatlist,HeatList>>
+* <<heatspec,HeatSpec>>
+* <<heatspecbase,HeatSpecBase>>
+* <<heatspeccore,HeatSpecCore>>
+* <<heatstatus,HeatStatus>>
 * <<horizionoverridespec,HorizionOverrideSpec>>
 * <<horizon,Horizon>>
 * <<horizonextravolmounts,HorizonExtraVolMounts>>
@@ -211,13 +211,6 @@
 * <<ironicservicetemplate,IronicServiceTemplate>>
 * <<keystoneendpoints,KeystoneEndpoints>>
 * <<passwordselector,PasswordSelector>>
-* <<dhcprange,DHCPRange>>
-* <<ironic,Ironic>>
-* <<ironicimages,IronicImages>>
-* <<ironiclist,IronicList>>
-* <<ironicspec,IronicSpec>>
-* <<ironicspeccore,IronicSpecCore>>
-* <<ironicstatus,IronicStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<ironicapi,IronicAPI>>
 * <<ironicapilist,IronicAPIList>>
@@ -241,6 +234,13 @@
 * <<ironicneutronagentspec,IronicNeutronAgentSpec>>
 * <<ironicneutronagentstatus,IronicNeutronAgentStatus>>
 * <<ironicneutronagenttemplate,IronicNeutronAgentTemplate>>
+* <<dhcprange,DHCPRange>>
+* <<ironic,Ironic>>
+* <<ironicimages,IronicImages>>
+* <<ironiclist,IronicList>>
+* <<ironicspec,IronicSpec>>
+* <<ironicspeccore,IronicSpecCore>>
+* <<ironicstatus,IronicStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<keystoneapi,KeystoneAPI>>
 * <<keystoneapilist,KeystoneAPIList>>
@@ -259,15 +259,6 @@
 * <<manilaservicetemplate,ManilaServiceTemplate>>
 * <<manilatemplate,ManilaTemplate>>
 * <<passwordselector,PasswordSelector>>
-* <<dbpurge,DBPurge>>
-* <<manila,Manila>>
-* <<maniladebug,ManilaDebug>>
-* <<manilaextravolmounts,ManilaExtraVolMounts>>
-* <<manilalist,ManilaList>>
-* <<manilaspec,ManilaSpec>>
-* <<manilaspecbase,ManilaSpecBase>>
-* <<manilaspeccore,ManilaSpecCore>>
-* <<manilastatus,ManilaStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<manilaapi,ManilaAPI>>
 * <<manilaapilist,ManilaAPIList>>
@@ -287,6 +278,15 @@
 * <<manilasharestatus,ManilaShareStatus>>
 * <<manilasharetemplate,ManilaShareTemplate>>
 * <<manilasharetemplatecore,ManilaShareTemplateCore>>
+* <<dbpurge,DBPurge>>
+* <<manila,Manila>>
+* <<maniladebug,ManilaDebug>>
+* <<manilaextravolmounts,ManilaExtraVolMounts>>
+* <<manilalist,ManilaList>>
+* <<manilaspec,ManilaSpec>>
+* <<manilaspecbase,ManilaSpecBase>>
+* <<manilaspeccore,ManilaSpecCore>>
+* <<manilastatus,ManilaStatus>>
 * <<adoptionredirectspec,AdoptionRedirectSpec>>
 * <<galera,Galera>>
 * <<galeraattributes,GaleraAttributes>>
@@ -315,10 +315,6 @@
 * <<novaimages,NovaImages>>
 * <<novaservicebase,NovaServiceBase>>
 * <<passwordselector,PasswordSelector>>
-* <<nova,Nova>>
-* <<novalist,NovaList>>
-* <<novaspeccore,NovaSpecCore>>
-* <<novastatus,NovaStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<novaapi,NovaAPI>>
 * <<novaapilist,NovaAPIList>>
@@ -360,11 +356,22 @@
 * <<novaschedulerspec,NovaSchedulerSpec>>
 * <<novaschedulerstatus,NovaSchedulerStatus>>
 * <<novaschedulertemplate,NovaSchedulerTemplate>>
+* <<nova,Nova>>
+* <<novalist,NovaList>>
+* <<novaspeccore,NovaSpecCore>>
+* <<novastatus,NovaStatus>>
 * <<octaviaamphoracontroller,OctaviaAmphoraController>>
 * <<octaviaamphoracontrollerlist,OctaviaAmphoraControllerList>>
 * <<octaviaamphoracontrollerspec,OctaviaAmphoraControllerSpec>>
 * <<octaviaamphoracontrollerspeccore,OctaviaAmphoraControllerSpecCore>>
 * <<octaviaamphoracontrollerstatus,OctaviaAmphoraControllerStatus>>
+* <<apioverridespec,APIOverrideSpec>>
+* <<octaviaapi,OctaviaAPI>>
+* <<octaviaapilist,OctaviaAPIList>>
+* <<octaviaapispec,OctaviaAPISpec>>
+* <<octaviaapispeccore,OctaviaAPISpecCore>>
+* <<octaviaapistatus,OctaviaAPIStatus>>
+* <<octaviaapitls,OctaviaApiTLS>>
 * <<octavia,Octavia>>
 * <<octaviaamphoraflavor,OctaviaAmphoraFlavor>>
 * <<octavialbmgmtnetworks,OctaviaLbMgmtNetworks>>
@@ -374,13 +381,6 @@
 * <<octaviaspeccore,OctaviaSpecCore>>
 * <<octaviastatus,OctaviaStatus>>
 * <<passwordselector,PasswordSelector>>
-* <<apioverridespec,APIOverrideSpec>>
-* <<octaviaapi,OctaviaAPI>>
-* <<octaviaapilist,OctaviaAPIList>>
-* <<octaviaapispec,OctaviaAPISpec>>
-* <<octaviaapispeccore,OctaviaAPISpecCore>>
-* <<octaviaapistatus,OctaviaAPIStatus>>
-* <<octaviaapitls,OctaviaApiTLS>>
 * <<cpucountreq,CPUCountReq>>
 * <<cpumhzreq,CPUMhzReq>>
 * <<cpureqs,CPUReqs>>
@@ -425,12 +425,6 @@
 * <<placementapispec,PlacementAPISpec>>
 * <<placementapispeccore,PlacementAPISpecCore>>
 * <<placementapistatus,PlacementAPIStatus>>
-* <<swift,Swift>>
-* <<swiftlist,SwiftList>>
-* <<swiftspec,SwiftSpec>>
-* <<swiftspecbase,SwiftSpecBase>>
-* <<swiftspeccore,SwiftSpecCore>>
-* <<swiftstatus,SwiftStatus>>
 * <<passwordselector,PasswordSelector>>
 * <<proxyoverridespec,ProxyOverrideSpec>>
 * <<swiftproxy,SwiftProxy>>
@@ -449,6 +443,12 @@
 * <<swiftstoragespec,SwiftStorageSpec>>
 * <<swiftstoragespeccore,SwiftStorageSpecCore>>
 * <<swiftstoragestatus,SwiftStorageStatus>>
+* <<swift,Swift>>
+* <<swiftlist,SwiftList>>
+* <<swiftspec,SwiftSpec>>
+* <<swiftspecbase,SwiftSpecBase>>
+* <<swiftspeccore,SwiftSpecCore>>
+* <<swiftstatus,SwiftStatus>>
 * <<apioverridespec,APIOverrideSpec>>
 * <<aodh,Aodh>>
 * <<aodhcore,AodhCore>>
@@ -2252,192 +2252,6 @@ OpenStackVersionStatus defines the observed state of OpenStackVersion
 
 <<custom-resources,Back to Custom Resources>>
 
-[#barbican]
-==== Barbican
-
-Barbican is the Schema for the barbicans API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<barbicanspec,BarbicanSpec>>
-| false
-
-| status
-|
-| <<barbicanstatus,BarbicanStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#barbicanlist]
-==== BarbicanList
-
-BarbicanList contains a list of Barbican
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<barbican,Barbican>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#barbicanspec]
-==== BarbicanSpec
-
-BarbicanSpec defines the desired state of Barbican
-
-|===
-| Field | Description | Scheme | Required
-
-| barbicanAPI
-|
-| <<barbicanapitemplate,BarbicanAPITemplate>>
-| true
-
-| barbicanWorker
-|
-| <<barbicanworkertemplate,BarbicanWorkerTemplate>>
-| true
-
-| barbicanKeystoneListener
-|
-| <<barbicankeystonelistenertemplate,BarbicanKeystoneListenerTemplate>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#barbicanspecbase]
-==== BarbicanSpecBase
-
-BarbicanSpecBase -
-
-|===
-| Field | Description | Scheme | Required
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| true
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes running this component. Setting here overrides any global NodeSelector settings within the Barbican CR.
-| map[string]string
-| false
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
-| string
-| false
-
-| defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
-| map[string]string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#barbicanspeccore]
-==== BarbicanSpecCore
-
-BarbicanSpecCore defines the desired state of Barbican, for use with the OpenStackControlplane CR (no containerImages)
-
-|===
-| Field | Description | Scheme | Required
-
-| barbicanAPI
-|
-| <<barbicanapitemplatecore,BarbicanAPITemplateCore>>
-| true
-
-| barbicanWorker
-|
-| <<barbicanworkertemplatecore,BarbicanWorkerTemplateCore>>
-| true
-
-| barbicanKeystoneListener
-|
-| <<barbicankeystonelistenertemplatecore,BarbicanKeystoneListenerTemplateCore>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#barbicanstatus]
-==== BarbicanStatus
-
-BarbicanStatus defines the observed state of Barbican
-
-|===
-| Field | Description | Scheme | Required
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| serviceID
-| ServiceID
-| string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| barbicanAPIReadyCount
-| ReadyCount of Barbican API instances
-| int32
-| false
-
-| barbicanWorkerReadyCount
-| ReadyCount of Barbican Worker instances
-| int32
-| false
-
-| barbicanKeystoneListenerReadyCount
-| ReadyCount of Barbican KeystoneListener instances
-| int32
-| false
-
-| transportURLSecret
-| TransportURLSecret - Secret containing RabbitMQ transportURL
-| string
-| false
-
-| databaseHostname
-| Barbican Database Hostname
-| string
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#apioverridespec]
 ==== APIOverrideSpec
 
@@ -2730,6 +2544,192 @@ BarbicanKeystoneListenerTemplate defines common Spec elements for the KeystoneLi
 
 <<custom-resources,Back to Custom Resources>>
 
+[#barbican]
+==== Barbican
+
+Barbican is the Schema for the barbicans API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<barbicanspec,BarbicanSpec>>
+| false
+
+| status
+|
+| <<barbicanstatus,BarbicanStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#barbicanlist]
+==== BarbicanList
+
+BarbicanList contains a list of Barbican
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<barbican,Barbican>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#barbicanspec]
+==== BarbicanSpec
+
+BarbicanSpec defines the desired state of Barbican
+
+|===
+| Field | Description | Scheme | Required
+
+| barbicanAPI
+|
+| <<barbicanapitemplate,BarbicanAPITemplate>>
+| true
+
+| barbicanWorker
+|
+| <<barbicanworkertemplate,BarbicanWorkerTemplate>>
+| true
+
+| barbicanKeystoneListener
+|
+| <<barbicankeystonelistenertemplate,BarbicanKeystoneListenerTemplate>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#barbicanspecbase]
+==== BarbicanSpecBase
+
+BarbicanSpecBase -
+
+|===
+| Field | Description | Scheme | Required
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this component. Setting here overrides any global NodeSelector settings within the Barbican CR.
+| map[string]string
+| false
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| string
+| false
+
+| defaultConfigOverwrite
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| map[string]string
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#barbicanspeccore]
+==== BarbicanSpecCore
+
+BarbicanSpecCore defines the desired state of Barbican, for use with the OpenStackControlplane CR (no containerImages)
+
+|===
+| Field | Description | Scheme | Required
+
+| barbicanAPI
+|
+| <<barbicanapitemplatecore,BarbicanAPITemplateCore>>
+| true
+
+| barbicanWorker
+|
+| <<barbicanworkertemplatecore,BarbicanWorkerTemplateCore>>
+| true
+
+| barbicanKeystoneListener
+|
+| <<barbicankeystonelistenertemplatecore,BarbicanKeystoneListenerTemplateCore>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#barbicanstatus]
+==== BarbicanStatus
+
+BarbicanStatus defines the observed state of Barbican
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| serviceID
+| ServiceID
+| string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| barbicanAPIReadyCount
+| ReadyCount of Barbican API instances
+| int32
+| false
+
+| barbicanWorkerReadyCount
+| ReadyCount of Barbican Worker instances
+| int32
+| false
+
+| barbicanKeystoneListenerReadyCount
+| ReadyCount of Barbican KeystoneListener instances
+| int32
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| databaseHostname
+| Barbican Database Hostname
+| string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#barbicanworker]
 ==== BarbicanWorker
 
@@ -2972,282 +2972,6 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 
 | simplecryptokek
 |
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#cinder]
-==== Cinder
-
-Cinder is the Schema for the cinders API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<cinderspec,CinderSpec>>
-| false
-
-| status
-|
-| <<cinderstatus,CinderStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#cinderextravolmounts]
-==== CinderExtraVolMounts
-
-CinderExtraVolMounts exposes additional parameters processed by the cinder-operator and defines the common VolMounts structure provided by the main storage module
-
-|===
-| Field | Description | Scheme | Required
-
-| name
-|
-| string
-| false
-
-| region
-|
-| string
-| false
-
-| extraVol
-|
-| []storage.VolMounts
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#cinderlist]
-==== CinderList
-
-CinderList contains a list of Cinder
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<cinder,Cinder>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#cinderspec]
-==== CinderSpec
-
-CinderSpec defines the desired state of Cinder
-
-|===
-| Field | Description | Scheme | Required
-
-| cinderAPI
-| CinderAPI - Spec definition for the API service of this Cinder deployment
-| <<cinderapitemplate,CinderAPITemplate>>
-| true
-
-| cinderScheduler
-| CinderScheduler - Spec definition for the Scheduler service of this Cinder deployment
-| <<cinderschedulertemplate,CinderSchedulerTemplate>>
-| true
-
-| cinderBackup
-| CinderBackup - Spec definition for the Backup service of this Cinder deployment
-| <<cinderbackuptemplate,CinderBackupTemplate>>
-| true
-
-| cinderVolumes
-| CinderVolumes - Map of chosen names to spec definitions for the Volume(s) service(s) of this Cinder deployment
-| map[string]<<cindervolumetemplate,CinderVolumeTemplate>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#cinderspecbase]
-==== CinderSpecBase
-
-|===
-| Field | Description | Scheme | Required
-
-| databaseInstance
-| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
-| string
-| true
-
-| rabbitMqClusterName
-| RabbitMQ instance name Needed to request a transportURL that is created and used in Cinder
-| string
-| true
-
-| memcachedInstance
-| Memcached instance name.
-| string
-| true
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| true
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
-| string
-| false
-
-| extraMounts
-| ExtraMounts containing conf files and credentials
-| []<<cinderextravolmounts,CinderExtraVolMounts>>
-| false
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
-| false
-
-| dbPurge
-| DBPurge parameters -
-| <<dbpurge,DBPurge>>
-| false
-
-| apiTimeout
-| APITimeout for HAProxy, Apache, and rpc_response_timeout
-| int
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#cinderspeccore]
-==== CinderSpecCore
-
-CinderSpecCore the same as CinderSpec without ContainerImage references
-
-|===
-| Field | Description | Scheme | Required
-
-| cinderAPI
-| CinderAPI - Spec definition for the API service of this Cinder deployment
-| <<cinderapitemplatecore,CinderAPITemplateCore>>
-| true
-
-| cinderScheduler
-| CinderScheduler - Spec definition for the Scheduler service of this Cinder deployment
-| <<cinderschedulertemplatecore,CinderSchedulerTemplateCore>>
-| true
-
-| cinderBackup
-| CinderBackup - Spec definition for the Backup service of this Cinder deployment
-| <<cinderbackuptemplatecore,CinderBackupTemplateCore>>
-| true
-
-| cinderVolumes
-| CinderVolumes - Map of chosen names to spec definitions for the Volume(s) service(s) of this Cinder deployment
-| map[string]<<cindervolumetemplatecore,CinderVolumeTemplateCore>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#cinderstatus]
-==== CinderStatus
-
-CinderStatus defines the observed state of Cinder
-
-|===
-| Field | Description | Scheme | Required
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| databaseHostname
-| Cinder Database Hostname
-| string
-| false
-
-| transportURLSecret
-| TransportURLSecret - Secret containing RabbitMQ transportURL
-| string
-| false
-
-| apiEndpoints
-| API endpoints
-| map[string]map[string]string
-| false
-
-| serviceIDs
-| ServiceIDs
-| map[string]string
-| false
-
-| cinderAPIReadyCount
-| ReadyCount of Cinder API instance
-| int32
-| true
-
-| cinderBackupReadyCount
-| ReadyCount of Cinder Backup instance
-| int32
-| true
-
-| cinderSchedulerReadyCount
-| ReadyCount of Cinder Scheduler instance
-| int32
-| true
-
-| cinderVolumesReadyCounts
-| ReadyCounts of Cinder Volume instances
-| map[string]int32
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is different than the spec generation, then the controller has not started processing the latest changes, and the status and its conditions are likely stale.
-| int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#dbpurge]
-==== DBPurge
-
-DBPurge struct is used to model the parameters exposed to the Cinder cronJob
-
-|===
-| Field | Description | Scheme | Required
-
-| age
-| Age is the DBPurgeAge parameter and indicates the number of days of purging DB records
-| int
-| true
-
-| schedule
-| Schedule defines the crontab format string to schedule the DBPurge cronJob
 | string
 | true
 |===
@@ -3738,6 +3462,282 @@ CinderSchedulerTemplate defines the input parameters for the Cinder Scheduler se
 
 <<custom-resources,Back to Custom Resources>>
 
+[#cinder]
+==== Cinder
+
+Cinder is the Schema for the cinders API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<cinderspec,CinderSpec>>
+| false
+
+| status
+|
+| <<cinderstatus,CinderStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cinderextravolmounts]
+==== CinderExtraVolMounts
+
+CinderExtraVolMounts exposes additional parameters processed by the cinder-operator and defines the common VolMounts structure provided by the main storage module
+
+|===
+| Field | Description | Scheme | Required
+
+| name
+|
+| string
+| false
+
+| region
+|
+| string
+| false
+
+| extraVol
+|
+| []storage.VolMounts
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cinderlist]
+==== CinderList
+
+CinderList contains a list of Cinder
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<cinder,Cinder>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cinderspec]
+==== CinderSpec
+
+CinderSpec defines the desired state of Cinder
+
+|===
+| Field | Description | Scheme | Required
+
+| cinderAPI
+| CinderAPI - Spec definition for the API service of this Cinder deployment
+| <<cinderapitemplate,CinderAPITemplate>>
+| true
+
+| cinderScheduler
+| CinderScheduler - Spec definition for the Scheduler service of this Cinder deployment
+| <<cinderschedulertemplate,CinderSchedulerTemplate>>
+| true
+
+| cinderBackup
+| CinderBackup - Spec definition for the Backup service of this Cinder deployment
+| <<cinderbackuptemplate,CinderBackupTemplate>>
+| true
+
+| cinderVolumes
+| CinderVolumes - Map of chosen names to spec definitions for the Volume(s) service(s) of this Cinder deployment
+| map[string]<<cindervolumetemplate,CinderVolumeTemplate>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cinderspecbase]
+==== CinderSpecBase
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseInstance
+| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
+| string
+| true
+
+| rabbitMqClusterName
+| RabbitMQ instance name Needed to request a transportURL that is created and used in Cinder
+| string
+| true
+
+| memcachedInstance
+| Memcached instance name.
+| string
+| true
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| true
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| string
+| false
+
+| extraMounts
+| ExtraMounts containing conf files and credentials
+| []<<cinderextravolmounts,CinderExtraVolMounts>>
+| false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
+| map[string]string
+| false
+
+| dbPurge
+| DBPurge parameters -
+| <<dbpurge,DBPurge>>
+| false
+
+| apiTimeout
+| APITimeout for HAProxy, Apache, and rpc_response_timeout
+| int
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cinderspeccore]
+==== CinderSpecCore
+
+CinderSpecCore the same as CinderSpec without ContainerImage references
+
+|===
+| Field | Description | Scheme | Required
+
+| cinderAPI
+| CinderAPI - Spec definition for the API service of this Cinder deployment
+| <<cinderapitemplatecore,CinderAPITemplateCore>>
+| true
+
+| cinderScheduler
+| CinderScheduler - Spec definition for the Scheduler service of this Cinder deployment
+| <<cinderschedulertemplatecore,CinderSchedulerTemplateCore>>
+| true
+
+| cinderBackup
+| CinderBackup - Spec definition for the Backup service of this Cinder deployment
+| <<cinderbackuptemplatecore,CinderBackupTemplateCore>>
+| true
+
+| cinderVolumes
+| CinderVolumes - Map of chosen names to spec definitions for the Volume(s) service(s) of this Cinder deployment
+| map[string]<<cindervolumetemplatecore,CinderVolumeTemplateCore>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cinderstatus]
+==== CinderStatus
+
+CinderStatus defines the observed state of Cinder
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| databaseHostname
+| Cinder Database Hostname
+| string
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| apiEndpoints
+| API endpoints
+| map[string]map[string]string
+| false
+
+| serviceIDs
+| ServiceIDs
+| map[string]string
+| false
+
+| cinderAPIReadyCount
+| ReadyCount of Cinder API instance
+| int32
+| true
+
+| cinderBackupReadyCount
+| ReadyCount of Cinder Backup instance
+| int32
+| true
+
+| cinderSchedulerReadyCount
+| ReadyCount of Cinder Scheduler instance
+| int32
+| true
+
+| cinderVolumesReadyCounts
+| ReadyCounts of Cinder Volume instances
+| map[string]int32
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is different than the spec generation, then the controller has not started processing the latest changes, and the status and its conditions are likely stale.
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#dbpurge]
+==== DBPurge
+
+DBPurge struct is used to model the parameters exposed to the Cinder cronJob
+
+|===
+| Field | Description | Scheme | Required
+
+| age
+| Age is the DBPurgeAge parameter and indicates the number of days of purging DB records
+| int
+| true
+
+| schedule
+| Schedule defines the crontab format string to schedule the DBPurge cronJob
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#cindervolume]
 ==== CinderVolume
 
@@ -4087,328 +4087,6 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 | Service - Selector to get the designate service password from the Secret
 | string
 | true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#designate]
-==== Designate
-
-Designate is the Schema for the designates API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<designatespec,DesignateSpec>>
-| false
-
-| status
-|
-| <<designatestatus,DesignateStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#designateextravolmounts]
-==== DesignateExtraVolMounts
-
-DesignateExtraVolMounts exposes additional parameters processed by the designate-operator and defines the common VolMounts structure provided by the main storage module
-
-|===
-| Field | Description | Scheme | Required
-
-| name
-|
-| string
-| false
-
-| region
-|
-| string
-| false
-
-| extraVol
-|
-| []storage.VolMounts
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#designatelist]
-==== DesignateList
-
-DesignateList contains a list of Designate
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<designate,Designate>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#designatespec]
-==== DesignateSpec
-
-DesignateAPISpec defines the desired state of DesignateAPI
-
-|===
-| Field | Description | Scheme | Required
-
-| designateAPI
-| DesignateAPI - Spec definition for the API service of this Designate deployment
-| <<designateapispec,DesignateAPISpec>>
-| true
-
-| designateCentral
-| DesignateCentral - Spec definition for the Central service of this Designate deployment
-| <<designatecentralspec,DesignateCentralSpec>>
-| true
-
-| designateWorker
-| DesignateWorker - Spec definition for the Worker service of this Designate deployment
-| <<designateworkerspec,DesignateWorkerSpec>>
-| true
-
-| designateMdns
-| DesignateMdns - Spec definition for the Mdns service of this Designate deployment
-| <<designatemdnsspec,DesignateMdnsSpec>>
-| true
-
-| designateProducer
-| DesignateProducer - Spec definition for the Producer service of this Designate deployment
-| <<designateproducerspec,DesignateProducerSpec>>
-| true
-
-| designateBackendbind9
-| DesignateBackendbind9 - Spec definition for the Backendbind9 service of this Designate deployment
-| <<designatebackendbind9spec,DesignateBackendbind9Spec>>
-| true
-
-| designateUnbound
-| DesignateUnbound - Spec definition for the Unbound Resolver service of this Designate deployment
-| <<designateunboundspec,DesignateUnboundSpec>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#designatespecbase]
-==== DesignateSpecBase
-
-DesignateSpecBase -
-
-|===
-| Field | Description | Scheme | Required
-
-| serviceUser
-| ServiceUser - optional username used for this service to register in designate
-| string
-| true
-
-| databaseInstance
-| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
-| string
-| true
-
-| databaseAccount
-| DatabaseAccount - name of MariaDBAccount which will be used to connect.
-| string
-| true
-
-| rabbitMqClusterName
-| RabbitMQ instance name Needed to request a transportURL that is created and used in Designate
-| string
-| true
-
-| secret
-| Secret containing OpenStack password information for designate AdminPassword
-| string
-| true
-
-| passwordSelectors
-| PasswordSelectors - Selectors to identify the DB and AdminUser password from the Secret
-| <<passwordselector,PasswordSelector>>
-| false
-
-| None
-| BackendType - Defines the backend service/configuration we are using, i.e. bind9, unhbound, PowerDNS, BYO, etc.. Helps maintain a single init container/init.sh to do container setup
-| string
-| true
-
-| backendWorkerServerProtocol
-| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:worker']
-| string
-| true
-
-| backendMdnsServerProtocol
-| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:mdns']
-| string
-| true
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes running this service
-| map[string]string
-| false
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| false
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
-| string
-| false
-
-| defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
-| map[string]string
-| false
-
-| resources
-| Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-| corev1.ResourceRequirements
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#designatespeccore]
-==== DesignateSpecCore
-
-DesignateAPISpecCore - this version has no containerImage for use with the OpenStackControlplane
-
-|===
-| Field | Description | Scheme | Required
-
-| designateAPI
-| DesignateAPI - Spec definition for the API service of this Designate deployment
-| <<designateapispeccore,DesignateAPISpecCore>>
-| true
-
-| designateCentral
-| DesignateCentral - Spec definition for the Central service of this Designate deployment
-| <<designatecentralspeccore,DesignateCentralSpecCore>>
-| true
-
-| designateWorker
-| DesignateWorker - Spec definition for the Worker service of this Designate deployment
-| <<designateworkerspeccore,DesignateWorkerSpecCore>>
-| true
-
-| designateMdns
-| DesignateMdns - Spec definition for the Mdns service of this Designate deployment
-| <<designatemdnsspeccore,DesignateMdnsSpecCore>>
-| true
-
-| designateProducer
-| DesignateProducer - Spec definition for the Producer service of this Designate deployment
-| <<designateproducerspeccore,DesignateProducerSpecCore>>
-| true
-
-| designateBackendbind9
-| DesignateBackendbind9 - Spec definition for the Backendbind9 service of this Designate deployment
-| <<designatebackendbind9speccore,DesignateBackendbind9SpecCore>>
-| true
-
-| designateUnbound
-| DesignateUnbound - Spec definition for the Unbound Resolver service of this Designate deployment
-| <<designateunboundspeccore,DesignateUnboundSpecCore>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#designatestatus]
-==== DesignateStatus
-
-DesignateStatus defines the observed state of Designate
-
-|===
-| Field | Description | Scheme | Required
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| apiEndpoint
-| API endpoint
-| map[string]string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| databaseHostname
-| Designate Database Hostname
-| string
-| false
-
-| transportURLSecret
-| TransportURLSecret - Secret containing RabbitMQ transportURL
-| string
-| false
-
-| designateAPIReadyCount
-| ReadyCount of Designate API instance
-| int32
-| false
-
-| designateCentralReadyCount
-| ReadyCount of Designate Central instance
-| int32
-| false
-
-| designateWorkerReadyCount
-| ReadyCount of Designate Worker instance
-| int32
-| false
-
-| designateMdnsReadyCount
-| ReadyCount of Designate Mdns instance
-| int32
-| false
-
-| designateProducerReadyCount
-| ReadyCount of Designate Producer instance
-| int32
-| false
-
-| designateBackendbind9ReadyCount
-| ReadyCount of Designate Backendbind9 instance
-| int32
-| false
-
-| designateUnboundReadyCount
-| ReadyCount of Designate Unbound instance
-| int32
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -5009,6 +4687,328 @@ DesignateProducerStatus defines the observed state of DesignateProducer
 
 <<custom-resources,Back to Custom Resources>>
 
+[#designate]
+==== Designate
+
+Designate is the Schema for the designates API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<designatespec,DesignateSpec>>
+| false
+
+| status
+|
+| <<designatestatus,DesignateStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#designateextravolmounts]
+==== DesignateExtraVolMounts
+
+DesignateExtraVolMounts exposes additional parameters processed by the designate-operator and defines the common VolMounts structure provided by the main storage module
+
+|===
+| Field | Description | Scheme | Required
+
+| name
+|
+| string
+| false
+
+| region
+|
+| string
+| false
+
+| extraVol
+|
+| []storage.VolMounts
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#designatelist]
+==== DesignateList
+
+DesignateList contains a list of Designate
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<designate,Designate>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#designatespec]
+==== DesignateSpec
+
+DesignateAPISpec defines the desired state of DesignateAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| designateAPI
+| DesignateAPI - Spec definition for the API service of this Designate deployment
+| <<designateapispec,DesignateAPISpec>>
+| true
+
+| designateCentral
+| DesignateCentral - Spec definition for the Central service of this Designate deployment
+| <<designatecentralspec,DesignateCentralSpec>>
+| true
+
+| designateWorker
+| DesignateWorker - Spec definition for the Worker service of this Designate deployment
+| <<designateworkerspec,DesignateWorkerSpec>>
+| true
+
+| designateMdns
+| DesignateMdns - Spec definition for the Mdns service of this Designate deployment
+| <<designatemdnsspec,DesignateMdnsSpec>>
+| true
+
+| designateProducer
+| DesignateProducer - Spec definition for the Producer service of this Designate deployment
+| <<designateproducerspec,DesignateProducerSpec>>
+| true
+
+| designateBackendbind9
+| DesignateBackendbind9 - Spec definition for the Backendbind9 service of this Designate deployment
+| <<designatebackendbind9spec,DesignateBackendbind9Spec>>
+| true
+
+| designateUnbound
+| DesignateUnbound - Spec definition for the Unbound Resolver service of this Designate deployment
+| <<designateunboundspec,DesignateUnboundSpec>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#designatespecbase]
+==== DesignateSpecBase
+
+DesignateSpecBase -
+
+|===
+| Field | Description | Scheme | Required
+
+| serviceUser
+| ServiceUser - optional username used for this service to register in designate
+| string
+| true
+
+| databaseInstance
+| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
+| string
+| true
+
+| databaseAccount
+| DatabaseAccount - name of MariaDBAccount which will be used to connect.
+| string
+| true
+
+| rabbitMqClusterName
+| RabbitMQ instance name Needed to request a transportURL that is created and used in Designate
+| string
+| true
+
+| secret
+| Secret containing OpenStack password information for designate AdminPassword
+| string
+| true
+
+| passwordSelectors
+| PasswordSelectors - Selectors to identify the DB and AdminUser password from the Secret
+| <<passwordselector,PasswordSelector>>
+| false
+
+| None
+| BackendType - Defines the backend service/configuration we are using, i.e. bind9, unhbound, PowerDNS, BYO, etc.. Helps maintain a single init container/init.sh to do container setup
+| string
+| true
+
+| backendWorkerServerProtocol
+| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:worker']
+| string
+| true
+
+| backendMdnsServerProtocol
+| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:mdns']
+| string
+| true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| map[string]string
+| false
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| false
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| string
+| false
+
+| defaultConfigOverwrite
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| map[string]string
+| false
+
+| resources
+| Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+| corev1.ResourceRequirements
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#designatespeccore]
+==== DesignateSpecCore
+
+DesignateAPISpecCore - this version has no containerImage for use with the OpenStackControlplane
+
+|===
+| Field | Description | Scheme | Required
+
+| designateAPI
+| DesignateAPI - Spec definition for the API service of this Designate deployment
+| <<designateapispeccore,DesignateAPISpecCore>>
+| true
+
+| designateCentral
+| DesignateCentral - Spec definition for the Central service of this Designate deployment
+| <<designatecentralspeccore,DesignateCentralSpecCore>>
+| true
+
+| designateWorker
+| DesignateWorker - Spec definition for the Worker service of this Designate deployment
+| <<designateworkerspeccore,DesignateWorkerSpecCore>>
+| true
+
+| designateMdns
+| DesignateMdns - Spec definition for the Mdns service of this Designate deployment
+| <<designatemdnsspeccore,DesignateMdnsSpecCore>>
+| true
+
+| designateProducer
+| DesignateProducer - Spec definition for the Producer service of this Designate deployment
+| <<designateproducerspeccore,DesignateProducerSpecCore>>
+| true
+
+| designateBackendbind9
+| DesignateBackendbind9 - Spec definition for the Backendbind9 service of this Designate deployment
+| <<designatebackendbind9speccore,DesignateBackendbind9SpecCore>>
+| true
+
+| designateUnbound
+| DesignateUnbound - Spec definition for the Unbound Resolver service of this Designate deployment
+| <<designateunboundspeccore,DesignateUnboundSpecCore>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#designatestatus]
+==== DesignateStatus
+
+DesignateStatus defines the observed state of Designate
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| apiEndpoint
+| API endpoint
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| databaseHostname
+| Designate Database Hostname
+| string
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| designateAPIReadyCount
+| ReadyCount of Designate API instance
+| int32
+| false
+
+| designateCentralReadyCount
+| ReadyCount of Designate Central instance
+| int32
+| false
+
+| designateWorkerReadyCount
+| ReadyCount of Designate Worker instance
+| int32
+| false
+
+| designateMdnsReadyCount
+| ReadyCount of Designate Mdns instance
+| int32
+| false
+
+| designateProducerReadyCount
+| ReadyCount of Designate Producer instance
+| int32
+| false
+
+| designateBackendbind9ReadyCount
+| ReadyCount of Designate Backendbind9 instance
+| int32
+| false
+
+| designateUnboundReadyCount
+| ReadyCount of Designate Unbound instance
+| int32
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#designateunbound]
 ==== DesignateUnbound
 
@@ -5355,6 +5355,160 @@ ImageCache - struct where the exposed imageCache params are defined
 
 <<custom-resources,Back to Custom Resources>>
 
+[#glanceapi]
+==== GlanceAPI
+
+GlanceAPI is the Schema for the glanceapis API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<glanceapispec,GlanceAPISpec>>
+| false
+
+| status
+|
+| <<glanceapistatus,GlanceAPIStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#glanceapilist]
+==== GlanceAPIList
+
+GlanceAPIList contains a list of GlanceAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<glanceapi,GlanceAPI>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#glanceapispec]
+==== GlanceAPISpec
+
+GlanceAPISpec defines the desired state of GlanceAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| apiType
+|
+| string
+| true
+
+| serviceUser
+| ServiceUser - optional username used for this service to register in glance
+| string
+| true
+
+| serviceAccount
+| ServiceAccount - service account name used internally to provide GlanceAPI the default SA name
+| string
+| true
+
+| databaseHostname
+| DatabaseHostname - Glance Database Hostname
+| string
+| true
+
+| databaseAccount
+| DatabaseAccount - name of MariaDBAccount which will be used to connect.
+| string
+| true
+
+| secret
+| Secret containing OpenStack password information for glance AdminPassword
+| string
+| true
+
+| passwordSelectors
+| PasswordSelectors - Selectors to identify the DB and ServiceUser password from the Secret
+| <<passwordselector,PasswordSelector>>
+| true
+
+| extraMounts
+| ExtraMounts containing conf files and credentials
+| []<<glanceextravolmounts,GlanceExtraVolMounts>>
+| false
+
+| quota
+| QuotaEnforce if true, per-tenant quotas are enforced according to the registered keystone limits
+| bool
+| true
+
+| memcachedInstance
+| Memcached instance name.
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#glanceapistatus]
+==== GlanceAPIStatus
+
+GlanceAPIStatus defines the observed state of GlanceAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| readyCount
+| ReadyCount of glance API instances
+| int32
+| true
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| apiEndpoint
+| API endpoint
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| networkAttachments
+| NetworkAttachments status of the deployment pods
+| map[string][]string
+| false
+
+| domain
+| Domain is a parameter used by each glanceAPI replicas to setup a worker and set the worker_self_reference_url config option. It's requierd when distributed image import is enabled and it enables pod to pod communication via the associated hostnames
+| string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#dbpurge-2]
 ==== DBPurge
 
@@ -5664,160 +5818,6 @@ QuotaLimits - The parameters exposed to the top level glance CR that represents 
 
 <<custom-resources,Back to Custom Resources>>
 
-[#glanceapi]
-==== GlanceAPI
-
-GlanceAPI is the Schema for the glanceapis API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<glanceapispec,GlanceAPISpec>>
-| false
-
-| status
-|
-| <<glanceapistatus,GlanceAPIStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#glanceapilist]
-==== GlanceAPIList
-
-GlanceAPIList contains a list of GlanceAPI
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<glanceapi,GlanceAPI>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#glanceapispec]
-==== GlanceAPISpec
-
-GlanceAPISpec defines the desired state of GlanceAPI
-
-|===
-| Field | Description | Scheme | Required
-
-| apiType
-|
-| string
-| true
-
-| serviceUser
-| ServiceUser - optional username used for this service to register in glance
-| string
-| true
-
-| serviceAccount
-| ServiceAccount - service account name used internally to provide GlanceAPI the default SA name
-| string
-| true
-
-| databaseHostname
-| DatabaseHostname - Glance Database Hostname
-| string
-| true
-
-| databaseAccount
-| DatabaseAccount - name of MariaDBAccount which will be used to connect.
-| string
-| true
-
-| secret
-| Secret containing OpenStack password information for glance AdminPassword
-| string
-| true
-
-| passwordSelectors
-| PasswordSelectors - Selectors to identify the DB and ServiceUser password from the Secret
-| <<passwordselector,PasswordSelector>>
-| true
-
-| extraMounts
-| ExtraMounts containing conf files and credentials
-| []<<glanceextravolmounts,GlanceExtraVolMounts>>
-| false
-
-| quota
-| QuotaEnforce if true, per-tenant quotas are enforced according to the registered keystone limits
-| bool
-| true
-
-| memcachedInstance
-| Memcached instance name.
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#glanceapistatus]
-==== GlanceAPIStatus
-
-GlanceAPIStatus defines the observed state of GlanceAPI
-
-|===
-| Field | Description | Scheme | Required
-
-| readyCount
-| ReadyCount of glance API instances
-| int32
-| true
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| apiEndpoint
-| API endpoint
-| map[string]string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| networkAttachments
-| NetworkAttachments status of the deployment pods
-| map[string][]string
-| false
-
-| domain
-| Domain is a parameter used by each glanceAPI replicas to setup a worker and set the worker_self_reference_url config option. It's requierd when distributed image import is enabled and it enables pod to pod communication via the associated hostnames
-| string
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#apioverridespec-2]
 ==== APIOverrideSpec
 
@@ -5918,202 +5918,6 @@ PasswordSelector ..
 | AuthEncryptionKey - Selector to get the heat auth encryption key from the Secret
 | string
 | true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#heat]
-==== Heat
-
-Heat is the Schema for the heats API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<heatspec,HeatSpec>>
-| false
-
-| status
-|
-| <<heatstatus,HeatStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#heatlist]
-==== HeatList
-
-HeatList contains a list of Heat
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<heat,Heat>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#heatspec]
-==== HeatSpec
-
-HeatSpec defines the desired state of Heat
-
-|===
-| Field | Description | Scheme | Required
-
-| heatAPI
-| HeatAPI - Spec definition for the API service of this Heat deployment
-| <<heatapitemplate,HeatAPITemplate>>
-| true
-
-| heatCfnAPI
-| HeatCfnAPI - Spec definition for the CfnAPI service of this Heat deployment
-| <<heatcfnapitemplate,HeatCfnAPITemplate>>
-| true
-
-| heatEngine
-| HeatEngine - Spec definition for the Engine service of this Heat deployment
-| <<heatenginetemplate,HeatEngineTemplate>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#heatspecbase]
-==== HeatSpecBase
-
-HeatSpec defines the desired state of Heat
-
-|===
-| Field | Description | Scheme | Required
-
-| databaseInstance
-| MariaDB instance name. Right now required by the maridb-operator to get the credentials from the instance to create the DB. Might not be required in future.
-| string
-| true
-
-| memcachedInstance
-| Memcached instance name.
-| string
-| true
-
-| rabbitMqClusterName
-| RabbitMQ instance name Needed to request a transportURL that is created and used in Heat
-| string
-| true
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
-| string
-| false
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| true
-
-| defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
-| map[string]string
-| false
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes for running the Heat services
-| map[string]string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#heatspeccore]
-==== HeatSpecCore
-
-HeatSpecCore defines the desired state of Heat, for use with OpenStackControlplane (no containerImages)
-
-|===
-| Field | Description | Scheme | Required
-
-| heatAPI
-| HeatAPI - Spec definition for the API service of this Heat deployment
-| <<heatapitemplatecore,HeatAPITemplateCore>>
-| true
-
-| heatCfnAPI
-| HeatCfnAPI - Spec definition for the CfnAPI service of this Heat deployment
-| <<heatcfnapitemplatecore,HeatCfnAPITemplateCore>>
-| true
-
-| heatEngine
-| HeatEngine - Spec definition for the Engine service of this Heat deployment
-| <<heatenginetemplatecore,HeatEngineTemplateCore>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#heatstatus]
-==== HeatStatus
-
-HeatStatus defines the observed state of Heat
-
-|===
-| Field | Description | Scheme | Required
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| databaseHostname
-| Heat Database Hostname
-| string
-| false
-
-| transportURLSecret
-| TransportURLSecret - Secret containing RabbitMQ transportURL
-| string
-| false
-
-| heatApiReadyCount
-| ReadyCount of Heat API instance
-| int32
-| false
-
-| heatCfnApiReadyCount
-| ReadyCount of Heat CfnAPI instance
-| int32
-| false
-
-| heatEngineReadyCount
-| ReadyCount of Heat Engine instance
-| int32
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -6525,6 +6329,202 @@ HeatEngineTemplate defines the input parameters for the Heat Engine service
 
 <<custom-resources,Back to Custom Resources>>
 
+[#heat]
+==== Heat
+
+Heat is the Schema for the heats API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<heatspec,HeatSpec>>
+| false
+
+| status
+|
+| <<heatstatus,HeatStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#heatlist]
+==== HeatList
+
+HeatList contains a list of Heat
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<heat,Heat>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#heatspec]
+==== HeatSpec
+
+HeatSpec defines the desired state of Heat
+
+|===
+| Field | Description | Scheme | Required
+
+| heatAPI
+| HeatAPI - Spec definition for the API service of this Heat deployment
+| <<heatapitemplate,HeatAPITemplate>>
+| true
+
+| heatCfnAPI
+| HeatCfnAPI - Spec definition for the CfnAPI service of this Heat deployment
+| <<heatcfnapitemplate,HeatCfnAPITemplate>>
+| true
+
+| heatEngine
+| HeatEngine - Spec definition for the Engine service of this Heat deployment
+| <<heatenginetemplate,HeatEngineTemplate>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#heatspecbase]
+==== HeatSpecBase
+
+HeatSpec defines the desired state of Heat
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseInstance
+| MariaDB instance name. Right now required by the maridb-operator to get the credentials from the instance to create the DB. Might not be required in future.
+| string
+| true
+
+| memcachedInstance
+| Memcached instance name.
+| string
+| true
+
+| rabbitMqClusterName
+| RabbitMQ instance name Needed to request a transportURL that is created and used in Heat
+| string
+| true
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| string
+| false
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| true
+
+| defaultConfigOverwrite
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| map[string]string
+| false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes for running the Heat services
+| map[string]string
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#heatspeccore]
+==== HeatSpecCore
+
+HeatSpecCore defines the desired state of Heat, for use with OpenStackControlplane (no containerImages)
+
+|===
+| Field | Description | Scheme | Required
+
+| heatAPI
+| HeatAPI - Spec definition for the API service of this Heat deployment
+| <<heatapitemplatecore,HeatAPITemplateCore>>
+| true
+
+| heatCfnAPI
+| HeatCfnAPI - Spec definition for the CfnAPI service of this Heat deployment
+| <<heatcfnapitemplatecore,HeatCfnAPITemplateCore>>
+| true
+
+| heatEngine
+| HeatEngine - Spec definition for the Engine service of this Heat deployment
+| <<heatenginetemplatecore,HeatEngineTemplateCore>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#heatstatus]
+==== HeatStatus
+
+HeatStatus defines the observed state of Heat
+
+|===
+| Field | Description | Scheme | Required
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| databaseHostname
+| Heat Database Hostname
+| string
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| heatApiReadyCount
+| ReadyCount of Heat API instance
+| int32
+| false
+
+| heatCfnApiReadyCount
+| ReadyCount of Heat CfnAPI instance
+| int32
+| false
+
+| heatEngineReadyCount
+| ReadyCount of Heat Engine instance
+| int32
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#horizionoverridespec]
 ==== HorizionOverrideSpec
 
@@ -6801,313 +6801,6 @@ PasswordSelector to identify the AdminUser password from the Secret
 | Service - Selector to get the ironic service password from the Secret
 | string
 | true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#dhcprange]
-==== DHCPRange
-
-DHCPRange to define address range for DHCP requestes
-
-|===
-| Field | Description | Scheme | Required
-
-| name
-| Name - Name of the DHCPRange (used for tagging in dnsmasq)
-| string
-| false
-
-| cidr
-| Cidr - IP address prefix (CIDR) representing an IP network.
-| string
-| true
-
-| start
-| Start - Start of DHCP range
-| string
-| true
-
-| end
-| End - End of DHCP range
-| string
-| true
-
-| gateway
-| Gateway - IP address for the router
-| string
-| false
-
-| mtu
-| MTU - Maximum Transmission Unit
-| int
-| false
-
-| podIndex
-| PodIndex - Maps the DHCPRange to a specific statefulset pod index
-| int
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ironic]
-==== Ironic
-
-Ironic is the Schema for the ironics API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<ironicspec,IronicSpec>>
-| false
-
-| status
-|
-| <<ironicstatus,IronicStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ironicimages]
-==== IronicImages
-
-IronicImages to specify container images required by all ironic services
-
-|===
-| Field | Description | Scheme | Required
-
-| api
-| API - Ironic API Container Image (will be set to environmental default if empty)
-| string
-| true
-
-| conductor
-| Conductor - Ironic Conductor Container Image (will be set to environmental default if empty)
-| string
-| true
-
-| inspector
-| Inspector - Ironic Inspector Container Image (will be set to environmental default if empty)
-| string
-| true
-
-| neutronAgent
-| NeutronAgent - ML2 baremtal - Ironic Neutron Agent Image (will be set to environmental default if empty)
-| string
-| true
-
-| pxe
-| Pxe- Ironic DHCP/TFTP/HTTP Container Image URL (will be set to environmental default if empty)
-| string
-| true
-
-| ironicPythonAgent
-| IronicPythonAgent - Image containing the ironic-python-agent kernel and ramdisk
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ironiclist]
-==== IronicList
-
-IronicList contains a list of Ironic
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<ironic,Ironic>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ironicspec]
-==== IronicSpec
-
-IronicSpec defines the desired state of Ironic
-
-|===
-| Field | Description | Scheme | Required
-
-| images
-| Images - Container images for all ironic services
-| <<ironicimages,IronicImages>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ironicspeccore]
-==== IronicSpecCore
-
-IronicSpec defines the desired state of Ironic
-
-|===
-| Field | Description | Scheme | Required
-
-| standalone
-| Whether to deploy a standalone Ironic.
-| bool
-| true
-
-| serviceUser
-| ServiceUser - optional username used for this service to register in ironic
-| string
-| true
-
-| databaseInstance
-| MariaDB instance name. Right now required by the maridb-operator to get the credentials from the instance to create the DB. Might not be required in future.
-| string
-| true
-
-| databaseAccount
-| DatabaseAccount - optional MariaDBAccount used for ironic DB, defaults to ironic.
-| string
-| true
-
-| secret
-| Secret containing OpenStack password information for ironic IronicPassword
-| string
-| true
-
-| passwordSelectors
-| PasswordSelectors - Selectors to identify the DB and ServiceUser password from the Secret
-| <<passwordselector,PasswordSelector>>
-| true
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| true
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
-| string
-| true
-
-| defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
-| map[string]string
-| false
-
-| ironicAPI
-| IronicAPI - Spec definition for the API service of this Ironic deployment
-| <<ironicapitemplate,IronicAPITemplate>>
-| true
-
-| ironicConductors
-| IronicConductors - Spec definitions for the conductor service of this Ironic deployment
-| []<<ironicconductortemplate,IronicConductorTemplate>>
-| false
-
-| ironicInspector
-| IronicInspector - Spec definition for the inspector service of this Ironic deployment
-| <<ironicinspectortemplate,IronicInspectorTemplate>>
-| true
-
-| ironicNeutronAgent
-| IronicNeutronAgent - Spec definition for the ML2 baremetal ironic-neutron-agent service of this Ironic deployment
-| <<ironicneutronagenttemplate,IronicNeutronAgentTemplate>>
-| true
-
-| rabbitMqClusterName
-| RabbitMQ instance name Needed to request a transportURL that is created and used in Ironic
-| string
-| true
-
-| rpcTransport
-| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE \-> ironic and ironic-inspector require oslo.messaging transport when not in standalone mode.
-| string
-| true
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
-| false
-
-| storageClass
-| Storage class to host data. This is passed to IronicConductors unless storageClass is explicitly set for the conductor.
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#ironicstatus]
-==== IronicStatus
-
-IronicStatus defines the observed state of Ironic
-
-|===
-| Field | Description | Scheme | Required
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| databaseHostname
-| Ironic Database Hostname
-| string
-| false
-
-| apiEndpoints
-| API endpoint
-| map[string]map[string]string
-| false
-
-| ironicAPIReadyCount
-| ReadyCount of Ironic API instance
-| int32
-| false
-
-| ironicConductorReadyCount
-| ReadyCount of Ironic Conductor instance
-| map[string]int32
-| false
-
-| ironicInspectorReadyCount
-| ReadyCount of Ironic Inspector instance
-| int32
-| false
-
-| ironicNeutronAgentReadyCount
-| ReadyCount of Ironic Neutron Agent instance
-| int32
-| false
-
-| transportURLSecret
-| TransportURLSecret - Secret containing RabbitMQ transportURL
-| string
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -7905,6 +7598,313 @@ IronicNeutronAgentTemplate defines the input parameters for ML2 baremetal - iron
 
 <<custom-resources,Back to Custom Resources>>
 
+[#dhcprange]
+==== DHCPRange
+
+DHCPRange to define address range for DHCP requestes
+
+|===
+| Field | Description | Scheme | Required
+
+| name
+| Name - Name of the DHCPRange (used for tagging in dnsmasq)
+| string
+| false
+
+| cidr
+| Cidr - IP address prefix (CIDR) representing an IP network.
+| string
+| true
+
+| start
+| Start - Start of DHCP range
+| string
+| true
+
+| end
+| End - End of DHCP range
+| string
+| true
+
+| gateway
+| Gateway - IP address for the router
+| string
+| false
+
+| mtu
+| MTU - Maximum Transmission Unit
+| int
+| false
+
+| podIndex
+| PodIndex - Maps the DHCPRange to a specific statefulset pod index
+| int
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ironic]
+==== Ironic
+
+Ironic is the Schema for the ironics API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<ironicspec,IronicSpec>>
+| false
+
+| status
+|
+| <<ironicstatus,IronicStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ironicimages]
+==== IronicImages
+
+IronicImages to specify container images required by all ironic services
+
+|===
+| Field | Description | Scheme | Required
+
+| api
+| API - Ironic API Container Image (will be set to environmental default if empty)
+| string
+| true
+
+| conductor
+| Conductor - Ironic Conductor Container Image (will be set to environmental default if empty)
+| string
+| true
+
+| inspector
+| Inspector - Ironic Inspector Container Image (will be set to environmental default if empty)
+| string
+| true
+
+| neutronAgent
+| NeutronAgent - ML2 baremtal - Ironic Neutron Agent Image (will be set to environmental default if empty)
+| string
+| true
+
+| pxe
+| Pxe- Ironic DHCP/TFTP/HTTP Container Image URL (will be set to environmental default if empty)
+| string
+| true
+
+| ironicPythonAgent
+| IronicPythonAgent - Image containing the ironic-python-agent kernel and ramdisk
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ironiclist]
+==== IronicList
+
+IronicList contains a list of Ironic
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<ironic,Ironic>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ironicspec]
+==== IronicSpec
+
+IronicSpec defines the desired state of Ironic
+
+|===
+| Field | Description | Scheme | Required
+
+| images
+| Images - Container images for all ironic services
+| <<ironicimages,IronicImages>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ironicspeccore]
+==== IronicSpecCore
+
+IronicSpec defines the desired state of Ironic
+
+|===
+| Field | Description | Scheme | Required
+
+| standalone
+| Whether to deploy a standalone Ironic.
+| bool
+| true
+
+| serviceUser
+| ServiceUser - optional username used for this service to register in ironic
+| string
+| true
+
+| databaseInstance
+| MariaDB instance name. Right now required by the maridb-operator to get the credentials from the instance to create the DB. Might not be required in future.
+| string
+| true
+
+| databaseAccount
+| DatabaseAccount - optional MariaDBAccount used for ironic DB, defaults to ironic.
+| string
+| true
+
+| secret
+| Secret containing OpenStack password information for ironic IronicPassword
+| string
+| true
+
+| passwordSelectors
+| PasswordSelectors - Selectors to identify the DB and ServiceUser password from the Secret
+| <<passwordselector,PasswordSelector>>
+| true
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| true
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| string
+| true
+
+| defaultConfigOverwrite
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| map[string]string
+| false
+
+| ironicAPI
+| IronicAPI - Spec definition for the API service of this Ironic deployment
+| <<ironicapitemplate,IronicAPITemplate>>
+| true
+
+| ironicConductors
+| IronicConductors - Spec definitions for the conductor service of this Ironic deployment
+| []<<ironicconductortemplate,IronicConductorTemplate>>
+| false
+
+| ironicInspector
+| IronicInspector - Spec definition for the inspector service of this Ironic deployment
+| <<ironicinspectortemplate,IronicInspectorTemplate>>
+| true
+
+| ironicNeutronAgent
+| IronicNeutronAgent - Spec definition for the ML2 baremetal ironic-neutron-agent service of this Ironic deployment
+| <<ironicneutronagenttemplate,IronicNeutronAgentTemplate>>
+| true
+
+| rabbitMqClusterName
+| RabbitMQ instance name Needed to request a transportURL that is created and used in Ironic
+| string
+| true
+
+| rpcTransport
+| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE \-> ironic and ironic-inspector require oslo.messaging transport when not in standalone mode.
+| string
+| true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
+| map[string]string
+| false
+
+| storageClass
+| Storage class to host data. This is passed to IronicConductors unless storageClass is explicitly set for the conductor.
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ironicstatus]
+==== IronicStatus
+
+IronicStatus defines the observed state of Ironic
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| databaseHostname
+| Ironic Database Hostname
+| string
+| false
+
+| apiEndpoints
+| API endpoint
+| map[string]map[string]string
+| false
+
+| ironicAPIReadyCount
+| ReadyCount of Ironic API instance
+| int32
+| false
+
+| ironicConductorReadyCount
+| ReadyCount of Ironic Conductor instance
+| map[string]int32
+| false
+
+| ironicInspectorReadyCount
+| ReadyCount of Ironic Inspector instance
+| int32
+| false
+
+| ironicNeutronAgentReadyCount
+| ReadyCount of Ironic Neutron Agent instance
+| int32
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#apioverridespec-2]
 ==== APIOverrideSpec
 
@@ -8461,280 +8461,6 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 
 <<custom-resources,Back to Custom Resources>>
 
-[#dbpurge-2]
-==== DBPurge
-
-DBPurge struct is used to model the parameters exposed to the Manila API CronJob
-
-|===
-| Field | Description | Scheme | Required
-
-| age
-| Age is the DBPurgeAge parameter and indicates the number of days of purging DB records
-| int
-| true
-
-| schedule
-| Schedule defines the crontab format string to schedule the DBPurge cronJob
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#manila]
-==== Manila
-
-Manila is the Schema for the manilas API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<manilaspec,ManilaSpec>>
-| false
-
-| status
-|
-| <<manilastatus,ManilaStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#maniladebug]
-==== ManilaDebug
-
-ManilaDebug contains flags related to multiple debug activities. See the individual comments for what this means for each flag.
-
-|===
-| Field | Description | Scheme | Required
-
-| dbPurge
-| DBPurge increases log verbosity by executing the db_purge command with "--debug".
-| bool
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#manilaextravolmounts]
-==== ManilaExtraVolMounts
-
-ManilaExtraVolMounts exposes additional parameters processed by the manila-operator and defines the common VolMounts structure provided by the main storage module
-
-|===
-| Field | Description | Scheme | Required
-
-| name
-|
-| string
-| false
-
-| region
-|
-| string
-| false
-
-| extraVol
-|
-| []storage.VolMounts
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#manilalist]
-==== ManilaList
-
-ManilaList contains a list of Manila
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<manila,Manila>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#manilaspec]
-==== ManilaSpec
-
-ManilaSpec defines the desired state of Manila
-
-|===
-| Field | Description | Scheme | Required
-
-| manilaAPI
-| ManilaAPI - Spec definition for the API service of this Manila deployment
-| <<manilaapitemplate,ManilaAPITemplate>>
-| true
-
-| manilaScheduler
-| ManilaScheduler - Spec definition for the Scheduler service of this Manila deployment
-| <<manilaschedulertemplate,ManilaSchedulerTemplate>>
-| true
-
-| manilaShares
-| ManilaShares - Map of chosen names to spec definitions for the Share(s) service(s) of this Manila deployment
-| map[string]<<manilasharetemplate,ManilaShareTemplate>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#manilaspecbase]
-==== ManilaSpecBase
-
-ManilaSpecBase -
-
-|===
-| Field | Description | Scheme | Required
-
-| databaseInstance
-| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
-| string
-| false
-
-| rabbitMqClusterName
-| RabbitMQ instance name Needed to request a transportURL that is created and used in Manila
-| string
-| true
-
-| memcachedInstance
-| Memcached instance name.
-| string
-| true
-
-| debug
-| Debug - enable debug for different deploy stages. If an init container is used, it runs and the actual action pod gets started with sleep infinity
-| <<maniladebug,ManilaDebug>>
-| false
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| false
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
-| string
-| false
-
-| extraMounts
-| ExtraMounts containing conf files and credentials
-| []<<manilaextravolmounts,ManilaExtraVolMounts>>
-| false
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
-| false
-
-| dbPurge
-| DBPurge parameters -
-| <<dbpurge,DBPurge>>
-| false
-
-| apiTimeout
-| APITimeout for HAProxy, Apache, and rpc_response_timeout
-| int
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#manilaspeccore]
-==== ManilaSpecCore
-
-ManilaSpecCore defines the desired state of Manila. This version is used by OpenStackControlplane
-
-|===
-| Field | Description | Scheme | Required
-
-| manilaAPI
-| ManilaAPI - Spec definition for the API service of this Manila deployment
-| <<manilaapitemplatecore,ManilaAPITemplateCore>>
-| true
-
-| manilaScheduler
-| ManilaScheduler - Spec definition for the Scheduler service of this Manila deployment
-| <<manilaschedulertemplatecore,ManilaSchedulerTemplateCore>>
-| true
-
-| manilaShares
-| ManilaShares - Map of chosen names to spec definitions for the Share(s) service(s) of this Manila deployment
-| map[string]<<manilasharetemplatecore,ManilaShareTemplateCore>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#manilastatus]
-==== ManilaStatus
-
-ManilaStatus defines the observed state of Manila
-
-|===
-| Field | Description | Scheme | Required
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| databaseHostname
-| Manila Database Hostname
-| string
-| false
-
-| transportURLSecret
-| TransportURLSecret - Secret containing RabbitMQ transportURL
-| string
-| false
-
-| manilaAPIReadyCount
-| ReadyCount of Manila API instance
-| int32
-| false
-
-| manilaSchedulerReadyCount
-| ReadyCount of Manila Scheduler instance
-| int32
-| false
-
-| manilaSharesReadyCounts
-| ReadyCounts of Manila Share instances
-| map[string]int32
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#apioverridespec-2]
 ==== APIOverrideSpec
 
@@ -9205,6 +8931,280 @@ ManilaShareTemplateCore -
 | Replicas - Manila API Replicas
 | *int32
 | true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#dbpurge-2]
+==== DBPurge
+
+DBPurge struct is used to model the parameters exposed to the Manila API CronJob
+
+|===
+| Field | Description | Scheme | Required
+
+| age
+| Age is the DBPurgeAge parameter and indicates the number of days of purging DB records
+| int
+| true
+
+| schedule
+| Schedule defines the crontab format string to schedule the DBPurge cronJob
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#manila]
+==== Manila
+
+Manila is the Schema for the manilas API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<manilaspec,ManilaSpec>>
+| false
+
+| status
+|
+| <<manilastatus,ManilaStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#maniladebug]
+==== ManilaDebug
+
+ManilaDebug contains flags related to multiple debug activities. See the individual comments for what this means for each flag.
+
+|===
+| Field | Description | Scheme | Required
+
+| dbPurge
+| DBPurge increases log verbosity by executing the db_purge command with "--debug".
+| bool
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#manilaextravolmounts]
+==== ManilaExtraVolMounts
+
+ManilaExtraVolMounts exposes additional parameters processed by the manila-operator and defines the common VolMounts structure provided by the main storage module
+
+|===
+| Field | Description | Scheme | Required
+
+| name
+|
+| string
+| false
+
+| region
+|
+| string
+| false
+
+| extraVol
+|
+| []storage.VolMounts
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#manilalist]
+==== ManilaList
+
+ManilaList contains a list of Manila
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<manila,Manila>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#manilaspec]
+==== ManilaSpec
+
+ManilaSpec defines the desired state of Manila
+
+|===
+| Field | Description | Scheme | Required
+
+| manilaAPI
+| ManilaAPI - Spec definition for the API service of this Manila deployment
+| <<manilaapitemplate,ManilaAPITemplate>>
+| true
+
+| manilaScheduler
+| ManilaScheduler - Spec definition for the Scheduler service of this Manila deployment
+| <<manilaschedulertemplate,ManilaSchedulerTemplate>>
+| true
+
+| manilaShares
+| ManilaShares - Map of chosen names to spec definitions for the Share(s) service(s) of this Manila deployment
+| map[string]<<manilasharetemplate,ManilaShareTemplate>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#manilaspecbase]
+==== ManilaSpecBase
+
+ManilaSpecBase -
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseInstance
+| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
+| string
+| false
+
+| rabbitMqClusterName
+| RabbitMQ instance name Needed to request a transportURL that is created and used in Manila
+| string
+| true
+
+| memcachedInstance
+| Memcached instance name.
+| string
+| true
+
+| debug
+| Debug - enable debug for different deploy stages. If an init container is used, it runs and the actual action pod gets started with sleep infinity
+| <<maniladebug,ManilaDebug>>
+| false
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| false
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
+| string
+| false
+
+| extraMounts
+| ExtraMounts containing conf files and credentials
+| []<<manilaextravolmounts,ManilaExtraVolMounts>>
+| false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
+| map[string]string
+| false
+
+| dbPurge
+| DBPurge parameters -
+| <<dbpurge,DBPurge>>
+| false
+
+| apiTimeout
+| APITimeout for HAProxy, Apache, and rpc_response_timeout
+| int
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#manilaspeccore]
+==== ManilaSpecCore
+
+ManilaSpecCore defines the desired state of Manila. This version is used by OpenStackControlplane
+
+|===
+| Field | Description | Scheme | Required
+
+| manilaAPI
+| ManilaAPI - Spec definition for the API service of this Manila deployment
+| <<manilaapitemplatecore,ManilaAPITemplateCore>>
+| true
+
+| manilaScheduler
+| ManilaScheduler - Spec definition for the Scheduler service of this Manila deployment
+| <<manilaschedulertemplatecore,ManilaSchedulerTemplateCore>>
+| true
+
+| manilaShares
+| ManilaShares - Map of chosen names to spec definitions for the Share(s) service(s) of this Manila deployment
+| map[string]<<manilasharetemplatecore,ManilaShareTemplateCore>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#manilastatus]
+==== ManilaStatus
+
+ManilaStatus defines the observed state of Manila
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| databaseHostname
+| Manila Database Hostname
+| string
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| manilaAPIReadyCount
+| ReadyCount of Manila API instance
+| int32
+| false
+
+| manilaSchedulerReadyCount
+| ReadyCount of Manila Scheduler instance
+| int32
+| false
+
+| manilaSharesReadyCounts
+| ReadyCounts of Manila Share instances
+| map[string]int32
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10012,180 +10012,6 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 | MetadataSecret - the name of the field to get the metadata secret from the Secret
 | string
 | true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#nova]
-==== Nova
-
-Nova is the Schema for the nova API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<novaspec,NovaSpec>>
-| false
-
-| status
-|
-| <<novastatus,NovaStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#novalist]
-==== NovaList
-
-NovaList contains a list of Nova
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<nova,Nova>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#novaspeccore]
-==== NovaSpecCore
-
-NovaSpecCore defines the template for NovaSpec used in OpenStackControlPlane
-
-|===
-| Field | Description | Scheme | Required
-
-| keystoneInstance
-| KeystoneInstance to name of the KeystoneAPI CR to select the Service instance used by the Nova services to authenticate.
-| string
-| true
-
-| apiDatabaseInstance
-| APIDatabaseInstance is the name of the MariaDB CR to select the DB Service instance used for the Nova API DB.
-| string
-| true
-
-| apiMessageBusInstance
-| APIMessageBusInstance is the name of the RabbitMqCluster CR to select the Message Bus Service instance used by the Nova top level services to communicate.
-| string
-| true
-
-| cellTemplates
-| Cells is a mapping of cell names to NovaCellTemplate objects defining the cells in the deployment. The "cell0" cell is a mandatory cell in every deployment. Moreover any real deployment needs at least one additional normal cell as "cell0" cannot have any computes.
-| map[string]<<novacelltemplate,NovaCellTemplate>>
-| true
-
-| serviceUser
-| ServiceUser - optional username used for this service to register in keystone
-| string
-| true
-
-| apiDatabaseAccount
-| APIDatabaseAccount - MariaDBAccount to use when accessing the API DB
-| string
-| true
-
-| secret
-| Secret is the name of the Secret instance containing password information for nova like the keystone service password and DB passwords
-| string
-| true
-
-| passwordSelectors
-| PasswordSelectors - Selectors to identify the DB and ServiceUser passwords from the Secret
-| <<passwordselector,PasswordSelector>>
-| true
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
-| false
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| true
-
-| apiServiceTemplate
-| APIServiceTemplate - define the nova-api service
-| <<novaapitemplate,NovaAPITemplate>>
-| true
-
-| schedulerServiceTemplate
-| SchedulerServiceTemplate- define the nova-scheduler service
-| <<novaschedulertemplate,NovaSchedulerTemplate>>
-| true
-
-| metadataServiceTemplate
-| MetadataServiceTemplate - defines the metadata service that is global for the deployment serving all the cells. Note that if you want to deploy metadata per cell then the metadata service should be disabled here and enabled in the cellTemplates instead.
-| <<novametadatatemplate,NovaMetadataTemplate>>
-| true
-
-| memcachedInstance
-| MemcachedInstance is the name of the Memcached CR that all nova service will use.
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#novastatus]
-==== NovaStatus
-
-NovaStatus defines the observed state of Nova
-
-|===
-| Field | Description | Scheme | Required
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| apiServiceReadyCount
-| APIServiceReadyCount defines the number or replicas ready from nova-api
-| int32
-| false
-
-| schedulerServiceReadyCount
-| SchedulerServiceReadyCount defines the number or replicas ready from nova-scheduler
-| int32
-| false
-
-| metadataServiceReadyCount
-| MetadataReadyCount defines the number of replicas ready from nova-metadata service
-| int32
-| false
-
-| registeredCells
-| RegisteredCells is a map keyed by cell names that are registered in the nova_api database with a value that is the hash of the given cell configuration.
-| map[string]string
-| false
-
-| discoveredCells
-| DiscoveredCells is a map keyed by cell names that have discovered all kubernetes managed computes in cell value is a hash of config from all kubernetes managed computes in cell
-| map[string]string
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
-| int64
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -11761,6 +11587,180 @@ NovaSchedulerTemplate defines the input parameters specified by the user to crea
 
 <<custom-resources,Back to Custom Resources>>
 
+[#nova]
+==== Nova
+
+Nova is the Schema for the nova API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<novaspec,NovaSpec>>
+| false
+
+| status
+|
+| <<novastatus,NovaStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#novalist]
+==== NovaList
+
+NovaList contains a list of Nova
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<nova,Nova>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#novaspeccore]
+==== NovaSpecCore
+
+NovaSpecCore defines the template for NovaSpec used in OpenStackControlPlane
+
+|===
+| Field | Description | Scheme | Required
+
+| keystoneInstance
+| KeystoneInstance to name of the KeystoneAPI CR to select the Service instance used by the Nova services to authenticate.
+| string
+| true
+
+| apiDatabaseInstance
+| APIDatabaseInstance is the name of the MariaDB CR to select the DB Service instance used for the Nova API DB.
+| string
+| true
+
+| apiMessageBusInstance
+| APIMessageBusInstance is the name of the RabbitMqCluster CR to select the Message Bus Service instance used by the Nova top level services to communicate.
+| string
+| true
+
+| cellTemplates
+| Cells is a mapping of cell names to NovaCellTemplate objects defining the cells in the deployment. The "cell0" cell is a mandatory cell in every deployment. Moreover any real deployment needs at least one additional normal cell as "cell0" cannot have any computes.
+| map[string]<<novacelltemplate,NovaCellTemplate>>
+| true
+
+| serviceUser
+| ServiceUser - optional username used for this service to register in keystone
+| string
+| true
+
+| apiDatabaseAccount
+| APIDatabaseAccount - MariaDBAccount to use when accessing the API DB
+| string
+| true
+
+| secret
+| Secret is the name of the Secret instance containing password information for nova like the keystone service password and DB passwords
+| string
+| true
+
+| passwordSelectors
+| PasswordSelectors - Selectors to identify the DB and ServiceUser passwords from the Secret
+| <<passwordselector,PasswordSelector>>
+| true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
+| map[string]string
+| false
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| true
+
+| apiServiceTemplate
+| APIServiceTemplate - define the nova-api service
+| <<novaapitemplate,NovaAPITemplate>>
+| true
+
+| schedulerServiceTemplate
+| SchedulerServiceTemplate- define the nova-scheduler service
+| <<novaschedulertemplate,NovaSchedulerTemplate>>
+| true
+
+| metadataServiceTemplate
+| MetadataServiceTemplate - defines the metadata service that is global for the deployment serving all the cells. Note that if you want to deploy metadata per cell then the metadata service should be disabled here and enabled in the cellTemplates instead.
+| <<novametadatatemplate,NovaMetadataTemplate>>
+| true
+
+| memcachedInstance
+| MemcachedInstance is the name of the Memcached CR that all nova service will use.
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#novastatus]
+==== NovaStatus
+
+NovaStatus defines the observed state of Nova
+
+|===
+| Field | Description | Scheme | Required
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| apiServiceReadyCount
+| APIServiceReadyCount defines the number or replicas ready from nova-api
+| int32
+| false
+
+| schedulerServiceReadyCount
+| SchedulerServiceReadyCount defines the number or replicas ready from nova-scheduler
+| int32
+| false
+
+| metadataServiceReadyCount
+| MetadataReadyCount defines the number of replicas ready from nova-metadata service
+| int32
+| false
+
+| registeredCells
+| RegisteredCells is a map keyed by cell names that are registered in the nova_api database with a value that is the hash of the given cell configuration.
+| map[string]string
+| false
+
+| discoveredCells
+| DiscoveredCells is a map keyed by cell names that have discovered all kubernetes managed computes in cell value is a hash of config from all kubernetes managed computes in cell
+| map[string]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#octaviaamphoracontroller]
 ==== OctaviaAmphoraController
 
@@ -11986,6 +11986,241 @@ OctaviaAmphoraControllerStatus defines the observed state of the Octavia Amphora
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#apioverridespec-2]
+==== APIOverrideSpec
+
+APIOverrideSpec to override the generated manifest of several child resources.
+
+|===
+| Field | Description | Scheme | Required
+
+| service
+| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
+| map[service.Endpoint]service.RoutedOverrideSpec
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviaapi]
+==== OctaviaAPI
+
+OctaviaAPI is the Schema for the octaviaapis API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<octaviaapispec,OctaviaAPISpec>>
+| false
+
+| status
+|
+| <<octaviaapistatus,OctaviaAPIStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviaapilist]
+==== OctaviaAPIList
+
+OctaviaAPIList contains a list of OctaviaAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<octaviaapi,OctaviaAPI>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviaapispec]
+==== OctaviaAPISpec
+
+OctaviaAPISpec defines the desired state of OctaviaAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| containerImage
+| Octavia Container Image URL
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviaapispeccore]
+==== OctaviaAPISpecCore
+
+OctaviaAPISpecCore -
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseInstance
+| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
+| string
+| true
+
+| databaseAccount
+| DatabaseAccount - name of MariaDBAccount which will be used to connect for the main octavia database
+| string
+| true
+
+| persistenceDatabaseAccount
+| PersistenceDatabaseAccount - name of MariaDBAccount which will be used to connect for the persistence database
+| string
+| true
+
+| databaseHostname
+| DatabaseHostname - Octavia DB hostname
+| string
+| false
+
+| serviceUser
+| ServiceUser - service user name
+| string
+| true
+
+| serviceAccount
+| ServiceAccount - service account name used internally to provide Octavia services the default SA name
+| string
+| true
+
+| replicas
+| Replicas of octavia API to run
+| *int32
+| true
+
+| secret
+| Secret containing OpenStack password information for octavia OctaviaDatabasePassword, AdminPassword
+| string
+| true
+
+| passwordSelectors
+| PasswordSelectors - Selectors to identify the DB and ServiceUser password from the Secret
+| <<passwordselector,PasswordSelector>>
+| false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| map[string]string
+| false
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| false
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| string
+| false
+
+| defaultConfigOverwrite
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| map[string]string
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| resources
+| Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+| corev1.ResourceRequirements
+| false
+
+| override
+| Override, provides the ability to override the generated manifest of several child resources.
+| <<apioverridespec,APIOverrideSpec>>
+| false
+
+| networkAttachments
+| NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
+| []string
+| false
+
+| tls
+| TLS - Parameters related to the TLS
+| <<octaviaapitls,OctaviaApiTLS>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviaapistatus]
+==== OctaviaAPIStatus
+
+OctaviaAPIStatus defines the observed state of OctaviaAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| readyCount
+| ReadyCount of octavia API instances
+| int32
+| false
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| networkAttachments
+| NetworkAttachment status of the deployment pods
+| map[string][]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviaapitls]
+==== OctaviaApiTLS
+
+|===
+| Field | Description | Scheme | Required
+
+| api
+| API tls type which encapsulates for API services
+| tls.APIService
+| false
+
+| ovn
+| Ovn GenericService - holds the secret for the OvnDb client cert
+| tls.GenericService
 | false
 |===
 
@@ -12345,241 +12580,6 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 | service
 | Service - Selector to get the service user password from the Secret
 | string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#octaviaapi]
-==== OctaviaAPI
-
-OctaviaAPI is the Schema for the octaviaapis API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<octaviaapispec,OctaviaAPISpec>>
-| false
-
-| status
-|
-| <<octaviaapistatus,OctaviaAPIStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#octaviaapilist]
-==== OctaviaAPIList
-
-OctaviaAPIList contains a list of OctaviaAPI
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<octaviaapi,OctaviaAPI>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#octaviaapispec]
-==== OctaviaAPISpec
-
-OctaviaAPISpec defines the desired state of OctaviaAPI
-
-|===
-| Field | Description | Scheme | Required
-
-| containerImage
-| Octavia Container Image URL
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#octaviaapispeccore]
-==== OctaviaAPISpecCore
-
-OctaviaAPISpecCore -
-
-|===
-| Field | Description | Scheme | Required
-
-| databaseInstance
-| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
-| string
-| true
-
-| databaseAccount
-| DatabaseAccount - name of MariaDBAccount which will be used to connect for the main octavia database
-| string
-| true
-
-| persistenceDatabaseAccount
-| PersistenceDatabaseAccount - name of MariaDBAccount which will be used to connect for the persistence database
-| string
-| true
-
-| databaseHostname
-| DatabaseHostname - Octavia DB hostname
-| string
-| false
-
-| serviceUser
-| ServiceUser - service user name
-| string
-| true
-
-| serviceAccount
-| ServiceAccount - service account name used internally to provide Octavia services the default SA name
-| string
-| true
-
-| replicas
-| Replicas of octavia API to run
-| *int32
-| true
-
-| secret
-| Secret containing OpenStack password information for octavia OctaviaDatabasePassword, AdminPassword
-| string
-| true
-
-| passwordSelectors
-| PasswordSelectors - Selectors to identify the DB and ServiceUser password from the Secret
-| <<passwordselector,PasswordSelector>>
-| false
-
-| nodeSelector
-| NodeSelector to target subset of worker nodes running this service
-| map[string]string
-| false
-
-| preserveJobs
-| PreserveJobs - do not delete jobs after they finished e.g. to check logs
-| bool
-| false
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
-| string
-| false
-
-| defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
-| map[string]string
-| false
-
-| transportURLSecret
-| TransportURLSecret - Secret containing RabbitMQ transportURL
-| string
-| false
-
-| resources
-| Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-| corev1.ResourceRequirements
-| false
-
-| override
-| Override, provides the ability to override the generated manifest of several child resources.
-| <<apioverridespec,APIOverrideSpec>>
-| false
-
-| networkAttachments
-| NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
-| []string
-| false
-
-| tls
-| TLS - Parameters related to the TLS
-| <<octaviaapitls,OctaviaApiTLS>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#octaviaapistatus]
-==== OctaviaAPIStatus
-
-OctaviaAPIStatus defines the observed state of OctaviaAPI
-
-|===
-| Field | Description | Scheme | Required
-
-| readyCount
-| ReadyCount of octavia API instances
-| int32
-| false
-
-| hash
-| Map of hashes to track e.g. job status
-| map[string]string
-| false
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| networkAttachments
-| NetworkAttachment status of the deployment pods
-| map[string][]string
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#octaviaapitls]
-==== OctaviaApiTLS
-
-|===
-| Field | Description | Scheme | Required
-
-| api
-| API tls type which encapsulates for API services
-| tls.APIService
-| false
-
-| ovn
-| Ovn GenericService - holds the secret for the OvnDb client cert
-| tls.GenericService
 | false
 |===
 
@@ -13949,152 +13949,6 @@ PlacementAPIStatus defines the observed state of PlacementAPI
 
 <<custom-resources,Back to Custom Resources>>
 
-[#swift]
-==== Swift
-
-Swift is the Schema for the swifts API
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ObjectMeta
-| false
-
-| spec
-|
-| <<swiftspec,SwiftSpec>>
-| false
-
-| status
-|
-| <<swiftstatus,SwiftStatus>>
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#swiftlist]
-==== SwiftList
-
-SwiftList contains a list of Swift
-
-|===
-| Field | Description | Scheme | Required
-
-| metadata
-|
-| metav1.ListMeta
-| false
-
-| items
-|
-| []<<swift,Swift>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#swiftspec]
-==== SwiftSpec
-
-SwiftSpec defines the desired state of Swift
-
-|===
-| Field | Description | Scheme | Required
-
-| swiftRing
-| SwiftRing - Spec definition for the Ring service of this Swift deployment
-| <<swiftringspec,SwiftRingSpec>>
-| true
-
-| swiftStorage
-| SwiftStorage - Spec definition for the Storage service of this Swift deployment
-| <<swiftstoragespec,SwiftStorageSpec>>
-| true
-
-| swiftProxy
-| SwiftProxy - Spec definition for the Proxy service of this Swift deployment
-| <<swiftproxyspec,SwiftProxySpec>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#swiftspecbase]
-==== SwiftSpecBase
-
-SwiftSpecBase -
-
-|===
-| Field | Description | Scheme | Required
-
-| storageClass
-| Storage class. This is passed to SwiftStorage unless storageClass is explicitly set for the SwiftStorage.
-| string
-| true
-
-| networkAttachments
-| NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
-| []string
-| false
-
-| memcachedInstance
-| Memcached instance name.
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#swiftspeccore]
-==== SwiftSpecCore
-
-SwiftSpecCore defines the desired state of Swift (this version is used by OpenStackControlplane)
-
-|===
-| Field | Description | Scheme | Required
-
-| swiftRing
-| SwiftRing - Spec definition for the Ring service of this Swift deployment
-| <<swiftringspeccore,SwiftRingSpecCore>>
-| true
-
-| swiftStorage
-| SwiftStorage - Spec definition for the Storage service of this Swift deployment
-| <<swiftstoragespeccore,SwiftStorageSpecCore>>
-| true
-
-| swiftProxy
-| SwiftProxy - Spec definition for the Proxy service of this Swift deployment
-| <<swiftproxyspeccore,SwiftProxySpecCore>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#swiftstatus]
-==== SwiftStatus
-
-SwiftStatus defines the observed state of Swift
-
-|===
-| Field | Description | Scheme | Required
-
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
-| observedGeneration
-| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
-| int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#passwordselector-2]
 ==== PasswordSelector
 
@@ -14606,6 +14460,152 @@ SwiftStorageStatus defines the observed state of SwiftStorage
 | hash
 | Map of hashes to track e.g. job status
 | map[string]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#swift]
+==== Swift
+
+Swift is the Schema for the swifts API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<swiftspec,SwiftSpec>>
+| false
+
+| status
+|
+| <<swiftstatus,SwiftStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#swiftlist]
+==== SwiftList
+
+SwiftList contains a list of Swift
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<swift,Swift>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#swiftspec]
+==== SwiftSpec
+
+SwiftSpec defines the desired state of Swift
+
+|===
+| Field | Description | Scheme | Required
+
+| swiftRing
+| SwiftRing - Spec definition for the Ring service of this Swift deployment
+| <<swiftringspec,SwiftRingSpec>>
+| true
+
+| swiftStorage
+| SwiftStorage - Spec definition for the Storage service of this Swift deployment
+| <<swiftstoragespec,SwiftStorageSpec>>
+| true
+
+| swiftProxy
+| SwiftProxy - Spec definition for the Proxy service of this Swift deployment
+| <<swiftproxyspec,SwiftProxySpec>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#swiftspecbase]
+==== SwiftSpecBase
+
+SwiftSpecBase -
+
+|===
+| Field | Description | Scheme | Required
+
+| storageClass
+| Storage class. This is passed to SwiftStorage unless storageClass is explicitly set for the SwiftStorage.
+| string
+| true
+
+| networkAttachments
+| NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
+| []string
+| false
+
+| memcachedInstance
+| Memcached instance name.
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#swiftspeccore]
+==== SwiftSpecCore
+
+SwiftSpecCore defines the desired state of Swift (this version is used by OpenStackControlplane)
+
+|===
+| Field | Description | Scheme | Required
+
+| swiftRing
+| SwiftRing - Spec definition for the Ring service of this Swift deployment
+| <<swiftringspeccore,SwiftRingSpecCore>>
+| true
+
+| swiftStorage
+| SwiftStorage - Spec definition for the Storage service of this Swift deployment
+| <<swiftstoragespeccore,SwiftStorageSpecCore>>
+| true
+
+| swiftProxy
+| SwiftProxy - Spec definition for the Proxy service of this Swift deployment
+| <<swiftproxyspeccore,SwiftProxySpecCore>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#swiftstatus]
+==== SwiftStatus
+
+SwiftStatus defines the observed state of Swift
+
+|===
+| Field | Description | Scheme | Required
+
+| conditions
+| Conditions
+| condition.Conditions
 | false
 
 | observedGeneration
