@@ -420,16 +420,6 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 |===
 | Field | Description | Scheme | Required
 
-| configMaps
-| ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE
-| []string
-| false
-
-| secrets
-| Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE
-| []string
-| false
-
 | dataSources
 | DataSources list of DataSource objects to mount as ExtraMounts for the OpenStackAnsibleEE
 | []<<datasource,DataSource>>

@@ -41,9 +41,8 @@ var _ = Describe("OpenstackDataplaneService Test", func() {
 
 		It("spec fields are set up", func() {
 			service := GetService(dataplaneServiceName)
-			Expect(service.Spec.Secrets).To(BeEmpty())
+			Expect(service.Spec.DataSources).To(BeEmpty())
 			Expect(service.Spec.Playbook).To(BeEmpty())
-			Expect(service.Spec.ConfigMaps).To(BeEmpty())
 			Expect(service.Spec.DeployOnAllNodeSets).To(BeFalse())
 		})
 	})
@@ -57,9 +56,8 @@ var _ = Describe("OpenstackDataplaneService Test", func() {
 
 		It("spec fields are set up", func() {
 			service := GetService(dataplaneServiceName)
-			Expect(service.Spec.Secrets).To(BeEmpty())
+			Expect(service.Spec.DataSources).To(BeEmpty())
 			Expect(service.Spec.Playbook).To(BeEmpty())
-			Expect(service.Spec.ConfigMaps).To(BeEmpty())
 			Expect(service.Spec.DeployOnAllNodeSets).To(BeTrue())
 		})
 	})

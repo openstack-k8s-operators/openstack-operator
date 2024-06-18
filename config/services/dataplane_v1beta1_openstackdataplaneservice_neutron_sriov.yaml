@@ -4,8 +4,9 @@ metadata:
   name: neutron-sriov
 spec:
   playbook: osp.edpm.neutron_sriov
-  secrets:
-  - neutron-sriov-agent-neutron-config
+  dataSources:
+    - secretRef:
+        name: neutron-sriov-agent-neutron-config
   caCerts: combined-ca-bundle
   containerImageFields:
   - EdpmNeutronSriovAgentImage

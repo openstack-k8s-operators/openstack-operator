@@ -4,8 +4,9 @@ metadata:
   name: ovn
 spec:
   playbook: osp.edpm.ovn
-  configMaps:
-  - ovncontroller-config
+  dataSources:
+    - configMapRef:
+        name: ovncontroller-config
   tlsCerts:
     default:
       contents:

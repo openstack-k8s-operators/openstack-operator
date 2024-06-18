@@ -3,8 +3,9 @@ kind: OpenStackDataPlaneService
 metadata:
   name: telemetry
 spec:
-  secrets:
-    - ceilometer-compute-config-data
+  dataSources:
+    - secretRef:
+        name: ceilometer-compute-config-data
   playbook: osp.edpm.telemetry
   tlsCerts:
     default:

@@ -38,10 +38,6 @@ spec:
                 type: string
               certsFrom:
                 type: string
-              configMaps:
-                items:
-                  type: string
-                type: array
               containerImageFields:
                 items:
                   type: string
@@ -79,10 +75,6 @@ spec:
                 type: string
               playbookContents:
                 type: string
-              secrets:
-                items:
-                  type: string
-                type: array
               tlsCerts:
                 additionalProperties:
                   properties:
