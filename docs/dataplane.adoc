@@ -6,9 +6,9 @@
 :doctype: book
 :context: osp
 
-The dataplane-operator automates the deployment of an OpenStack dataplane. A
+The openstack-operator automates the deployment of an OpenStack dataplane. A
 dataplane is a collection of nodes that will be used for hosting OpenStack
-workloads. The dataplane-operator prepares the nodes with enough operating
+workloads. The openstack-operator prepares the nodes with enough operating
 system configuration so that they are ready for hosting other required
 OpenStack services and workloads.
 

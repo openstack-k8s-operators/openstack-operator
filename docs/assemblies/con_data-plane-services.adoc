@@ -1,27 +1,27 @@
 = Composable services
 
-Composable services with dataplane-operator provide a way for users to
+Composable services with openstack-operator provide a way for users to
 customize services that are deployed on dataplane nodes. It is possible to
 "compose" a set of services such that the dataplane deployment can be
 customized in whichever ways are needed.
 
 Composing services can take different forms. The interfaces in
-dataplane-operator allow for:
+openstack-operator allow for:
 
 * Enabling/disabling services
 * Ordering services
 * Developing custom services
 
-For the purposes of the interfaces in dataplane-operator, a service is an
+For the purposes of the interfaces in openstack-operator, a service is an
 ansible execution that manages a software deployment (installation,
 configuration, execution, etc) on dataplane nodes. The ansible content that
 makes up each service is defined by the service itself. Each service is a
 resource instance of the
 xref:openstack_dataplaneservice.adoc[`OpenStackDataPlaneService`] CRD.
 
-== dataplane-operator provided services
+== openstack-operator provided services
 
-dataplane-operator provides a default list of services that will be deployed on
+openstack-operator provides a default list of services that will be deployed on
 dataplane nodes. The services list is set on the
 <<openstackdataplanenodesetspec,OpenStackDataPlaneNodeSet>> CRD.
 

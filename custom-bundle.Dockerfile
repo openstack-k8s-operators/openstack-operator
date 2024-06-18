@@ -33,7 +33,7 @@ COPY bundle/manifests /manifests/
 COPY bundle_extra_data /bundle_extra_data
 
 # Merge things into our openstack-operator CSV:
-#  -dataplane-operator CSV
+#  -openstack-operator CSV
 #  -ENV vars from all operators (for webhooks)
 RUN /workspace/csv-merger \
 	--import-env-files=/bundle_extra_data/env-vars.yaml \
