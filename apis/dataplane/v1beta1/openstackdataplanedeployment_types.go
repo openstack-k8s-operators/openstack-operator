@@ -89,10 +89,6 @@ type OpenStackDataPlaneDeploymentStatus struct {
 
 	// DeployedVersion
 	DeployedVersion string `json:"deployedVersion,omitempty"`
-
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deployed
-	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
@@ -151,6 +147,4 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 
 		}
 	}
-
-	instance.Status.Deployed = false
 }

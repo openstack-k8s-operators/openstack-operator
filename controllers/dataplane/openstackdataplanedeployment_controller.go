@@ -98,12 +98,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		Log,
 	)
 
-	// If the deploy is already done, return immediately.
-	if instance.Status.Deployed {
-		Log.Info("Already deployed", "instance.Status.Deployed", instance.Status.Deployed)
-		return ctrl.Result{}, nil
-	}
-
 	// initialize status if Conditions is nil, but do not reset if it already
 	// exists
 	isNewInstance := instance.Status.Conditions == nil
@@ -293,8 +287,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	for _, nodeSet := range nodeSets.Items {
 
 		Log.Info(fmt.Sprintf("Deploying NodeSet: %s", nodeSet.Name))
-		Log.Info("Set Status.Deployed to false", "instance", instance)
-		instance.Status.Deployed = false
 		Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition, condition.RequestedReason,
@@ -387,7 +379,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	Log.Info("Set DeploymentReadyCondition true")
 	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	Log.Info("Set Status.Deployed to true", "instance", instance)
-	instance.Status.Deployed = true
 	if version != nil {
 		instance.Status.DeployedVersion = version.Spec.TargetVersion
 	}
