@@ -45,6 +45,7 @@ func (r *OpenStackDataPlaneService) Default() {
 
 	openstackdataplaneservicelog.Info("default", "name", r.Name)
 	r.Spec.Default(r.Name)
+	r.DefaultLabels()
 }
 
 // Default - set defaults for this OpenStackDataPlaneService

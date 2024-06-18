@@ -1,12 +1,6 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  labels:
-    app.kubernetes.io/name: openstackdataplaneservice
-    app.kubernetes.io/instance: openstackdataplaneservice-configure-network
-    app.kubernetes.io/part-of: openstack-operator
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: openstack-operator
   name: configure-network
 spec:
   playbook: osp.edpm.configure_network
