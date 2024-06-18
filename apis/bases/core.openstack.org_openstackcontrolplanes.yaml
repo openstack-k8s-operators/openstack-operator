@@ -4528,6 +4528,9 @@ spec:
                     - memcachedInstance
                     - secret
                     type: object
+                  uniquePodNames:
+                    default: false
+                    type: boolean
                 type: object
               heat:
                 properties:

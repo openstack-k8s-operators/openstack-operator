@@ -28,13 +28,28 @@ const (
 
 // ReconcileGlance -
 func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+	glanceName := "glance"
+	altGlanceName := fmt.Sprintf("glance-%s", instance.UID[:5])
+	if instance.Spec.Glance.UniquePodNames {
+		glanceName, altGlanceName = altGlanceName, glanceName
+	}
+	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
 	glance := &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "glance",
+			Name:      altGlanceName,
 			Namespace: instance.Namespace,
 		},
 	}
+	if res, err := EnsureDeleted(ctx, helper, glance); err != nil {
+		return res, err
+	}
 
+	glance = &glancev1.Glance{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      glanceName,
+			Namespace: instance.Namespace,
+		},
+	}
 	Log := GetLogger(ctx)
 
 	if !instance.Spec.Glance.Enabled {
@@ -52,7 +67,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	// When component services got created check if there is the need to create a route
-	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "glance", Namespace: instance.Namespace}, glance); err != nil {
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: glanceName, Namespace: instance.Namespace}, glance); err != nil {
 		if !k8s_errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
@@ -144,7 +159,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		return ctrl.Result{}, nil
 	}
 
-	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", "glance")
+	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", glanceName)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
 		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec.GlanceSpecCore)
 		glance.Spec.ContainerImage = *version.Status.ContainerImages.GlanceAPIImage
