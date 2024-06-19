@@ -122,8 +122,9 @@ spec:
         store_description = "RBD backend"
         rbd_store_pool = images
         rbd_store_user = openstack
-      storageClass: ""
-      storageRequest: 10G
+      storage:
+        storageClass: ""
+        storageRequest: 10G
       secret: osp-secret
       keystoneEndpoint: default
       glanceAPIs:

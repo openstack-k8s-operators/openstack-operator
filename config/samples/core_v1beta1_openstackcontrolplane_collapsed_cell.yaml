@@ -46,8 +46,9 @@ spec:
     template:
       secret: osp-secret
       databaseInstance: openstack
-      storageClass: ""
-      storageRequest: 10G
+      storage:
+        storageClass: ""
+        storageRequest: 10G
       keystoneEndpoint: default
       glanceAPIs:
         default:

@@ -154,8 +154,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		if glance.Spec.DatabaseInstance == "" {
 			glance.Spec.DatabaseInstance = "openstack"
 		}
-		if glance.Spec.StorageClass == "" {
-			glance.Spec.StorageClass = instance.Spec.StorageClass
+		if glance.Spec.Storage.StorageClass == "" {
+			glance.Spec.Storage.StorageClass = instance.Spec.StorageClass
 		}
 		// Append globally defined extraMounts to the service's own list.
 		for _, ev := range instance.Spec.ExtraMounts {

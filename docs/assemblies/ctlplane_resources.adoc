@@ -161,6 +161,7 @@
 * <<apioverridespec,APIOverrideSpec>>
 * <<glanceapitemplate,GlanceAPITemplate>>
 * <<imagecache,ImageCache>>
+* <<storage,Storage>>
 * <<dbpurge,DBPurge>>
 * <<glance,Glance>>
 * <<glanceextravolmounts,GlanceExtraVolMounts>>
@@ -5266,11 +5267,6 @@ GlanceAPITemplate defines the desired state of GlanceAPI
 | map[string]string
 | false
 
-| pvc
-| Pvc - Storage claim for file-backed Glance
-| string
-| false
-
 | customServiceConfig
 | CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
@@ -5296,15 +5292,10 @@ GlanceAPITemplate defines the desired state of GlanceAPI
 | <<apioverridespec,APIOverrideSpec>>
 | false
 
-| storageClass
-| StorageClass
-| string
+| storage
+| Storage -
+| <<storage,Storage>>
 | false
-
-| storageRequest
-| StorageRequest
-| string
-| true
 
 | type
 | Type - represents the layout of the glanceAPI deployment.
@@ -5351,6 +5342,30 @@ ImageCache - struct where the exposed imageCache params are defined
 | Schedule defines the crontab format string to schedule the Pruner cronJob
 | string
 | true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#storage]
+==== Storage
+
+|===
+| Field | Description | Scheme | Required
+
+| storageClass
+| StorageClass -
+| string
+| false
+
+| storageRequest
+| StorageRequest -
+| string
+| false
+
+| external
+| External -
+| bool
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -5523,15 +5538,10 @@ GlanceSpec defines the desired state of Glance
 | []string
 | false
 
-| storageClass
-| StorageClass
-| string
+| storage
+| Storage -
+| <<storage,Storage>>
 | false
-
-| storageRequest
-| StorageRequest
-| string
-| true
 
 | glanceAPIs
 | GlanceAPIs - Spec definition for the API service of this Glance deployment
@@ -15375,7 +15385,7 @@ PersistentStorage defines storage options used for persistent storage
 
 <<custom-resources,Back to Custom Resources>>
 
-[#storage]
+[#storage-2]
 ==== Storage
 
 Storage defines the options used for storage of metrics

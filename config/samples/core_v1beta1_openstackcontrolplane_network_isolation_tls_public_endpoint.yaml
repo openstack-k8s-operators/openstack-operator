@@ -80,8 +80,9 @@ spec:
         route: {}
     template:
       databaseInstance: openstack
-      storageClass: ""
-      storageRequest: 10G
+      storage:
+        storageClass: ""
+        storageRequest: 10G
       secret: osp-secret
       keystoneEndpoint: default
       glanceAPIs:
