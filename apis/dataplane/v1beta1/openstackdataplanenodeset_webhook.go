@@ -108,30 +108,21 @@ var _ webhook.Validator = &OpenStackDataPlaneNodeSet{}
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate create", "name", r.Name)
-
 	var errors field.ErrorList
-
-	nodeSetList := &OpenStackDataPlaneNodeSetList{}
-	opts := &client.ListOptions{
-		Namespace: r.ObjectMeta.Namespace,
-	}
-
-	err := webhookClient.List(context.TODO(), nodeSetList, opts)
+	errors, err := r.validateNodes()
 	if err != nil {
 		return nil, err
 	}
+
 	// Check if OpenStackDataPlaneNodeSet name matches RFC1123 for use in labels
 	validate := validator.New()
-	if err = validate.Var(r.Name, "hostname_rfc1123"); err != nil {
+	if err := validate.Var(r.Name, "hostname_rfc1123"); err != nil {
 		openstackdataplanenodesetlog.Error(err, "Error validating OpenStackDataPlaneNodeSet name, name must follow RFC1123")
 		errors = append(errors, field.Invalid(
 			field.NewPath("Name"),
 			r.Name,
 			fmt.Sprintf("Error validating OpenStackDataPlaneNodeSet name %s, name must follow RFC1123", r.Name)))
 	}
-
-	errors = append(errors, r.Spec.ValidateCreate(nodeSetList)...)
-
 	if len(errors) > 0 {
 		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)
 
@@ -143,17 +134,27 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 	return nil, nil
 }
 
-func (r *OpenStackDataPlaneNodeSetSpec) ValidateCreate(nodeSetList *OpenStackDataPlaneNodeSetList) field.ErrorList {
+func (r *OpenStackDataPlaneNodeSet) validateNodes() (field.ErrorList, error) {
 	var errors field.ErrorList
+	nodeSetList := &OpenStackDataPlaneNodeSetList{}
+	opts := &client.ListOptions{
+		Namespace: r.ObjectMeta.Namespace,
+	}
+
+	err := webhookClient.List(context.TODO(), nodeSetList, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	// Currently, this check is only valid for PreProvisioned nodes. Since we can't possibly
 	// have duplicates in Baremetal Deployments, we can exit early here for Baremetal NodeSets.
 	// If this is the first NodeSet being created, then there can be no duplicates
 	// we can exit early here.
-	if r.PreProvisioned && len(nodeSetList.Items) != 0 {
-		errors = append(errors, r.duplicateNodeCheck(nodeSetList)...)
+	if r.Spec.PreProvisioned && len(nodeSetList.Items) != 0 {
+		errors = append(errors, r.Spec.duplicateNodeCheck(nodeSetList, r.ObjectMeta.Name)...)
 	}
 
-	return errors
+	return errors, nil
 
 }
 
@@ -165,8 +166,12 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admissio
 		return nil, apierrors.NewInternalError(
 			fmt.Errorf("expected a OpenStackDataPlaneNodeSet object, but got %T", oldNodeSet))
 	}
+	errors, err := r.validateNodes()
+	if err != nil {
+		return nil, err
+	}
 
-	errors := r.Spec.ValidateUpdate(&oldNodeSet.Spec)
+	errors = append(errors, r.Spec.ValidateUpdate(&oldNodeSet.Spec)...)
 
 	if errors != nil {
 		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)

@@ -268,25 +268,33 @@ func getStrPtr(in string) *string {
 
 // duplicateNodeCheck checks the NodeSetList for pre-existing nodes. If the user is trying to redefine an
 // existing node, we will return an error and block resource creation.
-func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList) (errors field.ErrorList) {
+func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList, nodesetName string) (errors field.ErrorList) {
 	existingNodeNames := make([]string, 0)
-	for _, existingNode := range nodeSetList.Items {
-		for _, node := range existingNode.Spec.Nodes {
+	for _, nodeSet := range nodeSetList.Items {
+		if nodeSet.ObjectMeta.Name == nodesetName {
+			continue
+		}
+		for _, node := range nodeSet.Spec.Nodes {
 			existingNodeNames = append(existingNodeNames, node.HostName)
 			if node.Ansible.AnsibleHost != "" {
 				existingNodeNames = append(existingNodeNames, node.Ansible.AnsibleHost)
 			}
 		}
+
 	}
 
-	for _, newNodeName := range r.Nodes {
-		if slices.Contains(existingNodeNames, newNodeName.HostName) || slices.Contains(existingNodeNames, newNodeName.Ansible.AnsibleHost) {
+	for _, newNode := range r.Nodes {
+		if slices.Contains(existingNodeNames, newNode.HostName) || slices.Contains(existingNodeNames, newNode.Ansible.AnsibleHost) {
 			errors = append(errors, field.Invalid(
 				field.NewPath("spec").Child("nodes"),
-				newNodeName,
-				fmt.Sprintf("node %s already exists in another cluster", newNodeName.HostName)))
+				newNode,
+				fmt.Sprintf("node %s already exists in another cluster", newNode.HostName)))
+		} else {
+			existingNodeNames = append(existingNodeNames, newNode.HostName)
+			if newNode.Ansible.AnsibleHost != "" {
+				existingNodeNames = append(existingNodeNames, newNode.Ansible.AnsibleHost)
+			}
 		}
 	}
-
 	return
 }
