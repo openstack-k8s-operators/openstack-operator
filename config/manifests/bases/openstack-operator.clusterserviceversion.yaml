@@ -514,11 +514,6 @@ spec:
         path: conditions
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
-      - description: Deployed
-        displayName: Deployed
-        path: deployed
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1beta1
     - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets
         API OpenStackDataPlaneNodeSet name must be a valid RFC1123 as it is used in
