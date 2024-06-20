@@ -385,7 +385,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	}
 
-	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, err := checkDeployment(helper, instance)
+	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(helper, instance)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -436,6 +436,19 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
 	} else if isDeploymentFailed {
+		podsInterface := r.Kclient.CoreV1().Pods(instance.Namespace)
+		podsList, _err := podsInterface.List(ctx, v1.ListOptions{
+			LabelSelector: fmt.Sprintf("openstackdataplanedeployment=%s", failedDeployment),
+			FieldSelector: "status.phase=Failed",
+		})
+
+		if _err != nil {
+			Log.Error(err, "unable to retrieve list of pods for dataplane diagnostic")
+		} else {
+			for _, pod := range podsList.Items {
+				Log.Info(fmt.Sprintf("openstackansibleee job %s failed due to %s with message: %s", pod.Name, pod.Status.Reason, pod.Status.Message))
+			}
+		}
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		deployErrorMsg := ""
 		if err != nil {
@@ -451,8 +464,9 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 func checkDeployment(helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-) (bool, bool, bool, error) {
+) (bool, bool, bool, string, error) {
 	// Get all completed deployments
+	var failedDeployment string
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
@@ -460,7 +474,7 @@ func checkDeployment(helper *helper.Helper,
 	err := helper.GetClient().List(context.Background(), deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return false, false, false, err
+		return false, false, false, failedDeployment, err
 	}
 
 	var isDeploymentReady bool
@@ -499,6 +513,7 @@ func checkDeployment(helper *helper.Helper,
 			if condition.IsError(deploymentCondition) {
 				err = fmt.Errorf(deploymentCondition.Message)
 				isDeploymentFailed = true
+				failedDeployment = deployment.Name
 				break
 			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
 				isDeploymentRunning = true
@@ -523,7 +538,7 @@ func checkDeployment(helper *helper.Helper,
 		}
 	}
 
-	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, err
+	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -662,8 +677,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) genericWatcherFn(
 }
 
 func (r *OpenStackDataPlaneNodeSetReconciler) deploymentWatcherFn(
-	ctx context.Context, obj client.Object) []reconcile.Request {
-	Log := r.GetLogger(ctx)
+	ctx context.Context, //revive:disable-line
+	obj client.Object) []reconcile.Request {
 	namespace := obj.GetNamespace()
 	deployment := obj.(*dataplanev1.OpenStackDataPlaneDeployment)
 
@@ -675,20 +690,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) deploymentWatcherFn(
 				Name:      nodeSet,
 			},
 		})
-	}
-
-	podsInterface := r.Kclient.CoreV1().Pods(namespace)
-	podsList, err := podsInterface.List(ctx, v1.ListOptions{
-		LabelSelector: fmt.Sprintf("openstackdataplanedeployment=%s", deployment.Name),
-		FieldSelector: "status.phase=Failed",
-	})
-
-	if err != nil {
-		Log.Error(err, "unable to retrieve list of pods for dataplane diagnostic")
-	} else {
-		for _, pod := range podsList.Items {
-			Log.Info(fmt.Sprintf("openstackansibleee job %s failed due to %s with message: %s", pod.Name, pod.Status.Reason, pod.Status.Message))
-		}
 	}
 	return requests
 }
