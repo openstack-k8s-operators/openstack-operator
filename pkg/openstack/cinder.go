@@ -122,9 +122,8 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			return errors.New("default Cinder Volume images is unset")
 		}
 
-		if cinder.Spec.CinderVolumes == nil {
-			cinder.Spec.CinderVolumes = make(map[string]cinderv1.CinderVolumeTemplate)
-		}
+		// Discard old list of volume services and rebuild it
+		cinder.Spec.CinderVolumes = make(map[string]cinderv1.CinderVolumeTemplate)
 
 		for name, volume := range instance.Spec.Cinder.Template.CinderVolumes {
 			cinderCore := cinderv1.CinderVolumeTemplate{}
