@@ -12,11 +12,11 @@ spec:
   galera:
     templates:
       openstack:
-        storageRequest: 500M
+        storageRequest: 5G
         secret: osp-secret
         replicas: 3
       openstack-cell1:
-        storageRequest: 500M
+        storageRequest: 5G
         secret: osp-secret
         replicas: 3
   rabbitmq:

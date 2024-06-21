@@ -120,9 +120,9 @@ spec:
   galera:
     templates:
       openstack:
-        storageRequest: 500M
+        storageRequest: 5G
       openstack-cell1:
-        storageRequest: 500M
+        storageRequest: 5G
   memcached:
     templates:
       memcached:

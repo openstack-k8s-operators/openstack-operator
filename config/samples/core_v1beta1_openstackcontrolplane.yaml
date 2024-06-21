@@ -13,12 +13,12 @@ spec:
     templates:
       openstack:
         storageClass: local-storage
-        storageRequest: 500M
+        storageRequest: 5G
         secret: osp-secret
         replicas: 1
       openstack-cell1:
         storageClass: local-storage
-        storageRequest: 500M
+        storageRequest: 5G
         secret: osp-secret
         replicas: 1
   rabbitmq:

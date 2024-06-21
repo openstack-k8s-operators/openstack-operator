@@ -12,7 +12,7 @@ spec:
   galera:
     templates:
       openstack:
-        storageRequest: 500M
+        storageRequest: 5G
   rabbitmq:
     templates:
       rabbitmq:
