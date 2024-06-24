@@ -148,3 +148,19 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 		}
 	}
 }
+
+// InitHashesAndImages - Initialize ConfigHashes and Images
+func (instance *OpenStackDataPlaneDeployment) InitHashesAndImages() {
+	if instance.Status.ConfigMapHashes == nil {
+		instance.Status.ConfigMapHashes = make(map[string]string)
+	}
+	if instance.Status.SecretHashes == nil {
+		instance.Status.SecretHashes = make(map[string]string)
+	}
+	if instance.Status.NodeSetHashes == nil {
+		instance.Status.NodeSetHashes = make(map[string]string)
+	}
+	if instance.Status.ContainerImages == nil {
+		instance.Status.ContainerImages = make(map[string]string)
+	}
+}
