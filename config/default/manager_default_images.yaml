@@ -11,18 +11,14 @@ spec:
       containers:
       - name: manager
         env:
-        - name: RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
-        - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
         - name: RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-frr:current-podified
         - name: RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
         - name: RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-cron:current-podified
-        - name: RELATED_IMAGE_EDPM_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
+        - name: RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-multipathd:current-podified
         - name: RELATED_IMAGE_EDPM_NEUTRON_DHCP_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified
         - name: RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT
@@ -31,9 +27,13 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified
         - name: RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified
-        - name: RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
         - name: RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT
           value: quay.io/prometheus/node-exporter:v1.5.0
-        - name: RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-multipathd:current-podified
+        - name: RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
+        - name: RELATED_IMAGE_EDPM_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
+        - name: RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
