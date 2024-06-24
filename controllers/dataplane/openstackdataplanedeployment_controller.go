@@ -121,6 +121,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	// this reconcile loop.
 	instance.InitConditions()
 	instance.InitHashesAndImages()
+
 	// Set ObservedGeneration since we've reset conditions
 	instance.Status.ObservedGeneration = instance.Generation
 
@@ -245,6 +246,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	shouldRequeue := false
 	haveError := false
 	deploymentErrMsg := ""
+	var nodesetServiceMap map[string][]string
 	backoffLimitReached := false
 
 	globalInventorySecrets := map[string]string{}
@@ -258,7 +260,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	if instance.Spec.ServicesOverride == nil {
-		if err := deployment.CheckGlobalServiceExecutionConsistency(ctx, helper, nodeSets.Items); err != nil {
+		if nodesetServiceMap, err = deployment.DedupServices(ctx, helper, nodeSets.Items); err != nil {
 			util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
 			instance.Status.Conditions.MarkFalse(
 				condition.DeploymentReadyCondition,
@@ -320,7 +322,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		if len(instance.Spec.ServicesOverride) != 0 {
 			deployResult, err = deployer.Deploy(instance.Spec.ServicesOverride)
 		} else {
-			deployResult, err = deployer.Deploy(nodeSet.Spec.Services)
+			deployResult, err = deployer.Deploy(nodesetServiceMap[nodeSet.Name])
 		}
 
 		nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]

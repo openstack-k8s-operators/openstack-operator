@@ -23,6 +23,7 @@ import (
 	"path"
 	"strings"
 
+	"golang.org/x/exp/slices"
 	yaml "gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -153,38 +154,31 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	return nil
 }
 
-// CheckGlobalServiceExecutionConsistency - Check that global services are defined only once in all nodesets, report and fail if there are duplicates
-func CheckGlobalServiceExecutionConsistency(ctx context.Context, helper *helper.Helper, nodesets []dataplanev1.OpenStackDataPlaneNodeSet) error {
+// Dedup services for deploy
+// Multiple Services of same ServiceType/ServiceName in a nodeset
+// Global Services in multiple NodeSets for a deployment
+func DedupServices(ctx context.Context, helper *helper.Helper, nodesets []dataplanev1.OpenStackDataPlaneNodeSet) (map[string][]string, error) {
 	var globalServices []string
-	var allServices []string
-
+	var nodeSetServiceMap = make(map[string][]string, 0)
 	for _, nodeset := range nodesets {
-		allServices = append(allServices, nodeset.Spec.Services...)
-	}
-	for _, svc := range allServices {
-		service, err := GetService(ctx, helper, svc)
-		if err != nil {
-			helper.GetLogger().Error(err, fmt.Sprintf("error getting service %s for consistency check", svc))
-			return err
-		}
-
-		if service.Spec.DeployOnAllNodeSets {
-			if serviceInList(service.Name, globalServices) {
-				return fmt.Errorf("global service %s defined multiple times", service.Name)
+		var services []string
+		var nodeSetServiceTypes []string
+		for _, svc := range nodeset.Spec.Services {
+			service, err := GetService(ctx, helper, svc)
+			if err != nil {
+				helper.GetLogger().Error(err, fmt.Sprintf("Configured service %s does not exist", svc))
+				return nil, err
 			}
-			globalServices = append(globalServices, service.Name)
+			if !slices.Contains(nodeSetServiceTypes, service.Spec.EDPMServiceType) && !slices.Contains(services, svc) {
+				nodeSetServiceTypes = append(nodeSetServiceTypes, service.Spec.EDPMServiceType)
+				services = append(services, svc)
+			}
+			if service.Spec.DeployOnAllNodeSets && !slices.Contains(globalServices, svc) {
+				globalServices = append(globalServices, svc)
+				services = append(services, svc)
+			}
 		}
+		nodeSetServiceMap[nodeset.Name] = services
 	}
-
-	return nil
-}
-
-// Check if service name is already in a list
-func serviceInList(service string, services []string) bool {
-	for _, svc := range services {
-		if svc == service {
-			return true
-		}
-	}
-	return false
+	return nodeSetServiceMap, nil
 }
