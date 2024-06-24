@@ -11,6 +11,58 @@ spec:
       containers:
       - name: manager
         env:
+        - name: RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
+        - name: RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+        - name: RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-api:current-podified
+        - name: RELATED_IMAGE_AODH_EVALUATOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-evaluator:current-podified
+        - name: RELATED_IMAGE_AODH_LISTENER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-listener:current-podified
+        - name: RELATED_IMAGE_AODH_NOTIFIER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-notifier:current-podified
+        - name: RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT
+          value: registry.redhat.io/ubi9/httpd-24:latest
+        - name: RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-barbican-api:current-podified
+        - name: RELATED_IMAGE_BARBICAN_KEYSTONE_LISTENER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-barbican-keystone-listener:current-podified
+        - name: RELATED_IMAGE_BARBICAN_WORKER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-barbican-worker:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-central:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-notification:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT
+          value: quay.io/infrawatch/sg-core:v5.2.0-nextgen
+        - name: RELATED_IMAGE_CINDER_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-api:current-podified
+        - name: RELATED_IMAGE_CINDER_BACKUP_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-backup:current-podified
+        - name: RELATED_IMAGE_CINDER_SCHEDULER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-scheduler:current-podified
+        - name: RELATED_IMAGE_CINDER_VOLUME_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-volume:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-api:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_BACKENDBIND9_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-backend-bind9:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_CENTRAL_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-central:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_MDNS_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-mdns:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_PRODUCER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-producer:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_UNBOUND_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-unbound:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_WORKER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-worker:current-podified
         - name: RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-frr:current-podified
         - name: RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT
@@ -33,7 +85,87 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
         - name: RELATED_IMAGE_EDPM_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
+        - name: RELATED_IMAGE_GLANCE_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-glance-api:current-podified
+        - name: RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-heat-api:current-podified
+        - name: RELATED_IMAGE_HEAT_CFNAPI_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-heat-api-cfn:current-podified
+        - name: RELATED_IMAGE_HEAT_ENGINE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-heat-engine:current-podified
+        - name: RELATED_IMAGE_HORIZON_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-horizon:current-podified
+        - name: RELATED_IMAGE_INFRA_DNSMASQ_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-neutron-server:current-podified
+        - name: RELATED_IMAGE_INFRA_MEMCACHED_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-memcached:current-podified
+        - name: RELATED_IMAGE_IRONIC_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-api:current-podified
+        - name: RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-conductor:current-podified
+        - name: RELATED_IMAGE_IRONIC_INSPECTOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-inspector:current-podified
+        - name: RELATED_IMAGE_IRONIC_NEUTRON_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-neutron-agent:current-podified
+        - name: RELATED_IMAGE_IRONIC_PXE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-pxe:current-podified
+        - name: RELATED_IMAGE_IRONIC_PYTHON_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/ironic-python-agent:current-podified
+        - name: RELATED_IMAGE_KEYSTONE_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-keystone:current-podified
+        - name: RELATED_IMAGE_MANILA_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-manila-api:current-podified
+        - name: RELATED_IMAGE_MANILA_SCHEDULER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-manila-scheduler:current-podified
+        - name: RELATED_IMAGE_MANILA_SHARE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-manila-share:current-podified
+        - name: RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
+        - name: RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-neutron-server:current-podified
+        - name: RELATED_IMAGE_NOVA_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
+        - name: RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified
+        - name: RELATED_IMAGE_NOVA_CONDUCTOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
+        - name: RELATED_IMAGE_NOVA_NOVNC_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-novncproxy:current-podified
+        - name: RELATED_IMAGE_NOVA_SCHEDULER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-scheduler:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_APACHE_IMAGE_URL_DEFAULT
+          value: registry.redhat.io/ubi9/httpd-24:latest
+        - name: RELATED_IMAGE_OCTAVIA_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-api:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_HEALTHMANAGER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-health-manager:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_HOUSEKEEPING_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-housekeeping:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-worker:current-podified
         - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
+        - name: RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified
+        - name: RELATED_IMAGE_OVN_CONTROLLER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
+        - name: RELATED_IMAGE_OVN_CONTROLLER_OVS_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-base:current-podified
+        - name: RELATED_IMAGE_OVN_NB_DBCLUSTER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-nb-db-server:current-podified
+        - name: RELATED_IMAGE_OVN_NORTHD_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-northd:current-podified
+        - name: RELATED_IMAGE_OVN_SB_DBCLUSTER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-sb-db-server:current-podified
+        - name: RELATED_IMAGE_PLACEMENT_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-placement-api:current-podified
         - name: RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
+        - name: RELATED_IMAGE_SWIFT_ACCOUNT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-account:current-podified
+        - name: RELATED_IMAGE_SWIFT_CONTAINER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-container:current-podified
+        - name: RELATED_IMAGE_SWIFT_OBJECT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-object:current-podified
+        - name: RELATED_IMAGE_SWIFT_PROXY_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-proxy-server:current-podified
