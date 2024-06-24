@@ -91,6 +91,7 @@ func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 	openstackcontrolplanelog.Info("validate create", "name", r.Name)
 
 	var allErrs field.ErrorList
+	var allWarn []string
 	basePath := field.NewPath("spec")
 
 	ctlplaneList := &OpenStackControlPlaneList{}
@@ -124,17 +125,14 @@ func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 		)
 	}
 
-	if err := r.ValidateCreateServices(basePath); err != nil {
-		allErrs = append(allErrs, err...)
-	}
-
+	allWarn, allErrs = r.ValidateCreateServices(basePath)
 	if len(allErrs) != 0 {
-		return nil, apierrors.NewInvalid(
+		return allWarn, apierrors.NewInvalid(
 			schema.GroupKind{Group: "core.openstack.org", Kind: "OpenStackControlPlane"},
 			r.Name, allErrs)
 	}
 
-	return nil, nil
+	return allWarn, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
@@ -246,8 +244,9 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 }
 
 // ValidateCreateServices validating service definitions during the OpenstackControlPlane CR creation
-func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) field.ErrorList {
+func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (admission.Warnings, field.ErrorList) {
 	var errors field.ErrorList
+	var warnings []string
 
 	errors = append(errors, r.ValidateServiceDependencies(basePath)...)
 
@@ -304,7 +303,15 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) fie
 		errors = append(errors, r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"))...)
 	}
 
-	return errors
+	if r.Spec.Galera.Enabled {
+		for key, s := range *r.Spec.Galera.Templates {
+			warn, err := s.ValidateCreate(basePath.Child("galera").Child("template").Key(key))
+			errors = append(errors, err...)
+			warnings = append(warnings, warn...)
+		}
+	}
+
+	return warnings, errors
 }
 
 // ValidateUpdateServices validating service definitions during the OpenstackControlPlane CR update
@@ -497,7 +504,7 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 
 		if depErrorMsg := r.checkDepsEnabled("Telemetry.Ceilometer"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("ceilometer").Child("enabled"),
-					     *r.Spec.Telemetry.Template.Ceilometer.Enabled, depErrorMsg)
+				*r.Spec.Telemetry.Template.Ceilometer.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -507,7 +514,7 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 
 		if depErrorMsg := r.checkDepsEnabled("Telemetry.Autoscaling"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("autoscaling").Child("enabled"),
-					     *r.Spec.Telemetry.Template.Autoscaling.Enabled, depErrorMsg)
+				*r.Spec.Telemetry.Template.Autoscaling.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
