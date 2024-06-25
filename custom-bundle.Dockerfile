@@ -1,4 +1,4 @@
-ARG GOLANG_CTX=registry.access.redhat.com/ubi9/go-toolset:1.20
+ARG GOLANG_CTX=registry.access.redhat.com/ubi9/go-toolset:1.21
 
 FROM $GOLANG_CTX as builder
 
