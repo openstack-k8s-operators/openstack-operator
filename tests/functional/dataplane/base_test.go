@@ -237,12 +237,24 @@ func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 }
 
 func MinorUpdateDataPlaneDeploymentSpec() map[string]interface{} {
-
 	return map[string]interface{}{
 		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
 		"servicesOverride": []string{"update"},
+	}
+}
+
+// Build OpenStackDataPlnaeDeploymentSpec with duplicate services
+func DuplicateServiceDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"edpm-compute-nodeset",
+		},
+		"servicesOverride": []string{
+			"foo-service",
+			"duplicate-service",
+		},
 	}
 }
 
