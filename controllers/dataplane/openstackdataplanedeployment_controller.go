@@ -259,17 +259,16 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 	}
 
-	if instance.Spec.ServicesOverride == nil {
-		if nodesetServiceMap, err = deployment.DedupServices(ctx, helper, nodeSets.Items); err != nil {
-			util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
-			instance.Status.Conditions.MarkFalse(
-				condition.DeploymentReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				dataplanev1.ServiceErrorMessage,
-				err.Error())
-			return ctrl.Result{}, err
-		}
+	if nodesetServiceMap, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
+		instance.Spec.ServicesOverride); err != nil {
+		util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1.ServiceErrorMessage,
+			err.Error())
+		return ctrl.Result{}, err
 	}
 
 	version, err := dataplaneutil.GetVersion(ctx, helper, instance.Namespace)
@@ -320,7 +319,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		// deploy with the OpenStackDataPlaneNodeSet's Services.
 		var deployResult *ctrl.Result
 		if len(instance.Spec.ServicesOverride) != 0 {
-			deployResult, err = deployer.Deploy(instance.Spec.ServicesOverride)
+			deployResult, err = deployer.Deploy(nodesetServiceMap[deployment.AllNodeSets])
 		} else {
 			deployResult, err = deployer.Deploy(nodesetServiceMap[nodeSet.Name])
 		}
