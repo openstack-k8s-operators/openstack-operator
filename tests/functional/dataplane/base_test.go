@@ -213,6 +213,20 @@ func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 	}
 }
 
+// Build OpenStackDataPlnaeDeploymentSpec with duplicate services
+func DuplicateServiceDeploymentSpec() map[string]interface{} {
+
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"edpm-compute-nodeset",
+		},
+		"servicesOverride": []string{
+			"foo-service",
+			"duplicate-service",
+		},
+	}
+}
+
 func DefaultNetConfigSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"networks": []map[string]interface{}{{
