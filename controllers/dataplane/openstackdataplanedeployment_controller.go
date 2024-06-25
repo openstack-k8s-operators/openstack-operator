@@ -112,6 +112,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	// Reset all conditions to Unknown as the state is not yet known for
 	// this reconcile loop.
 	instance.InitConditions()
+	instance.InitHashesAndImages()
 	// Set ObservedGeneration since we've reset conditions
 	instance.Status.ObservedGeneration = instance.Generation
 
@@ -135,19 +136,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			return
 		}
 	}()
-
-	if instance.Status.ConfigMapHashes == nil {
-		instance.Status.ConfigMapHashes = make(map[string]string)
-	}
-	if instance.Status.SecretHashes == nil {
-		instance.Status.SecretHashes = make(map[string]string)
-	}
-	if instance.Status.NodeSetHashes == nil {
-		instance.Status.NodeSetHashes = make(map[string]string)
-	}
-	if instance.Status.ContainerImages == nil {
-		instance.Status.ContainerImages = make(map[string]string)
-	}
 
 	// Ensure NodeSets
 	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
