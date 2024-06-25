@@ -16,10 +16,10 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240622123909-205129589c38
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240623150030-e53574c3da59
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240623145456-c19b57192709
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240621144804-4b3c1fd10960
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240624132705-6c8da3c0bbfd
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240621144804-4b3c1fd10960
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240623200540-210efea65180
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240622094308-5012e4d6ae8c
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240624150155-414cc98576d1
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240623150026-b33cfbd3c3bf
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240623110641-32e3cb3025cc
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240623150031-5548ad9cd2a8
