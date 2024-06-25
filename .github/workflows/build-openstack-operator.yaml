@@ -17,7 +17,7 @@ jobs:
       operator_name: openstack
       go_version: 1.20.x
       operator_sdk_version: 1.31.0
-      bundle_dockerfile: ./custom-bundle.Dockerfile
+      bundle_dockerfile: ./bundle.Dockerfile
       catalog_extra_bundles_script: ./hack/pin-bundle-images.sh
     secrets:
       IMAGENAMESPACE: ${{ secrets.IMAGENAMESPACE }}
