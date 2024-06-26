@@ -1661,6 +1661,9 @@ spec:
                     - rabbitMqClusterName
                     - secret
                     type: object
+                  uniquePodNames:
+                    default: false
+                    type: boolean
                 type: object
               designate:
                 properties:
@@ -4525,6 +4528,9 @@ spec:
                     - memcachedInstance
                     - secret
                     type: object
+                  uniquePodNames:
+                    default: false
+                    type: boolean
                 type: object
               heat:
                 properties:

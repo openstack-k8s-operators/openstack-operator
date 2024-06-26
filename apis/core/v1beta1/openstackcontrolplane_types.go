@@ -414,6 +414,13 @@ type GlanceSection struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// APIOverride, provides the ability to override the generated manifest of several child resources.
 	APIOverride map[string]Override `json:"apiOverrides,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// UniquePodNames - Use a unique prefix for glance CRs to have unique pod names.
+	// Convenient to avoid podname (and thus hostname) collision between different deployments.
+	// Useful for CI jobs as well as preproduction and production environments that use the same storage backend, etc.
+	UniquePodNames bool `json:"uniquePodNames"`
 }
 
 // CinderSection defines the desired state of Cinder service
@@ -433,6 +440,13 @@ type CinderSection struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// APIOverride, provides the ability to override the generated manifest of several child resources.
 	APIOverride Override `json:"apiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// UniquePodNames - Use a unique prefix for cinder CRs to have unique pod names.
+	// Convenient to avoid podname (and thus hostname) collision between different deployments.
+	// Useful for CI jobs as well as preproduction and production environments that use the same storage backend, etc.
+	UniquePodNames bool `json:"uniquePodNames"`
 }
 
 // GaleraSection defines the desired state of Galera services

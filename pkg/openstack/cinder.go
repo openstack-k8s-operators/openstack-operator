@@ -21,9 +21,27 @@ import (
 
 // ReconcileCinder -
 func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+	cinderName := "cinder"
+	altCinderName := fmt.Sprintf("cinder-%s", instance.UID[:5])
+
+	if instance.Spec.Cinder.UniquePodNames {
+		cinderName, altCinderName = altCinderName, cinderName
+	}
+
+	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
 	cinder := &cinderv1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "cinder",
+			Name:      altCinderName,
+			Namespace: instance.Namespace,
+		},
+	}
+	if res, err := EnsureDeleted(ctx, helper, cinder); err != nil {
+		return res, err
+	}
+
+	cinder = &cinderv1.Cinder{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cinderName,
 			Namespace: instance.Namespace,
 		},
 	}
@@ -58,7 +76,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	// When component services got created check if there is the need to create a route
-	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "cinder", Namespace: instance.Namespace}, cinder); err != nil {
+	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: cinderName, Namespace: instance.Namespace}, cinder); err != nil {
 		if !k8s_errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
@@ -106,7 +124,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.CinderAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", "cinder")
+	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", cinderName)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), cinder, func() error {
 		instance.Spec.Cinder.Template.CinderSpecBase.DeepCopyInto(&cinder.Spec.CinderSpecBase)
 		instance.Spec.Cinder.Template.CinderAPI.DeepCopyInto(&cinder.Spec.CinderAPI.CinderAPITemplateCore)
