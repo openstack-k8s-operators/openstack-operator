@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: check for replace lines in go.mod files
         run: |
           ! egrep --invert-match -e '^replace.*/apis => \./apis|^replace.*//allow-merging$'  `find . -name 'go.mod'` | egrep -e 'go.mod:replace'
