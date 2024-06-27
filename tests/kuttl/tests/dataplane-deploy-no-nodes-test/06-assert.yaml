@@ -86,18 +86,18 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
+    - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-beta-nodeset
+      name: ssh-key-edpm-compute-beta-nodeset
+      subPath: ssh_key_edpm-compute-beta-nodeset
     - mountPath: /runner/inventory/hosts
       name: inventory
       subPath: inventory
     volumes:
-    - name: ssh-key
+    - name: ssh-key-edpm-compute-beta-nodeset
       secret:
         items:
         - key: ssh-privatekey
-          path: ssh_key
+          path: ssh_key_edpm-compute-beta-nodeset
         secretName: dataplane-ansible-ssh-private-key-secret
     - name: inventory
       secret:
@@ -136,18 +136,18 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
+    - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-beta-nodeset
+      name: ssh-key-edpm-compute-beta-nodeset
+      subPath: ssh_key_edpm-compute-beta-nodeset
     - mountPath: /runner/inventory/hosts
       name: inventory
       subPath: inventory
     volumes:
-    - name: ssh-key
+    - name: ssh-key-edpm-compute-beta-nodeset
       secret:
         items:
         - key: ssh-privatekey
-          path: ssh_key
+          path: ssh_key_edpm-compute-beta-nodeset
         secretName: dataplane-ansible-ssh-private-key-secret
     - name: inventory
       secret:
