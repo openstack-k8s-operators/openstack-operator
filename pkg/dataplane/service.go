@@ -122,17 +122,6 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 			helper.GetLogger().Info("service name must follow RFC1123")
 			return err
 		}
-		nodeSetContainsService := false
-		for _, roleServiceName := range instance.Spec.Services {
-			if roleServiceName == serviceObjMeta.Name {
-				nodeSetContainsService = true
-				break
-			}
-		}
-		if !nodeSetContainsService {
-			helper.GetLogger().Info("Skipping ensure service since it is not a service on this nodeset", "service", serviceObjMeta.Name)
-			continue
-		}
 
 		serviceObjSpec := &dataplanev1.OpenStackDataPlaneServiceSpec{}
 		err = serviceObj.Spec.Decode(serviceObjSpec)
