@@ -112,7 +112,30 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 	)
 }
 
+// Create OpenStackVersion
+func CreateOpenStackVersion(name types.NamespacedName) *unstructured.Unstructured {
+	raw := DefaultOpenStackVersion(name)
+	return th.CreateUnstructured(raw)
+}
+
 // Struct initialization
+
+func DefaultOpenStackVersion(name types.NamespacedName) map[string]interface{} {
+	return map[string]interface{}{
+		"apiVersion": "core.openstack.org/v1beta1",
+		"kind":       "OpenStackVersion",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": map[string]interface{}{
+			"targetVersion": "0.0.1",
+		},
+		"status": map[string]interface{}{
+			"availableVersion": "0.0.1",
+		},
+	}
+}
 
 // Build OpenStackDataPlaneNodeSetSpec struct and fill it with preset values
 func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
@@ -177,6 +200,16 @@ func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 			"edpm-compute-nodeset",
 		},
 		"servicesOverride": []string{},
+	}
+}
+
+func MinorUpdateDataPlaneDeploymentSpec() map[string]interface{} {
+
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"edpm-compute-nodeset",
+		},
+		"servicesOverride": []string{"update"},
 	}
 }
 
