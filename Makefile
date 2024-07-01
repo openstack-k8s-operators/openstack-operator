@@ -170,6 +170,9 @@ golangci-lint:
 .PHONY: test
 test: manifests generate gowork fmt vet envtest ginkgo ginkgo-run ## Run ginkgo tests with dependencies.
 
+PROCS?=$(shell expr $(shell nproc --ignore 2) / 2)
+PROC_CMD = --procs ${PROCS}
+
 .PHONY: ginkgo-run
 ginkgo-run: ## Run ginkgo.
 	source hack/export_related_images.sh && \
