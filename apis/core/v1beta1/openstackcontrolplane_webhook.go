@@ -497,7 +497,7 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 
 		if depErrorMsg := r.checkDepsEnabled("Telemetry.Ceilometer"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("ceilometer").Child("enabled"),
-					     *r.Spec.Telemetry.Template.Ceilometer.Enabled, depErrorMsg)
+				*r.Spec.Telemetry.Template.Ceilometer.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -507,7 +507,7 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 
 		if depErrorMsg := r.checkDepsEnabled("Telemetry.Autoscaling"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("autoscaling").Child("enabled"),
-					     *r.Spec.Telemetry.Template.Autoscaling.Enabled, depErrorMsg)
+				*r.Spec.Telemetry.Template.Autoscaling.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
