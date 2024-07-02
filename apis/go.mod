@@ -7,26 +7,26 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
-	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240623150029-c72080b6a9a6
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240625102603-9119e8944ec4
-	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240623150028-a237ee3870f4
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240625133023-f64b97144a8e
-	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240625133022-8a9f7de62bf0
-	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240622124727-be8b4a106ecf
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240625170705-ea36cdc812df
-	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240624082843-0b21b8423e40
+	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240627184755-d07cdad0aaf7
+	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240701014200-8f627d558478
+	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240701062758-0f14f6a70826
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240701051632-3abd41eefa7f
+	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240627060823-69878ea34ffe
+	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240701051346-1a6efac38ad5
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240701051058-e23cdfd81161
+	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240630211522-e073adc7d7f1
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240625151513-04190feb4597
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240624132705-6c8da3c0bbfd
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240624132705-6c8da3c0bbfd
-	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240625154837-a12daddba0ee
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240624150155-414cc98576d1
-	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240624045625-42d79e24105b
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240625170705-b2d76178c5c3
-	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240626053422-e9947d8c31be
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240625194024-3f6deaad2eae
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240624185838-9f91003467ee
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240625144205-0b9bd13edce7
-	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240624081744-6788d5c8e704
+	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240630212043-88fed7663cfc
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240626205513-5c175a95f408
+	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240701051630-fa8672d3d88f
+	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240628152138-9ea2124e10e9
+	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240701051631-abaeee67c64a
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240701051059-9faa34b40a2d
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240701062514-c0c1319f326c
+	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240701051631-94a9077bc405
+	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240626092239-217758b5607a
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240625131637-2f8d146fa1d6
 	github.com/rabbitmq/cluster-operator/v2 v2.9.0
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.69.0-rhobs1 // indirect
@@ -115,4 +115,4 @@ require (
 replace github.com/openshift/api => github.com/openshift/api v0.0.0-20230414143018-3367bc7e6ac7 //allow-merging
 
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.6.0_patches_tag)
-replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20240612145157-629e537392b3 //allow-merging
+replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20240626194327-e7df1b654cb7 //allow-merging
