@@ -91,8 +91,8 @@ docs-dependencies: .bundle
 	bundle config set --local path 'local/bundle'; bundle install
 
 .PHONY: docs
-docs: manifests docs-dependencies crd-to-markdown  docs-kustomize-examples ## Build docs
-	CRD_MARKDOWN=$(CRD_MARKDOWN) MAKE=$(MAKE) ./docs/build_docs.sh
+docs: manifests docs-dependencies crd-to-adoc docs-kustomize-examples ## Build docs
+	CRD_ASCIIDOC=$(CRD_ASCIIDOC) MAKE=$(MAKE) ./docs/build_docs.sh
 
 .PHONY: docs-preview
 docs-preview: docs
@@ -259,14 +259,14 @@ $(LOCALBIN):
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
-CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
+CRD_ASCIIDOC ?= $(LOCALBIN)/crd-to-adoc
 GINKGO ?= $(LOCALBIN)/ginkgo
 KUTTL ?= $(LOCALBIN)/kubectl-kuttl
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v3.8.7
 CONTROLLER_TOOLS_VERSION ?= v0.11.1
-CRD_MARKDOWN_VERSION ?= v0.0.3
+CRD_ASCIIDOC_VERSION ?= 0.0.2
 KUTTL_VERSION ?= 0.15.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
@@ -285,10 +285,10 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
-.PHONY: crd-to-markdown
-crd-to-markdown: $(CRD_MARKDOWN) ## Download crd-to-markdown locally if necessary.
-$(CRD_MARKDOWN): $(LOCALBIN)
-	test -s $(LOCALBIN)/crd-to-markdown || GOBIN=$(LOCALBIN) go install github.com/clamoriniere/crd-to-markdown@$(CRD_MARKDOWN_VERSION)
+.PHONY: crd-to-adoc
+crd-to-adoc: $(CRD_ASCIIDOC) ## Download crd-to-adoc locally if necessary.
+$(CRD_ASCIIDOC): $(LOCALBIN)
+	test -s $(LOCALBIN)/crd-to-adoc || GOBIN=$(LOCALBIN) go install github.com/fao89/crd-to-adoc@$(CRD_ASCIIDOC_VERSION)
 
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
