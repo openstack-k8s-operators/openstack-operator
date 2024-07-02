@@ -27,6 +27,7 @@ import (
 	slices "golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/iancoleman/strcase"
@@ -310,8 +311,12 @@ func (d *Deployer) addCertMounts(
 					}
 					projectedVolumeSource.Sources = append(projectedVolumeSource.Sources, volumeProjection)
 				}
+				volumeName := GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, 0)
+				if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
+					volumeName = volumeName[:apimachineryvalidation.DNS1123LabelMaxLength]
+				}
 				certVolume := corev1.Volume{
-					Name: GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, 0),
+					Name: volumeName,
 					VolumeSource: corev1.VolumeSource{
 						Projected: &projectedVolumeSource,
 					},
@@ -323,7 +328,7 @@ func (d *Deployer) addCertMounts(
 				}
 
 				certVolumeMount := corev1.VolumeMount{
-					Name:      GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, 0),
+					Name:      volumeName,
 					MountPath: path.Join(CertPaths, certMountDir, certKey),
 				}
 				volMounts.Volumes = append(volMounts.Volumes, certVolume)
@@ -341,8 +346,12 @@ func (d *Deployer) addCertMounts(
 			if err != nil {
 				return d.AeeSpec, err
 			}
+			volumeName := fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts)
+			if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
+				volumeName = volumeName[:apimachineryvalidation.DNS1123LabelMaxLength]
+			}
 			cacertVolume := corev1.Volume{
-				Name: fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts),
+				Name: volumeName,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
 						SecretName: service.Spec.CACerts,
@@ -351,7 +360,7 @@ func (d *Deployer) addCertMounts(
 			}
 
 			cacertVolumeMount := corev1.VolumeMount{
-				Name:      fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts),
+				Name:      volumeName,
 				MountPath: path.Join(CACertPaths, service.Spec.EDPMServiceType),
 			}
 
@@ -401,9 +410,13 @@ func (d *Deployer) addServiceExtraMounts(
 		sort.Strings(keys)
 
 		for idx, key := range keys {
-			name := fmt.Sprintf("%s-%s", cm.Name, strconv.Itoa(idx))
+			volumeName := fmt.Sprintf("%s-%s", cm.Name, strconv.Itoa(idx))
+			if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
+				limit := apimachineryvalidation.DNS1123LabelMaxLength - len(strconv.Itoa(idx))
+				volumeName = volumeName[:limit] + strconv.Itoa(idx)
+			}
 			volume := corev1.Volume{
-				Name: name,
+				Name: volumeName,
 				VolumeSource: corev1.VolumeSource{
 					ConfigMap: &corev1.ConfigMapVolumeSource{
 						LocalObjectReference: corev1.LocalObjectReference{
@@ -420,7 +433,7 @@ func (d *Deployer) addServiceExtraMounts(
 			}
 
 			volumeMount := corev1.VolumeMount{
-				Name:      name,
+				Name:      volumeName,
 				MountPath: path.Join(baseMountPath, key),
 				SubPath:   key,
 			}
@@ -443,9 +456,13 @@ func (d *Deployer) addServiceExtraMounts(
 		sort.Strings(keys)
 
 		for idx, key := range keys {
-			name := fmt.Sprintf("%s-%s", sec.Name, strconv.Itoa(idx))
+			volumeName := fmt.Sprintf("%s-%s", sec.Name, strconv.Itoa(idx))
+			if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
+				limit := apimachineryvalidation.DNS1123LabelMaxLength - len(strconv.Itoa(idx))
+				volumeName = volumeName[:limit] + strconv.Itoa(idx)
+			}
 			volume := corev1.Volume{
-				Name: name,
+				Name: volumeName,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
 						SecretName: sec.Name,
@@ -460,7 +477,7 @@ func (d *Deployer) addServiceExtraMounts(
 			}
 
 			volumeMount := corev1.VolumeMount{
-				Name:      name,
+				Name:      volumeName,
 				MountPath: path.Join(baseMountPath, key),
 				SubPath:   key,
 			}

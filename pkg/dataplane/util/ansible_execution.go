@@ -27,6 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -279,6 +280,7 @@ func GetAnsibleExecution(ctx context.Context,
 // getAnsibleExecutionNamePrefix compute the name of the AnsibleEE
 func getAnsibleExecutionNamePrefix(serviceName string) string {
 	var executionNamePrefix string
+	AnsibleExecutionServiceNameLen := apimachineryvalidation.DNS1123LabelMaxLength - 10
 	if len(serviceName) > AnsibleExecutionServiceNameLen {
 		executionNamePrefix = serviceName[:AnsibleExecutionServiceNameLen]
 	} else {
@@ -295,8 +297,9 @@ func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneSer
 	if !service.Spec.DeployOnAllNodeSets {
 		executionName = fmt.Sprintf("%s-%s", executionName, nodeSetName)
 	}
-	if len(executionName) > AnsibleExcecutionNameLabelLen {
-		executionName = executionName[:AnsibleExcecutionNameLabelLen]
+
+	if len(executionName) > apimachineryvalidation.DNS1123LabelMaxLength {
+		executionName = executionName[:apimachineryvalidation.DNS1123LabelMaxLength]
 	}
 
 	labels := map[string]string{

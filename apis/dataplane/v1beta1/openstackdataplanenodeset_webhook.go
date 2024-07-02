@@ -28,6 +28,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -122,6 +123,18 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 			field.NewPath("Name"),
 			r.Name,
 			fmt.Sprintf("Error validating OpenStackDataPlaneNodeSet name %s, name must follow RFC1123", r.Name)))
+	}
+	// Validate volume names
+	for _, emount := range r.Spec.NodeTemplate.ExtraMounts {
+		for _, vol := range emount.Volumes {
+			msgs := apimachineryvalidation.IsDNS1123Label(vol.Name)
+			for _, msg := range msgs {
+				errors = append(errors, field.Invalid(
+					field.NewPath("spec.nodeTemplate.extraMounts"),
+					vol.Name,
+					msg))
+			}
+		}
 	}
 	if len(errors) > 0 {
 		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)

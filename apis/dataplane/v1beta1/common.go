@@ -102,10 +102,6 @@ type AnsibleOpts struct {
 
 // NodeSection defines the top level attributes inherited by nodes in the CR.
 type NodeSection struct {
-	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-	// +kubebuilder:validation:Optional
-	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
-
 	// Networks - Instance networks
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
