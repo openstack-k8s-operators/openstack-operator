@@ -98,6 +98,9 @@ var _ = BeforeSuite(func() {
 	infraCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/infra-operator/apis", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	openstackCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/openstack-operator/apis", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -106,6 +109,7 @@ var _ = BeforeSuite(func() {
 			aeeCRDs,
 			baremetalCRDs,
 			infraCRDs,
+			openstackCRDs,
 		},
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
 			Paths: []string{filepath.Join("..", "..", "..", "config", "webhook")},
@@ -175,6 +179,9 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	err = (&dataplanev1.OpenStackDataPlaneService{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = (&openstackv1.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
 	kclient, err := kubernetes.NewForConfig(cfg)
