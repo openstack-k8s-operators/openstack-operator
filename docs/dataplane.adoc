@@ -6,6 +6,8 @@
 :doctype: book
 :context: osp
 
+DNM, this is a test of documentation build CI job!
+
 The openstack-operator automates the deployment of an OpenStack dataplane. A
 dataplane is a collection of nodes that will be used for hosting OpenStack
 workloads. The openstack-operator prepares the nodes with enough operating
