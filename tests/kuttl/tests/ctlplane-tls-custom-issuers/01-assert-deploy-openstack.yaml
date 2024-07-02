@@ -174,28 +174,14 @@ spec:
         replicas: 1
   tls:
     ingress:
-      ca:
-        duration: 87600h0m0s
-      cert:
-        duration: 43800h0m0s
       enabled: true
+      ca:
+        customIssuer: rootca-ingress-custom
     podLevel:
       enabled: true
       internal:
         ca:
-          duration: 87600h0m0s
-        cert:
-          duration: 43800h0m0s
-      libvirt:
-        ca:
-          duration: 87600h0m0s
-        cert:
-          duration: 43800h0m0s
-      ovn:
-        ca:
-          duration: 87600h0m0s
-        cert:
-          duration: 43800h0m0s
+          customIssuer: rootca-internal-custom
 status:
   conditions:
   - message: Setup complete

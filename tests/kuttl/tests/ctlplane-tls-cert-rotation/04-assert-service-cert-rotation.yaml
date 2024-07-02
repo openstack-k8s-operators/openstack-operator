@@ -1,0 +1,26 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 30
+commands:
+  - script: |
+      echo "Get fingerprints of all service certs"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_after
+
+  - script: |
+      echo "Check fingerprints"
+      any_cert_not_rotated=0
+      while IFS= read -r fp; do
+        if grep -qF "$fp" /tmp/endpoint_fingerprints_before; then
+          echo "Cert not rotated - $fp"
+          any_cert_not_rotated=1
+        fi
+      done < /tmp/endpoint_fingerprints_after
+
+  - script: |
+      if [ $any_cert_not_rotated -eq 1 ]; then
+        echo "Some certificates were not rotated"
+        exit 1
+      else
+        echo "All certificates were rotated successfully"
+        exit 0
+      fi
