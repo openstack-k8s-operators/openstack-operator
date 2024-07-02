@@ -625,7 +625,186 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			)
 		})
 	})
+	When("A dataplaneDeployment is created with duplicate service in nodeset", func() {
+		BeforeEach(func() {
+			CreateDataplaneServicesWithSameServiceType(dataplaneServiceName)
+			CreateSSHSecret(dataplaneSSHSecretName)
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaNeutronMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			// DefaultDataPlanenodeSetSpec comes with two mock services, one marked for deployment on all nodesets
+			// But we will not create them to test this scenario
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DuplicateServiceNodeSetSpec(dataplaneNodeSetName.Name)))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:              []string{"edpm-compute-nodeset"},
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				BackoffLimit:          &DefaultBackoffLimit,
+				DeploymentRequeueTime: 15,
+				ServicesOverride:      nil,
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+		})
 
+		It("should have conditions set to true", func() {
+			// Create config map for OVN service
+			ovnConfigMapName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "ovncontroller-config",
+			}
+			mapData := map[string]interface{}{
+				"ovsdb-config": "test-ovn-config",
+			}
+			th.CreateConfigMap(ovnConfigMapName, mapData)
+			service := GetService(dataplaneServiceName)
+			aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(service,
+				dataplaneDeploymentName.Name, dataplaneNodeSetName.Name)
+			ansibleeeName := types.NamespacedName{
+				Name:      aeeName,
+				Namespace: dataplaneDeploymentName.Namespace,
+			}
+			Eventually(func(g Gomega) {
+				ansibleEE := GetAnsibleee(ansibleeeName)
+				ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionTrue,
+			)
+		})
+	})
+	When("A dataplaneDeployment is created with duplicate service in deployment service override", func() {
+		BeforeEach(func() {
+			CreateDataplaneServicesWithSameServiceType(dataplaneServiceName)
+			CreateSSHSecret(dataplaneSSHSecretName)
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaNeutronMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			// DefaultDataPlanenodeSetSpec comes with two mock services, one marked for deployment on all nodesets
+			// But we will not create them to test this scenario
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DuplicateServiceDeploymentSpec()))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:              []string{"edpm-compute-nodeset"},
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				BackoffLimit:          &DefaultBackoffLimit,
+				DeploymentRequeueTime: 15,
+				ServicesOverride:      []string{dataplaneServiceName.Name, "duplicate-service"},
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+		})
+
+		It("should have conditions set to true", func() {
+			baremetal := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      dataplaneNodeSetName.Name,
+					Namespace: dataplaneNodeName.Namespace,
+				},
+			}
+			// Set baremetal provisioning conditions to True
+			// This must succeed, as the "alpha-nodeset" exists
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName, &baremetal)).To(Succeed())
+				baremetal.Status.Conditions.MarkTrue(
+					condition.ReadyCondition,
+					condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// Create config map for OVN service
+			ovnConfigMapName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "ovncontroller-config",
+			}
+			mapData := map[string]interface{}{
+				"ovsdb-config": "test-ovn-config",
+			}
+			th.CreateConfigMap(ovnConfigMapName, mapData)
+			service := GetService(dataplaneServiceName)
+			aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(service,
+				dataplaneDeploymentName.Name, dataplaneNodeSetName.Name)
+			ansibleeeName := types.NamespacedName{
+				Name:      aeeName,
+				Namespace: dataplaneDeploymentName.Namespace,
+			}
+			Eventually(func(g Gomega) {
+				ansibleEE := GetAnsibleee(ansibleeeName)
+				ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionTrue,
+			)
+		})
+	})
 	When("A dataplaneDeployment is created with non-existent service in nodeset", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
