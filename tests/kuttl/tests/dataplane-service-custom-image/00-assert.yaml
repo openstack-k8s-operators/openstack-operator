@@ -69,18 +69,18 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
+    - mountPath: /runner/env/ssh_key/ssh_key_edpm-no-nodes-custom-svc
+      name: ssh-key-edpm-no-nodes-custom-svc
+      subPath: ssh_key_edpm-no-nodes-custom-svc
     - mountPath: /runner/inventory/hosts
       name: inventory
       subPath: inventory
     volumes:
-    - name: ssh-key
+    - name: ssh-key-edpm-no-nodes-custom-svc
       secret:
         items:
         - key: ssh-privatekey
-          path: ssh_key
+          path: ssh_key_edpm-no-nodes-custom-svc
         secretName: dataplane-ansible-ssh-private-key-secret
     - name: inventory
       secret:

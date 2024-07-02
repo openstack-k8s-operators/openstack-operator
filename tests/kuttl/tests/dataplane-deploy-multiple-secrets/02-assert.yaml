@@ -138,18 +138,18 @@ spec:
       secret:
         secretName: combined-ca-bundle
   - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
+    - mountPath: /runner/env/ssh_key/ssh_key_openstack-edpm-tls
+      name: ssh-key-openstack-edpm-tls
+      subPath: ssh_key_openstack-edpm-tls
     - mountPath: /runner/inventory/hosts
       name: inventory
       subPath: inventory
     volumes:
-    - name: ssh-key
+    - name: ssh-key-openstack-edpm-tls
       secret:
         items:
         - key: ssh-privatekey
-          path: ssh_key
+          path: ssh_key_openstack-edpm-tls
         secretName: dataplane-ansible-ssh-private-key-secret
     - name: inventory
       secret:
@@ -185,18 +185,18 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
+    - mountPath: /runner/env/ssh_key/ssh_key_openstack-edpm-tls
+      name: ssh-key-openstack-edpm-tls
+      subPath: ssh_key_openstack-edpm-tls
     - mountPath: /runner/inventory/hosts
       name: inventory
       subPath: inventory
     volumes:
-    - name: ssh-key
+    - name: ssh-key-openstack-edpm-tls
       secret:
         items:
         - key: ssh-privatekey
-          path: ssh_key
+          path: ssh_key_openstack-edpm-tls
         secretName: dataplane-ansible-ssh-private-key-secret
     - name: inventory
       secret:
