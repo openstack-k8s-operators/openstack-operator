@@ -62,7 +62,7 @@ func DataplaneNodesetsDeployed(version *corev1beta1.OpenStackVersion, dataplaneN
 		if !nodeset.IsReady() {
 			return false
 		}
-		if nodeset.Status.DeployedVersion != version.Spec.TargetVersion {
+		if !nodeset.Status.Conditions.IsTrue(dataplanev1.NodeSetMinorUpdateReadyCondition) {
 			return false
 		}
 

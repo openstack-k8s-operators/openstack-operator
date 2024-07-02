@@ -109,4 +109,11 @@ const (
 
 	// NodeSetServiceDeploymentErrorMessage error
 	NodeSetServiceDeploymentErrorMessage = "Deployment error occurred in %s service"
+
+	// NodeSetMinorUpdateReadyCondition Status=True condition indicates if the
+	// NodeSet minor update is finished and successful.
+	NodeSetMinorUpdateReadyCondition condition.Type = "NodeSetMinorUpdateReady"
+
+	// NodeSetMinorUpdateReadyMessage ready
+	NodeSetMinorUpdateReadyMessage = "Minor update ready for NodeSet"
 )

@@ -385,7 +385,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	}
 
-	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(helper, instance)
+	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(helper, instance, version)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -464,6 +464,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 func checkDeployment(helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	version *openstackv1.OpenStackVersion,
 ) (bool, bool, bool, string, error) {
 	// Get all completed deployments
 	var failedDeployment string
@@ -530,8 +531,41 @@ func checkDeployment(helper *helper.Helper,
 				}
 				instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
 				instance.Status.DeployedVersion = deployment.Status.DeployedVersion
-			}
 
+				// Get list of services by name, either from ServicesOverride or
+				// the NodeSet.
+				var services []string
+				if len(deployment.Spec.ServicesOverride) != 0 {
+					services = deployment.Spec.ServicesOverride
+				} else {
+					services = instance.Spec.Services
+				}
+
+				// For each service, check if EDPMServiceType is "update", and the
+				// deployment deployed the latest version.
+				for _, serviceName := range services {
+					service := &dataplanev1.OpenStackDataPlaneService{}
+					name := types.NamespacedName{
+						Namespace: instance.Namespace,
+						Name:      serviceName,
+					}
+					err := helper.GetClient().Get(context.Background(), name, service)
+					if err != nil {
+						helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
+						return false, false, false, failedDeployment, err
+					}
+
+					if service.Spec.EDPMServiceType != "update" {
+						continue
+					}
+
+					if deployment.Status.DeployedVersion == version.Spec.TargetVersion {
+						instance.Status.Conditions.MarkTrue(
+							dataplanev1.NodeSetMinorUpdateReadyCondition,
+							dataplanev1.NodeSetMinorUpdateReadyMessage)
+					}
+				}
+			}
 		}
 	}
 
