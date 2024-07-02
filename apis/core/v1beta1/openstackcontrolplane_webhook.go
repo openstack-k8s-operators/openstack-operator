@@ -35,6 +35,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
@@ -602,9 +604,20 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			if override, ok = r.Spec.Glance.APIOverride[name]; !ok {
 				override = Override{}
 			}
-			initializeOverrideSpec(&override.Route, true)
-			glanceAPI.SetDefaultRouteAnnotations(override.Route.Annotations)
-			r.Spec.Glance.APIOverride[name] = override
+			// Do not build APIOverrides for an APIEdge instance
+			if glanceAPI.Type != glancev1.APIEdge {
+				initializeOverrideSpec(&override.Route, true)
+				glanceAPI.SetDefaultRouteAnnotations(override.Route.Annotations)
+				r.Spec.Glance.APIOverride[name] = override
+			}
+		}
+		// clean up the APIOverrides for each glanceAPI that has been
+		// deleted from the ctlplane
+		apis := maps.Keys(r.Spec.Glance.Template.GlanceAPIs)
+		for k, _ := range r.Spec.Glance.APIOverride {
+			if !slices.Contains(apis, k) {
+				delete(r.Spec.Glance.APIOverride, k)
+			}
 		}
 	}
 
