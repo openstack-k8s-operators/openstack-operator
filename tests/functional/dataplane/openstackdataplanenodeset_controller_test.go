@@ -23,6 +23,8 @@ import (
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
 	//revive:disable-next-line:dot-imports
@@ -64,6 +66,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneDeploymentName types.NamespacedName
 	var dataplaneConfigHash string
 	var dataplaneGlobalServiceName types.NamespacedName
+	var dataplaneUpdateServiceName types.NamespacedName
 
 	defaultEdpmServiceList := []string{
 		"edpm_frr_image",
@@ -106,6 +109,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		}
 		dataplaneGlobalServiceName = types.NamespacedName{
 			Name:      "global-service",
+			Namespace: namespace,
+		}
+		dataplaneUpdateServiceName = types.NamespacedName{
+			Name:      "update",
 			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_SERVICES", "../../../config/services")
@@ -1290,4 +1297,51 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			}).Should(BeTrue())
 		})
 	})
+
+	When("A DataPlaneNodeSet is created with NoNodes and a MinorUpdate OpenStackDataPlaneDeployment is created", func() {
+		BeforeEach(func() {
+
+			updateServiceSpec := map[string]interface{}{
+				"playbook": "osp.edpm.update",
+			}
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, updateServiceSpec)
+			DeferCleanup(th.DeleteService, dataplaneUpdateServiceName)
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(false)))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, MinorUpdateDataPlaneDeploymentSpec()))
+			openstackVersionName := types.NamespacedName{
+				Name:      "openstackversion",
+				Namespace: namespace,
+			}
+			err := os.Setenv("OPENSTACK_RELEASE_VERSION", "0.0.1")
+			Expect(err).NotTo(HaveOccurred())
+			openstackv1.SetupVersionDefaults()
+			DeferCleanup(th.DeleteInstance, CreateOpenStackVersion(openstackVersionName))
+
+			CreateSSHSecret(dataplaneSSHSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+
+			Eventually(func(g Gomega) {
+				// Make an AnsibleEE name for each service
+				ansibleeeName := types.NamespacedName{
+					Name:      "update-edpm-deployment-edpm-compute-nodeset",
+					Namespace: namespace,
+				}
+				ansibleEE := GetAnsibleee(ansibleeeName)
+				ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+		})
+		It("NodeSet.Status.DeployedVersion should be set to latest version", Label("update"), func() {
+			Eventually(func() string {
+				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				return dataplaneNodeSetInstance.Status.DeployedVersion
+			}).Should(Equal("0.0.1"))
+		})
+	})
+
 })

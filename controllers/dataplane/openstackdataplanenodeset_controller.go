@@ -529,9 +529,41 @@ func checkDeployment(helper *helper.Helper,
 					instance.Status.ContainerImages[k] = v
 				}
 				instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
-				instance.Status.DeployedVersion = deployment.Status.DeployedVersion
-			}
 
+				// Get list of services by name, either from ServicesOverride or
+				// the NodeSet.
+				var services []string
+				if len(deployment.Spec.ServicesOverride) != 0 {
+					services = deployment.Spec.ServicesOverride
+				} else {
+					services = instance.Spec.Services
+				}
+
+				// For each service, check if EDPMServiceType is "update", and
+				// if so, copy Deployment.Status.DeployedVersion to
+				// NodeSet.Status.DeployedVersion
+				for _, serviceName := range services {
+					service := &dataplanev1.OpenStackDataPlaneService{}
+					name := types.NamespacedName{
+						Namespace: instance.Namespace,
+						Name:      serviceName,
+					}
+					err := helper.GetClient().Get(context.Background(), name, service)
+					if err != nil {
+						helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
+						return false, false, false, failedDeployment, err
+					}
+
+					if service.Spec.EDPMServiceType != "update" {
+						continue
+					}
+
+					// An "update" service Deployment has been completed, so
+					// set the NodeSet's DeployedVersion to the Deployment's
+					// DeployedVersion.
+					instance.Status.DeployedVersion = deployment.Status.DeployedVersion
+				}
+			}
 		}
 	}
 
