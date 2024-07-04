@@ -39,8 +39,10 @@ import (
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 )
 
-var envContainerImages (map[string]*string)
-var envAvailableVersion string
+var (
+	envContainerImages  (map[string]*string)
+	envAvailableVersion string
+)
 
 // SetupVersionDefaults -
 func SetupVersionDefaults() {
@@ -72,7 +74,7 @@ func (r *OpenStackVersionReconciler) GetLogger(ctx context.Context) logr.Logger 
 
 // +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions/finalizers,verbs=update;patch
 // +kubebuilder:rbac:groups=core.openstack.org,resources=openstackcontrolplanes,verbs=get;list;watch
 // +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch
 
@@ -82,7 +84,6 @@ func (r *OpenStackVersionReconciler) GetLogger(ctx context.Context) logr.Logger 
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
 func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-
 	Log := r.GetLogger(ctx)
 	Log.Info("Reconciling OpenStackVersion")
 	// Fetch the instance
@@ -293,7 +294,6 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackVersionReconciler) SetupWithManager(mgr ctrl.Manager) error {
-
 	versionFunc := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, o client.Object) []reconcile.Request {
 		Log := r.GetLogger(ctx)
 		versionList := &corev1beta1.OpenStackVersionList{}
