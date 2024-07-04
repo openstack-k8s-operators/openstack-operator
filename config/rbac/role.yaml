@@ -123,6 +123,7 @@ rules:
   resources:
   - openstackbaremetalsets/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - baremetal.openstack.org
@@ -257,6 +258,7 @@ rules:
   resources:
   - openstackcontrolplanes/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - core.openstack.org
@@ -283,6 +285,7 @@ rules:
   resources:
   - openstackversions/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - core.openstack.org
@@ -307,6 +310,7 @@ rules:
   resources:
   - openstackdataplanedeployments/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - dataplane.openstack.org
@@ -333,6 +337,7 @@ rules:
   resources:
   - openstackdataplanenodesets/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - dataplane.openstack.org
@@ -358,6 +363,7 @@ rules:
   resources:
   - openstackdataplaneservices/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - designate.openstack.org
@@ -550,6 +556,7 @@ rules:
   resources:
   - dnsdata/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - network.openstack.org
@@ -592,6 +599,7 @@ rules:
   resources:
   - ipsets/finalizers
   verbs:
+  - patch
   - update
 - apiGroups:
   - network.openstack.org
@@ -728,6 +736,7 @@ rules:
   - create
   - get
   - list
+  - patch
   - update
   - watch
 - apiGroups:
