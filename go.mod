@@ -17,7 +17,7 @@ require (
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240703112830-4f7fa998a681
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240703112829-d690c1d74d5d
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240703112831-4aa930efde40
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240703194327-e6d59ea07161
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240703160047-b10f37be3c50
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240703115602-422a5e8a4337
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240703115846-c761682ad2ad
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240701051058-e23cdfd81161
@@ -40,7 +40,7 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240703082132-ac0b0c3f7ce4
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240703150302-8ffe5ae29ce7
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240704053242-1648c659d04b
-	github.com/openstack-k8s-operators/test-operator/api v0.0.0-20240703174651-2173e836f7e4
+	github.com/openstack-k8s-operators/test-operator/api v0.0.0-20240704121719-5656a7097845
 	github.com/operator-framework/api v0.20.0
 	github.com/rabbitmq/cluster-operator/v2 v2.9.0
 	go.uber.org/zap v1.27.0
