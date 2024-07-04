@@ -1863,4 +1863,78 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 			),
 		)
 	})
+
+	It("Blocks creating ctlplane CRs with to long memcached keys/names", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+
+		memcachedTemplate := map[string]interface{}{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{
+				"replicas": 1,
+			},
+		}
+
+		spec["memcached"] = map[string]interface{}{
+			"enabled":   true,
+			"templates": memcachedTemplate,
+		}
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than 52 characters"),
+		)
+	})
+
+	It("Blocks creating ctlplane CRs with wrong memcached keys/names", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+
+		memcachedTemplate := map[string]interface{}{
+			"foo_bar": map[string]interface{}{
+				"replicas": 1,
+			},
+		}
+
+		spec["memcached"] = map[string]interface{}{
+			"enabled":   true,
+			"templates": memcachedTemplate,
+		}
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Invalid value: \"foo_bar\": a lowercase RFC 1123 label must consist"),
+		)
+	})
 })
