@@ -11,6 +11,8 @@ spec:
       containers:
       - name: manager
         env:
+        - name: RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:current-podified
         - name: RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
         - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
