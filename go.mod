@@ -18,14 +18,14 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240731084039-931d948c6ce3
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240731072333-75659acdc7fc
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240731065850-f38ddc99c0af
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240730231405-cdc28f50e42f
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240913164928-5ae3f1f5134a
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240731082121-80290e3ec6af
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240731084038-2251de08ce56
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240730154700-e526dc22c2bf
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240801155104-32cc1b1d93da
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240730154700-e526dc22c2bf
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240913084932-eb5ec1aa13b5
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240730154700-e526dc22c2bf
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240730154700-e526dc22c2bf
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240913084932-eb5ec1aa13b5
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240731090804-e066d8ab8a2b
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240730223820-fc21475d72f9
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240731084037-a291f481b0aa
