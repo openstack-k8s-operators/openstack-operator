@@ -118,7 +118,6 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.1/pkg/reconcile
 func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-
 	Log := r.GetLogger(ctx)
 	// Fetch the OpenStackControlPlane instance
 	instance := &corev1beta1.OpenStackControlPlane{}
@@ -263,11 +262,9 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			return ctrl.Result{}, nil
 		}
 	}
-
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
-
 	OVNControllerReady, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -281,11 +278,9 @@ func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Co
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
 	}
 	return ctrl.Result{}, nil
-
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
-
 	ctrlResult, err := openstack.ReconcileCAs(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -458,7 +453,6 @@ func (r *OpenStackControlPlaneReconciler) reconcileDelete(ctx context.Context, i
 	helper.GetLogger().Info(fmt.Sprintf("finalizer removed '%s' successfully", helper.GetFinalizer()))
 
 	return ctrl.Result{}, nil
-
 }
 
 // fields to index to reconcile when change
