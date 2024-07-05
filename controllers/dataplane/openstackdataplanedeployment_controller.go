@@ -55,7 +55,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) GetLogger(ctx context.Context) 
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=get;list;watch;create;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments/finalizers,verbs=update
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments/finalizers,verbs=update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
@@ -66,7 +66,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) GetLogger(ctx context.Context) 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-
 	Log := r.GetLogger(ctx)
 	Log.Info("Reconciling Deployment")
 
@@ -260,7 +259,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				err.Error())
 			return ctrl.Result{}, err
 		}
-
 	}
 
 	version, err := dataplaneutil.GetVersion(ctx, helper, instance.Namespace)
@@ -383,7 +381,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
 	instance *dataplanev1.OpenStackDataPlaneDeployment,
 	nodeSets dataplanev1.OpenStackDataPlaneNodeSetList,
 ) error {
-
 	var err error
 	services := []string{}
 
