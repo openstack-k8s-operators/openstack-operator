@@ -7,27 +7,27 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
-	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240703112830-4f7fa998a681
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240703112829-d690c1d74d5d
-	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240703112831-4aa930efde40
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240703160047-b10f37be3c50
-	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240703115602-422a5e8a4337
-	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240703115846-c761682ad2ad
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240701051058-e23cdfd81161
-	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240703115847-33328239d321
-	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240703053916-a2bf14020ef4
+	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240705080032-2a515074bcea
+	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240705075807-be7803a42d75
+	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240704231514-c2b1728e46b7
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240707065058-26631ed517b9
+	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240704231515-a1bb7731fd73
+	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240704220914-63a9fd21e69b
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240704231227-c7ee9d3de988
+	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240704220915-746cf7c339c5
+	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240704220917-e65444cf5f26
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240624132705-6c8da3c0bbfd
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240624132705-6c8da3c0bbfd
-	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240703123716-e68f23707bf7
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240626205513-5c175a95f408
-	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240703113929-8201d1454a2f
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240703151430-8f8ca6512933
-	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240703143816-b6000f653f1c
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240703054730-75382e776839
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240703011800-46c696684430
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240703082132-ac0b0c3f7ce4
-	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240703150302-8ffe5ae29ce7
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240704053242-1648c659d04b
+	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240704201628-8bd806665c0f
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240704221159-db920d37527a
+	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240704221200-3f5964b57e32
+	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240704191845-3ace225b81d5
+	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240704173130-75793ce6429c
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240704221200-e36b4925add5
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240705005943-39edd4414c95
+	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240704164502-7a8d9b50869c
+	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240704182345-5399100dea21
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240705105058-bfaba15f3ed7
 	github.com/rabbitmq/cluster-operator/v2 v2.9.0
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.69.0-rhobs1 // indirect
 	github.com/rhobs/observability-operator v0.0.28 // indirect
