@@ -16410,8 +16410,19 @@ spec:
                             maximum: 65535
                             minimum: 1
                             type: integer
-                          prometheusTLS:
-                            type: boolean
+                          prometheusTLSCaCertSecret:
+                            nullable: true
+                            properties:
+                              key:
+                                type: string
+                              name:
+                                type: string
+                              optional:
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
                         required:
                         - heatInstance
                         type: object
