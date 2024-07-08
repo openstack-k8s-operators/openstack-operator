@@ -126,8 +126,8 @@ github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.2024062
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240624132705-6c8da3c0bbfd/go.mod h1:zuPcZ5Kopr15AdfxvA0xqKIIGCZ0XbSe/0VHNKuvbEE=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240624132705-6c8da3c0bbfd h1:MY3MDe11c9R/kp0ALVeaWHIdRpbQh9Xs3ym/Z/KBBlU=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240624132705-6c8da3c0bbfd/go.mod h1:v9iFrR8J5fZACS9W5pZau/4lwyWs/YmO4ezpDeoEFKU=
-github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240624132705-6c8da3c0bbfd h1:FDN/wK2+B+9IwIpuY8K1CCLjqrzSLVXuqn9PFWPX+LM=
-github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240624132705-6c8da3c0bbfd/go.mod h1:0h76CxD9g0z2Hk7fGFOZcjnzT1tQQ/yRNv3OXng+S/A=
+github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240709171418-83ff4f73c986 h1:DS6K5o+Mb3ghNsf/6als1+LjpqSAknvqetuDSUdxV9M=
+github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240709171418-83ff4f73c986/go.mod h1:0h76CxD9g0z2Hk7fGFOZcjnzT1tQQ/yRNv3OXng+S/A=
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240709222938-272b1b93e719 h1:SZqwffeJXG73gYiMab7yPtrMJkA2mtOatMw8hsSpjGg=
 github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240709222938-272b1b93e719/go.mod h1:Vc61/6I9y+fBCw6k0HVi29mStMEvq0G1IMquFQJfGhM=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240709194146-eb1cfc2518c5 h1:kRO+Q9xd4YChb4WZtGmbNoaU8dkYsAHNCqDsSWXAA5A=

@@ -155,24 +155,43 @@ func reconcileRabbitMQ(
 		},
 	}
 
+	IPv6Enabled, err := ocp.HasIPv6ClusterNetwork(ctx, helper)
+	if err != nil {
+		return mqFailed, ctrl.Result{}, err
+	}
+	inetFamily := "inet"
+	inetProtocol := "tcp"
+	tlsArgs := ""
+	fipsArgs := ""
+	if IPv6Enabled {
+		inetFamily = "inet6"
+	}
+	erlangInetConfig := fmt.Sprintf("{%s,true}.\n", inetFamily)
+
 	if instance.Spec.TLS.PodLevel.Enabled {
+		inetProtocol = "tls"
+		tlsArgs = "-ssl_dist_optfile /etc/rabbitmq/inter-node-tls.config"
 		fipsEnabled, err := ocp.IsFipsCluster(ctx, helper)
 		if err != nil {
 			return mqFailed, ctrl.Result{}, err
 		}
-		clusterNodeTLSArgs := "-proto_dist inet_tls -ssl_dist_optfile /etc/rabbitmq/inter-node-tls.config"
 		if fipsEnabled {
-			clusterNodeTLSArgs += " -crypto fips_mode true"
+			fipsArgs = "-crypto fips_mode true"
 		}
-
-		envVars = append(envVars, corev1.EnvVar{
-			Name:  "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS",
-			Value: clusterNodeTLSArgs,
-		}, corev1.EnvVar{
-			Name:  "RABBITMQ_CTL_ERL_ARGS",
-			Value: clusterNodeTLSArgs,
-		})
 	}
+	envVars = append(envVars, corev1.EnvVar{
+		Name: "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS",
+		Value: fmt.Sprintf(
+			"-kernel inetrc '/etc/rabbitmq/erl_inetrc' -proto_dist %s_%s %s %s",
+			inetFamily,
+			inetProtocol,
+			tlsArgs,
+			fipsArgs,
+		),
+	}, corev1.EnvVar{
+		Name:  "RABBITMQ_CTL_ERL_ARGS",
+		Value: fmt.Sprintf("-proto_dist %s_%s %s", inetFamily, inetProtocol, tlsArgs),
+	})
 
 	cms := []util.Template{
 		{
@@ -206,7 +225,7 @@ func reconcileRabbitMQ(
 		},
 	}
 
-	err := configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
+	err = configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
 	if err != nil {
 		Log.Error(err, "Unable to create rabbitmq config maps")
 		return mqFailed, ctrl.Result{}, err
@@ -344,6 +363,8 @@ func reconcileRabbitMQ(
 			rabbitmq.Spec.Rabbitmq.AdditionalConfig = strings.Join(settings, "\n")
 		}
 
+		rabbitmq.Spec.Rabbitmq.ErlangInetConfig = erlangInetConfig
+		rabbitmq.Spec.Rabbitmq.AdvancedConfig = ""
 		if tlsCert != "" {
 			rabbitmq.Spec.TLS.CaSecretName = tlsCert
 			rabbitmq.Spec.TLS.SecretName = tlsCert

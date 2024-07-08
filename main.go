@@ -52,6 +52,7 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
+
 	// Note(lpiwowar): Please, do not remove! This import is necessary in order
 	// to make the test-operator part of the openstack-operator-index.
 	_ "github.com/openstack-k8s-operators/test-operator/api/v1beta1"
@@ -75,6 +76,7 @@ import (
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
+	ocp_configv1 "github.com/openshift/api/config/v1"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
@@ -117,6 +119,7 @@ func init() {
 	utilruntime.Must(routev1.AddToScheme(scheme))
 	utilruntime.Must(certmgrv1.AddToScheme(scheme))
 	utilruntime.Must(barbicanv1.AddToScheme(scheme))
+	utilruntime.Must(ocp_configv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
