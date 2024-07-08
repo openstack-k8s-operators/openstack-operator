@@ -473,9 +473,10 @@ var allWatchFields = []string{
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *OpenStackControlPlaneReconciler) SetupWithManager(
+	ctx context.Context, mgr ctrl.Manager) error {
 	// index passwordSecretField
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, passwordSecretField, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, passwordSecretField, func(rawObj client.Object) []string {
 		// Extract the secret name from the spec, if one is provided
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.Secret == "" {
@@ -487,7 +488,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 	}
 
 	// index caBundleSecretNameField
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsCABundleSecretNameField, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsCABundleSecretNameField, func(rawObj client.Object) []string {
 		// Extract the secret name from the spec, if one is provided
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.CaBundleSecretName == "" {
@@ -499,7 +500,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 	}
 
 	// index tlsIngressCACustomIssuer
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsIngressCACustomIssuer, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsIngressCACustomIssuer, func(rawObj client.Object) []string {
 		// Extract the secret name from the spec, if one is provided
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.Ingress.Ca.CustomIssuer == nil {
@@ -511,7 +512,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 	}
 
 	// index tlsPodLevelInternalCACustomIssuer
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsPodLevelInternalCACustomIssuer, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsPodLevelInternalCACustomIssuer, func(rawObj client.Object) []string {
 		// Extract the secret name from the spec, if one is provided
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer == nil {
@@ -523,7 +524,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) err
 	}
 
 	// index tlsPodLevelOvnCACustomIssuer
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1beta1.OpenStackControlPlane{}, tlsPodLevelOvnCACustomIssuer, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsPodLevelOvnCACustomIssuer, func(rawObj client.Object) []string {
 		// Extract the secret name from the spec, if one is provided
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer == nil {

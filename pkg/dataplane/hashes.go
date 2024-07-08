@@ -44,7 +44,7 @@ func GetDeploymentHashesForService(
 		Namespace: namespace,
 	}
 	service := &dataplanev1.OpenStackDataPlaneService{}
-	err := helper.GetClient().Get(context.Background(), namespacedName, service)
+	err := helper.GetClient().Get(ctx, namespacedName, service)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
 		return err

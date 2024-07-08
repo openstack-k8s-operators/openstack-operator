@@ -385,7 +385,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	}
 
-	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(helper, instance)
+	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(
+		ctx, helper, instance)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -462,7 +463,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	return ctrl.Result{}, err
 }
 
-func checkDeployment(helper *helper.Helper,
+func checkDeployment(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (bool, bool, bool, string, error) {
 	// Get all completed deployments
@@ -471,7 +472,7 @@ func checkDeployment(helper *helper.Helper,
 	opts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
 	}
-	err := helper.GetClient().List(context.Background(), deployments, opts...)
+	err := helper.GetClient().List(ctx, deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
 		return false, false, false, failedDeployment, err
@@ -548,7 +549,7 @@ func checkDeployment(helper *helper.Helper,
 						Namespace: instance.Namespace,
 						Name:      serviceName,
 					}
-					err := helper.GetClient().Get(context.Background(), name, service)
+					err := helper.GetClient().Get(ctx, name, service)
 					if err != nil {
 						helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
 						return false, false, false, failedDeployment, err
@@ -571,9 +572,10 @@ func checkDeployment(helper *helper.Helper,
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
+	ctx context.Context, mgr ctrl.Manager) error {
 	// index for ConfigMaps listed on ansibleVarsFrom
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(),
+	if err := mgr.GetFieldIndexer().IndexField(ctx,
 		&dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.configMaps",
 		func(rawObj client.Object) []string {
 			nodeSet := rawObj.(*dataplanev1.OpenStackDataPlaneNodeSet)
@@ -597,7 +599,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 	}
 
 	// index for Secrets listed on ansibleVarsFrom
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(),
+	if err := mgr.GetFieldIndexer().IndexField(ctx,
 		&dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.secrets",
 		func(rawObj client.Object) []string {
 			nodeSet := rawObj.(*dataplanev1.OpenStackDataPlaneNodeSet)

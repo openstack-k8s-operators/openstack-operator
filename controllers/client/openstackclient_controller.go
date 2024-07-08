@@ -436,9 +436,10 @@ var allWatchFields = []string{
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *OpenStackClientReconciler) SetupWithManager(
+	ctx context.Context, mgr ctrl.Manager) error {
 	// index caBundleSecretNameField
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &clientv1.OpenStackClient{}, caBundleSecretNameField, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &clientv1.OpenStackClient{}, caBundleSecretNameField, func(rawObj client.Object) []string {
 		// Extract the secret name from the spec, if one is provided
 		cr := rawObj.(*clientv1.OpenStackClient)
 		if cr.Spec.CaBundleSecretName == "" {
@@ -449,7 +450,7 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	// index openStackConfigMap
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &clientv1.OpenStackClient{}, openStackConfigMapField, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &clientv1.OpenStackClient{}, openStackConfigMapField, func(rawObj client.Object) []string {
 		// Extract the configmap name from the spec, if one is provided
 		cr := rawObj.(*clientv1.OpenStackClient)
 		if cr.Spec.OpenStackConfigMap == nil {
@@ -463,7 +464,7 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	// index openStackConfigSecret
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &clientv1.OpenStackClient{}, openStackConfigSecretField, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &clientv1.OpenStackClient{}, openStackConfigSecretField, func(rawObj client.Object) []string {
 		// Extract the configmap name from the spec, if one is provided
 		cr := rawObj.(*clientv1.OpenStackClient)
 		if cr.Spec.OpenStackConfigSecret == nil {
@@ -477,7 +478,7 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
-	Log := r.GetLogger(context.Background())
+	Log := r.GetLogger(ctx)
 	metricStorageFn := func(ctx context.Context, o client.Object) []reconcile.Request {
 		result := []reconcile.Request{}
 
@@ -486,7 +487,7 @@ func (r *OpenStackClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		listOpts := []client.ListOption{
 			client.InNamespace(o.GetNamespace()),
 		}
-		if err := r.Client.List(context.Background(), openstackclients, listOpts...); err != nil {
+		if err := r.Client.List(ctx, openstackclients, listOpts...); err != nil {
 			Log.Error(err, "Unable to retrieve OpenstackClient CRs %v")
 			return nil
 		}
