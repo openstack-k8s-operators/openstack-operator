@@ -518,6 +518,9 @@ func checkDeployment(helper *helper.Helper,
 			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
 				isDeploymentRunning = true
 			} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
+				if deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash {
+					continue
+				}
 				isDeploymentReady = true
 				for k, v := range deployment.Status.ConfigMapHashes {
 					instance.Status.ConfigMapHashes[k] = v
