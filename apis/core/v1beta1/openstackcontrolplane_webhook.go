@@ -202,7 +202,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 	case "Nova":
 		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled) {
-			reqs = "Galera, Memcached, RabbitMQ, Keystone, Glance Neutron, Placement"
+			reqs = "Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Placement"
 		}
 	case "Heat":
 		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
