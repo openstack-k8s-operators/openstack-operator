@@ -558,6 +558,10 @@ func ensureCaBundles(
 		return ctrl.Result{}, err
 	}
 
+	if len(caCertStatusBundle.certs) == 0 {
+		return ctrl.Result{}, fmt.Errorf("caCertStatusBundle.certs is empty")
+	}
+
 	status := corev1.TLSCAStatus{
 		Name:    caName,
 		Expires: caCertStatusBundle.certs[0].expire.Format(time.RFC3339),
@@ -710,8 +714,8 @@ func getOperatorCABundle(caFile string) ([]byte, error) {
 	return contents, nil
 }
 
-func days(t time.Time) int {
-	return int(math.Round(time.Since(t).Hours() / 24))
+func minutes(t time.Time) int {
+	return int(math.Round(time.Since(t).Minutes()))
 }
 
 type caBundle struct {
@@ -765,7 +769,7 @@ func (cab *caBundle) getCertsFromPEM(PEMdata []byte) error {
 		}
 
 		// validate if the CA expired
-		if -days(certificate.NotAfter) <= 0 {
+		if -minutes(certificate.NotAfter) <= 0 {
 			continue
 		}
 
