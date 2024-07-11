@@ -189,7 +189,6 @@ cover: test ## Run tests and display functional test coverage
 .PHONY: build
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
-	go build -o bin/csv-merger cmd/csv-merger/csv-merger.go
 
 .PHONY: run
 run: export METRICS_PORT?=8080
@@ -328,7 +327,7 @@ endif
 endif
 
 .PHONY: bundle
-bundle: build manifests kustomize bundle-cache-extra-data operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
+bundle: build manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
 	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
@@ -337,7 +336,7 @@ bundle: build manifests kustomize bundle-cache-extra-data operator-sdk ## Genera
 
 .PHONY: bundle-build
 bundle-build: bundle ## Build the bundle image.
-	podman build -f custom-bundle.Dockerfile -t $(BUNDLE_IMG) .
+	podman build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
 
 .PHONY: bundle-push
 bundle-push: ## Push the bundle image.
@@ -467,10 +466,3 @@ run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 .PHONY: webhook-cleanup
 webhook-cleanup:
 	/bin/bash hack/clean_local_webhook.sh
-
-# refresh the bundle extra data based on go.mod entries
-# bundle extra data includes:
-#  - extracted ENV vars from all operators (required for webhooks)
-.PHONY: bundle-cache-extra-data
-bundle-cache-extra-data: build
-	bash hack/bundle-cache-data.sh

@@ -69,7 +69,7 @@ bundle.
 make dep-bundle-build-push
 ```
 
-3. Run bundle-build. This will execute podman to build the custom-bundle.Dockerfile.
+3. Run bundle-build. This will execute podman to build the bundle.Dockerfile.
 
 ```sh
 make bundle-build
