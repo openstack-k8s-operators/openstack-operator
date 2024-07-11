@@ -27,7 +27,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240624132705-6c8da3c0bbfd
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240709171418-83ff4f73c986
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240624132705-6c8da3c0bbfd
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240624132705-6c8da3c0bbfd
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240709171418-83ff4f73c986
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240709222938-272b1b93e719
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240709194146-eb1cfc2518c5
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240710004943-45c853971543
