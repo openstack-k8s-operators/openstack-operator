@@ -3360,6 +3360,8 @@ spec:
                           type: string
                         disableNonTLSListeners:
                           type: boolean
+                        logToDisk:
+                          type: boolean
                         nodeSelector:
                           additionalProperties:
                             type: string
@@ -17076,6 +17078,13 @@ spec:
                                 pattern: ^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$
                                 type: string
                             type: object
+                          dashboardsEnabled:
+                            default: false
+                            type: boolean
+                          dataplaneNetwork:
+                            default: ctlplane
+                            pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                            type: string
                           enabled:
                             default: false
                             type: boolean
@@ -17085,13 +17094,6 @@ spec:
                               alertingEnabled:
                                 default: true
                                 type: boolean
-                              dashboardsEnabled:
-                                default: false
-                                type: boolean
-                              dataplaneNetwork:
-                                default: ctlplane
-                                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
-                                type: string
                               scrapeInterval:
                                 default: 30s
                                 type: string
@@ -17143,8 +17145,6 @@ spec:
                                     - persistent
                                     type: string
                                 type: object
-                            required:
-                            - dataplaneNetwork
                             type: object
                           prometheusTls:
                             properties:
