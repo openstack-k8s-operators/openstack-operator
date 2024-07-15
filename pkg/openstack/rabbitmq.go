@@ -346,6 +346,9 @@ func reconcileRabbitMQ(
 
 		if rabbitmq.Spec.Override.Service != nil &&
 			rabbitmq.Spec.Override.Service.Spec.Type == corev1.ServiceTypeLoadBalancer {
+			if rabbitmq.Spec.Override.Service.EmbeddedLabelsAnnotations == nil {
+				rabbitmq.Spec.Override.Service.EmbeddedLabelsAnnotations = &rabbitmqv2.EmbeddedLabelsAnnotations{}
+			}
 			rabbitmq.Spec.Override.Service.Annotations =
 				util.MergeStringMaps(rabbitmq.Spec.Override.Service.Annotations,
 					map[string]string{networkv1.AnnotationHostnameKey: hostname})
