@@ -270,10 +270,15 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				// create novncproxy vencrypt cert
 				if instance.Spec.TLS.PodLevel.Enabled {
 					serviceName := endpointDetails.EndpointDetails[service.EndpointPublic].Service.Spec.Name
+					hostname := fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace)
 					certRequest := certmanager.CertificateRequest{
 						IssuerName: instance.GetLibvirtIssuer(),
 						CertName:   nova.Name + "-novncproxy-" + cellName + "-vencrypt",
-						CommonName: ptr.To(fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace)),
+						CommonName: ptr.To(serviceName), // common name has a max length of 64bytes, therefore just set the short name
+						Hostnames: []string{
+							hostname,
+							fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+						},
 						Subject: &certmgrv1.X509Subject{
 							Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, ClusterInternalDomain)},
 						},
