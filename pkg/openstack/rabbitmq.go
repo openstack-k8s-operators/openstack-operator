@@ -272,13 +272,10 @@ func reconcileRabbitMQ(
 	}
 
 	tlsCert := ""
-	commonName := fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain)
-
 	if instance.Spec.TLS.PodLevel.Enabled {
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
-			CommonName: &commonName,
 			Hostnames:  hostnames,
 			Subject: &certmgrv1.X509Subject{
 				Organizations: []string{fmt.Sprintf("%s.%s", rabbitmq.Namespace, ClusterInternalDomain)},
