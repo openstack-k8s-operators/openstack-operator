@@ -12,6 +12,14 @@ spec:
         name: nova-extra-config
         optional: true
   playbook: osp.edpm.nova
+  tlsCerts:
+    default:
+      contents:
+        - dnsnames
+        - ips
+      networks:
+        - ctlplane
+      issuer: osp-rootca-issuer-internal
   caCerts: combined-ca-bundle
   containerImageFields:
   - NovaComputeImage
