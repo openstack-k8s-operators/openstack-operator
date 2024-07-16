@@ -342,10 +342,13 @@ func reconcileRabbitMQ(
 		}
 
 		if rabbitmq.Spec.Override.Service != nil &&
+			rabbitmq.Spec.Override.Service.Spec != nil &&
 			rabbitmq.Spec.Override.Service.Spec.Type == corev1.ServiceTypeLoadBalancer {
 			if rabbitmq.Spec.Override.Service.EmbeddedLabelsAnnotations == nil {
 				rabbitmq.Spec.Override.Service.EmbeddedLabelsAnnotations = &rabbitmqv2.EmbeddedLabelsAnnotations{}
 			}
+
+			// add annotation to register service name in dnsmasq
 			rabbitmq.Spec.Override.Service.Annotations =
 				util.MergeStringMaps(rabbitmq.Spec.Override.Service.Annotations,
 					map[string]string{networkv1.AnnotationHostnameKey: hostname})
