@@ -170,8 +170,10 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 				nodeName)
 		}
 
+		commonName := strings.Split(baseName, ".")[0]
+
 		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
-			issuer, labels, baseName, hosts, ips, service.Spec.TLSCerts[certKey].KeyUsages)
+			issuer, labels, commonName, hosts, ips, service.Spec.TLSCerts[certKey].KeyUsages)
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {
