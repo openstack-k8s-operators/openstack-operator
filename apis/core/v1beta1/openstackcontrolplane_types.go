@@ -654,6 +654,7 @@ type HorizonSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// Enabled - Whether Horizon services should be deployed and managed
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	Enabled bool `json:"enabled"`
 
 	// +kubebuilder:validation:Optional

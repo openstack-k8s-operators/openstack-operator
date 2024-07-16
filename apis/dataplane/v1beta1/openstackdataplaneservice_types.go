@@ -95,6 +95,7 @@ type OpenStackDataPlaneServiceSpec struct {
 	// DeployOnAllNodeSets - should the service be deploy across all nodesets
 	// This will override default target of a service play, setting it to 'all'.
 	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	DeployOnAllNodeSets bool `json:"deployOnAllNodeSets,omitempty" yaml:"deployOnAllNodeSets,omitempty"`
 
 	// ContainerImageFields - list of container image fields names that this
