@@ -368,7 +368,7 @@ func (d *Deployer) addCertMounts(
 func (d *Deployer) addServiceExtraMounts(
 	service dataplanev1.OpenStackDataPlaneService,
 ) (*dataplanev1.AnsibleEESpec, error) {
-	baseMountPath := path.Join(ConfigPaths, service.Name)
+	baseMountPath := path.Join(ConfigPaths, service.Spec.EDPMServiceType)
 
 	var configMaps []*corev1.ConfigMap
 	var secrets []*corev1.Secret
