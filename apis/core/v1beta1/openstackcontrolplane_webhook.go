@@ -23,8 +23,11 @@ import (
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
+	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -35,8 +38,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
@@ -313,6 +314,16 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 		}
 	}
 
+	if r.Spec.Memcached.Enabled {
+		if r.Spec.Memcached.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("memcached").Child("template"),
+				maps.Keys(*r.Spec.Memcached.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
 	return warnings, errors
 }
 
@@ -412,6 +423,16 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 			old.Designate.Template = &designatev1.DesignateSpecCore{}
 		}
 		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"))...)
+	}
+
+	if r.Spec.Memcached.Enabled {
+		if r.Spec.Memcached.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("memcached").Child("template"),
+				maps.Keys(*r.Spec.Memcached.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
 	}
 
 	return errors
