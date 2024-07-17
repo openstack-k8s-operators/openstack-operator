@@ -580,6 +580,63 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
+    - description: OpenStackAnsibleEE is the Schema for the openstackansibleees API
+      displayName: OpenStack Ansible EE
+      kind: OpenStackAnsibleEE
+      name: openstackansibleees.ansibleee.openstack.org
+      version: ""
+    - description: OpenStackAnsibleEE is the Schema for the openstackansibleees API
+      displayName: OpenStack Ansible EE
+      kind: OpenStackAnsibleEE
+      name: openstackansibleees.ansibleee.openstack.org
+      specDescriptors:
+      - description: BackoffLimit allows to define the maximum number of retried executions
+          (defaults to 6).
+        displayName: Backoff Limit
+        path: backoffLimit
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:number
+      - description: 'RestartPolicy is the policy applied to the Job on whether it
+          needs to restart the Pod. It can be "OnFailure" or "Never". RestartPolicy
+          default: Never'
+        displayName: Restart Policy
+        path: restartPolicy
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:select:OnFailure
+        - urn:alm:descriptor:com.tectonic.ui:select:Never
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
+      version: v1alpha1
+    - description: OpenStackAnsibleEE is the Schema for the openstackansibleees API
+      displayName: OpenStack Ansible EE
+      kind: OpenStackAnsibleEE
+      name: openstackansibleees.ansibleee.openstack.org
+      specDescriptors:
+      - description: BackoffLimit allows to define the maximum number of retried executions
+          (defaults to 6).
+        displayName: Backoff Limit
+        path: backoffLimit
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:number
+      - description: 'RestartPolicy is the policy applied to the Job on whether it
+          needs to restart the Pod. It can be "OnFailure" or "Never". RestartPolicy
+          default: Never'
+        displayName: Restart Policy
+        path: restartPolicy
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:select:OnFailure
+        - urn:alm:descriptor:com.tectonic.ui:select:Never
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
+      version: v1beta1
     - description: OpenStackVersion is the Schema for the openstackversionupdates
         API
       displayName: OpenStack Version

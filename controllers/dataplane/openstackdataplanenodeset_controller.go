@@ -48,8 +48,8 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/serviceaccount"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-operator/apis/ansibleee/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	deployment "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane"
@@ -576,7 +576,8 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
-	ctx context.Context, mgr ctrl.Manager) error {
+	ctx context.Context, mgr ctrl.Manager,
+) error {
 	// index for ConfigMaps listed on ansibleVarsFrom
 	if err := mgr.GetFieldIndexer().IndexField(ctx,
 		&dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.configMaps",

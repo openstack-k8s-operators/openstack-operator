@@ -35,7 +35,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-operator/apis/ansibleee/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	deployment "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane"
 	dataplaneutil "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane/util"

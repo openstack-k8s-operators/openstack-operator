@@ -42,8 +42,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
-	aee "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-operator/apis/ansibleee/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
@@ -89,9 +89,6 @@ var _ = BeforeSuite(func() {
 
 	const gomod = "../../../go.mod"
 
-	aeeCRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api", gomod, "bases")
-	Expect(err).ShouldNot(HaveOccurred())
 	baremetalCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/openstack-baremetal-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
@@ -103,7 +100,6 @@ var _ = BeforeSuite(func() {
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "..", "config", "crd", "bases"),
-			aeeCRDs,
 			baremetalCRDs,
 			infraCRDs,
 		},
@@ -126,8 +122,6 @@ var _ = BeforeSuite(func() {
 	// Keep this in synch with SetupWithManager, otherwise the reconciler loop
 	// will silently not start in the test env.
 	err = dataplanev1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-	err = aee.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = batchv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
@@ -175,6 +169,9 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	err = (&dataplanev1.OpenStackDataPlaneService{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = (&ansibleeev1.OpenStackAnsibleEE{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
 	err = (&openstackv1.OpenStackVersion{}).SetupWebhookWithManager(k8sManager)

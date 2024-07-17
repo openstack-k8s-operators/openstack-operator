@@ -53,10 +53,6 @@ dependencies:
       version: ">=0.0.0"
   - type: olm.package
     value:
-      packageName: openstack-ansibleee-operator
-      version: ">=0.0.0"
-  - type: olm.package
-    value:
       packageName: openstack-baremetal-operator
       version: ">=0.0.0"
   - type: olm.package

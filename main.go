@@ -46,7 +46,6 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
@@ -72,11 +71,13 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-operator/apis/ansibleee/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
 	ocp_configv1 "github.com/openshift/api/config/v1"
+	ansibleeecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/ansibleee"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
@@ -92,6 +93,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(corev1.AddToScheme(scheme))
+	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(dataplanev1.AddToScheme(scheme))
 	utilruntime.Must(keystonev1.AddToScheme(scheme))
 	utilruntime.Must(mariadbv1.AddToScheme(scheme))
@@ -108,7 +110,6 @@ func init() {
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
 	utilruntime.Must(octaviav1.AddToScheme(scheme))
 	utilruntime.Must(designatev1.AddToScheme(scheme))
-	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
 	utilruntime.Must(manilav1.AddToScheme(scheme))
 	utilruntime.Must(horizonv1.AddToScheme(scheme))
@@ -241,6 +242,14 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneDeployment")
 		os.Exit(1)
 	}
+	if err = (&ansibleeecontrollers.OpenStackAnsibleEEReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Kclient: kclient,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackAnsibleEE")
+		os.Exit(1)
+	}
 	corecontrollers.SetupVersionDefaults()
 
 	// Defaults for service operators
@@ -282,6 +291,10 @@ func main() {
 		}
 		if err = (&dataplanev1.OpenStackDataPlaneService{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneService")
+			os.Exit(1)
+		}
+		if err = (&ansibleeev1.OpenStackAnsibleEE{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackAnsiblEE")
 			os.Exit(1)
 		}
 		checker = mgr.GetWebhookServer().StartedChecker()

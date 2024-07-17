@@ -95,6 +95,20 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ansibleee.openstack.org
+  resources:
+  - openstackansibleees/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ansibleee.openstack.org
+  resources:
+  - openstackansibleees/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - barbican.openstack.org
   resources:
   - barbicans
@@ -225,6 +239,13 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
 - apiGroups:
   - ""
   resources:

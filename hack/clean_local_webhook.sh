@@ -11,3 +11,5 @@ oc delete validatingwebhookconfiguration/vopenstackdataplaneservice.kb.io --igno
 oc delete mutatingwebhookconfiguration/mopenstackdataplanenodeset.kb.io --ignore-not-found
 oc delete mutatingwebhookconfiguration/mopenstackdataplaneservice.kb.io --ignore-not-found
 oc delete mutatingwebhookconfiguration/mopenstackdataplanedeployment.kb.io --ignore-not-found
+oc delete validatingwebhookconfiguration/vopenstackansibleee.kb.io --ignore-not-found
+oc delete mutatingwebhookconfiguration/mopenstackansibleee.kb.io --ignore-not-found

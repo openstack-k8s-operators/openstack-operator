@@ -33,7 +33,6 @@ require (
 	github.com/openstack-k8s-operators/neutron-operator/api v0.4.1-0.20240710193154-26495b739566
 	github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240710014205-232a1f1b9ef3
 	github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240715113514-b85e9263c0b4
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.4.1-0.20240713101220-5c3d837b9740
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20240710123341-f09e275d360e
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
 	github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20240710183926-15f69cfd799a

@@ -12,7 +12,7 @@ import (
 
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-operator/apis/ansibleee/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 )
 
@@ -466,8 +466,8 @@ func DataplaneDeploymentConditionGetter(name types.NamespacedName) condition.Con
 	return instance.Status.Conditions
 }
 
-func GetAnsibleee(name types.NamespacedName) *v1beta1.OpenStackAnsibleEE {
-	instance := &v1beta1.OpenStackAnsibleEE{}
+func GetAnsibleee(name types.NamespacedName) *ansibleeev1.OpenStackAnsibleEE {
+	instance := &ansibleeev1.OpenStackAnsibleEE{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())

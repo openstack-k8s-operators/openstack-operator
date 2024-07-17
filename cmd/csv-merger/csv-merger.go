@@ -78,7 +78,6 @@ var (
 	mariadbCsv     = flag.String("mariadb-csv", "", "Mariadb CSV filename")
 	rabbitmqCsv    = flag.String("rabbitmq-csv", "", "RabbitMQ CSV filename")
 	infraCsv       = flag.String("infra-csv", "", "Infra CSV filename")
-	ansibleEECsv   = flag.String("ansibleee-csv", "", "Ansible EE CSV filename")
 	novaCsv        = flag.String("nova-csv", "", "Nova CSV filename")
 	heatCsv        = flag.String("heat-csv", "", "Heat CSV filename")
 	neutronCsv     = flag.String("neutron-csv", "", "Neutron CSV filename")
@@ -125,7 +124,6 @@ func main() {
 		*mariadbCsv,
 		*rabbitmqCsv,
 		*infraCsv,
-		*ansibleEECsv,
 		*novaCsv,
 		*neutronCsv,
 		*manilaCsv,
@@ -152,7 +150,8 @@ func main() {
 		TypeMeta:   csvBase.TypeMeta,
 		ObjectMeta: csvBase.ObjectMeta,
 		Spec:       csvBase.Spec,
-		Status:     csvBase.Status}
+		Status:     csvBase.Status,
+	}
 
 	installStrategyBase := csvBase.Spec.InstallStrategy.StrategySpec
 	csvNew.Spec.RelatedImages = csvBase.Spec.RelatedImages
@@ -214,7 +213,7 @@ func main() {
 					exitWithError(err.Error())
 				}
 				if err = json.Unmarshal([]byte(csvStructAlmString), &structAlmCrs); err == nil {
-					//panic(err)
+					// panic(err)
 					baseAlmCrs = append(baseAlmCrs, structAlmCrs...)
 				}
 				almB, err := json.Marshal(baseAlmCrs)
@@ -225,7 +224,6 @@ func main() {
 			}
 			csvNew.Spec.WebhookDefinitions = append(csvNew.Spec.WebhookDefinitions, csvStruct.Spec.WebhookDefinitions...)
 		}
-
 	}
 	if len(*exportEnvFile) > 0 {
 		writeEnvToYaml(*exportEnvFile, envVarList)
@@ -295,5 +293,4 @@ func main() {
 	if err != nil {
 		exitWithError(err.Error())
 	}
-
 }

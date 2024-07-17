@@ -10,24 +10,24 @@ sudo firewall-cmd --zone=libvirt --add-port=9443/tcp
 sudo firewall-cmd --runtime-to-permanent
 
 # Generate the certs and the ca bundle
-if [ "$SKIP_CERT" = false ] ; then
-    mkdir -p ${TMPDIR}
-    rm -rf ${TMPDIR}/* || true
+if [ "$SKIP_CERT" = false ]; then
+	mkdir -p ${TMPDIR}
+	rm -rf ${TMPDIR}/* || true
 
-    openssl req -newkey rsa:2048 -days 3650 -nodes -x509 \
-    -subj "/CN=${HOSTNAME}" \
-    -addext "subjectAltName = IP:${CRC_IP}" \
-    -keyout ${TMPDIR}/tls.key \
-    -out ${TMPDIR}/tls.crt
+	openssl req -newkey rsa:2048 -days 3650 -nodes -x509 \
+		-subj "/CN=${HOSTNAME}" \
+		-addext "subjectAltName = IP:${CRC_IP}" \
+		-keyout ${TMPDIR}/tls.key \
+		-out ${TMPDIR}/tls.crt
 
-    cat ${TMPDIR}/tls.crt ${TMPDIR}/tls.key | base64 -w 0 > ${TMPDIR}/bundle.pem
+	cat ${TMPDIR}/tls.crt ${TMPDIR}/tls.key | base64 -w 0 >${TMPDIR}/bundle.pem
 
 fi
 
-CA_BUNDLE=`cat ${TMPDIR}/bundle.pem`
+CA_BUNDLE=$(cat ${TMPDIR}/bundle.pem)
 
 # Patch the webhook(s)
-cat >> ${TMPDIR}/patch_webhook_configurations.yaml <<EOF_CAT
+cat >>${TMPDIR}/patch_webhook_configurations.yaml <<EOF_CAT
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -305,6 +305,62 @@ webhooks:
     - UPDATE
     resources:
     - openstackdataplaneservices
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: vopenstackansibleee.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/validate-ansibleee-openstack-org-v1beta1-openstackansibleee
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: vopenstackansibleee.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - ansibleee.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackansibleees
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mopenstackansibleee.kb.io
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: ${CA_BUNDLE}
+    url: https://${CRC_IP}:9443/mutate-ansibleee-openstack-org-v1beta1-openstackansibleee
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: mopenstackansibleee.kb.io
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - ansibleee.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackansibleees
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10

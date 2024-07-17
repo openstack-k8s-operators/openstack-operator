@@ -38,7 +38,6 @@ bin/csv-merger \
     --placement-csv=$CSV_DIR/placement-operator.clusterserviceversion.yaml \
     --ovn-csv=$CSV_DIR/ovn-operator.clusterserviceversion.yaml \
     --neutron-csv=$CSV_DIR/neutron-operator.clusterserviceversion.yaml \
-    --ansibleee-csv=$CSV_DIR/openstack-ansibleee-operator.clusterserviceversion.yaml \
     --nova-csv=$CSV_DIR/nova-operator.clusterserviceversion.yaml \
     --heat-csv=$CSV_DIR/heat-operator.clusterserviceversion.yaml \
     --ironic-csv=$CSV_DIR/ironic-operator.clusterserviceversion.yaml \

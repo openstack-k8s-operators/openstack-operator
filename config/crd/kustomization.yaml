@@ -8,6 +8,7 @@ resources:
 - bases/dataplane.openstack.org_openstackdataplanenodesets.yaml
 - bases/dataplane.openstack.org_openstackdataplaneservices.yaml
 - bases/dataplane.openstack.org_openstackdataplanedeployments.yaml
+- bases/ansibleee.openstack.org_openstackansibleees.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
