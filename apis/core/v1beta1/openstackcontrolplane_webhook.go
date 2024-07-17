@@ -317,8 +317,18 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	if r.Spec.Memcached.Enabled {
 		if r.Spec.Memcached.Templates != nil {
 			err := common_webhook.ValidateDNS1123Label(
-				basePath.Child("memcached").Child("template"),
+				basePath.Child("memcached").Child("templates"),
 				maps.Keys(*r.Spec.Memcached.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Rabbitmq.Enabled {
+		if r.Spec.Rabbitmq.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("rabbitmq").Child("templates"),
+				maps.Keys(*r.Spec.Rabbitmq.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
@@ -428,8 +438,18 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 	if r.Spec.Memcached.Enabled {
 		if r.Spec.Memcached.Templates != nil {
 			err := common_webhook.ValidateDNS1123Label(
-				basePath.Child("memcached").Child("template"),
+				basePath.Child("memcached").Child("templates"),
 				maps.Keys(*r.Spec.Memcached.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Rabbitmq.Enabled {
+		if r.Spec.Rabbitmq.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("rabbitmq").Child("templates"),
+				maps.Keys(*r.Spec.Rabbitmq.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
