@@ -13,6 +13,7 @@ spec:
         optional: true
   playbook: osp.edpm.nova
   caCerts: combined-ca-bundle
+  edpmServiceType: nova
   containerImageFields:
   - NovaComputeImage
   - EdpmIscsidImage
