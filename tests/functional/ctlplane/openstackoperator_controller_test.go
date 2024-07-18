@@ -2011,4 +2011,78 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 				"Invalid value: \"foo_bar\": a lowercase RFC 1123 label must consist"),
 		)
 	})
+
+	It("Blocks creating ctlplane CRs with to long galera keys/names", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+
+		galeraTemplate := map[string]interface{}{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{
+				"storageRequest": "500M",
+			},
+		}
+
+		spec["galera"] = map[string]interface{}{
+			"enabled":   true,
+			"templates": galeraTemplate,
+		}
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than 46 characters"),
+		)
+	})
+
+	It("Blocks creating ctlplane CRs with wrong galera keys/names", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+
+		galeraTemplate := map[string]interface{}{
+			"foo_bar": map[string]interface{}{
+				"storageRequest": "500M",
+			},
+		}
+
+		spec["galera"] = map[string]interface{}{
+			"enabled":   true,
+			"templates": galeraTemplate,
+		}
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Invalid value: \"foo_bar\": a lowercase RFC 1123 label must consist"),
+		)
+	})
 })

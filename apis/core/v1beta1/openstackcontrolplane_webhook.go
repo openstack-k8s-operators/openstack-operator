@@ -334,6 +334,16 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 		}
 	}
 
+	if r.Spec.Galera.Enabled {
+		if r.Spec.Galera.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("galera").Child("templates"),
+				maps.Keys(*r.Spec.Galera.Templates),
+				mariadbv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
 	return warnings, errors
 }
 
@@ -451,6 +461,16 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 				basePath.Child("rabbitmq").Child("templates"),
 				maps.Keys(*r.Spec.Rabbitmq.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Galera.Enabled {
+		if r.Spec.Galera.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("galera").Child("templates"),
+				maps.Keys(*r.Spec.Galera.Templates),
+				mariadbv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
 	}

@@ -19,7 +19,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240913084932-eb5ec1aa13b5
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240730154700-e526dc22c2bf
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240731090804-e066d8ab8a2b
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240730223820-fc21475d72f9
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240913133408-b9bc0c122ce8
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240731084037-a291f481b0aa
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240731091052-6640ad821a8a
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240731083222-f718ddbac180
@@ -41,7 +41,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.16.6
 )
 
-require k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0
+require k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
