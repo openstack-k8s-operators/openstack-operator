@@ -2030,6 +2030,8 @@ spec:
                 items:
                   type: string
                 type: array
+              inventorySecretName:
+                type: string
               observedGeneration:
                 format: int64
                 type: integer

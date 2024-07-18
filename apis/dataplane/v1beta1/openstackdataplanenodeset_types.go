@@ -144,6 +144,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// out config changes.
 	DeployedConfigHash string `json:"deployedConfigHash,omitempty"`
 
+	// InventorySecretName Name of a secret containing the ansible inventory
+	InventorySecretName string `json:"inventorySecretName,omitempty"`
+
 	//ObservedGeneration - the most recent generation observed for this NodeSet. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 

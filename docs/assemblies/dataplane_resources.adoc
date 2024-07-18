@@ -347,6 +347,11 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | string
 | false
 
+| inventorySecretName
+| InventorySecretName Name of a secret containing the ansible inventory
+| string
+| false
+
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this NodeSet. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 | int64

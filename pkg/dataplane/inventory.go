@@ -167,6 +167,9 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		},
 	}
 	err = secret.EnsureSecrets(ctx, helper, instance, template, nil)
+	if err == nil {
+		instance.Status.InventorySecretName = secretName
+	}
 	return secretName, err
 }
 
