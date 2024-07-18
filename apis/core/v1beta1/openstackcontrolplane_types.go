@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
@@ -62,6 +64,9 @@ const (
 	OvnDbCaName = tls.DefaultCAPrefix + "ovn"
 	// LibvirtCaName -
 	LibvirtCaName = tls.DefaultCAPrefix + "libvirt"
+
+	// GlanceName - Default Glance name
+	GlanceName = "glance"
 )
 
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
@@ -973,4 +978,15 @@ func (c CertConfig) GetRenewBeforeHours() string {
 	}
 
 	return ""
+}
+
+// GetServiceName - returns the name and altName depending if
+// UniquePodNames is configured
+func (instance OpenStackControlPlane) GetServiceName(name string, uniquePodNames bool) (string, string) {
+	altName := fmt.Sprintf("%s-%s", name, instance.UID[:5])
+	if uniquePodNames {
+		name, altName = altName, name
+	}
+
+	return name, altName
 }
