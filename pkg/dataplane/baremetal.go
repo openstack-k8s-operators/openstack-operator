@@ -71,6 +71,9 @@ func DeployBaremetalSet(
 						}
 						ipPrefix, _ := ipNet.Mask.Size()
 						instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/%d", res.Address, ipPrefix)
+						if res.Gateway == nil {
+							return fmt.Errorf("%s gateway is missing", CtlPlaneNetwork)
+						}
 						baremetalSet.Spec.CtlplaneGateway = *res.Gateway
 						baremetalSet.Spec.BootstrapDNS = dnsAddresses
 						baremetalSet.Spec.DNSSearchDomains = []string{res.DNSDomain}
@@ -89,7 +92,8 @@ func DeployBaremetalSet(
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.NodeSetBaremetalProvisionErrorMessage)
+			dataplanev1.NodeSetBaremetalProvisionErrorMessage,
+			err.Error())
 		return false, err
 	}
 
