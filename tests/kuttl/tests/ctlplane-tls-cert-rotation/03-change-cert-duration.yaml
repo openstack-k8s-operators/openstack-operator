@@ -1,0 +1,6 @@
+# Deploys with custom tls service certs and CA certs duration
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      oc kustomize ../../../../config/samples/tls/custom_duration | oc apply -n $NAMESPACE -f -

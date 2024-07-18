@@ -1,0 +1,7 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      echo "Deleting secrets..."
+      oc get secret -l service-cert -n $NAMESPACE -o name > /tmp/deleted-secrets.txt
+      oc delete secret -l service-cert -n $NAMESPACE
