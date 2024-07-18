@@ -15,7 +15,7 @@ require (
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240731032705-4a6f7bdc7202
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240731063935-e70504866b5d
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240731063935-7d1a5bfcadb6
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240731084039-931d948c6ce3
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240913114408-6cb58c0ce9cd
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240731072333-75659acdc7fc
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240731065850-f38ddc99c0af
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240913164928-5ae3f1f5134a

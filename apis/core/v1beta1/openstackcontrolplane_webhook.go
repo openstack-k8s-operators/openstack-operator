@@ -279,6 +279,14 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Glance.Enabled {
+		glanceName, _ := r.GetServiceName(GlanceName, r.Spec.Glance.UniquePodNames)
+		for key, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("glance").Child("template").Child("glanceAPIs"),
+				[]string{key},
+				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
 		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"))...)
 	}
 
@@ -399,6 +407,14 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 	if r.Spec.Glance.Enabled {
 		if old.Glance.Template == nil {
 			old.Glance.Template = &glancev1.GlanceSpecCore{}
+		}
+		glanceName, _ := r.GetServiceName(GlanceName, r.Spec.Glance.UniquePodNames)
+		for key, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("glance").Child("template").Child("glanceAPIs"),
+				[]string{key},
+				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
 		}
 		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"))...)
 	}

@@ -28,11 +28,7 @@ const (
 
 // ReconcileGlance -
 func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
-	glanceName := "glance"
-	altGlanceName := fmt.Sprintf("glance-%s", instance.UID[:5])
-	if instance.Spec.Glance.UniquePodNames {
-		glanceName, altGlanceName = altGlanceName, glanceName
-	}
+	glanceName, altGlanceName := instance.GetServiceName(corev1beta1.GlanceName, instance.Spec.Glance.UniquePodNames)
 	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
 	glance := &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
