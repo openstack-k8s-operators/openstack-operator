@@ -54,7 +54,7 @@ const (
 	NodeSetBaremetalProvisionReadyWaitingMessage = "NodeSetBaremetalProvisionReady not yet ready"
 
 	// NodeSetBaremetalProvisionErrorMessage error
-	NodeSetBaremetalProvisionErrorMessage = "NodeSetBaremetalProvisionReady error occurred"
+	NodeSetBaremetalProvisionErrorMessage = "NodeSetBaremetalProvisionReady error occurred %s"
 
 	// NodeSetIPReservationReadyCondition Status=True condition indicates
 	// IPSets reserved for all nodes in a NodeSet.
@@ -67,7 +67,7 @@ const (
 	NodeSetIPReservationReadyWaitingMessage = "NodeSetIPReservationReady not yet ready"
 
 	// NodeSetIPReservationReadyErrorMessage error
-	NodeSetIPReservationReadyErrorMessage = "NodeSetIPReservationReady error occurred"
+	NodeSetIPReservationReadyErrorMessage = "NodeSetIPReservationReady error occurred %s"
 
 	// NodeSetDNSDataReadyCondition Status=True condition indicates
 	// DNSData created for the NodeSet.
@@ -80,7 +80,7 @@ const (
 	NodeSetDNSDataReadyWaitingMessage = "NodeSetDNSDataReady not yet ready"
 
 	// NodeSetDNSDataReadyErrorMessage error
-	NodeSetDNSDataReadyErrorMessage = "NodeSetDNSDataReady error occurred"
+	NodeSetDNSDataReadyErrorMessage = "NodeSetDNSDataReady error occurred %s"
 
 	// NodeSetDNSDataMultipleDNSMasqErrorMessage error
 	NodeSetDNSDataMultipleDNSMasqErrorMessage = "NodeSet DNSData error occurred. Multiple DNSMasq resources exist."

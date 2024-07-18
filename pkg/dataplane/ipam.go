@@ -198,7 +198,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.NodeSetDNSDataReadyErrorMessage)
+			dataplanev1.NodeSetDNSDataReadyErrorMessage,
+			err.Error())
 		return dnsDetails, err
 	}
 
@@ -214,7 +215,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.NodeSetDNSDataReadyErrorMessage)
+			dataplanev1.NodeSetDNSDataReadyErrorMessage,
+			err.Error())
 		return dnsDetails, err
 	}
 	if !dnsData.IsReady() {
@@ -242,7 +244,8 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetIPReservationReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.NodeSetIPReservationReadyErrorMessage)
+			dataplanev1.NodeSetIPReservationReadyErrorMessage,
+			err.Error())
 		return nil, false, err
 	}
 
