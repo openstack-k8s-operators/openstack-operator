@@ -147,21 +147,6 @@ func init() {
 	SchemeBuilder.Register(&OpenStackDataPlaneService{}, &OpenStackDataPlaneServiceList{})
 }
 
-// IsReady - returns true if service is ready to serve requests
-func (instance OpenStackDataPlaneService) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
-}
-
-// InitConditions - Initializes Status Conditons
-func (instance OpenStackDataPlaneService) InitConditions() {
-	if instance.Status.Conditions == nil {
-		instance.Status.Conditions = condition.Conditions{}
-	}
-	cl := condition.CreateList(condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.InitReason))
-	// initialize conditions used later as Status=Unknown
-	instance.Status.Conditions.Init(&cl)
-}
-
 // DefaultLabel - adding default label to the OpenStackDataPlaneService
 func (r *OpenStackDataPlaneService) DefaultLabels() {
 	labels := map[string]string{
