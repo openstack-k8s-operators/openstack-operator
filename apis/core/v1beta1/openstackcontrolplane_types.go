@@ -67,6 +67,8 @@ const (
 
 	// GlanceName - Default Glance name
 	GlanceName = "glance"
+	// CinderName - Default Cinder name
+	CinderName = "cinder"
 )
 
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
