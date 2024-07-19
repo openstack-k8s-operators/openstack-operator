@@ -716,6 +716,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) deploymentWatcherFn(
 	ctx context.Context, //revive:disable-line
 	obj client.Object,
 ) []reconcile.Request {
+	Log := r.GetLogger(ctx)
 	namespace := obj.GetNamespace()
 	deployment := obj.(*dataplanev1.OpenStackDataPlaneDeployment)
 
@@ -727,6 +728,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) deploymentWatcherFn(
 				Name:      nodeSet,
 			},
 		})
+		Log.Info(fmt.Sprintf("Reconciling NodeSet %s due to watcher on %s/%s", nodeSet, obj.GetObjectKind().GroupVersionKind().Kind, obj.GetName()))
 	}
 	return requests
 }
