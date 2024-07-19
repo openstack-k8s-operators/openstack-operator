@@ -291,6 +291,12 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Cinder.Enabled {
+		cinderName, _ := r.GetServiceName(CinderName, r.Spec.Cinder.UniquePodNames)
+		errs := common_webhook.ValidateDNS1123Label(
+			basePath.Child("cinder").Child("template").Child("cinderVolumes"),
+			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
+			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+		errors = append(errors, errs...)
 		errors = append(errors, r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template"))...)
 	}
 
@@ -423,6 +429,12 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Cinder.Template == nil {
 			old.Cinder.Template = &cinderv1.CinderSpecCore{}
 		}
+		cinderName, _ := r.GetServiceName(CinderName, r.Spec.Cinder.UniquePodNames)
+		errs := common_webhook.ValidateDNS1123Label(
+			basePath.Child("cinder").Child("template").Child("cinderVolumes"),
+			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
+			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+		errors = append(errors, errs...)
 		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(*old.Cinder.Template, basePath.Child("cinder").Child("template"))...)
 	}
 

@@ -21,13 +21,7 @@ import (
 
 // ReconcileCinder -
 func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
-	cinderName := "cinder"
-	altCinderName := fmt.Sprintf("cinder-%s", instance.UID[:5])
-
-	if instance.Spec.Cinder.UniquePodNames {
-		cinderName, altCinderName = altCinderName, cinderName
-	}
-
+	cinderName, altCinderName := instance.GetServiceName(corev1beta1.CinderName, instance.Spec.Cinder.UniquePodNames)
 	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
 	cinder := &cinderv1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
