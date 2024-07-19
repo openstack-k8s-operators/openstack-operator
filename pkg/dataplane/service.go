@@ -138,6 +138,10 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 		}
 		_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ensureService, func() error {
 			serviceObjSpec.DeepCopyInto(&ensureService.Spec)
+			ensureService.DefaultLabels()
+			if ensureService.Spec.EDPMServiceType == "" {
+				ensureService.Spec.EDPMServiceType = serviceObjMeta.Name
+			}
 			return nil
 		})
 		if err != nil {
