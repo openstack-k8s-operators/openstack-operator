@@ -38,14 +38,10 @@ for API_PATH in ${DATAPLANE_PATHS[@]};do
 done
 
 # Build ctlplane docs from APIs
-${CRD_MARKDOWN} $CTLPLANE_FILES -n OpenStackClient -n OpenStackControlPlane -n OpenStackVersion > docs/assemblies/ctlplane_resources.md
-bundle exec kramdoc --auto-ids docs/assemblies/ctlplane_resources.md && rm docs/assemblies/ctlplane_resources.md
-sed -i "s/=== Custom/== Custom/g" docs/assemblies/ctlplane_resources.adoc
+${CRD_ASCIIDOC} $CTLPLANE_FILES -n OpenStackClient -n OpenStackControlPlane -n OpenStackVersion > docs/assemblies/ctlplane_resources.adoc
 
 # Build dataplane docs from APIs
-${CRD_MARKDOWN} $DATAPLANE_FILES -n OpenStackDataPlaneDeployment -n OpenStackDataPlaneNodeSet -n OpenStackDataPlaneService > docs/assemblies/dataplane_resources.md
-bundle exec kramdoc --auto-ids docs/assemblies/dataplane_resources.md && rm docs/assemblies/dataplane_resources.md
-sed -i "s/=== Custom/== Custom/g" docs/assemblies/dataplane_resources.adoc
+${CRD_ASCIIDOC} $DATAPLANE_FILES -n OpenStackDataPlaneDeployment -n OpenStackDataPlaneNodeSet -n OpenStackDataPlaneService > docs/assemblies/dataplane_resources.adoc
 
 
 # Render HTML
