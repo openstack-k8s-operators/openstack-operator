@@ -105,6 +105,19 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	// add services list
 	nodeSetGroup.Vars["edpm_services"] = instance.Spec.Services
 
+	// add service types list
+	serviceTypes := []string{}
+	for _, serviceName := range instance.Spec.Services {
+		service, err := GetService(ctx, helper, serviceName)
+		if err != nil {
+			helper.GetLogger().Error(err, fmt.Sprintf("could not get service %s, using name as EDPMServiceType", serviceName))
+			serviceTypes = append(serviceTypes, serviceName)
+		} else {
+			serviceTypes = append(serviceTypes, service.Spec.EDPMServiceType)
+		}
+	}
+	nodeSetGroup.Vars["edpm_service_types"] = serviceTypes
+
 	nodeSetGroup.Vars["ansible_ssh_private_key_file"] = fmt.Sprintf("/runner/env/ssh_key/ssh_key_%s", instance.Name)
 
 	for _, node := range instance.Spec.Nodes {
