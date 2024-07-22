@@ -758,6 +758,11 @@ CinderSection defines the desired state of Cinder service
 | APIOverride, provides the ability to override the generated manifest of several child resources.
 | <<override,Override>>
 | false
+
+| uniquePodNames
+| UniquePodNames - Use a unique prefix for cinder CRs to have unique pod names. Convenient to avoid podname (and thus hostname) collision between different deployments. Useful for CI jobs as well as preproduction and production environments that use the same storage backend, etc.
+| bool
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -852,6 +857,11 @@ GlanceSection defines the desired state of Glance service
 | APIOverride, provides the ability to override the generated manifest of several child resources.
 | map[string]<<override,Override>>
 | false
+
+| uniquePodNames
+| UniquePodNames - Use a unique prefix for glance CRs to have unique pod names. Convenient to avoid podname (and thus hostname) collision between different deployments. Useful for CI jobs as well as preproduction and production environments that use the same storage backend, etc.
+| bool
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -9376,6 +9386,11 @@ GaleraSpec defines the desired state of Galera
 | When TLS is configured, only allow connections to the DB over TLS
 | bool
 | false
+
+| logToDisk
+| Log Galera pod's output to disk
+| bool
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -9777,7 +9792,7 @@ NeutronAPISpecCore -
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| DefaultConfigOverwrite - interface to overwrite default config files like policy.yaml
 | map[string]string
 | false
 
@@ -14825,9 +14840,9 @@ AutoscalingSpecBase -
 | int32
 | false
 
-| prometheusTLS
-| If TLS should be used for user deployed prometheus
-| *bool
+| prometheusTLSCaCertSecret
+| If defined, specifies which CA certificate to use for user deployed prometheus
+| *corev1.SecretKeySelector
 | false
 
 | heatInstance
@@ -15279,6 +15294,16 @@ MetricStorageSpec defines the desired state of MetricStorage
 |===
 | Field | Description | Scheme | Required
 
+| dashboardsEnabled
+| DashboardsEnabled allows to enable or disable dashboards and related artifacts
+| bool
+| true
+
+| dataplaneNetwork
+| DataplaneNetwork defines the network that will be used to scrape dataplane node_exporter endpoints
+| infranetworkv1.NetNameStr
+| true
+
 | monitoringStack
 | MonitoringStack allows to define a metric storage with options supported by Red Hat
 | *<<monitoringstack,MonitoringStack>>
@@ -15336,19 +15361,9 @@ MonitoringStack defines the options for a Red Hat supported metric storage
 | bool
 | true
 
-| dashboardsEnabled
-| DashboardsEnabled allows to enable or disable dashboards and related artifacts
-| bool
-| true
-
 | scrapeInterval
 | ScrapeInterval sets the interval between scrapes
 | string
-| true
-
-| dataplaneNetwork
-| DataplaneNetwork defines the network that will be used to scrape dataplane node_exporter endpoints
-| infranetworkv1.NetNameStr
 | true
 
 | storage
