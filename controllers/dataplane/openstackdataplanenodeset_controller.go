@@ -628,7 +628,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
 		return err
 	}
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&dataplanev1.OpenStackDataPlaneNodeSet{}).
+		For(&dataplanev1.OpenStackDataPlaneNodeSet{},
+			builder.WithPredicates(predicate.Or(
+				predicate.GenerationChangedPredicate{},
+				predicate.AnnotationChangedPredicate{},
+				predicate.LabelChangedPredicate{}))).
 		Owns(&ansibleeev1.OpenStackAnsibleEE{}).
 		Owns(&baremetalv1.OpenStackBaremetalSet{}).
 		Owns(&infranetworkv1.IPSet{}).
@@ -655,7 +659,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) secretWatcherFn(
 	Log := r.GetLogger(ctx)
 	nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
 	kind := strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)
-
 	selector := "spec.ansibleVarsFrom.ansible.configMaps"
 	if kind == "secret" {
 		selector = "spec.ansibleVarsFrom.ansible.secrets"
@@ -690,7 +693,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) genericWatcherFn(
 ) []reconcile.Request {
 	Log := r.GetLogger(ctx)
 	nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
-
 	listOpts := []client.ListOption{
 		client.InNamespace(obj.GetNamespace()),
 	}
