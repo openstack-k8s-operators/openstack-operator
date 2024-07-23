@@ -6,8 +6,8 @@ SKIP_CERT=${SKIP_CERT:-false}
 CRC_IP=${CRC_IP:-$(/sbin/ip -o -4 addr list crc | awk '{print $4}' | cut -d/ -f1)}
 
 #Open 9443
-sudo firewall-cmd --zone=libvirt --add-port=9443/tcp
-sudo firewall-cmd --runtime-to-permanent
+sudo firewall-cmd --zone=libvirt --add-port=9443/tcp || :
+sudo firewall-cmd --runtime-to-permanent || :
 
 # Generate the certs and the ca bundle
 if [ "$SKIP_CERT" = false ] ; then
