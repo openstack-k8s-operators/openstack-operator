@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 # This script can be executed in 2 modes. If DOCKERFILE is set then we replace the image locations there with pinned SHA version.
 # If no DOCKERFILE is set the script just echo's a list of bundle dependencies to stout as a single common separated line. This
@@ -13,11 +13,12 @@ LOCAL_REGISTRY=${LOCAL_REGISTRY:-0}
 
 if [ -n "$DOCKERFILE" ]; then
     cp "$DOCKERFILE" "${DOCKERFILE}.pinned"
-    set -ex #in DOCKERFILE mode we like extra logging
+    set -exo pipefail #in DOCKERFILE mode we like extra logging
 fi
 
 #loop over each openstack-k8s-operators go.mod entry
-for MOD_PATH in $(go list -mod=readonly -m -json all | jq -r '. | select(.Path | contains("openstack")) | .Replace // . |.Path' | grep -v openstack-operator | grep -v lib-common); do
+MOD_PATHS=$(go list -mod=readonly -m -json all | jq -r '. | select(.Path | contains("openstack")) | .Replace // . |.Path' | grep -v openstack-operator | grep -v lib-common)
+for MOD_PATH in ${MOD_PATHS}; do
     if [[ "$MOD_PATH" == "./apis" ]]; then
         continue
     fi
