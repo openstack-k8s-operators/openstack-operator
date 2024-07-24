@@ -2219,4 +2219,130 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 				"Invalid value: \"foo_bar\": a lowercase RFC 1123 label must consist"),
 		)
 	})
+
+	It("Blocks creating ctlplane CRs with to long cinderVolume keys/names", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+
+		volumeList := map[string]interface{}{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{},
+		}
+		cinderTemplate := map[string]interface{}{
+			"databaseInstance": "openstack",
+			"secret":           "secret",
+			"databaseAccount":  "account",
+			"cinderVolumes":    volumeList,
+		}
+
+		spec["cinder"] = map[string]interface{}{
+			"enabled":        true,
+			"uniquePodNames": false,
+			"template":       cinderTemplate,
+		}
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than 38 characters"),
+		)
+	})
+
+	It("Blocks creating ctlplane CRs with to long cinderVolume keys/names (uniquePodNames)", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+
+		volumeList := map[string]interface{}{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{},
+		}
+		cinderTemplate := map[string]interface{}{
+			"databaseInstance": "openstack",
+			"secret":           "secret",
+			"databaseAccount":  "account",
+			"cinderVolumes":    volumeList,
+		}
+
+		spec["cinder"] = map[string]interface{}{
+			"enabled":        true,
+			"uniquePodNames": true,
+			"template":       cinderTemplate,
+		}
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than 32 characters"),
+		)
+	})
+
+	It("Blocks creating ctlplane CRs with wrong cinderVolume keys/names", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+
+		volumeList := map[string]interface{}{
+			"foo_bar": map[string]interface{}{},
+		}
+		cinderTemplate := map[string]interface{}{
+			"databaseInstance": "openstack",
+			"secret":           "secret",
+			"databaseAccount":  "account",
+			"cinderVolumes":    volumeList,
+		}
+
+		spec["cinder"] = map[string]interface{}{
+			"enabled":        true,
+			"uniquePodNames": true,
+			"template":       cinderTemplate,
+		}
+
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+		Expect(statusError.ErrStatus.Message).To(
+			ContainSubstring(
+				"Invalid value: \"foo_bar\": a lowercase RFC 1123 label must consist"),
+		)
+	})
 })
