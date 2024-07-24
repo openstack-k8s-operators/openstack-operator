@@ -172,6 +172,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | DeployedVersion
 | string
 | false
+
+| deployed
+| Deployed
+| bool
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
