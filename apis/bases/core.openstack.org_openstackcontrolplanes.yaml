@@ -17524,6 +17524,14 @@ spec:
                     type: string
                   telemetryNodeExporterImage:
                     type: string
+                  testAnsibletestImage:
+                    type: string
+                  testHorizontestImage:
+                    type: string
+                  testTempestImage:
+                    type: string
+                  testTobikoImage:
+                    type: string
                 type: object
               deployedOVNVersion:
                 type: string
