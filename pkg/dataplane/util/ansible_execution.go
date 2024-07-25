@@ -65,6 +65,12 @@ func AnsibleExecution(
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
+
+	// Don't patch and re-run jobs if the job status is already completed.
+	if ansibleEE != nil && ansibleEE.Status.JobStatus == ansibleeev1.JobStatusSucceeded {
+		return nil
+	}
+
 	if ansibleEE == nil {
 		ansibleEE = &ansibleeev1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
