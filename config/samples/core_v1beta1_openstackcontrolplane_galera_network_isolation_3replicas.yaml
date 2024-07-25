@@ -342,8 +342,11 @@ spec:
         secret: osp-secret
       logging:
         enabled: false
-        network: internalapi
         ipaddr: 172.17.0.80
+        annotations:
+          metallb.universe.tf/address-pool: internalapi
+          metallb.universe.tf/allow-shared-ip: internalapi
+          metallb.universe.tf/loadBalancerIPs: 172.17.0.80
         port: 10514
         cloNamespace: openshift-logging
   swift:
