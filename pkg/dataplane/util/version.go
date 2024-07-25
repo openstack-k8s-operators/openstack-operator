@@ -39,7 +39,7 @@ func GetVersion(ctx context.Context, helper *helper.Helper, namespace string) (*
 		return nil, err
 	}
 	if len(versions.Items) > 1 {
-		errorMsg := "Found multiple OpenStackVersions when at most 1 should exist"
+		errorMsg := "found multiple OpenStackVersions when at most 1 should exist"
 		err := errors.New(errorMsg)
 		log.Error(err, errorMsg)
 		return nil, err
@@ -55,7 +55,6 @@ func GetVersion(ctx context.Context, helper *helper.Helper, namespace string) (*
 // GetContainerImages - get the container image values considering either the
 // OpenStackVersion or the defaults
 func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.ContainerImages {
-
 	var containerImages openstackv1.ContainerImages
 
 	// Set the containerImages variable for the container images If there is an
