@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,7 +41,6 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	deployment "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane"
 	dataplaneutil "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane/util"
@@ -63,7 +63,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) GetLogger(ctx context.Context) 
 // +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments/finalizers,verbs=update;patch
 // +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch
-// +kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=discovery.k8s.io,resources=endpointslices,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
@@ -494,7 +493,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manag
 				predicate.GenerationChangedPredicate{},
 				predicate.AnnotationChangedPredicate{},
 				predicate.LabelChangedPredicate{}))).
-		Owns(&ansibleeev1.OpenStackAnsibleEE{}).
+		Owns(&batchv1.Job{}).
 		Watches(&certmgrv1.Certificate{},
 			handler.EnqueueRequestsFromMapFunc(certFn)).
 		Complete(r)
