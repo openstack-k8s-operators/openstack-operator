@@ -18,6 +18,8 @@ package deployment
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"path"
 	"reflect"
@@ -313,7 +315,8 @@ func (d *Deployer) addCertMounts(
 				}
 				volumeName := GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, 0)
 				if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
-					volumeName = volumeName[:apimachineryvalidation.DNS1123LabelMaxLength]
+					hash := sha256.Sum224([]byte(volumeName))
+					volumeName = "cert" + hex.EncodeToString(hash[:])
 				}
 				certVolume := corev1.Volume{
 					Name: volumeName,
@@ -348,7 +351,8 @@ func (d *Deployer) addCertMounts(
 			}
 			volumeName := fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts)
 			if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
-				volumeName = volumeName[:apimachineryvalidation.DNS1123LabelMaxLength]
+				hash := sha256.Sum224([]byte(volumeName))
+				volumeName = "cacert" + hex.EncodeToString(hash[:])
 			}
 			cacertVolume := corev1.Volume{
 				Name: volumeName,
@@ -412,8 +416,8 @@ func (d *Deployer) addServiceExtraMounts(
 		for idx, key := range keys {
 			volumeName := fmt.Sprintf("%s-%s", cm.Name, strconv.Itoa(idx))
 			if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
-				limit := apimachineryvalidation.DNS1123LabelMaxLength - len(strconv.Itoa(idx))
-				volumeName = volumeName[:limit] + strconv.Itoa(idx)
+				hash := sha256.Sum224([]byte(volumeName))
+				volumeName = "cm" + hex.EncodeToString(hash[:])
 			}
 			volume := corev1.Volume{
 				Name: volumeName,
@@ -458,8 +462,8 @@ func (d *Deployer) addServiceExtraMounts(
 		for idx, key := range keys {
 			volumeName := fmt.Sprintf("%s-%s", sec.Name, strconv.Itoa(idx))
 			if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
-				limit := apimachineryvalidation.DNS1123LabelMaxLength - len(strconv.Itoa(idx))
-				volumeName = volumeName[:limit] + strconv.Itoa(idx)
+				hash := sha256.Sum224([]byte(volumeName))
+				volumeName = "sec" + hex.EncodeToString(hash[:])
 			}
 			volume := corev1.Volume{
 				Name: volumeName,
