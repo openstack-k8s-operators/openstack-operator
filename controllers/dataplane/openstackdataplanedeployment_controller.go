@@ -28,8 +28,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/go-logr/logr"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -435,7 +437,11 @@ func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&dataplanev1.OpenStackDataPlaneDeployment{}).
+		For(&dataplanev1.OpenStackDataPlaneDeployment{},
+			builder.WithPredicates(predicate.Or(
+				predicate.GenerationChangedPredicate{},
+				predicate.AnnotationChangedPredicate{},
+				predicate.LabelChangedPredicate{}))).
 		Owns(&ansibleeev1.OpenStackAnsibleEE{}).
 		Complete(r)
 }
