@@ -126,8 +126,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() { // update the Ready condition based on the sub conditions
-		condition.RestoreLastTransitionTimes(
-			&instance.Status.Conditions, savedConditions)
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
 				condition.ReadyCondition, condition.ReadyMessage)
@@ -137,6 +135,8 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
 
+		condition.RestoreLastTransitionTimes(
+			&instance.Status.Conditions, savedConditions)
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			Log.Error(err, "Error updating instance status conditions")
