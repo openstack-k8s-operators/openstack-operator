@@ -176,8 +176,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() { // update the Ready condition based on the sub conditions
-		condition.RestoreLastTransitionTimes(
-			&instance.Status.Conditions, savedConditions)
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
 				condition.ReadyCondition, dataplanev1.NodeSetReadyMessage)
@@ -186,6 +184,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			instance.Status.Conditions.Set(
 				instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+		condition.RestoreLastTransitionTimes(
+			&instance.Status.Conditions, savedConditions)
 
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
