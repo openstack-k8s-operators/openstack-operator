@@ -1778,9 +1778,9 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      None:
-                        type: string
                       backendMdnsServerProtocol:
+                        type: string
+                      backendType:
                         type: string
                       backendWorkerServerProtocol:
                         type: string
@@ -1798,9 +1798,9 @@ spec:
                         type: object
                       designateAPI:
                         properties:
-                          None:
-                            type: string
                           backendMdnsServerProtocol:
+                            type: string
+                          backendType:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
@@ -1935,9 +1935,9 @@ spec:
                         type: object
                       designateBackendbind9:
                         properties:
-                          None:
-                            type: string
                           backendMdnsServerProtocol:
+                            type: string
+                          backendType:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
@@ -2021,9 +2021,9 @@ spec:
                         type: object
                       designateCentral:
                         properties:
-                          None:
-                            type: string
                           backendMdnsServerProtocol:
+                            type: string
+                          backendType:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
@@ -2107,9 +2107,9 @@ spec:
                         type: object
                       designateMdns:
                         properties:
-                          None:
-                            type: string
                           backendMdnsServerProtocol:
+                            type: string
+                          backendType:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
@@ -2193,9 +2193,9 @@ spec:
                         type: object
                       designateProducer:
                         properties:
-                          None:
-                            type: string
                           backendMdnsServerProtocol:
+                            type: string
+                          backendType:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
@@ -2339,9 +2339,9 @@ spec:
                         type: object
                       designateWorker:
                         properties:
-                          None:
-                            type: string
                           backendMdnsServerProtocol:
+                            type: string
+                          backendType:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
@@ -2478,6 +2478,7 @@ spec:
                         default: designate
                         type: string
                     required:
+                    - databaseInstance
                     - designateAPI
                     - designateBackendbind9
                     - designateCentral
@@ -10846,6 +10847,91 @@ spec:
                       octaviaNetworkAttachment:
                         default: octavia
                         type: string
+                      octaviaRsyslog:
+                        properties:
+                          adminLogTargets:
+                            items:
+                              properties:
+                                host:
+                                  type: string
+                                port:
+                                  type: integer
+                                protocol:
+                                  type: string
+                              required:
+                              - host
+                              - port
+                              - protocol
+                              type: object
+                            type: array
+                          defaultConfigOverwrite:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          networkAttachments:
+                            default:
+                            - octavia
+                            items:
+                              type: string
+                            type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          serviceAccount:
+                            type: string
+                          serviceUser:
+                            default: octavia
+                            type: string
+                          tenantLogTargets:
+                            items:
+                              properties:
+                                host:
+                                  type: string
+                                port:
+                                  type: integer
+                                protocol:
+                                  type: string
+                              required:
+                              - host
+                              - port
+                              - protocol
+                              type: object
+                            type: array
+                        required:
+                        - serviceAccount
+                        type: object
                       octaviaWorker:
                         properties:
                           amphoraCustomFlavors:
@@ -16280,6 +16366,7 @@ spec:
                             default:
                               databaseAccount: aodh
                               databaseInstance: openstack
+                              memcachedInstance: memcached
                               passwordSelector:
                                 aodhService: AodhPassword
                               rabbitMqClusterName: rabbitmq
@@ -16299,6 +16386,9 @@ spec:
                                 additionalProperties:
                                   type: string
                                 type: object
+                              memcachedInstance:
+                                default: memcached
+                                type: string
                               networkAttachmentDefinitions:
                                 items:
                                   type: string
@@ -16397,6 +16487,7 @@ spec:
                                 type: object
                             required:
                             - databaseInstance
+                            - memcachedInstance
                             - secret
                             type: object
                           enabled:
