@@ -329,6 +329,32 @@ func reconcileRabbitMQ(
 		if spec.Affinity != nil {
 			rabbitmq.Spec.Affinity = spec.Affinity
 			//spec.Affinity.DeepCopyInto(rabbitmq.Spec.Affinity)
+		} else {
+			// default anti affinity as in
+			// https://github.com/rabbitmq/cluster-operator/blob/11361d4201a55f457da7c1a2f69e75b2b0cfd069/docs/examples/pod-anti-affinity/rabbitmq.yaml
+			rabbitmq.Spec.Affinity = &corev1.Affinity{
+				PodAntiAffinity: &corev1.PodAntiAffinity{
+					PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
+						{
+							Weight: 100,
+							PodAffinityTerm: corev1.PodAffinityTerm{
+								LabelSelector: &metav1.LabelSelector{
+									MatchExpressions: []metav1.LabelSelectorRequirement{
+										{
+											Key:      "app.kubernetes.io/name",
+											Operator: metav1.LabelSelectorOpIn,
+											Values: []string{
+												"pod-anti-affinity",
+											},
+										},
+									},
+								},
+								TopologyKey: "kubernetes.io/hostname",
+							},
+						},
+					},
+				},
+			}
 		}
 
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
