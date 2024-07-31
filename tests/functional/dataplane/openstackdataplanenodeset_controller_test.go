@@ -23,7 +23,6 @@ import (
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
@@ -1301,6 +1300,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	When("A DataPlaneNodeSet is created with NoNodes and a MinorUpdate OpenStackDataPlaneDeployment is created", func() {
 		BeforeEach(func() {
 
+			dataplanev1.SetupDefaults()
 			updateServiceSpec := map[string]interface{}{
 				"playbook": "osp.edpm.update",
 			}
@@ -1331,7 +1331,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					Namespace: namespace,
 				}
 				ansibleEE := GetAnsibleee(ansibleeeName)
-				ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+				ansibleEE.Status.Succeeded = 1
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 			}, th.Timeout, th.Interval).Should(Succeed())
 
