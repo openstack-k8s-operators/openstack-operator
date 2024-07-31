@@ -3360,6 +3360,8 @@ spec:
                           type: string
                         disableNonTLSListeners:
                           type: boolean
+                        logToDisk:
+                          type: boolean
                         nodeSelector:
                           additionalProperties:
                             type: string
