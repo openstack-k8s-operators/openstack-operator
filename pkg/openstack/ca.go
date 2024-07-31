@@ -610,7 +610,7 @@ func createRootCACertAndIssuer(
 		})
 	cert := certmanager.NewCertificate(caCertReq, 5)
 
-	ctrlResult, err := cert.CreateOrPatch(ctx, helper, nil)
+	ctrlResult, _, err := cert.CreateOrPatch(ctx, helper, nil)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1.OpenStackControlPlaneCAReadyCondition,
