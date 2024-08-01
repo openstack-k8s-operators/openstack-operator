@@ -24,7 +24,7 @@ require (
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240731082121-80290e3ec6af
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240731084038-2251de08ce56
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240730154700-e526dc22c2bf
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240730154700-e526dc22c2bf
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240801155104-32cc1b1d93da
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240730154700-e526dc22c2bf
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240730154700-e526dc22c2bf
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240730154700-e526dc22c2bf

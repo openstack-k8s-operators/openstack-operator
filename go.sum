@@ -118,8 +118,8 @@ github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240731084038
 github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240731084038-2251de08ce56/go.mod h1:A9Q/22ZCJm/uvnnaAHQzAsZTZ0vlTwmz/IZIWy5vrhs=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240730154700-e526dc22c2bf h1:boELXNuvA2BZGt3TJmcKGMeVOmDXKumDIsEcWIoZHFM=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240730154700-e526dc22c2bf/go.mod h1:tP+nxk95PisCKJaXE/an2igG9lluxuOVhdmV9WtkR2s=
-github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240730154700-e526dc22c2bf h1:mXToLdT1UztfecNDSnx3EXhzmvs3Wd7nIZu7YhQkgvI=
-github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240730154700-e526dc22c2bf/go.mod h1:GooNi6hM78cOUMjhBy0fXsZIcDTK1dUb1rlay170IJo=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240801155104-32cc1b1d93da h1:VQ+1buVOee3XLlR0ZfA0b8p+5Wb9C+YD/uTzPFyFCFs=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240801155104-32cc1b1d93da/go.mod h1:GooNi6hM78cOUMjhBy0fXsZIcDTK1dUb1rlay170IJo=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240730154700-e526dc22c2bf h1:VDxaGely5T2NBt7HtCMYMMd7yR6w7tKrHFdQgAus/wY=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240730154700-e526dc22c2bf/go.mod h1:k9KuWN2LBtLbKHgcyh/0lrwk3Kr0cOAhiR3hi/mrwOQ=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240730154700-e526dc22c2bf h1:5IxujAEi+Fk3DyOY83CegcNe+Lcqg/RwEPaPEhQiQ3E=
