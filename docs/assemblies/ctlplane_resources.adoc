@@ -382,6 +382,12 @@
 * <<octaviaapispeccore,OctaviaAPISpecCore>>
 * <<octaviaapistatus,OctaviaAPIStatus>>
 * <<octaviaapitls,OctaviaApiTLS>>
+* <<octaviarsyslog,OctaviaRsyslog>>
+* <<octaviarsysloglist,OctaviaRsyslogList>>
+* <<octaviarsyslogspec,OctaviaRsyslogSpec>>
+* <<octaviarsyslogspeccore,OctaviaRsyslogSpecCore>>
+* <<octaviarsyslogstatus,OctaviaRsyslogStatus>>
+* <<octaviarsyslogtarget,OctaviaRsyslogTarget>>
 * <<cpucountreq,CPUCountReq>>
 * <<cpumhzreq,CPUMhzReq>>
 * <<cpureqs,CPUReqs>>
@@ -2126,6 +2132,26 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | false
 
 | telemetryNodeExporterImage
+|
+| *string
+| false
+
+| testTempestImage
+|
+| *string
+| false
+
+| testTobikoImage
+|
+| *string
+| false
+
+| testHorizontestImage
+|
+| *string
+| false
+
+| testAnsibletestImage
 |
 | *string
 | false
@@ -4068,7 +4094,7 @@ DesignateTemplate defines common input parameters used by all Designate services
 | <<passwordselector,PasswordSelector>>
 | true
 
-| None
+| backendType
 | BackendType - Defines the backend service/configuration we are using, i.e. bind9, PowerDNS, BYO, etc.. Helps maintain a single init container/init.sh to do container setup
 | string
 | true
@@ -4257,9 +4283,9 @@ DesignateSpecBase -
 | passwordSelectors
 | PasswordSelectors - Selectors to identify the DB and AdminUser password from the Secret
 | <<passwordselector,PasswordSelector>>
-| false
+| true
 
-| None
+| backendType
 | BackendType - Defines the backend service/configuration we are using, i.e. bind9, unhbound, PowerDNS, BYO, etc.. Helps maintain a single init container/init.sh to do container setup
 | string
 | true
@@ -4372,7 +4398,7 @@ DesignateStatus defines the observed state of Designate
 | false
 
 | databaseHostname
-| Designate Database Hostname
+| DatabaseHostname - Designate Database Hostname
 | string
 | false
 
@@ -12152,6 +12178,11 @@ OctaviaSpec defines the desired state of Octavia
 | OctaviaHousekeeping - Spec definition for the Octavia Housekeeping agent for the Octavia deployment
 | <<octaviaamphoracontrollerspec,OctaviaAmphoraControllerSpec>>
 | true
+
+| octaviaRsyslog
+| OctaviaRsyslog - Spec definition for the Octavia Rsyslog agent for the Octavia deployment
+| <<octaviarsyslogspec,OctaviaRsyslogSpec>>
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -12294,6 +12325,11 @@ OctaviaSpecCore - this version has no containerImages and is used by OpenStackCo
 | OctaviaHousekeeping - Spec definition for the Octavia Housekeeping agent for the Octavia deployment
 | <<octaviaamphoracontrollerspeccore,OctaviaAmphoraControllerSpecCore>>
 | true
+
+| octaviaRsyslog
+| OctaviaRsyslog - Spec definition for the Octavia Rsyslog agent for the Octavia deployment
+| <<octaviarsyslogspeccore,OctaviaRsyslogSpecCore>>
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -12343,6 +12379,11 @@ OctaviaStatus defines the observed state of Octavia
 
 | healthmanagerreadyCount
 | ReadyCount of octavia HealthManager instances
+| int32
+| false
+
+| rsyslogreadyCount
+| ReadyCount of octavia Rsyslog instances
 | int32
 | false
 
@@ -12606,6 +12647,185 @@ OctaviaAPIStatus defines the observed state of OctaviaAPI
 | Ovn GenericService - holds the secret for the OvnDb client cert
 | tls.GenericService
 | false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviarsyslog]
+==== OctaviaRsyslog
+
+OctaviaRsyslog is the Schema for the octaviaworkers API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<octaviarsyslogspec,OctaviaRsyslogSpec>>
+| false
+
+| status
+|
+| <<octaviarsyslogstatus,OctaviaRsyslogStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviarsysloglist]
+==== OctaviaRsyslogList
+
+OctaviaRsyslogList contains a list of OctaviaWorker
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<octaviarsyslog,OctaviaRsyslog>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviarsyslogspec]
+==== OctaviaRsyslogSpec
+
+OctaviaRsyslogSpec defines common state for all Octavia Amphora Controllers
+
+|===
+| Field | Description | Scheme | Required
+
+| containerImage
+| ContainerImage - Amphora Controller Container Image URL
+| string
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviarsyslogspeccore]
+==== OctaviaRsyslogSpecCore
+
+OctaviaRsyslogSpecCore -
+
+|===
+| Field | Description | Scheme | Required
+
+| serviceUser
+| ServiceUser - service user name (TODO: beagles, do we need this at all)
+| string
+| true
+
+| serviceAccount
+| ServiceAccount - service account name used internally to provide Octavia services the default SA name
+| string
+| true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| map[string]string
+| false
+
+| defaultConfigOverwrite
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| map[string]string
+| false
+
+| resources
+| Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+| corev1.ResourceRequirements
+| false
+
+| networkAttachments
+| NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
+| []string
+| false
+
+| adminLogTargets
+| AdminLogTargets is a list of OctaviaRsyslogTarget, the admin logs are forwarded to those targets. Use only when forwarding to an external Rsyslog server.
+| []<<octaviarsyslogtarget,OctaviaRsyslogTarget>>
+| false
+
+| tenantLogTargets
+| TenantLogTargets is a list of OctaviaRsyslogTarget, the tenant logs are forwarded to those targets. Use only when forwarding to an external Rsyslog server.
+| []<<octaviarsyslogtarget,OctaviaRsyslogTarget>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviarsyslogstatus]
+==== OctaviaRsyslogStatus
+
+OctaviaRsyslogStatus defines the observed state of the Octavia Amphora Controller
+
+|===
+| Field | Description | Scheme | Required
+
+| readyCount
+| ReadyCount of Octavia Amphora Controllers
+| int32
+| false
+
+| desiredNumberScheduled
+| DesiredNumberScheduled - total number of the nodes which should be running Daemon
+| int32
+| false
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| networkAttachments
+| NetworkAttachment status of the deployment pods
+| map[string][]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#octaviarsyslogtarget]
+==== OctaviaRsyslogTarget
+
+|===
+| Field | Description | Scheme | Required
+
+| host
+|
+| string
+| true
+
+| port
+|
+| int
+| true
+
+| protocol
+|
+| string
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -14751,6 +14971,11 @@ Aodh defines the aodh component spec
 | bool
 | true
 
+| memcachedInstance
+| Memcached instance name.
+| string
+| true
+
 | tls
 | TLS - Parameters related to the TLS
 | tls.API
@@ -15301,7 +15526,7 @@ MetricStorageSpec defines the desired state of MetricStorage
 
 | dataplaneNetwork
 | DataplaneNetwork defines the network that will be used to scrape dataplane node_exporter endpoints
-| infranetworkv1.NetNameStr
+| *infranetworkv1.NetNameStr
 | true
 
 | monitoringStack

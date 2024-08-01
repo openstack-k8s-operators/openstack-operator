@@ -18,6 +18,8 @@ package deployment
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"sort"
 	"strconv"
@@ -28,6 +30,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -284,5 +287,10 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 // openstack-epdm-nova-default-certs-0.
 func GetServiceCertsSecretName(instance *dataplanev1.OpenStackDataPlaneNodeSet, serviceName string,
 	certKey string, index int) string {
-	return fmt.Sprintf("%s-%s-%s-certs-%s", instance.Name, serviceName, certKey, strconv.Itoa(index))
+	name := fmt.Sprintf("%s-%s-%s-certs-%s", instance.Name, serviceName, certKey, strconv.Itoa(index))
+	if len(name) > apimachineryvalidation.DNS1123SubdomainMaxLength {
+		hash := sha256.Sum224([]byte(name))
+		name = "cert-" + hex.EncodeToString(hash[:])
+	}
+	return name
 }

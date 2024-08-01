@@ -35,6 +35,7 @@ spec:
                 default: false
                 type: boolean
               caCerts:
+                maxLength: 253
                 type: string
               certsFrom:
                 type: string
@@ -48,6 +49,7 @@ spec:
                     configMapRef:
                       properties:
                         name:
+                          maxLength: 253
                           type: string
                         optional:
                           type: boolean
@@ -58,6 +60,7 @@ spec:
                     secretRef:
                       properties:
                         name:
+                          maxLength: 253
                           type: string
                         optional:
                           type: boolean
