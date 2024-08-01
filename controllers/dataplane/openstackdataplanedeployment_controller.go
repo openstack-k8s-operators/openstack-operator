@@ -229,7 +229,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 								condition.SeverityError,
 								condition.TLSInputErrorMessage,
 								err.Error())
-							return ctrl.Result{}, err
+							return *result, err
 						} else if (*result != ctrl.Result{}) {
 							return *result, nil // requeue here
 						}
