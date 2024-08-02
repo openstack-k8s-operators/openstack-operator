@@ -29,8 +29,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/go-logr/logr"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -433,8 +436,51 @@ func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// watch for changes in certificates
+	certFn := func(ctx context.Context, obj client.Object) []reconcile.Request {
+		Log := r.GetLogger(ctx)
+		result := []reconcile.Request{}
+
+		objectLabelValue, ok := obj.GetLabels()[deployment.NodeSetLabel]
+		if !ok {
+			// cert doesn't have a nodeset label
+			return nil
+		}
+
+		// get all deployments in namespace
+		deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
+		listOpts := []client.ListOption{
+			client.InNamespace(obj.GetNamespace()),
+		}
+		if err := r.Client.List(context.Background(), deployments, listOpts...); err != nil {
+			Log.Error(err, "Unable to retrieve deployments %w")
+			return nil
+		}
+
+		for _, dep := range deployments.Items {
+			if dep.Status.Deployed {
+				continue
+			}
+			if util.StringInSlice(objectLabelValue, dep.Spec.NodeSets) {
+				name := client.ObjectKey{
+					Namespace: dep.GetNamespace(),
+					Name:      dep.GetName(),
+				}
+				Log.Info(fmt.Sprintf("Cert %s is used by deployment %s", obj.GetName(), dep.GetName()))
+				result = append(result, reconcile.Request{NamespacedName: name})
+			}
+		}
+
+		if len(result) > 0 {
+			return result
+		}
+		return nil
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlaneDeployment{}).
 		Owns(&ansibleeev1.OpenStackAnsibleEE{}).
+		Watches(&certmgrv1.Certificate{},
+			handler.EnqueueRequestsFromMapFunc(certFn)).
 		Complete(r)
 }
