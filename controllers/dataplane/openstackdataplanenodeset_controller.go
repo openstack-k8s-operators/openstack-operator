@@ -40,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/go-logr/logr"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -98,6 +99,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update;patch
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch
+//+kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;
 
 // RBAC for the ServiceAccount for the internal image registry
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
@@ -638,6 +640,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
 		Owns(&infranetworkv1.IPSet{}).
 		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.Secret{}).
+		Owns(&certmgrv1.Certificate{}).
 		Watches(&infranetworkv1.DNSMasq{},
 			handler.EnqueueRequestsFromMapFunc(r.genericWatcherFn)).
 		Watches(&dataplanev1.OpenStackDataPlaneDeployment{},
