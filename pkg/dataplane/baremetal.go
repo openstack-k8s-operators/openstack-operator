@@ -30,6 +30,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 )
 
@@ -38,6 +39,7 @@ func DeployBaremetalSet(
 	ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	ipSets map[string]infranetworkv1.IPSet,
 	dnsAddresses []string,
+	containerImages openstackv1.ContainerImages,
 ) (bool, error) {
 	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -52,6 +54,17 @@ func DeployBaremetalSet(
 	utils.LogForObject(helper, "Reconciling BaremetalSet", instance)
 	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
+		// Set Images
+		if containerImages.OsContainerImage != nil && instance.Spec.BaremetalSetTemplate.OSContainerImageURL == "" {
+			baremetalSet.Spec.OSContainerImageURL = *containerImages.OsContainerImage
+		}
+		if containerImages.AgentImage != nil && instance.Spec.BaremetalSetTemplate.AgentImageURL == "" {
+			baremetalSet.Spec.AgentImageURL = *containerImages.AgentImage
+		}
+		if containerImages.ApacheImage != nil && instance.Spec.BaremetalSetTemplate.ApacheImageURL == "" {
+			baremetalSet.Spec.ApacheImageURL = *containerImages.ApacheImage
+		}
+
 		for _, node := range instance.Spec.Nodes {
 			hostName := node.HostName
 			ipSet, ok := ipSets[hostName]
