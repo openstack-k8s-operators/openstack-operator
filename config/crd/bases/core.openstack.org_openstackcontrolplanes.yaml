@@ -1930,6 +1930,24 @@ spec:
                           serviceUser:
                             default: designate
                             type: string
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2102,6 +2120,11 @@ spec:
                           serviceUser:
                             default: designate
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2188,6 +2211,11 @@ spec:
                           serviceUser:
                             default: designate
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2274,6 +2302,11 @@ spec:
                           serviceUser:
                             default: designate
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2420,6 +2453,11 @@ spec:
                           serviceUser:
                             default: designate
                             type: string
+                          tls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
