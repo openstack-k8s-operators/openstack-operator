@@ -83,7 +83,6 @@ type ContainerTemplate struct {
 	CeilometerIpmiImage           *string `json:"ceilometerIpmiImage,omitempty"`
 	CeilometerNotificationImage   *string `json:"ceilometerNotificationImage,omitempty"`
 	CeilometerSgcoreImage         *string `json:"ceilometerSgcoreImage,omitempty"`
-	CeilometerProxyImage          *string `json:"ceilometerProxyImage,omitempty"`
 	CinderAPIImage                *string `json:"cinderAPIImage,omitempty"`
 	CinderBackupImage             *string `json:"cinderBackupImage,omitempty"`
 	CinderSchedulerImage          *string `json:"cinderSchedulerImage,omitempty"`
