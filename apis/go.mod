@@ -16,7 +16,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.4.1-0.20240730162859-91b64b2d2de7
 	github.com/openstack-k8s-operators/ironic-operator/api v0.4.1-0.20240730161800-bc7aabb3803a
 	github.com/openstack-k8s-operators/keystone-operator/api v0.4.1-0.20240730210414-ba2309d261a2
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240730142703-7fd3da600c9d
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240807131303-1647f58f6934
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.4.1-0.20240730142703-7fd3da600c9d
 	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20240730164536-11b9c621cc17
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.4.1-0.20240730222151-2d771bf1a024

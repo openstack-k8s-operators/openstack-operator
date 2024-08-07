@@ -118,10 +118,10 @@ github.com/openstack-k8s-operators/keystone-operator/api v0.4.1-0.20240730210414
 github.com/openstack-k8s-operators/keystone-operator/api v0.4.1-0.20240730210414-ba2309d261a2/go.mod h1:cSNSeN7+pXC/DLwtGoT9HsbdUYzbAnLHGtXN9/uugk8=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.4.1-0.20240730142703-7fd3da600c9d h1:wLvAa6yPVmeP2AE93EV0Y5FSejGSgVyWzzkk7nS057M=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.4.1-0.20240730142703-7fd3da600c9d/go.mod h1:tP+nxk95PisCKJaXE/an2igG9lluxuOVhdmV9WtkR2s=
-github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.4.1-0.20240730142703-7fd3da600c9d h1:N6w5FKXP+FVjNnCwAGQnjXBS0JSpti8MD3qUFtJVMi8=
-github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.4.1-0.20240730142703-7fd3da600c9d/go.mod h1:ja6CQm/06ZWyTDp0e+VM2kHy0k7jc9qMV252pVqzmQA=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240730142703-7fd3da600c9d h1:WfEUkOxDpMnnYo+mQTJc9juoY85me/V6ubNAsOHdjnc=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240730142703-7fd3da600c9d/go.mod h1:YlNmaOTuZNZvwlOfosPI94od/V2Itektn9KWThRzylI=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.4.1-0.20240807131303-1647f58f6934 h1:IMjaWK6LNqpQbybtHfloh7v380xnaP02oGdmxQeb+Kc=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.4.1-0.20240807131303-1647f58f6934/go.mod h1:1zjtu8i5b5Kudhu1GO/O7mFEHFTuHGjyEdkHfwJ0eQI=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240807131303-1647f58f6934 h1:lIendREibdp4CpzeKMAPb7CLoAHAQAPwm/8VVdKs7BQ=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240807131303-1647f58f6934/go.mod h1:hCT/Ba8kRkRB23d07YEsCzELsYcJGpD/Uw4NDh+LD6w=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.4.1-0.20240730142703-7fd3da600c9d h1:SRB1rCIVpaVhKxJPkSXE9CNN+xHSrdgXzrRV9ed/hIc=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.4.1-0.20240730142703-7fd3da600c9d/go.mod h1:TyZh5+Uwxb1vcyY44H5GJVulvlQxU05TTAPQ4tSmbzY=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.4.1-0.20240730142703-7fd3da600c9d h1:jyp3D2NPI1fvt1F/vzz6SsPf6fLqDpNEdVws/K2CX5E=
