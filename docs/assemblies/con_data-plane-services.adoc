@@ -125,6 +125,12 @@ behavior. Setting this field changes what services are deployed when the
 `OpenStackDataPlaneDeployment` is created. If the field is set, only the
 services listed in the field will be deployed on all nodeSets.
 
+If deployment has been configured with `tlsEnabled` set to `True` in the
+original `OpenStackDataPlaneNodeSet` CR, it is recommended to add also
+`install-certs` to the list of services in `servicesOverride` list. That will
+install certificates potentially required by the other services in
+the destination nodes.
+
 The following example `OpenStackDataPlaneDeployment` resource illustrates using
 `servicesOverride` to perform a pre-upgrade task of executing just the ovn
 service.
@@ -141,6 +147,9 @@ spec:
 
   // Only the services here will be executed. Overriding any services value
   // on the openstack-edpm nodeSet.
+  // Service install-certs is added here to install certificates
+  // potentially required by the ovn service
   servicesOverride:
+    - install-certs
     - ovn
 ....
