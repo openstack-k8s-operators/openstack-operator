@@ -22,13 +22,19 @@ import (
 
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
 
+	appsv1 "k8s.io/api/apps/v1"
 	k8s_corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 )
 
@@ -282,6 +288,55 @@ func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]inte
 	return th.CreateUnstructured(raw)
 }
 
+// Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
+func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
+	spec := map[string]interface{}{
+		"preProvisioned": true,
+		"nodeTemplate": map[string]interface{}{
+			"networks": []infrav1.IPSetNetwork{
+				{Name: "ctlplane", SubnetName: "subnet1"},
+			},
+			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+		},
+		"nodes":            map[string]interface{}{},
+		"servicesOverride": []string{},
+	}
+	if tlsEnabled {
+		spec["tlsEnabled"] = true
+	}
+	spec["nodes"] = map[string]dataplanev1.NodeSection{"edpm-compute-node-1": {}}
+	return spec
+}
+
+func GetDataplaneNodeset(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneNodeSet {
+	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// Build OpenStackDataPlaneNodeSet struct and fill it with preset values
+func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+
+		"apiVersion": "dataplane.openstack.org/v1beta1",
+		"kind":       "OpenStackDataPlaneNodeSet",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+}
+
+// Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
+// func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) client.Object {
+	instance := DefaultDataplaneNodeSetTemplate(name, spec)
+	return th.CreateUnstructured(instance)
+}
+
 func GetTLSPublicSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"podLevel": map[string]interface{}{
@@ -474,4 +529,113 @@ func GetRabbitMQCluster(name types.NamespacedName) *rabbitmqv2.RabbitmqCluster {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
 	return instance
+}
+
+func SimulateControlplaneReady() {
+	instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+	if instance.Spec.Keystone.Enabled {
+		keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+	}
+
+	if instance.Spec.Galera.Enabled {
+		// FIXME add helpers to mariadb-operator to simulate galera!
+		Eventually(func(g Gomega) {
+
+			for dbName := range *instance.Spec.Galera.Templates {
+				dbNamespacedName := types.NamespacedName{
+					Namespace: names.Namespace,
+					Name:      dbName,
+				}
+
+				db := &mariadbv1.Galera{}
+				g.Expect(th.K8sClient.Get(th.Ctx, dbNamespacedName, db)).Should(Succeed())
+				db.Status.ObservedGeneration = db.Generation
+				db.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, db)).To(Succeed())
+				th.Logger.Info("Simulated DB ready", "on", dbName)
+			}
+
+		}, timeout, interval).Should(Succeed())
+	}
+
+	if instance.Spec.Rabbitmq.Enabled {
+		Eventually(func(g Gomega) {
+
+			for rabbitName := range *instance.Spec.Rabbitmq.Templates {
+				rabbitmqNamespacedName := types.NamespacedName{
+					Namespace: names.Namespace,
+					Name:      rabbitName,
+				}
+
+				rabbit := &rabbitmqv2.RabbitmqCluster{}
+				g.Expect(th.K8sClient.Get(th.Ctx, rabbitmqNamespacedName, rabbit)).Should(Succeed())
+				rabbit.Status.ObservedGeneration = rabbit.Generation
+				sts := &appsv1.StatefulSet{}
+				sts.Spec.Template.Spec.Containers = []k8s_corev1.Container{
+					{
+						Resources: k8s_corev1.ResourceRequirements{
+							Limits: map[k8s_corev1.ResourceName]resource.Quantity{
+								"memory": resource.MustParse("100Mi"),
+							},
+							Requests: map[k8s_corev1.ResourceName]resource.Quantity{
+								"memory": resource.MustParse("100Mi"),
+							},
+						},
+					},
+				}
+
+				sts.Status = appsv1.StatefulSetStatus{
+					ObservedGeneration: 0,
+					Replicas:           0,
+					ReadyReplicas:      3,
+					CurrentReplicas:    0,
+					UpdatedReplicas:    0,
+					CurrentRevision:    "",
+					UpdateRevision:     "",
+					CollisionCount:     nil,
+					Conditions:         nil,
+				}
+				endPoints := &k8s_corev1.Endpoints{
+					Subsets: []k8s_corev1.EndpointSubset{
+						{
+							Addresses: []k8s_corev1.EndpointAddress{
+								{
+									IP: "127.0.0.1",
+								},
+							},
+						},
+					},
+				}
+				rabbit.Status.SetConditions([]runtime.Object{sts, endPoints})
+				rabbit.Status.SetCondition("ClusterAvailable", k8s_corev1.ConditionTrue, "Cluster is ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, rabbit)).To(Succeed())
+				th.Logger.Info("Simulated Rabbitmq ready", "on", rabbitName)
+			}
+
+		}, timeout, interval).Should(Succeed())
+	}
+
+	if instance.Spec.Memcached.Enabled {
+		if instance.Spec.TLS.PodLevel.Enabled {
+			infra.SimulateTLSMemcachedReady(names.MemcachedName)
+		} else {
+			infra.SimulateMemcachedReady(names.MemcachedName)
+
+		}
+	}
+
+	if instance.Spec.Ovn.Enabled {
+		ovn.SimulateOVNNorthdReady(names.OVNNorthdName)
+		ovn.SimulateOVNDBClusterReady(names.OVNDbServerNBName)
+		ovn.SimulateOVNDBClusterReady(names.OVNDbServerSBName)
+		ovn.SimulateOVNControllerReady(names.OVNControllerName)
+	}
+
+	// simulate pod ready for openstackclient
+	Eventually(func(g Gomega) {
+		th.SimulatePodReady(names.OpenStackClientName)
+		th.Logger.Info("Simulated OpenStackClient ready")
+
+	}, timeout, interval).Should(Succeed())
 }
