@@ -102,8 +102,8 @@ github.com/openstack-k8s-operators/barbican-operator/api v0.4.1-0.20240731090237
 github.com/openstack-k8s-operators/barbican-operator/api v0.4.1-0.20240731090237-5ecf0bd0acbd/go.mod h1:b28eAeJNT3PKr/yOzF7o4Q+8QfzAkI53C+v8O+qCme8=
 github.com/openstack-k8s-operators/cinder-operator/api v0.4.1-0.20240805141527-edad0fa15cb2 h1:SsbPtH+wPQ1vJo13n7lyONioF//FwoDCEu29ySE1KfI=
 github.com/openstack-k8s-operators/cinder-operator/api v0.4.1-0.20240805141527-edad0fa15cb2/go.mod h1:rjhrx13b5HhRGkIyL1ILRxeZyPzDwBuJ7YH8ZgvCnyk=
-github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240805124542-47c3d9b65ed5 h1:GLhUwZkZGK26lzzrJ18Um66c3rmK7bEzZlmyZLs7YFQ=
-github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240805124542-47c3d9b65ed5/go.mod h1:9iTYpUriDfNG14jSdLhEwr6ljWkz9Y7mM22OMxsTd1k=
+github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240806164057-b414b935449a h1:pWjh769jUGOzNI8aj/jI06uEDcxr4PS3uQ8+kWiEKcE=
+github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240806164057-b414b935449a/go.mod h1:9axql2241sBBU7lHoOM9b2wBif4syJgFoftZr4IoIxQ=
 github.com/openstack-k8s-operators/glance-operator/api v0.4.1-0.20240805103045-5387db6209e1 h1:+JLs7AZ/BZxoKh+BFlLsjWCO3PzpLRHJM3Iwj29EAM4=
 github.com/openstack-k8s-operators/glance-operator/api v0.4.1-0.20240805103045-5387db6209e1/go.mod h1:jnNcvM2tKHXhgnVcv1Qk1fIRBGpLx32pypsgBSsv0nw=
 github.com/openstack-k8s-operators/heat-operator/api v0.4.1-0.20240805141528-910e4e4f6c72 h1:KbUboU4nRYqKtbJ+H5PS6IqdOiV5kmzHO7PzHHt6fb0=

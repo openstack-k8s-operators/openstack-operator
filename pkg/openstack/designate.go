@@ -7,7 +7,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -59,6 +58,13 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 				designate.Name)
 	}
 
+	// preserve any previously set TLS certs, set CA cert
+	if instance.Spec.TLS.PodLevel.Enabled {
+		instance.Spec.Designate.Template.DesignateAPI.TLS = designate.Spec.DesignateAPI.TLS
+	}
+
+	instance.Spec.Designate.Template.DesignateAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
 	// When component services got created check if there is the need to create a route
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "designate", Namespace: instance.Namespace}, designate); err != nil {
 		if !k8s_errors.IsNotFound(err) {
@@ -87,8 +93,8 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Designate.Template.DesignateAPI.Override.Service,
 			instance.Spec.Designate.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeDesignateReadyCondition,
-			true, // TODO: (mschuppert) disable TLS for now until implemented
-			tls.API{},
+			false, // TODO: (oschwart) could be removed when all integrated service support TLS
+			instance.Spec.Designate.Template.DesignateAPI.TLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -97,6 +103,10 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 		// set service overrides
 		instance.Spec.Designate.Template.DesignateAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+
+		// update TLS settings with cert secret
+		instance.Spec.Designate.Template.DesignateAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Designate.Template.DesignateAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	helper.GetLogger().Info("Reconciling Designate", "Designate.Namespace", instance.Namespace, "Designate.Name", "designate")
