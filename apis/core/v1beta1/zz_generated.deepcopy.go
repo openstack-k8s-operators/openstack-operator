@@ -312,11 +312,6 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.CeilometerProxyImage != nil {
-		in, out := &in.CeilometerProxyImage, &out.CeilometerProxyImage
-		*out = new(string)
-		**out = **in
-	}
 	if in.CinderAPIImage != nil {
 		in, out := &in.CinderAPIImage, &out.CinderAPIImage
 		*out = new(string)
