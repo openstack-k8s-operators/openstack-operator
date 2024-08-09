@@ -700,13 +700,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 				}
 				g.Expect(vols).To(ContainElements("combined-ca-bundle", "openstack-config", "openstack-config-secret"))
 
-				volMounts := map[string]string{}
+				volMounts := map[string][]string{}
 				for _, x := range pod.Spec.Containers[0].VolumeMounts {
-					volMounts[x.Name] = x.MountPath
+					volMounts[x.Name] = append(volMounts[x.Name], x.MountPath)
 				}
-				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"))
-				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", "/home/cloud-admin/.config/openstack/clouds.yaml"))
-				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", "/home/cloud-admin/.config/openstack/secure.yaml"))
+				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", []string{"/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"}))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", []string{"/home/cloud-admin/.config/openstack/clouds.yaml"}))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", []string{"/home/cloud-admin/.config/openstack/secure.yaml", "/home/cloud-admin/cloudrc"}))
 
 				// simulate pod being in the ready state
 				th.SimulatePodReady(names.OpenStackClientName)
@@ -985,13 +985,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 				}
 				g.Expect(vols).To(ContainElements("combined-ca-bundle", "openstack-config", "openstack-config-secret"))
 
-				volMounts := map[string]string{}
+				volMounts := map[string][]string{}
 				for _, x := range pod.Spec.Containers[0].VolumeMounts {
-					volMounts[x.Name] = x.MountPath
+					volMounts[x.Name] = append(volMounts[x.Name], x.MountPath)
 				}
-				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"))
-				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", "/home/cloud-admin/.config/openstack/clouds.yaml"))
-				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", "/home/cloud-admin/.config/openstack/secure.yaml"))
+				g.Expect(volMounts).To(HaveKeyWithValue("combined-ca-bundle", []string{"/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"}))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config", []string{"/home/cloud-admin/.config/openstack/clouds.yaml"}))
+				g.Expect(volMounts).To(HaveKeyWithValue("openstack-config-secret", []string{"/home/cloud-admin/.config/openstack/secure.yaml", "/home/cloud-admin/cloudrc"}))
 
 				// simulate pod being in the ready state
 				th.SimulatePodReady(names.OpenStackClientName)
