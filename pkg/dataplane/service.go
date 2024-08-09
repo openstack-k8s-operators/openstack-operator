@@ -55,7 +55,6 @@ func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneServ
 		d.InventorySecrets,
 		d.AeeSpec,
 		d.NodeSet)
-
 	if err != nil {
 		d.Helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
 		return err
@@ -156,8 +155,9 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 // Global Services in multiple NodeSets for a deployment
 func DedupeServices(ctx context.Context, helper *helper.Helper,
 	nodesets []dataplanev1.OpenStackDataPlaneNodeSet,
-	serviceOverride []string) (map[string][]string, error) {
-	var nodeSetServiceMap = make(map[string][]string, 0)
+	serviceOverride []string,
+) (map[string][]string, error) {
+	nodeSetServiceMap := make(map[string][]string, 0)
 	var globalServices []string
 	if len(serviceOverride) != 0 {
 		services, err := dedupe(ctx, helper, serviceOverride, globalServices)
@@ -178,7 +178,8 @@ func DedupeServices(ctx context.Context, helper *helper.Helper,
 }
 
 func dedupe(ctx context.Context, helper *helper.Helper,
-	services []string, globalServices []string) ([]string, error) {
+	services []string, globalServices []string,
+) ([]string, error) {
 	var dedupedServices []string
 	var nodeSetServiceTypes []string
 	for _, svc := range services {

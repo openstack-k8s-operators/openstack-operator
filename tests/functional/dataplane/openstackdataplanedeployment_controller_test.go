@@ -12,7 +12,6 @@ import (
 
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -128,7 +127,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			// with EDPMServiceType set
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-service"})
+				"edpmServiceType":               "foo-update-service",
+				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -204,25 +204,22 @@ var _ = Describe("Dataplane Deployment Test", func() {
 						Name:      aeeName,
 						Namespace: dataplaneDeploymentName.Namespace,
 					}
-					ansibleEE := &ansibleeev1.OpenStackAnsibleEE{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      ansibleeeName.Name,
-							Namespace: ansibleeeName.Namespace,
-						}}
-					g.Expect(th.K8sClient.Get(th.Ctx, ansibleeeName, ansibleEE)).To(Succeed())
-					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+					ansibleEE := GetAnsibleee(ansibleeeName)
 
+					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
-					g.Expect(ansibleEE.Spec.ExtraVars).To(HaveKey("edpm_override_hosts"))
 					if service.Spec.EDPMServiceType != "" {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("edpm_service_type"))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(service.Spec.EDPMServiceType))
 					} else {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(serviceName))
 					}
 					if service.Spec.DeployOnAllNodeSets {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_override_hosts"])).To(Equal("\"all\""))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("edpm_override_hosts"))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("all"))
 					} else {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_override_hosts"])).To(Equal(fmt.Sprintf("\"%s\"", dataplaneNodeSetName.Name)))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("edpm_override_hosts"))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(dataplaneNodeSetName.Name))
 					}
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
@@ -275,7 +272,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-service"})
+				"edpmServiceType":               "foo-update-service",
+				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -424,19 +422,21 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
 					if service.Spec.DeployOnAllNodeSets {
-						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(4))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(4))
 					} else {
-						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(2))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(2))
 					}
-					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 					if service.Spec.EDPMServiceType != "" {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(service.Spec.EDPMServiceType))
 					} else {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(serviceName))
 					}
 					if service.Spec.DeployOnAllNodeSets {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_override_hosts"])).To(Equal("\"all\""))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("edpm_override_hosts"))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("all"))
+
 					}
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
@@ -461,16 +461,16 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
 					if service.Spec.DeployOnAllNodeSets {
-						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(4))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(4))
 					} else {
-						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(2))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(2))
 					}
-					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 					if service.Spec.EDPMServiceType != "" {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(service.Spec.EDPMServiceType))
 					} else {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(serviceName))
 					}
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
@@ -688,7 +688,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 			Eventually(func(g Gomega) {
 				ansibleEE := GetAnsibleee(ansibleeeName)
-				ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+				ansibleEE.Status.Succeeded = 1
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 			}, th.Timeout, th.Interval).Should(Succeed())
 
@@ -787,7 +787,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 			Eventually(func(g Gomega) {
 				ansibleEE := GetAnsibleee(ansibleeeName)
-				ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+				ansibleEE.Status.Succeeded = 1
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 			}, th.Timeout, th.Interval).Should(Succeed())
 

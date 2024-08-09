@@ -46,7 +46,6 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
@@ -108,7 +107,6 @@ func init() {
 	utilruntime.Must(neutronv1.AddToScheme(scheme))
 	utilruntime.Must(octaviav1.AddToScheme(scheme))
 	utilruntime.Must(designatev1.AddToScheme(scheme))
-	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqv1.AddToScheme(scheme))
 	utilruntime.Must(manilav1.AddToScheme(scheme))
 	utilruntime.Must(horizonv1.AddToScheme(scheme))
