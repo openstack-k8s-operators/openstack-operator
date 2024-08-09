@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -418,6 +419,101 @@ func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]interfa
 		},
 		"spec": map[string]interface{}{
 			"deployOnAllNodeSets": true,
+		},
+	}
+}
+
+func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {
+
+	raw := map[string]interface{}{
+		"apiVersion": "core.openstack.org/v1beta1",
+		"kind":       "OpenStackControlPlane",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+	return th.CreateUnstructured(raw)
+}
+
+func GetDefaultOpenStackControlPlaneSpec(enableTLS bool) map[string]interface{} {
+	memcachedTemplate := map[string]interface{}{
+		"memcached": map[string]interface{}{
+			"replicas": 1,
+		},
+	}
+	rabbitTemplate := map[string]interface{}{
+		"rabbitmq": map[string]interface{}{
+			"replicas": 1,
+		},
+		"rabbitmq-cell1": map[string]interface{}{
+			"replicas": 1,
+		},
+	}
+	galeraTemplate := map[string]interface{}{
+		"openstack": map[string]interface{}{
+			"storageRequest": "500M",
+		},
+		"openstack-cell1": map[string]interface{}{
+			"storageRequest": "500M",
+		},
+	}
+	keystoneTemplate := map[string]interface{}{
+		"databaseInstance": "keystone",
+		"secret":           "osp-secret",
+	}
+
+	return map[string]interface{}{
+		"secret":       "osp-secret",
+		"storageClass": "local-storage",
+		"galera": map[string]interface{}{
+			"enabled":   true,
+			"templates": galeraTemplate,
+		},
+		"rabbitmq": map[string]interface{}{
+			"enabled":   true,
+			"templates": rabbitTemplate,
+		},
+		"memcached": map[string]interface{}{
+			"enabled":   true,
+			"templates": memcachedTemplate,
+		},
+		"keystone": map[string]interface{}{
+			"enabled":  true,
+			"template": keystoneTemplate,
+		},
+		"tls": map[string]interface{}{
+			"ingress": map[string]interface{}{
+				"enabled": enableTLS,
+
+				"ca": map[string]interface{}{
+					"customIssuer": "custom-issuer",
+					"duration":     "100h",
+				},
+				"cert": map[string]interface{}{
+					"duration": "10h",
+				},
+			},
+			"podLevel": map[string]interface{}{
+				"enabled": enableTLS,
+				"internal": map[string]interface{}{
+					"ca": map[string]interface{}{
+						"duration": "100h",
+					},
+					"cert": map[string]interface{}{
+						"duration": "10h",
+					},
+				},
+				"ovn": map[string]interface{}{
+					"ca": map[string]interface{}{
+						"duration": "100h",
+					},
+					"cert": map[string]interface{}{
+						"duration": "10h",
+					},
+				},
+			},
 		},
 	}
 }

@@ -17,9 +17,11 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	"fmt"
 
 	"golang.org/x/exp/slices"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -300,4 +302,48 @@ func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStac
 		}
 	}
 	return
+}
+
+// Compare TLS settings of control plane and data plane
+// if control plane name is specified attempt to retrieve it
+// otherwise get any control plane in the namespace
+func (r *OpenStackDataPlaneNodeSetSpec) ValidateTLS(namespace string, reconcilerClient client.Client, ctx context.Context) error {
+	var err error
+	controlPlanes := openstackv1.OpenStackControlPlaneList{}
+	opts := client.ListOptions{
+		Namespace: namespace,
+	}
+
+	// Attempt to get list of all ControlPlanes fail if that isn't possible
+	if err = reconcilerClient.List(ctx, &controlPlanes, &opts); err != nil {
+		return err
+	}
+	// Verify TLS status of control plane only if there is a single one
+	// otherwise proceed without verification
+	if len(controlPlanes.Items) == 1 {
+		controlPlane := controlPlanes.Items[0]
+		fieldErr := r.TLSMatch(controlPlane)
+		if fieldErr != nil {
+			err = fmt.Errorf("%s", fieldErr.Error())
+		}
+	}
+
+	return err
+}
+
+// Do TLS flags match in control plane ingress, pods and data plane
+func (r *OpenStackDataPlaneNodeSetSpec) TLSMatch(controlPlane openstackv1.OpenStackControlPlane) *field.Error {
+
+	if controlPlane.Spec.TLS.Ingress.Enabled != r.TLSEnabled || controlPlane.Spec.TLS.PodLevel.Enabled != r.TLSEnabled {
+
+		return field.Forbidden(
+			field.NewPath("spec.tlsEnabled"),
+			fmt.Sprintf(
+				"TLS settings on Data Plane node set and Control Plane %s do not match, Node set: %t Control Plane Ingress: %t Control Plane PodLevel: %t",
+				controlPlane.Name,
+				r.TLSEnabled,
+				controlPlane.Spec.TLS.Ingress.Enabled,
+				controlPlane.Spec.TLS.PodLevel.Enabled))
+	}
+	return nil
 }
