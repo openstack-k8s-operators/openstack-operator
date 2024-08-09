@@ -167,6 +167,11 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: horizon.apiOverride.tls
+      - description: Enabled - Whether Horizon services should be deployed and managed
+        displayName: Enabled
+        path: horizon.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - description: Template - Overrides to use when creating the Horizon services
         displayName: Template
         path: horizon.template
@@ -571,6 +576,13 @@ spec:
       - description: AddCertMounts - Whether to add cert mounts
         displayName: Add Cert Mounts
         path: addCertMounts
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: DeployOnAllNodeSets - should the service be deploy across all
+          nodesets This will override default target of a service play, setting it
+          to 'all'.
+        displayName: Deploy On All Node Sets
+        path: deployOnAllNodeSets
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       statusDescriptors:

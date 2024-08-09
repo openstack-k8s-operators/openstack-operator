@@ -698,11 +698,6 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 |===
 | Field | Description | Scheme | Required
 
-| extraMounts
-| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-| []storage.VolMounts
-| false
-
 | networks
 | Networks - Instance networks
 | []infranetworkv1.IPSetNetwork

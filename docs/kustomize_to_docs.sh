@@ -5,7 +5,7 @@ BAREMETAL=docs/assemblies/ref_example-OpenStackDataPlaneNodeSet-CR-for-bare-meta
 FOOTER=$(sed '0,/----/d' $BAREMETAL | sed -e '0,/----/d')
 sed -i '/----/q' $BAREMETAL
 sed -i 's/preprovisioned/baremetal/' config/samples/dataplane/no_vars_from/kustomization.yaml
-$KUSTOMIZE --load-restrictor LoadRestrictionsNone build config/samples/dataplane/no_vars_from | $LOCALBIN/yq ' select(.kind == "OpenStackDataPlaneNodeSet")' >> $BAREMETAL
+$LOCALBIN/oc kustomize --load-restrictor LoadRestrictionsNone config/samples/dataplane/no_vars_from | $LOCALBIN/yq ' select(.kind == "OpenStackDataPlaneNodeSet")' >> $BAREMETAL
 sed -i 's/\/baremetal/\/preprovisioned/' config/samples/dataplane/no_vars_from/kustomization.yaml
 echo -e "----\n$FOOTER" >> $BAREMETAL
 
@@ -32,7 +32,7 @@ done
 PREPROVISIONED=docs/assemblies/ref_example-OpenStackDataPlaneNodeSet-CR-for-preprovisioned-nodes.adoc
 FOOTER=$(sed '0,/----/d' $PREPROVISIONED | sed -e '0,/----/d')
 sed -i '/----/q' $PREPROVISIONED
-$KUSTOMIZE --load-restrictor LoadRestrictionsNone build config/samples/dataplane/no_vars_from | $LOCALBIN/yq ' select(.kind == "OpenStackDataPlaneNodeSet")' >> $PREPROVISIONED
+$LOCALBIN/oc kustomize --load-restrictor LoadRestrictionsNone config/samples/dataplane/no_vars_from | $LOCALBIN/yq ' select(.kind == "OpenStackDataPlaneNodeSet")' >> $PREPROVISIONED
 echo -e "----\n$FOOTER" >> $PREPROVISIONED
 
 COUNT=1
