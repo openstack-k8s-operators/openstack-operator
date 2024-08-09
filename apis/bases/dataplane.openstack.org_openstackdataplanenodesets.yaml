@@ -285,6 +285,7 @@ spec:
                             configMapRef:
                               properties:
                                 name:
+                                  maxLength: 253
                                   type: string
                                 optional:
                                   type: boolean
@@ -295,6 +296,7 @@ spec:
                             secretRef:
                               properties:
                                 name:
+                                  maxLength: 253
                                   type: string
                                 optional:
                                   type: boolean
@@ -304,6 +306,7 @@ spec:
                         type: array
                     type: object
                   ansibleSSHPrivateKeySecret:
+                    maxLength: 253
                     type: string
                   extraMounts:
                     items:
@@ -1109,6 +1112,7 @@ spec:
                               configMapRef:
                                 properties:
                                   name:
+                                    maxLength: 253
                                     type: string
                                   optional:
                                     type: boolean
@@ -1119,6 +1123,7 @@ spec:
                               secretRef:
                                 properties:
                                   name:
+                                    maxLength: 253
                                     type: string
                                   optional:
                                     type: boolean

@@ -32,6 +32,7 @@ type LocalObjectReference struct {
 	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
 	// TODO: Add other useful fields. apiVersion, kind, uid?
 	// +optional
+	// +kubebuilder:validation:MaxLength:=253
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
@@ -155,6 +156,7 @@ type NodeTemplate struct {
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
 	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MaxLength:=253
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
