@@ -1354,8 +1354,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
 					corev1.OpenStackControlPlaneCustomTLSReadyCondition,
 					k8s_corev1.ConditionFalse,
-					condition.ErrorReason,
-					fmt.Sprintf("OpenStackControlPlane custom TLS cert secret custom-service-cert error occured Secret %s/custom-service-cert not found", namespace),
+					condition.RequestedReason,
+					fmt.Sprintf(corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage, names.CustomServiceCertSecretName.Name),
 				)
 			})
 
