@@ -427,8 +427,11 @@ const (
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCAReadyErrorMessage = "OpenStackControlPlane CAs %s %s error occured %s"
 
-	// OpenStackControlPlaneCAReadyMessage
+	// OpenStackControlPlaneCustomTLSReadyMessage
 	OpenStackControlPlaneCustomTLSReadyMessage = "OpenStackControlPlane custom TLS cert secret available"
+
+	// OpenStackControlPlaneCustomTLSReadyWaitingMessage
+	OpenStackControlPlaneCustomTLSReadyWaitingMessage = "OpenStackControlPlane custom TLS cert secret %s not yet available"
 
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCustomTLSReadyErrorMessage = "OpenStackControlPlane custom TLS cert secret %s error occured %s"

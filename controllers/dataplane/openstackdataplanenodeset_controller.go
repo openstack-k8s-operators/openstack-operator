@@ -265,21 +265,20 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		time.Second*5,
 	)
 	if err != nil {
-		if (result != ctrl.Result{}) {
-			instance.Status.Conditions.MarkFalse(
-				condition.InputReadyCondition,
-				condition.RequestedReason,
-				condition.SeverityInfo,
-				dataplanev1.InputReadyWaitingMessage,
-				"secret/"+ansibleSSHPrivateKeySecret)
-		} else {
-			instance.Status.Conditions.MarkFalse(
-				condition.InputReadyCondition,
-				condition.RequestedReason,
-				condition.SeverityError,
-				err.Error())
-		}
+		instance.Status.Conditions.MarkFalse(
+			condition.InputReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityError,
+			err.Error())
 		return result, err
+	} else if (result != ctrl.Result{}) {
+		instance.Status.Conditions.MarkFalse(
+			condition.InputReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			dataplanev1.InputReadyWaitingMessage,
+			"secret/"+ansibleSSHPrivateKeySecret)
+		return result, nil
 	}
 
 	// all our input checks out so report InputReady

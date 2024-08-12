@@ -260,6 +260,12 @@ func EnsureEndpointConfig(
 
 						return endpoints, ctrlResult, err
 					} else if (ctrlResult != ctrl.Result{}) {
+						instance.Status.Conditions.Set(condition.FalseCondition(
+							corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+							condition.RequestedReason,
+							condition.SeverityInfo,
+							corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage,
+							ingressOverride.TLS.SecretName))
 						return endpoints, ctrlResult, nil
 					}
 					instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCustomTLSReadyCondition,
