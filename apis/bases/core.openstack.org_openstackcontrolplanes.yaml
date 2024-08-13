@@ -8286,9 +8286,15 @@ spec:
                   templates:
                     additionalProperties:
                       properties:
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          type: object
                         replicas:
                           default: 1
                           format: int32
+                          maximum: 32
+                          minimum: 1
                           type: integer
                         tls:
                           properties:
@@ -8297,6 +8303,8 @@ spec:
                             secretName:
                               type: string
                           type: object
+                      required:
+                      - replicas
                       type: object
                     type: object
                 type: object
