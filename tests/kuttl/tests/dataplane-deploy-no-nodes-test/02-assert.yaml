@@ -6,65 +6,113 @@ collectors:
   command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
   name: operator-logs
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
-  name: custom-svc-edpm-compute-no-nodes-ovrd-edpm-compute-no-nodes
+  labels:
+    app: openstackansibleee
+    job-name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
+    openstackansibleee_cr: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
+    openstackdataplanedeployment: edpm-compute-no-nodes
+    openstackdataplanenodeset: edpm-compute-no-nodes
+    openstackdataplaneservice: configure-os
+    osaee: "true"
+  name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack-kuttl-tests
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-no-nodes-ovrd
+    name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
-  env:
-  - name: ANSIBLE_FORCE_COLOR
-    value: "True"
-  envConfigMapName: openstack-aee-default-env
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-no-nodes
-  name: openstackansibleee
-  playbookContents: |
-    - hosts: localhost
-      gather_facts: no
-      name: kuttl play
-      tasks:
-        - name: Sleep
-          command: sleep 1
-          delegate_to: localhost
-  preserveJobs: true
-  restartPolicy: Never
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[]'
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
+        job-name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
+        openstackansibleee_cr: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
+        openstackdataplanedeployment: edpm-compute-no-nodes
+        openstackdataplanenodeset: edpm-compute-no-nodes
+        openstackdataplaneservice: configure-os
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.configure_os
+        - -i
+        - configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.configure_os
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-no-nodes
+            edpm_service_type: configure-os
+            foo: bar
+
+
+        imagePullPolicy: Always
+        name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-no-nodes
+      serviceAccountName: edpm-compute-no-nodes
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}

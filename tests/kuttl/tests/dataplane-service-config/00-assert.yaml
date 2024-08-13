@@ -6,9 +6,18 @@ collectors:
   command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
   name: operator-logs
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+    openstackansibleee_cr: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+    openstackdataplanedeployment: edpm-compute-no-nodes
+    openstackdataplanenodeset: edpm-compute-no-nodes
+    openstackdataplaneservice: kuttl-service
+    osaee: "true"
   name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -18,109 +27,165 @@ metadata:
     kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
   backoffLimit: 6
-  envConfigMapName: openstack-aee-default-env
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/kuttl-service/00-ansibleVars
-      subPath: 00-ansibleVars
-    - mountPath: /var/lib/openstack/configs/kuttl-service/00-kuttl-service.conf
-      subPath: 00-kuttl-service.conf
-    - mountPath: /var/lib/openstack/configs/kuttl-service/01-kuttl-service.conf
-      subPath: 01-kuttl-service.conf
-    volumes:
-    - configMap:
-        items:
-        - key: 00-ansibleVars
-          path: 00-ansibleVars
-        name: kuttl-service-cm-0
-    - configMap:
-        items:
-        - key: 00-kuttl-service.conf
-          path: 00-kuttl-service.conf
-        name: kuttl-service-cm-0
-    - configMap:
-        items:
-        - key: 01-kuttl-service.conf
-          path: 01-kuttl-service.conf
-        name: kuttl-service-cm-0
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/kuttl-service/01-ansibleVars
-      subPath: 01-ansibleVars
-    - mountPath: /var/lib/openstack/configs/kuttl-service/10-kuttl-service.conf
-      subPath: 10-kuttl-service.conf
-    - mountPath: /var/lib/openstack/configs/kuttl-service/20-kuttl-service.conf
-      subPath: 20-kuttl-service.conf
-    volumes:
-    - configMap:
-        items:
-        - key: 01-ansibleVars
-          path: 01-ansibleVars
-        name: kuttl-service-cm-1
-    - configMap:
-        items:
-        - key: 10-kuttl-service.conf
-          path: 10-kuttl-service.conf
-        name: kuttl-service-cm-1
-    - configMap:
-        items:
-        - key: 20-kuttl-service.conf
-          path: 20-kuttl-service.conf
-        name: kuttl-service-cm-1
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/kuttl-service/30-kuttl-service.conf
-      subPath: 30-kuttl-service.conf
-    volumes:
-    - configMap:
-        items:
-        - key: 30-kuttl-service.conf
-          path: 30-kuttl-service.conf
-        name: kuttl-service-cm-2
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-no-nodes
-  name: openstackansibleee
-  playbookContents: |
-    - hosts: localhost
-      gather_facts: no
-      name: kuttl play
-      tasks:
-        - name: Sleep
-          command: sleep infinity
-          delegate_to: localhost
-  preserveJobs: true
-  restartPolicy: Never
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[]'
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        job-name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        openstackansibleee_cr: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        openstackdataplanedeployment: edpm-compute-no-nodes
+        openstackdataplanenodeset: edpm-compute-no-nodes
+        openstackdataplaneservice: kuttl-service
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - playbook.yaml
+        - -i
+        - kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            - hosts: localhost
+              gather_facts: no
+              name: kuttl play
+              tasks:
+                - name: Sleep
+                  command: sleep infinity
+                  delegate_to: localhost
+
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-no-nodes
+            edpm_service_type: kuttl-service
+
+
+        imagePullPolicy: Always
+        name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/kuttl-service/00-ansibleVars
+          name: kuttl-service-cm-0-0
+          subPath: 00-ansibleVars
+        - mountPath: /var/lib/openstack/configs/kuttl-service/00-kuttl-service.conf
+          name: kuttl-service-cm-0-1
+          subPath: 00-kuttl-service.conf
+        - mountPath: /var/lib/openstack/configs/kuttl-service/01-kuttl-service.conf
+          name: kuttl-service-cm-0-2
+          subPath: 01-kuttl-service.conf
+        - mountPath: /var/lib/openstack/configs/kuttl-service/01-ansibleVars
+          name: kuttl-service-cm-1-0
+          subPath: 01-ansibleVars
+        - mountPath: /var/lib/openstack/configs/kuttl-service/10-kuttl-service.conf
+          name: kuttl-service-cm-1-1
+          subPath: 10-kuttl-service.conf
+        - mountPath: /var/lib/openstack/configs/kuttl-service/20-kuttl-service.conf
+          name: kuttl-service-cm-1-2
+          subPath: 20-kuttl-service.conf
+        - mountPath: /var/lib/openstack/configs/kuttl-service/30-kuttl-service.conf
+          name: kuttl-service-cm-2-0
+          subPath: 30-kuttl-service.conf
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-no-nodes
+      serviceAccountName: edpm-compute-no-nodes
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 00-ansibleVars
+            path: 00-ansibleVars
+          name: kuttl-service-cm-0
+        name: kuttl-service-cm-0-0
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 00-kuttl-service.conf
+            path: 00-kuttl-service.conf
+          name: kuttl-service-cm-0
+        name: kuttl-service-cm-0-1
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 01-kuttl-service.conf
+            path: 01-kuttl-service.conf
+          name: kuttl-service-cm-0
+        name: kuttl-service-cm-0-2
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 01-ansibleVars
+            path: 01-ansibleVars
+          name: kuttl-service-cm-1
+        name: kuttl-service-cm-1-0
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 10-kuttl-service.conf
+            path: 10-kuttl-service.conf
+          name: kuttl-service-cm-1
+        name: kuttl-service-cm-1-1
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 20-kuttl-service.conf
+            path: 20-kuttl-service.conf
+          name: kuttl-service-cm-1
+        name: kuttl-service-cm-1-2
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: 30-kuttl-service.conf
+            path: 30-kuttl-service.conf
+          name: kuttl-service-cm-2
+        name: kuttl-service-cm-2-0
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  JobStatus: Running
-  conditions:
-  - message: Job in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: Ready
-  - message: Job in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: JobReady
+  active: 1
+  ready: 1
+  terminating: 0
+  uncountedTerminatedPods: {}

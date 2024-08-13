@@ -133,9 +133,17 @@ metadata:
     name: openstack-edpm-tls
 type: Opaque
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  labels:
+    app: openstackansibleee
+    job-name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+    openstackansibleee_cr: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+    openstackdataplanedeployment: openstack-edpm-tls
+    openstackdataplanenodeset: openstack-edpm-tls
+    openstackdataplaneservice: install-certs-ovrd
+    osaee: "true"
   name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -146,110 +154,233 @@ metadata:
     name: openstack-edpm-tls
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/certs/tls-dnsnames/default
-      name: openstack-edpm-tls-tls-dnsnames-default-certs-0
-    volumes:
-    - name: openstack-edpm-tls-tls-dnsnames-default-certs-0
-      projected:
-        sources:
-        - secret:
-            name: openstack-edpm-tls-tls-dnsnames-default-certs-0
-  - mounts:
-    - mountPath: /var/lib/openstack/certs/tls-dnsnames/second
-      name: openstack-edpm-tls-tls-dnsnames-second-certs-0
-    volumes:
-    - name: openstack-edpm-tls-tls-dnsnames-second-certs-0
-      projected:
-        sources:
-        - secret:
-            name: openstack-edpm-tls-tls-dnsnames-second-certs-0
-  - mounts:
-    - mountPath: /var/lib/openstack/cacerts/tls-dnsnames
-      name: tls-dnsnames-combined-ca-bundle
-    volumes:
-    - name: tls-dnsnames-combined-ca-bundle
-      secret:
-        secretName: combined-ca-bundle
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-openstack-edpm-tls
-  name: openstackansibleee
-  restartPolicy: Never
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[]'
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+        job-name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+        openstackansibleee_cr: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+        openstackdataplanedeployment: openstack-edpm-tls
+        openstackdataplanenodeset: openstack-edpm-tls
+        openstackdataplaneservice: install-certs-ovrd
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - playbook.yaml
+        - -i
+        - install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            - hosts: localhost
+              gather_facts: no
+              name: kuttl play
+              tasks:
+                - name: Sleep
+                  command: sleep 1
+                  delegate_to: localhost
+
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: openstack-edpm-tls
+            edpm_service_type: install-certs-ovrd
+
+
+        imagePullPolicy: Always
+        name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/certs/tls-dnsnames/default
+          name: openstack-edpm-tls-tls-dnsnames-default-certs-0
+        - mountPath: /var/lib/openstack/certs/tls-dnsnames/second
+          name: openstack-edpm-tls-tls-dnsnames-second-certs-0
+        - mountPath: /var/lib/openstack/cacerts/tls-dnsnames
+          name: tls-dnsnames-combined-ca-bundle
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: openstack-edpm-tls
+      serviceAccountName: openstack-edpm-tls
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: openstack-edpm-tls-tls-dnsnames-default-certs-0
+        projected:
+          defaultMode: 420
+          sources:
+          - secret:
+              name: openstack-edpm-tls-tls-dnsnames-default-certs-0
+      - name: openstack-edpm-tls-tls-dnsnames-second-certs-0
+        projected:
+          defaultMode: 420
+          sources:
+          - secret:
+              name: openstack-edpm-tls-tls-dnsnames-second-certs-0
+      - name: tls-dnsnames-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-openstack-edpm-tls
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  labels:
+    app: openstackansibleee
+    job-name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+    openstackansibleee_cr: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+    openstackdataplanedeployment: openstack-edpm-tls
+    openstackdataplanenodeset: openstack-edpm-tls
+    openstackdataplaneservice: tls-dnsnames
+    osaee: "true"
   name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
     kind: OpenStackDataPlaneDeployment
     name: openstack-edpm-tls
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-openstack-edpm-tls
-  name: openstackansibleee
-  restartPolicy: Never
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[]'
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+        job-name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+        openstackansibleee_cr: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+        openstackdataplanedeployment: openstack-edpm-tls
+        openstackdataplanenodeset: openstack-edpm-tls
+        openstackdataplaneservice: tls-dnsnames
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - playbook.yaml
+        - -i
+        - tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            - hosts: localhost
+              gather_facts: no
+              name: kuttl play
+              tasks:
+                - name: Sleep
+                  command: sleep 1
+                  delegate_to: localhost
+
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: openstack-edpm-tls
+            edpm_service_type: tls-dnsnames
+
+
+        imagePullPolicy: Always
+        name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: openstack-edpm-tls
+      serviceAccountName: openstack-edpm-tls
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-openstack-edpm-tls
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}

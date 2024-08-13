@@ -1217,7 +1217,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
-					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
@@ -1424,7 +1424,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
-					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
@@ -1449,7 +1449,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
-					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}

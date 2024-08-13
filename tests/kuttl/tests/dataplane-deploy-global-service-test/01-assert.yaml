@@ -70,10 +70,18 @@ status:
     status: "True"
     type: SetupReady
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: custom-global-service-edpm-compute-global
+    openstackansibleee_cr: custom-global-service-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: custom-global-service
+    osaee: "true"
   name: custom-global-service-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -84,60 +92,107 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  env:
-  - name: ANSIBLE_FORCE_COLOR
-    value: "True"
-  envConfigMapName: openstack-aee-default-env
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-global
-      name: ssh-key-edpm-compute-global
-      subPath: ssh_key_edpm-compute-global
-    - mountPath: /runner/inventory/inventory-0
-      name: inventory-0
-      subPath: inventory-0
-    volumes:
-    - name: ssh-key-edpm-compute-global
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key_edpm-compute-global
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory-0
-      secret:
-        items:
-        - key: inventory
-          path: inventory-0
-        secretName: dataplanenodeset-edpm-compute-global
-  extraVars:
-    edpm_override_hosts: all
-  name: openstackansibleee
-  playbookContents: |
-    - hosts: localhost
-      gather_facts: no
-      name: global kuttl play
-      tasks:
-        - name: Sleep
-          command: sleep 1
-          delegate_to: localhost
-  preserveJobs: true
-  restartPolicy: Never
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: custom-global-service-edpm-compute-global
+        job-name: custom-global-service-edpm-compute-global
+        openstackansibleee_cr: custom-global-service-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: custom-global-service
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - playbook.yaml
+        - -i
+        - custom-global-service-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            - hosts: localhost
+              gather_facts: no
+              name: global kuttl play
+              tasks:
+                - name: Sleep
+                  command: sleep 1
+                  delegate_to: localhost
+
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: all
+            edpm_service_type: custom-global-service
+
+
+        imagePullPolicy: Always
+        name: custom-global-service-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-global
+          name: ssh-key-edpm-compute-global
+          subPath: ssh_key_edpm-compute-global
+        - mountPath: /runner/inventory/inventory-0
+          name: inventory-0
+          subPath: inventory-0
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key-edpm-compute-global
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key_edpm-compute-global
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory-0
+          secretName: dataplanenodeset-edpm-compute-global
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  succeeded: 1
+  uncountedTerminatedPods: {}
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: download-cache-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: download-cache-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: download-cache
+    osaee: "true"
   name: download-cache-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -148,46 +203,103 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.download_cache
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: download-cache-edpm-compute-global-edpm-compute-global
+        job-name: download-cache-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: download-cache-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: download-cache
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.download_cache
+        - -i
+        - download-cache-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.download_cache
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: download-cache
+
+
+        imagePullPolicy: Always
+        name: download-cache-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: bootstrap-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: bootstrap-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: bootstrap
+    osaee: "true"
   name: bootstrap-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -198,47 +310,104 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.bootstrap
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: bootstrap-edpm-compute-global-edpm-compute-global
+        job-name: bootstrap-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: bootstrap-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: bootstrap
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.bootstrap
+        - -i
+        - bootstrap-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.bootstrap
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: bootstrap
+
+
+        imagePullPolicy: Always
+        name: bootstrap-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
 
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: configure-network-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: configure-network-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: configure-network
+    osaee: "true"
   name: configure-network-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -249,46 +418,104 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.configure_network
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: configure-network-edpm-compute-global-edpm-compute-global
+        job-name: configure-network-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: configure-network-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: configure-network
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.configure_network
+        - -i
+        - configure-network-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.configure_network
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: configure-network
+
+
+        imagePullPolicy: Always
+        name: configure-network-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
+
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: validate-network-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: validate-network-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: validate-network
+    osaee: "true"
   name: validate-network-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -299,97 +526,104 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.validate_network
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: validate-network-edpm-compute-global-edpm-compute-global
+        job-name: validate-network-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: validate-network-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: validate-network
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.validate_network
+        - -i
+        - validate-network-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.validate_network
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: validate-network
+
+
+        imagePullPolicy: Always
+        name: validate-network-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
+
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
-metadata:
-  name: install-os-edpm-compute-global-edpm-compute-global
-  namespace: openstack-kuttl-tests
-  ownerReferences:
-  - apiVersion: dataplane.openstack.org/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global
-spec:
-  backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.install_os
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
----
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: configure-os-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: configure-os-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: configure-os
+    osaee: "true"
   name: configure-os-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -400,96 +634,104 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.configure_os
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: configure-os-edpm-compute-global-edpm-compute-global
+        job-name: configure-os-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: configure-os-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: configure-os
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.configure_os
+        - -i
+        - configure-os-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.configure_os
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: configure-os
+
+
+        imagePullPolicy: Always
+        name: configure-os-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
+
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: run-os-edpm-compute-global-edpm-compute-global
-  namespace: openstack-kuttl-tests
-  ownerReferences:
-  - apiVersion: dataplane.openstack.org/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global
-spec:
-  backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.run_os
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
----
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
-metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: install-certs-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: install-certs-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: install-certs
+    osaee: "true"
   name: install-certs-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -500,47 +742,95 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.install_certs
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: install-certs-edpm-compute-global-edpm-compute-global
+        job-name: install-certs-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: install-certs-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: install-certs
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.install_certs
+        - -i
+        - install-certs-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.install_certs
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: install-certs
+
+
+        imagePullPolicy: Always
+        name: install-certs-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: ovn-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: ovn-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: ovn
+    osaee: "true"
   name: ovn-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -551,58 +841,105 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/ovn/ovsdb-config
-      name: ovncontroller-config-0
-      subPath: ovsdb-config
-    volumes:
-    - configMap:
-        items:
-        - key: ovsdb-config
-          path: ovsdb-config
-        name: ovncontroller-config
-      name: ovncontroller-config-0
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.ovn
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: ovn-edpm-compute-global-edpm-compute-global
+        job-name: ovn-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: ovn-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: ovn
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.ovn
+        - -i
+        - ovn-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.ovn
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: ovn
+
+
+        imagePullPolicy: Always
+        name: ovn-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/ovn/ovsdb-config
+          name: ovncontroller-config-0
+          subPath: ovsdb-config
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: ovsdb-config
+            path: ovsdb-config
+          name: ovncontroller-config
+        name: ovncontroller-config-0
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: neutron-metadata-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: neutron-metadata-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: neutron-metadata
+    osaee: "true"
   name: neutron-metadata-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -613,87 +950,135 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/neutron-metadata/10-neutron-metadata.conf
-      name: neutron-ovn-metadata-agent-neutron-config-0
-      subPath: 10-neutron-metadata.conf
-    volumes:
-    - secret:
-        items:
-        - key: 10-neutron-metadata.conf
-          path: 10-neutron-metadata.conf
-        secretName: neutron-ovn-metadata-agent-neutron-config
-      name: neutron-ovn-metadata-agent-neutron-config-0
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/neutron-metadata/05-nova-metadata.conf
-      name: nova-metadata-neutron-config-0
-      subPath: 05-nova-metadata.conf
-    - mountPath: /var/lib/openstack/configs/neutron-metadata/httpd.conf
-      name: nova-metadata-neutron-config-1
-      subPath: httpd.conf
-    - mountPath: /var/lib/openstack/configs/neutron-metadata/nova-metadata-config.json
-      name: nova-metadata-neutron-config-2
-      subPath: nova-metadata-config.json
-    volumes:
-    - secret:
-        items:
-        - key: 05-nova-metadata.conf
-          path: 05-nova-metadata.conf
-        secretName: nova-metadata-neutron-config
-      name: nova-metadata-neutron-config-0
-    - name: nova-metadata-neutron-config-1
-      secret:
-        items:
-        - key: httpd.conf
-          path: httpd.conf
-        secretName: nova-metadata-neutron-config
-    - name: nova-metadata-neutron-config-2
-      secret:
-        items:
-        - key: nova-metadata-config.json
-          path: nova-metadata-config.json
-        secretName: nova-metadata-neutron-config
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.neutron_metadata
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: neutron-metadata-edpm-compute-global-edpm-compute-global
+        job-name: neutron-metadata-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: neutron-metadata-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: neutron-metadata
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.neutron_metadata
+        - -i
+        - neutron-metadata-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.neutron_metadata
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: neutron-metadata
+
+
+        imagePullPolicy: Always
+        name: neutron-metadata-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/neutron-metadata/10-neutron-metadata.conf
+          name: neutron-ovn-metadata-agent-neutron-config-0
+          subPath: 10-neutron-metadata.conf
+        - mountPath: /var/lib/openstack/configs/neutron-metadata/05-nova-metadata.conf
+          name: nova-metadata-neutron-config-0
+          subPath: 05-nova-metadata.conf
+        - mountPath: /var/lib/openstack/configs/neutron-metadata/httpd.conf
+          name: nova-metadata-neutron-config-1
+          subPath: httpd.conf
+        - mountPath: /var/lib/openstack/configs/neutron-metadata/nova-metadata-config.json
+          name: nova-metadata-neutron-config-2
+          subPath: nova-metadata-config.json
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: neutron-ovn-metadata-agent-neutron-config-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: 10-neutron-metadata.conf
+            path: 10-neutron-metadata.conf
+          secretName: neutron-ovn-metadata-agent-neutron-config
+      - name: nova-metadata-neutron-config-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: 05-nova-metadata.conf
+            path: 05-nova-metadata.conf
+          secretName: nova-metadata-neutron-config
+      - name: nova-metadata-neutron-config-1
+        secret:
+          defaultMode: 420
+          items:
+          - key: httpd.conf
+            path: httpd.conf
+          secretName: nova-metadata-neutron-config
+      - name: nova-metadata-neutron-config-2
+        secret:
+          defaultMode: 420
+          items:
+          - key: nova-metadata-config.json
+            path: nova-metadata-config.json
+          secretName: nova-metadata-neutron-config
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: neutron-ovn-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: neutron-ovn-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: neutron-ovn
+    osaee: "true"
   name: neutron-ovn-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -704,58 +1089,105 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/neutron-ovn/10-neutron-ovn.conf
-      name: neutron-ovn-agent-neutron-config-0
-      subPath: 10-neutron-ovn.conf
-    volumes:
-    - secret:
-        items:
-        - key: 10-neutron-ovn.conf
-          path: 10-neutron-ovn.conf
-        secretName: neutron-ovn-agent-neutron-config
-      name: neutron-ovn-agent-neutron-config-0
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.neutron_ovn
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: neutron-ovn-edpm-compute-global-edpm-compute-global
+        job-name: neutron-ovn-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: neutron-ovn-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: neutron-ovn
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.neutron_ovn
+        - -i
+        - neutron-ovn-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.neutron_ovn
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: neutron-ovn
+
+
+        imagePullPolicy: Always
+        name: neutron-ovn-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/neutron-ovn/10-neutron-ovn.conf
+          name: neutron-ovn-agent-neutron-config-0
+          subPath: 10-neutron-ovn.conf
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: neutron-ovn-agent-neutron-config-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: 10-neutron-ovn.conf
+            path: 10-neutron-ovn.conf
+          secretName: neutron-ovn-agent-neutron-config
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: neutron-sriov-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: neutron-sriov-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: neutron-sriov
+    osaee: "true"
   name: neutron-sriov-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -766,58 +1198,105 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/neutron-sriov/10-neutron-sriov.conf
-      name: neutron-sriov-agent-neutron-config-0
-      subPath: 10-neutron-sriov.conf
-    volumes:
-    - secret:
-        items:
-        - key: 10-neutron-sriov.conf
-          path: 10-neutron-sriov.conf
-        secretName: neutron-sriov-agent-neutron-config
-      name: neutron-sriov-agent-neutron-config-0
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.neutron_sriov
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: neutron-sriov-edpm-compute-global-edpm-compute-global
+        job-name: neutron-sriov-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: neutron-sriov-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: neutron-sriov
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.neutron_sriov
+        - -i
+        - neutron-sriov-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.neutron_sriov
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: neutron-sriov
+
+
+        imagePullPolicy: Always
+        name: neutron-sriov-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/neutron-sriov/10-neutron-sriov.conf
+          name: neutron-sriov-agent-neutron-config-0
+          subPath: 10-neutron-sriov.conf
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: neutron-sriov-agent-neutron-config-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: 10-neutron-sriov.conf
+            path: 10-neutron-sriov.conf
+          secretName: neutron-sriov-agent-neutron-config
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
   generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: neutron-dhcp-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: neutron-dhcp-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: neutron-dhcp
+    osaee: "true"
   name: neutron-dhcp-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -828,57 +1307,105 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/neutron-dhcp/10-neutron-dhcp.conf
-      name: neutron-dhcp-agent-neutron-config-0
-      subPath: 10-neutron-dhcp.conf
-    volumes:
-    - secret:
-        items:
-        - key: 10-neutron-dhcp.conf
-          path: 10-neutron-dhcp.conf
-        secretName: neutron-dhcp-agent-neutron-config
-      name: neutron-dhcp-agent-neutron-config-0
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.neutron_dhcp
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: neutron-dhcp-edpm-compute-global-edpm-compute-global
+        job-name: neutron-dhcp-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: neutron-dhcp-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: neutron-dhcp
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.neutron_dhcp
+        - -i
+        - neutron-dhcp-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.neutron_dhcp
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: neutron-dhcp
+
+
+        imagePullPolicy: Always
+        name: neutron-dhcp-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/neutron-dhcp/10-neutron-dhcp.conf
+          name: neutron-dhcp-agent-neutron-config-0
+          subPath: 10-neutron-dhcp.conf
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: neutron-dhcp-agent-neutron-config-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: 10-neutron-dhcp.conf
+            path: 10-neutron-dhcp.conf
+          secretName: neutron-dhcp-agent-neutron-config
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: libvirt-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: libvirt-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: libvirt
+    osaee: "true"
   name: libvirt-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -889,138 +1416,228 @@ metadata:
     name: edpm-compute-global
 spec:
   backoffLimit: 6
-  envConfigMapName: openstack-aee-default-env
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/libvirt/LibvirtPassword
-      name: libvirt-secret-0
-      subPath: LibvirtPassword
-    volumes:
-    - name: libvirt-secret-0
-      secret:
-        items:
-        - key: LibvirtPassword
-          path: LibvirtPassword
-        secretName: libvirt-secret
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  preserveJobs: true
-  restartPolicy: Never
-  playbook: osp.edpm.libvirt
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: libvirt-edpm-compute-global-edpm-compute-global
+        job-name: libvirt-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: libvirt-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: libvirt
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.libvirt
+        - -i
+        - libvirt-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.libvirt
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: libvirt
+
+
+        imagePullPolicy: Always
+        name: libvirt-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/libvirt/LibvirtPassword
+          name: libvirt-secret-0
+          subPath: LibvirtPassword
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: libvirt-secret-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: LibvirtPassword
+            path: LibvirtPassword
+          secretName: libvirt-secret
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  generation: 1
+  labels:
+    app: openstackansibleee
+    job-name: nova-edpm-compute-global-edpm-compute-global
+    openstackansibleee_cr: nova-edpm-compute-global-edpm-compute-global
+    openstackdataplanedeployment: edpm-compute-global
+    openstackdataplanenodeset: edpm-compute-global
+    openstackdataplaneservice: nova
+    osaee: "true"
   name: nova-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
-  envConfigMapName: openstack-aee-default-env
-  extraMounts:
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/nova/01-nova.conf
-      name: nova-cell1-compute-config-0
-      subPath: 01-nova.conf
-    - mountPath: /var/lib/openstack/configs/nova/nova-blank.conf
-      name: nova-cell1-compute-config-1
-      subPath: nova-blank.conf
-    volumes:
-    - name: nova-cell1-compute-config-0
-      secret:
-        items:
-        - key: 01-nova.conf
-          path: 01-nova.conf
-        secretName: nova-cell1-compute-config
-    - name: nova-cell1-compute-config-1
-      secret:
-        items:
-        - key: nova-blank.conf
-          path: nova-blank.conf
-        secretName: nova-cell1-compute-config
-  - mounts:
-    - mountPath: /var/lib/openstack/configs/nova/ssh-privatekey
-      name: nova-migration-ssh-key-0
-      subPath: ssh-privatekey
-    - mountPath: /var/lib/openstack/configs/nova/ssh-publickey
-      name: nova-migration-ssh-key-1
-      subPath: ssh-publickey
-    volumes:
-    - name: nova-migration-ssh-key-0
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh-privatekey
-        secretName: nova-migration-ssh-key
-    - name: nova-migration-ssh-key-1
-      secret:
-        items:
-        - key: ssh-publickey
-          path: ssh-publickey
-        secretName: nova-migration-ssh-key
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-global
-  name: openstackansibleee
-  preserveJobs: true
-  restartPolicy: Never
-  playbook: osp.edpm.nova
-  uid: 1001
-status:
-  JobStatus: Succeeded
-  conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: nova-edpm-compute-global-edpm-compute-global
+        job-name: nova-edpm-compute-global-edpm-compute-global
+        openstackansibleee_cr: nova-edpm-compute-global-edpm-compute-global
+        openstackdataplanedeployment: edpm-compute-global
+        openstackdataplanenodeset: edpm-compute-global
+        openstackdataplaneservice: nova
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.nova
+        - -i
+        - nova-edpm-compute-global-edpm-compute-global
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.nova
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-global
+            edpm_service_type: nova
+
+
+        imagePullPolicy: Always
+        name: nova-edpm-compute-global-edpm-compute-global
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/openstack/configs/nova/01-nova.conf
+          name: nova-cell1-compute-config-0
+          subPath: 01-nova.conf
+        - mountPath: /var/lib/openstack/configs/nova/nova-blank.conf
+          name: nova-cell1-compute-config-1
+          subPath: nova-blank.conf
+        - mountPath: /var/lib/openstack/configs/nova/ssh-privatekey
+          name: nova-migration-ssh-key-0
+          subPath: ssh-privatekey
+        - mountPath: /var/lib/openstack/configs/nova/ssh-publickey
+          name: nova-migration-ssh-key-1
+          subPath: ssh-publickey
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-global
+      serviceAccountName: edpm-compute-global
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: nova-cell1-compute-config-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: 01-nova.conf
+            path: 01-nova.conf
+          secretName: nova-cell1-compute-config
+      - name: nova-cell1-compute-config-1
+        secret:
+          defaultMode: 420
+          items:
+          - key: nova-blank.conf
+            path: nova-blank.conf
+          secretName: nova-cell1-compute-config
+      - name: nova-migration-ssh-key-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh-privatekey
+          secretName: nova-migration-ssh-key
+      - name: nova-migration-ssh-key-1
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-publickey
+            path: ssh-publickey
+          secretName: nova-migration-ssh-key
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-global
