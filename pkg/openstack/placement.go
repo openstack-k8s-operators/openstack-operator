@@ -150,10 +150,11 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 }
 
 // PlacementImageMatch - return true if the placement images match on the ControlPlane and Version, or if Placement is not enabled
-func PlacementImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func PlacementImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Placement.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.PlacementAPIImage, version.Status.ContainerImages.PlacementAPIImage) {
+			Log.Info("Placement API image mismatch", "controlPlane.Status.ContainerImages.PlacementAPIImage", controlPlane.Status.ContainerImages.PlacementAPIImage, "version.Status.ContainerImages.PlacementAPIImage", version.Status.ContainerImages.PlacementAPIImage)
 			return false
 		}
 	}

@@ -196,10 +196,11 @@ func reconcileGalera(
 }
 
 // GaleraImageMatch - return true if the Galera images match on the ControlPlane and Version, or if Galera is not enabled
-func GaleraImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func GaleraImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Galera.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.MariadbImage, version.Status.ContainerImages.MariadbImage) {
+			Log.Info("Galera images do not match", "controlPlane.Status.ContainerImages.MariadbImage", controlPlane.Status.ContainerImages.MariadbImage, "version.Status.ContainerImages.MariadbImage", version.Status.ContainerImages.MariadbImage)
 			return false
 		}
 	}

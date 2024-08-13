@@ -231,10 +231,11 @@ func reconcileMemcached(
 }
 
 // MemcachedImageMatch - return true if the memcached images match on the ControlPlane and Version, or if Memcached is not enabled
-func MemcachedImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func MemcachedImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Memcached.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.InfraMemcachedImage, version.Status.ContainerImages.InfraMemcachedImage) {
+			Log.Info("Memcached images do not match", "controlPlane.Status.ContainerImages.InfraMemcachedImage", controlPlane.Status.ContainerImages.InfraMemcachedImage, "version.Status.ContainerImages.InfraMemcachedImage", version.Status.ContainerImages.InfraMemcachedImage)
 			return false
 		}
 	}

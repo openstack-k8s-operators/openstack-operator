@@ -162,13 +162,14 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 }
 
 // SwiftImageMatch - return true if the swift images match on the ControlPlane and Version, or if Swift is not enabled
-func SwiftImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func SwiftImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Swift.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.SwiftAccountImage, version.Status.ContainerImages.SwiftAccountImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.SwiftContainerImage, version.Status.ContainerImages.SwiftContainerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.SwiftObjectImage, version.Status.ContainerImages.SwiftObjectImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.SwiftProxyImage, version.Status.ContainerImages.SwiftProxyImage) {
+			Log.Info("Swift images do not match")
 			return false
 		}
 	}

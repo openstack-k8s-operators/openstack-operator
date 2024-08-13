@@ -505,10 +505,11 @@ func reconcileRabbitMQ(
 }
 
 // RabbitmqImageMatch - return true if the rabbitmq images match on the ControlPlane and Version, or if Rabbitmq is not enabled
-func RabbitmqImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func RabbitmqImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Rabbitmq.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.RabbitmqImage, version.Status.ContainerImages.RabbitmqImage) {
+			Log.Info("RabbitMQ image mismatch", "controlPlane.Status.ContainerImages.RabbitmqImage", controlPlane.Status.ContainerImages.RabbitmqImage, "version.Status.ContainerImages.RabbitmqImage", version.Status.ContainerImages.RabbitmqImage)
 			return false
 		}
 	}

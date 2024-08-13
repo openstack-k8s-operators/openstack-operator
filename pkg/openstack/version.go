@@ -227,31 +227,31 @@ func stringPointersEqual(a, b *string) bool {
 
 // ControlplaneContainerImageMatch - function to compare the ContainerImages on the controlPlane to the OpenStackVersion
 // only enabled services are checked
-func ControlplaneContainerImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 
-	if BarbicanImageMatch(controlPlane, version) &&
-		CinderImageMatch(controlPlane, version) &&
-		DesignateImageMatch(controlPlane, version) &&
-		DnsmasqImageMatch(controlPlane, version) &&
-		GaleraImageMatch(controlPlane, version) &&
-		GlanceImageMatch(controlPlane, version) &&
-		HeatImageMatch(controlPlane, version) &&
-		HorizonImageMatch(controlPlane, version) &&
-		IronicImageMatch(controlPlane, version) &&
-		KeystoneImageMatch(controlPlane, version) &&
-		ManilaImageMatch(controlPlane, version) &&
-		MemcachedImageMatch(controlPlane, version) &&
-		NeutronImageMatch(controlPlane, version) &&
-		NovaImageMatch(controlPlane, version) &&
-		OctaviaImageMatch(controlPlane, version) &&
-		ClientImageMatch(controlPlane, version) &&
-		OVNControllerImageMatch(controlPlane, version) &&
-		OVNNorthImageMatch(controlPlane, version) &&
-		OVNDbClusterImageMatch(controlPlane, version) &&
-		PlacementImageMatch(controlPlane, version) &&
-		RabbitmqImageMatch(controlPlane, version) &&
-		SwiftImageMatch(controlPlane, version) &&
-		TelemetryImageMatch(controlPlane, version) {
+	if BarbicanImageMatch(ctx, controlPlane, version) &&
+		CinderImageMatch(ctx, controlPlane, version) &&
+		DesignateImageMatch(ctx, controlPlane, version) &&
+		DnsmasqImageMatch(ctx, controlPlane, version) &&
+		GaleraImageMatch(ctx, controlPlane, version) &&
+		GlanceImageMatch(ctx, controlPlane, version) &&
+		HeatImageMatch(ctx, controlPlane, version) &&
+		HorizonImageMatch(ctx, controlPlane, version) &&
+		IronicImageMatch(ctx, controlPlane, version) &&
+		KeystoneImageMatch(ctx, controlPlane, version) &&
+		ManilaImageMatch(ctx, controlPlane, version) &&
+		MemcachedImageMatch(ctx, controlPlane, version) &&
+		NeutronImageMatch(ctx, controlPlane, version) &&
+		NovaImageMatch(ctx, controlPlane, version) &&
+		OctaviaImageMatch(ctx, controlPlane, version) &&
+		ClientImageMatch(ctx, controlPlane, version) &&
+		OVNControllerImageMatch(ctx, controlPlane, version) &&
+		OVNNorthImageMatch(ctx, controlPlane, version) &&
+		OVNDbClusterImageMatch(ctx, controlPlane, version) &&
+		PlacementImageMatch(ctx, controlPlane, version) &&
+		RabbitmqImageMatch(ctx, controlPlane, version) &&
+		SwiftImageMatch(ctx, controlPlane, version) &&
+		TelemetryImageMatch(ctx, controlPlane, version) {
 
 		return true
 	}

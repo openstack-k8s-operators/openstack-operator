@@ -164,12 +164,14 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 }
 
 // BarbicanImageMatch - return true if the Barbican images match on the ControlPlane and Version, or if Barbican is not enabled
-func BarbicanImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func BarbicanImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Barbican.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.BarbicanAPIImage, version.Status.ContainerImages.BarbicanAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.BarbicanWorkerImage, version.Status.ContainerImages.BarbicanWorkerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.BarbicanKeystoneListenerImage, version.Status.ContainerImages.BarbicanKeystoneListenerImage) {
+			Log.Info("Barbican images do not match")
 			return false
 		}
 	}

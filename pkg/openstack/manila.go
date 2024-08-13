@@ -190,15 +190,17 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 }
 
 // ManilaImageMatch - return true if the Manila images match on the ControlPlane and Version, or if Manila is not enabled
-func ManilaImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func ManilaImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Manila.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.ManilaAPIImage, version.Status.ContainerImages.ManilaAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.ManilaSchedulerImage, version.Status.ContainerImages.ManilaSchedulerImage) {
+			Log.Info("Manila images do not match")
 			return false
 		}
 		for name, img := range version.Status.ContainerImages.ManilaShareImages {
 			if !stringPointersEqual(controlPlane.Status.ContainerImages.ManilaShareImages[name], img) {
+				Log.Info("Manila share images do not match")
 				return false
 			}
 		}

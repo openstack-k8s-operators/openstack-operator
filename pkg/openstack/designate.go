@@ -192,7 +192,8 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 }
 
 // DesignateImageMatch - return true if the Designate images match on the ControlPlane and Version, or if Designate is not enabled
-func DesignateImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func DesignateImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Designate.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.DesignateAPIImage, version.Status.ContainerImages.DesignateAPIImage) ||
@@ -202,6 +203,7 @@ func DesignateImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, versio
 			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateWorkerImage, version.Status.ContainerImages.DesignateWorkerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateBackendbind9Image, version.Status.ContainerImages.DesignateBackendbind9Image) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.DesignateUnboundImage, version.Status.ContainerImages.DesignateUnboundImage) {
+			Log.Info("Designate images do not match")
 			return false
 		}
 	}

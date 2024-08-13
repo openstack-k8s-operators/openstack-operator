@@ -416,14 +416,15 @@ func noVNCProxyEnabled(vncproxy novav1.NovaNoVNCProxyTemplate) bool {
 }
 
 // NovaImageMatch - return true if the nova images match on the ControlPlane and Version, or if Nova is not enabled
-func NovaImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func NovaImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Nova.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.NovaAPIImage, version.Status.ContainerImages.NovaAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaComputeImage, version.Status.ContainerImages.NovaComputeImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaConductorImage, version.Status.ContainerImages.NovaConductorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaNovncImage, version.Status.ContainerImages.NovaNovncImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.NovaSchedulerImage, version.Status.ContainerImages.NovaSchedulerImage) {
+			Log.Info("Nova images do not match")
 			return false
 		}
 	}
