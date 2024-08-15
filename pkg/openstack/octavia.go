@@ -176,6 +176,10 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		octavia.Spec.OctaviaHousekeeping.ContainerImage = *version.Status.ContainerImages.OctaviaHousekeepingImage
 		octavia.Spec.ApacheContainerImage = *version.Status.ContainerImages.ApacheImage
 
+		if octavia.Spec.Secret == "" {
+			octavia.Spec.Secret = instance.Spec.Secret
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), octavia, helper.GetScheme())
 		if err != nil {
 			return err

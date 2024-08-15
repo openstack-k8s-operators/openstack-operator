@@ -120,6 +120,10 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		swift.Spec.SwiftStorage.ContainerImageProxy = *version.Status.ContainerImages.SwiftProxyImage
 		swift.Spec.SwiftProxy.ContainerImageProxy = *version.Status.ContainerImages.SwiftProxyImage
 
+		if swift.Spec.SwiftProxy.Secret == "" {
+			swift.Spec.SwiftProxy.Secret = instance.Spec.Secret
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), swift, helper.GetScheme())
 		if err != nil {
 			return err

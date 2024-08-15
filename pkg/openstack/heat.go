@@ -165,6 +165,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		heat.Spec.HeatCfnAPI.ContainerImage = *version.Status.ContainerImages.HeatCfnapiImage
 		heat.Spec.HeatEngine.ContainerImage = *version.Status.ContainerImages.HeatEngineImage
 
+		if heat.Spec.Secret == "" {
+			heat.Spec.Secret = instance.Spec.Secret
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), heat, helper.GetScheme())
 		if err != nil {
 			return err

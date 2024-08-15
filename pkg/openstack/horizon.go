@@ -141,6 +141,9 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 		horizon.Spec.ContainerImage = *version.Status.ContainerImages.HorizonImage
 		horizon.Spec.Override.Service = ptr.To(serviceOverrides[service.EndpointPublic])
+		if horizon.Spec.Secret == "" {
+			horizon.Spec.Secret = instance.Spec.Secret
+		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), horizon, helper.GetScheme())
 		if err != nil {
