@@ -12,6 +12,9 @@ spec:
     kind: OpenStackClient
     listKind: OpenStackClientList
     plural: openstackclients
+    shortNames:
+    - osclient
+    - osclients
     singular: openstackclient
   scope: Namespaced
   versions:
