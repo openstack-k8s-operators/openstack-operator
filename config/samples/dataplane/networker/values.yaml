@@ -47,8 +47,8 @@ data:
           - name: tenant
             subnetName: subnet1
     services:
-    - download-cache
     - bootstrap
+    - download-cache
     - configure-network
     - validate-network
     - install-os

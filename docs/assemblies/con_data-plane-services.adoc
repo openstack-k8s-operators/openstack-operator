@@ -30,8 +30,8 @@ The default list of services as they will appear on the `services` field on an
 
 ----
 services:
-  - download-cache
   - bootstrap
+  - download-cache
   - configure-network
   - validate-network
   - install-os

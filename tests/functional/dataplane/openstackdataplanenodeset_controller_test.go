@@ -314,8 +314,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						},
 					},
 					Services: []string{
-						"download-cache",
 						"bootstrap",
+						"download-cache",
 						"configure-network",
 						"validate-network",
 						"install-os",
@@ -363,8 +363,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			BeforeEach(func() {
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
 				nodeSetSpec["services"] = []string{
-					"download-cache",
 					"bootstrap",
+					"download-cache",
 					"configure-network",
 					"validate-network",
 					"install-os",
@@ -452,8 +452,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						},
 					},
 					Services: []string{
-						"download-cache",
 						"bootstrap",
+						"download-cache",
 						"configure-network",
 						"validate-network",
 						"install-os",
@@ -898,8 +898,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						},
 					},
 					Services: []string{
-						"download-cache",
 						"bootstrap",
+						"download-cache",
 						"configure-network",
 						"validate-network",
 						"install-os",

@@ -109,8 +109,8 @@ data:
           edpm_ovn_bgp_agent_exposing_method: ovn
           edpm_ovn_bgp_agent_provider_networks_pool_prefixes: '172.16.0.0/16'
     services:
-    - download-cache
     - bootstrap
+    - download-cache
     - configure-network
     - validate-network
     - frr

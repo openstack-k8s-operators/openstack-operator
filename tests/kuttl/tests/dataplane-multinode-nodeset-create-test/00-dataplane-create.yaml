@@ -45,8 +45,8 @@ spec:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
   services:
-    - download-cache
     - bootstrap
+    - download-cache
     - configure-network
     - validate-network
     - install-os

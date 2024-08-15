@@ -85,8 +85,8 @@ data:
           edpm_frr_bgp_ipv6_src_network: bgpmainnet6
           edpm_ovn_bgp_agent_expose_tenant_networks: true
     services:
-    - download-cache
     - bootstrap
+    - download-cache
     - configure-network
     - validate-network
     - frr

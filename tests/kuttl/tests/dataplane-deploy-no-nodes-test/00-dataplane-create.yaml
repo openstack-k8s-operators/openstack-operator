@@ -74,8 +74,8 @@ spec:
   preProvisioned: true
   tlsEnabled: false
   services:
-  - download-cache
   - bootstrap
+  - download-cache
   - configure-network
   - validate-network
   - install-os

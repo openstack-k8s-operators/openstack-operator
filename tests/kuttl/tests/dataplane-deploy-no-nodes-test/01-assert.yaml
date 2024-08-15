@@ -13,8 +13,8 @@ metadata:
   namespace: openstack-kuttl-tests
 spec:
   services:
-  - download-cache
   - bootstrap
+  - download-cache
   - configure-network
   - validate-network
   - install-os
