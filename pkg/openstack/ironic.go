@@ -166,6 +166,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		ironic.Spec.Images.Pxe = *version.Status.ContainerImages.IronicPxeImage
 		ironic.Spec.Images.IronicPythonAgent = *version.Status.ContainerImages.IronicPythonAgentImage
 
+		if ironic.Spec.Secret == "" {
+			ironic.Spec.Secret = instance.Spec.Secret
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), ironic, helper.GetScheme())
 		if err != nil {
 			return err

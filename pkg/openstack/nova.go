@@ -341,6 +341,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		nova.Spec.NovaImages.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
 		nova.Spec.NovaImages.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
 
+		if nova.Spec.Secret == "" {
+			nova.Spec.Secret = instance.Spec.Secret
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), nova, helper.GetScheme())
 		if err != nil {
 			return err
