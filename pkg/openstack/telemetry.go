@@ -46,7 +46,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.CeilometerIpmiImage = nil
 		instance.Status.ContainerImages.CeilometerNotificationImage = nil
 		instance.Status.ContainerImages.CeilometerSgcoreImage = nil
-		instance.Status.ContainerImages.ApacheImage = nil
+		instance.Status.ContainerImages.CeilometerProxyImage = nil
 		instance.Status.ContainerImages.AodhAPIImage = nil
 		instance.Status.ContainerImages.AodhEvaluatorImage = nil
 		instance.Status.ContainerImages.AodhNotifierImage = nil
@@ -250,7 +250,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.IpmiImage = *version.Status.ContainerImages.CeilometerIpmiImage
 		telemetry.Spec.Ceilometer.NotificationImage = *version.Status.ContainerImages.CeilometerNotificationImage
 		telemetry.Spec.Ceilometer.SgCoreImage = *version.Status.ContainerImages.CeilometerSgcoreImage
-		telemetry.Spec.Ceilometer.ProxyImage = *version.Status.ContainerImages.ApacheImage
+		telemetry.Spec.Ceilometer.ProxyImage = *version.Status.ContainerImages.CeilometerProxyImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
@@ -297,7 +297,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.CeilometerIpmiImage = version.Status.ContainerImages.CeilometerIpmiImage
 		instance.Status.ContainerImages.CeilometerNotificationImage = version.Status.ContainerImages.CeilometerNotificationImage
 		instance.Status.ContainerImages.CeilometerSgcoreImage = version.Status.ContainerImages.CeilometerSgcoreImage
-		instance.Status.ContainerImages.ApacheImage = version.Status.ContainerImages.ApacheImage
+		instance.Status.ContainerImages.CeilometerProxyImage = version.Status.ContainerImages.CeilometerProxyImage
 		instance.Status.ContainerImages.AodhAPIImage = version.Status.ContainerImages.AodhAPIImage
 		instance.Status.ContainerImages.AodhEvaluatorImage = version.Status.ContainerImages.AodhEvaluatorImage
 		instance.Status.ContainerImages.AodhNotifierImage = version.Status.ContainerImages.AodhNotifierImage
@@ -323,7 +323,7 @@ func TelemetryImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, versio
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerIpmiImage, version.Status.ContainerImages.CeilometerIpmiImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerNotificationImage, version.Status.ContainerImages.CeilometerNotificationImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerSgcoreImage, version.Status.ContainerImages.CeilometerSgcoreImage) ||
-			!stringPointersEqual(controlPlane.Status.ContainerImages.ApacheImage, version.Status.ContainerImages.ApacheImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerProxyImage, version.Status.ContainerImages.CeilometerProxyImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhAPIImage, version.Status.ContainerImages.AodhAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhEvaluatorImage, version.Status.ContainerImages.AodhEvaluatorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhNotifierImage, version.Status.ContainerImages.AodhNotifierImage) ||

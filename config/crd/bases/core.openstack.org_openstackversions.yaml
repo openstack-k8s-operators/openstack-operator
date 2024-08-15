@@ -67,6 +67,8 @@ spec:
                     type: string
                   ceilometerNotificationImage:
                     type: string
+                  ceilometerProxyImage:
+                    type: string
                   ceilometerSgcoreImage:
                     type: string
                   cinderAPIImage:
@@ -270,6 +272,8 @@ spec:
                       type: string
                     ceilometerNotificationImage:
                       type: string
+                    ceilometerProxyImage:
+                      type: string
                     ceilometerSgcoreImage:
                       type: string
                     cinderAPIImage:
@@ -437,6 +441,8 @@ spec:
                   ceilometerIpmiImage:
                     type: string
                   ceilometerNotificationImage:
+                    type: string
+                  ceilometerProxyImage:
                     type: string
                   ceilometerSgcoreImage:
                     type: string
