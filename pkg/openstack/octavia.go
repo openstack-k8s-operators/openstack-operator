@@ -56,8 +56,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Status.ContainerImages.OctaviaWorkerImage = nil
 		instance.Status.ContainerImages.OctaviaHealthmanagerImage = nil
 		instance.Status.ContainerImages.OctaviaHousekeepingImage = nil
-		//FIXME: (dprince) Octavia should have its own parameter for the apache image (it can share the same image in OpenStackVersion though)
-		instance.Status.ContainerImages.ApacheImage = nil
+		instance.Status.ContainerImages.OctaviaApacheImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -174,7 +173,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		octavia.Spec.OctaviaWorker.ContainerImage = *version.Status.ContainerImages.OctaviaWorkerImage
 		octavia.Spec.OctaviaHealthManager.ContainerImage = *version.Status.ContainerImages.OctaviaHealthmanagerImage
 		octavia.Spec.OctaviaHousekeeping.ContainerImage = *version.Status.ContainerImages.OctaviaHousekeepingImage
-		octavia.Spec.ApacheContainerImage = *version.Status.ContainerImages.ApacheImage
+		octavia.Spec.ApacheContainerImage = *version.Status.ContainerImages.OctaviaApacheImage
 
 		if octavia.Spec.Secret == "" {
 			octavia.Spec.Secret = instance.Spec.Secret
@@ -205,7 +204,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Status.ContainerImages.OctaviaWorkerImage = version.Status.ContainerImages.OctaviaWorkerImage
 		instance.Status.ContainerImages.OctaviaHealthmanagerImage = version.Status.ContainerImages.OctaviaHealthmanagerImage
 		instance.Status.ContainerImages.OctaviaHousekeepingImage = version.Status.ContainerImages.OctaviaHousekeepingImage
-		instance.Status.ContainerImages.ApacheImage = version.Status.ContainerImages.ApacheImage
+		instance.Status.ContainerImages.OctaviaApacheImage = version.Status.ContainerImages.ApacheImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOctaviaReadyCondition, corev1beta1.OpenStackControlPlaneOctaviaReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -226,7 +225,7 @@ func OctaviaImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version 
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaWorkerImage, version.Status.ContainerImages.OctaviaWorkerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHealthmanagerImage, version.Status.ContainerImages.OctaviaHealthmanagerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHousekeepingImage, version.Status.ContainerImages.OctaviaHousekeepingImage) ||
-			!stringPointersEqual(controlPlane.Status.ContainerImages.ApacheImage, version.Status.ContainerImages.ApacheImage) {
+			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaApacheImage, version.Status.ContainerImages.ApacheImage) {
 			return false
 		}
 	}

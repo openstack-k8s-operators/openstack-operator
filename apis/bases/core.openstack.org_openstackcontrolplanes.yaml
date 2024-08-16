@@ -17630,6 +17630,8 @@ spec:
                     type: string
                   octaviaAPIImage:
                     type: string
+                  octaviaApacheImage:
+                    type: string
                   octaviaHealthmanagerImage:
                     type: string
                   octaviaHousekeepingImage:

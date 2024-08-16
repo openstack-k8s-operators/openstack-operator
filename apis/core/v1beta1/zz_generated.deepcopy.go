@@ -192,6 +192,16 @@ func (in *ContainerDefaults) DeepCopy() *ContainerDefaults {
 func (in *ContainerImages) DeepCopyInto(out *ContainerImages) {
 	*out = *in
 	in.ContainerTemplate.DeepCopyInto(&out.ContainerTemplate)
+	if in.OctaviaApacheImage != nil {
+		in, out := &in.OctaviaApacheImage, &out.OctaviaApacheImage
+		*out = new(string)
+		**out = **in
+	}
+	if in.CeilometerProxyImage != nil {
+		in, out := &in.CeilometerProxyImage, &out.CeilometerProxyImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.CinderVolumeImages != nil {
 		in, out := &in.CinderVolumeImages, &out.CinderVolumeImages
 		*out = make(map[string]*string, len(*in))
@@ -309,11 +319,6 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 	}
 	if in.CeilometerSgcoreImage != nil {
 		in, out := &in.CeilometerSgcoreImage, &out.CeilometerSgcoreImage
-		*out = new(string)
-		**out = **in
-	}
-	if in.CeilometerProxyImage != nil {
-		in, out := &in.CeilometerProxyImage, &out.CeilometerProxyImage
 		*out = new(string)
 		**out = **in
 	}

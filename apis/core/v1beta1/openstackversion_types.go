@@ -57,23 +57,26 @@ type ContainerDefaults struct {
 
 // ContainerImages - struct acts as the source of truth for container image URLs to be deployed
 type ContainerImages struct {
-	ContainerTemplate `json:",inline"`
+	ContainerTemplate    `json:",inline"`
+	OctaviaApacheImage   *string `json:"octaviaApacheImage,omitempty"`   // gets set to ApacheImage once applied
+	CeilometerProxyImage *string `json:"ceilometerProxyImage,omitempty"` // gets set to ApacheImage once applied
 	// CinderVolumeImages custom Cinder Volume images for each backend (default Cinder volume image is stored 'default' key)
 	// TODO: add validation to cinder-operator to prevent backend being named 'default'
 	CinderVolumeImages map[string]*string `json:"cinderVolumeImages,omitempty"`
 	// ManilaShareImages custom Manila Share images for each backend (default Manila share image is stored 'default' key)
-	// TODO: add validation to cinder-operator to prevent backend being named 'default'
+	// TODO: add validation to manila-operator to prevent backend being named 'default'
 	ManilaShareImages map[string]*string `json:"manilaShareImages,omitempty"`
 }
 
 // ContainerTemplate - struct that contains container image URLs for each service in OpenStackControlplane
 type ContainerTemplate struct {
-	AgentImage                    *string `json:"agentImage,omitempty"`
-	AnsibleeeImage                *string `json:"ansibleeeImage,omitempty"`
-	AodhAPIImage                  *string `json:"aodhAPIImage,omitempty"`
-	AodhEvaluatorImage            *string `json:"aodhEvaluatorImage,omitempty"`
-	AodhListenerImage             *string `json:"aodhListenerImage,omitempty"`
-	AodhNotifierImage             *string `json:"aodhNotifierImage,omitempty"`
+	AgentImage         *string `json:"agentImage,omitempty"`
+	AnsibleeeImage     *string `json:"ansibleeeImage,omitempty"`
+	AodhAPIImage       *string `json:"aodhAPIImage,omitempty"`
+	AodhEvaluatorImage *string `json:"aodhEvaluatorImage,omitempty"`
+	AodhListenerImage  *string `json:"aodhListenerImage,omitempty"`
+	AodhNotifierImage  *string `json:"aodhNotifierImage,omitempty"`
+	// this is shared by BaremetalOperator, OctaviaOperator, and TelemetryOperator
 	ApacheImage                   *string `json:"apacheImage,omitempty"`
 	BarbicanAPIImage              *string `json:"barbicanAPIImage,omitempty"`
 	BarbicanKeystoneListenerImage *string `json:"barbicanKeystoneListenerImage,omitempty"`
@@ -83,7 +86,6 @@ type ContainerTemplate struct {
 	CeilometerIpmiImage           *string `json:"ceilometerIpmiImage,omitempty"`
 	CeilometerNotificationImage   *string `json:"ceilometerNotificationImage,omitempty"`
 	CeilometerSgcoreImage         *string `json:"ceilometerSgcoreImage,omitempty"`
-	CeilometerProxyImage          *string `json:"ceilometerProxyImage,omitempty"`
 	CinderAPIImage                *string `json:"cinderAPIImage,omitempty"`
 	CinderBackupImage             *string `json:"cinderBackupImage,omitempty"`
 	CinderSchedulerImage          *string `json:"cinderSchedulerImage,omitempty"`
