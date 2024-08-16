@@ -34,7 +34,6 @@ export RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT=quay.io/podified-antel
 export RELATED_IMAGE_CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ceilometer-notification:current-podified
 export RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified
 export RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT=quay.io/infrawatch/sg-core:v5.2.0-nextgen
-export RELATED_IMAGE_CEILOMETER_PROXY_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-aodh-api:current-podified
 export RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-aodh-api:current-podified
 export RELATED_IMAGE_AODH_EVALUATOR_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-aodh-evaluator:current-podified
 export RELATED_IMAGE_AODH_NOTIFIER_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-aodh-notifier:current-podified
