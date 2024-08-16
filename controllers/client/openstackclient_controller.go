@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -342,8 +343,14 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 					osclient.Name,
 					errors.New("Config changed recreate pod"), // Specify the error message
 				)
+			case !reflect.DeepEqual(osclient.Spec.NodeSelector, instance.Spec.NodeSelector):
+				// if NodeSelector change force re-create by triggering NewForbidden
+				return k8s_errors.NewForbidden(
+					schema.GroupResource{Group: "", Resource: "pods"}, // Specify the group and resource type
+					osclient.Name,
+					errors.New("Cannot update Pod spec field - Spec.NodeSelector"), // Specify the error message
+				)
 			}
-
 		}
 
 		osclient.Labels = util.MergeStringMaps(osclient.Labels, clientLabels)
