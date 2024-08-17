@@ -8,26 +8,26 @@ require (
 	github.com/onsi/ginkgo/v2 v2.20.0
 	github.com/onsi/gomega v1.34.1
 	github.com/openstack-k8s-operators/barbican-operator/api v0.4.1-0.20240813072241-61e947eee09c
-	github.com/openstack-k8s-operators/cinder-operator/api v0.4.1-0.20240812195447-b058c177fb64
-	github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240813062212-7daecab531c4
-	github.com/openstack-k8s-operators/glance-operator/api v0.4.1-0.20240811111750-e9a70ef5fe70
+	github.com/openstack-k8s-operators/cinder-operator/api v0.4.1-0.20240814190057-861c886d4d4c
+	github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240813162313-053bc83c4667
+	github.com/openstack-k8s-operators/glance-operator/api v0.4.1-0.20240817121634-bbbb0633ae67
 	github.com/openstack-k8s-operators/heat-operator/api v0.4.1-0.20240812092555-dfcac6c57e46
 	github.com/openstack-k8s-operators/horizon-operator/api v0.4.1-0.20240807084709-b73449a41fc0
 	github.com/openstack-k8s-operators/infra-operator/apis v0.4.1-0.20240813061654-72bf12d9b73e
 	github.com/openstack-k8s-operators/ironic-operator/api v0.4.1-0.20240807084947-190400f63726
 	github.com/openstack-k8s-operators/keystone-operator/api v0.4.1-0.20240812074544-7379da550fef
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240812062742-719002a7b4cb
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.4.1-0.20240812062742-719002a7b4cb
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240814075458-0ae9f7f9e059
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.4.1-0.20240814075458-0ae9f7f9e059
 	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20240812141412-c5c6218e8c49
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.4.1-0.20240812075114-497caae42b27
-	github.com/openstack-k8s-operators/neutron-operator/api v0.4.1-0.20240813090144-da2647a30fda
-	github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240808053100-27895863ccb7
-	github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240808060116-3501057e9abf
+	github.com/openstack-k8s-operators/neutron-operator/api v0.4.1-0.20240814120827-4f9bd63c86f5
+	github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240816124839-8e2b21b39c48
+	github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240814092612-7d738db3a52b
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20240806143957-8a0f3651fa1d
-	github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20240808071815-7b6c3c9f48bb
+	github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20240814152914-51bfe5de67bb
 	github.com/openstack-k8s-operators/placement-operator/api v0.4.1-0.20240809082308-d3a775bb32a9
 	github.com/openstack-k8s-operators/swift-operator/api v0.4.1-0.20240812114343-789f4ced41df
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.4.1-0.20240807090618-53aaa0df3522
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.4.1-0.20240815220838-855ff928766f
 	github.com/rabbitmq/cluster-operator/v2 v2.9.0
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.69.0-rhobs1 // indirect
 	github.com/rhobs/observability-operator v0.0.28 // indirect
@@ -35,9 +35,9 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/tools v0.24.0 // indirect
-	k8s.io/api v0.28.12
-	k8s.io/apimachinery v0.28.12
-	k8s.io/client-go v0.28.12
+	k8s.io/api v0.28.13
+	k8s.io/apimachinery v0.28.13
+	k8s.io/client-go v0.28.13
 	sigs.k8s.io/controller-runtime v0.16.6
 )
 
@@ -79,7 +79,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.4.1-0.20240812062742-719002a7b4cb // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.4.1-0.20240814075458-0ae9f7f9e059 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
@@ -100,8 +100,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.28.12 // indirect
-	k8s.io/component-base v0.28.12 // indirect
+	k8s.io/apiextensions-apiserver v0.28.13 // indirect
+	k8s.io/component-base v0.28.13 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	sigs.k8s.io/gateway-api v0.8.0 // indirect

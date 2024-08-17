@@ -10223,6 +10223,9 @@ spec:
                           metadataSecret:
                             default: MetadataSecret
                             type: string
+                          prefixMetadataCellsSecret:
+                            default: MetadataCellsSecret
+                            type: string
                           service:
                             default: NovaPassword
                             type: string
