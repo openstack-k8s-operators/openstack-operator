@@ -312,7 +312,7 @@ spec:
         displayName: Template
         path: octavia.template
       - description: OpenStackClient - Parameters related to the OpenStackClient
-        displayName: Open Stack Client
+        displayName: OpenStack Client
         path: openstackclient
       - description: Template - Overrides to use when creating the OpenStackClient
           Resource

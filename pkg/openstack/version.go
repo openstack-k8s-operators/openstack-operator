@@ -55,6 +55,11 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 	if envImages["RELATED_IMAGE_MANILA_SHARE_IMAGE_URL_DEFAULT"] != nil {
 		defaults.ManilaShareImage = envImages["RELATED_IMAGE_MANILA_SHARE_IMAGE_URL_DEFAULT"]
 	}
+	// this is shared with the infra-operator (for dnsmasq), avoiding two RELATED_IMAGES
+	// with the same value fixes bundle validation warnings
+	if envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"] != nil {
+		defaults.InfraDnsmasqImage = envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"]
+	}
 	Log.Info("Initialize OpenStackVersion return defaults")
 	return defaults
 
