@@ -55,6 +55,11 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 	if envImages["RELATED_IMAGE_MANILA_SHARE_IMAGE_URL_DEFAULT"] != nil {
 		defaults.ManilaShareImage = envImages["RELATED_IMAGE_MANILA_SHARE_IMAGE_URL_DEFAULT"]
 	}
+	// this is shared with the infra-operator (for dnsmasq), avoiding two RELATED_IMAGES
+	// with the same value fixes bundle validation warnings
+	if envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"] != nil {
+		defaults.InfraDnsmasqImage = envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"]
+	}
 	Log.Info("Initialize OpenStackVersion return defaults")
 	return defaults
 
@@ -73,8 +78,10 @@ func getImg(val1 *string, val2 *string) *string {
 func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1beta1.OpenStackVersion) corev1beta1.ContainerImages {
 
 	containerImages := corev1beta1.ContainerImages{
-		CinderVolumeImages: instance.Spec.CustomContainerImages.CinderVolumeImages,
-		ManilaShareImages:  instance.Spec.CustomContainerImages.ManilaShareImages,
+		CinderVolumeImages:   instance.Spec.CustomContainerImages.CinderVolumeImages,
+		ManilaShareImages:    instance.Spec.CustomContainerImages.ManilaShareImages,
+		CeilometerProxyImage: getImg(instance.Spec.CustomContainerImages.ApacheImage, defaults.ApacheImage),
+		OctaviaApacheImage:   getImg(instance.Spec.CustomContainerImages.ApacheImage, defaults.ApacheImage),
 		ContainerTemplate: corev1beta1.ContainerTemplate{
 			AgentImage:                    getImg(instance.Spec.CustomContainerImages.AgentImage, defaults.AgentImage),
 			AnsibleeeImage:                getImg(instance.Spec.CustomContainerImages.AnsibleeeImage, defaults.AnsibleeeImage),
@@ -91,7 +98,6 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			CeilometerIpmiImage:           getImg(instance.Spec.CustomContainerImages.CeilometerIpmiImage, defaults.CeilometerIpmiImage),
 			CeilometerNotificationImage:   getImg(instance.Spec.CustomContainerImages.CeilometerNotificationImage, defaults.CeilometerNotificationImage),
 			CeilometerSgcoreImage:         getImg(instance.Spec.CustomContainerImages.CeilometerSgcoreImage, defaults.CeilometerSgcoreImage),
-			CeilometerProxyImage:          getImg(instance.Spec.CustomContainerImages.CeilometerProxyImage, defaults.CeilometerProxyImage),
 			CinderAPIImage:                getImg(instance.Spec.CustomContainerImages.CinderAPIImage, defaults.CinderAPIImage),
 			CinderBackupImage:             getImg(instance.Spec.CustomContainerImages.CinderBackupImage, defaults.CinderBackupImage),
 			CinderSchedulerImage:          getImg(instance.Spec.CustomContainerImages.CinderSchedulerImage, defaults.CinderSchedulerImage),
