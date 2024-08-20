@@ -60,7 +60,7 @@ func AnsibleExecution(
 
 	ansibleEEMounts := storage.VolMounts{}
 
-	executionName, labels := GetAnsibleExecutionNameAndLabels(service, deployment.GetName(), nodeSet.GetName())
+	executionName, labels := GetAnsibleExecutionNameAndLabels(service, deployment.GetName(), nodeSet.GetName(), deployment.Spec.NodeSets)
 	ansibleEE, err := GetAnsibleExecution(ctx, helper, deployment, labels)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
@@ -101,7 +101,7 @@ func AnsibleExecution(
 		if len(aeeSpec.AnsibleSkipTags) > 0 {
 			fmt.Fprintf(&cmdLineArguments, "--skip-tags %s ", aeeSpec.AnsibleSkipTags)
 		}
-		if len(aeeSpec.ServiceAccountName) > 0 {
+		if len(aeeSpec.ServiceAccountName) > 0 && !service.Spec.DeployOnAllNodeSets {
 			ansibleEE.Spec.ServiceAccountName = aeeSpec.ServiceAccountName
 		}
 		if cmdLineArguments.Len() > 0 {
@@ -298,10 +298,15 @@ func getAnsibleExecutionNamePrefix(serviceName string) string {
 // GetAnsibleExecutionNameAndLabels Name and Labels of AnsibleEE
 func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneService,
 	deploymentName string,
-	nodeSetName string) (string, map[string]string) {
+	nodeSetName string,
+	deploymentNodeSetNames []string) (string, map[string]string) {
 	executionName := fmt.Sprintf("%s-%s", getAnsibleExecutionNamePrefix(service.Name), deploymentName)
+	var labelNodeSetNames string
 	if !service.Spec.DeployOnAllNodeSets {
 		executionName = fmt.Sprintf("%s-%s", executionName, nodeSetName)
+		labelNodeSetNames = nodeSetName
+	} else {
+		labelNodeSetNames = strings.Join(deploymentNodeSetNames, "-")
 	}
 
 	if len(executionName) > apimachineryvalidation.DNS1123LabelMaxLength {
@@ -311,7 +316,7 @@ func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneSer
 	labels := map[string]string{
 		"openstackdataplaneservice":    service.Name,
 		"openstackdataplanedeployment": deploymentName,
-		"openstackdataplanenodeset":    nodeSetName,
+		"openstackdataplanenodesets":   labelNodeSetNames,
 	}
 	return executionName, labels
 }

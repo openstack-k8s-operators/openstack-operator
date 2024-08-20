@@ -82,6 +82,7 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
 		log.Info("Deploying service", "service", service)
 		foundService, err := GetService(d.Ctx, d.Helper, service)
+
 		if err != nil {
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
@@ -198,7 +199,7 @@ func (d *Deployer) ConditionalDeploy(
 
 	if nsConditions.IsFalse(readyCondition) {
 		var ansibleEE *ansibleeev1.OpenStackAnsibleEE
-		_, labelSelector := dataplaneutil.GetAnsibleExecutionNameAndLabels(&foundService, d.Deployment.Name, d.NodeSet.Name)
+		_, labelSelector := dataplaneutil.GetAnsibleExecutionNameAndLabels(&foundService, d.Deployment.Name, d.NodeSet.Name, d.Deployment.Spec.NodeSets)
 		ansibleEE, err = dataplaneutil.GetAnsibleExecution(d.Ctx, d.Helper, d.Deployment, labelSelector)
 		if err != nil {
 			// Return nil if we don't have AnsibleEE available yet

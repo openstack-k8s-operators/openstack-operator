@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
+	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane/util"
@@ -203,7 +204,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSet.GetName())
+					service, deployment.GetName(), nodeSet.GetName(),
+					[]string{dataplaneNodeSetName.Name})
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
 					ansibleeeName := types.NamespacedName{
@@ -420,7 +422,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetAlpha.GetName())
+					service, deployment.GetName(), nodeSetAlpha.GetName(),
+					[]string{nodeSetAlpha.Name})
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
@@ -456,7 +459,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetBeta.GetName())
+					service, deployment.GetName(), nodeSetBeta.GetName(),
+					[]string{nodeSetBeta.Name})
 
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
@@ -687,7 +691,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			th.CreateConfigMap(ovnConfigMapName, mapData)
 			service := GetService(dataplaneServiceName)
 			aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(service,
-				dataplaneDeploymentName.Name, dataplaneNodeSetName.Name)
+				dataplaneDeploymentName.Name, dataplaneNodeSetName.Name,
+				[]string{dataplaneNodeSetName.Name})
 			ansibleeeName := types.NamespacedName{
 				Name:      aeeName,
 				Namespace: dataplaneDeploymentName.Namespace,
@@ -888,7 +893,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetAlpha.GetName())
+					service, deployment.GetName(), nodeSetAlpha.GetName(), []string{nodeSetAlpha.GetName()})
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
@@ -912,7 +917,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetBeta.GetName())
+					service, deployment.GetName(), nodeSetBeta.GetName(), []string{nodeSetBeta.GetName()})
 
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
@@ -1016,7 +1021,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			th.CreateConfigMap(ovnConfigMapName, mapData)
 			service := GetService(dataplaneServiceName)
 			aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(service,
-				dataplaneDeploymentName.Name, dataplaneNodeSetName.Name)
+				dataplaneDeploymentName.Name, dataplaneNodeSetName.Name,
+				[]string{dataplaneNodeSetName.Name})
 			ansibleeeName := types.NamespacedName{
 				Name:      aeeName,
 				Namespace: dataplaneDeploymentName.Namespace,
@@ -1208,7 +1214,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetAlpha.GetName())
+					service, deployment.GetName(), nodeSetAlpha.GetName(),
+					[]string{nodeSetAlpha.Name})
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
@@ -1415,7 +1422,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetAlpha.GetName())
+					service, deployment.GetName(), nodeSetAlpha.GetName(),
+					[]string{nodeSetAlpha.GetName()})
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
@@ -1439,7 +1447,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetBeta.GetName())
+					service, deployment.GetName(), nodeSetBeta.GetName(),
+					[]string{nodeSetBeta.GetName()})
 
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
@@ -1766,4 +1775,127 @@ var _ = Describe("Dataplane Deployment Test", func() {
 
 	})
 
+	When("A user sets servicesOverride with a global service", func() {
+		var dataplaneNodeSetName1 types.NamespacedName
+		var service *dataplanev1.OpenStackDataPlaneService
+		var aeeName string
+		var expectedAnsibleeeName types.NamespacedName
+		var expectedAnsibleEE *ansibleeev1.OpenStackAnsibleEE
+
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateDataplaneService(dataplaneGlobalServiceName, true)
+			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			dataplaneNodeSetSpec := DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)
+			dataplaneNodeSetSpec["services"] = []string{}
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, dataplaneNodeSetSpec))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+			dataplaneNodeSetName1 = types.NamespacedName{
+				Name:      "edpm-compute-nodeset-1",
+				Namespace: namespace,
+			}
+			dataplaneNodeSetSpec1 := DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName1.Name)
+			dataplaneNodeSetSpec1["services"] = []string{}
+			dataplaneNodeSetSpec1["nodes"] = map[string]interface{}{
+				fmt.Sprintf("%s-node-1", dataplaneNodeSetName1.Name): map[string]interface{}{
+					"hostName": "edpm-compute-node-1-1",
+					"networks": []infrav1.IPSetNetwork{
+						{Name: "ctlplane", SubnetName: "subnet1"},
+					},
+				},
+			}
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName1, dataplaneNodeSetSpec1))
+			SimulateDNSDataComplete(dataplaneNodeSetName1)
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, GlobalServicesOverrideDeploymentSpec()))
+
+			service = GetService(dataplaneGlobalServiceName)
+			aeeName, _ = dataplaneutil.GetAnsibleExecutionNameAndLabels(
+				service, dataplaneDeploymentName.Name, dataplaneNodeSetName.Name,
+				[]string{dataplaneNodeSetName.Name})
+			expectedAnsibleeeName = types.NamespacedName{
+				Name:      aeeName,
+				Namespace: dataplaneDeploymentName.Namespace,
+			}
+			expectedAnsibleEE = &ansibleeev1.OpenStackAnsibleEE{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      expectedAnsibleeeName.Name,
+					Namespace: expectedAnsibleeeName.Namespace,
+				},
+			}
+
+			baremetal := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      dataplaneNodeSetName.Name,
+					Namespace: dataplaneNodeName.Namespace,
+				},
+			}
+			// Set baremetal provisioning conditions to True
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName, &baremetal)).To(Succeed())
+				baremetal.Status.Conditions.MarkTrue(
+					condition.ReadyCondition,
+					condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+			baremetal1 := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      dataplaneNodeSetName1.Name,
+					Namespace: dataplaneNodeSetName1.Namespace,
+				},
+			}
+			// Set baremetal provisioning conditions to True
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName1, &baremetal1)).To(Succeed())
+				baremetal1.Status.Conditions.MarkTrue(
+					condition.ReadyCondition,
+					condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal1)).To(Succeed())
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:              []string{"edpm-compute-nodeset", "edpm-compute-nodeset-1"},
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				DeploymentRequeueTime: 15,
+				ServicesOverride:      []string{"global-service"},
+				BackoffLimit:          ptr.To(int32(6)),
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+			service = GetService(dataplaneGlobalServiceName)
+		})
+
+		It("Deployment should succeed with AnsibleEE generation 1", func() {
+			expectedAnsibleEE = GetAnsibleee(expectedAnsibleeeName)
+
+			Eventually(func(g Gomega) {
+				expectedAnsibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, expectedAnsibleEE)).To(Succeed())
+				th.ExpectCondition(
+					dataplaneDeploymentName,
+					ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionTrue,
+				)
+
+				g.Expect(expectedAnsibleEE.Generation).Should(Equal(int64(1)))
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+		})
+
+	})
 })

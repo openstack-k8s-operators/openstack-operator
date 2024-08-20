@@ -287,6 +287,20 @@ func SingleGlobalServiceDeploymentSpec() map[string]interface{} {
 	}
 }
 
+// OpenStackDataPlnaeDeploymentSpec with multiple NodeSets and servicesOverride
+// with service with deployOnAllNodeSets set.
+func GlobalServicesOverrideDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"edpm-compute-nodeset",
+			"edpm-compute-nodeset-1",
+		},
+		"servicesOverride": []string{
+			"global-service",
+		},
+	}
+}
+
 func DefaultNetConfigSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"networks": []map[string]interface{}{{

@@ -12,7 +12,7 @@ metadata:
   generation: 1
   labels:
     openstackdataplanedeployment: edpm-compute-no-nodes
-    openstackdataplanenodeset: edpm-compute-no-nodes
+    openstackdataplanenodesets: edpm-compute-no-nodes
     openstackdataplaneservice: failed-service
   name: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack-kuttl-tests
