@@ -438,6 +438,8 @@ spec:
                     type: string
                   ceilometerNotificationImage:
                     type: string
+                  ceilometerProxyImage:
+                    type: string
                   ceilometerSgcoreImage:
                     type: string
                   cinderAPIImage:
@@ -535,6 +537,8 @@ spec:
                   novaSchedulerImage:
                     type: string
                   octaviaAPIImage:
+                    type: string
+                  octaviaApacheImage:
                     type: string
                   octaviaHealthmanagerImage:
                     type: string
