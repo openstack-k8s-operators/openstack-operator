@@ -299,7 +299,7 @@ func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneSer
 	}
 
 	if len(executionName) > apimachineryvalidation.DNS1123LabelMaxLength {
-		executionName = executionName[:apimachineryvalidation.DNS1123LabelMaxLength]
+		executionName = strings.TrimRight(executionName[:apimachineryvalidation.DNS1123LabelMaxLength], "-.")
 	}
 
 	labels := map[string]string{
