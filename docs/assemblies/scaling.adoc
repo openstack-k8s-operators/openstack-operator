@@ -105,10 +105,6 @@ new nodes and the new configuration for those nodes. Then a new
 `OpenStackDataPlaneDeployment` needs to be created that points to *both the
 existing and the new `OpenStackDataPlaneNodeSets`* to trigger the scale out.
 
-WARNING: The existing `OpenStackDataPlaneNodeSet` has the `ssh-known-hosts`
-service. That service is global for the whole deployment so it should not be
-listed on the new `OpenStackDataPlaneNodeSet`.
-
 WARNING: If only the new `OpenStackDataPlaneNodeSet` is included into the new
 `OpenStackDataPlaneDeployment` then the scale out seems to succeed but will
 be incomplete causing that VM move operations will fail between nodes
@@ -223,10 +219,13 @@ compute-03   deprovisioning                         false            43h
 
 == Scaling In by removing a NodeSet
 
-If the scale in would remove the last node from a `OpenStackDataPlaneNodeSet`
-then the `OpenStackDataPlaneNodeSet` resource should deleted as well. If this
-was the one that listed the `ssh-known-hosts` service then that service needs
-to be added to exactly one of the remaining `OpenStackDataPlaneNodeSets`. To
-remove the ssh host keys of the removed nodes from the remaining nodes a new
+If a full `OpenStackDataPlaneNodeSet` has to be removed, steps mentioned
+above to disable `nova-compute` services, stop the `ovn` and `nova-compute`
+containers on nodes, delete network agents and delete `nova-compute` services
+should be done for each compute. Finally the `OpenStackDataPlaneNodeSet` CR can
+be deleted. If this `OpenStackDataPlaneNodeSet` is the only one listing the
+`ssh-known-hosts` service, then this service needs to be added to one or more
+of the remaining `OpenStackDataPlaneNodeSets`. To remove the ssh host keys of
+the removed nodes of this `OpenStackDataPlaneNodeSet` from other nodes a new
 `OpenStackDataPlaneDeployment` needs to be created that points to all the
 remaining `OpenStackDataPlaneNodeSets`.
