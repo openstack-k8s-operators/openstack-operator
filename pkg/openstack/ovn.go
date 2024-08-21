@@ -410,11 +410,13 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 }
 
 // OVNControllerImageMatch - return true if the OVN Controller images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNControllerImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func OVNControllerImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Ovn.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.OvnControllerImage, version.Status.ContainerImages.OvnControllerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OvnControllerOvsImage, version.Status.ContainerImages.OvnControllerOvsImage) {
+			Log.Info("OVN Controller images do not match")
 			return false
 		}
 	}
@@ -422,11 +424,13 @@ func OVNControllerImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, ve
 }
 
 // OVNDbClusterImageMatch - return true if the OVN DbCluster images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNDbClusterImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func OVNDbClusterImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Ovn.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.OvnNbDbclusterImage, version.Status.ContainerImages.OvnNbDbclusterImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OvnSbDbclusterImage, version.Status.ContainerImages.OvnSbDbclusterImage) {
+			Log.Info("OVN Cluster images do not match")
 			return false
 		}
 	}
@@ -434,10 +438,12 @@ func OVNDbClusterImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, ver
 }
 
 // OVNNorthImageMatch - return true if the OVN North images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNNorthImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func OVNNorthImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Ovn.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.OvnNorthdImage, version.Status.ContainerImages.OvnNorthdImage) {
+			Log.Info("OVN North images do not match", "controlPlane.Status.ContainerImages.OvnNorthdImage", controlPlane.Status.ContainerImages.OvnNorthdImage, "version.Status.ContainerImages.OvnNorthdImage", version.Status.ContainerImages.OvnNorthdImage)
 			return false
 		}
 	}

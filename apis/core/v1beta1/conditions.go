@@ -481,5 +481,5 @@ const (
 	OpenStackVersionMinorUpdateReadyRunningMessage = "in progress"
 
 	// OpenStackVersionMinorUpdateReadyErrorMessage
-	//OpenStackVersionMinorUpdateReadyErrorMessage = "error occured %s"
+	OpenStackVersionMinorUpdateReadyErrorMessage = "error occured %s"
 )

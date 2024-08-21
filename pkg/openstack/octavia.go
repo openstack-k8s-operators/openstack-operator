@@ -218,14 +218,15 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 }
 
 // OctaviaImageMatch - return true if the octavia images match on the ControlPlane and Version, or if Octavia is not enabled
-func OctaviaImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func OctaviaImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Octavia.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaAPIImage, version.Status.ContainerImages.OctaviaAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaWorkerImage, version.Status.ContainerImages.OctaviaWorkerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHealthmanagerImage, version.Status.ContainerImages.OctaviaHealthmanagerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHousekeepingImage, version.Status.ContainerImages.OctaviaHousekeepingImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaApacheImage, version.Status.ContainerImages.ApacheImage) {
+			Log.Info("Octavia images do not match")
 			return false
 		}
 	}

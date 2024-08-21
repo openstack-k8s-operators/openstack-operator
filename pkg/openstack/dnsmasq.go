@@ -83,10 +83,11 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 }
 
 // DnsmasqImageMatch - return true if the Dnsmasq images match on the ControlPlane and Version, or if Dnsmasq is not enabled
-func DnsmasqImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func DnsmasqImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.DNS.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.InfraDnsmasqImage, version.Status.ContainerImages.InfraDnsmasqImage) {
+			Log.Info("Dnsmasq images do not match", "controlPlane.Status.ContainerImages.InfraDnsmasqImage", controlPlane.Status.ContainerImages.InfraDnsmasqImage, "version.Status.ContainerImages.InfraDnsmasqImage", version.Status.ContainerImages.InfraDnsmasqImage)
 			return false
 		}
 	}

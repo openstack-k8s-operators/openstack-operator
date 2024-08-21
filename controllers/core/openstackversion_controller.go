@@ -226,7 +226,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	// minor update in progress
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
 
-		if !openstack.OVNControllerImageMatch(controlPlane, instance) ||
+		if !openstack.OVNControllerImageMatch(ctx, controlPlane, instance) ||
 			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
@@ -255,8 +255,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
 		// minor update for Controlplane in progress
-		if !openstack.ControlplaneContainerImageMatch(controlPlane, instance) ||
-			!controlPlane.IsReady() {
+		if !controlPlane.IsReady() {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateControlplane,
 				condition.RequestedReason,
@@ -265,6 +264,19 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			Log.Info("Minor update for Controlplane in progress")
 			return ctrl.Result{}, nil
 		}
+		// ctlplane is ready, lets make sure all images match newly deployed versions
+		ctlplaneImagesMatch, badMatches := openstack.ControlplaneContainerImageMatch(ctx, controlPlane, instance)
+		if !ctlplaneImagesMatch {
+			errMsgBadMatches := "Controlplane images do not match the target version for the following services: " + strings.Join(badMatches, ", ")
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackVersionMinorUpdateControlplane,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackVersionMinorUpdateReadyErrorMessage,
+				errMsgBadMatches))
+
+		}
+
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateControlplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)

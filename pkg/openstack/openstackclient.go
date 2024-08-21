@@ -95,8 +95,12 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 }
 
 // ClientImageMatch - return true if the openstackclient images match on the ControlPlane and Version, or if OpenstackClient is not enabled
-func ClientImageMatch(controlPlane *corev1.OpenStackControlPlane, version *corev1.OpenStackVersion) bool {
-
+func ClientImageMatch(ctx context.Context, controlPlane *corev1.OpenStackControlPlane, version *corev1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	//FIXME: (dprince) - OpenStackClientSection should have Enabled?
-	return stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackClientImage, version.Status.ContainerImages.OpenstackClientImage)
+	if !stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackClientImage, version.Status.ContainerImages.OpenstackClientImage) {
+		Log.Info("OpenStackClient images do not match", "controlPlane.Status.ContainerImages.OpenstackClientImage", controlPlane.Status.ContainerImages.OpenstackClientImage, "version.Status.ContainerImages.OpenstackClientImage", version.Status.ContainerImages.OpenstackClientImage)
+		return false
+	}
+	return true
 }

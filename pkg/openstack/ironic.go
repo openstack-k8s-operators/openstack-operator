@@ -211,8 +211,8 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 }
 
 // IronicImagesCheck - return true if the ironic images match on the ControlPlane and Version, or if Ironic is not enabled
-func IronicImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func IronicImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Ironic.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.IronicAPIImage, version.Status.ContainerImages.IronicAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicConductorImage, version.Status.ContainerImages.IronicConductorImage) ||
@@ -220,6 +220,7 @@ func IronicImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicNeutronAgentImage, version.Status.ContainerImages.IronicNeutronAgentImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPxeImage, version.Status.ContainerImages.IronicPxeImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPythonAgentImage, version.Status.ContainerImages.IronicPythonAgentImage) {
+			Log.Info("Ironic images do not match")
 			return false
 		}
 	}

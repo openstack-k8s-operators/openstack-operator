@@ -199,10 +199,11 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 }
 
 // NeutronImageMatch - return true if the neutron images match on the ControlPlane and Version, or if Neutron is not enabled
-func NeutronImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func NeutronImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Neutron.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.NeutronAPIImage, version.Status.ContainerImages.NeutronAPIImage) {
+			Log.Info("Neutron API image mismatch", "controlPlane.Status.ContainerImages.NeutronAPIImage", controlPlane.Status.ContainerImages.NeutronAPIImage, "version.Status.ContainerImages.NeutronAPIImage", version.Status.ContainerImages.NeutronAPIImage)
 			return false
 		}
 	}

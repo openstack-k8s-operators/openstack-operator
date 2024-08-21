@@ -315,8 +315,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 }
 
 // TelemetryImageMatch - return true if the telemetry images match on the ControlPlane and Version, or if Telemetry is not enabled
-func TelemetryImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func TelemetryImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Telemetry.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerCentralImage, version.Status.ContainerImages.CeilometerCentralImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerComputeImage, version.Status.ContainerImages.CeilometerComputeImage) ||
@@ -328,7 +328,7 @@ func TelemetryImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, versio
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhEvaluatorImage, version.Status.ContainerImages.AodhEvaluatorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhNotifierImage, version.Status.ContainerImages.AodhNotifierImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhListenerImage, version.Status.ContainerImages.AodhListenerImage) {
-
+			Log.Info("Telemetry images do not match")
 			return false
 		}
 	}

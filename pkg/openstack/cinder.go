@@ -204,16 +204,18 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 }
 
 // CinderImageMatch - return true if the Cinder images match on the ControlPlane and Version, or if Cinder is not enabled
-func CinderImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func CinderImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Cinder.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.CinderAPIImage, version.Status.ContainerImages.CinderAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CinderSchedulerImage, version.Status.ContainerImages.CinderSchedulerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CinderBackupImage, version.Status.ContainerImages.CinderBackupImage) {
+			Log.Info("Cinder images do not match")
 			return false
 		}
 		for name, img := range version.Status.ContainerImages.CinderVolumeImages {
 			if !stringPointersEqual(controlPlane.Status.ContainerImages.CinderVolumeImages[name], img) {
+				Log.Info("Cinder Volume images do not match")
 				return false
 			}
 		}

@@ -220,10 +220,11 @@ func getGlanceAPILabelMap(name string, apiName string, apiType string) map[strin
 }
 
 // GlanceImageMatch - return true if the glance images match on the ControlPlane and Version, or if Glance is not enabled
-func GlanceImageMatch(controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-
+func GlanceImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+	Log := GetLogger(ctx)
 	if controlPlane.Spec.Glance.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.GlanceAPIImage, version.Status.ContainerImages.GlanceAPIImage) {
+			Log.Info("Glance API image mismatch", "controlPlane.Status.ContainerImages.GlanceAPIImage", controlPlane.Status.ContainerImages.GlanceAPIImage, "version.Status.ContainerImages.GlanceAPIImage", version.Status.ContainerImages.GlanceAPIImage)
 			return false
 		}
 	}
