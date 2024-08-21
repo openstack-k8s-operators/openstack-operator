@@ -163,28 +163,32 @@ func DedupeServices(ctx context.Context, helper *helper.Helper,
 	serviceOverride []string) (map[string][]string, error) {
 	var nodeSetServiceMap = make(map[string][]string, 0)
 	var globalServices []string
+	var services []string
+	var err error
 	if len(serviceOverride) != 0 {
-		services, err := dedupe(ctx, helper, serviceOverride, globalServices)
+		services, globalServices, err = dedupe(ctx, helper, serviceOverride, globalServices)
 		if err != nil {
 			return nil, err
 		}
 		nodeSetServiceMap[AllNodeSets] = services
 	} else {
 		for _, nodeset := range nodesets {
-			services, err := dedupe(ctx, helper, nodeset.Spec.Services, globalServices)
+			services, globalServices, err = dedupe(ctx, helper, nodeset.Spec.Services, globalServices)
 			if err != nil {
 				return nil, err
 			}
 			nodeSetServiceMap[nodeset.Name] = services
 		}
 	}
+	helper.GetLogger().Info(fmt.Sprintf("Current Global Services %s", globalServices))
 	return nodeSetServiceMap, nil
 }
 
 func dedupe(ctx context.Context, helper *helper.Helper,
-	services []string, globalServices []string) ([]string, error) {
+	services []string, globalServices []string) ([]string, []string, error) {
 	var dedupedServices []string
 	var nodeSetServiceTypes []string
+	updatedglobalServices := globalServices
 	for _, svc := range services {
 		service, err := GetService(ctx, helper, svc)
 		if err != nil {
@@ -195,13 +199,13 @@ func dedupe(ctx context.Context, helper *helper.Helper,
 				dedupedServices = append(dedupedServices, svc)
 				continue
 			}
-			return dedupedServices, err
+			return dedupedServices, updatedglobalServices, err
 
 		}
 		if !slices.Contains(nodeSetServiceTypes, service.Spec.EDPMServiceType) && !slices.Contains(dedupedServices, svc) {
 			if service.Spec.DeployOnAllNodeSets {
 				if !slices.Contains(globalServices, svc) {
-					globalServices = append(globalServices, svc)
+					updatedglobalServices = append(globalServices, svc)
 				} else {
 					continue
 				}
@@ -210,5 +214,5 @@ func dedupe(ctx context.Context, helper *helper.Helper,
 			dedupedServices = append(dedupedServices, svc)
 		}
 	}
-	return dedupedServices, nil
+	return dedupedServices, updatedglobalServices, nil
 }
