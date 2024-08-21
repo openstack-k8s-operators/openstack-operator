@@ -348,6 +348,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			nsConditions.MarkTrue(
 				dataplanev1.NodeSetDeploymentReadyCondition,
 				condition.DeploymentReadyMessage)
+			instance.Status.NodeSetHashes[nodeSet.Name] = nodeSet.Status.ConfigHash
 		}
 	}
 
