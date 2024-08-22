@@ -196,7 +196,8 @@ type OpenStackControlPlaneSpec struct {
 	Barbican BarbicanSection `json:"barbican,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="OpenStack Client"
+
 	// OpenStackClient - Parameters related to the OpenStackClient
 	OpenStackClient OpenStackClientSection `json:"openstackclient,omitempty"`
 
