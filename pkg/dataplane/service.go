@@ -165,22 +165,21 @@ func DedupeServices(ctx context.Context, helper *helper.Helper,
 	var globalServices []string
 	var services []string
 	var err error
-	if len(serviceOverride) != 0 {
-		services, globalServices, err = dedupe(ctx, helper, serviceOverride, globalServices)
+
+	for _, nodeset := range nodesets {
+		var nodeSetServices []string
+		if len(serviceOverride) != 0 {
+			nodeSetServices = serviceOverride
+		} else {
+			nodeSetServices = nodeset.Spec.Services
+		}
+		services, globalServices, err = dedupe(ctx, helper, nodeSetServices, globalServices)
 		if err != nil {
 			return nil, err
 		}
-		nodeSetServiceMap[AllNodeSets] = services
-	} else {
-		for _, nodeset := range nodesets {
-			services, globalServices, err = dedupe(ctx, helper, nodeset.Spec.Services, globalServices)
-			if err != nil {
-				return nil, err
-			}
-			nodeSetServiceMap[nodeset.Name] = services
-		}
+		nodeSetServiceMap[nodeset.Name] = services
 	}
-	helper.GetLogger().Info(fmt.Sprintf("Current Global Services %s", globalServices))
+	helper.GetLogger().Info(fmt.Sprintf("Current Global Services %v", globalServices))
 	return nodeSetServiceMap, nil
 }
 

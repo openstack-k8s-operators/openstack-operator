@@ -318,11 +318,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		// deploy those services for each OpenStackDataPlaneNodeSet. Otherwise,
 		// deploy with the OpenStackDataPlaneNodeSet's Services.
 		var deployResult *ctrl.Result
-		if len(instance.Spec.ServicesOverride) != 0 {
-			deployResult, err = deployer.Deploy(nodesetServiceMap[deployment.AllNodeSets])
-		} else {
-			deployResult, err = deployer.Deploy(nodesetServiceMap[nodeSet.Name])
-		}
+		deployResult, err = deployer.Deploy(nodesetServiceMap[nodeSet.Name])
 
 		nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
 		nsConditions.Set(nsConditions.Mirror(dataplanev1.NodeSetDeploymentReadyCondition))
