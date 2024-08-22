@@ -37,9 +37,10 @@ import (
 )
 
 // getAnsibleVarsFrom gets ansible vars from ConfigMap/Secret
-func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]string, error) {
+func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]interface{}, error) {
 
-	var result = make(map[string]string)
+	var result = make(map[string]interface{})
+	var value interface{}
 
 	for _, dataSource := range ansible.AnsibleVarsFrom {
 		configMap, secret, err := util.GetDataSourceCmSecret(ctx, helper, namespace, dataSource)
@@ -55,7 +56,13 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 					k = dataSource.Prefix + k
 				}
 
-				result[k] = v
+				// Attempt to unmarshal the value into json. If that fails,
+				// assume it's a plain string.
+				err := json.Unmarshal([]byte(v), &value)
+				if err != nil {
+					value = v
+				}
+				result[k] = value
 			}
 		}
 
@@ -64,7 +71,13 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 				if len(dataSource.Prefix) > 0 {
 					k = dataSource.Prefix + k
 				}
-				result[k] = string(v)
+				// Attempt to unmarshal the value into json. If that fails,
+				// assume it's a plain string.
+				err := json.Unmarshal(v, &value)
+				if err != nil {
+					value = string(v)
+				}
+				result[k] = value
 			}
 		}
 
