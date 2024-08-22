@@ -1176,11 +1176,11 @@ spec:
                 type: integer
               services:
                 default:
-                - download-cache
                 - bootstrap
                 - configure-network
                 - validate-network
                 - install-os
+                - download-cache
                 - configure-os
                 - ssh-known-hosts
                 - run-os

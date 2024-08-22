@@ -45,11 +45,11 @@ spec:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
   services:
-    - download-cache
     - bootstrap
     - configure-network
     - validate-network
     - install-os
+    - download-cache
     - configure-os
     - run-os
     - install-certs

@@ -51,11 +51,11 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
   preProvisioned: true
   services:
-  - download-cache
   - bootstrap
   - configure-network
   - validate-network
   - install-os
+  - download-cache
   - configure-os
   - run-os
   - install-certs
