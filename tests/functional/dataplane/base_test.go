@@ -259,6 +259,34 @@ func DuplicateServiceDeploymentSpec() map[string]interface{} {
 	}
 }
 
+// Build OpenStackDataPlnaeDeploymentSpec with global service
+func GlobalServiceDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"alpha-nodeset",
+			"beta-nodeset",
+		},
+		"servicesOverride": []string{
+			"foo-service",
+			"global-service",
+			"foo-update-service",
+		},
+	}
+}
+
+// Build OpenStackDataPlnaeDeploymentSpec with single global service
+func SingleGlobalServiceDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"alpha-nodeset",
+			"beta-nodeset",
+		},
+		"servicesOverride": []string{
+			"global-service",
+		},
+	}
+}
+
 func DefaultNetConfigSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"networks": []map[string]interface{}{{

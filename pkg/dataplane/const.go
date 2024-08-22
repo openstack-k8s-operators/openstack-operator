@@ -71,8 +71,4 @@ const (
 
 	//HostnameLabel label for marking secrets to be watched for changes
 	HostnameLabel = "hostname"
-
-	//AllNodeSets Key used in nodeset service map for all nodesets when
-	//using serviceOverride.
-	AllNodeSets = "AllNodeSets"
 )
