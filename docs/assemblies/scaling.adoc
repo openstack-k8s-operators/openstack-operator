@@ -61,6 +61,14 @@ created with the `OpenStackDataPlaneNodeSet` in the `nodeSets` section.
     - openstack-edpm-ipam # scaled out nodeset name
 
 
+WARNING: Before applying the *new* `OpenStackDataPlaneDeployment` CR, verify
+if the `OpenStackDataPlaneNodeSet` in the `nodeSets` section has reached the `SetupReady` status.
+
+[,console]
+----
+$ oc wait openstackdataplanenodeset openstack-edpm-ipam --for condition=SetupReady --timeout=10m
+----
+
 Once deployment completes `OpenStackDataPlaneNodeSet` would be ready as shown below.
 
 [,console]
