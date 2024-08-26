@@ -368,18 +368,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
 
-		// Set Images
-		if containerImages.OsContainerImage != nil {
-			instance.Spec.BaremetalSetTemplate.OSContainerImageURL = *containerImages.OsContainerImage
-		}
-		if containerImages.AgentImage != nil {
-			instance.Spec.BaremetalSetTemplate.AgentImageURL = *containerImages.AgentImage
-		}
-		if containerImages.ApacheImage != nil {
-			instance.Spec.BaremetalSetTemplate.ApacheImageURL = *containerImages.ApacheImage
-		}
 		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
-			allIPSets, dnsDetails.ServerAddresses)
+			allIPSets, dnsDetails.ServerAddresses, containerImages)
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
