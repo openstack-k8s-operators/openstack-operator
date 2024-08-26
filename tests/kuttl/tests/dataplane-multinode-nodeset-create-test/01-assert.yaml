@@ -1,0 +1,98 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-multinode
+status:
+  allHostnames:
+    edpm-compute-0:
+      ctlplane: edpm-compute-0.ctlplane.example.com
+      internalapi: edpm-compute-0.internalapi.example.com
+      storage: edpm-compute-0.storage.example.com
+      tenant: edpm-compute-0.tenant.example.com
+  allIPs:
+    edpm-compute-0:
+      ctlplane: 192.168.122.150
+      internalapi: 172.17.0.150
+      storage: 172.18.0.150
+      tenant: 172.19.0.150
+  ctlplaneSearchDomain: ctlplane.example.com
+  conditions:
+  - message: Deployment not started
+    reason: Requested
+    status: "False"
+    type: Ready
+  - message: Deployment not started
+    reason: Requested
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+---
+apiVersion: network.openstack.org/v1beta1
+kind: IPSet
+metadata:
+  name: edpm-compute-0
+status:
+  conditions:
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: Reservation successful
+    reason: Ready
+    status: "True"
+    type: ReservationReady
+  reservations:
+  - address: 192.168.122.150
+    cidr: 192.168.122.0/24
+    dnsDomain: ctlplane.example.com
+    gateway: 192.168.122.1
+    mtu: 1500
+    network: ctlplane
+    routes:
+    - destination: 0.0.0.0/0
+      nexthop: 192.168.122.1
+    subnet: subnet1
+  - address: 172.17.0.150
+    cidr: 172.17.0.0/24
+    dnsDomain: internalapi.example.com
+    mtu: 1500
+    network: internalapi
+    subnet: subnet1
+    vlan: 20
+  - address: 172.18.0.150
+    cidr: 172.18.0.0/24
+    dnsDomain: storage.example.com
+    mtu: 1500
+    network: storage
+    subnet: subnet1
+    vlan: 21
+  - address: 172.19.0.150
+    cidr: 172.19.0.0/24
+    dnsDomain: tenant.example.com
+    mtu: 1500
+    network: tenant
+    subnet: subnet1
+    vlan: 22
