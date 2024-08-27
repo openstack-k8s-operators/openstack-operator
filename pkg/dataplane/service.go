@@ -23,7 +23,9 @@ import (
 	"path"
 	"strings"
 
+	"golang.org/x/exp/slices"
 	yaml "gopkg.in/yaml.v3"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -153,38 +155,63 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	return nil
 }
 
-// CheckGlobalServiceExecutionConsistency - Check that global services are defined only once in all nodesets, report and fail if there are duplicates
-func CheckGlobalServiceExecutionConsistency(ctx context.Context, helper *helper.Helper, nodesets []dataplanev1.OpenStackDataPlaneNodeSet) error {
+// Dedupe services to deploy
+// Multiple Services of same ServiceType/ServiceName in a nodeset
+// Global Services in multiple NodeSets for a deployment
+func DedupeServices(ctx context.Context, helper *helper.Helper,
+	nodesets []dataplanev1.OpenStackDataPlaneNodeSet,
+	serviceOverride []string) (map[string][]string, error) {
+	var nodeSetServiceMap = make(map[string][]string, 0)
 	var globalServices []string
-	var allServices []string
+	var services []string
+	var err error
 
 	for _, nodeset := range nodesets {
-		allServices = append(allServices, nodeset.Spec.Services...)
-	}
-	for _, svc := range allServices {
-		service, err := GetService(ctx, helper, svc)
+		var nodeSetServices []string
+		if len(serviceOverride) != 0 {
+			nodeSetServices = serviceOverride
+		} else {
+			nodeSetServices = nodeset.Spec.Services
+		}
+		services, globalServices, err = dedupe(ctx, helper, nodeSetServices, globalServices)
 		if err != nil {
-			helper.GetLogger().Error(err, fmt.Sprintf("error getting service %s for consistency check", svc))
-			return err
+			return nil, err
 		}
-
-		if service.Spec.DeployOnAllNodeSets {
-			if serviceInList(service.Name, globalServices) {
-				return fmt.Errorf("global service %s defined multiple times", service.Name)
-			}
-			globalServices = append(globalServices, service.Name)
-		}
+		nodeSetServiceMap[nodeset.Name] = services
 	}
-
-	return nil
+	helper.GetLogger().Info(fmt.Sprintf("Current Global Services %v", globalServices))
+	return nodeSetServiceMap, nil
 }
 
-// Check if service name is already in a list
-func serviceInList(service string, services []string) bool {
+func dedupe(ctx context.Context, helper *helper.Helper,
+	services []string, globalServices []string) ([]string, []string, error) {
+	var dedupedServices []string
+	var nodeSetServiceTypes []string
+	updatedglobalServices := globalServices
 	for _, svc := range services {
-		if svc == service {
-			return true
+		service, err := GetService(ctx, helper, svc)
+		if err != nil {
+			if k8s_errors.IsNotFound(err) && !slices.Contains(dedupedServices, svc) {
+				helper.GetLogger().Error(err, fmt.Sprintf("Configured service %s does not exist", svc))
+				// Add the service to the service list as it would fail later when deploying and
+				// Update the statuses accordingly.
+				dedupedServices = append(dedupedServices, svc)
+				continue
+			}
+			return dedupedServices, updatedglobalServices, err
+
+		}
+		if !slices.Contains(nodeSetServiceTypes, service.Spec.EDPMServiceType) && !slices.Contains(dedupedServices, svc) {
+			if service.Spec.DeployOnAllNodeSets {
+				if !slices.Contains(globalServices, svc) {
+					updatedglobalServices = append(globalServices, svc)
+				} else {
+					continue
+				}
+			}
+			nodeSetServiceTypes = append(nodeSetServiceTypes, service.Spec.EDPMServiceType)
+			dedupedServices = append(dedupedServices, svc)
 		}
 	}
-	return false
+	return dedupedServices, updatedglobalServices, nil
 }

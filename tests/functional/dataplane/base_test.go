@@ -52,6 +52,14 @@ func CreateDataplaneService(name types.NamespacedName, globalService bool) *unst
 	return th.CreateUnstructured(raw)
 }
 
+func CreateDataplaneServicesWithSameServiceType(name types.NamespacedName) {
+	CreateDataPlaneServiceFromSpec(name, map[string]interface{}{
+		"edpmServiceType": "nova"})
+	CreateDataPlaneServiceFromSpec(types.NamespacedName{
+		Name: "duplicate-service", Namespace: name.Namespace}, map[string]interface{}{
+		"edpmServiceType": "nova"})
+}
+
 // Create an OpenStackDataPlaneService with a given NamespacedName, and a given unstructured spec
 func CreateDataPlaneServiceFromSpec(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
 	raw := map[string]interface{}{
@@ -172,6 +180,32 @@ func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 	}
 }
 
+func DuplicateServiceNodeSetSpec(nodeSetName string) map[string]interface{} {
+	return map[string]interface{}{
+		"services": []string{
+			"foo-service",
+			"duplicate-service",
+		},
+		"nodeTemplate": map[string]interface{}{
+			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+			"ansible": map[string]interface{}{
+				"ansibleUser": "cloud-user",
+			},
+		},
+		"nodes": map[string]interface{}{
+			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
+				"hostName": "edpm-compute-node-1",
+				"networks": []infrav1.IPSetNetwork{
+					{Name: "ctlplane", SubnetName: "subnet1"},
+				},
+			},
+		},
+		"secretMaxSize":  1048576,
+		"tlsEnabled":     true,
+		"preProvisioned": true,
+	}
+}
+
 // Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
 func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 	spec := map[string]interface{}{
@@ -182,8 +216,7 @@ func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
-		"nodes":            map[string]interface{}{},
-		"servicesOverride": []string{},
+		"nodes": map[string]interface{}{},
 	}
 	if tlsEnabled {
 		spec["tlsEnabled"] = true
@@ -204,12 +237,52 @@ func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 }
 
 func MinorUpdateDataPlaneDeploymentSpec() map[string]interface{} {
-
 	return map[string]interface{}{
 		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
 		"servicesOverride": []string{"update"},
+	}
+}
+
+// Build OpenStackDataPlnaeDeploymentSpec with duplicate services
+func DuplicateServiceDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"edpm-compute-nodeset",
+		},
+		"servicesOverride": []string{
+			"foo-service",
+			"duplicate-service",
+		},
+	}
+}
+
+// Build OpenStackDataPlnaeDeploymentSpec with global service
+func GlobalServiceDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"alpha-nodeset",
+			"beta-nodeset",
+		},
+		"servicesOverride": []string{
+			"foo-service",
+			"global-service",
+			"foo-update-service",
+		},
+	}
+}
+
+// Build OpenStackDataPlnaeDeploymentSpec with single global service
+func SingleGlobalServiceDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"alpha-nodeset",
+			"beta-nodeset",
+		},
+		"servicesOverride": []string{
+			"global-service",
+		},
 	}
 }
 

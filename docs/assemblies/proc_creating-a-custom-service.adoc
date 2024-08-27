@@ -92,7 +92,7 @@ spec:
 +
 A mount is created for each `ConfigMap` and `Secret` in the `OpenStackAnsibleEE` pod with a filename that matches the resource value. The mounts are created under `/var/lib/openstack/configs/<service name>`.
 
-. Optional: It may be necessary to run some services on all nodesets at the same time. These services need to have their `deployOnAllNodeSets` field set to true.
+. Optional: It may be necessary to run some services on all nodesets at the same time. These services need to have their `deployOnAllNodeSets` field set to true. If these services are repated in multiple nodeset specs included in a deployment, they would be ignored from subsequent nodeset services and would be run only once.
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
@@ -112,7 +112,7 @@ spec:
   deployOnAllNodeSets: true
 ----
 
-. Optional: Specify the `edpmServiceType` field for the service. Different custom services may use the same ansible content to manage the same EDPM service (such as `ovn` or `nova`). The `DataSources`, TLS certificates, and CA certificates need to be mounted at the same locations so they can be found by the ansible content even when using a custom service. `edpmServiceType` is used to create this association. The value is the name of the default service that uses the same ansible content as the custom service.
+. Optional: Specify the `edpmServiceType` field for the service. Different custom services may use the same ansible content to manage the same EDPM service (such as `ovn` or `nova`). The `DataSources`, TLS certificates, and CA certificates need to be mounted at the same locations so they can be found by the ansible content even when using a custom service. `edpmServiceType` is used to create this association. The value is the name of the default service that uses the same ansible content as the custom service. If there are multiple services with the same `edpmServiceType` listed in a nodeset or deployment spec, latter ones would be ignored.
 +
 For example, a custom service that uses the `edpm_ovn` ansible content from `edpm-ansible` would set `edpmServiceType` to `ovn`, which matches the default `ovn` service name provided by `openstack-operator`.
 +
