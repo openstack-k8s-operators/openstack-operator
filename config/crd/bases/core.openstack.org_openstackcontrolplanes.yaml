@@ -17583,6 +17583,8 @@ spec:
                     type: string
                   edpmIscsidImage:
                     type: string
+                  edpmKeplerImage:
+                    type: string
                   edpmLogrotateCrondImage:
                     type: string
                   edpmMultipathdImage:
