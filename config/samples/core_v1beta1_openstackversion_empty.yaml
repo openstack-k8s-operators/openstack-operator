@@ -1,0 +1,5 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackVersion
+metadata:
+  name: default
+spec:

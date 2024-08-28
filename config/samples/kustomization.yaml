@@ -1,11 +1,12 @@
 ## Append samples you want in your CSV to this file as resources ##
+# NOTE(dprince): these get added to the bundle ALM examples
+# we do not have space for long examples here and want
+# to guide users to documentation instead
 resources:
-- core_v1beta1_openstackcontrolplane.yaml
-- core_v1beta1_openstackcontrolplane_collapsed_cell.yaml
-- core_v1beta1_openstackcontrolplane_network_isolation.yaml
-- client_v1beta1_openstackclient.yaml
-- core_v1beta1_openstackversion.yaml
-- dataplane_v1beta1_openstackdataplanenodeset.yaml
-- dataplane_v1beta1_openstackdataplaneservice.yaml
-- dataplane_v1beta1_openstackdataplanedeployment.yaml
+- core_v1beta1_openstackcontrolplane_empty.yaml
+- client_v1beta1_openstackclient_empty.yaml
+- core_v1beta1_openstackversion_empty.yaml
+- dataplane_v1beta1_openstackdataplanenodeset_empty.yaml
+- dataplane_v1beta1_openstackdataplaneservice_empty.yaml
+- dataplane_v1beta1_openstackdataplanedeployment_empty.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
