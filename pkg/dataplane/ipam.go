@@ -128,7 +128,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 						fqdnNames = append(fqdnNames, fqdnName)
 						dnsDetails.Hostnames[hostName][infranetworkv1.NetNameStr(netLower)] = fqdnName
 					}
-					if dataplanev1.NodeHostNameIsFQDN(hostName) && netLower == CtlPlaneNetwork {
+					if dataplanev1.NodeHostNameIsFQDN(hostName) && netLower == dataplanev1.CtlPlaneNetwork {
 						fqdnNames = append(fqdnNames, hostName)
 						dnsDetails.Hostnames[hostName][infranetworkv1.NetNameStr(netLower)] = hostName
 					}
@@ -137,7 +137,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					allDNSRecords = append(allDNSRecords, dnsRecord)
 					// Adding only ctlplane domain for ansibleee.
 					// TODO (rabi) This is not very efficient.
-					if netLower == CtlPlaneNetwork && ctlplaneSearchDomain == "" {
+					if netLower == dataplanev1.CtlPlaneNetwork && ctlplaneSearchDomain == "" {
 						dnsDetails.CtlplaneSearchDomain = res.DNSDomain
 					}
 				}
