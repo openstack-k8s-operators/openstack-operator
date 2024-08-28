@@ -117,11 +117,9 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			return &ctrl.Result{}, err
 		}
 
-		// Add certMounts if TLS is enabled
-		if d.NodeSet.Spec.TLSEnabled {
-			if foundService.Spec.AddCertMounts {
-				d.AeeSpec, err = d.addCertMounts(services)
-			}
+		// Add certMounts
+		if foundService.Spec.AddCertMounts {
+			d.AeeSpec, err = d.addCertMounts(services)
 			if err != nil {
 				nsConditions.Set(condition.FalseCondition(
 					readyCondition,
@@ -274,7 +272,7 @@ func (d *Deployer) addCertMounts(
 			}
 		}
 
-		if service.Spec.TLSCerts != nil {
+		if service.Spec.TLSCerts != nil && d.NodeSet.Spec.TLSEnabled {
 			// sort cert list to ensure mount list is consistent
 			certKeyList := make([]string, 0, len(service.Spec.TLSCerts))
 			for ckey := range service.Spec.TLSCerts {
@@ -340,7 +338,7 @@ func (d *Deployer) addCertMounts(
 			}
 		}
 
-		// add mount for cacert bundle
+		// add mount for cacert bundle, even if TLS-E is not enabled
 		if len(service.Spec.CACerts) > 0 {
 			log.Info("Mounting CA cert bundle for service", "service", svc)
 			volMounts := storage.VolMounts{}
