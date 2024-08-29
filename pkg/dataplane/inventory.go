@@ -213,14 +213,14 @@ func populateInventoryFromIPAM(
 			netCidr, _ := ipnet.Mask.Size()
 			host.Vars[entry+"_cidr"] = netCidr
 		}
-		if res.Vlan != nil || entry != CtlPlaneNetwork {
+		if res.Vlan != nil || entry != dataplanev1.CtlPlaneNetwork {
 			host.Vars[entry+"_vlan_id"] = res.Vlan
 		}
 		host.Vars[entry+"_mtu"] = res.MTU
 		host.Vars[entry+"_gateway_ip"] = res.Gateway
 		host.Vars[entry+"_host_routes"] = res.Routes
 
-		if entry == CtlPlaneNetwork {
+		if entry == dataplanev1.CtlPlaneNetwork {
 			host.Vars[entry+"_dns_nameservers"] = dnsAddresses
 			if dataplanev1.NodeHostNameIsFQDN(hostName) {
 				host.Vars["canonical_hostname"] = hostName
@@ -355,7 +355,7 @@ func buildNetworkVars(networks []infranetworkv1.IPSetNetwork) ([]string, map[str
 	var nets []string
 	for _, network := range networks {
 		netName := string(network.Name)
-		if strings.EqualFold(netName, CtlPlaneNetwork) {
+		if strings.EqualFold(netName, dataplanev1.CtlPlaneNetwork) {
 			continue
 		}
 		nets = append(nets, netName)

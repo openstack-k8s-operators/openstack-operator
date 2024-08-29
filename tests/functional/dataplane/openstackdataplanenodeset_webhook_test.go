@@ -243,4 +243,21 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				dataplaneDeploymentName.Name, string(v1beta1.NodeSetDeploymentReadyCondition))))
 		})
 	})
+	When("networks are out of order", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
+			dataplaneNodeSetName.Name = "unordered"
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+		})
+
+		It("Should fail when ctlplane is not the first network", func() {
+			Eventually(func(_ Gomega) string {
+				dataplaneNodeSetName.Name = "unordered"
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				instance.Spec.NodeTemplate.Networks[0].Name = "wrong"
+				err := th.K8sClient.Update(th.Ctx, instance)
+				return fmt.Sprintf("%s", err)
+			}).Should(ContainSubstring("networks should start with ctlplane got wrong instead"))
+		})
+	})
 })

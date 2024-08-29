@@ -19,6 +19,7 @@ package v1beta1
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"golang.org/x/exp/slices"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -346,4 +347,30 @@ func (r *OpenStackDataPlaneNodeSetSpec) TLSMatch(controlPlane openstackv1.OpenSt
 				controlPlane.Spec.TLS.PodLevel.Enabled))
 	}
 	return nil
+}
+
+// Validate NodeSet networks
+func (r *OpenStackDataPlaneNodeSetSpec) ValidateNetworks() (errors field.ErrorList) {
+	for nodeName, node := range r.Nodes {
+		if len(node.Networks) > 0 && !strings.EqualFold(string(node.Networks[0].Name), CtlPlaneNetwork) {
+			errors = append(errors, field.Invalid(
+				field.NewPath("spec").Child("nodes").Child(nodeName).Child("networks"),
+				node.Networks,
+				fmt.Sprintf(
+					"node %s error: networks should start with %s got %s instead",
+					node.HostName, CtlPlaneNetwork, node.Networks[0].Name,
+				)))
+		}
+	}
+	if len(r.NodeTemplate.Networks) > 0 && !strings.EqualFold(string(r.NodeTemplate.Networks[0].Name), CtlPlaneNetwork) {
+		errors = append(errors, field.Invalid(
+			field.NewPath("spec").Child("nodeTemplate").Child("networks"),
+			r.NodeTemplate.Networks,
+			fmt.Sprintf(
+				"networks should start with %s got %s instead",
+				CtlPlaneNetwork, r.NodeTemplate.Networks[0].Name,
+			)))
+	}
+
+	return errors
 }

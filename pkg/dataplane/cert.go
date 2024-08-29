@@ -167,7 +167,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		// NOTE: we are assuming that there will always be a ctlplane network
 		// that means if you are not using network isolation with multiple networks
 		// you should still need to have a ctlplane network at a minimum to use tls-e
-		baseName, ok := dnsNames[CtlPlaneNetwork]
+		baseName, ok := dnsNames[dataplanev1.CtlPlaneNetwork]
 		if !ok {
 			return &result, fmt.Errorf(
 				"control plane network not found for node %s , tls-e requires a control plane network to be present",

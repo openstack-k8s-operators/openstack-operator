@@ -17,10 +17,6 @@ limitations under the License.
 package deployment
 
 const (
-
-	// CtlPlaneNetwork - default ctlplane Network Name in NetConfig
-	CtlPlaneNetwork = "ctlplane"
-
 	// ValidateNetworkLabel for ValidateNetwork OpenStackAnsibleEE
 	ValidateNetworkLabel = "validate-network"
 

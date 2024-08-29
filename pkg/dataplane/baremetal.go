@@ -77,7 +77,7 @@ func DeployBaremetalSet(
 				instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/24", node.Ansible.AnsibleHost)
 			} else {
 				for _, res := range ipSet.Status.Reservation {
-					if strings.ToLower(string(res.Network)) == CtlPlaneNetwork {
+					if strings.ToLower(string(res.Network)) == dataplanev1.CtlPlaneNetwork {
 						_, ipNet, err := net.ParseCIDR(res.Cidr)
 						if err != nil {
 							return err
@@ -85,7 +85,7 @@ func DeployBaremetalSet(
 						ipPrefix, _ := ipNet.Mask.Size()
 						instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/%d", res.Address, ipPrefix)
 						if res.Gateway == nil {
-							return fmt.Errorf("%s gateway is missing", CtlPlaneNetwork)
+							return fmt.Errorf("%s gateway is missing", dataplanev1.CtlPlaneNetwork)
 						}
 						baremetalSet.Spec.CtlplaneGateway = *res.Gateway
 						baremetalSet.Spec.BootstrapDNS = dnsAddresses
