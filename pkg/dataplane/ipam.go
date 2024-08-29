@@ -239,6 +239,17 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (map[string]infranetworkv1.IPSet, bool, error) {
+	// Cleanup the stale reservations first
+	err := cleanupStaleReservations(ctx, helper, instance)
+	if err != nil {
+		util.LogErrorForObject(helper, err, "Could not cleanup stale IP Reservations", instance)
+		instance.Status.Conditions.MarkFalse(
+			dataplanev1.NodeSetIPReservationReadyCondition,
+			condition.ErrorReason, condition.SeverityError,
+			dataplanev1.NodeSetIPReservationReadyErrorMessage,
+			err.Error())
+		return nil, false, err
+	}
 	allIPSets, err := reserveIPs(ctx, helper, instance)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
@@ -264,6 +275,44 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 	return allIPSets, true, nil
 }
 
+// cleanupStaleReservations Cleanup stale ipset reservations
+func cleanupStaleReservations(ctx context.Context, helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet) error {
+	ipSetList := &infranetworkv1.IPSetList{}
+	labelSelectorMap := map[string]string{IPSetOwnershipLabelKey: instance.Name}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels(labelSelectorMap),
+	}
+
+	err := helper.GetClient().List(ctx, ipSetList, listOpts...)
+	if err != nil {
+		return err
+	}
+
+	ipSetsToRemove := []infranetworkv1.IPSet{}
+	// Delete all IPSet for nodes that are not in nodeset
+	for _, ipSet := range ipSetList.Items {
+		found := false
+		for _, node := range instance.Spec.Nodes {
+			if ipSet.Name == node.HostName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			ipSetsToRemove = append(ipSetsToRemove, ipSet)
+		}
+	}
+	for _, ipSet := range ipSetsToRemove {
+		if err := helper.GetClient().Delete(ctx, &ipSet); err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
+
 // reserveIPs Reserves IPs by creating IPSets
 func reserveIPs(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
@@ -284,6 +333,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	}
 
 	allIPSets := make(map[string]infranetworkv1.IPSet)
+
 	// CreateOrPatch IPSets
 	for nodeName, node := range instance.Spec.Nodes {
 		nets := node.Networks
@@ -300,6 +350,8 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 				},
 			}
 			_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ipSet, func() error {
+				ipSet.Labels = util.MergeStringMaps(ipSet.Labels,
+					map[string]string{IPSetOwnershipLabelKey: instance.Name})
 				ipSet.Spec.Networks = nets
 				// Set controller reference to the DataPlaneNode object
 				err := controllerutil.SetControllerReference(
@@ -316,6 +368,5 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			return nil, fmt.Errorf(msg)
 		}
 	}
-
 	return allIPSets, nil
 }

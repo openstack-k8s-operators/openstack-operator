@@ -67,4 +67,7 @@ const (
 
 	//HostnameLabel label for marking secrets to be watched for changes
 	HostnameLabel = "hostname"
+
+	// IPSetOwnershipLabelKey label key to find all IPSets for OpenStackDataPlaneNodeSet
+	IPSetOwnershipLabelKey = "nodeset/name"
 )
