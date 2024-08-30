@@ -9,23 +9,22 @@ status:
       internalapi: edpm-compute-0.internalapi.example.com
       storage: edpm-compute-0.storage.example.com
       tenant: edpm-compute-0.tenant.example.com
-    edpm-compute-1:
-      ctlplane: edpm-compute-1.ctlplane.example.com
-      internalapi: edpm-compute-1.internalapi.example.com
-      storage: edpm-compute-1.storage.example.com
-      tenant: edpm-compute-1.tenant.example.com
+    edpm-compute-2:
+      ctlplane: edpm-compute-2.ctlplane.example.com
+      internalapi: edpm-compute-2.internalapi.example.com
+      storage: edpm-compute-2.storage.example.com
+      tenant: edpm-compute-2.tenant.example.com
   allIPs:
     edpm-compute-0:
       ctlplane: 192.168.122.150
       internalapi: 172.17.0.150
       storage: 172.18.0.150
       tenant: 172.19.0.150
-    edpm-compute-1:
+    edpm-compute-2:
       ctlplane: 192.168.122.151
       internalapi: 172.17.0.151
       storage: 172.18.0.151
       tenant: 172.19.0.151
-  observedGeneration: 1
   ctlplaneSearchDomain: ctlplane.example.com
   conditions:
   - message: Deployment not started
@@ -111,7 +110,7 @@ status:
 apiVersion: network.openstack.org/v1beta1
 kind: IPSet
 metadata:
-  name: edpm-compute-1
+  name: edpm-compute-2
 status:
   conditions:
   - message: Setup complete
@@ -158,45 +157,3 @@ status:
     network: tenant
     subnet: subnet1
     vlan: 22
----
-apiVersion: network.openstack.org/v1beta1
-kind: DNSData
-metadata:
-  name: openstack-edpm-multinode
-spec:
-  dnsDataLabelSelectorValue: dnsdata
-  hosts:
-  - hostnames:
-    - edpm-compute-0.ctlplane.example.com
-    ip: 192.168.122.150
-  - hostnames:
-    - edpm-compute-0.internalapi.example.com
-    ip: 172.17.0.150
-  - hostnames:
-    - edpm-compute-0.storage.example.com
-    ip: 172.18.0.150
-  - hostnames:
-    - edpm-compute-0.tenant.example.com
-    ip: 172.19.0.150
-  - hostnames:
-    - edpm-compute-1.ctlplane.example.com
-    ip: 192.168.122.151
-  - hostnames:
-    - edpm-compute-1.internalapi.example.com
-    ip: 172.17.0.151
-  - hostnames:
-    - edpm-compute-1.storage.example.com
-    ip: 172.18.0.151
-  - hostnames:
-    - edpm-compute-1.tenant.example.com
-    ip: 172.19.0.151
-status:
-  conditions:
-  - message: Setup complete
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Input data complete
-    reason: Ready
-    status: "True"
-    type: ServiceConfigReady

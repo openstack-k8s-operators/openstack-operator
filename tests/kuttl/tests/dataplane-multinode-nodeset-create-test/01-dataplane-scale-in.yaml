@@ -1,0 +1,5 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      oc patch openstackdataplanenodeset/openstack-edpm-multinode -n openstack-kuttl-tests --type json --patch '[{ "op": "remove", "path": "/spec/nodes/edpm-compute-1" }]'
