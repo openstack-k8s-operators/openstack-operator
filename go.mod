@@ -9,14 +9,14 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/onsi/ginkgo/v2 v2.20.0
+	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/barbican-operator/api v0.4.1-0.20240813072241-61e947eee09c
-	github.com/openstack-k8s-operators/cinder-operator/api v0.4.1-0.20240814190057-861c886d4d4c
-	github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240813162313-053bc83c4667
-	github.com/openstack-k8s-operators/glance-operator/api v0.4.1-0.20240817121634-bbbb0633ae67
-	github.com/openstack-k8s-operators/heat-operator/api v0.4.1-0.20240812092555-dfcac6c57e46
+	github.com/openstack-k8s-operators/barbican-operator/api v0.4.1-0.20240821132053-e158d69590fe
+	github.com/openstack-k8s-operators/cinder-operator/api v0.4.1-0.20240822085221-534075b051a4
+	github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240819174529-551dcc501022
+	github.com/openstack-k8s-operators/glance-operator/api v0.4.1-0.20240826073624-be72af419520
+	github.com/openstack-k8s-operators/heat-operator/api v0.4.1-0.20240821014231-635bde3178eb
 	github.com/openstack-k8s-operators/horizon-operator/api v0.4.1-0.20240807084709-b73449a41fc0
 	github.com/openstack-k8s-operators/infra-operator/apis v0.4.1-0.20240813061654-72bf12d9b73e
 	github.com/openstack-k8s-operators/ironic-operator/api v0.4.1-0.20240807084947-190400f63726
@@ -26,19 +26,19 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240814075458-0ae9f7f9e059
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.4.1-0.20240814075458-0ae9f7f9e059
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.4.1-0.20240814075458-0ae9f7f9e059
-	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20240812141412-c5c6218e8c49
+	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20240828194804-f733ae7bf68d
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.4.1-0.20240812075114-497caae42b27
-	github.com/openstack-k8s-operators/neutron-operator/api v0.4.1-0.20240814120827-4f9bd63c86f5
-	github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240816124839-8e2b21b39c48
-	github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240814092612-7d738db3a52b
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.4.1-0.20240811172645-e80f584d32a0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20240806143957-8a0f3651fa1d
+	github.com/openstack-k8s-operators/neutron-operator/api v0.4.1-0.20240826084433-8d6ce42954e5
+	github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240820173613-85d4e1271cee
+	github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240821070936-03a1f12267a1
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.4.1-0.20240819105135-20bba339978c
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20240821085652-a2f0aa1b1cef
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
-	github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20240814152914-51bfe5de67bb
+	github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20240821110851-6a2f34fc6383
 	github.com/openstack-k8s-operators/placement-operator/api v0.4.1-0.20240809082308-d3a775bb32a9
-	github.com/openstack-k8s-operators/swift-operator/api v0.4.1-0.20240812114343-789f4ced41df
+	github.com/openstack-k8s-operators/swift-operator/api v0.4.1-0.20240819115207-0dce98413926
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.4.1-0.20240815220838-855ff928766f
-	github.com/openstack-k8s-operators/test-operator/api v0.0.0-20240815212722-79883cdd9cdb
+	github.com/openstack-k8s-operators/test-operator/api v0.0.0-20240828144006-8d218245b629
 	github.com/rabbitmq/cluster-operator/v2 v2.9.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56

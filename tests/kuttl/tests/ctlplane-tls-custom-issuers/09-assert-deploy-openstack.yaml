@@ -157,8 +157,6 @@ spec:
         replicas: 0 # backend needs to be configured
       designateProducer:
         replicas: 0 # backend needs to be configured
-      designateMdns:
-        replicas: 0 # backend needs to be configured
       designateBackendbind9:
         replicas: 0 # backend needs to be configured
   barbican:
