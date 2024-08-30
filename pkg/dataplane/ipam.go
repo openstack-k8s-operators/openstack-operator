@@ -48,6 +48,8 @@ type DNSDetails struct {
 	Hostnames map[string]map[infranetworkv1.NetNameStr]string
 	// AllIPs holds a map of all IP addresses per hostname.
 	AllIPs map[string]map[infranetworkv1.NetNameStr]string
+	// DNSDataLabelSelectorValue to match configmaps dnsmasqhosts label
+	DNSDataLabelSelectorValue string
 }
 
 // checkDNSService checks if DNS is configured and ready
@@ -78,6 +80,8 @@ func checkDNSService(ctx context.Context, helper *helper.Helper,
 	}
 	dnsDetails.ClusterAddresses = dnsmasqList.Items[0].Status.DNSClusterAddresses
 	dnsDetails.ServerAddresses = dnsmasqList.Items[0].Status.DNSAddresses
+	dnsDetails.DNSDataLabelSelectorValue = dnsmasqList.Items[0].Spec.DNSDataLabelSelectorValue
+
 	return nil
 }
 
@@ -152,9 +156,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	}
 	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), dnsData, func() error {
 		dnsData.Spec.Hosts = allDNSRecords
-		// TODO (rabi) DNSDataLabelSelectorValue can probably be
-		// used from dnsmasq(?)
-		dnsData.Spec.DNSDataLabelSelectorValue = "dnsdata"
+		dnsData.Spec.DNSDataLabelSelectorValue = dnsDetails.DNSDataLabelSelectorValue
 		// Set controller reference to the DataPlaneNode object
 		err := controllerutil.SetControllerReference(
 			helper.GetBeforeObject(), dnsData, helper.GetScheme())
