@@ -106,6 +106,11 @@ func clientPodVolumeMounts() []corev1.VolumeMount {
 			MountPath: "/home/cloud-admin/.config/openstack/secure.yaml",
 			SubPath:   "secure.yaml",
 		},
+		{
+			Name:      "openstack-config-secret",
+			MountPath: "/home/cloud-admin/cloudrc",
+			SubPath:   "cloudrc",
+		},
 	}
 }
 
