@@ -329,7 +329,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 		return nil, err
 	}
 	if len(netConfigList.Items) == 0 {
-		errMsg := "No NetConfig CR exists yet"
+		errMsg := "no NetConfig CR exists yet"
 		util.LogForObject(helper, errMsg, instance)
 		return nil, fmt.Errorf(errMsg)
 	}

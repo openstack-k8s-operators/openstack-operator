@@ -83,7 +83,7 @@ const (
 	NodeSetDNSDataReadyErrorMessage = "NodeSetDNSDataReady error occurred %s"
 
 	// NodeSetDNSDataMultipleDNSMasqErrorMessage error
-	NodeSetDNSDataMultipleDNSMasqErrorMessage = "NodeSet DNSData error occurred. Multiple DNSMasq resources exist."
+	NodeSetDNSDataMultipleDNSMasqErrorMessage = "NodeSet DNSData error occurred. Multiple DNSMasq resources exist"
 
 	// InputReadyWaitingMessage not yet ready
 	InputReadyWaitingMessage = "Waiting for input %s, not yet ready"
