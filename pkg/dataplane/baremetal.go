@@ -70,29 +70,26 @@ func DeployBaremetalSet(
 			ipSet, ok := ipSets[hostName]
 			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]
 			if !ok {
-				// TODO: Change this to raise an error instead.
-				// NOTE(hjensas): Hardcode /24 here, this used to rely on
-				// baremetalSet.Spec.CtlplaneNetmask's default value ("255.255.255.0").
-				utils.LogForObject(helper, "IPAM Not configured for use, skipping", instance)
-				instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/24", node.Ansible.AnsibleHost)
-			} else {
-				for _, res := range ipSet.Status.Reservation {
-					if strings.ToLower(string(res.Network)) == dataplanev1.CtlPlaneNetwork {
-						_, ipNet, err := net.ParseCIDR(res.Cidr)
-						if err != nil {
-							return err
-						}
-						ipPrefix, _ := ipNet.Mask.Size()
-						instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/%d", res.Address, ipPrefix)
-						if res.Gateway == nil {
-							return fmt.Errorf("%s gateway is missing", dataplanev1.CtlPlaneNetwork)
-						}
-						baremetalSet.Spec.CtlplaneGateway = *res.Gateway
-						baremetalSet.Spec.BootstrapDNS = dnsAddresses
-						baremetalSet.Spec.DNSSearchDomains = []string{res.DNSDomain}
+				err := fmt.Errorf("no IPSet found for host: %s", hostName)
+				return err
+			}
+			for _, res := range ipSet.Status.Reservation {
+				if strings.ToLower(string(res.Network)) == dataplanev1.CtlPlaneNetwork {
+					_, ipNet, err := net.ParseCIDR(res.Cidr)
+					if err != nil {
+						return err
 					}
+					ipPrefix, _ := ipNet.Mask.Size()
+					instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/%d", res.Address, ipPrefix)
+					if res.Gateway == nil {
+						return fmt.Errorf("%s gateway is missing", dataplanev1.CtlPlaneNetwork)
+					}
+					baremetalSet.Spec.CtlplaneGateway = *res.Gateway
+					baremetalSet.Spec.BootstrapDNS = dnsAddresses
+					baremetalSet.Spec.DNSSearchDomains = []string{res.DNSDomain}
 				}
 			}
+
 			baremetalSet.Spec.BaremetalHosts[hostName] = instanceSpec
 
 		}
