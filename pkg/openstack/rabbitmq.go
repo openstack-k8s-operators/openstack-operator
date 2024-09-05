@@ -133,7 +133,7 @@ func reconcileRabbitMQ(
 			Value: "/var/lib/rabbitmq/rabbitmq_upgrade.log",
 		},
 		{
-			// For some reason HOME needs to be explictly set here even though the entry
+			// For some reason HOME needs to be explicitly set here even though the entry
 			// for the random user in /etc/passwd has the correct homedir set.
 			Name:  "HOME",
 			Value: "/var/lib/rabbitmq",
