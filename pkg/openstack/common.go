@@ -248,8 +248,17 @@ func EnsureEndpointConfig(
 				if ingressOverride.TLS != nil && ingressOverride.TLS.SecretName != "" {
 					ed.Route.TLS.SecretName = ptr.To(ingressOverride.TLS.SecretName)
 					validateSecret := &tls.GenericService{SecretName: ed.Route.TLS.SecretName}
-					_, ctrlResult, err := validateSecret.ValidateCertSecret(ctx, helper, instance.GetNamespace())
+					_, err := validateSecret.ValidateCertSecret(ctx, helper, instance.GetNamespace())
 					if err != nil {
+						if k8s_errors.IsNotFound(err) {
+							instance.Status.Conditions.Set(condition.FalseCondition(
+								corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+								condition.RequestedReason,
+								condition.SeverityInfo,
+								corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage,
+								ingressOverride.TLS.SecretName))
+							return endpoints, ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
+						}
 						instance.Status.Conditions.Set(condition.FalseCondition(
 							corev1.OpenStackControlPlaneCustomTLSReadyCondition,
 							condition.ErrorReason,
@@ -257,16 +266,7 @@ func EnsureEndpointConfig(
 							corev1.OpenStackControlPlaneCustomTLSReadyErrorMessage,
 							ingressOverride.TLS.SecretName,
 							err.Error()))
-
-						return endpoints, ctrlResult, err
-					} else if (ctrlResult != ctrl.Result{}) {
-						instance.Status.Conditions.Set(condition.FalseCondition(
-							corev1.OpenStackControlPlaneCustomTLSReadyCondition,
-							condition.RequestedReason,
-							condition.SeverityInfo,
-							corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage,
-							ingressOverride.TLS.SecretName))
-						return endpoints, ctrlResult, nil
+						return endpoints, ctrl.Result{}, err
 					}
 					instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCustomTLSReadyCondition,
 						corev1.OpenStackControlPlaneCustomTLSReadyMessage)
@@ -284,11 +284,12 @@ func EnsureEndpointConfig(
 				// a LoadBalancer (MetalLB) for the public endpoints.
 				if !ed.Route.Create && (tlsConfig.API.Public.SecretName != nil && *tlsConfig.API.Public.SecretName != "") {
 					ed.Service.TLS.SecretName = tlsConfig.API.Public.SecretName
-					_, ctrlResult, err := ed.Service.TLS.GenericService.ValidateCertSecret(ctx, helper, instance.GetNamespace())
+					_, err := ed.Service.TLS.GenericService.ValidateCertSecret(ctx, helper, instance.GetNamespace())
 					if err != nil {
-						return endpoints, ctrlResult, err
-					} else if (ctrlResult != ctrl.Result{}) {
-						return endpoints, ctrlResult, nil
+						if k8s_errors.IsNotFound(err) {
+							return endpoints, ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
+						}
+						return endpoints, ctrl.Result{}, err
 					}
 				} else {
 					// issue a certificate for public pod virthost

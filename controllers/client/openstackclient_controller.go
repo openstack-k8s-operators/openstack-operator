@@ -255,7 +255,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	configVars[*instance.Spec.OpenStackConfigSecret] = env.SetValue(secretHash)
 
 	if instance.Spec.CaBundleSecretName != "" {
-		secretHash, ctrlResult, err := tls.ValidateCACertSecret(
+		secretHash, err := tls.ValidateCACertSecret(
 			ctx,
 			helper.GetClient(),
 			types.NamespacedName{
@@ -266,26 +266,19 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		if err != nil {
 			if k8s_errors.IsNotFound(err) {
 				instance.Status.Conditions.Set(condition.FalseCondition(
-					clientv1.OpenStackClientReadyCondition,
+					condition.TLSInputReadyCondition,
 					condition.RequestedReason,
 					condition.SeverityInfo,
-					clientv1.OpenStackClientSecretWaitingMessage))
-				return ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
+					fmt.Sprintf(condition.TLSInputReadyWaitingMessage, instance.Spec.CaBundleSecretName)))
+				return ctrl.Result{}, nil
 			}
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				clientv1.OpenStackClientReadyCondition,
+				condition.TLSInputReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				clientv1.OpenStackClientReadyErrorMessage,
+				condition.TLSInputErrorMessage,
 				err.Error()))
 			return ctrl.Result{}, err
-		} else if (ctrlResult != ctrl.Result{}) {
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				clientv1.OpenStackClientReadyCondition,
-				condition.RequestedReason,
-				condition.SeverityInfo,
-				clientv1.OpenStackClientSecretWaitingMessage))
-			return ctrlResult, nil
 		}
 
 		configVars[instance.Spec.CaBundleSecretName] = env.SetValue(secretHash)
@@ -299,6 +292,9 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err == nil {
 		configVars["PrometheusTls"] = env.SetValue(fmt.Sprint(metricStorage.Spec.PrometheusTLS.Enabled()))
 	}
+
+	// all cert input checks out so report InputReady
+	instance.Status.Conditions.MarkTrue(condition.TLSInputReadyCondition, condition.InputReadyMessage)
 
 	configVarsHash, err := util.HashOfInputHashes(configVars)
 	if err != nil {
