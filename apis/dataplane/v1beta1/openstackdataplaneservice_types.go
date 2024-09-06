@@ -120,11 +120,10 @@ type OpenStackDataPlaneServiceStatus struct {
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 // +kubebuilder:resource:shortName=osdps;osdpservice;osdpservices
-//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Service"
-
+// +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Service"
 // OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API
 // OpenStackDataPlaneService name must be a valid RFC1123 as it is used in labels
 type OpenStackDataPlaneService struct {
@@ -135,8 +134,7 @@ type OpenStackDataPlaneService struct {
 	Status OpenStackDataPlaneServiceStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-
+// +kubebuilder:object:root=true
 // OpenStackDataPlaneServiceList contains a list of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceList struct {
 	metav1.TypeMeta `json:",inline"`

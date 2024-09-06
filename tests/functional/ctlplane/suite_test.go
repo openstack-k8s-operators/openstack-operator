@@ -67,7 +67,7 @@ import (
 	test "github.com/openstack-k8s-operators/lib-common/modules/test"
 	mariadb_test "github.com/openstack-k8s-operators/mariadb-operator/api/test/helpers"
 	ovn_test "github.com/openstack-k8s-operators/ovn-operator/api/test/helpers"
-	//+kubebuilder:scaffold:imports
+	// +kubebuilder:scaffold:imports
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -272,7 +272,7 @@ var _ = BeforeSuite(func() {
 	err = ocp_configv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	//+kubebuilder:scaffold:scheme
+	// +kubebuilder:scaffold:scheme
 
 	logger = ctrl.Log.WithName("---CtlPlane Test---")
 

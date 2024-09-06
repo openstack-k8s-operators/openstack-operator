@@ -75,50 +75,50 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackDataPlaneNodeSet")
 }
 
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets/finalizers,verbs=update;patch
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch;create;update;patch
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/finalizers,verbs=update;patch
-//+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets/status,verbs=get
-//+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets/finalizers,verbs=update;patch
-//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
-//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
-//+kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
-//+kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
-//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/status,verbs=get
-//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/finalizers,verbs=update;patch
-//+kubebuilder:rbac:groups=network.openstack.org,resources=netconfigs,verbs=get;list;watch
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs,verbs=get;list;watch
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs/status,verbs=get
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/status,verbs=get
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update;patch
-//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch
+// +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets/finalizers,verbs=update;patch
+// +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/finalizers,verbs=update;patch
+// +kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets/status,verbs=get
+// +kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets/finalizers,verbs=update;patch
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
+// +kubebuilder:rbac:groups=network.openstack.org,resources=ipsets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/status,verbs=get
+// +kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/finalizers,verbs=update;patch
+// +kubebuilder:rbac:groups=network.openstack.org,resources=netconfigs,verbs=get;list;watch
+// +kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs,verbs=get;list;watch
+// +kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs/status,verbs=get
+// +kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/status,verbs=get
+// +kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update;patch
+// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch
 
 // RBAC for the ServiceAccount for the internal image registry
-//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
-//+kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update;patch
-//+kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch
-//+kubebuilder:rbac:groups="security.openshift.io",resourceNames=anyuid,resources=securitycontextconstraints,verbs=use
-//+kubebuilder:rbac:groups="",resources=pods,verbs=create;delete;get;list;patch;update;watch
-//+kubebuilder:rbac:groups="",resources=projects,verbs=get
-//+kubebuilder:rbac:groups="project.openshift.io",resources=projects,verbs=get
-//+kubebuilder:rbac:groups="",resources=imagestreamimages,verbs=get;list;watch
-//+kubebuilder:rbac:groups="",resources=imagestreammappings,verbs=get;list;watch
-//+kubebuilder:rbac:groups="",resources=imagestreams,verbs=get;list;watch
-//+kubebuilder:rbac:groups="",resources=imagestreams/layers,verbs=get;list;watch
-//+kubebuilder:rbac:groups="",resources=imagestreamtags,verbs=get;list;watch
-//+kubebuilder:rbac:groups="",resources=imagetags,verbs=get;list;watch
-//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamimages,verbs=get;list;watch
-//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreammappings,verbs=get;list;watch
-//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreams,verbs=get;list;watch
-//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreams/layers,verbs=get
-//+kubebuilder:rbac:groups="image.openshift.io",resources=imagetags,verbs=get;list;watch
-//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamtags,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="security.openshift.io",resourceNames=anyuid,resources=securitycontextconstraints,verbs=use
+// +kubebuilder:rbac:groups="",resources=pods,verbs=create;delete;get;list;patch;update;watch
+// +kubebuilder:rbac:groups="",resources=projects,verbs=get
+// +kubebuilder:rbac:groups="project.openshift.io",resources=projects,verbs=get
+// +kubebuilder:rbac:groups="",resources=imagestreamimages,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=imagestreammappings,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=imagestreams,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=imagestreams/layers,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=imagestreamtags,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=imagetags,verbs=get;list;watch
+// +kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamimages,verbs=get;list;watch
+// +kubebuilder:rbac:groups="image.openshift.io",resources=imagestreammappings,verbs=get;list;watch
+// +kubebuilder:rbac:groups="image.openshift.io",resources=imagestreams,verbs=get;list;watch
+// +kubebuilder:rbac:groups="image.openshift.io",resources=imagestreams/layers,verbs=get
+// +kubebuilder:rbac:groups="image.openshift.io",resources=imagetags,verbs=get;list;watch
+// +kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamtags,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

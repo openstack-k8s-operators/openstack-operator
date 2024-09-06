@@ -81,7 +81,7 @@ import (
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
-	//+kubebuilder:scaffold:imports
+	// +kubebuilder:scaffold:imports
 )
 
 var (
@@ -120,7 +120,7 @@ func init() {
 	utilruntime.Must(certmgrv1.AddToScheme(scheme))
 	utilruntime.Must(barbicanv1.AddToScheme(scheme))
 	utilruntime.Must(ocp_configv1.AddToScheme(scheme))
-	//+kubebuilder:scaffold:scheme
+	// +kubebuilder:scaffold:scheme
 }
 
 func main() {
@@ -287,7 +287,7 @@ func main() {
 		checker = mgr.GetWebhookServer().StartedChecker()
 	}
 
-	//+kubebuilder:scaffold:builder
+	// +kubebuilder:scaffold:builder
 	if err := mgr.AddHealthzCheck("healthz", checker); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)

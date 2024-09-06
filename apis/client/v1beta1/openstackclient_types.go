@@ -53,7 +53,7 @@ type OpenStackClientSpecCore struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Secret containing any CA certificates which should be added to deployment pods
 	tls.Ca `json:",inline"`
 }
@@ -70,12 +70,12 @@ type OpenStackClientStatus struct {
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Client"
-//+kubebuilder:resource:shortName=osclient;osclients
-//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
-//+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Client"
+// +kubebuilder:resource:shortName=osclient;osclients
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
+// +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackClient is the Schema for the openstackclients API
 type OpenStackClient struct {
@@ -86,7 +86,7 @@ type OpenStackClient struct {
 	Status OpenStackClientStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // OpenStackClientList contains a list of OpenStackClient
 type OpenStackClientList struct {

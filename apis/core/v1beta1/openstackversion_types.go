@@ -155,7 +155,7 @@ type ContainerTemplate struct {
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
 type OpenStackVersionStatus struct {
-	//+operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 
@@ -172,13 +172,12 @@ type OpenStackVersionStatus struct {
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 // +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Version"
 // +kubebuilder:printcolumn:name="Target Version",type=string,JSONPath=`.spec.targetVersion`
 // +kubebuilder:printcolumn:name="Available Version",type=string,JSONPath=`.status.availableVersion`
 // +kubebuilder:printcolumn:name="Deployed Version",type=string,JSONPath=`.status.deployedVersion`
-
 // OpenStackVersion is the Schema for the openstackversionupdates API
 type OpenStackVersion struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -188,8 +187,7 @@ type OpenStackVersion struct {
 	Status OpenStackVersionStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-
+// +kubebuilder:object:root=true
 // OpenStackVersionList contains a list of OpenStackVersion
 type OpenStackVersionList struct {
 	metav1.TypeMeta `json:",inline"`
