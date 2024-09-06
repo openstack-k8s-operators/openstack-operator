@@ -27,6 +27,7 @@ import (
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -105,6 +106,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=octavia.openstack.org,resources=octavias,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=barbican.openstack.org,resources=barbicans,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=designate.openstack.org,resources=designates,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=redis.openstack.org,resources=redises,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes/custom-host,verbs=create;update;patch
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;
@@ -415,6 +417,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcileRedis(ctx, instance, version, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	ctrlResult, err = openstack.ReconcileOctavia(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -565,6 +574,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 		Owns(&ironicv1.Ironic{}).
 		Owns(&horizonv1.Horizon{}).
 		Owns(&telemetryv1.Telemetry{}).
+		Owns(&redisv1.Redis{}).
 		Owns(&octaviav1.Octavia{}).
 		Owns(&designatev1.Designate{}).
 		Owns(&routev1.Route{}).

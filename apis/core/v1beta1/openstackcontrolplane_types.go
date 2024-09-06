@@ -27,6 +27,7 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -194,6 +195,9 @@ type OpenStackControlPlaneSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Barbican - Parameters related to the Barbican service
 	Barbican BarbicanSection `json:"barbican,omitempty"`
+
+	// Redis - Parameters related to the Redis service
+	Redis RedisSection `json:"redis,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="OpenStack Client"
@@ -780,6 +784,20 @@ type BarbicanSection struct {
 	APIOverride Override `json:"apiOverride,omitempty"`
 }
 
+// RedisSection defines the desired state of the Redis service
+type RedisSection struct {
+	// +kubebuilder:validation:Optional
+	// Enabled - Whether the Redis service should be deployed and managed
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// Templates - Overrides to use when creating the Redis Resources
+	Templates *map[string]redisv1.RedisSpecCore `json:"templates,omitempty"`
+}
+
 // OpenStackClientSection defines the desired state of the OpenStackClient
 type OpenStackClientSection struct {
 	// +kubebuilder:validation:Optional
@@ -900,6 +918,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneOctaviaReadyCondition, condition.InitReason, OpenStackControlPlaneOctaviaReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneDesignateReadyCondition, condition.InitReason, OpenStackControlPlaneDesignateReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneBarbicanReadyCondition, condition.InitReason, OpenStackControlPlaneBarbicanReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneRedisReadyCondition, condition.InitReason, OpenStackControlPlaneRedisReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
 
 		// Also add the overall status condition as Unknown

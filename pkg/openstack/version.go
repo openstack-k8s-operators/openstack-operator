@@ -125,6 +125,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			HorizonImage:                  getImg(instance.Spec.CustomContainerImages.HorizonImage, defaults.HorizonImage),
 			InfraDnsmasqImage:             getImg(instance.Spec.CustomContainerImages.InfraDnsmasqImage, defaults.InfraDnsmasqImage),
 			InfraMemcachedImage:           getImg(instance.Spec.CustomContainerImages.InfraMemcachedImage, defaults.InfraMemcachedImage),
+			InfraRedisImage:               getImg(instance.Spec.CustomContainerImages.InfraRedisImage, defaults.InfraRedisImage),
 			IronicAPIImage:                getImg(instance.Spec.CustomContainerImages.IronicAPIImage, defaults.IronicAPIImage),
 			IronicConductorImage:          getImg(instance.Spec.CustomContainerImages.IronicConductorImage, defaults.IronicConductorImage),
 			IronicInspectorImage:          getImg(instance.Spec.CustomContainerImages.IronicInspectorImage, defaults.IronicInspectorImage),
@@ -264,6 +265,9 @@ func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1be
 	}
 	if MemcachedImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Memcached")
+	}
+	if RedisImageMatch(ctx, controlPlane, version) {
+		failedMatches = append(failedMatches, "Redis")
 	}
 	if NeutronImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Neutron")
