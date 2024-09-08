@@ -6005,6 +6005,10 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      networkAttachments:
+                        items:
+                          type: string
+                        type: array
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -17277,6 +17281,7 @@ spec:
                                     default: persistent
                                     enum:
                                     - persistent
+                                    - ephemeral
                                     type: string
                                 type: object
                             type: object
