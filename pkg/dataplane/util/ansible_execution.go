@@ -49,17 +49,6 @@ func AnsibleExecution(
 	nodeSet client.Object,
 ) error {
 	var err error
-	var cmdLineArguments strings.Builder
-	var inventoryVolume corev1.Volume
-	var inventoryName string
-	var inventoryMountPath string
-	var sshKeyName string
-	var sshKeyMountPath string
-	var sshKeyMountSubPath string
-
-	const jobRestartPolicy string = "OnFailure"
-
-	ansibleEEMounts := storage.VolMounts{}
 
 	executionName, labels := GetAnsibleExecutionNameAndLabels(service, deployment.GetName(), nodeSet.GetName())
 
@@ -85,151 +74,11 @@ func AnsibleExecution(
 		return fmt.Errorf("failed to create NetworkAttachment annotation. Error: %w", err)
 	}
 
-	if aeeSpec.DNSConfig != nil {
-		ansibleEE.DNSConfig = aeeSpec.DNSConfig
-	}
-	if len(aeeSpec.OpenStackAnsibleEERunnerImage) > 0 {
-		ansibleEE.Image = aeeSpec.OpenStackAnsibleEERunnerImage
-	} else {
-		ansibleEE.Image = *dataplanev1.ContainerImageDefaults.AnsibleeeImage
-	}
-	if len(aeeSpec.ExtraVars) > 0 {
-		ansibleEE.ExtraVars = aeeSpec.ExtraVars
-	}
-	if len(aeeSpec.AnsibleTags) > 0 {
-		fmt.Fprintf(&cmdLineArguments, "--tags %s ", aeeSpec.AnsibleTags)
-	}
-	if len(aeeSpec.AnsibleLimit) > 0 {
-		fmt.Fprintf(&cmdLineArguments, "--limit %s ", aeeSpec.AnsibleLimit)
-	}
-	if len(aeeSpec.AnsibleSkipTags) > 0 {
-		fmt.Fprintf(&cmdLineArguments, "--skip-tags %s ", aeeSpec.AnsibleSkipTags)
-	}
-	if len(aeeSpec.ServiceAccountName) > 0 {
-		ansibleEE.ServiceAccountName = aeeSpec.ServiceAccountName
-	}
-	if cmdLineArguments.Len() > 0 {
-		ansibleEE.CmdLine = strings.TrimSpace(cmdLineArguments.String())
-	}
+	ansibleEE.BuildAeeJobSpec(aeeSpec, deployment, service, nodeSet)
 
-	if len(service.Spec.PlaybookContents) > 0 {
-		ansibleEE.PlaybookContents = service.Spec.PlaybookContents
-	}
-	if len(service.Spec.Playbook) > 0 {
-		ansibleEE.Playbook = service.Spec.Playbook
-	}
-	ansibleEE.BackoffLimit = deployment.Spec.BackoffLimit
-	ansibleEE.RestartPolicy = jobRestartPolicy
-
-	// If we have a service that ought to be deployed everywhere
-	// substitute the existing play target with 'all'
-	// Check if we have ExtraVars before accessing it
-	if ansibleEE.ExtraVars == nil {
-		ansibleEE.ExtraVars = make(map[string]json.RawMessage)
-	}
-	if service.Spec.DeployOnAllNodeSets {
-		ansibleEE.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte("\"all\""))
-	} else {
-		ansibleEE.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", nodeSet.GetName())))
-	}
-	if service.Spec.EDPMServiceType != "" {
-		ansibleEE.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
-	} else {
-		ansibleEE.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
-	}
-
-	if len(deployment.Spec.ServicesOverride) > 0 {
-		ansibleEE.ExtraVars["edpm_services_override"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", deployment.Spec.ServicesOverride)))
-	}
-
-	// Sort keys of the ssh secret map
-	sshKeys := make([]string, 0)
-	for k := range sshKeySecrets {
-		sshKeys = append(sshKeys, k)
-	}
-	sort.Strings(sshKeys)
-
-	for _, sshKeyNodeName := range sshKeys {
-		sshKeySecret := sshKeySecrets[sshKeyNodeName]
-		if service.Spec.DeployOnAllNodeSets {
-			sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
-			sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
-			sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
-		} else {
-			if sshKeyNodeName != nodeSet.GetName() {
-				continue
-			}
-			sshKeyName = "ssh-key"
-			sshKeyMountSubPath = "ssh_key"
-			sshKeyMountPath = "/runner/env/ssh_key"
-		}
-		sshKeyVolume := corev1.Volume{
-			Name: sshKeyName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: sshKeySecret,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "ssh-privatekey",
-							Path: sshKeyMountSubPath,
-						},
-					},
-				},
-			},
-		}
-		sshKeyMount := corev1.VolumeMount{
-			Name:      sshKeyName,
-			MountPath: sshKeyMountPath,
-			SubPath:   sshKeyMountSubPath,
-		}
-		// Mount ssh secrets
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
-	}
-
-	// order the inventory keys otherwise it could lead to changing order and mount order changing
-	invKeys := make([]string, 0)
-	for k := range inventorySecrets {
-		invKeys = append(invKeys, k)
-	}
-	sort.Strings(invKeys)
-
-	// Mounting inventory and secrets
-	for inventoryIndex, nodeName := range invKeys {
-		if service.Spec.DeployOnAllNodeSets {
-			inventoryName = fmt.Sprintf("inventory-%d", inventoryIndex)
-			inventoryMountPath = fmt.Sprintf("/runner/inventory/%s", inventoryName)
-		} else {
-			if nodeName != nodeSet.GetName() {
-				continue
-			}
-			inventoryName = "inventory"
-			inventoryMountPath = "/runner/inventory/hosts"
-		}
-
-		inventoryVolume = corev1.Volume{
-			Name: inventoryName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: inventorySecrets[nodeName],
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "inventory",
-							Path: inventoryName,
-						},
-					},
-				},
-			},
-		}
-		inventoryMount := corev1.VolumeMount{
-			Name:      inventoryName,
-			MountPath: inventoryMountPath,
-			SubPath:   inventoryName,
-		}
-		// Inventory mount
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
-	}
+	ansibleEEMounts := storage.VolMounts{}
+	SetAeeSSHMounts(nodeSet, service, sshKeySecrets, &ansibleEEMounts)
+	SetAeeInvMounts(nodeSet, service, inventorySecrets, &ansibleEEMounts)
 
 	ansibleEE.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 	ansibleEE.Env = aeeSpec.Env
@@ -260,7 +109,8 @@ func AnsibleExecution(
 // "openstackdataplanenodeset":    <nodeSetName>,
 // If none or more than one is found, return nil and error
 func GetAnsibleExecution(ctx context.Context,
-	helper *helper.Helper, obj client.Object, labelSelector map[string]string) (*batchv1.Job, error) {
+	helper *helper.Helper, obj client.Object, labelSelector map[string]string,
+) (*batchv1.Job, error) {
 	var err error
 	ansibleEEs := &batchv1.JobList{}
 
@@ -303,7 +153,8 @@ func getAnsibleExecutionNamePrefix(serviceName string) string {
 // GetAnsibleExecutionNameAndLabels Name and Labels of AnsibleEE
 func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneService,
 	deploymentName string,
-	nodeSetName string) (string, map[string]string) {
+	nodeSetName string,
+) (string, map[string]string) {
 	executionName := fmt.Sprintf("%s-%s", getAnsibleExecutionNamePrefix(service.Name), deploymentName)
 	if !service.Spec.DeployOnAllNodeSets {
 		executionName = fmt.Sprintf("%s-%s", executionName, nodeSetName)
@@ -319,4 +170,198 @@ func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneSer
 		"openstackdataplanenodeset":    nodeSetName,
 	}
 	return executionName, labels
+}
+
+func (a *EEJob) BuildAeeJobSpec(
+	aeeSpec *dataplanev1.AnsibleEESpec,
+	deployment *dataplanev1.OpenStackDataPlaneDeployment,
+	service *dataplanev1.OpenStackDataPlaneService,
+	nodeSet client.Object,
+) {
+	const jobRestartPolicy string = "OnFailure"
+
+	if aeeSpec.DNSConfig != nil {
+		a.DNSConfig = aeeSpec.DNSConfig
+	}
+	if len(aeeSpec.ServiceAccountName) > 0 {
+		a.ServiceAccountName = aeeSpec.ServiceAccountName
+	}
+
+	if len(service.Spec.PlaybookContents) > 0 {
+		a.PlaybookContents = service.Spec.PlaybookContents
+	}
+	if len(service.Spec.Playbook) > 0 {
+		a.Playbook = service.Spec.Playbook
+	}
+
+	a.BackoffLimit = deployment.Spec.BackoffLimit
+	a.RestartPolicy = jobRestartPolicy
+	a.FormatAEECmdLineArguments(aeeSpec)
+	a.FormatAEEExtraVars(aeeSpec, service, deployment, nodeSet)
+	a.DetermineAeeImage(aeeSpec)
+}
+
+func (a *EEJob) FormatAEECmdLineArguments(aeeSpec *dataplanev1.AnsibleEESpec) {
+	var cmdLineArguments strings.Builder
+
+	if len(aeeSpec.AnsibleTags) > 0 {
+		fmt.Fprintf(&cmdLineArguments, "--tags %s ", aeeSpec.AnsibleTags)
+	}
+	if len(aeeSpec.AnsibleLimit) > 0 {
+		fmt.Fprintf(&cmdLineArguments, "--limit %s ", aeeSpec.AnsibleLimit)
+	}
+	if len(aeeSpec.AnsibleSkipTags) > 0 {
+		fmt.Fprintf(&cmdLineArguments, "--skip-tags %s ", aeeSpec.AnsibleSkipTags)
+	}
+
+	if cmdLineArguments.Len() > 0 {
+		a.CmdLine = strings.TrimSpace(cmdLineArguments.String())
+	}
+}
+
+func (a *EEJob) FormatAEEExtraVars(
+	aeeSpec *dataplanev1.AnsibleEESpec,
+	service *dataplanev1.OpenStackDataPlaneService,
+	deployment *dataplanev1.OpenStackDataPlaneDeployment,
+	nodeSet client.Object,
+) {
+	if len(aeeSpec.ExtraVars) > 0 {
+		a.ExtraVars = aeeSpec.ExtraVars
+	}
+
+	// If we have a service that ought to be deployed everywhere
+	// substitute the existing play target with 'all'
+	// Check if we have ExtraVars before accessing it
+	if a.ExtraVars == nil {
+		a.ExtraVars = make(map[string]json.RawMessage)
+	}
+	if service.Spec.DeployOnAllNodeSets {
+		a.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte("\"all\""))
+	} else {
+		a.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", nodeSet.GetName())))
+	}
+	if service.Spec.EDPMServiceType != "" {
+		a.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
+	} else {
+		a.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
+	}
+
+	if len(deployment.Spec.ServicesOverride) > 0 {
+		a.ExtraVars["edpm_services_override"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", deployment.Spec.ServicesOverride)))
+	}
+}
+
+func (a *EEJob) DetermineAeeImage(aeeSpec *dataplanev1.AnsibleEESpec) {
+	if len(aeeSpec.OpenStackAnsibleEERunnerImage) > 0 {
+		a.Image = aeeSpec.OpenStackAnsibleEERunnerImage
+	} else {
+		a.Image = *dataplanev1.ContainerImageDefaults.AnsibleeeImage
+	}
+}
+
+// SetAeeSshMounts - Using the information provided from the NodeSet, Service and AnsibleEE Spec. We determine the required
+// ssh key mounts that are required for the Ansible Execution Job. This function takes a pointer to the storage.VolMounts
+// struct and updates them as per the required ssh key related mounts.
+func SetAeeSSHMounts(
+	nodeSet client.Object,
+	service *dataplanev1.OpenStackDataPlaneService,
+	sshKeySecrets map[string]string,
+	ansibleEEMounts *storage.VolMounts,
+) {
+	var (
+		sshKeyName         string
+		sshKeyMountPath    string
+		sshKeyMountSubPath string
+	)
+
+	// Sort keys of the ssh secret map
+	sshKeys := make([]string, 0)
+	for k := range sshKeySecrets {
+		sshKeys = append(sshKeys, k)
+	}
+	sort.Strings(sshKeys)
+
+	for _, sshKeyNodeName := range sshKeys {
+		sshKeySecret := sshKeySecrets[sshKeyNodeName]
+		if service.Spec.DeployOnAllNodeSets {
+			sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
+			sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
+			sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
+		} else {
+			if sshKeyNodeName != nodeSet.GetName() {
+				continue
+			}
+			sshKeyName = "ssh-key"
+			sshKeyMountSubPath = "ssh_key"
+			sshKeyMountPath = "/runner/env/ssh_key"
+		}
+
+		CreateVolume(ansibleEEMounts, sshKeyName, sshKeyMountSubPath, sshKeySecret, "ssh-privatekey")
+		CreateVolumeMount(ansibleEEMounts, sshKeyName, sshKeyMountPath, sshKeyMountSubPath)
+	}
+}
+
+func SetAeeInvMounts(
+	nodeSet client.Object,
+	service *dataplanev1.OpenStackDataPlaneService,
+	inventorySecrets map[string]string,
+	ansibleEEMounts *storage.VolMounts,
+) {
+	var (
+		inventoryName      string
+		inventoryMountPath string
+	)
+
+	// order the inventory keys otherwise it could lead to changing order and mount order changing
+	invKeys := make([]string, 0)
+	for k := range inventorySecrets {
+		invKeys = append(invKeys, k)
+	}
+	sort.Strings(invKeys)
+
+	// Mounting inventory and secrets
+	for inventoryIndex, nodeName := range invKeys {
+		if service.Spec.DeployOnAllNodeSets {
+			inventoryName = fmt.Sprintf("inventory-%d", inventoryIndex)
+			inventoryMountPath = fmt.Sprintf("/runner/inventory/%s", inventoryName)
+		} else {
+			if nodeName != nodeSet.GetName() {
+				continue
+			}
+			inventoryName = "inventory"
+			inventoryMountPath = "/runner/inventory/hosts"
+		}
+
+		CreateVolume(ansibleEEMounts, inventoryName, inventoryName, inventorySecrets[nodeName], "inventory")
+		CreateVolumeMount(ansibleEEMounts, inventoryName, inventoryMountPath, inventoryName)
+	}
+}
+
+func CreateVolume(ansibleEEMounts *storage.VolMounts, volumeName string, volumeMountPath string, secretName string, keyToPathKey string) {
+	volume := corev1.Volume{
+		Name: volumeName,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretName,
+				Items: []corev1.KeyToPath{
+					{
+						Key:  keyToPathKey,
+						Path: volumeMountPath,
+					},
+				},
+			},
+		},
+	}
+
+	ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, volume)
+}
+
+func CreateVolumeMount(ansibleEEMounts *storage.VolMounts, volumeMountName string, volumeMountPath string, volumeMountSubPath string) {
+	volumeMount := corev1.VolumeMount{
+		Name:      volumeMountName,
+		MountPath: volumeMountPath,
+		SubPath:   volumeMountSubPath,
+	}
+
+	ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, volumeMount)
 }
