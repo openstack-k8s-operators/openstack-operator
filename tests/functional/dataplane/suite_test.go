@@ -53,7 +53,7 @@ import (
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	test "github.com/openstack-k8s-operators/lib-common/modules/test"
-	//+kubebuilder:scaffold:imports
+	// +kubebuilder:scaffold:imports
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -152,7 +152,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = certmgrv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
-	//+kubebuilder:scaffold:scheme
+	// +kubebuilder:scaffold:scheme
 
 	logger = ctrl.Log.WithName("---DataPlane Test---")
 

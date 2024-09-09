@@ -50,7 +50,7 @@ func (r *OpenStackClient) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-//+kubebuilder:webhook:path=/mutate-client-openstack-org-v1beta1-openstackclient,mutating=true,failurePolicy=fail,sideEffects=None,groups=client.openstack.org,resources=openstackclients,verbs=create;update,versions=v1beta1,name=mopenstackclient.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/mutate-client-openstack-org-v1beta1-openstackclient,mutating=true,failurePolicy=fail,sideEffects=None,groups=client.openstack.org,resources=openstackclients,verbs=create;update,versions=v1beta1,name=mopenstackclient.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Defaulter = &OpenStackClient{}
 
@@ -69,7 +69,7 @@ func (spec *OpenStackClientSpec) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate-client-openstack-org-v1beta1-openstackclient,mutating=false,failurePolicy=fail,sideEffects=None,groups=client.openstack.org,resources=openstackclients,verbs=create;update,versions=v1beta1,name=vopenstackclient.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate-client-openstack-org-v1beta1-openstackclient,mutating=false,failurePolicy=fail,sideEffects=None,groups=client.openstack.org,resources=openstackclients,verbs=create;update,versions=v1beta1,name=vopenstackclient.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Validator = &OpenStackClient{}
 

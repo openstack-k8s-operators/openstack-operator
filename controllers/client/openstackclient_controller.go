@@ -70,13 +70,13 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackClient")
 }
 
-//+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/finalizers,verbs=update
-//+kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch
-//+kubebuilder:rbac:groups=telemetry.openstack.org,resources=metricstorages,verbs=get;list;watch
-//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;
-//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;
+// +kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/finalizers,verbs=update
+// +kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch
+// +kubebuilder:rbac:groups=telemetry.openstack.org,resources=metricstorages,verbs=get;list;watch
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;
 // service account, role, rolebinding
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update;patch

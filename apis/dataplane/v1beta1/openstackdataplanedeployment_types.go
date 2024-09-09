@@ -95,13 +95,13 @@ type OpenStackDataPlaneDeploymentStatus struct {
 	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Deployments"
-//+kubebuilder:resource:shortName=osdpd;osdpdeployment;osdpdeployments
-//+kubebuilder:printcolumn:name="NodeSets",type="string",JSONPath=".spec.nodeSets",description="NodeSets"
-//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
-//+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Deployments"
+// +kubebuilder:resource:shortName=osdpd;osdpdeployment;osdpdeployments
+// +kubebuilder:printcolumn:name="NodeSets",type="string",JSONPath=".spec.nodeSets",description="NodeSets"
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
+// +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API
 // OpenStackDataPlaneDeployment name must be a valid RFC1123 as it is used in labels
@@ -114,7 +114,7 @@ type OpenStackDataPlaneDeployment struct {
 	Status OpenStackDataPlaneDeploymentStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // OpenStackDataPlaneDeploymentList contains a list of OpenStackDataPlaneDeployment
 type OpenStackDataPlaneDeploymentList struct {
