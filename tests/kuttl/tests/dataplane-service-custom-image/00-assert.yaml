@@ -54,9 +54,17 @@ status:
     status: "True"
     type: SetupReady
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  labels:
+    app: openstackansibleee
+    job-name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+    openstackansibleee_cr: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+    openstackdataplanedeployment: edpm-compute-no-nodes
+    openstackdataplanenodeset: edpm-no-nodes-custom-svc
+    openstackdataplaneservice: custom-img-svc
+    osaee: "true"
   name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -67,41 +75,86 @@ metadata:
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-no-nodes-custom-svc
-  image: example.com/repo/runner-image:latest
-  name: openstackansibleee
-  restartPolicy: Never
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[]'
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+        job-name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+        openstackansibleee_cr: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+        openstackdataplanedeployment: edpm-compute-no-nodes
+        openstackdataplanenodeset: edpm-no-nodes-custom-svc
+        openstackdataplaneservice: custom-img-svc
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - playbook.yaml
+        - -i
+        - custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            playbook.yaml
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-no-nodes-custom-svc
+            edpm_service_type: custom-img-svc
+
+
+        image: example.com/repo/runner-image:latest
+        imagePullPolicy: Always
+        name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-no-nodes-custom-svc
+      serviceAccountName: edpm-no-nodes-custom-svc
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-no-nodes-custom-svc
 status:
-  JobStatus: Running
-  conditions:
-  - message: Job in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: Ready
-  - message: Job in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: JobReady
+  active: 1
+  ready: 0
+  terminating: 0
+  uncountedTerminatedPods: {}

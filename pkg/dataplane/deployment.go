@@ -26,6 +26,9 @@ import (
 	"sort"
 	"strconv"
 
+	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
+
 	slices "golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,11 +40,9 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane/util"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // Deployer defines a data structure with all of the relevant objects required for a full deployment.
@@ -197,13 +198,13 @@ func (d *Deployer) ConditionalDeploy(
 	}
 
 	if nsConditions.IsFalse(readyCondition) {
-		var ansibleEE *ansibleeev1.OpenStackAnsibleEE
+		var ansibleEE *batchv1.Job
 		_, labelSelector := dataplaneutil.GetAnsibleExecutionNameAndLabels(&foundService, d.Deployment.Name, d.NodeSet.Name)
 		ansibleEE, err = dataplaneutil.GetAnsibleExecution(d.Ctx, d.Helper, d.Deployment, labelSelector)
 		if err != nil {
 			// Return nil if we don't have AnsibleEE available yet
 			if k8s_errors.IsNotFound(err) {
-				log.Info(fmt.Sprintf("%s OpenStackAnsibleEE not yet found", readyCondition))
+				log.Info(fmt.Sprintf("%s AnsibleEE job is not yet found", readyCondition))
 				return nil
 			}
 			log.Error(err, fmt.Sprintf("Error getting ansibleEE job for %s", deployName))
@@ -215,15 +216,15 @@ func (d *Deployer) ConditionalDeploy(
 				err.Error()))
 		}
 
-		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusSucceeded {
+		if ansibleEE.Status.Succeeded > 0 {
 			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 			nsConditions.Set(condition.TrueCondition(
 				readyCondition,
 				readyMessage))
 		}
 
-		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusRunning || ansibleEE.Status.JobStatus == ansibleeev1.JobStatusPending {
-			log.Info(fmt.Sprintf("AnsibleEE job is not yet completed: Execution: %s, Status: %s", ansibleEE.Name, ansibleEE.Status.JobStatus))
+		if ansibleEE.Status.Active > 0 {
+			log.Info(fmt.Sprintf("AnsibleEE job is not yet completed: Execution: %s, Active pods: %d", ansibleEE.Name, ansibleEE.Status.Active))
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.RequestedReason,
@@ -231,18 +232,23 @@ func (d *Deployer) ConditionalDeploy(
 				readyWaitingMessage))
 		}
 
-		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusFailed {
-			errorMsg := fmt.Sprintf("execution.name %s execution.namespace %s execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
-			ansibleCondition := ansibleEE.Status.Conditions.Get(condition.ReadyCondition)
+		var ansibleCondition *batchv1.JobCondition
+		if ansibleEE.Status.Failed > 0 {
+			errorMsg := fmt.Sprintf("execution.name %s execution.namespace %s failed pods: %d", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.Failed)
+			for _, condition := range ansibleEE.Status.Conditions {
+				if condition.Type == batchv1.JobFailed {
+					ansibleCondition = &condition
+				}
+			}
 			if ansibleCondition.Reason == condition.JobReasonBackoffLimitExceeded {
-				errorMsg = fmt.Sprintf("backoff limit reached for execution.name %s execution.namespace %s execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
+				errorMsg = fmt.Sprintf("backoff limit reached for execution.name %s execution.namespace %s execution.condition.message: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleCondition.Message)
 			}
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
 			err = fmt.Errorf(errorMsg)
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
-				ansibleCondition.Reason,
-				ansibleCondition.Severity,
+				condition.Reason(ansibleCondition.Reason),
+				condition.SeverityError,
 				readyErrorMessage,
 				err.Error()))
 		}

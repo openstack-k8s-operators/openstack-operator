@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
 	"gopkg.in/yaml.v3"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -13,7 +14,6 @@ import (
 
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 )
 
@@ -590,8 +590,8 @@ func DataplaneDeploymentConditionGetter(name types.NamespacedName) condition.Con
 	return instance.Status.Conditions
 }
 
-func GetAnsibleee(name types.NamespacedName) *v1beta1.OpenStackAnsibleEE {
-	instance := &v1beta1.OpenStackAnsibleEE{}
+func GetAnsibleee(name types.NamespacedName) *batchv1.Job {
+	instance := &batchv1.Job{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
@@ -619,4 +619,13 @@ func getCtlPlaneIP(secret *corev1.Secret) string {
 		fmt.Printf("Error unmarshalling secretData: %v", err)
 	}
 	return inv.EdpmComputeNodeset.Hosts.Node.CtlPlaneIP
+}
+
+func findEnvVar(envVars []corev1.EnvVar) corev1.EnvVar {
+	for _, envVar := range envVars {
+		if envVar.Name == "RUNNER_EXTRA_VARS" {
+			return envVar
+		}
+	}
+	return corev1.EnvVar{}
 }

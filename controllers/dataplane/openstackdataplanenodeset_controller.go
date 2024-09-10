@@ -24,6 +24,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/exp/slices"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -48,7 +49,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/serviceaccount"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
@@ -622,7 +622,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
 				predicate.GenerationChangedPredicate{},
 				predicate.AnnotationChangedPredicate{},
 				predicate.LabelChangedPredicate{}))).
-		Owns(&ansibleeev1.OpenStackAnsibleEE{}).
+		Owns(&batchv1.Job{}).
 		Owns(&baremetalv1.OpenStackBaremetalSet{}).
 		Owns(&infranetworkv1.IPSet{}).
 		Owns(&infranetworkv1.DNSData{}).

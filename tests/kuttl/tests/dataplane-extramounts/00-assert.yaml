@@ -27,9 +27,17 @@ spec:
           claimName: edpm-ansible
           readOnly: true
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  labels:
+    app: openstackansibleee
+    job-name: test-service-edpm-extramounts-edpm-extramounts
+    openstackansibleee_cr: test-service-edpm-extramounts-edpm-extramounts
+    openstackdataplanedeployment: edpm-extramounts
+    openstackdataplanenodeset: edpm-extramounts
+    openstackdataplaneservice: test-service
+    osaee: "true"
   name: test-service-edpm-extramounts-edpm-extramounts
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -39,33 +47,92 @@ metadata:
     kind: OpenStackDataPlaneDeployment
     name: edpm-extramounts
 spec:
-  extraMounts:
-  - extraVolType: edpm-ansible
-    mounts:
-    - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
-      name: edpm-ansible
-    volumes:
-    - name: edpm-ansible
-      persistentVolumeClaim:
-        claimName: edpm-ansible
-        readOnly: true
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-extramounts
+  backoffLimit: 6
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[]'
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: test-service-edpm-extramounts-edpm-extramounts
+        job-name: test-service-edpm-extramounts-edpm-extramounts
+        openstackansibleee_cr: test-service-edpm-extramounts-edpm-extramounts
+        openstackdataplanedeployment: edpm-extramounts
+        openstackdataplanenodeset: edpm-extramounts
+        openstackdataplaneservice: test-service
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - test.yml
+        - -i
+        - test-service-edpm-extramounts-edpm-extramounts
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            test.yml
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-extramounts
+            edpm_service_type: test-service
+
+
+        imagePullPolicy: Always
+        name: test-service-edpm-extramounts-edpm-extramounts
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
+          name: edpm-ansible
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-extramounts
+      serviceAccountName: edpm-extramounts
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: edpm-ansible
+        persistentVolumeClaim:
+          claimName: edpm-ansible
+          readOnly: true
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-extramounts
+status:
+  active: 1
+  ready: 0
+  terminating: 0
+  uncountedTerminatedPods: {}

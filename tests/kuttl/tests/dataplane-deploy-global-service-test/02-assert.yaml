@@ -73,9 +73,17 @@ spec:
     - edpm-compute-global
     - edpm-compute-beta-nodeset
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  labels:
+    app: openstackansibleee
+    job-name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+    openstackansibleee_cr: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+    openstackdataplanedeployment: edpm-multinodeset
+    openstackdataplanenodeset: edpm-compute-beta-nodeset
+    openstackdataplaneservice: download-cache
+    osaee: "true"
   name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -86,46 +94,102 @@ metadata:
     name: edpm-multinodeset
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-beta-nodeset
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.download_cache
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+        job-name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+        openstackansibleee_cr: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+        openstackdataplanedeployment: edpm-multinodeset
+        openstackdataplanenodeset: edpm-compute-beta-nodeset
+        openstackdataplaneservice: download-cache
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.download_cache
+        - -i
+        - download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.download_cache
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-beta-nodeset
+            edpm_service_type: download-cache
+
+
+        imagePullPolicy: Always
+        name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-beta-nodeset
+      serviceAccountName: edpm-compute-beta-nodeset
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-beta-nodeset
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
 ---
-apiVersion: ansibleee.openstack.org/v1beta1
-kind: OpenStackAnsibleEE
+apiVersion: batch/v1
+kind: Job
 metadata:
+  labels:
+    app: openstackansibleee
+    job-name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+    openstackansibleee_cr: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+    openstackdataplanedeployment: edpm-multinodeset
+    openstackdataplanenodeset: edpm-compute-beta-nodeset
+    openstackdataplaneservice: bootstrap
+    osaee: "true"
   name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -136,39 +200,87 @@ metadata:
     name: edpm-multinodeset
 spec:
   backoffLimit: 6
-  extraMounts:
-  - mounts:
-    - mountPath: /runner/env/ssh_key
-      name: ssh-key
-      subPath: ssh_key
-    - mountPath: /runner/inventory/hosts
-      name: inventory
-      subPath: inventory
-    volumes:
-    - name: ssh-key
-      secret:
-        items:
-        - key: ssh-privatekey
-          path: ssh_key
-        secretName: dataplane-ansible-ssh-private-key-secret
-    - name: inventory
-      secret:
-        items:
-        - key: inventory
-          path: inventory
-        secretName: dataplanenodeset-edpm-compute-beta-nodeset
-  name: openstackansibleee
-  restartPolicy: Never
-  playbook: osp.edpm.bootstrap
-  uid: 1001
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  suspend: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+        job-name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+        openstackansibleee_cr: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+        openstackdataplanedeployment: edpm-multinodeset
+        openstackdataplanenodeset: edpm-compute-beta-nodeset
+        openstackdataplaneservice: bootstrap
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - osp.edpm.bootstrap
+        - -i
+        - bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+        env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            osp.edpm.bootstrap
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            edpm_override_hosts: edpm-compute-beta-nodeset
+            edpm_service_type: bootstrap
+
+
+        imagePullPolicy: Always
+        name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /runner/env/ssh_key
+          name: ssh-key
+          subPath: ssh_key
+        - mountPath: /runner/inventory/hosts
+          name: inventory
+          subPath: inventory
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: edpm-compute-beta-nodeset
+      serviceAccountName: edpm-compute-beta-nodeset
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ssh-key
+        secret:
+          defaultMode: 420
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+          secretName: dataplane-ansible-ssh-private-key-secret
+      - name: inventory
+        secret:
+          defaultMode: 420
+          items:
+          - key: inventory
+            path: inventory
+          secretName: dataplanenodeset-edpm-compute-beta-nodeset
 status:
-  JobStatus: Succeeded
   conditions:
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Job completed
-    reason: Ready
-    status: "True"
-    type: JobReady
+  - status: "True"
+    type: Complete
+  ready: 0
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}
