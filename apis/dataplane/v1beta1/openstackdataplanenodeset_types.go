@@ -335,15 +335,14 @@ func (r *OpenStackDataPlaneNodeSetSpec) ValidateTLS(namespace string, reconciler
 // Do TLS flags match in control plane ingress, pods and data plane
 func (r *OpenStackDataPlaneNodeSetSpec) TLSMatch(controlPlane openstackv1.OpenStackControlPlane) *field.Error {
 
-	if controlPlane.Spec.TLS.Ingress.Enabled != r.TLSEnabled || controlPlane.Spec.TLS.PodLevel.Enabled != r.TLSEnabled {
+	if controlPlane.Spec.TLS.PodLevel.Enabled != r.TLSEnabled {
 
 		return field.Forbidden(
 			field.NewPath("spec.tlsEnabled"),
 			fmt.Sprintf(
-				"TLS settings on Data Plane node set and Control Plane %s do not match, Node set: %t Control Plane Ingress: %t Control Plane PodLevel: %t",
+				"TLS settings on Data Plane node set and Control Plane %s do not match, Node set: %t Control Plane PodLevel: %t",
 				controlPlane.Name,
 				r.TLSEnabled,
-				controlPlane.Spec.TLS.Ingress.Enabled,
 				controlPlane.Spec.TLS.PodLevel.Enabled))
 	}
 	return nil

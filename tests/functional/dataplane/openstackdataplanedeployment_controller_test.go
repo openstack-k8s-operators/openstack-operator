@@ -1563,7 +1563,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		})
 	})
 
-	When("A user sets TLSEnabled to true with control plane TLS disabled", func() {
+	When("A user sets TLSEnabled to true with control plane with PodLevel TLS disabled", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
@@ -1596,7 +1596,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			SimulateIPSetComplete(dataplaneNodeName)
 			SimulateDNSDataComplete(dataplaneNodeSetName)
 
-			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(controlPlaneName, GetDefaultOpenStackControlPlaneSpec(false)))
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(controlPlaneName, GetDefaultOpenStackControlPlaneSpec(true, false)))
 		})
 
 		It("Should have Spec fields initialized", func() {
@@ -1661,7 +1661,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 
 	})
 
-	When("A user sets TLSEnabled to true with control plane TLS enabled", func() {
+	When("A user sets TLSEnabled to true with control plane PodLevel TLS enabled", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
@@ -1695,7 +1695,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			SimulateIPSetComplete(dataplaneNodeName)
 			SimulateDNSDataComplete(dataplaneNodeSetName)
 
-			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(controlPlaneName, GetDefaultOpenStackControlPlaneSpec(true)))
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(controlPlaneName, GetDefaultOpenStackControlPlaneSpec(true, true)))
 		})
 
 		It("Should have Spec fields initialized", func() {

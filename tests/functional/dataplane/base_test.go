@@ -465,7 +465,7 @@ func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]inte
 	return th.CreateUnstructured(raw)
 }
 
-func GetDefaultOpenStackControlPlaneSpec(enableTLS bool) map[string]interface{} {
+func GetDefaultOpenStackControlPlaneSpec(tlsIngress bool, tlsPodlevel bool) map[string]interface{} {
 	memcachedTemplate := map[string]interface{}{
 		"memcached": map[string]interface{}{
 			"replicas": 1,
@@ -513,7 +513,7 @@ func GetDefaultOpenStackControlPlaneSpec(enableTLS bool) map[string]interface{} 
 		},
 		"tls": map[string]interface{}{
 			"ingress": map[string]interface{}{
-				"enabled": enableTLS,
+				"enabled": tlsIngress,
 
 				"ca": map[string]interface{}{
 					"customIssuer": "custom-issuer",
@@ -524,7 +524,7 @@ func GetDefaultOpenStackControlPlaneSpec(enableTLS bool) map[string]interface{} 
 				},
 			},
 			"podLevel": map[string]interface{}{
-				"enabled": enableTLS,
+				"enabled": tlsPodlevel,
 				"internal": map[string]interface{}{
 					"ca": map[string]interface{}{
 						"duration": "100h",
