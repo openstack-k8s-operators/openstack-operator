@@ -46,6 +46,7 @@ import (
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
@@ -223,6 +224,7 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			reqs = "Galera, Keystone"
 		}
 	case "Octavia":
+		// TODO(beagles): So far we haven't declared Redis as dependency for Octavia, but we might.
 		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled &&
 			r.Spec.Ovn.Enabled) {
@@ -334,6 +336,16 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 				basePath.Child("memcached").Child("templates"),
 				maps.Keys(*r.Spec.Memcached.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Redis.Enabled {
+		if r.Spec.Redis.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("redis").Child("templates"),
+				maps.Keys(*r.Spec.Redis.Templates),
+				redisv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
 	}
@@ -874,6 +886,20 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		}
 		r.Spec.Designate.Template.Default()
 	}
+
+	// Redis
+        if r.Spec.Redis.Enabled || r.Spec.Redis.Templates != nil {
+                if r.Spec.Redis.Templates == nil {
+                        r.Spec.Redis.Templates = ptr.To(map[string]redisv1.RedisSpecCore{})
+                }
+
+                for key, template := range *r.Spec.Redis.Templates {
+                        template.Default()
+                        // By-value copy, need to update
+                        (*r.Spec.Redis.Templates)[key] = template
+                }
+        }
+
 }
 
 // DefaultLabel - adding default label to the OpenStackControlPlane

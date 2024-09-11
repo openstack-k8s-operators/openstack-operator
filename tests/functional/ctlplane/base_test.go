@@ -453,6 +453,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"nova": map[string]interface{}{
 			"enabled": false,
 		},
+		"redis": map[string]interface{}{
+			"enabled": false,
+		},
 		"ironic": map[string]interface{}{
 			"enabled":  false,
 			"template": ironicTemplate,

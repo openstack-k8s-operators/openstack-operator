@@ -95,6 +95,8 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-horizon:current-podified
         - name: RELATED_IMAGE_INFRA_MEMCACHED_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-memcached:current-podified
+        - name: RELATED_IMAGE_INFRA_REDIS_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-redis:current-podified
         - name: RELATED_IMAGE_IRONIC_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ironic-api:current-podified
         - name: RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT
