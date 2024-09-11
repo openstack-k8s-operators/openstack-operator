@@ -1344,4 +1344,39 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 	})
 
+	When("A NodeSet and Deployment are created", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+			nodeSetSpec["preProvisioned"] = true
+			nodeSetSpec["services"] = []string{"bootstrap"}
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+
+		})
+		It("Should have SSH and Inventory volume mounts", func() {
+			Eventually(func(g Gomega) {
+				const bootstrapName string = "bootstrap"
+				// Make an AnsibleEE name for each service
+				ansibleeeName := types.NamespacedName{
+					Name: fmt.Sprintf(
+						bootstrapName + "-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name),
+					Namespace: namespace,
+				}
+				ansibleEE := GetAnsibleee(ansibleeeName)
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(2))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].Name).To(Equal("ssh-key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("inventory"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+	})
 })
