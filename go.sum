@@ -136,8 +136,6 @@ github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240907101151-b05
 github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240907101151-b05427a4ffbf/go.mod h1:TPjN09Doefidj9cJM5wfRu2FUA2xqcGPxVL39Nmddfo=
 github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240906123247-d049901982ac h1:q9wC1Dykx2Eg1Jc+v2uYR7mkbNB0RvTdZqjdrg1EfcM=
 github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240906123247-d049901982ac/go.mod h1:tGgavimnAXiBEw1TKHbW3jOVnGD84AI4aVQi7+NQ3sw=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.4.1-0.20240819105135-20bba339978c h1:uwLzBhrXB4PmC+ZrI/3r8lROXHEEhb8YL77VowX3UaU=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.4.1-0.20240819105135-20bba339978c/go.mod h1:eBaU1YIVyMY9vdhWMl6nWf2prCgme+S5Bp0U6r0UWtY=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20240906043908-171788786286 h1:Z8fIh06z1oWnJAuPkzPHjDZQGVOJHeuaXAyrlM7RHUc=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20240906043908-171788786286/go.mod h1:BOjHTeLCZK7A0iAME27ZDML6qkkOuK2iG3Gtib78Z6Q=
 github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20240909074420-f268cc641a1d h1:mRht4Npry4p1Qfm01ygVjenfVuDFMZ02YV/i2uKJXFM=
