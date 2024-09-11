@@ -17,7 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
+	"regexp"
+
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -204,4 +207,43 @@ func init() {
 // IsReady - returns true if service is ready to serve requests
 func (instance OpenStackVersion) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+}
+
+func getOpenStackReleaseVersion(openstackReleaseVersion string, releaseVersionScheme string, operatorConditionName string) string {
+
+	/* NOTE: dprince
+	 * The releaseVersionScheme can be optionally used to enable 'csvEpochAppend' behavior
+	 * This is used by some downstream builds to append the version to the CSV version suffix (epoch) which
+	 * is obtained from the OPERATOR_CONDITION_NAME environment variable to the openstack release version.
+	 * In some downstream build systems CSV version bumps can be easily automated where as the
+	 * OPENSTACK_RELEASE_VERSION is more of a static constant.
+	 * The reason we don't always use the CSV version is that the raw version in those same downstream
+	 * builds does not match the OpenStackVersion (for example CSV version is 1.0 where as OpenStack product
+	 * version is set to 18.0, go figure!)
+	 */
+	if releaseVersionScheme == "csvEpochAppend" {
+		re := regexp.MustCompile(`\.[[:digit:]]{10,}\.p`)
+		operatorConditionEpoch := re.FindString(operatorConditionName)
+		if operatorConditionEpoch == "" {
+			return openstackReleaseVersion
+		} else {
+			return openstackReleaseVersion + operatorConditionEpoch
+		}
+	}
+	return openstackReleaseVersion
+}
+
+// GetOpenStackReleaseVersion - returns the OpenStack release version
+func GetOpenStackReleaseVersion(envVars []string) string {
+
+	return getOpenStackReleaseVersion(
+		util.GetEnvVar("OPENSTACK_RELEASE_VERSION", ""),
+		// can be set to csvEpochAppend
+		util.GetEnvVar("OPENSTACK_RELEASE_VERSION_SCHEME", ""),
+		// NOTE: dprince this is essentially the CSV version. OLM sets this to provide
+		// a way for the controller-manager to know the operator condition name
+		// we do it this way to *avoid requiring the CSV structs in this operator*
+		util.GetEnvVar("OPERATOR_CONDITION_NAME", ""),
+	)
+
 }
