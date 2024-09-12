@@ -165,3 +165,11 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-swift-object:current-podified
         - name: RELATED_IMAGE_SWIFT_PROXY_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-swift-proxy-server:current-podified
+        - name: RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-tempest-all:current-podified
+        - name: RELATED_IMAGE_TEST_TOBIKO_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
+        - name: RELATED_IMAGE_TEST_ANSIBLETEST_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified
+        - name: RELATED_IMAGE_TEST_HORIZONTEST_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-horizontest:current-podified
