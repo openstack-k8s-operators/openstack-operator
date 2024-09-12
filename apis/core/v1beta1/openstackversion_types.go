@@ -114,6 +114,7 @@ type ContainerTemplate struct {
 	InfraDnsmasqImage             *string `json:"infraDnsmasqImage,omitempty"`
 	InfraMemcachedImage           *string `json:"infraMemcachedImage,omitempty"`
 	InfraRedisImage               *string `json:"infraRedisImage,omitempty"`
+	InfraInstanceHaImage          *string `json:"infraInstanceHaImage,omitempty"`
 	IronicAPIImage                *string `json:"ironicAPIImage,omitempty"`
 	IronicConductorImage          *string `json:"ironicConductorImage,omitempty"`
 	IronicInspectorImage          *string `json:"ironicInspectorImage,omitempty"`

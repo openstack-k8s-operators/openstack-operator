@@ -230,6 +230,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneClientReady
+  - message: OpenStackControlPlane custom TLS cert secret available
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCustomTLSReadyCondition
   - message: OpenStackControlPlane barbican service exposed
     reason: Ready
     status: "True"
@@ -266,6 +270,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneGlanceReady
+  - message: OpenStackControlPlane InstanceHa CM is available
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneInstanceHaCMReadyCondition
   - message: OpenStackControlPlane KeystoneAPI completed
     reason: Ready
     status: "True"

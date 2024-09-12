@@ -126,6 +126,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			InfraDnsmasqImage:             getImg(instance.Spec.CustomContainerImages.InfraDnsmasqImage, defaults.InfraDnsmasqImage),
 			InfraMemcachedImage:           getImg(instance.Spec.CustomContainerImages.InfraMemcachedImage, defaults.InfraMemcachedImage),
 			InfraRedisImage:               getImg(instance.Spec.CustomContainerImages.InfraRedisImage, defaults.InfraRedisImage),
+			InfraInstanceHaImage:          getImg(instance.Spec.CustomContainerImages.InfraInstanceHaImage, defaults.InfraInstanceHaImage),
 			IronicAPIImage:                getImg(instance.Spec.CustomContainerImages.IronicAPIImage, defaults.IronicAPIImage),
 			IronicConductorImage:          getImg(instance.Spec.CustomContainerImages.IronicConductorImage, defaults.IronicConductorImage),
 			IronicInspectorImage:          getImg(instance.Spec.CustomContainerImages.IronicInspectorImage, defaults.IronicInspectorImage),

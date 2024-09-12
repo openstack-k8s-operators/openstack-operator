@@ -206,6 +206,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneGlanceReady
+  - message: OpenStackControlPlane InstanceHa CM is available
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneInstanceHaCMReadyCondition
   - message: OpenStackControlPlane KeystoneAPI completed
     reason: Ready
     status: "True"
