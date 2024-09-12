@@ -1,0 +1,9 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  barbican-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  placement-public-route

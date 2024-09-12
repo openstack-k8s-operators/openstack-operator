@@ -1,0 +1,21 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  barbican:
+    apiOverride:
+      tls:
+        secretName: barbican-custom-route
+  placement:
+    apiOverride:
+      route:
+        spec:
+          tls:
+            certificate: |
+              CERT123
+            key: |
+              KEY123
+            caCertificate: |
+              CACERT123
+            termination: reencrypt

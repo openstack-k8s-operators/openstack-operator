@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+  - script: |
+      echo "Checking barbican custom route certificate..."
+      bash ../../common/osp_check_route_cert.sh "barbican"
+
+  - script: |
+      echo "Checking placement custom route certificate..."
+      bash ../../common/osp_check_route_cert.sh "placement"
