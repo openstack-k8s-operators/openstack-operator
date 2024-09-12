@@ -213,7 +213,7 @@ func populateInventoryFromIPAM(
 			netCidr, _ := ipnet.Mask.Size()
 			host.Vars[entry+"_cidr"] = netCidr
 		}
-		if res.Vlan != nil || entry != dataplanev1.CtlPlaneNetwork {
+		if res.Vlan != nil {
 			host.Vars[entry+"_vlan_id"] = res.Vlan
 		}
 		host.Vars[entry+"_mtu"] = res.MTU
