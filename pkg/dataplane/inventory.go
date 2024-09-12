@@ -153,15 +153,16 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 
 		err = resolveHostAnsibleVars(&node, &host)
 		if err != nil {
-			utils.LogErrorForObject(helper, err, "Could not resolve ansible host vars", instance)
+			utils.LogErrorForObject(helper, err, "could not resolve ansible host vars", instance)
 			return "", err
 		}
 
 		ipSet, ok := allIPSets[node.HostName]
-		if ok {
-			populateInventoryFromIPAM(&ipSet, host, dnsAddresses, node.HostName)
+		if !ok {
+			err := fmt.Errorf("no IPSet found for host: %s", node.HostName)
+			return "", err
 		}
-
+		populateInventoryFromIPAM(&ipSet, host, dnsAddresses, node.HostName)
 	}
 
 	invData, err := inventory.MarshalYAML()
