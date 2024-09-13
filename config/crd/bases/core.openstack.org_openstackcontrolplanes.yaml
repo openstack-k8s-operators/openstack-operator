@@ -17611,6 +17611,8 @@ spec:
                     type: string
                   infraDnsmasqImage:
                     type: string
+                  infraInstanceHaImage:
+                    type: string
                   infraMemcachedImage:
                     type: string
                   infraRedisImage:

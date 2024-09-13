@@ -463,6 +463,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.InfraInstanceHaImage != nil {
+		in, out := &in.InfraInstanceHaImage, &out.InfraInstanceHaImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.IronicAPIImage != nil {
 		in, out := &in.IronicAPIImage, &out.IronicAPIImage
 		*out = new(string)

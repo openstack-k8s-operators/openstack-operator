@@ -146,6 +146,9 @@ const (
 
 	// OpenStackControlPlaneTestCMReadyCondition Status=True condition which indicates if Test operator CM is ready
 	OpenStackControlPlaneTestCMReadyCondition condition.Type = "OpenStackControlPlaneTestCMReadyCondition"
+
+	// OpenStackControlPlaneInstanceHaCMReadyCondition Status=True condition which indicates if InstanceHa CM is ready
+	OpenStackControlPlaneInstanceHaCMReadyCondition condition.Type = "OpenStackControlPlaneInstanceHaCMReadyCondition"
 )
 
 // Common Messages used by API objects.
@@ -456,6 +459,12 @@ const (
 
 	// OpenStackControlPlaneTestCMReadyMessage
 	OpenStackControlPlaneTestCMReadyMessage = "OpenStackControlPlane Test Operator CM is available"
+
+	// OpenStackControlPlaneInstanceHaCMReadyErrorMessage
+	OpenStackControlPlaneInstanceHaCMReadyErrorMessage = "OpenStackControlPlane InstanceHa CM error occured %s"
+
+	// OpenStackControlPlaneInstanceHaCMReadyMessage
+	OpenStackControlPlaneInstanceHaCMReadyMessage = "OpenStackControlPlane InstanceHa CM is available"
 )
 
 // Version Conditions used by API objects.
