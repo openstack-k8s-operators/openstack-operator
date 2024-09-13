@@ -53,8 +53,9 @@ Sufficient number of edpm node BareMetalHost(BMH) CRs should be created and be i
 `Available` state (after inspection).By default baremetal-operator would be looking
 for BMHs in the `openshift-machine-api` namespace.
 
-If BMHs in other namesapces are expected to be managed, `Provisioning` resource should
-be patched to watch all namespaces with `watchAllNamesapces: true`.
+`Provisioning` resource should be patched to watch all namespaces with `watchAllNamespaces: true`
+as the secrets would be created in `openstack` namespace, in spite of BMHs in `openshift-machine-api`
+namespace.
 
 [,console]
 ----
