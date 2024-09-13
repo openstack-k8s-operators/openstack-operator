@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 300
+commands:
+    - script: |
+        ovs_controller_pod_count=$(oc get pod -n $NAMESPACE -l service=ovn-controller-ovs --no-headers=true --ignore-not-found=true | wc -l)
+        ovn_controller_pod_count=$(oc get pod -n $NAMESPACE -l service=ovn-controller --no-headers=true --ignore-not-found=true | wc -l)
+        if [ $ovs_controller_pod_count -eq 0 ] && [ $ovn_controller_pod_count -eq 0 ]; then
+          exit 0
+        fi
+        exit 1

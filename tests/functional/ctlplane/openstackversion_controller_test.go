@@ -239,6 +239,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 							"dbType": "SB",
 						},
 					},
+					"ovnController": map[string]interface{}{
+						"nicMappings": map[string]interface{}{
+							"datacentre": "ospbr",
+						},
+					},
 				},
 			}
 			DeferCleanup(
