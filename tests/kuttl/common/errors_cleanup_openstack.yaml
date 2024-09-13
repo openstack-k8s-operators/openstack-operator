@@ -222,3 +222,113 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: swift-public
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: barbican-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cinder-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: barbican-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cinder-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: glance-default-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: glance-default-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keystone-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keystone-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: neutron-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: neutron-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-novncproxy-cell1-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-novncproxy-cell1-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: placement-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: placement-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: swift-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: swift-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-internal
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-libvirt
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-ovn
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-public
