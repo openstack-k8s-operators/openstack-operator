@@ -1,6 +1,6 @@
 module github.com/openstack-k8s-operators/openstack-operator
 
-go 1.20
+go 1.21
 
 require (
 	github.com/cert-manager/cert-manager v1.13.6
