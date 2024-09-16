@@ -585,7 +585,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeFalse())
 
 			// creates selfsigned issuer
-			Eventually(func(g Gomega) {
+			Eventually(func(_ Gomega) {
 				crtmgr.GetIssuer(names.SelfSignedIssuerName)
 			}, timeout, interval).Should(Succeed())
 
@@ -852,7 +852,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
 
 			// creates selfsigned issuer
-			Eventually(func(g Gomega) {
+			Eventually(func(_ Gomega) {
 				crtmgr.GetIssuer(names.SelfSignedIssuerName)
 			}, timeout, interval).Should(Succeed())
 
@@ -1137,12 +1137,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			It("should have OpenStackControlPlaneCAReadyCondition ready when custom issuer exist", func() {
 				// creates selfsigned issuer
-				Eventually(func(g Gomega) {
+				Eventually(func(_ Gomega) {
 					crtmgr.GetIssuer(names.SelfSignedIssuerName)
 				}, timeout, interval).Should(Succeed())
 
 				// does not create public CA, as custom issuer is used
-				Eventually(func(g Gomega) {
+				Eventually(func(_ Gomega) {
 					crtmgr.AssertCertDoesNotExist(names.RootCAPublicName)
 				}, timeout, interval).Should(Succeed())
 
@@ -1371,7 +1371,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
 
 				// expect the ready status to propagate to control plane object
-				Eventually(func(g Gomega) {
+				Eventually(func(_ Gomega) {
 					th.ExpectCondition(
 						names.OpenStackControlplaneName,
 						ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
@@ -1446,7 +1446,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			// expect the ready status to propagate to control plane object
-			Eventually(func(g Gomega) {
+			Eventually(func(_ Gomega) {
 				th.ExpectCondition(
 					names.OpenStackControlplaneName,
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
@@ -1486,7 +1486,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			// expect the ready status to propagate to control plane object
-			Eventually(func(g Gomega) {
+			Eventually(func(_ Gomega) {
 				th.ExpectCondition(
 					names.OpenStackControlplaneName,
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
@@ -1553,7 +1553,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			// expect the ready status to propagate to control plane object
-			Eventually(func(g Gomega) {
+			Eventually(func(_ Gomega) {
 				th.ExpectCondition(
 					names.OpenStackControlplaneName,
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
@@ -1593,7 +1593,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			// expect the ready status to propagate to control plane object
-			Eventually(func(g Gomega) {
+			Eventually(func(_ Gomega) {
 				th.ExpectCondition(
 					names.OpenStackControlplaneName,
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
@@ -1660,7 +1660,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			ovn.SimulateOVNControllerReady(names.OVNControllerName)
 
 			// expect the ready status to propagate to control plane object
-			Eventually(func(g Gomega) {
+			Eventually(func(_ Gomega) {
 				th.ExpectCondition(
 					names.OpenStackControlplaneName,
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
