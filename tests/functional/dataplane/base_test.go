@@ -350,12 +350,13 @@ func SimulateIPSetComplete(name types.NamespacedName) {
 		gateway := "172.20.12.1"
 		IPSet.Status.Reservation = []infrav1.IPSetReservation{
 			{
-				Address: "172.20.12.76",
-				Cidr:    "172.20.12.0/16",
-				MTU:     1500,
-				Network: "CtlPlane",
-				Subnet:  "subnet1",
-				Gateway: &gateway,
+				Address:        "172.20.12.76",
+				Cidr:           "172.20.12.0/16",
+				MTU:            1500,
+				Network:        "CtlPlane",
+				Subnet:         "subnet1",
+				Gateway:        &gateway,
+				ServiceNetwork: "ctlplane",
 			},
 		}
 		// This can return conflict so we have the gomega.Eventually block to retry
