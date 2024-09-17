@@ -144,7 +144,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -252,7 +252,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -361,7 +361,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -470,7 +470,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -579,7 +579,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -688,7 +688,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -791,7 +791,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -910,7 +910,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -1041,7 +1041,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -1151,7 +1151,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -1261,7 +1261,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -1371,7 +1371,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -1490,7 +1490,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes

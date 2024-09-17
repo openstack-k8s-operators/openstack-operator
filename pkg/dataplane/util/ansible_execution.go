@@ -178,8 +178,6 @@ func (a *EEJob) BuildAeeJobSpec(
 	service *dataplanev1.OpenStackDataPlaneService,
 	nodeSet client.Object,
 ) {
-	const jobRestartPolicy string = "OnFailure"
-
 	if aeeSpec.DNSConfig != nil {
 		a.DNSConfig = aeeSpec.DNSConfig
 	}
@@ -195,7 +193,6 @@ func (a *EEJob) BuildAeeJobSpec(
 	}
 
 	a.BackoffLimit = deployment.Spec.BackoffLimit
-	a.RestartPolicy = jobRestartPolicy
 	a.FormatAEECmdLineArguments(aeeSpec)
 	a.FormatAEEExtraVars(aeeSpec, service, deployment, nodeSet)
 	a.DetermineAeeImage(aeeSpec)

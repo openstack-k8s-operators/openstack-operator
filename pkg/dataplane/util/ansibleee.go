@@ -30,9 +30,6 @@ type EEJob struct {
 	Namespace string `json:"namespace,omitempty"`
 	// EnvConfigMapName is the name of the k8s config map that contains the ansible env variables
 	EnvConfigMapName string `json:"envConfigMapName,omitempty"`
-	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be "OnFailure" or "Never".
-	// RestartPolicy default: Never
-	RestartPolicy string `json:"restartPolicy,omitempty"`
 	// CmdLine is the command line passed to ansible-runner
 	CmdLine string `json:"cmdLine,omitempty"`
 	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
@@ -103,9 +100,9 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 	}
 
 	podSpec := corev1.PodSpec{
-		RestartPolicy: corev1.RestartPolicy(a.RestartPolicy),
+		RestartPolicy: corev1.RestartPolicyNever,
 		Containers: []corev1.Container{{
-			ImagePullPolicy: "Always",
+			ImagePullPolicy: corev1.PullAlways,
 			Image:           a.Image,
 			Name:            a.Name,
 			Args:            args,

@@ -224,7 +224,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: openstack-edpm-tls
@@ -355,7 +355,7 @@ spec:
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: openstack-edpm-tls
