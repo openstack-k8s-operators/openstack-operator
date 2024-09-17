@@ -35,6 +35,12 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
 
+	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
+	// PreserveJobs default: true
+	// +kubebuilder:validation:Enum:=true;false
+	// +kubebuilder:default:=true
+	PreserveJobs bool `json:"preserveJobs,omitempty"`
+
 	// AnsibleTags for ansible execution
 	// +kubebuilder:validation:Optional
 	AnsibleTags string `json:"ansibleTags,omitempty"`
@@ -67,6 +73,9 @@ type OpenStackDataPlaneDeploymentSpec struct {
 type OpenStackDataPlaneDeploymentStatus struct {
 	// NodeSetConditions
 	NodeSetConditions map[string]condition.Conditions `json:"nodeSetConditions,omitempty" optional:"true"`
+
+	// AnsibleEEHashes
+	AnsibleEEHashes map[string]string `json:"ansibleEEHashes,omitempty" optional:"true"`
 
 	// ConfigMapHashes
 	ConfigMapHashes map[string]string `json:"configMapHashes,omitempty" optional:"true"`
@@ -165,6 +174,9 @@ func (instance *OpenStackDataPlaneDeployment) InitHashesAndImages() {
 	}
 	if instance.Status.NodeSetHashes == nil {
 		instance.Status.NodeSetHashes = make(map[string]string)
+	}
+	if instance.Status.AnsibleEEHashes == nil {
+		instance.Status.AnsibleEEHashes = make(map[string]string)
 	}
 	if instance.Status.ContainerImages == nil {
 		instance.Status.ContainerImages = make(map[string]string)

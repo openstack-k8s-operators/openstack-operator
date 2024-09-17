@@ -92,6 +92,11 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | *int32
 | false
 
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs PreserveJobs default: true
+| bool
+| false
+
 | ansibleTags
 | AnsibleTags for ansible execution
 | string
@@ -136,6 +141,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | nodeSetConditions
 | NodeSetConditions
 | map[string]condition.Conditions
+| false
+
+| ansibleEEHashes
+| AnsibleEEHashes
+| map[string]string
 | false
 
 | configMapHashes

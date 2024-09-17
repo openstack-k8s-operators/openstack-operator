@@ -41,6 +41,7 @@
 * <<ovnsection,OvnSection>>
 * <<placementsection,PlacementSection>>
 * <<rabbitmqsection,RabbitmqSection>>
+* <<redissection,RedisSection>>
 * <<swiftsection,SwiftSection>>
 * <<tlscastatus,TLSCAStatus>>
 * <<tlsingressconfig,TLSIngressConfig>>
@@ -1323,6 +1324,11 @@ OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
 | <<barbicansection,BarbicanSection>>
 | false
 
+| redis
+| Redis - Parameters related to the Redis service
+| <<redissection,RedisSection>>
+| false
+
 | openstackclient
 | OpenStackClient - Parameters related to the OpenStackClient
 | <<openstackclientsection,OpenStackClientSection>>
@@ -1514,6 +1520,27 @@ RabbitmqSection defines the desired state of RabbitMQ service
 | Templates - Overrides to use when creating the Rabbitmq clusters
 | *map[string]<<rabbitmqtemplate,RabbitmqTemplate>>
 | true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#redissection]
+==== RedisSection
+
+RedisSection defines the desired state of the Redis service
+
+|===
+| Field | Description | Scheme | Required
+
+| enabled
+| Enabled - Whether the Redis service should be deployed and managed
+| bool
+| true
+
+| templates
+| Templates - Overrides to use when creating the Redis Resources
+| *map[string]redisv1.RedisSpecCore
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -1730,6 +1757,16 @@ ContainerImages - struct acts as the source of truth for container image URLs to
 |===
 | Field | Description | Scheme | Required
 
+| octaviaApacheImage
+|
+| *string
+| false
+
+| ceilometerProxyImage
+|
+| *string
+| false
+
 | cinderVolumeImages
 | CinderVolumeImages custom Cinder Volume images for each backend (default Cinder volume image is stored 'default' key)
 | map[string]*string
@@ -1782,7 +1819,7 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | false
 
 | apacheImage
-|
+| this is shared by BaremetalOperator, OctaviaOperator, and TelemetryOperator
 | *string
 | false
 
@@ -1822,11 +1859,6 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | false
 
 | ceilometerSgcoreImage
-|
-| *string
-| false
-
-| ceilometerProxyImage
 |
 | *string
 | false
@@ -1962,6 +1994,16 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | false
 
 | infraMemcachedImage
+|
+| *string
+| false
+
+| infraRedisImage
+|
+| *string
+| false
+
+| infraInstanceHaImage
 |
 | *string
 | false
@@ -4545,6 +4587,11 @@ DesignateAPISpecBase -
 | Override, provides the ability to override the generated manifest of several child resources.
 | <<apioverridespec,APIOverrideSpec>>
 | false
+
+| tls
+| TLS - Parameters related to the TLS
+| tls.API
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -4778,6 +4825,11 @@ DesignateCentralSpecBase -
 | ServiceAccount - service account name used internally to provide Designate services the default SA name
 | string
 | true
+
+| tls
+| TLS - Parameters related to the TLS
+| tls.Ca
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -4873,11 +4925,6 @@ DesignateMdnsSpecBase -
 |===
 | Field | Description | Scheme | Required
 
-| replicas
-| Replicas - Designate Mdns Replicas
-| *int32
-| true
-
 | databaseHostname
 | DatabaseHostname - Designate Database Hostname
 | string
@@ -4892,6 +4939,11 @@ DesignateMdnsSpecBase -
 | ServiceAccount - service account name used internally to provide Designate services the default SA name
 | string
 | true
+
+| tls
+| TLS - Parameters related to the TLS
+| tls.Ca
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -4906,6 +4958,11 @@ DesignateMdnsStatus defines the observed state of DesignateMdns
 
 | readyCount
 | ReadyCount of designate MDNS instances
+| int32
+| false
+
+| desiredNumberScheduled
+| DesiredNumberScheduled - total number of the nodes which should be running Daemon
 | int32
 | false
 
@@ -5006,6 +5063,11 @@ DesignateProducerSpec defines the desired state of DesignateProducer
 | ServiceAccount - service account name used internally to provide Designate services the default SA name
 | string
 | true
+
+| tls
+| TLS - Parameters related to the TLS
+| tls.Ca
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -5224,6 +5286,11 @@ DesignateWorkerSpecBase -
 | ServiceAccount - service account name used internally to provide Designate services the default SA name
 | string
 | true
+
+| tls
+| TLS - Parameters related to the TLS
+| tls.Ca
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -6738,6 +6805,11 @@ HorizonSpecBase -
 | ExtraMounts containing conf files
 | []<<horizonextravolmounts,HorizonExtraVolMounts>>
 | false
+
+| networkAttachments
+| NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
+| []string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -6773,6 +6845,11 @@ HorizonStatus defines the observed state of Horizon
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
+| false
+
+| networkAttachments
+| NetworkAttachments status of the deployment pods
+| map[string][]string
 | false
 |===
 
@@ -10061,6 +10138,11 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 
 | metadataSecret
 | MetadataSecret - the name of the field to get the metadata secret from the Secret
+| string
+| true
+
+| prefixMetadataCellsSecret
+| prefixMetadataCellsSecret - the prefix name of the field to get the metadata secret from the Secret for cells. Vale of metadata_proxy_shared_secret information for the nova-metadata service. This secret is shared between nova and neutron ovn-metadata inside selected cell and if this is not defined the global metadata_proxy_shared_secret secret will be used
 | string
 | true
 |===
@@ -13412,6 +13494,11 @@ OpenStackProvisionServerSpec defines the desired state of OpenStackProvisionServ
 | string
 | true
 
+| osImageDir
+| OSImageDir - Directory on the container which holds the OS qcow2 image and checksum
+| *string
+| true
+
 | osContainerImageUrl
 | OSContainerImageURL - Container image URL for init with the OS qcow2 image (osImage)
 | string
@@ -13436,6 +13523,11 @@ OpenStackProvisionServerSpec defines the desired state of OpenStackProvisionServ
 | Resources - Compute Resources required by this provision server (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 | corev1.ResourceRequirements
 | false
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -13470,6 +13562,21 @@ OpenStackProvisionServerStatus defines the observed state of OpenStackProvisionS
 
 | localImageUrl
 | URL of provisioning image on underlying Apache web server
+| string
+| false
+
+| osImageChecksumFilename
+| Filename of OSImage checksum
+| string
+| false
+
+| osImageChecksumType
+| OSImage checksum type
+| metal3v1.ChecksumType
+| false
+
+| localImageChecksumUrl
+| URL of provisioning image checksum on underlying Apache web server
 | string
 | false
 |===
@@ -15634,7 +15741,7 @@ Storage defines the options used for storage of metrics
 | Field | Description | Scheme | Required
 
 | strategy
-| Strategy to use for storage. Can be "persistent" or empty, in which case a COO default is used
+| Strategy to use for storage. Can be "persistent", "ephemeral" or empty, in which case a COO default is used
 | string
 | true
 
@@ -15645,8 +15752,8 @@ Storage defines the options used for storage of metrics
 
 | persistent
 | Used to specify the options of persistent storage when strategy = "persistent"
-| <<persistentstorage,PersistentStorage>>
-| true
+| *<<persistentstorage,PersistentStorage>>
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15979,6 +16086,11 @@ MemcachedSpecCore - this version is used by the OpenStackControlplane CR (no con
 | Size of the memcached cluster
 | *int32
 | true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| map[string]string
+| false
 
 | tls
 | TLS settings for memcached service
