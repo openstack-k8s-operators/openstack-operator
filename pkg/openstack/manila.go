@@ -120,9 +120,8 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			return errors.New("default Manila Share images is unset")
 		}
 
-		if manila.Spec.ManilaShares == nil {
-			manila.Spec.ManilaShares = make(map[string]manilav1.ManilaShareTemplate)
-		}
+		// Discard old list of share services and rebuild it
+		manila.Spec.ManilaShares = make(map[string]manilav1.ManilaShareTemplate)
 
 		for name, share := range instance.Spec.Manila.Template.ManilaShares {
 			manilaCore := manilav1.ManilaShareTemplate{}
