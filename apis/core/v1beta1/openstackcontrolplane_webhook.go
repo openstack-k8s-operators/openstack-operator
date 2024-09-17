@@ -23,8 +23,11 @@ import (
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
+	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -35,8 +38,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
@@ -278,10 +279,24 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Glance.Enabled {
+		glanceName, _ := r.GetServiceName(GlanceName, r.Spec.Glance.UniquePodNames)
+		for key, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("glance").Child("template").Child("glanceAPIs"),
+				[]string{key},
+				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
 		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"))...)
 	}
 
 	if r.Spec.Cinder.Enabled {
+		cinderName, _ := r.GetServiceName(CinderName, r.Spec.Cinder.UniquePodNames)
+		errs := common_webhook.ValidateDNS1123Label(
+			basePath.Child("cinder").Child("template").Child("cinderVolumes"),
+			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
+			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+		errors = append(errors, errs...)
 		errors = append(errors, r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template"))...)
 	}
 
@@ -310,6 +325,36 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 			warn, err := s.ValidateCreate(basePath.Child("galera").Child("template").Key(key))
 			errors = append(errors, err...)
 			warnings = append(warnings, warn...)
+		}
+	}
+
+	if r.Spec.Memcached.Enabled {
+		if r.Spec.Memcached.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("memcached").Child("templates"),
+				maps.Keys(*r.Spec.Memcached.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Rabbitmq.Enabled {
+		if r.Spec.Rabbitmq.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("rabbitmq").Child("templates"),
+				maps.Keys(*r.Spec.Rabbitmq.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Galera.Enabled {
+		if r.Spec.Galera.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("galera").Child("templates"),
+				maps.Keys(*r.Spec.Galera.Templates),
+				mariadbv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
 		}
 	}
 
@@ -369,6 +414,14 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Glance.Template == nil {
 			old.Glance.Template = &glancev1.GlanceSpecCore{}
 		}
+		glanceName, _ := r.GetServiceName(GlanceName, r.Spec.Glance.UniquePodNames)
+		for key, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("glance").Child("template").Child("glanceAPIs"),
+				[]string{key},
+				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
 		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"))...)
 	}
 
@@ -376,6 +429,12 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Cinder.Template == nil {
 			old.Cinder.Template = &cinderv1.CinderSpecCore{}
 		}
+		cinderName, _ := r.GetServiceName(CinderName, r.Spec.Cinder.UniquePodNames)
+		errs := common_webhook.ValidateDNS1123Label(
+			basePath.Child("cinder").Child("template").Child("cinderVolumes"),
+			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
+			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+		errors = append(errors, errs...)
 		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(*old.Cinder.Template, basePath.Child("cinder").Child("template"))...)
 	}
 
@@ -412,6 +471,36 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 			old.Designate.Template = &designatev1.DesignateSpecCore{}
 		}
 		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"))...)
+	}
+
+	if r.Spec.Memcached.Enabled {
+		if r.Spec.Memcached.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("memcached").Child("templates"),
+				maps.Keys(*r.Spec.Memcached.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Rabbitmq.Enabled {
+		if r.Spec.Rabbitmq.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("rabbitmq").Child("templates"),
+				maps.Keys(*r.Spec.Rabbitmq.Templates),
+				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
+	}
+
+	if r.Spec.Galera.Enabled {
+		if r.Spec.Galera.Templates != nil {
+			err := common_webhook.ValidateDNS1123Label(
+				basePath.Child("galera").Child("templates"),
+				maps.Keys(*r.Spec.Galera.Templates),
+				mariadbv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
+			errors = append(errors, err...)
+		}
 	}
 
 	return errors

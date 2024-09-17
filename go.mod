@@ -13,21 +13,21 @@ require (
 	github.com/onsi/gomega v1.33.1
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240731032705-4a6f7bdc7202
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240731063935-e70504866b5d
+	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240913145922-b68af838bb95
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240731063935-7d1a5bfcadb6
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240731084039-931d948c6ce3
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240913114408-6cb58c0ce9cd
 	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240731072333-75659acdc7fc
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240731065850-f38ddc99c0af
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240730231405-cdc28f50e42f
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240913164928-5ae3f1f5134a
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240731082121-80290e3ec6af
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240731084038-2251de08ce56
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240730154700-e526dc22c2bf
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240801155104-32cc1b1d93da
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240730154700-e526dc22c2bf
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240913084932-eb5ec1aa13b5
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240730154700-e526dc22c2bf
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240730154700-e526dc22c2bf
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240913084932-eb5ec1aa13b5
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240731090804-e066d8ab8a2b
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240730223820-fc21475d72f9
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240913133408-b9bc0c122ce8
 	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240731084037-a291f481b0aa
 	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240731091052-6640ad821a8a
 	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240731083222-f718ddbac180
@@ -46,7 +46,7 @@ require (
 	k8s.io/api v0.28.11
 	k8s.io/apimachinery v0.28.11
 	k8s.io/client-go v0.28.11
-	k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0
+	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 	sigs.k8s.io/controller-runtime v0.16.6
 )
 
