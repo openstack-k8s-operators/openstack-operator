@@ -18,10 +18,11 @@ package v1beta1
 
 import (
 	"testing"
+        . "github.com/onsi/ginkgo/v2"
+        . "github.com/onsi/gomega"
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Refer to
-// http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
-// Implement later
 func TestAPIs(t *testing.T) {
+        RegisterFailHandler(Fail)
+        RunSpecs(t, "Controller v1beta1 Suite")
 }

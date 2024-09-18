@@ -18,12 +18,12 @@ package v1beta1
 
 import (
 	"context"
+	"os"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -173,7 +173,7 @@ func (r *OpenStackVersion) ValidateDelete() (admission.Warnings, error) {
 // SetupVersionDefaults -
 func SetupVersionDefaults() {
 	openstackVersionDefaults := OpenStackVersionDefaults{
-		AvailableVersion: util.GetEnvVar("OPENSTACK_RELEASE_VERSION", ""),
+		AvailableVersion: GetOpenStackReleaseVersion(os.Environ()),
 	}
 
 	SetupOpenStackVersionDefaults(openstackVersionDefaults)

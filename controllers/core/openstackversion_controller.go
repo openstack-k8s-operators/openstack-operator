@@ -56,6 +56,7 @@ func SetupVersionDefaults() {
 			localVars[envArr[0]] = &envArr[1]
 		}
 	}
+	envAvailableVersion = corev1beta1.GetOpenStackReleaseVersion(os.Environ())
 	envContainerImages = localVars
 }
 
