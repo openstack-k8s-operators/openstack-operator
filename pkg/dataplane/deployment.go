@@ -197,6 +197,7 @@ func (d *Deployer) ConditionalDeploy(
 
 	}
 
+	var ansibleCondition *batchv1.JobCondition
 	if nsConditions.IsFalse(readyCondition) {
 		var ansibleEE *batchv1.Job
 		_, labelSelector := dataplaneutil.GetAnsibleExecutionNameAndLabels(&foundService, d.Deployment.Name, d.NodeSet.Name)
@@ -221,19 +222,14 @@ func (d *Deployer) ConditionalDeploy(
 			nsConditions.Set(condition.TrueCondition(
 				readyCondition,
 				readyMessage))
-		}
-
-		if ansibleEE.Status.Active > 0 {
+		} else if ansibleEE.Status.Active > 0 {
 			log.Info(fmt.Sprintf("AnsibleEE job is not yet completed: Execution: %s, Active pods: %d", ansibleEE.Name, ansibleEE.Status.Active))
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.RequestedReason,
 				condition.SeverityInfo,
 				readyWaitingMessage))
-		}
-
-		var ansibleCondition *batchv1.JobCondition
-		if ansibleEE.Status.Failed > 0 {
+		} else if ansibleEE.Status.Failed > 0 {
 			errorMsg := fmt.Sprintf("execution.name %s execution.namespace %s failed pods: %d", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.Failed)
 			for _, condition := range ansibleEE.Status.Conditions {
 				if condition.Type == batchv1.JobFailed {

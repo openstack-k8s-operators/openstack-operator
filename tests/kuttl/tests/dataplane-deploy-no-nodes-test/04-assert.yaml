@@ -148,7 +148,7 @@ spec:
           name: inventory
           subPath: inventory
       dnsPolicy: ClusterFirst
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes

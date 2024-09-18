@@ -93,7 +93,7 @@ spec:
           name: inventory
           subPath: inventory
       dnsPolicy: ClusterFirst
-      restartPolicy: OnFailure
+      restartPolicy: Never
       schedulerName: default-scheduler
       securityContext: {}
       serviceAccount: edpm-compute-no-nodes
@@ -115,7 +115,7 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  failed: 1
+  failed: 4
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
