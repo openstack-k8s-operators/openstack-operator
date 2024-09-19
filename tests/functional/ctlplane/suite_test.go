@@ -328,7 +328,6 @@ var _ = BeforeSuite(func() {
 	core_ctrl.SetupVersionDefaults()
 	openstack.SetupServiceOperatorDefaults()
 	openstackclientv1.SetupDefaults()
-	corev1.SetupDefaults()
 	corev1.SetupVersionDefaults()
 
 	err = (&client_ctrl.OpenStackClientReconciler{

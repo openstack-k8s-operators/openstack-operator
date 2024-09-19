@@ -34,7 +34,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -926,16 +925,6 @@ func (instance *OpenStackControlPlane) InitConditions() {
 	)
 	// initialize conditions used later as Status=Unknown
 	instance.Status.Conditions.Init(&cl)
-}
-
-// SetupDefaults - initializes any CRD field defaults based on environment variables (the defaulting mechanism itself is implemented via webhooks)
-func SetupDefaults() {
-	// Acquire environmental defaults and initialize OpenStackControlPlane defaults with them
-	openstackControlPlaneDefaults := OpenStackControlPlaneDefaults{
-		RabbitMqImageURL: util.GetEnvVar("RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT", RabbitMqContainerImage),
-	}
-
-	SetupOpenStackControlPlaneDefaults(openstackControlPlaneDefaults)
 }
 
 // IsCustomIssuer - returns true if CustomIssuer is provided and not empty string
