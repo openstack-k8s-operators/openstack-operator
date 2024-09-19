@@ -50,6 +50,8 @@ type DNSDetails struct {
 	AllIPs map[string]map[infranetworkv1.NetNameStr]string
 	// DNSDataLabelSelectorValue to match configmaps dnsmasqhosts label
 	DNSDataLabelSelectorValue string
+	// NetServiceNetMap network name to service network mapping
+	NetServiceNetMap map[string]string
 }
 
 // checkDNSService checks if DNS is configured and ready
@@ -81,8 +83,21 @@ func checkDNSService(ctx context.Context, helper *helper.Helper,
 	dnsDetails.ClusterAddresses = dnsmasqList.Items[0].Status.DNSClusterAddresses
 	dnsDetails.ServerAddresses = dnsmasqList.Items[0].Status.DNSAddresses
 	dnsDetails.DNSDataLabelSelectorValue = dnsmasqList.Items[0].Spec.DNSDataLabelSelectorValue
-
 	return nil
+}
+
+// createNetServiceNetMap Creates a map of net and ServiceNet
+func BuildNetServiceNetMap(netconfig infranetworkv1.NetConfig) map[string]string {
+	serviceNetMap := make(map[string]string)
+	for _, net := range netconfig.Spec.Networks {
+		netLower := strings.ToLower(string(net.Name))
+		if net.ServiceNetwork == "" {
+			serviceNetMap[netLower] = netLower
+		} else {
+			serviceNetMap[netLower] = string(net.ServiceNetwork)
+		}
+	}
+	return serviceNetMap
 }
 
 // createOrPatchDNSData builds the DNSData
@@ -240,7 +255,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 // EnsureIPSets Creates the IPSets
 func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-) (map[string]infranetworkv1.IPSet, bool, error) {
+) (map[string]infranetworkv1.IPSet, map[string]string, bool, error) {
 	// Cleanup the stale reservations first
 	err := cleanupStaleReservations(ctx, helper, instance)
 	if err != nil {
@@ -250,16 +265,16 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.NodeSetIPReservationReadyErrorMessage,
 			err.Error())
-		return nil, false, err
+		return nil, nil, false, err
 	}
-	allIPSets, err := reserveIPs(ctx, helper, instance)
+	allIPSets, netServiceNetMap, err := reserveIPs(ctx, helper, instance)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetIPReservationReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.NodeSetIPReservationReadyErrorMessage,
 			err.Error())
-		return nil, false, err
+		return nil, netServiceNetMap, false, err
 	}
 
 	for _, s := range allIPSets {
@@ -268,13 +283,13 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 				dataplanev1.NodeSetIPReservationReadyCondition,
 				condition.RequestedReason, condition.SeverityInfo,
 				dataplanev1.NodeSetIPReservationReadyWaitingMessage)
-			return nil, false, nil
+			return nil, netServiceNetMap, false, nil
 		}
 	}
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1.NodeSetIPReservationReadyCondition,
 		dataplanev1.NodeSetIPReservationReadyMessage)
-	return allIPSets, true, nil
+	return allIPSets, netServiceNetMap, true, nil
 }
 
 // cleanupStaleReservations Cleanup stale ipset reservations
@@ -318,7 +333,7 @@ func cleanupStaleReservations(ctx context.Context, helper *helper.Helper,
 // reserveIPs Reserves IPs by creating IPSets
 func reserveIPs(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-) (map[string]infranetworkv1.IPSet, error) {
+) (map[string]infranetworkv1.IPSet, map[string]string, error) {
 	// Verify NetConfig CRs exist
 	netConfigList := &infranetworkv1.NetConfigList{}
 	listOpts := []client.ListOption{
@@ -326,14 +341,14 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	}
 	err := helper.GetClient().List(ctx, netConfigList, listOpts...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(netConfigList.Items) == 0 {
 		errMsg := "no NetConfig CR exists yet"
 		util.LogForObject(helper, errMsg, instance)
-		return nil, fmt.Errorf(errMsg)
+		return nil, nil, fmt.Errorf(errMsg)
 	}
-
+	netServiceNetMap := BuildNetServiceNetMap(netConfigList.Items[0])
 	allIPSets := make(map[string]infranetworkv1.IPSet)
 
 	// CreateOrPatch IPSets
@@ -361,14 +376,14 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 				return err
 			})
 			if err != nil {
-				return nil, err
+				return nil, netServiceNetMap, err
 			}
 			allIPSets[hostName] = *ipSet
 		} else {
 			msg := fmt.Sprintf("No Networks defined for node %s or template", nodeName)
 			util.LogForObject(helper, msg, instance)
-			return nil, fmt.Errorf(msg)
+			return nil, netServiceNetMap, fmt.Errorf(msg)
 		}
 	}
-	return allIPSets, nil
+	return allIPSets, netServiceNetMap, nil
 }

@@ -89,7 +89,8 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string,
-	containerImages openstackv1.ContainerImages) (string, error) {
+	containerImages openstackv1.ContainerImages,
+	netServiceNetMap map[string]string) (string, error) {
 	inventory := ansible.MakeInventory()
 	nodeSetGroup := inventory.AddGroup(instance.Name)
 	groupVars, err := getAnsibleVarsFrom(ctx, helper, instance.Namespace, &instance.Spec.NodeTemplate.Ansible)
@@ -100,7 +101,8 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	for k, v := range groupVars {
 		nodeSetGroup.Vars[k] = v
 	}
-	err = resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, containerImages)
+	err = resolveGroupAnsibleVars(&instance.Spec.NodeTemplate,
+		&nodeSetGroup, containerImages, netServiceNetMap)
 	if err != nil {
 		utils.LogErrorForObject(helper, err, "Could not resolve ansible group vars", instance)
 		return "", err
@@ -151,7 +153,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 			host.Vars["ansible_host"] = node.HostName
 		}
 
-		err = resolveHostAnsibleVars(&node, &host)
+		err = resolveHostAnsibleVars(&node, &host, netServiceNetMap)
 		if err != nil {
 			utils.LogErrorForObject(helper, err, "could not resolve ansible host vars", instance)
 			return "", err
@@ -207,7 +209,7 @@ func populateInventoryFromIPAM(
 	var dnsSearchDomains []string
 	for _, res := range ipSet.Status.Reservation {
 		// Build the vars for ips/routes etc
-		entry := strings.ToLower(string(res.Network))
+		entry := string(res.ServiceNetwork)
 		host.Vars[entry+"_ip"] = res.Address
 		_, ipnet, err := net.ParseCIDR(res.Cidr)
 		if err == nil {
@@ -240,7 +242,8 @@ func populateInventoryFromIPAM(
 
 // set group ansible vars from NodeTemplate
 func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.Group,
-	containerImages openstackv1.ContainerImages) error {
+	containerImages openstackv1.ContainerImages,
+	netServiceNetMap map[string]string) error {
 
 	if template.Ansible.AnsibleUser != "" {
 		group.Vars["ansible_user"] = template.Ansible.AnsibleUser
@@ -302,16 +305,19 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 		return err
 	}
 	if len(template.Networks) != 0 {
-		nets, netsLower := buildNetworkVars(template.Networks)
+		nets, serviceNetMap := buildNetworkVars(template.Networks, netServiceNetMap)
 		group.Vars["nodeset_networks"] = nets
-		group.Vars["networks_lower"] = netsLower
+		// We may get rid of networks_lower var after changing it's usage
+		group.Vars["networks_lower"] = serviceNetMap
+		group.Vars["network_servicenet_map"] = serviceNetMap
 	}
 
 	return nil
 }
 
 // set host ansible vars from NodeSection
-func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) error {
+func resolveHostAnsibleVars(node *dataplanev1.NodeSection,
+	host *ansible.Host, netServiceNetMap map[string]string) error {
 
 	if node.Ansible.AnsibleUser != "" {
 		host.Vars["ansible_user"] = node.Ansible.AnsibleUser
@@ -328,9 +334,11 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) e
 		return err
 	}
 	if len(node.Networks) != 0 {
-		nets, netsLower := buildNetworkVars(node.Networks)
+		nets, serviceNetMap := buildNetworkVars(node.Networks, netServiceNetMap)
 		host.Vars["nodeset_networks"] = nets
-		host.Vars["networks_lower"] = netsLower
+		// We may get rid of networks_lower var after changing it's usage
+		host.Vars["networks_lower"] = serviceNetMap
+		host.Vars["network_servicenet_map"] = serviceNetMap
 	}
 	return nil
 
@@ -351,16 +359,17 @@ func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
 	return nil
 }
 
-func buildNetworkVars(networks []infranetworkv1.IPSetNetwork) ([]string, map[string]string) {
-	netsLower := make(map[string]string)
+func buildNetworkVars(networks []infranetworkv1.IPSetNetwork,
+	netServiceNetMap map[string]string) ([]string, map[string]string) {
+	serviceNetMap := make(map[string]string)
 	var nets []string
 	for _, network := range networks {
 		netName := string(network.Name)
-		if strings.EqualFold(netName, dataplanev1.CtlPlaneNetwork) {
+		if netServiceNetMap[strings.ToLower(netName)] == dataplanev1.CtlPlaneNetwork {
 			continue
 		}
 		nets = append(nets, netName)
-		netsLower[netName] = strings.ToLower(netName)
+		serviceNetMap[netName] = netServiceNetMap[strings.ToLower(netName)]
 	}
-	return nets, netsLower
+	return nets, serviceNetMap
 }

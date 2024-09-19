@@ -230,7 +230,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Ensure IPSets Required for Nodes
-	allIPSets, isReady, err := deployment.EnsureIPSets(ctx, helper, instance)
+	allIPSets, netServiceNetMap, isReady, err := deployment.EnsureIPSets(ctx, helper, instance)
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
@@ -390,7 +390,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if !isDeploymentRunning && !isDeploymentFailed {
 		// Generate NodeSet Inventory
 		_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
-			allIPSets, dnsDetails.ServerAddresses, containerImages)
+			allIPSets, dnsDetails.ServerAddresses, containerImages, netServiceNetMap)
 		if err != nil {
 			errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
 			util.LogErrorForObject(helper, err, errorMsg, instance)
