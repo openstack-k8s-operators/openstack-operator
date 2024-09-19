@@ -380,6 +380,13 @@ func (in *OpenStackDataPlaneDeploymentStatus) DeepCopyInto(out *OpenStackDataPla
 			(*out)[key] = outVal
 		}
 	}
+	if in.AnsibleEEHashes != nil {
+		in, out := &in.AnsibleEEHashes, &out.AnsibleEEHashes
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.ConfigMapHashes != nil {
 		in, out := &in.ConfigMapHashes, &out.ConfigMapHashes
 		*out = make(map[string]string, len(*in))

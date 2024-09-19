@@ -155,6 +155,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -349,6 +350,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -557,6 +559,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -669,6 +672,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -819,6 +823,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -980,6 +985,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      []string{dataplaneServiceName.Name, "duplicate-service"},
 			}
@@ -1140,6 +1146,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      []string{"global-service"},
 			}
@@ -1346,6 +1353,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      []string{"foo-service", "global-service", "foo-update-service"},
 			}
@@ -1507,6 +1515,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -1609,6 +1618,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 				BackoffLimit:          ptr.To(int32(6)),
+				PreserveJobs:          true,
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1708,6 +1718,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 				BackoffLimit:          ptr.To(int32(6)),
+				PreserveJobs:          true,
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
