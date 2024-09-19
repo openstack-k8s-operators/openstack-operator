@@ -30,6 +30,7 @@ import (
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/labels"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 )
@@ -281,10 +282,11 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 func cleanupStaleReservations(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet) error {
 	ipSetList := &infranetworkv1.IPSetList{}
-	labelSelectorMap := map[string]string{IPSetOwnershipLabelKey: instance.Name}
+	labelSelector := labels.GetLabels(instance,
+		labels.GetGroupLabel(NodeSetLabel), map[string]string{})
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
-		client.MatchingLabels(labelSelectorMap),
+		client.MatchingLabels(labelSelector),
 	}
 
 	err := helper.GetClient().List(ctx, ipSetList, listOpts...)
@@ -352,8 +354,8 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 				},
 			}
 			_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ipSet, func() error {
-				ipSet.Labels = util.MergeStringMaps(ipSet.Labels,
-					map[string]string{IPSetOwnershipLabelKey: instance.Name})
+				ownerLabels := labels.GetLabels(instance, labels.GetGroupLabel(NodeSetLabel), map[string]string{})
+				ipSet.Labels = util.MergeStringMaps(ipSet.GetLabels(), ownerLabels)
 				ipSet.Spec.Networks = nets
 				// Set controller reference to the DataPlaneNode object
 				err := controllerutil.SetControllerReference(
