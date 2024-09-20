@@ -80,6 +80,7 @@ export RELATED_IMAGE_EDPM_NEUTRON_OVN_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-a
 export RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified
 export RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
 export RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT=quay.io/prometheus/node-exporter:v1.5.0
+export RELATED_IMAGE_EDPM_KEPLER_IMAGE_URL_DEFAULT=quay.io/sustainable_computing_io/kepler:release-0.7.11
 export RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tempest-all:current-podified
 export RELATED_IMAGE_TEST_TOBIKO_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
 export RELATED_IMAGE_TEST_ANSIBLETEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified

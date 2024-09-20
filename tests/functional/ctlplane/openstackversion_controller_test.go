@@ -131,6 +131,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.EdpmNeutronMetadataAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNeutronSriovAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.EdpmKeplerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmOvnBgpAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.GlanceAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.HeatAPIImage).ShouldNot(BeNil())
@@ -175,6 +176,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.SwiftObjectImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.SwiftProxyImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.EdpmKeplerImage).ShouldNot(BeNil())
 
 			}, timeout, interval).Should(Succeed())
 		})

@@ -69,6 +69,7 @@ ifeval::["{build}" != "downstream"]
         edpm_ovn_bgp_agent_local_ovn_northd_image: "quay.io/podified-antelope-centos9/openstack-ovn-northd
         edpm_ovn_bgp_agent_local_ovn_controller_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller
         edpm_telemetry_node_exporter_image: quay.io/prometheus/node-exporter
+        edpm_telemetry_kepler_image: "quay.io/sustainable_computing_io/kepler"
         edpm_telemetry_ceilometer_compute_image: quay.io/podified-antelope-centos9/openstack-ceilometer-compute
         edpm_telemetry_ceilometer_ipmi_image: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi
         edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute
@@ -93,6 +94,7 @@ ifeval::["{build}" == "downstream"]
         edpm_ovn_bgp_agent_local_ovn_northd_image: "redhat.registry.io/rhoso-beta/openstack-ovn-northd-rhel9:18.0.0
         edpm_ovn_bgp_agent_local_ovn_controller_image: "redhat.registry.io/rhoso-beta/openstack-ovn-controller-rhel9:18.0.0
         edpm_telemetry_node_exporter_image: redhat.registry.io/prometheus/node-exporter-rhel9:18.0.0
+        edpm_telemetry_kepler_image: "registry.redhat.io/openshift-power-monitoring/kepler-rhel9:v0.7.10-2"
         edpm_telemetry_ceilometer_compute_image: redhat.registry.io/rhoso-beta/openstack-ceilometer-compute-rhel9:18.0.0
         edpm_telemetry_ceilometer_ipmi_image: redhat.registry.io/rhoso-beta/openstack-ceilometer-ipmi-rhel9:18.0.0
         edpm_nova_compute_image: "redhat.registry.io/rhoso-beta/openstack-nova-compute-rhel9:18.0.0

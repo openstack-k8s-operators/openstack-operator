@@ -97,6 +97,8 @@ spec:
                     type: string
                   edpmIscsidImage:
                     type: string
+                  edpmKeplerImage:
+                    type: string
                   edpmLogrotateCrondImage:
                     type: string
                   edpmMultipathdImage:
@@ -302,6 +304,8 @@ spec:
                       type: string
                     edpmIscsidImage:
                       type: string
+                    edpmKeplerImage:
+                      type: string
                     edpmLogrotateCrondImage:
                       type: string
                     edpmMultipathdImage:
@@ -477,6 +481,8 @@ spec:
                   edpmFrrImage:
                     type: string
                   edpmIscsidImage:
+                    type: string
+                  edpmKeplerImage:
                     type: string
                   edpmLogrotateCrondImage:
                     type: string

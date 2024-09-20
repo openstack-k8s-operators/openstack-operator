@@ -16,3 +16,4 @@ spec:
   - CeilometerComputeImage
   - CeilometerIpmiImage
   - EdpmNodeExporterImage
+  - EdpmKeplerImage
