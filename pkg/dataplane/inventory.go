@@ -38,8 +38,7 @@ import (
 
 // getAnsibleVarsFrom gets ansible vars from ConfigMap/Secret
 func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]interface{}, error) {
-
-	var result = make(map[string]interface{})
+	result := make(map[string]interface{})
 	var value interface{}
 
 	for _, dataSource := range ansible.AnsibleVarsFrom {
@@ -90,7 +89,8 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string,
 	containerImages openstackv1.ContainerImages,
-	netServiceNetMap map[string]string) (string, error) {
+	netServiceNetMap map[string]string,
+) (string, error) {
 	inventory := ansible.MakeInventory()
 	nodeSetGroup := inventory.AddGroup(instance.Name)
 	groupVars, err := getAnsibleVarsFrom(ctx, helper, instance.Namespace, &instance.Spec.NodeTemplate.Ansible)
@@ -110,6 +110,23 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 
 	// add the NodeSet name variable
 	nodeSetGroup.Vars["edpm_nodeset_name"] = instance.Name
+
+	isDisconnected, err := util.IsDisconnectedOCP(ctx, helper)
+	if err != nil {
+		return "", err
+	}
+
+	if isDisconnected {
+		registryConfig, err := util.GetMCRegistryConf(ctx, helper)
+		if err != nil {
+			return "", err
+		}
+		helper.GetLogger().Info("disconnected registry was identified via the ImageContentSourcePolicy. Using OCP registry.")
+
+		// Use OCP registries.conf for disconnected deployments
+		nodeSetGroup.Vars["edpm_podman_registries_conf"] = registryConfig
+		nodeSetGroup.Vars["edpm_podman_disconnected_ocp"] = isDisconnected
+	}
 
 	// add TLS ansible variable
 	nodeSetGroup.Vars["edpm_tls_certs_enabled"] = instance.Spec.TLSEnabled
@@ -205,7 +222,8 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 // populateInventoryFromIPAM populates inventory from IPAM
 func populateInventoryFromIPAM(
 	ipSet *infranetworkv1.IPSet, host ansible.Host,
-	dnsAddresses []string, hostName string) {
+	dnsAddresses []string, hostName string,
+) {
 	var dnsSearchDomains []string
 	for _, res := range ipSet.Status.Reservation {
 		// Build the vars for ips/routes etc
@@ -243,8 +261,8 @@ func populateInventoryFromIPAM(
 // set group ansible vars from NodeTemplate
 func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.Group,
 	containerImages openstackv1.ContainerImages,
-	netServiceNetMap map[string]string) error {
-
+	netServiceNetMap map[string]string,
+) error {
 	if template.Ansible.AnsibleUser != "" {
 		group.Vars["ansible_user"] = template.Ansible.AnsibleUser
 	}
@@ -320,8 +338,8 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 
 // set host ansible vars from NodeSection
 func resolveHostAnsibleVars(node *dataplanev1.NodeSection,
-	host *ansible.Host, netServiceNetMap map[string]string) error {
-
+	host *ansible.Host, netServiceNetMap map[string]string,
+) error {
 	if node.Ansible.AnsibleUser != "" {
 		host.Vars["ansible_user"] = node.Ansible.AnsibleUser
 	}
@@ -344,13 +362,12 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection,
 		host.Vars["network_servicenet_map"] = serviceNetMap
 	}
 	return nil
-
 }
 
 // unmarshal raw strings into an ansible vars dictionary
 func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
-	parsedVars map[string]interface{}) error {
-
+	parsedVars map[string]interface{},
+) error {
 	for key, val := range ansibleVars {
 		var v interface{}
 		err := yaml.Unmarshal(val, &v)
@@ -363,7 +380,8 @@ func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
 }
 
 func buildNetworkVars(networks []infranetworkv1.IPSetNetwork,
-	netServiceNetMap map[string]string) ([]string, map[string]string) {
+	netServiceNetMap map[string]string,
+) ([]string, map[string]string) {
 	serviceNetMap := make(map[string]string)
 	var nets []string
 	for _, network := range networks {

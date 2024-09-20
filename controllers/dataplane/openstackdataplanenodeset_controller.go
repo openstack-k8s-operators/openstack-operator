@@ -120,6 +120,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 // +kubebuilder:rbac:groups="image.openshift.io",resources=imagetags,verbs=get;list;watch
 // +kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamtags,verbs=get;list;watch
 
+// RBAC for ImageContentSourcePolicy and MachineConfig
+// +kubebuilder:rbac:groups="operator.openshift.io",resources=imagecontentsourcepolicy,verbs=get;list
+// +kubebuilder:rbac:groups="machineconfiguration.openshift.io",resources=machineconfig,verbs=get;list
+
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
@@ -565,7 +569,8 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
-	ctx context.Context, mgr ctrl.Manager) error {
+	ctx context.Context, mgr ctrl.Manager,
+) error {
 	// index for ConfigMaps listed on ansibleVarsFrom
 	if err := mgr.GetFieldIndexer().IndexField(ctx,
 		&dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.configMaps",
