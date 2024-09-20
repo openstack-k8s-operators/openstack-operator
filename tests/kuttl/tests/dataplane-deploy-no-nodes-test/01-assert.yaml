@@ -682,6 +682,20 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/ovn
+          name: ovn-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/neutron-metadata
+          name: neutron-metadata-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/neutron-ovn
+          name: neutron-ovn-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/neutron-sriov
+          name: neutron-sriov-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/neutron-dhcp
+          name: neutron-dhcp-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/libvirt
+          name: libvirt-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/nova
+          name: nova-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -695,6 +709,34 @@ spec:
       serviceAccountName: edpm-compute-no-nodes
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: ovn-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: neutron-metadata-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: neutron-ovn-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: neutron-sriov-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: neutron-dhcp-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: libvirt-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: nova-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
