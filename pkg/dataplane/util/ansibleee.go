@@ -230,10 +230,14 @@ func labelsForOpenStackAnsibleEE(name string, labels map[string]string) map[stri
 }
 
 func (a *EEJob) addEnvFrom(job *batchv1.Job) {
+	// Add optional config map
+
+	optional := true
 	job.Spec.Template.Spec.Containers[0].EnvFrom = []corev1.EnvFromSource{
 		{
 			ConfigMapRef: &corev1.ConfigMapEnvSource{
 				LocalObjectReference: corev1.LocalObjectReference{Name: a.EnvConfigMapName},
+				Optional:             &(optional),
 			},
 		},
 	}

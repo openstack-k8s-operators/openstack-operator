@@ -63,9 +63,10 @@ func AnsibleExecution(
 	}
 
 	ansibleEE := EEJob{
-		Name:      executionName,
-		Namespace: deployment.GetNamespace(),
-		Labels:    labels,
+		Name:             executionName,
+		Namespace:        deployment.GetNamespace(),
+		Labels:           labels,
+		EnvConfigMapName: "openstack-aee-default-env",
 	}
 
 	ansibleEE.NetworkAttachments = aeeSpec.NetworkAttachments
