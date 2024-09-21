@@ -344,7 +344,7 @@ func reconcileRabbitMQ(
 											Key:      "app.kubernetes.io/name",
 											Operator: metav1.LabelSelectorOpIn,
 											Values: []string{
-												"pod-anti-affinity",
+												rabbitmq.Name,
 											},
 										},
 									},
