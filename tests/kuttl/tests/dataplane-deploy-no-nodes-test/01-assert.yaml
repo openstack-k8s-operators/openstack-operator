@@ -435,6 +435,55 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
+    - mountPath: /var/lib/openstack/cacerts/ovn
+      name: ovn-combined-ca-bundle
+    volumes:
+    - name: ovn-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/neutron-metadata
+      name: neutron-metadata-combined-ca-bundle
+    volumes:
+    - name: neutron-metadata-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/neutron-ovn
+      name: neutron-ovn-combined-ca-bundle
+    volumes:
+    - name: neutron-ovn-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/neutron-sriov
+      name: neutron-sriov-combined-ca-bundle
+    volumes:
+    - name: neutron-sriov-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/neutron-dhcp
+      name: neutron-dhcp-combined-ca-bundle
+    volumes:
+    - name: neutron-dhcp-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/libvirt
+      name: libvirt-combined-ca-bundle
+    volumes:
+    - name: libvirt-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
+    - mountPath: /var/lib/openstack/cacerts/nova
+      name: nova-combined-ca-bundle
+    volumes:
+    - name: nova-combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  - mounts:
     - mountPath: /runner/env/ssh_key
       name: ssh-key
       subPath: ssh_key
