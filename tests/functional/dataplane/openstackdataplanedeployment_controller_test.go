@@ -1777,4 +1777,167 @@ var _ = Describe("Dataplane Deployment Test", func() {
 
 	})
 
+	When("A dataplaneDeployment is created with matching NodeSet and additional AEE options", func() {
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaNeutronMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			// DefaultDataPlanenodeSetSpec comes with three mock services
+			// default service
+			CreateDataplaneService(dataplaneServiceName, false)
+			// marked for deployment on all nodesets
+			CreateDataplaneService(dataplaneGlobalServiceName, true)
+			// with EDPMServiceType set
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
+				"edpmServiceType":               "foo-update-service",
+				"openStackAnsibleEERunnerImage": "foo-image:latest"})
+			deploymentSpec := DefaultDataPlaneDeploymentSpec()
+			deploymentSpec["ansibleEeConfig"] = dataplanev1.DataSource{
+				ConfigMapRef: &dataplanev1.ConfigMapEnvSource{
+					LocalObjectReference: dataplanev1.LocalObjectReference{
+						Name: "additionalaeeonf",
+					},
+					Optional: ptr.To(true),
+				},
+			}
+			// Create config map for OVN service
+			aEEConfigMapName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "additionalaeeonf",
+			}
+			mapData := map[string]interface{}{
+				"envConfigMapName": "test-config-map",
+			}
+			th.CreateConfigMap(aEEConfigMapName, mapData)
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, deploymentSpec))
+		})
+
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:              []string{"edpm-compute-nodeset"},
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				BackoffLimit:          &DefaultBackoffLimit,
+				PreserveJobs:          true,
+				DeploymentRequeueTime: 15,
+				ServicesOverride:      nil,
+				AnsibleEEConfig: dataplanev1.DataSource{
+					ConfigMapRef: &dataplanev1.ConfigMapEnvSource{
+						LocalObjectReference: dataplanev1.LocalObjectReference{
+							Name: "additionalaeeonf",
+						},
+						Optional: ptr.To(true),
+					},
+				},
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+		})
+
+		It("should have conditions set", func() {
+
+			nodeSet := dataplanev1.OpenStackDataPlaneNodeSet{}
+			baremetal := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      nodeSet.Name,
+					Namespace: nodeSet.Namespace,
+				},
+			}
+			// Create config map for OVN service
+			ovnConfigMapName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "ovncontroller-config",
+			}
+			mapData := map[string]interface{}{
+				"ovsdb-config": "test-ovn-config",
+			}
+			th.CreateConfigMap(ovnConfigMapName, mapData)
+
+			nodeSet = *GetDataplaneNodeSet(dataplaneNodeSetName)
+
+			// Set baremetal provisioning conditions to True
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName, &baremetal)).To(Succeed())
+				baremetal.Status.Conditions.MarkTrue(
+					condition.ReadyCondition,
+					condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// Create all services necessary for deployment
+			for _, serviceName := range nodeSet.Spec.Services {
+				dataplaneServiceName := types.NamespacedName{
+					Name:      serviceName,
+					Namespace: namespace,
+				}
+				service := GetService(dataplaneServiceName)
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				//Retrieve service AnsibleEE and set JobStatus to Successful
+				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
+					service, deployment.GetName(), nodeSet.GetName())
+				Eventually(func(g Gomega) {
+					// Make an AnsibleEE name for each service
+					ansibleeeName := types.NamespacedName{
+						Name:      aeeName,
+						Namespace: dataplaneDeploymentName.Namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+
+					ansibleEE.Status.Succeeded = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+					if service.Spec.EDPMServiceType != "" {
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("edpm_service_type"))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(service.Spec.EDPMServiceType))
+					} else {
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(serviceName))
+					}
+					if service.Spec.DeployOnAllNodeSets {
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("edpm_override_hosts"))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("all"))
+					} else {
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring("edpm_override_hosts"))
+						g.Expect(findEnvVar(ansibleEE.Spec.Template.Spec.Containers[0].Env).Value).To(ContainSubstring(dataplaneNodeSetName.Name))
+					}
+				}, th.Timeout, th.Interval).Should(Succeed())
+			}
+
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionTrue,
+			)
+		})
+	})
 })

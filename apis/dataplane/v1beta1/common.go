@@ -194,4 +194,7 @@ type AnsibleEESpec struct {
 	// the ansible execution run with. Without specifying, it will run with
 	// default serviceaccount
 	ServiceAccountName string
+	// EnvConfigMapName name of configuration config map to be used
+	// defaults to openstack-aee-default-env
+	EnvConfigMapName string `json:"envConfigMapName,omitempty"`
 }

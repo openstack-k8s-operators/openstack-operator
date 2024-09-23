@@ -50,7 +50,6 @@ func AnsibleExecution(
 	nodeSet client.Object,
 ) error {
 	var err error
-
 	executionName, labels := GetAnsibleExecutionNameAndLabels(service, deployment.GetName(), nodeSet.GetName())
 
 	existingAnsibleEE, err := GetAnsibleExecution(ctx, helper, deployment, labels)
@@ -67,7 +66,7 @@ func AnsibleExecution(
 		Name:             executionName,
 		Namespace:        deployment.GetNamespace(),
 		Labels:           labels,
-		EnvConfigMapName: "openstack-aee-default-env",
+		EnvConfigMapName: aeeSpec.EnvConfigMapName,
 	}
 
 	ansibleEE.NetworkAttachments = aeeSpec.NetworkAttachments
