@@ -24,8 +24,6 @@ import (
 	"strconv"
 	"strings"
 
-	yaml "gopkg.in/yaml.v3"
-
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -303,7 +301,7 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 		group.Vars["edpm_telemetry_kepler_image"] = containerImages.EdpmKeplerImage
 	}
 
-	err := unmarshalAnsibleVars(template.Ansible.AnsibleVars, group.Vars)
+	err := util.UnmarshalRawStrings(template.Ansible.AnsibleVars, group.Vars)
 	if err != nil {
 		return err
 	}
@@ -332,7 +330,7 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection,
 		host.Vars["management_network"] = node.ManagementNetwork
 	}
 
-	err := unmarshalAnsibleVars(node.Ansible.AnsibleVars, host.Vars)
+	err := util.UnmarshalRawStrings(node.Ansible.AnsibleVars, host.Vars)
 	if err != nil {
 		return err
 	}
@@ -345,21 +343,6 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection,
 	}
 	return nil
 
-}
-
-// unmarshal raw strings into an ansible vars dictionary
-func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
-	parsedVars map[string]interface{}) error {
-
-	for key, val := range ansibleVars {
-		var v interface{}
-		err := yaml.Unmarshal(val, &v)
-		if err != nil {
-			return err
-		}
-		parsedVars[key] = v
-	}
-	return nil
 }
 
 func buildNetworkVars(networks []infranetworkv1.IPSetNetwork,
