@@ -34,8 +34,8 @@ For user-provisioned insfrastructure a provisioning CR has to be created manuall
  metadata:
    name: provisioning-configuration
  spec:
- provisioningNetwork: "Disabled"
- watchAllNamespaces: false
+   provisioningNetwork: "Disabled"
+   watchAllNamespaces: false
 
 BMO manages the available hosts on clusters and performs the following operations:
 
@@ -67,11 +67,11 @@ Sample BMH spec:
  apiVersion: metal3.io/v1alpha1
  kind: BareMetalHost
  metadata:
- name: edpm-compute-01
- namespace: openstack
- labels:
-   app: openstack
-   workload: compute
+   name: edpm-compute-01
+   namespace: openstack
+   labels:
+     app: openstack
+     workload: compute
  spec:
    bmc:
      address: redfish+http://192.168.111.1:8000/redfish/v1/Systems/e8efd888-f844-4fe0-9e2e-498f4ab7806d
