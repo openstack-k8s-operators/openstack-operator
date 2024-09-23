@@ -14,7 +14,7 @@ spec:
         - name: RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
         - name: RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT
-          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:18.0.0-proposed-latest
         - name: RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-aodh-api:current-podified
         - name: RELATED_IMAGE_AODH_EVALUATOR_IMAGE_URL_DEFAULT
