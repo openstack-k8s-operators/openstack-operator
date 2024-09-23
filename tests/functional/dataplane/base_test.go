@@ -165,6 +165,7 @@ func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
 				"hostName": "edpm-compute-node-1",
 				"networks": []infrav1.IPSetNetwork{
+					{Name: "networkinternal", SubnetName: "subnet1"},
 					{Name: "ctlplane", SubnetName: "subnet1"},
 				},
 			},
@@ -197,6 +198,7 @@ func DuplicateServiceNodeSetSpec(nodeSetName string) map[string]interface{} {
 			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
 				"hostName": "edpm-compute-node-1",
 				"networks": []infrav1.IPSetNetwork{
+					{Name: "networkinternal", SubnetName: "subnet1"},
 					{Name: "ctlplane", SubnetName: "subnet1"},
 				},
 			},
@@ -213,6 +215,7 @@ func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 		"preProvisioned": true,
 		"nodeTemplate": map[string]interface{}{
 			"networks": []infrav1.IPSetNetwork{
+				{Name: "networkinternal", SubnetName: "subnet1"},
 				{Name: "ctlplane", SubnetName: "subnet1"},
 			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
@@ -290,9 +293,10 @@ func SingleGlobalServiceDeploymentSpec() map[string]interface{} {
 func DefaultNetConfigSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"networks": []map[string]interface{}{{
-			"dnsDomain": "test-domain.test",
-			"mtu":       1500,
-			"name":      "CtlPLane",
+			"dnsDomain":  "test-domain.test",
+			"mtu":        1500,
+			"name":       "CtlPlane",
+			"serviceNet": "ctlplane",
 			"subnets": []map[string]interface{}{{
 				"allocationRanges": []map[string]interface{}{{
 					"end":   "172.20.12.120",
@@ -302,6 +306,22 @@ func DefaultNetConfigSpec() map[string]interface{} {
 				"name":    "subnet1",
 				"cidr":    "172.20.12.0/16",
 				"gateway": "172.20.12.1",
+			},
+			},
+		}, {
+			"dnsDomain":  "test-domain.test",
+			"mtu":        1500,
+			"name":       "networkinternal",
+			"serviceNet": "internalapi",
+			"subnets": []map[string]interface{}{{
+				"allocationRanges": []map[string]interface{}{{
+					"end":   "172.20.13.120",
+					"start": "172.20.13.0",
+				},
+				},
+				"name":    "subnet1",
+				"cidr":    "172.20.13.0/16",
+				"gateway": "172.20.13.1",
 			},
 			},
 		},
@@ -357,6 +377,15 @@ func SimulateIPSetComplete(name types.NamespacedName) {
 				Subnet:         "subnet1",
 				Gateway:        &gateway,
 				ServiceNetwork: "ctlplane",
+			},
+			{
+				Address:        "172.20.13.76",
+				Cidr:           "172.20.13.0/16",
+				MTU:            1500,
+				Network:        "NetworkInternal",
+				Subnet:         "subnet1",
+				Gateway:        &gateway,
+				ServiceNetwork: "internalapi",
 			},
 		}
 		// This can return conflict so we have the gomega.Eventually block to retry

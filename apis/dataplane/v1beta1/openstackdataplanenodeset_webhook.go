@@ -114,8 +114,6 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 	if err != nil {
 		return nil, err
 	}
-	errors = append(errors, r.Spec.ValidateNetworks()...)
-
 	// Check if OpenStackDataPlaneNodeSet name matches RFC1123 for use in labels
 	validate := validator.New()
 	if err := validate.Var(r.Name, "hostname_rfc1123"); err != nil {
@@ -185,7 +183,6 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admissio
 		return nil, err
 	}
 
-	errors = append(errors, r.Spec.ValidateNetworks()...)
 	errors = append(errors, r.Spec.ValidateUpdate(&oldNodeSet.Spec)...)
 
 	if errors != nil {
