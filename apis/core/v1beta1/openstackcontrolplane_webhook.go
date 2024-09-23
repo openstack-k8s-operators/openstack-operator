@@ -59,21 +59,8 @@ import (
 
 var ctlplaneWebhookClient client.Client
 
-// OpenStackControlPlaneDefaults -
-type OpenStackControlPlaneDefaults struct {
-	RabbitMqImageURL string
-}
-
-var openstackControlPlaneDefaults OpenStackControlPlaneDefaults
-
 // log is for logging in this package.
 var openstackcontrolplanelog = logf.Log.WithName("openstackcontrolplane-resource")
-
-// SetupOpenStackControlPlaneDefaults - initialize OpenStackControlPlane spec defaults for use with internal webhooks
-func SetupOpenStackControlPlaneDefaults(defaults OpenStackControlPlaneDefaults) {
-	openstackControlPlaneDefaults = defaults
-	openstackcontrolplanelog.Info("OpenStackControlPlane defaults initialized", "defaults", defaults)
-}
 
 // SetupWebhookWithManager sets up the Webhook with the Manager.
 func (r *OpenStackControlPlane) SetupWebhookWithManager(mgr ctrl.Manager) error {

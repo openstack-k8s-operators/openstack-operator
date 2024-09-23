@@ -253,7 +253,6 @@ func main() {
 	dataplanev1.SetupDefaults()
 
 	// Defaults for anything else that was not covered by OpenStackClient nor service operator defaults
-	corev1.SetupDefaults()
 	corev1.SetupVersionDefaults()
 
 	// Webhooks
