@@ -97,9 +97,9 @@ spec:
           replicas: 1
           dbType: SB
           storageRequest: 10G
+      ovnController: {}
       ovnNorthd:
         replicas: 1
-      ovnController: {}
   neutron:
     template:
       databaseInstance: openstack
