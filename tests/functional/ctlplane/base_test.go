@@ -496,7 +496,7 @@ func CreateCertSecret(name types.NamespacedName) *k8s_corev1.Secret {
 	key, _ := base64.StdEncoding.DecodeString(keyBase64)
 
 	s := &k8s_corev1.Secret{}
-	Eventually(func(g Gomega) {
+	Eventually(func(_ Gomega) {
 		s = th.CreateSecret(
 			name,
 			map[string][]byte{
@@ -512,7 +512,7 @@ func CreateCertSecret(name types.NamespacedName) *k8s_corev1.Secret {
 func CreateClusterConfigCM() client.Object {
 	var cm client.Object
 
-	Eventually(func(g Gomega) {
+	Eventually(func(_ Gomega) {
 		cm = th.CreateConfigMap(
 			types.NamespacedName{
 				Name:      "cluster-config-v1",
@@ -636,7 +636,7 @@ func SimulateControlplaneReady() {
 	}
 
 	// simulate pod ready for openstackclient
-	Eventually(func(g Gomega) {
+	Eventually(func(_ Gomega) {
 		th.SimulatePodReady(names.OpenStackClientName)
 		th.Logger.Info("Simulated OpenStackClient ready")
 
