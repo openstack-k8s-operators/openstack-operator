@@ -65,13 +65,6 @@ type EEJob struct {
 	Env []corev1.EnvVar `json:"env,omitempty"`
 }
 
-// EEJobInterface defines the functions required to format AnsibleEE kubernetes jobs
-type EEJobInterface interface {
-	JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
-	addEnvFrom(job *batchv1.Job)
-	addMounts(job *batchv1.Job)
-}
-
 // JobForOpenStackAnsibleEE returns a openstackansibleee Job object
 func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error) {
 	const (
@@ -186,6 +179,7 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 	}
 
 	a.addMounts(job)
+	a.addEnvFrom(job)
 
 	// if we have any extra vars for ansible to use set them in the RUNNER_EXTRA_VARS
 	if len(a.ExtraVars) > 0 {
@@ -231,13 +225,12 @@ func labelsForOpenStackAnsibleEE(name string, labels map[string]string) map[stri
 
 func (a *EEJob) addEnvFrom(job *batchv1.Job) {
 	// Add optional config map
-
 	optional := true
 	job.Spec.Template.Spec.Containers[0].EnvFrom = []corev1.EnvFromSource{
 		{
 			ConfigMapRef: &corev1.ConfigMapEnvSource{
 				LocalObjectReference: corev1.LocalObjectReference{Name: a.EnvConfigMapName},
-				Optional:             &(optional),
+				Optional:             &optional,
 			},
 		},
 	}
