@@ -1369,4 +1369,29 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			}, th.Timeout, th.Interval).Should(Succeed())
 		})
 	})
+
+	When("A ImageContentSourcePolicy exists in the cluster", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+			nodeSetSpec["preProvisioned"] = true
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateICSP(dataplaneNodeSetName, DefaultICSPSpec())
+			CreateMachineConfig()
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+
+		})
+		It("Should set edpm_podman_disconnected_ocp variable", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			Expect(secret.Data["inventory"]).Should(
+				ContainSubstring("edpm_podman_disconnected_ocp"))
+			Expect(secret.Data["inventory"]).Should(
+				ContainSubstring("edpm_podman_registries_conf"))
+		})
+	})
 })

@@ -49,6 +49,9 @@ import (
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 
+	machineconfig "github.com/openshift/api/machineconfiguration/v1"
+	ocp_image "github.com/openshift/api/operator/v1alpha1"
+
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	test "github.com/openstack-k8s-operators/lib-common/modules/test"
@@ -101,6 +104,10 @@ var _ = BeforeSuite(func() {
 	openstackCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/openstack-operator/apis", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	imageContentSourcePolicyCRDs, err := test.GetCRDDirFromModule("github.com/openshift/api", gomod, "operator/v1alpha1/zz_generated.crd-manifests/")
+	Expect(err).ShouldNot(HaveOccurred())
+	machineConfigCRDs, err := test.GetCRDDirFromModule("github.com/openshift/api", gomod, "machineconfiguration/v1/zz_generated.crd-manifests/0000_80_machine-config_01_machineconfigs.crd.yaml")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -110,6 +117,8 @@ var _ = BeforeSuite(func() {
 			infraCRDs,
 			certmgrv1CRDs,
 			openstackCRDs,
+			imageContentSourcePolicyCRDs,
+			machineConfigCRDs,
 		},
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
 			Paths: []string{filepath.Join("..", "..", "..", "config", "webhook")},
@@ -145,6 +154,11 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = certmgrv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+	err = machineconfig.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = ocp_image.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
 	// +kubebuilder:scaffold:scheme
 
 	logger = ctrl.Log.WithName("---DataPlane Test---")
