@@ -30,6 +30,48 @@ var DefaultEdpmServiceAnsibleVarList = []string{
 var CustomEdpmServiceDomainTag = "test-image:latest"
 var DefaultBackoffLimit = int32(6)
 
+func CreateICSP(name types.NamespacedName, spec map[string]interface{}) client.Object {
+	raw := map[string]interface{}{
+		"apiVersion": "operator.openshift.io/v1alpha1",
+		"kind":       "ImageContentSourcePolicy",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+	return th.CreateUnstructured(raw)
+}
+
+func CreateMachineConfig() client.Object {
+	raw := map[string]interface{}{
+		"apiVersion": "machineconfiguration.openshift.io/v1",
+		"kind":       "MachineConfig",
+		"metadata": map[string]interface{}{
+			"name": "99-master-generated-registries",
+		},
+		"spec": map[string]interface{}{
+			"config": map[string]interface{}{
+				"storage": map[string]interface{}{
+					"files": []interface{}{
+						map[string]interface{}{
+							"contents": map[string]interface{}{
+								"source":      "data:text/plain;charset=utf-8;base64,dW5xdWFsaWZpZWQtc2VhcmNoLXJlZ2lzdHJpZXMgPSBbInJlZ2lzdHJ5LmFjY2Vzcy5yZWRoYXQuY29tIiwgImRvY2tlci5pbyJdCnNob3J0LW5hbWUtbW9kZSA9ICIiCgpbW3JlZ2lzdHJ5XV0KICBwcmVmaXggPSAiIgogIGxvY2F0aW9uID0gInJlZ2lzdHJ5LmNpLm9wZW5zaGlmdC5vcmcvb3JpZ2luLzQuMTMtMjAyMy0wMi0yNi0xNjMwMzAiCgogIFtbcmVnaXN0cnkubWlycm9yXV0KICAgIGxvY2F0aW9uID0gInJlZ2lzdHJ5Lm9rZC5ibmUtc2hpZnQubmV0Ojg0NDMvb2tkIgogICAgcHVsbC1mcm9tLW1pcnJvciA9ICJkaWdlc3Qtb25seSIKCltbcmVnaXN0cnldXQogIHByZWZpeCA9ICIiCiAgbG9jYXRpb24gPSAicmVnaXN0cnkuY2kub3BlbnNoaWZ0Lm9yZy9vcmlnaW4vNC4xMy0yMDIzLTAzLTA3LTA5NDQwNiIKCiAgW1tyZWdpc3RyeS5taXJyb3JdXQogICAgbG9jYXRpb24gPSAicmVnaXN0cnkub2tkLmJuZS1zaGlmdC5uZXQ6ODQ0My9va2QiCiAgICBwdWxsLWZyb20tbWlycm9yID0gImRpZ2VzdC1vbmx5IgoKW1tyZWdpc3RyeV1dCiAgcHJlZml4ID0gIiIKICBsb2NhdGlvbiA9ICJyZWdpc3RyeS5jaS5vcGVuc2hpZnQub3JnL29yaWdpbi9yZWxlYXNlIgoKICBbW3JlZ2lzdHJ5Lm1pcnJvcl1dCiAgICBsb2NhdGlvbiA9ICJyZWdpc3RyeS5va2QuYm5lLXNoaWZ0Lm5ldDo4NDQzL29rZCIKICAgIHB1bGwtZnJvbS1taXJyb3IgPSAiZGlnZXN0LW9ubHkiCg==",
+								"compression": "",
+							},
+						},
+					},
+				},
+			},
+			"overwrite": true,
+			"mode":      420,
+			"path":      "/etc/containers/registries.conf",
+		},
+	}
+
+	return th.CreateUnstructured(raw)
+}
+
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
 func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
 	instance := DefaultDataplaneNodeSetTemplate(name, spec)
@@ -128,7 +170,6 @@ func CreateOpenStackVersion(name types.NamespacedName) *unstructured.Unstructure
 }
 
 // Struct initialization
-
 func DefaultOpenStackVersion(name types.NamespacedName) map[string]interface{} {
 	return map[string]interface{}{
 		"apiVersion": "core.openstack.org/v1beta1",
@@ -142,6 +183,19 @@ func DefaultOpenStackVersion(name types.NamespacedName) map[string]interface{} {
 		},
 		"status": map[string]interface{}{
 			"availableVersion": "0.0.1",
+		},
+	}
+}
+
+func DefaultICSPSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"repositoryDigestMirrors": []interface{}{
+			map[string]interface{}{
+				"mirrors": []interface{}{
+					"registry.okd.bne-shift.net:8443/okd", // Change to a string
+				},
+				"source": "registry.ci.openshift.org/origin/release", // Move "source" here
+			},
 		},
 	}
 }
