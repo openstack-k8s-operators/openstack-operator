@@ -49,6 +49,7 @@ func AnsibleExecution(
 	aeeSpec *dataplanev1.AnsibleEESpec,
 	nodeSet client.Object,
 ) error {
+	const preserveJobs bool = true
 	var err error
 
 	executionName, labels := GetAnsibleExecutionNameAndLabels(service, deployment.GetName(), nodeSet.GetName())
@@ -94,7 +95,7 @@ func AnsibleExecution(
 	ansibleeeJob := job.NewJob(
 		jobDef,
 		ansibleEE.Name,
-		ansibleEE.PreserveJobs,
+		preserveJobs,
 		time.Duration(5)*time.Second,
 		currentJobHash,
 	)
@@ -103,7 +104,6 @@ func AnsibleExecution(
 		ctx,
 		helper,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -206,7 +206,6 @@ func (a *EEJob) BuildAeeJobSpec(
 	}
 
 	a.BackoffLimit = deployment.Spec.BackoffLimit
-	a.PreserveJobs = deployment.Spec.PreserveJobs
 	a.FormatAEECmdLineArguments(aeeSpec)
 	a.FormatAEEExtraVars(aeeSpec, service, deployment, nodeSet)
 	a.DetermineAeeImage(aeeSpec)

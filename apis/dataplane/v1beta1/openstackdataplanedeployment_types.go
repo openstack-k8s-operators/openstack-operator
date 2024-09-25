@@ -35,12 +35,6 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
 
-	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
-	// PreserveJobs default: true
-	// +kubebuilder:validation:Enum:=true;false
-	// +kubebuilder:default:=true
-	PreserveJobs bool `json:"preserveJobs,omitempty"`
-
 	// AnsibleTags for ansible execution
 	// +kubebuilder:validation:Optional
 	AnsibleTags string `json:"ansibleTags,omitempty"`
@@ -93,7 +87,7 @@ type OpenStackDataPlaneDeploymentStatus struct {
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 
-	//ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
+	// ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 
 	// DeployedVersion

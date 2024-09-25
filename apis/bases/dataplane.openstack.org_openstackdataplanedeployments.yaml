@@ -65,12 +65,6 @@ spec:
                   type: string
                 minItems: 1
                 type: array
-              preserveJobs:
-                default: true
-                enum:
-                - true
-                - false
-                type: boolean
               servicesOverride:
                 items:
                   type: string

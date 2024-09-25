@@ -42,9 +42,6 @@ type EEJob struct {
 	Args []string `json:"args,omitempty"`
 	// NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`
-	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
-	// PreserveJobs default: true
-	PreserveJobs bool `json:"preserveJobs,omitempty"`
 	// BackoffLimit allows to define the maximum number of retried executions (defaults to 6).
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
 	// UID is the userid that will be used to run the container.
