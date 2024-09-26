@@ -314,13 +314,6 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 			return false, err
 		}
 		return false, nil
-	} else if len(instance.Spec.Ovn.Template.OVNController.NicMappings) == 0 {
-		// If nicMappings is not configured there's no need to start ovn-controller
-		Log.Info("OVN Controller has no nicMappings configured, forcing ready condition to true.")
-		if _, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
-			return false, err
-		}
-		return true, nil
 	}
 
 	ovnControllerSpec := &instance.Spec.Ovn.Template.OVNController
