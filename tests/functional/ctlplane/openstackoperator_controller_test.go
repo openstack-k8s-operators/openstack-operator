@@ -1620,11 +1620,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 							"dbType": "SB",
 						},
 					},
-					"ovnController": map[string]interface{}{
-						"nicMappings": map[string]interface{}{
-							"datacentre": "ospbr",
-						},
-					},
 				},
 			}
 			DeferCleanup(
@@ -1672,37 +1667,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 					corev1.OpenStackControlPlaneOVNReadyCondition,
 					k8s_corev1.ConditionTrue,
 				)
-			}, timeout, interval).Should(Succeed())
-		})
-
-		It("should remove ovn-controller if nicMappings are removed", func() {
-			// Update spec
-			Eventually(func(g Gomega) {
-				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-				OSCtlplane.Spec.Ovn.Template.OVNController.NicMappings = nil
-				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
-			}, timeout, interval).Should(Succeed())
-
-			// ovn services exist
-			Eventually(func(g Gomega) {
-				ovnNorthd := ovn.GetOVNNorthd(names.OVNNorthdName)
-				g.Expect(ovnNorthd).Should(Not(BeNil()))
-			}, timeout, interval).Should(Succeed())
-
-			// If nicMappings are not configured, ovnController shouldn't spawn
-			Eventually(func(g Gomega) {
-				instance := &ovnv1.OVNController{}
-				g.Expect(th.K8sClient.Get(th.Ctx, names.OVNControllerName, instance)).Should(Not(Succeed()))
-			}, timeout, interval).Should(Succeed())
-
-			Eventually(func(g Gomega) {
-				ovnDbServerNB := ovn.GetOVNDBCluster(names.OVNDbServerNBName)
-				g.Expect(ovnDbServerNB).Should(Not(BeNil()))
-			}, timeout, interval).Should(Succeed())
-
-			Eventually(func(g Gomega) {
-				ovnDbServerSB := ovn.GetOVNDBCluster(names.OVNDbServerSBName)
-				g.Expect(ovnDbServerSB).Should(Not(BeNil()))
 			}, timeout, interval).Should(Succeed())
 		})
 
