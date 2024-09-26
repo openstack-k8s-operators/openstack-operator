@@ -90,6 +90,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 		nodeSetHostMap := make(map[string]baremetalv1.InstanceSpec)
 		for _, node := range spec.Nodes {
 			instanceSpec := baremetalv1.InstanceSpec{}
+			instanceSpec.BmhLabelSelector = node.BmhLabelSelector
 			instanceSpec.UserData = node.UserData
 			instanceSpec.NetworkData = node.NetworkData
 			instanceSpec.PreprovisioningNetworkDataName = node.PreprovisioningNetworkDataName

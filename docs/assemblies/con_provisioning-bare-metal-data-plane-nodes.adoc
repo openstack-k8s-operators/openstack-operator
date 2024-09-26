@@ -90,7 +90,10 @@ For virtual-media provisioning BMC address should use virtual-media as below.
 
 To provision the baremetal nodes for edpm, OpenStackDataPlaneNodeSet spec should have the
 `baremetalSetTemplate` section as show below. Other than `bmhLabelSelector`, `hardwareReqs`
-field can also be provided for appropriate BMH selection.
+field can also be provided for appropriate BMH selection. To select a particular BMH for a
+node, `bmhLabelSelector` can be provided in the node section of the `OpenStackDataPlaneNodeSet`
+spec. These labels would be used in addition to the labels set in `baremetalSetTemplate` to
+select BMHs for the node.
 
  apiVersion: dataplane.openstack.org/v1beta1
  kind: OpenStackDataPlaneNodeSet
@@ -103,6 +106,13 @@ field can also be provided for appropriate BMH selection.
        workload: compute
      ctlplaneInterface: enp1s0
      cloudUserName: cloud-admin
+   nodes:
+     edpm-compute-0
+       hostName: edpm-compute-0
+       ansible:
+         ansibleHost: 192.168.122.100
+       bmhLabelSelector:
+         nodeName: edpm-compute-01
 
 === Relevant Status Condition
 

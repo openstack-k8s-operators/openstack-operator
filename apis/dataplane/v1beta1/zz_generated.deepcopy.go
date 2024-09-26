@@ -193,6 +193,13 @@ func (in *NodeSection) DeepCopyInto(out *NodeSection) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.BmhLabelSelector != nil {
+		in, out := &in.BmhLabelSelector, &out.BmhLabelSelector
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.UserData != nil {
 		in, out := &in.UserData, &out.UserData
 		*out = new(v1.SecretReference)
