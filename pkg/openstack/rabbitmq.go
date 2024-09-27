@@ -394,6 +394,11 @@ func reconcileRabbitMQ(
 
 		rabbitmq.Spec.Rabbitmq.ErlangInetConfig = erlangInetConfig
 		rabbitmq.Spec.Rabbitmq.AdvancedConfig = ""
+		rabbitmq.Spec.TLS.CaSecretName = ""
+		rabbitmq.Spec.TLS.SecretName = ""
+		rabbitmq.Spec.TLS.DisableNonTLSListeners = false
+		rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{}
+		rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{}
 		if tlsCert != "" {
 			rabbitmq.Spec.TLS.CaSecretName = tlsCert
 			rabbitmq.Spec.TLS.SecretName = tlsCert
@@ -444,8 +449,9 @@ func reconcileRabbitMQ(
 ].
 `
 
-			rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{
-				{
+			rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Volumes = append(
+				rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Volumes,
+				corev1.Volume{
 					Name: "config-data",
 					VolumeSource: corev1.VolumeSource{
 						ConfigMap: &corev1.ConfigMapVolumeSource{
@@ -462,15 +468,16 @@ func reconcileRabbitMQ(
 						},
 					},
 				},
-			}
-			rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
-				{
+			)
+			rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].VolumeMounts = append(
+				rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].VolumeMounts,
+				corev1.VolumeMount{
 					MountPath: "/etc/rabbitmq/inter-node-tls.config",
 					ReadOnly:  true,
 					Name:      "config-data",
 					SubPath:   "inter_node_tls.config",
 				},
-			}
+			)
 		}
 
 		// overrides
