@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    service: ovn-controller
+status:
+  phase: Running
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    service: ovn-controller-ovs
+status:
+  phase: Running
