@@ -4977,6 +4977,10 @@ spec:
                     properties:
                       customServiceConfig:
                         type: string
+                      customServiceConfigSecrets:
+                        items:
+                          type: string
+                        type: array
                       databaseAccount:
                         default: heat
                         type: string
@@ -4991,6 +4995,10 @@ spec:
                         properties:
                           customServiceConfig:
                             type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5110,6 +5118,10 @@ spec:
                         properties:
                           customServiceConfig:
                             type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -5229,6 +5241,10 @@ spec:
                         properties:
                           customServiceConfig:
                             type: string
+                          customServiceConfigSecrets:
+                            items:
+                              type: string
+                            type: array
                           defaultConfigOverwrite:
                             additionalProperties:
                               type: string
@@ -10871,6 +10887,8 @@ spec:
                       amphoraImageContainerImage:
                         type: string
                       apacheContainerImage:
+                        type: string
+                      apiTimeout:
                         type: string
                       customServiceConfig:
                         default: '# add your customization here'
@@ -17268,6 +17286,13 @@ spec:
                           enabled:
                             default: true
                             type: boolean
+                          ksmTls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                           networkAttachmentDefinitions:
                             items:
                               type: string
@@ -17391,6 +17416,8 @@ spec:
                                 default:
                                   replicas: 2
                                 properties:
+                                  enableOtlpHttpReceiver:
+                                    type: boolean
                                   enableRemoteWriteReceiver:
                                     type: boolean
                                   externalLabels:
@@ -17519,8 +17546,32 @@ spec:
                                               required:
                                               - clientId
                                               type: object
-                                          required:
-                                          - managedIdentity
+                                            oauth:
+                                              properties:
+                                                clientId:
+                                                  minLength: 1
+                                                  type: string
+                                                clientSecret:
+                                                  properties:
+                                                    key:
+                                                      type: string
+                                                    name:
+                                                      type: string
+                                                    optional:
+                                                      type: boolean
+                                                  required:
+                                                  - key
+                                                  type: object
+                                                  x-kubernetes-map-type: atomic
+                                                tenantId:
+                                                  minLength: 1
+                                                  pattern: ^[0-9a-zA-Z-.]+$
+                                                  type: string
+                                              required:
+                                              - clientId
+                                              - clientSecret
+                                              - tenantId
+                                              type: object
                                           type: object
                                         basicAuth:
                                           properties:
@@ -17553,6 +17604,8 @@ spec:
                                           type: string
                                         bearerTokenFile:
                                           type: string
+                                        enableHTTP2:
+                                          type: boolean
                                         headers:
                                           additionalProperties:
                                             type: string
