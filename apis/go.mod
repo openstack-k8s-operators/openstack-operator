@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
-	github.com/openstack-k8s-operators/barbican-operator/api v0.4.1-0.20240926143244-11e87a82569e
+	github.com/openstack-k8s-operators/barbican-operator/api v0.4.1-0.20240927165110-1c976d06e8f4
 	github.com/openstack-k8s-operators/cinder-operator/api v0.4.1-0.20240926172025-6dc1875a4244
 	github.com/openstack-k8s-operators/designate-operator/api v0.1.1-0.20240926173124-76a23768e0c4
 	github.com/openstack-k8s-operators/glance-operator/api v0.4.1-0.20240927123808-94bf45fdacce
@@ -18,7 +18,7 @@ require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.4.1-0.20240926170109-c06637e4b12b
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240926101719-8fc1c3da53f7
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.4.1-0.20240926101719-8fc1c3da53f7
-	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20240927080838-5d6801c47d33
+	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20240928151836-107490a75fca
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.4.1-0.20240927143624-61d230f582d6
 	github.com/openstack-k8s-operators/neutron-operator/api v0.4.1-0.20240926230407-337ebd074754
 	github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20240927075736-b326c891c264
