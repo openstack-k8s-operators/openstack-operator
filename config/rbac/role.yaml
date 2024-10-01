@@ -502,10 +502,11 @@ rules:
 - apiGroups:
   - machineconfiguration.openshift.io
   resources:
-  - machineconfig
+  - machineconfigs
   verbs:
   - get
   - list
+  - watch
 - apiGroups:
   - manila.openstack.org
   resources:
@@ -657,7 +658,7 @@ rules:
 - apiGroups:
   - operator.openshift.io
   resources:
-  - imagecontentsourcepolicy
+  - imagecontentsourcepolicies
   verbs:
   - get
   - list
