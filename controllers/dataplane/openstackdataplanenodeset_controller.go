@@ -54,6 +54,8 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	deployment "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane"
 	dataplaneutil "github.com/openstack-k8s-operators/openstack-operator/pkg/dataplane/util"
+
+	machineconfig "github.com/openshift/api/machineconfiguration/v1"
 )
 
 const (
@@ -121,8 +123,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 // +kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamtags,verbs=get;list;watch
 
 // RBAC for ImageContentSourcePolicy and MachineConfig
-// +kubebuilder:rbac:groups="operator.openshift.io",resources=imagecontentsourcepolicy,verbs=get;list
-// +kubebuilder:rbac:groups="machineconfiguration.openshift.io",resources=machineconfig,verbs=get;list
+// +kubebuilder:rbac:groups="operator.openshift.io",resources=imagecontentsourcepolicies,verbs=get;list
+// +kubebuilder:rbac:groups="machineconfiguration.openshift.io",resources=machineconfigs,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -644,7 +646,44 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Watches(&openstackv1.OpenStackVersion{},
 			handler.EnqueueRequestsFromMapFunc(r.genericWatcherFn)).
+		Watches(&machineconfig.MachineConfig{},
+			handler.EnqueueRequestsFromMapFunc(r.machineConfigWatcherFn),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
+}
+
+// machineConfigWatcherFn - watches for changes to the registries MachineConfig resource and queues
+// a reconcile of each NodeSet if the MachineConfig is changed.
+func (r *OpenStackDataPlaneNodeSetReconciler) machineConfigWatcherFn(
+	ctx context.Context, obj client.Object,
+) []reconcile.Request {
+	Log := r.GetLogger(ctx)
+	nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
+	kind := strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)
+	const registryMachineConfigName string = "99-master-generated-registries"
+
+	mcNamespacedName := types.NamespacedName{
+		Name:      registryMachineConfigName,
+		Namespace: "",
+	}
+
+	if err := r.Get(ctx, mcNamespacedName, obj); err != nil {
+		Log.Error(err, fmt.Sprintf("Unable to retrieve MachingConfig %s", registryMachineConfigName))
+		return nil
+	}
+
+	requests := make([]reconcile.Request, 0, len(nodeSets.Items))
+	for _, nodeSet := range nodeSets.Items {
+		requests = append(requests, reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: obj.GetNamespace(),
+				Name:      nodeSet.Name,
+			},
+		})
+		Log.Info(fmt.Sprintf("reconcile loop for openstackdataplanenodeset %s triggered by %s %s",
+			nodeSet.Name, kind, obj.GetName()))
+	}
+	return requests
 }
 
 func (r *OpenStackDataPlaneNodeSetReconciler) secretWatcherFn(
