@@ -55,6 +55,10 @@ spec:
                   baremetalHosts:
                     additionalProperties:
                       properties:
+                        bmhLabelSelector:
+                          additionalProperties:
+                            type: string
+                          type: object
                         ctlPlaneIP:
                           type: string
                         networkData:
@@ -1158,6 +1162,10 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           type: array
+                      type: object
+                    bmhLabelSelector:
+                      additionalProperties:
+                        type: string
                       type: object
                     hostName:
                       type: string

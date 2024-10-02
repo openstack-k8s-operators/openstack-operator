@@ -107,6 +107,10 @@ type NodeSection struct {
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	// BmhLabelSelector allows for a sub-selection of BaremetalHosts based on arbitrary labels for a node.
+	BmhLabelSelector map[string]string `json:"bmhLabelSelector,omitempty"`
+
 	// UserData  node specific user-data
 	// +kubebuilder:validation:Optional
 	UserData *corev1.SecretReference `json:"userData,omitempty"`
