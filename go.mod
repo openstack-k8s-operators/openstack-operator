@@ -3,7 +3,7 @@ module github.com/openstack-k8s-operators/openstack-operator
 go 1.21
 
 require (
-	github.com/cert-manager/cert-manager v1.13.6
+	github.com/cert-manager/cert-manager v1.14.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.2
 	github.com/go-playground/validator/v10 v10.22.1
@@ -112,7 +112,7 @@ require (
 	k8s.io/component-base v0.29.9 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
-	sigs.k8s.io/gateway-api v0.8.0 // indirect
+	sigs.k8s.io/gateway-api v1.0.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
