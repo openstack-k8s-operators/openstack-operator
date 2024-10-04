@@ -2294,6 +2294,9 @@ spec:
                           transportURLSecret:
                             type: string
                         type: object
+                      designateNetworkAttachment:
+                        default: designate
+                        type: string
                       designateProducer:
                         properties:
                           backendMdnsServerProtocol:
@@ -2596,6 +2599,7 @@ spec:
                     - designateBackendbind9
                     - designateCentral
                     - designateMdns
+                    - designateNetworkAttachment
                     - designateProducer
                     - designateWorker
                     - rabbitMqClusterName
@@ -3492,11 +3496,6 @@ spec:
                   templates:
                     additionalProperties:
                       properties:
-                        adoptionRedirect:
-                          properties:
-                            host:
-                              type: string
-                          type: object
                         customServiceConfig:
                           type: string
                         disableNonTLSListeners:
@@ -9583,6 +9582,12 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      ml2MechanismDrivers:
+                        default:
+                        - ovn
+                        items:
+                          type: string
+                        type: array
                       networkAttachments:
                         items:
                           type: string
