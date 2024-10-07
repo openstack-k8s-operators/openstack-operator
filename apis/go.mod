@@ -18,13 +18,13 @@ require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.4.1-0.20240926170109-c06637e4b12b
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.4.1-0.20240926101719-8fc1c3da53f7
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.4.1-0.20240926101719-8fc1c3da53f7
-	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20241002071413-93c7969abc98
+	github.com/openstack-k8s-operators/manila-operator/api v0.4.1-0.20241005090652-1a5ba189a7c4
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.4.1-0.20241003090345-178862fb12c3
 	github.com/openstack-k8s-operators/neutron-operator/api v0.4.1-0.20241002143558-cc9057fb3ecb
 	github.com/openstack-k8s-operators/nova-operator/api v0.4.1-0.20241004094255-bfc06d9ba5f0
-	github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20240925065929-d1afc2060b03
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20241002132014-09cc2fbc4c05
-	github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20241004111626-f4652b3b9e11
+	github.com/openstack-k8s-operators/octavia-operator/api v0.4.1-0.20241004142613-90ffa9a759ca
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.4.1-0.20241004135556-199ee1a0e111
+	github.com/openstack-k8s-operators/ovn-operator/api v0.4.1-0.20241004235326-1a06180488f1
 	github.com/openstack-k8s-operators/placement-operator/api v0.4.1-0.20240930083623-0dbd528ec911
 	github.com/openstack-k8s-operators/swift-operator/api v0.4.1-0.20240930070251-1f0a2f5e19b0
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.4.1-0.20241003123929-0877a64455bc
