@@ -8785,6 +8785,9 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      corePlugin:
+                        default: ml2
+                        type: string
                       customServiceConfig:
                         type: string
                       databaseAccount:

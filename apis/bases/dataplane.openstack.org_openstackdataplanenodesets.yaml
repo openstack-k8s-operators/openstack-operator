@@ -69,8 +69,6 @@ spec:
                               type: string
                           type: object
                           x-kubernetes-map-type: atomic
-                        preprovisioningNetworkDataName:
-                          type: string
                         userData:
                           properties:
                             name:
@@ -166,14 +164,6 @@ spec:
                             type: object
                         type: object
                     type: object
-                  networkData:
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
                   osContainerImageUrl:
                     type: string
                   osImage:
@@ -190,14 +180,6 @@ spec:
                     type: string
                   provisioningInterface:
                     type: string
-                  userData:
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
                 required:
                 - cloudUserName
                 - ctlplaneInterface
