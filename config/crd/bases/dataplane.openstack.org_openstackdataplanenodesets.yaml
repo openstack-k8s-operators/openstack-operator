@@ -1157,8 +1157,6 @@ spec:
                         - subnetName
                         type: object
                       type: array
-                    preprovisioningNetworkDataName:
-                      type: string
                     userData:
                       properties:
                         name:

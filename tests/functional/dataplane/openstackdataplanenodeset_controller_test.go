@@ -256,8 +256,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
 						BaremetalHosts:        nil,
 						OSImage:               "",
-						UserData:              nil,
-						NetworkData:           nil,
 						AutomatedCleaningMode: "metadata",
 						ProvisionServerName:   "",
 						ProvisioningInterface: "",
@@ -295,8 +293,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 							AnsibleVars: nil,
 						},
 						ExtraMounts: nil,
-						UserData:    nil,
-						NetworkData: nil,
 						Networks: []infrav1.IPSetNetwork{{
 							Name:       "ctlplane",
 							SubnetName: "subnet1",
@@ -394,8 +390,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
 						BaremetalHosts:        nil,
 						OSImage:               "",
-						UserData:              nil,
-						NetworkData:           nil,
 						AutomatedCleaningMode: "metadata",
 						ProvisionServerName:   "",
 						ProvisioningInterface: "",
@@ -438,8 +432,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 							AnsibleVars: nil,
 						},
 						ExtraMounts: nil,
-						UserData:    nil,
-						NetworkData: nil,
 					},
 					Env:                nil,
 					PreProvisioned:     true,
@@ -840,8 +832,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
 						BaremetalHosts:        nil,
 						OSImage:               "",
-						UserData:              nil,
-						NetworkData:           nil,
 						AutomatedCleaningMode: "metadata",
 						ProvisionServerName:   "",
 						ProvisioningInterface: "",

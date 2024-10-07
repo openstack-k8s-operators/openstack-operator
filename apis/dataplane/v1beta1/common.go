@@ -125,10 +125,6 @@ type NodeSection struct {
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
 	// +kubebuilder:validation:Optional
 	ManagementNetwork string `json:"managementNetwork,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// PreprovisioningNetworkDataName - NetworkData secret name in the local namespace for pre-provisioing
-	PreprovisioningNetworkDataName string `json:"preprovisioningNetworkDataName,omitempty"`
 }
 
 // NodeTemplate is a specification of the node attributes that override top level attributes.
