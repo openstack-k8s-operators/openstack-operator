@@ -430,7 +430,7 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"template": keystoneTemplate,
 		},
 		"placement": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"glance": map[string]interface{}{
 			"enabled": true,
@@ -442,29 +442,29 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"enabled": true,
 		},
 		"ovn": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"neutron": map[string]interface{}{
 			"enabled": true,
 		},
 		"swift": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"nova": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"redis": map[string]interface{}{
 			"enabled": false,
 		},
 		"ironic": map[string]interface{}{
-			"enabled":  false,
+			"enabled":  true,
 			"template": ironicTemplate,
 		},
 		"designate": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"barbican": map[string]interface{}{
-			"enabled": false,
+			"enabled": true,
 		},
 		"openstackclient": map[string]interface{}{
 			"enabled": true,
