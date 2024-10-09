@@ -163,3 +163,5 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-swift-object:current-podified
         - name: RELATED_IMAGE_SWIFT_PROXY_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-swift-proxy-server:current-podified
+        - name: RELEATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-must-gather:latest
