@@ -85,3 +85,4 @@ export RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-ce
 export RELATED_IMAGE_TEST_TOBIKO_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
 export RELATED_IMAGE_TEST_ANSIBLETEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified
 export RELATED_IMAGE_TEST_HORIZONTEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-horizontest:current-podified
+export RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT=quay.io/openstack-k8s-operators/openstack-must-gather:latest

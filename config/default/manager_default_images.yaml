@@ -177,3 +177,5 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified
         - name: RELATED_IMAGE_TEST_HORIZONTEST_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-horizontest:current-podified
+        - name: RELEATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-must-gather:latest
