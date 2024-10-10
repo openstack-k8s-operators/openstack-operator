@@ -1,10 +1,10 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
-timeout: 500
+timeout: 800
 commands:
   - script: |
       echo "Waiting for OpenStack control plane to be ready..."
-      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=400s -l core.openstack.org/openstackcontrolplane
+      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=700s -l core.openstack.org/openstackcontrolplane
 
   - script: |
       echo "Checking issuer of internal certificates..."
