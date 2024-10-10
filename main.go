@@ -77,6 +77,8 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
 	ocp_configv1 "github.com/openshift/api/config/v1"
+	machineconfig "github.com/openshift/api/machineconfiguration/v1"
+	ocp_image "github.com/openshift/api/operator/v1alpha1"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
@@ -120,6 +122,8 @@ func init() {
 	utilruntime.Must(certmgrv1.AddToScheme(scheme))
 	utilruntime.Must(barbicanv1.AddToScheme(scheme))
 	utilruntime.Must(ocp_configv1.AddToScheme(scheme))
+	utilruntime.Must(ocp_image.AddToScheme(scheme))
+	utilruntime.Must(machineconfig.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
