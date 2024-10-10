@@ -672,6 +672,14 @@ func (r *OpenStackDataPlaneNodeSetReconciler) machineConfigWatcherFn(
 		return nil
 	}
 
+	listOpts := []client.ListOption{
+		client.InNamespace(obj.GetNamespace()),
+	}
+	if err := r.Client.List(ctx, nodeSets, listOpts...); err != nil {
+		Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList")
+		return nil
+	}
+
 	requests := make([]reconcile.Request, 0, len(nodeSets.Items))
 	for _, nodeSet := range nodeSets.Items {
 		requests = append(requests, reconcile.Request{
