@@ -576,6 +576,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.manila.openstack.org/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Octavia.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
 		})
 
 		It("should create selfsigned issuer and public+internal CA and issuer", func() {

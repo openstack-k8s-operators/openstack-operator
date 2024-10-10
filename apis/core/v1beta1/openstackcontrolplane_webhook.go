@@ -856,6 +856,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		}
 
 		r.Spec.Octavia.Template.Default()
+                setOverrideSpec(&r.Spec.Octavia.APIOverride.Route, r.Spec.Octavia.Template.GetDefaultRouteAnnotations())
 	}
 
 	// Barbican
