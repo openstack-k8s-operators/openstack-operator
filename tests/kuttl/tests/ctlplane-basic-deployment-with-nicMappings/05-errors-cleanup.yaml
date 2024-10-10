@@ -1,0 +1,334 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: mariadb
+    cr: mariadb-openstack
+    owner: mariadb-operator
+  name: mariadb-openstack
+---
+apiVersion: mariadb.openstack.org/v1beta1
+kind: Galera
+metadata:
+  name: openstack
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openstack-galera
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: openstack-galera-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: openstack-galera-1
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: openstack-galera-2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openstack-galera
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: openstack-galera
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openstack-config-data
+---
+apiVersion: ovn.openstack.org/v1beta1
+kind: OVNNorthd
+metadata:
+  finalizers:
+  - openstack.org/ovnnorthd
+  name: ovnnorthd-sample
+---
+apiVersion: ovn.openstack.org/v1beta1
+kind: OVNDBCluster
+metadata:
+  finalizers:
+  - openstack.org/ovndbcluster
+  name: ovndbcluster-nb-sample
+---
+apiVersion: ovn.openstack.org/v1beta1
+kind: OVNDBCluster
+metadata:
+  finalizers:
+  - openstack.org/ovndbcluster
+  name: ovndbcluster-sb-sample
+---
+apiVersion: ovn.openstack.org/v1beta1
+kind: OVNController
+metadata:
+  finalizers:
+  - openstack.org/ovncontroller
+  name: ovncontroller-sample
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ovn-northd
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ovncontroller
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    service: ovn-northd
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    service: ovsdbserver-nb
+  name: ovsdbserver-nb-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    service: ovsdbserver-sb
+  name: ovsdbserver-sb-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    openshift.io/scc: privileged
+  generateName: ovn-controller-
+  labels:
+    service: ovn-controller
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ovsdbserver-nb
+  name: ovsdbserver-nb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ovsdbserver-nb
+    statefulset.kubernetes.io/pod-name: ovsdbserver-nb-0
+  name: ovsdbserver-nb-0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ovsdbserver-sb
+  name: ovsdbserver-sb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ovsdbserver-sb
+    statefulset.kubernetes.io/pod-name: ovsdbserver-sb-0
+  name: ovsdbserver-sb-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nova-api-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nova-cell1-novncproxy-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nova-metadata-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/name: SwiftProxy
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: swift-storage-0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    openshift.io/scc: anyuid
+  labels:
+    service: neutron
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: cinder-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: glance-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: barbican-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: keystone-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: neutron-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nova-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nova-novncproxy-cell1-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: placement-public
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: swift-public
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: barbican-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cinder-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: barbican-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cinder-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: glance-default-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: glance-default-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keystone-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keystone-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: neutron-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: neutron-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-novncproxy-cell1-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nova-novncproxy-cell1-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: placement-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: placement-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: swift-public-route
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: swift-public-svc
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-internal
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-libvirt
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-ovn
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rootca-public
