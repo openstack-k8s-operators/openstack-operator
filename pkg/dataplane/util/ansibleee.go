@@ -295,3 +295,18 @@ func calculateHash(envVar string) (string, error) {
 	}
 	return hash, nil
 }
+
+// unmarshal raw strings into a dictionary
+func UnmarshalRawStrings(rawStrings map[string]json.RawMessage,
+	parsedVars map[string]interface{}) error {
+
+	for key, val := range rawStrings {
+		var v interface{}
+		err := yaml.Unmarshal(val, &v)
+		if err != nil {
+			return err
+		}
+		parsedVars[key] = v
+	}
+	return nil
+}
