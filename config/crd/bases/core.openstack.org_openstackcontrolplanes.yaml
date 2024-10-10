@@ -2040,6 +2040,13 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
+                          controlNetworkName:
+                            default: designate
+                            type: string
+                          customBindOptions:
+                            items:
+                              type: string
+                            type: array
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2115,8 +2122,15 @@ spec:
                           serviceUser:
                             default: designate
                             type: string
+                          storageClass:
+                            type: string
+                          storageRequest:
+                            type: string
                           transportURLSecret:
                             type: string
+                        required:
+                        - controlNetworkName
+                        - storageRequest
                         type: object
                       designateCentral:
                         properties:
