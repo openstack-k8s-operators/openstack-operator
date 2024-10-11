@@ -525,11 +525,6 @@ func (r *OpenStackClientReconciler) SetupWithManager(
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
 		).
 		Watches(
-			&corev1.Secret{},
-			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
-			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
-		).
-		Watches(
 			// Reconcile all openstackclients when a MetricStorage changes.
 			// This is needed to ensure the observability client is
 			// configured correctly when tls is enabled or disabled.
@@ -542,6 +537,8 @@ func (r *OpenStackClientReconciler) SetupWithManager(
 func (r *OpenStackClientReconciler) findObjectsForSrc(ctx context.Context, src client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
 
+	l := log.FromContext(context.Background()).WithName("Controllers").WithName("OpenStackClient")
+
 	for _, field := range allWatchFields {
 		crList := &clientv1.OpenStackClientList{}
 		listOps := &client.ListOptions{
@@ -550,10 +547,13 @@ func (r *OpenStackClientReconciler) findObjectsForSrc(ctx context.Context, src c
 		}
 		err := r.List(ctx, crList, listOps)
 		if err != nil {
-			return []reconcile.Request{}
+			l.Error(err, fmt.Sprintf("listing %s for field: %s - %s", crList.GroupVersionKind().Kind, field, src.GetNamespace()))
+			return requests
 		}
 
 		for _, item := range crList.Items {
+			l.Info(fmt.Sprintf("input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
+
 			requests = append(requests,
 				reconcile.Request{
 					NamespacedName: types.NamespacedName{
