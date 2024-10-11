@@ -223,7 +223,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrlResult, nil
 	}
 
-	if instance.Status.DeployedVersion == nil || version.Spec.TargetVersion == *instance.Status.DeployedVersion { //revive:disable:indent-error-flow
+	if version.IsReady() { //revive:disable:indent-error-flow
 		// green field deployment or no minor update in progress
 		ctrlResult, err := r.reconcileNormal(ctx, instance, version, helper)
 		if err != nil {

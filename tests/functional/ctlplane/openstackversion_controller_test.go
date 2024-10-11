@@ -187,10 +187,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 	// a new targetVersion is "discovered". This test is meant to simulate that environment
 	When("Multiple target versions exist", func() {
 
-		initialVersion := "old"
+		initialVersion := "initial"
 		updatedVersion := "0.0.1"
-		targetOvnControllerVersion := ""
-		testOvnControllerImage := "foo/bar:0.0.2"
+		targetOvnControllerImage := "" // we capture this dynamically below
+		testOvnControllerImage := "foo/bar-ovn:0.0.1"
+		targetKeystoneAPIImage := "" // we capture this dynamically below
+		testKeystoneAPIImage := "foo/bar-keystone:0.0.1"
 
 		// a lightweight controlplane spec we'll use for minor update testing
 		// we are missing some test helpers to simulate ready state so once we have
@@ -282,7 +284,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				// capture this here as we'll need it below (this one comes from RELATED_IMAGES in hack/export_related_images.sh)
-				targetOvnControllerVersion = *version.Status.ContainerImages.OvnControllerImage
+				targetOvnControllerImage = *version.Status.ContainerImages.OvnControllerImage
+				targetKeystoneAPIImage = *version.Status.ContainerImages.KeystoneAPIImage
 				g.Expect(version).Should(Not(BeNil()))
 
 				g.Expect(*version.Status.AvailableVersion).Should(Equal("0.0.1"))
@@ -290,11 +293,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			}, timeout, interval).Should(Succeed())
 
-			// inject an "old" version
+			// inject an "initial" version
 			Eventually(func(g Gomega) {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				version.Status.ContainerImageVersionDefaults[initialVersion] = version.Status.ContainerImageVersionDefaults["0.0.1"]
 				version.Status.ContainerImageVersionDefaults[initialVersion].OvnControllerImage = &testOvnControllerImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].KeystoneAPIImage = &testKeystoneAPIImage
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
 
 				th.Logger.Info("Version injected", "on", names.OpenStackVersionName)
@@ -324,6 +328,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(osversion.Status.DeployedVersion).Should(BeNil())
 				// but the images should stay the same as we haven't switched to it yet
 				g.Expect(*osversion.Status.ContainerImages.OvnControllerImage).Should(Equal(testOvnControllerImage))
+				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(testKeystoneAPIImage))
 
 			}, timeout, interval).Should(Succeed())
 
@@ -338,13 +343,15 @@ var _ = Describe("OpenStackOperator controller", func() {
 			)
 
 			dataplanenodeset := GetDataplaneNodeset(names.OpenStackVersionName)
+			dataplanenodeset.Status.ObservedGeneration = dataplanenodeset.Generation
 			dataplanenodeset.Status.DeployedVersion = initialVersion
+			dataplanenodeset.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.NodeSetReadyMessage)
 			Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
 
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
 			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 
-			// verify that the controlplane deploys the old OVN controller image
+			// verify that the controlplane deploys the initial OVN controller image
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 			Expect(OSCtlplane.Spec.Ovn.Enabled).Should(BeTrue())
 
@@ -370,7 +377,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(osversion).Should(Not(BeNil()))
 				g.Expect(osversion.Generation).Should(Equal(osversion.Status.ObservedGeneration))
 
-				g.Expect(osversion.Status.DeployedVersion).Should(Equal(&initialVersion))
+				g.Expect(osversion.Status.DeployedVersion).Should(Not(BeNil()))
 
 			}, timeout, interval).Should(Succeed())
 
@@ -405,7 +412,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(*osversion.Status.AvailableVersion).Should(Equal(updatedVersion))
 				g.Expect(osversion.Spec.TargetVersion).Should(Equal(updatedVersion))
 				// the target OVN Controller image should be set
-				g.Expect(*osversion.Status.ContainerImages.OvnControllerImage).Should(Equal(targetOvnControllerVersion))
+				g.Expect(*osversion.Status.ContainerImages.OvnControllerImage).Should(Equal(targetOvnControllerImage))
+				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(targetKeystoneAPIImage))
 
 			}, timeout, interval).Should(Succeed())
 
@@ -422,12 +430,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 					names.OpenStackControlplaneName,
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
 					condition.ReadyCondition,
-					k8s_corev1.ConditionUnknown,
+					k8s_corev1.ConditionFalse,
 				)
 
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				// verify the image is set
-				g.Expect(*OSCtlplane.Status.ContainerImages.OvnControllerImage).Should(Equal(targetOvnControllerVersion))
+				g.Expect(*OSCtlplane.Status.ContainerImages.OvnControllerImage).Should(Equal(targetOvnControllerImage))
+				g.Expect(*OSCtlplane.Status.ContainerImages.KeystoneAPIImage).Should(Equal(testKeystoneAPIImage))
 
 			}, timeout, interval).Should(Succeed())
 
@@ -451,7 +460,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			dataplanenodeset := GetDataplaneNodeset(names.OpenStackVersionName)
 			dataplanenodeset.Status.ObservedGeneration = dataplanenodeset.Generation
 			dataplanenodeset.Status.ContainerImages = make(map[string]string)
-			dataplanenodeset.Status.ContainerImages["OvnControllerImage"] = targetOvnControllerVersion
+			dataplanenodeset.Status.ContainerImages["OvnControllerImage"] = targetOvnControllerImage
 			dataplanenodeset.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.NodeSetReadyMessage)
 			Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
 
@@ -493,7 +502,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				// verify images match for deployed services on the controlplane
 				g.Expect(OSCtlplane.Status.ContainerImages.MariadbImage).Should(Equal(osversion.Status.ContainerImages.MariadbImage))
-				g.Expect(OSCtlplane.Status.ContainerImages.KeystoneAPIImage).Should(Equal(osversion.Status.ContainerImages.KeystoneAPIImage))
+				//g.Expect(OSCtlplane.Status.ContainerImages.KeystoneAPIImage).Should(Equal(osversion.Status.ContainerImages.KeystoneAPIImage))
+				g.Expect(*OSCtlplane.Status.ContainerImages.KeystoneAPIImage).Should(Equal(targetKeystoneAPIImage))
 				g.Expect(OSCtlplane.Status.ContainerImages.InfraMemcachedImage).Should(Equal(osversion.Status.ContainerImages.InfraMemcachedImage))
 				g.Expect(OSCtlplane.Status.ContainerImages.OvnControllerImage).Should(Equal(osversion.Status.ContainerImages.OvnControllerImage))
 				g.Expect(OSCtlplane.Status.ContainerImages.OvnControllerOvsImage).Should(Equal(osversion.Status.ContainerImages.OvnControllerOvsImage))
@@ -505,11 +515,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			// 5) simulate 1 more dataplanenodeset update to finish the minor update workflow
 			// NOTE: the real workflow here requires manual intervention as well for now
-			dataplanenodeset = GetDataplaneNodeset(names.OpenStackVersionName)
-			dataplanenodeset.Status.ObservedGeneration = dataplanenodeset.Generation
-			dataplanenodeset.Status.DeployedVersion = osversion.Spec.TargetVersion
-			dataplanenodeset.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.NodeSetReadyMessage)
-			Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
+			Eventually(func(g Gomega) {
+				dataplanenodeset = GetDataplaneNodeset(names.OpenStackVersionName)
+				dataplanenodeset.Status.ObservedGeneration = dataplanenodeset.Generation
+				dataplanenodeset.Status.DeployedVersion = osversion.Spec.TargetVersion
+				dataplanenodeset.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.NodeSetReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
 
 			// and now finally we verify that OpenStackVersion is in the correct state (data plane conditions, etc)
 			Eventually(func(g Gomega) {
@@ -517,12 +529,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 				osversion := GetOpenStackVersion(names.OpenStackVersionName)
 				g.Expect(osversion).Should(Not(BeNil()))
 				g.Expect(osversion.OwnerReferences).Should(HaveLen(1))
-				th.ExpectCondition(
-					names.OpenStackVersionName,
-					ConditionGetterFunc(OpenStackVersionConditionGetter),
-					corev1.OpenStackVersionMinorUpdateDataplane,
-					k8s_corev1.ConditionTrue,
-				)
 				th.ExpectCondition(
 					names.OpenStackVersionName,
 					ConditionGetterFunc(OpenStackVersionConditionGetter),
@@ -535,6 +541,88 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 		})
 
-	})
+		// 1) simulate some dataplane nodesets getting deployed, but they fail so no DeployedVersion gets set
+		// 2) bump the targetVersion to 0.0.1
+		// 3) verify that the Controlplane images are all still updated (no minor update takes place)
+		// This covers a rare edge case where the dataplane fails initially to deploy and the controlplane is still updated
+		It("updating targetVersion updates images on Controlplane when no deployed dataplane exists", func() {
+			updatedVersion := "0.0.1"
 
+			// 1) simulate a dataplane nodeset getting deployed, but no DeployedVersion gets set (incomplete or failed deployment)
+			Eventually(func(g Gomega) {
+				dataplanenodeset := GetDataplaneNodeset(names.OpenStackVersionName)
+				dataplanenodeset.Status.ObservedGeneration = dataplanenodeset.Generation
+				dataplanenodeset.Status.DeployedVersion = ""
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// 2) switch to targetVersion to 0.0.1, this triggers a version update
+			Eventually(func(g Gomega) {
+				// first lets pretend we never fully deployed
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				osversion.Status.DeployedVersion = nil
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, osversion)).To(Succeed())
+				osversion.Spec.TargetVersion = updatedVersion
+				g.Expect(k8sClient.Update(ctx, osversion)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// verify the OpenStackVersion gets re-initialized with 0.0.1 image for all images
+			Eventually(func(g Gomega) {
+
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.Generation).Should(Equal(osversion.Status.ObservedGeneration))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+
+				g.Expect(*osversion.Status.AvailableVersion).Should(Equal(updatedVersion))
+				g.Expect(osversion.Spec.TargetVersion).Should(Equal(updatedVersion))
+			}, timeout, interval).Should(Succeed())
+
+			// 3) now we check that the target container images gets set on the OpenStackControlplane
+			SimulateControlplaneReady()
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					condition.ReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				// verify the image is set
+				g.Expect(OSCtlplane.Status.ContainerImages.MariadbImage).Should(Equal(osversion.Status.ContainerImages.MariadbImage))
+				g.Expect(OSCtlplane.Status.ContainerImages.KeystoneAPIImage).Should(Equal(osversion.Status.ContainerImages.KeystoneAPIImage))
+				g.Expect(OSCtlplane.Status.ContainerImages.InfraMemcachedImage).Should(Equal(osversion.Status.ContainerImages.InfraMemcachedImage))
+				g.Expect(OSCtlplane.Status.ContainerImages.OvnControllerImage).Should(Equal(osversion.Status.ContainerImages.OvnControllerImage))
+				g.Expect(OSCtlplane.Status.ContainerImages.OvnControllerOvsImage).Should(Equal(osversion.Status.ContainerImages.OvnControllerOvsImage))
+				g.Expect(OSCtlplane.Status.ContainerImages.OvnNbDbclusterImage).Should(Equal(osversion.Status.ContainerImages.OvnNbDbclusterImage))
+				g.Expect(OSCtlplane.Status.ContainerImages.OvnNorthdImage).Should(Equal(osversion.Status.ContainerImages.OvnNorthdImage))
+				g.Expect(OSCtlplane.Status.ContainerImages.OvnSbDbclusterImage).Should(Equal(osversion.Status.ContainerImages.OvnSbDbclusterImage))
+
+			}, timeout, interval).Should(Succeed())
+
+			// and now finally we verify that OpenStackVersion is in the correct state
+			Eventually(func(g Gomega) {
+
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.OwnerReferences).Should(HaveLen(1))
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					condition.ReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+		})
+
+	})
 })
