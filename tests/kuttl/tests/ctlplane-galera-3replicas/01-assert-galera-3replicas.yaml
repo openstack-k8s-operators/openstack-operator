@@ -152,6 +152,15 @@ spec:
           duration: 87600h0m0s
         cert:
           duration: 43800h0m0s
+  swift:
+    enabled: true
+    template:
+      swiftRing:
+        ringReplicas: 1
+      swiftStorage:
+        replicas: 1
+      swiftProxy:
+        replicas: 1
 status:
   conditions:
   - message: Setup complete
@@ -202,6 +211,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneExposePlacementAPIReady
+  - message: OpenStackControlPlane swift service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeSwiftReady
   - message: OpenStackControlPlane Glance completed
     reason: Ready
     status: "True"
@@ -242,6 +255,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneRabbitMQReady
+  - message: OpenStackControlPlane Swift completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneSwiftReady
   - message: OpenStackControlPlane Telemetry completed
     reason: Ready
     status: "True"
