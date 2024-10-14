@@ -17365,8 +17365,6 @@ spec:
                           enabled:
                             default: true
                             type: boolean
-                          ipaddr:
-                            type: string
                           port:
                             default: 10514
                             format: int32
@@ -17386,7 +17384,6 @@ spec:
                             default: 10514
                             type: integer
                         required:
-                        - ipaddr
                         - rsyslogQueueType
                         type: object
                       metricStorage:
