@@ -167,6 +167,11 @@ golangci-lint:
 	test -s $(LOCALBIN)/golangci-lint || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.59.1
 	$(LOCALBIN)/golangci-lint run --fix
 
+MAX_PROCS := 5
+NUM_PROCS := $(shell expr $(shell nproc --ignore 2) / 2)
+PROCS ?= $(shell if [ $(NUM_PROCS) -gt $(MAX_PROCS) ]; then echo $(MAX_PROCS); else echo $(NUM_PROCS); fi)
+PROC_CMD = --procs $(PROCS)
+
 .PHONY: test
 test: manifests generate gowork fmt vet envtest ginkgo ginkgo-run ## Run ginkgo tests with dependencies.
 
