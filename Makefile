@@ -148,13 +148,14 @@ vet: gowork ## Run go vet against code.
 	go vet ./...
 	go vet ./apis/...
 
+BRANCH=18.0.0-proposed
 .PHONY: force-bump
 force-bump: ## Force bump after tagging
 	for dep in $$(cat go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator|^replace' | awk '{print $$1}'); do \
-		go get $$dep@main ; \
+		go get $$dep@$(BRANCH) ; \
 	done
 	for dep in $$(cat apis/go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator|^replace' | awk '{print $$1}'); do \
-		cd ./apis && go get $$dep@main && cd .. ; \
+		cd ./apis && go get $$dep@$(BRANCH) && cd .. ; \
 	done
 
 .PHONY: tidy
