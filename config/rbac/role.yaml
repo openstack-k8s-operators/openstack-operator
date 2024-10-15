@@ -500,6 +500,14 @@ rules:
   - update
   - watch
 - apiGroups:
+  - machineconfiguration.openshift.io
+  resources:
+  - machineconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - manila.openstack.org
   resources:
   - manilas
@@ -647,6 +655,13 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - operator.openshift.io
+  resources:
+  - imagecontentsourcepolicies
+  verbs:
+  - get
+  - list
 - apiGroups:
   - ovn.openstack.org
   resources:
