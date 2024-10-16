@@ -7,6 +7,10 @@ commands:
       oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=400s -l core.openstack.org/openstackcontrolplane
 
   - script: |
+      echo "Checking rotation of non API service certificates..."
+      NAMESPACE=$NAMESPACE bash ../../common/osp_check_noapi_service_certs.sh
+
+  - script: |
       echo "Checking issuer of internal certificates..."
       oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_check_cert_issuer.sh "issuer=CN=rootca-internal" "internal"
 
