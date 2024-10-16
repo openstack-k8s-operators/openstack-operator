@@ -145,6 +145,46 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 	})
 
+	When("A Dataplane nodeset is created and no ctlplane network in networks", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance,
+				CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+
+			DeferCleanup(th.DeleteInstance,
+				CreateDataplaneNodeSet(dataplaneNodeSetName,
+					DefaultDataPlaneNoNodeSetSpec(false)))
+		})
+
+		It("Should fail to set NodeSetIPReservationReadyCondition true when ctlplane is not in the networks", func() {
+			Eventually(func(g Gomega) {
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				instance.Spec.NodeTemplate.Networks[1].Name = "notctlplane"
+				g.Expect(th.K8sClient.Update(th.Ctx, instance)).Should(Succeed())
+				th.ExpectCondition(
+					dataplaneNodeSetName,
+					ConditionGetterFunc(DataplaneConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
+				th.ExpectCondition(
+					dataplaneNodeSetName,
+					ConditionGetterFunc(DataplaneConditionGetter),
+					condition.InputReadyCondition,
+					corev1.ConditionUnknown,
+				)
+				th.ExpectCondition(
+					dataplaneNodeSetName,
+					ConditionGetterFunc(DataplaneConditionGetter),
+					dataplanev1.NodeSetIPReservationReadyCondition,
+					corev1.ConditionFalse,
+				)
+				conditions := DataplaneConditionGetter(dataplaneNodeSetName)
+				message := &conditions.Get(dataplanev1.NodeSetIPReservationReadyCondition).Message
+				g.Expect(*message).Should(ContainSubstring("ctlplane network should be defined for node"))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
 	When("A Dataplane nodeset is created and no dnsmasq", func() {
 		BeforeEach(func() {
 			DeferCleanup(th.DeleteInstance,
@@ -292,10 +332,15 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 							AnsibleVars: nil,
 						},
 						ExtraMounts: nil,
-						Networks: []infrav1.IPSetNetwork{{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
-						},
+						Networks: []infrav1.IPSetNetwork{
+							{
+								Name:       "networkinternal",
+								SubnetName: "subnet1",
+							},
+							{
+								Name:       "ctlplane",
+								SubnetName: "subnet1",
+							},
 						},
 					},
 					Env:                nil,
@@ -418,10 +463,15 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					},
 					NodeTemplate: dataplanev1.NodeTemplate{
 						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Networks: []infrav1.IPSetNetwork{{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
-						},
+						Networks: []infrav1.IPSetNetwork{
+							{
+								Name:       "networkinternal",
+								SubnetName: "subnet1",
+							},
+							{
+								Name:       "ctlplane",
+								SubnetName: "subnet1",
+							},
 						},
 						ManagementNetwork: "ctlplane",
 						Ansible: dataplanev1.AnsibleOpts{
@@ -724,10 +774,15 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				nodeOverrideSpec := dataplanev1.NodeSection{
 					HostName: dataplaneNodeName.Name,
-					Networks: []infrav1.IPSetNetwork{{
-						Name:       "ctlplane",
-						SubnetName: "subnet1",
-					},
+					Networks: []infrav1.IPSetNetwork{
+						{
+							Name:       "networkinternal",
+							SubnetName: "subnet1",
+						},
+						{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
+						},
 					},
 					Ansible: dataplanev1.AnsibleOpts{
 						AnsibleUser: "test-user",
@@ -860,10 +915,15 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					},
 					NodeTemplate: dataplanev1.NodeTemplate{
 						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Networks: []infrav1.IPSetNetwork{{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
-						},
+						Networks: []infrav1.IPSetNetwork{
+							{
+								Name:       "networkinternal",
+								SubnetName: "subnet1",
+							},
+							{
+								Name:       "ctlplane",
+								SubnetName: "subnet1",
+							},
 						},
 						ManagementNetwork: "ctlplane",
 						Ansible: dataplanev1.AnsibleOpts{
@@ -1164,10 +1224,15 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				nodeOverrideSpec := dataplanev1.NodeSection{
 					HostName: dataplaneNodeName.Name,
-					Networks: []infrav1.IPSetNetwork{{
-						Name:       "ctlplane",
-						SubnetName: "subnet1",
-					},
+					Networks: []infrav1.IPSetNetwork{
+						{
+							Name:       "networkinternal",
+							SubnetName: "subnet1",
+						},
+						{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
+						},
 					},
 					Ansible: dataplanev1.AnsibleOpts{
 						AnsibleUser: "test-user",

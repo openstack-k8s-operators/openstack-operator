@@ -355,6 +355,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 
 	// CreateOrPatch IPSets
 	for nodeName, node := range instance.Spec.Nodes {
+		foundCtlPlane := false
 		nets := node.Networks
 		hostName := node.HostName
 		if len(nets) == 0 {
@@ -362,6 +363,16 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 		}
 
 		if len(nets) > 0 {
+			for _, net := range nets {
+				if strings.EqualFold(string(net.Name), dataplanev1.CtlPlaneNetwork) ||
+					netServiceNetMap[strings.ToLower(string(net.Name))] == dataplanev1.CtlPlaneNetwork {
+					foundCtlPlane = true
+				}
+			}
+			if !foundCtlPlane {
+				msg := fmt.Sprintf("ctlplane network should be defined for node %s", nodeName)
+				return nil, netServiceNetMap, fmt.Errorf(msg)
+			}
 			ipSet := &infranetworkv1.IPSet{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: instance.Namespace,
