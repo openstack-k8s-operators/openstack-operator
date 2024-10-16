@@ -35,6 +35,7 @@ spec:
                 default: false
                 type: boolean
               caCerts:
+                default: combined-ca-bundle
                 maxLength: 253
                 type: string
               certsFrom:
