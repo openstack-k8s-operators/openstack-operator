@@ -10924,14 +10924,22 @@ spec:
                         type: object
                       lbMgmtNetwork:
                         default:
+                          createDefaultLbMgmtNetwork: true
                           manageLbMgmtNetworks: true
                         properties:
+                          availabilityZoneCIDRs:
+                            additionalProperties:
+                              type: string
+                            type: object
                           availabilityZones:
                             items:
                               type: string
                             type: array
+                          createDefaultLbMgmtNetwork:
+                            type: boolean
+                          lbMgmtRouterGateway:
+                            type: string
                           manageLbMgmtNetworks:
-                            default: true
                             type: boolean
                         type: object
                       nodeSelector:
@@ -11161,6 +11169,10 @@ spec:
                             type: object
                           octaviaProviderSubnetCIDR:
                             type: string
+                          octaviaProviderSubnetExtraCIDRs:
+                            items:
+                              type: string
+                            type: array
                           octaviaProviderSubnetGateway:
                             type: string
                           passwordSelectors:
@@ -11290,6 +11302,10 @@ spec:
                             type: object
                           octaviaProviderSubnetCIDR:
                             type: string
+                          octaviaProviderSubnetExtraCIDRs:
+                            items:
+                              type: string
+                            type: array
                           octaviaProviderSubnetGateway:
                             type: string
                           passwordSelectors:
@@ -11507,6 +11523,10 @@ spec:
                             type: object
                           octaviaProviderSubnetCIDR:
                             type: string
+                          octaviaProviderSubnetExtraCIDRs:
+                            items:
+                              type: string
+                            type: array
                           octaviaProviderSubnetGateway:
                             type: string
                           passwordSelectors:
