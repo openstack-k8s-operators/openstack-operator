@@ -40,7 +40,7 @@ spec:
         - name: RELATED_IMAGE_CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ceilometer-notification:current-podified
         - name: RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT
-          value: quay.io/infrawatch/sg-core:v5.2.0-nextgen
+          value: quay.io/openstack-k8s-operators/sg-core:v6.0.0
         - name: RELATED_IMAGE_CINDER_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-cinder-api:current-podified
         - name: RELATED_IMAGE_CINDER_BACKUP_IMAGE_URL_DEFAULT
