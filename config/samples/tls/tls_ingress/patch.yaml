@@ -1,0 +1,8 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  tls:
+    podLevel:
+      enabled: false
