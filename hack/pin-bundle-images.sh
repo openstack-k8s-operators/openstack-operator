@@ -87,6 +87,6 @@ for MOD_PATH in ${MOD_PATHS}; do
 done
 # append the rabbitmq URL only if we aren't in Dockerfile mode
 if [ -z "$DOCKERFILE" ]; then
-    # pin rabbit to sha256 for the e7df1b654cb702d343996c7ac4245de8535c39c7 for our v2.6.0_patches fork
-    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:c6ed5e2b416152c5adf42aeb984ab5de4f3d00593c15ffb626d1d87db67d1ccc"
+    # pin rabbit to sha256 for our v2.9.0_patches fork
+    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:bad31e1b028840ac3c199efc3a8ecb3c87bdb68e6a11c8e32a7dbcd5a4d4114d"
 fi
