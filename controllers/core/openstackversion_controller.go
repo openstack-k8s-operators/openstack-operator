@@ -297,7 +297,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 	}
 
-	if controlPlane.IsReady() {
+	if controlPlane.IsReady() && openstack.DataplaneNodesetsDeployed(instance, dataplaneNodesets) {
 		Log.Info("Setting DeployedVersion")
 		instance.Status.DeployedVersion = &instance.Spec.TargetVersion
 	}
