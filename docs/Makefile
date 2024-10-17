@@ -57,7 +57,7 @@ $(IMAGES_TS): $(IMAGES)
 	touch $(IMAGES_TS)
 
 $(CTLPLANE_HTML): $(ALL_SOURCES)
-	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" -a build=$(BUILD) -b xhtml5 -d book -o $@ $(CTLPLANE_SOURCE)
+	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" --failure-level WARN -a build=$(BUILD) -b xhtml5 -d book -o $@ $(CTLPLANE_SOURCE)
 
 $(DATAPLANE_HTML): $(ALL_SOURCES)
 	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" --failure-level WARN -a build=$(BUILD) -b xhtml5 -d book -o $@ $(DATAPLANE_SOURCE)
