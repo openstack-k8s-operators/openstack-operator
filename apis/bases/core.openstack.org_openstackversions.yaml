@@ -147,6 +147,8 @@ spec:
                     type: string
                   keystoneAPIImage:
                     type: string
+                  ksmImage:
+                    type: string
                   manilaAPIImage:
                     type: string
                   manilaSchedulerImage:
@@ -354,6 +356,8 @@ spec:
                       type: string
                     keystoneAPIImage:
                       type: string
+                    ksmImage:
+                      type: string
                     manilaAPIImage:
                       type: string
                     manilaSchedulerImage:
@@ -531,6 +535,8 @@ spec:
                   ironicPythonAgentImage:
                     type: string
                   keystoneAPIImage:
+                    type: string
+                  ksmImage:
                     type: string
                   manilaAPIImage:
                     type: string
