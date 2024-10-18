@@ -16366,6 +16366,8 @@ spec:
                                       type: string
                                     pkiIssuerPath:
                                       type: string
+                                    pkiRootPath:
+                                      type: string
                                   type: object
                               type: object
                           type: object
