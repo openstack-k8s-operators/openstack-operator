@@ -7273,6 +7273,16 @@ spec:
                       enableSecureRBAC:
                         default: true
                         type: boolean
+                      fernetMaxActiveKeys:
+                        default: 5
+                        format: int32
+                        minimum: 3
+                        type: integer
+                      fernetRotationDays:
+                        default: 1
+                        format: int32
+                        minimum: 1
+                        type: integer
                       memcachedInstance:
                         default: memcached
                         type: string
