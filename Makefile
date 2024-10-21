@@ -107,9 +107,8 @@ docs-clean:
 	rm -r docs_build
 
 .PHONY: docs-examples
-docs-kustomize-examples: export KUSTOMIZE_VERSION=v5.0.1
-docs-kustomize-examples: yq kustomize ## Generate updated docs from examples using kustomize
-	KUSTOMIZE=$(KUSTOMIZE) LOCALBIN=$(LOCALBIN) ./docs/kustomize_to_docs.sh
+docs-kustomize-examples: oc yq ## Generate updated docs from examples using kustomize
+	LOCALBIN=$(LOCALBIN) ./docs/kustomize_to_docs.sh
 
 ##@ General
 
@@ -276,6 +275,7 @@ CONTROLLER_TOOLS_VERSION ?= v0.11.1
 CRD_MARKDOWN_VERSION ?= v0.0.3
 KUTTL_VERSION ?= 0.17.0
 GOTOOLCHAIN_VERSION ?= go1.21.0
+OC_VERSION ?= 4.14.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
@@ -369,10 +369,16 @@ endif
 endif
 
 .PHONY: yq
-yq: ## Download and install yq in local env
+yq: $(LOCALBIN) ## Download and install yq in local env
 	test -s $(LOCALBIN)/yq || ( cd $(LOCALBIN) &&\
 	wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64.tar.gz -O - |\
 	tar xz && mv yq_linux_amd64 $(LOCALBIN)/yq )
+
+.PHONY: oc
+oc: $(LOCALBIN) ## Download and install oc in local env
+	test -s $(LOCALBIN)/oc || ( cd $(LOCALBIN) &&\
+	wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/$(OC_VERSION)/openshift-client-linux-$(OC_VERSION).tar.gz -O - |\
+	tar xz)
 
 # Build make variables to export for shell
 MAKE_ENV := $(shell echo '$(.VARIABLES)' | awk -v RS=' ' '/^(IMAGE)|.*?(REGISTRY)$$/')
