@@ -133,7 +133,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			// with EDPMServiceType set
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"edpmServiceType":               "foo-update-service",
+				"edpmServiceType":               "update",
 				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
@@ -279,7 +279,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"edpmServiceType":               "foo-update-service",
+				"edpmServiceType":               "update",
 				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
@@ -750,7 +750,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-update-service"})
+				"EDPMServiceType": "update"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -1081,7 +1081,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-update-service"})
+				"EDPMServiceType": "update"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -1288,7 +1288,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-update-service"})
+				"EDPMServiceType": "update"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)

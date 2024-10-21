@@ -110,6 +110,7 @@ type OpenStackDataPlaneServiceSpec struct {
 	// corresponds to the ansible role name (without the "edpm_" prefix) used
 	// to manage the service. If not set, will default to the
 	// OpenStackDataPlaneService name.
+	// +kubebuilder:validation:Enum=nova;ovn;update;libvirt;neutron-metadata;telemetry;generic
 	EDPMServiceType string `json:"edpmServiceType,omitempty" yaml:"edpmServiceType,omitempty"`
 }
 
