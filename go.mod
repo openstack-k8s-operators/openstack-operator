@@ -75,7 +75,7 @@ require (
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.7.4 // indirect
+	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.7.5 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/metal3-io/baremetal-operator/apis v0.6.2 // indirect
