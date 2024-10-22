@@ -127,8 +127,6 @@ spec:
                     type: string
                   infraDnsmasqImage:
                     type: string
-                  infraInstanceHaImage:
-                    type: string
                   infraMemcachedImage:
                     type: string
                   infraRedisImage:
@@ -334,8 +332,6 @@ spec:
                       type: string
                     infraDnsmasqImage:
                       type: string
-                    infraInstanceHaImage:
-                      type: string
                     infraMemcachedImage:
                       type: string
                     infraRedisImage:
@@ -511,8 +507,6 @@ spec:
                   horizonImage:
                     type: string
                   infraDnsmasqImage:
-                    type: string
-                  infraInstanceHaImage:
                     type: string
                   infraMemcachedImage:
                     type: string
