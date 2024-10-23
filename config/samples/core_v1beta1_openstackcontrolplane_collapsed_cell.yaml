@@ -46,6 +46,18 @@ spec:
     template:
       secret: osp-secret
       databaseInstance: openstack
+      customServiceConfig: |
+        [DEFAULT]
+        enabled_backends = default_backend:swift
+        [glance_store]
+        default_backend = default_backend
+        [default_backend]
+        swift_store_create_container_on_put = True
+        swift_store_auth_version = 3
+        swift_store_auth_address = {{ .KeystoneInternalURL }}
+        swift_store_endpoint_type = internalURL
+        swift_store_user = service:glance
+        swift_store_key = {{ .ServicePassword }}
       storage:
         storageClass: ""
         storageRequest: 10G
@@ -53,7 +65,6 @@ spec:
       glanceAPIs:
         default:
           replicas: 1
-          type: single
   cinder:
     template:
       databaseInstance: openstack
@@ -149,3 +160,12 @@ spec:
         ipaddr: 172.17.0.80
         port: 10514
         cloNamespace: openshift-logging
+  swift:
+    enabled: true
+    template:
+      swiftRing:
+        ringReplicas: 1
+      swiftStorage:
+        replicas: 1
+      swiftProxy:
+        replicas: 1
