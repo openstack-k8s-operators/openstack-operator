@@ -196,7 +196,7 @@ func dedupe(ctx context.Context, helper *helper.Helper,
 			return dedupedServices, updatedglobalServices, err
 
 		}
-		if !slices.Contains(nodeSetServiceTypes, service.Spec.EDPMServiceType) && !slices.Contains(dedupedServices, svc) {
+		if !slices.Contains(nodeSetServiceTypes, service.Name) && !slices.Contains(dedupedServices, svc) {
 			if service.Spec.DeployOnAllNodeSets {
 				if !slices.Contains(globalServices, svc) {
 					updatedglobalServices = append(globalServices, svc)

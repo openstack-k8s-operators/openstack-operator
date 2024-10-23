@@ -240,7 +240,7 @@ func DuplicateServiceNodeSetSpec(nodeSetName string) map[string]interface{} {
 	return map[string]interface{}{
 		"services": []string{
 			"foo-service",
-			"duplicate-service",
+			"foo-service",
 		},
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
@@ -311,7 +311,7 @@ func DuplicateServiceDeploymentSpec() map[string]interface{} {
 		},
 		"servicesOverride": []string{
 			"foo-service",
-			"duplicate-service",
+			"foo-service",
 		},
 	}
 }
