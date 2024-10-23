@@ -20,7 +20,7 @@ const (
 func ReconcileInstanceHa(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	missingImageDefault := ""
 	customData := map[string]string{
-		InstanceHaImageKey: *getImg(version.Status.ContainerImages.InfraInstanceHaImage, &missingImageDefault),
+		InstanceHaImageKey: *getImg(version.Status.ContainerImages.OpenstackClientImage, &missingImageDefault),
 	}
 
 	cms := []util.Template{

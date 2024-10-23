@@ -7,7 +7,6 @@ export RELATED_IMAGE_KEYSTONE_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-ce
 export RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
 export RELATED_IMAGE_INFRA_MEMCACHED_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-memcached:current-podified
 export RELATED_IMAGE_INFRA_REDIS_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-redis:current-podified
-export RELATED_IMAGE_INFRA_INSTANCE_HA_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
 export RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT=quay.io/openstack-k8s-operators/openstack-ansibleee-runner:current-podified
 export RELATED_IMAGE_NOVA_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
 export RELATED_IMAGE_NOVA_CONDUCTOR_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
