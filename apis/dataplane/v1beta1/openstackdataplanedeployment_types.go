@@ -67,6 +67,12 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Minimum:=1
 	// +kubebuilder:default:=15
 	DeploymentRequeueTime int `json:"deploymentRequeueTime"`
+
+	// Additional configuration options for AnsibleExecutionEnvironment
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
+	AnsibleEEConfig DataSource `json:"ansibleEeConfig,omitempty"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
