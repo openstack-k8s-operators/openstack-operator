@@ -211,17 +211,19 @@ spec:
       designateCentral:
         replicas: 1
       designateWorker:
-        replicas: 0
+        replicas: 1
         networkAttachments:
           - designate
       designateProducer:
-        replicas: 0
+        replicas: 1
       designateMdns:
         replicas: 0
         networkAttachments:
           - designate
       designateBackendbind9:
-        replicas: 0
+        replicas: 1
+        storageClass: local-storage
+        storageRequest: 10G
         networkAttachments:
           - designate
   swift:
