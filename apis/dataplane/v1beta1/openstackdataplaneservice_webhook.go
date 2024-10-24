@@ -44,14 +44,15 @@ var _ webhook.Defaulter = &OpenStackDataPlaneService{}
 func (r *OpenStackDataPlaneService) Default() {
 
 	openstackdataplaneservicelog.Info("default", "name", r.Name)
-	r.Spec.Default(r.Name)
+	r.Spec.Default()
 	r.DefaultLabels()
 }
 
 // Default - set defaults for this OpenStackDataPlaneService
-func (spec *OpenStackDataPlaneServiceSpec) Default(name string) {
+func (spec *OpenStackDataPlaneServiceSpec) Default() {
+	const EdpmGenericServiceName string = "generic"
 	if spec.EDPMServiceType == "" {
-		spec.EDPMServiceType = name
+		spec.EDPMServiceType = EdpmGenericServiceName
 	}
 }
 

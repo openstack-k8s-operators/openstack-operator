@@ -133,7 +133,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			// with EDPMServiceType set
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"edpmServiceType":               "foo-update-service",
+				"edpmServiceType":               "update",
 				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
@@ -279,7 +279,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"edpmServiceType":               "foo-update-service",
+				"edpmServiceType":               "update",
 				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
@@ -656,6 +656,12 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}))
 			// DefaultDataPlanenodeSetSpec comes with two mock services, one marked for deployment on all nodesets
 			// But we will not create them to test this scenario
+			CreateDataplaneService(dataplaneGlobalServiceName, false)
+
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
+				"edpmServiceType":               "update",
+				"openStackAnsibleEERunnerImage": "foo-image:latest"})
+
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 			SimulateDNSMasqComplete(dnsMasqName)
@@ -750,7 +756,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-update-service"})
+				"EDPMServiceType": "update"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -969,6 +975,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}))
 			// DefaultDataPlanenodeSetSpec comes with two mock services, one marked for deployment on all nodesets
 			// But we will not create them to test this scenario
+			CreateDataplaneService(dataplaneGlobalServiceName, true)
+			CreateDataplaneService(dataplaneUpdateServiceName, false)
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 			SimulateDNSMasqComplete(dnsMasqName)
@@ -987,7 +995,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:          &DefaultBackoffLimit,
 				PreserveJobs:          true,
 				DeploymentRequeueTime: 15,
-				ServicesOverride:      []string{dataplaneServiceName.Name, "duplicate-service"},
+				ServicesOverride:      []string{dataplaneServiceName.Name, "foo-service"},
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1081,7 +1089,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-update-service"})
+				"EDPMServiceType": "update"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -1288,7 +1296,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceType": "foo-update-service"})
+				"EDPMServiceType": "update"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)

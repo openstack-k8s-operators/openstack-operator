@@ -71,6 +71,14 @@ spec:
               deployOnAllNodeSets:
                 type: boolean
               edpmServiceType:
+                enum:
+                - nova
+                - ovn
+                - update
+                - libvirt
+                - neutron-metadata
+                - telemetry
+                - generic
                 type: string
               openStackAnsibleEERunnerImage:
                 type: string
