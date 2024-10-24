@@ -5,7 +5,7 @@ metadata:
 spec:
   dataSources:
     - secretRef:
-        name: ceilometer-compute-config-data
+        name: ceilometer-ipmi-config-data
   playbook: osp.edpm.telemetry_power_monitoring
   tlsCerts:
     default:
