@@ -486,7 +486,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | false
 
 | edpmServiceType
-| EDPMServiceType - service type, which typically corresponds to one of the default service names (such as nova, ovn, etc). Also typically corresponds to the ansible role name (without the "edpm_" prefix) used to manage the service. If not set, will default to the OpenStackDataPlaneService name.
+| EDPMServiceType - service type, which typically corresponds to one of the default service names (such as nova, ovn, etc). Also typically corresponds to the ansible role name (without the \"edpm_\" prefix) used to manage the service. If not set, will default to the OpenStackDataPlaneService name.
 | string
 | false
 |===
@@ -538,7 +538,7 @@ OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a da
 | false
 
 | edpmRoleServiceName
-| EDPMRoleServiceName is the value of the +++<role>+++_service_name variable from the edpm-ansible role where this certificate is used. For example if the certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be ovn, which matches the edpm_ovn_service_name variable from the role. If not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then OpenStackDataPlaneService.Name is used.+++</role>+++
+| EDPMRoleServiceName is the value of the <role>_service_name variable from the edpm-ansible role where this certificate is used. For example if the certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be ovn, which matches the edpm_ovn_service_name variable from the role.  If not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then OpenStackDataPlaneService.Name is used.
 | string
 | false
 |===
@@ -713,6 +713,11 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 | []infranetworkv1.IPSetNetwork
 | false
 
+| bmhLabelSelector
+| BmhLabelSelector allows for a sub-selection of BaremetalHosts based on arbitrary labels for a node.
+| map[string]string
+| false
+
 | userData
 | UserData  node specific user-data
 | *corev1.SecretReference
@@ -735,11 +740,6 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 
 | managementNetwork
 | ManagementNetwork - Name of network to use for management (SSH/Ansible)
-| string
-| false
-
-| preprovisioningNetworkDataName
-| PreprovisioningNetworkDataName - NetworkData secret name in the local namespace for pre-provisioing
 | string
 | false
 |===
@@ -775,7 +775,7 @@ NodeTemplate is a specification of the node attributes that override top level a
 | false
 
 | ansibleSSHPrivateKeySecret
-| AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: +++<base64 encoded="" private="" key="" contents="">+++<https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>+++</base64>+++
+| AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
 | string
 | true
 
