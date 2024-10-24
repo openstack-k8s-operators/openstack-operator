@@ -199,12 +199,14 @@ spec:
       designateAPI:
         replicas: 1
       designateCentral:
-        replicas: 0 # backend needs to be configured
+        replicas: 1 # backend needs to be configured
       designateWorker:
-        replicas: 0 # backend needs to be configured
+        replicas: 1 # backend needs to be configured
       designateProducer:
-        replicas: 0 # backend needs to be configured
+        replicas: 1 # backend needs to be configured
       designateMdns:
         replicas: 0 # backend needs to be configured
       designateBackendbind9:
-        replicas: 0 # backend needs to be configured
+        replicas: 1 # backend needs to be configured
+        storageClass: local-storage
+        storageRequest: 10G
