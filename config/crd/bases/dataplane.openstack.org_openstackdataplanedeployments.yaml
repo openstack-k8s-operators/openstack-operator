@@ -46,6 +46,10 @@ spec:
             properties:
               ansibleExtraVars:
                 x-kubernetes-preserve-unknown-fields: true
+              ansibleJobNodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
               ansibleLimit:
                 type: string
               ansibleSkipTags:
