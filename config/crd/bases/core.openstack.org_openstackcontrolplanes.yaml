@@ -5320,6 +5320,9 @@ spec:
                           service:
                             default: HeatPassword
                             type: string
+                          stackDomainAdminPassword:
+                            default: HeatStackDomainAdminPassword
+                            type: string
                         type: object
                       preserveJobs:
                         default: false
