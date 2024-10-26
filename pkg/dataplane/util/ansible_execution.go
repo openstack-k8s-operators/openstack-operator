@@ -350,9 +350,9 @@ func SetAeeInvMounts(
 }
 
 func CreateVolume(ansibleEEMounts *storage.VolMounts, volumeName string, volumeMountPath string, secretName string, keyToPathKey string) {
-	volume := corev1.Volume{
+	volume := storage.Volume{
 		Name: volumeName,
-		VolumeSource: corev1.VolumeSource{
+		VolumeSource: storage.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
 				SecretName: secretName,
 				Items: []corev1.KeyToPath{

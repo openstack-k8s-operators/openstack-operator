@@ -184,7 +184,10 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 		hashes["deployIdentifier"] = a.Labels["deployIdentifier"]
 	}
 
-	a.addMounts(job)
+	errMounts := a.addMounts(job)
+	if errMounts != nil {
+		return nil, errMounts
+	}
 	a.addEnvFrom(job)
 
 	// if we have any extra vars for ansible to use set them in the RUNNER_EXTRA_VARS
@@ -236,10 +239,9 @@ func (a *EEJob) addEnvFrom(job *batchv1.Job) {
 	}
 }
 
-func (a *EEJob) addMounts(job *batchv1.Job) {
+func (a *EEJob) addMounts(job *batchv1.Job) error {
 	var volumeMounts []corev1.VolumeMount
-	var volumes []corev1.Volume
-
+	var volumes []storage.Volume
 	// ExtraMounts propagation: for each volume defined in the top-level CR
 	// the propagation function provided by lib-common/modules/storage is
 	// called, and the resulting corev1.Volumes and corev1.Mounts are added
@@ -252,7 +254,17 @@ func (a *EEJob) addMounts(job *batchv1.Job) {
 	}
 
 	job.Spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
-	job.Spec.Template.Spec.Volumes = volumes
+
+	var coreVols []corev1.Volume
+	for _, vol := range volumes {
+		coreVol, errVol := vol.ToCoreVolume()
+		if errVol != nil {
+			return errVol
+		}
+		coreVols = append(coreVols, *coreVol)
+	}
+	job.Spec.Template.Spec.Volumes = coreVols
+	return nil
 }
 
 func hashPodSpec(
