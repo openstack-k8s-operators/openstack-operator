@@ -67,6 +67,10 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Minimum:=1
 	// +kubebuilder:default:=15
 	DeploymentRequeueTime int `json:"deploymentRequeueTime"`
+
+	// +kubebuilder:validation:Optional
+	// AnsibleJobNodeSelector to target subset of worker nodes running the ansible jobs
+	AnsibleJobNodeSelector map[string]string `json:"ansibleJobNodeSelector,omitempty"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment

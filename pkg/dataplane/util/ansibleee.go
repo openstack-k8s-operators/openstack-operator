@@ -63,6 +63,8 @@ type EEJob struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
+	// NodeSelector to target subset of worker nodes running the ansible jobs
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // JobForOpenStackAnsibleEE returns a openstackansibleee Job object
@@ -101,6 +103,10 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 			Args:            args,
 			Env:             a.Env,
 		}},
+	}
+
+	if a.NodeSelector != nil && len(a.NodeSelector) > 0 {
+		podSpec.NodeSelector = a.NodeSelector
 	}
 
 	if a.DNSConfig != nil {
