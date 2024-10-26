@@ -84,6 +84,7 @@ func AnsibleExecution(
 
 	ansibleEE.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 	ansibleEE.Env = aeeSpec.Env
+	ansibleEE.NodeSelector = deployment.Spec.AnsibleJobNodeSelector
 
 	currentJobHash := deployment.Status.AnsibleEEHashes[ansibleEE.Name]
 	jobDef, err := ansibleEE.JobForOpenStackAnsibleEE(helper)
