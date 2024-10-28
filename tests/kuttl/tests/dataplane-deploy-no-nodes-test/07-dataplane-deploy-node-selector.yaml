@@ -1,0 +1,11 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-node-selection
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  ansibleJobNodeSelector:
+    nodeWith: ctlplane
+  servicesOverride:
+    - configure-os
