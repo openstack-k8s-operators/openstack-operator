@@ -11,12 +11,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
-    openstackansibleee_cr: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
     openstackdataplanedeployment: edpm-compute-no-nodes
     openstackdataplanenodeset: edpm-compute-no-nodes
     openstackdataplaneservice: failed-service
-    osaee: "true"
   name: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -41,12 +38,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
-        job-name: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
-        openstackansibleee_cr: failed-service-edpm-compute-no-nodes-edpm-compute-no-nodes
         openstackdataplanedeployment: edpm-compute-no-nodes
         openstackdataplanenodeset: edpm-compute-no-nodes
         openstackdataplaneservice: failed-service
-        osaee: "true"
     spec:
       containers:
       - args:

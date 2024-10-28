@@ -71,12 +71,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: ovn-edpm-compute-no-nodes-updated-ovn-cm-edpm-compute-no-nodes
-    openstackansibleee_cr: ovn-edpm-compute-no-nodes-updated-ovn-cm-edpm-compute-no-nodes
     openstackdataplanedeployment: edpm-compute-no-nodes-updated-ovn-cm
     openstackdataplanenodeset: edpm-compute-no-nodes
     openstackdataplaneservice: ovn
-    osaee: "true"
   name: ovn-edpm-compute-no-nodes-updated-ovn-cm-edpm-compute-no-nodes
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -101,11 +98,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: ovn-edpm-compute-no-nodes-updated-ovn-cm-edpm-compute-no-nodes
-        openstackansibleee_cr: ovn-edpm-compute-no-nodes-updated-ovn-cm-edpm-compute-no-nodes
         openstackdataplanedeployment: edpm-compute-no-nodes-updated-ovn-cm
         openstackdataplanenodeset: edpm-compute-no-nodes
         openstackdataplaneservice: ovn
-        osaee: "true"
     spec:
       containers:
       - args:

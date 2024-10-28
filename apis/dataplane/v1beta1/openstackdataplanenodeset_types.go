@@ -197,7 +197,7 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 	instance.Status.Conditions.Init(&cl)
 }
 
-// GetAnsibleEESpec - get the fields that will be passed to AEE
+// GetAnsibleEESpec - get the fields that will be passed to AEE Job
 func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 	return AnsibleEESpec{
 		NetworkAttachments: instance.Spec.NetworkAttachments,

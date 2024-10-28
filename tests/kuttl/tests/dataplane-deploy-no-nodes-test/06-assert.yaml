@@ -76,12 +76,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
-    openstackansibleee_cr: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
     openstackdataplanedeployment: edpm-multinodeset
     openstackdataplanenodeset: edpm-compute-beta-nodeset
     openstackdataplaneservice: bootstrap
-    osaee: "true"
   name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -103,12 +100,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
-        job-name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
-        openstackansibleee_cr: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
         openstackdataplanedeployment: edpm-multinodeset
         openstackdataplanenodeset: edpm-compute-beta-nodeset
         openstackdataplaneservice: bootstrap
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -182,12 +176,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
-    openstackansibleee_cr: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
     openstackdataplanedeployment: edpm-multinodeset
     openstackdataplanenodeset: edpm-compute-beta-nodeset
     openstackdataplaneservice: download-cache
-    osaee: "true"
   name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -212,12 +203,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
-        job-name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
-        openstackansibleee_cr: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
         openstackdataplanedeployment: edpm-multinodeset
         openstackdataplanenodeset: edpm-compute-beta-nodeset
         openstackdataplaneservice: download-cache
-        osaee: "true"
     spec:
       containers:
       - args:

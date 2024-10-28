@@ -12,12 +12,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
-    openstackansibleee_cr: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
     openstackdataplanedeployment: edpm-compute-no-nodes
     openstackdataplanenodeset: edpm-compute-no-nodes
     openstackdataplaneservice: configure-os
-    osaee: "true"
   name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -42,12 +39,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
-        job-name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
-        openstackansibleee_cr: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
         openstackdataplanedeployment: edpm-compute-no-nodes
         openstackdataplanenodeset: edpm-compute-no-nodes
         openstackdataplaneservice: configure-os
-        osaee: "true"
     spec:
       containers:
       - args:
