@@ -23,6 +23,23 @@ spec:
 +
 * Replace `<nodeSet_name>` with the names of the `OpenStackDataPlaneNodeSet` CRs that you want to include in your data plane deployment.
 
+* You can optionally provide  `ansibleJobNodeSelector` to run the ansible jobs on specific set of OCP worker nodes. For example, worker nodes with `ctlplane` network, as ansible jobs require `ctlplane` NAD.
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-deployment-ipam
+spec:
+  nodeSets:
+    - openstack-edpm-ipam
+    - <nodeSet_name>
+    - ...
+    - <nodeSet_name>
+  ansibleJobNodeSelector:
+    nodeWith: ctlplane
+----
++
 . Save the `openstack-edpm-deploy.yaml` deployment file.
 
 . Deploy the data plane:
