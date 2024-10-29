@@ -32,12 +32,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: test-service-edpm-extramounts-edpm-extramounts
-    openstackansibleee_cr: test-service-edpm-extramounts-edpm-extramounts
     openstackdataplanedeployment: edpm-extramounts
     openstackdataplanenodeset: edpm-extramounts
     openstackdataplaneservice: test-service
-    osaee: "true"
   name: test-service-edpm-extramounts-edpm-extramounts
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -62,12 +59,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: test-service-edpm-extramounts-edpm-extramounts
-        job-name: test-service-edpm-extramounts-edpm-extramounts
-        openstackansibleee_cr: test-service-edpm-extramounts-edpm-extramounts
         openstackdataplanedeployment: edpm-extramounts
         openstackdataplanenodeset: edpm-extramounts
         openstackdataplaneservice: test-service
-        osaee: "true"
     spec:
       containers:
       - args:

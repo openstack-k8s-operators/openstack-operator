@@ -76,12 +76,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: custom-global-service-edpm-compute-global
-    openstackansibleee_cr: custom-global-service-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: custom-global-service
-    osaee: "true"
   name: custom-global-service-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -103,12 +100,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: custom-global-service-edpm-compute-global
-        job-name: custom-global-service-edpm-compute-global
-        openstackansibleee_cr: custom-global-service-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: custom-global-service
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -187,12 +181,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: download-cache-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: download-cache-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: download-cache
-    osaee: "true"
   name: download-cache-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -215,12 +206,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: download-cache-edpm-compute-global-edpm-compute-global
-        job-name: download-cache-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: download-cache-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: download-cache
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -294,12 +282,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: bootstrap-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: bootstrap-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: bootstrap
-    osaee: "true"
   name: bootstrap-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -322,12 +307,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: bootstrap-edpm-compute-global-edpm-compute-global
-        job-name: bootstrap-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: bootstrap-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: bootstrap
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -402,12 +384,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: configure-network-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: configure-network-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: configure-network
-    osaee: "true"
   name: configure-network-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -430,12 +409,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: configure-network-edpm-compute-global-edpm-compute-global
-        job-name: configure-network-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: configure-network-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: configure-network
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -510,12 +486,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: validate-network-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: validate-network-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: validate-network
-    osaee: "true"
   name: validate-network-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -538,12 +511,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: validate-network-edpm-compute-global-edpm-compute-global
-        job-name: validate-network-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: validate-network-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: validate-network
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -618,12 +588,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: configure-os-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: configure-os-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: configure-os
-    osaee: "true"
   name: configure-os-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -646,12 +613,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: configure-os-edpm-compute-global-edpm-compute-global
-        job-name: configure-os-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: configure-os-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: configure-os
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -726,12 +690,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: install-certs-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: install-certs-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: install-certs
-    osaee: "true"
   name: install-certs-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -754,12 +715,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: install-certs-edpm-compute-global-edpm-compute-global
-        job-name: install-certs-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: install-certs-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: install-certs
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -867,12 +825,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: ovn-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: ovn-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: ovn
-    osaee: "true"
   name: ovn-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -895,12 +850,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: ovn-edpm-compute-global-edpm-compute-global
-        job-name: ovn-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: ovn-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: ovn
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -976,12 +928,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: neutron-metadata-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: neutron-metadata-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: neutron-metadata
-    osaee: "true"
   name: neutron-metadata-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -1004,12 +953,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-metadata-edpm-compute-global-edpm-compute-global
-        job-name: neutron-metadata-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: neutron-metadata-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: neutron-metadata
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -1115,12 +1061,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: neutron-ovn-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: neutron-ovn-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: neutron-ovn
-    osaee: "true"
   name: neutron-ovn-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -1143,12 +1086,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-ovn-edpm-compute-global-edpm-compute-global
-        job-name: neutron-ovn-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: neutron-ovn-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: neutron-ovn
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -1224,12 +1164,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: neutron-sriov-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: neutron-sriov-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: neutron-sriov
-    osaee: "true"
   name: neutron-sriov-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -1252,12 +1189,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-sriov-edpm-compute-global-edpm-compute-global
-        job-name: neutron-sriov-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: neutron-sriov-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: neutron-sriov
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -1333,12 +1267,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: neutron-dhcp-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: neutron-dhcp-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: neutron-dhcp
-    osaee: "true"
   name: neutron-dhcp-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -1361,12 +1292,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-dhcp-edpm-compute-global-edpm-compute-global
-        job-name: neutron-dhcp-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: neutron-dhcp-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: neutron-dhcp
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -1442,12 +1370,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: libvirt-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: libvirt-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: libvirt
-    osaee: "true"
   name: libvirt-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -1470,12 +1395,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: libvirt-edpm-compute-global-edpm-compute-global
-        job-name: libvirt-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: libvirt-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: libvirt
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -1551,12 +1473,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: nova-edpm-compute-global-edpm-compute-global
-    openstackansibleee_cr: nova-edpm-compute-global-edpm-compute-global
     openstackdataplanedeployment: edpm-compute-global
     openstackdataplanenodeset: edpm-compute-global
     openstackdataplaneservice: nova
-    osaee: "true"
   name: nova-edpm-compute-global-edpm-compute-global
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -1579,12 +1498,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: nova-edpm-compute-global-edpm-compute-global
-        job-name: nova-edpm-compute-global-edpm-compute-global
-        openstackansibleee_cr: nova-edpm-compute-global-edpm-compute-global
         openstackdataplanedeployment: edpm-compute-global
         openstackdataplanenodeset: edpm-compute-global
         openstackdataplaneservice: nova
-        osaee: "true"
     spec:
       containers:
       - args:

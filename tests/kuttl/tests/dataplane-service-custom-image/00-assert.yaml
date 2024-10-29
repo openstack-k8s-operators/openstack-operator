@@ -59,12 +59,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
-    openstackansibleee_cr: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
     openstackdataplanedeployment: edpm-compute-no-nodes
     openstackdataplanenodeset: edpm-no-nodes-custom-svc
     openstackdataplaneservice: custom-img-svc
-    osaee: "true"
   name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -89,12 +86,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
-        job-name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
-        openstackansibleee_cr: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
         openstackdataplanedeployment: edpm-compute-no-nodes
         openstackdataplanenodeset: edpm-no-nodes-custom-svc
         openstackdataplaneservice: custom-img-svc
-        osaee: "true"
     spec:
       containers:
       - args:

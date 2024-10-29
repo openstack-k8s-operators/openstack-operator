@@ -144,12 +144,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
-    openstackansibleee_cr: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
     openstackdataplanedeployment: openstack-edpm-tls-ovrd
     openstackdataplanenodeset: openstack-edpm-tls
     openstackdataplaneservice: tls-dns-ips
-    osaee: "true"
   name: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -174,12 +171,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
-        job-name: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
-        openstackansibleee_cr: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
         openstackdataplanedeployment: openstack-edpm-tls-ovrd
         openstackdataplanenodeset: openstack-edpm-tls
         openstackdataplaneservice: tls-dns-ips
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -261,12 +255,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
-    openstackansibleee_cr: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
     openstackdataplanedeployment: openstack-edpm-tls-ovrd
     openstackdataplanenodeset: openstack-edpm-tls
     openstackdataplaneservice: custom-tls-dns
-    osaee: "true"
   name: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -288,12 +279,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
-        job-name: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
-        openstackansibleee_cr: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
         openstackdataplanedeployment: openstack-edpm-tls-ovrd
         openstackdataplanenodeset: openstack-edpm-tls
         openstackdataplaneservice: custom-tls-dns
-        osaee: "true"
     spec:
       containers:
       - args:

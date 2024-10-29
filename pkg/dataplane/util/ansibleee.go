@@ -24,7 +24,7 @@ type EEJob struct {
 	Playbook string `json:"playbook,omitempty"`
 	// Image is the container image that will execute the ansible command
 	Image string `json:"image,omitempty"`
-	// Name is the name of the internal container inside the pod
+	// Name is the name of the execution job
 	Name string `json:"name,omitempty"`
 	// Namespace - The kubernetes Namespace to create the job in
 	Namespace string `json:"namespace,omitempty"`
@@ -67,14 +67,14 @@ type EEJob struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
-// JobForOpenStackAnsibleEE returns a openstackansibleee Job object
+// JobForOpenStackAnsibleEE returns a Job object
 func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error) {
 	const (
 		CustomPlaybook  string = "playbook.yaml"
 		CustomInventory string = "/runner/inventory/inventory.yaml"
 	)
 
-	ls := labelsForOpenStackAnsibleEE(a.Name, a.Labels)
+	ls := labelsForOpenStackAnsibleEE(a.Labels)
 
 	args := a.Args
 
@@ -212,16 +212,10 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 	return job, nil
 }
 
-// labelsForOpenStackAnsibleEE returns the labels for selecting the resources
-// belonging to the given openstackansibleee CR name.
-func labelsForOpenStackAnsibleEE(name string, labels map[string]string) map[string]string {
-	const ansibleEELabel string = "openstackansibleee"
-
+// labelsForOpenStackAnsibleEE returns the labels for ansible execution job.
+func labelsForOpenStackAnsibleEE(labels map[string]string) map[string]string {
 	ls := map[string]string{
-		"app":                   ansibleEELabel,
-		"job-name":              name,
-		"openstackansibleee_cr": name,
-		"osaee":                 "true",
+		"app": "openstackansibleee",
 	}
 	for key, val := range labels {
 		ls[key] = val

@@ -138,12 +138,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
-    openstackansibleee_cr: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
     openstackdataplanedeployment: openstack-edpm-tls
     openstackdataplanenodeset: openstack-edpm-tls
     openstackdataplaneservice: install-certs-ovrd
-    osaee: "true"
   name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -168,12 +165,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
-        job-name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
-        openstackansibleee_cr: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
         openstackdataplanedeployment: openstack-edpm-tls
         openstackdataplanenodeset: openstack-edpm-tls
         openstackdataplaneservice: install-certs-ovrd
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -275,12 +269,9 @@ kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
-    openstackansibleee_cr: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
     openstackdataplanedeployment: openstack-edpm-tls
     openstackdataplanenodeset: openstack-edpm-tls
     openstackdataplaneservice: tls-dnsnames
-    osaee: "true"
   name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -305,12 +296,9 @@ spec:
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
-        job-name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
-        openstackansibleee_cr: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
         openstackdataplanedeployment: openstack-edpm-tls
         openstackdataplanenodeset: openstack-edpm-tls
         openstackdataplaneservice: tls-dnsnames
-        osaee: "true"
     spec:
       containers:
       - args:

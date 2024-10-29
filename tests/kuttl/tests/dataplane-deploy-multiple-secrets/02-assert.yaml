@@ -109,12 +109,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: install-certs-ovr-openstack-edpm-tls-openstack-edpm-tls
-    openstackansibleee_cr: install-certs-ovr-openstack-edpm-tls-openstack-edpm-tls
     openstackdataplanedeployment: openstack-edpm-tls
     openstackdataplanenodeset: openstack-edpm-tls
     openstackdataplaneservice: install-certs-ovr
-    osaee: "true"
   name: install-certs-ovr-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -135,12 +132,9 @@ spec:
     metadata:
       labels:
         app: openstackansibleee
-        job-name: install-certs-ovr-openstack-edpm-tls-openstack-edpm-tls
-        openstackansibleee_cr: install-certs-ovr-openstack-edpm-tls-openstack-edpm-tls
         openstackdataplanedeployment: openstack-edpm-tls
         openstackdataplanenodeset: openstack-edpm-tls
         openstackdataplaneservice: install-certs-ovr
-        osaee: "true"
     spec:
       containers:
       - args:
@@ -237,12 +231,9 @@ metadata:
   generation: 1
   labels:
     app: openstackansibleee
-    job-name: generic-service1-openstack-edpm-tls-openstack-edpm-tls
-    openstackansibleee_cr: generic-service1-openstack-edpm-tls-openstack-edpm-tls
     openstackdataplanedeployment: openstack-edpm-tls
     openstackdataplanenodeset: openstack-edpm-tls
     openstackdataplaneservice: generic-service1
-    osaee: "true"
   name: generic-service1-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack-kuttl-tests
   ownerReferences:
@@ -263,12 +254,9 @@ spec:
     metadata:
       labels:
         app: openstackansibleee
-        job-name: generic-service1-openstack-edpm-tls-openstack-edpm-tls
-        openstackansibleee_cr: generic-service1-openstack-edpm-tls-openstack-edpm-tls
         openstackdataplanedeployment: openstack-edpm-tls
         openstackdataplanenodeset: openstack-edpm-tls
         openstackdataplaneservice: generic-service1
-        osaee: "true"
     spec:
       containers:
       - args:
