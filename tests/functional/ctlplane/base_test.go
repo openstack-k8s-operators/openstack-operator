@@ -409,6 +409,13 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	ironicTemplate := map[string]interface{}{
 		"ironicConductors": []interface{}{},
 	}
+	heatTemplate := map[string]interface{}{
+		"databaseInstance": "openstack",
+		"secret":           "osp-secret",
+		"passwordSelectors": map[string]interface{}{
+			"AuthEncryptionKey": "HeatAuthEncryptionKey",
+		},
+	}
 
 	return map[string]interface{}{
 		"secret":       "osp-secret",
@@ -471,6 +478,10 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		},
 		"manila": map[string]interface{}{
 			"enabled": true,
+		},
+		"heat": map[string]interface{}{
+			"enabled":  true,
+			"template": heatTemplate,
 		},
 	}
 }
