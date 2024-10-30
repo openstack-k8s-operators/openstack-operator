@@ -763,6 +763,8 @@ spec:
           name: libvirt-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/nova
           name: nova-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/custom-global-service
+          name: custom-global-service-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -801,6 +803,10 @@ spec:
           defaultMode: 420
           secretName: combined-ca-bundle
       - name: nova-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: custom-global-service-combined-ca-bundle
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle

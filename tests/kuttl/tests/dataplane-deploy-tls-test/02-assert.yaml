@@ -206,6 +206,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/install-certs-ovrd
+          name: install-certs-ovrd-combined-ca-bundle
         - mountPath: /var/lib/openstack/certs/tls-dnsnames/default
           name: openstack-edpm-tls-tls-dnsnames-default-certs-0
         - mountPath: /var/lib/openstack/certs/tls-dnsnames/second
@@ -225,6 +227,10 @@ spec:
       serviceAccountName: openstack-edpm-tls
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: install-certs-ovrd-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: openstack-edpm-tls-tls-dnsnames-default-certs-0
         projected:
           defaultMode: 420

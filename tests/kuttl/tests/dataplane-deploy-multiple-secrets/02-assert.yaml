@@ -173,6 +173,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/install-certs-ovr
+          name: install-certs-ovr-combined-ca-bundle
         - mountPath: /var/lib/openstack/certs/generic-service1/default
           name: openstack-edpm-tls-generic-service1-default-certs-0
         - mountPath: /var/lib/openstack/cacerts/generic-service1
@@ -190,6 +192,10 @@ spec:
       serviceAccountName: openstack-edpm-tls
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: install-certs-ovr-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: openstack-edpm-tls-generic-service1-default-certs-0
         projected:
           defaultMode: 420
