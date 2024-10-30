@@ -423,6 +423,13 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"enabled": false,
 		},
 	}
+	heatTemplate := map[string]interface{}{
+		"databaseInstance": "openstack",
+		"secret":           "osp-secret",
+		"passwordSelectors": map[string]interface{}{
+			"AuthEncryptionKey": "HeatAuthEncryptionKey",
+		},
+	}
 
 	return map[string]interface{}{
 		"secret":       "osp-secret",
@@ -489,6 +496,10 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"telemetry": map[string]interface{}{
 			"enabled":  true,
 			"template": telemetryTemplate,
+		},
+		"heat": map[string]interface{}{
+			"enabled":  true,
+			"template": heatTemplate,
 		},
 	}
 }

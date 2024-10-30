@@ -233,6 +233,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 			spec["telemetry"] = map[string]interface{}{
 				"enabled": false,
 			}
+			spec["heat"] = map[string]interface{}{
+				"enabled": false,
+			}
 			spec["tls"] = GetTLSPublicSpec()
 			spec["ovn"] = map[string]interface{}{
 				"enabled": true,
