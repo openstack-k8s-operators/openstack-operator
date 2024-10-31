@@ -173,13 +173,13 @@ spec:
       designateAPI:
         replicas: 1
       designateCentral:
-        replicas: 0 # backend needs to be configured
+        replicas: 1
       designateWorker:
-        replicas: 0 # backend needs to be configured
+        replicas: 1
       designateProducer:
-        replicas: 0 # backend needs to be configured
+        replicas: 1
       designateBackendbind9:
-        replicas: 0 # backend needs to be configured
+        replicas: 1
   barbican:
     enabled: true
     template:
