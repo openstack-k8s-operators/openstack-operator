@@ -75,7 +75,8 @@ type OpenStackDataPlaneServiceSpec struct {
 	// CACerts - Secret containing the CA certificate chain
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MaxLength:=253
-	CACerts string `json:"caCerts,omitempty" yaml:"caCerts,omitempty"`
+	// +kubebuilder:default="combined-ca-bundle"
+	CACerts string `json:"caCerts" yaml:"caCerts"`
 
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	// +kubebuilder:validation:Optional
