@@ -8807,6 +8807,10 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 120
+                        minimum: 1
+                        type: integer
                       corePlugin:
                         default: ml2
                         type: string

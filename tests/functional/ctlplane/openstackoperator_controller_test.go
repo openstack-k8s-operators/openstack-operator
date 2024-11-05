@@ -565,6 +565,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
+			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.neutron.openstack.org/timeout", "120s"))
 			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Cinder.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.cinder.openstack.org/timeout", "60s"))
@@ -843,6 +844,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
+			Expect(OSCtlplane.Spec.Neutron.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.neutron.openstack.org/timeout", "120s"))
 		})
 
 		It("should create selfsigned issuer and public, internal, libvirt and ovn CA and issuer", func() {
