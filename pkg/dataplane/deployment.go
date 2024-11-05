@@ -317,9 +317,9 @@ func (d *Deployer) addCertMounts(
 					hash := sha256.Sum224([]byte(volumeName))
 					volumeName = "cert" + hex.EncodeToString(hash[:])
 				}
-				certVolume := corev1.Volume{
+				certVolume := storage.Volume{
 					Name: volumeName,
-					VolumeSource: corev1.VolumeSource{
+					VolumeSource: storage.VolumeSource{
 						Projected: &projectedVolumeSource,
 					},
 				}
@@ -353,9 +353,9 @@ func (d *Deployer) addCertMounts(
 				hash := sha256.Sum224([]byte(volumeName))
 				volumeName = "cacert" + hex.EncodeToString(hash[:])
 			}
-			cacertVolume := corev1.Volume{
+			cacertVolume := storage.Volume{
 				Name: volumeName,
-				VolumeSource: corev1.VolumeSource{
+				VolumeSource: storage.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
 						SecretName: service.Spec.CACerts,
 					},
@@ -418,9 +418,9 @@ func (d *Deployer) addServiceExtraMounts(
 				hash := sha256.Sum224([]byte(volumeName))
 				volumeName = "cm" + hex.EncodeToString(hash[:])
 			}
-			volume := corev1.Volume{
+			volume := storage.Volume{
 				Name: volumeName,
-				VolumeSource: corev1.VolumeSource{
+				VolumeSource: storage.VolumeSource{
 					ConfigMap: &corev1.ConfigMapVolumeSource{
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: cm.Name,
@@ -464,9 +464,9 @@ func (d *Deployer) addServiceExtraMounts(
 				hash := sha256.Sum224([]byte(volumeName))
 				volumeName = "sec" + hex.EncodeToString(hash[:])
 			}
-			volume := corev1.Volume{
+			volume := storage.Volume{
 				Name: volumeName,
-				VolumeSource: corev1.VolumeSource{
+				VolumeSource: storage.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
 						SecretName: sec.Name,
 						Items: []corev1.KeyToPath{
