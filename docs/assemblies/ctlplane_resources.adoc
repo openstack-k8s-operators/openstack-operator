@@ -91,7 +91,6 @@
 * <<cinderspeccore,CinderSpecCore>>
 * <<cinderstatus,CinderStatus>>
 * <<dbpurge,DBPurge>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<cinderapi,CinderAPI>>
 * <<cinderapilist,CinderAPIList>>
 * <<cinderapispec,CinderAPISpec>>
@@ -118,11 +117,9 @@
 * <<cindervolumetemplatecore,CinderVolumeTemplateCore>>
 * <<cinderservicetemplate,CinderServiceTemplate>>
 * <<cindertemplate,CinderTemplate>>
-* <<passwordselector,PasswordSelector>>
 * <<designateservicetemplate,DesignateServiceTemplate>>
 * <<designateservicetemplatecore,DesignateServiceTemplateCore>>
 * <<designatetemplate,DesignateTemplate>>
-* <<passwordselector,PasswordSelector>>
 * <<designate,Designate>>
 * <<designateextravolmounts,DesignateExtraVolMounts>>
 * <<designatelist,DesignateList>>
@@ -130,7 +127,6 @@
 * <<designatespecbase,DesignateSpecBase>>
 * <<designatespeccore,DesignateSpecCore>>
 * <<designatestatus,DesignateStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<designateapi,DesignateAPI>>
 * <<designateapilist,DesignateAPIList>>
 * <<designateapispecbase,DesignateAPISpecBase>>
@@ -159,27 +155,22 @@
 * <<designateworkerlist,DesignateWorkerList>>
 * <<designateworkerspecbase,DesignateWorkerSpecBase>>
 * <<designateworkerstatus,DesignateWorkerStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<glanceapitemplate,GlanceAPITemplate>>
 * <<imagecache,ImageCache>>
 * <<storage,Storage>>
-* <<dbpurge,DBPurge>>
 * <<glance,Glance>>
 * <<glanceextravolmounts,GlanceExtraVolMounts>>
 * <<glancelist,GlanceList>>
 * <<glancespec,GlanceSpec>>
 * <<glancespeccore,GlanceSpecCore>>
 * <<glancestatus,GlanceStatus>>
-* <<passwordselector,PasswordSelector>>
 * <<quotalimits,QuotaLimits>>
 * <<glanceapi,GlanceAPI>>
 * <<glanceapilist,GlanceAPIList>>
 * <<glanceapispec,GlanceAPISpec>>
 * <<glanceapistatus,GlanceAPIStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<heatservicetemplate,HeatServiceTemplate>>
 * <<heattemplate,HeatTemplate>>
-* <<passwordselector,PasswordSelector>>
 * <<heat,Heat>>
 * <<heatlist,HeatList>>
 * <<heatspec,HeatSpec>>
@@ -212,7 +203,6 @@
 * <<horizonstatus,HorizonStatus>>
 * <<ironicservicetemplate,IronicServiceTemplate>>
 * <<keystoneendpoints,KeystoneEndpoints>>
-* <<passwordselector,PasswordSelector>>
 * <<dhcprange,DHCPRange>>
 * <<ironic,Ironic>>
 * <<ironicimages,IronicImages>>
@@ -220,7 +210,6 @@
 * <<ironicspec,IronicSpec>>
 * <<ironicspeccore,IronicSpecCore>>
 * <<ironicstatus,IronicStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<ironicapi,IronicAPI>>
 * <<ironicapilist,IronicAPIList>>
 * <<ironicapispec,IronicAPISpec>>
@@ -243,13 +232,11 @@
 * <<ironicneutronagentspec,IronicNeutronAgentSpec>>
 * <<ironicneutronagentstatus,IronicNeutronAgentStatus>>
 * <<ironicneutronagenttemplate,IronicNeutronAgentTemplate>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<keystoneapi,KeystoneAPI>>
 * <<keystoneapilist,KeystoneAPIList>>
 * <<keystoneapispec,KeystoneAPISpec>>
 * <<keystoneapispeccore,KeystoneAPISpecCore>>
 * <<keystoneapistatus,KeystoneAPIStatus>>
-* <<passwordselector,PasswordSelector>>
 * <<keystoneendpoint,KeystoneEndpoint>>
 * <<keystoneendpointlist,KeystoneEndpointList>>
 * <<keystoneendpointspec,KeystoneEndpointSpec>>
@@ -260,8 +247,6 @@
 * <<keystoneservicestatus,KeystoneServiceStatus>>
 * <<manilaservicetemplate,ManilaServiceTemplate>>
 * <<manilatemplate,ManilaTemplate>>
-* <<passwordselector,PasswordSelector>>
-* <<dbpurge,DBPurge>>
 * <<manila,Manila>>
 * <<maniladebug,ManilaDebug>>
 * <<manilaextravolmounts,ManilaExtraVolMounts>>
@@ -270,7 +255,6 @@
 * <<manilaspecbase,ManilaSpecBase>>
 * <<manilaspeccore,ManilaSpecCore>>
 * <<manilastatus,ManilaStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<manilaapi,ManilaAPI>>
 * <<manilaapilist,ManilaAPIList>>
 * <<manilaapispec,ManilaAPISpec>>
@@ -289,7 +273,6 @@
 * <<manilasharestatus,ManilaShareStatus>>
 * <<manilasharetemplate,ManilaShareTemplate>>
 * <<manilasharetemplatecore,ManilaShareTemplateCore>>
-* <<adoptionredirectspec,AdoptionRedirectSpec>>
 * <<galera,Galera>>
 * <<galeraattributes,GaleraAttributes>>
 * <<galeralist,GaleraList>>
@@ -304,7 +287,6 @@
 * <<mariadbdatabaselist,MariaDBDatabaseList>>
 * <<mariadbdatabasespec,MariaDBDatabaseSpec>>
 * <<mariadbdatabasestatus,MariaDBDatabaseStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<neutronapi,NeutronAPI>>
 * <<neutronapilist,NeutronAPIList>>
 * <<neutronapispec,NeutronAPISpec>>
@@ -312,16 +294,13 @@
 * <<neutronapistatus,NeutronAPIStatus>>
 * <<neutronapitls,NeutronApiTLS>>
 * <<neutronextravolmounts,NeutronExtraVolMounts>>
-* <<passwordselector,PasswordSelector>>
 * <<novacellimages,NovaCellImages>>
 * <<novaimages,NovaImages>>
 * <<novaservicebase,NovaServiceBase>>
-* <<passwordselector,PasswordSelector>>
 * <<nova,Nova>>
 * <<novalist,NovaList>>
 * <<novaspeccore,NovaSpecCore>>
 * <<novastatus,NovaStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<novaapi,NovaAPI>>
 * <<novaapilist,NovaAPIList>>
 * <<novaapispec,NovaAPISpec>>
@@ -355,7 +334,6 @@
 * <<novanovncproxyspec,NovaNoVNCProxySpec>>
 * <<novanovncproxystatus,NovaNoVNCProxyStatus>>
 * <<novanovncproxytemplate,NovaNoVNCProxyTemplate>>
-* <<tlssection,TLSSection>>
 * <<vncproxyoverridespec,VNCProxyOverrideSpec>>
 * <<novascheduler,NovaScheduler>>
 * <<novaschedulerlist,NovaSchedulerList>>
@@ -375,8 +353,6 @@
 * <<octaviaspecbase,OctaviaSpecBase>>
 * <<octaviaspeccore,OctaviaSpecCore>>
 * <<octaviastatus,OctaviaStatus>>
-* <<passwordselector,PasswordSelector>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<octaviaapi,OctaviaAPI>>
 * <<octaviaapilist,OctaviaAPIList>>
 * <<octaviaapispec,OctaviaAPISpec>>
@@ -426,8 +402,6 @@
 * <<ovnnorthdspec,OVNNorthdSpec>>
 * <<ovnnorthdspeccore,OVNNorthdSpecCore>>
 * <<ovnnorthdstatus,OVNNorthdStatus>>
-* <<apioverridespec,APIOverrideSpec>>
-* <<passwordselector,PasswordSelector>>
 * <<placementapi,PlacementAPI>>
 * <<placementapilist,PlacementAPIList>>
 * <<placementapispec,PlacementAPISpec>>
@@ -439,7 +413,6 @@
 * <<swiftspecbase,SwiftSpecBase>>
 * <<swiftspeccore,SwiftSpecCore>>
 * <<swiftstatus,SwiftStatus>>
-* <<passwordselector,PasswordSelector>>
 * <<proxyoverridespec,ProxyOverrideSpec>>
 * <<swiftproxy,SwiftProxy>>
 * <<swiftproxylist,SwiftProxyList>>
@@ -457,7 +430,6 @@
 * <<swiftstoragespec,SwiftStorageSpec>>
 * <<swiftstoragespeccore,SwiftStorageSpecCore>>
 * <<swiftstoragestatus,SwiftStorageStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<aodh,Aodh>>
 * <<aodhcore,AodhCore>>
 * <<autoscaling,Autoscaling>>
@@ -471,6 +443,7 @@
 * <<ceilometerspec,CeilometerSpec>>
 * <<ceilometerspeccore,CeilometerSpecCore>>
 * <<ceilometerstatus,CeilometerStatus>>
+* <<ksmstatus,KSMStatus>>
 * <<logging,Logging>>
 * <<logginglist,LoggingList>>
 * <<loggingspec,LoggingSpec>>
@@ -481,7 +454,6 @@
 * <<metricstoragestatus,MetricStorageStatus>>
 * <<monitoringstack,MonitoringStack>>
 * <<persistentstorage,PersistentStorage>>
-* <<storage,Storage>>
 * <<autoscalingsection,AutoscalingSection>>
 * <<autoscalingsectioncore,AutoscalingSectionCore>>
 * <<ceilometersection,CeilometerSection>>
@@ -664,7 +636,7 @@ BarbicanSection defines the desired state of Barbican service
 
 | template
 | Template - Overrides to use when creating the Barbican Service
-| *barbicanv1.BarbicanSpecCore
+| *<<barbicanspeccore,BarbicanSpecCore>>
 | false
 
 | apiOverride
@@ -758,7 +730,7 @@ CinderSection defines the desired state of Cinder service
 
 | template
 | Template - Overrides to use when creating Cinder Resources
-| *cinderv1.CinderSpecCore
+| *<<cinderspeccore,CinderSpecCore>>
 | false
 
 | apiOverride
@@ -789,7 +761,7 @@ DNSMasqSection defines the desired state of DNSMasq service
 
 | template
 | Template - Overrides to use when creating the DNSMasq service
-| *networkv1.DNSMasqSpec
+| *<<dnsmasqspec,DNSMasqSpec>>
 | false
 |===
 
@@ -810,7 +782,7 @@ DesignateSection defines the desired state of the Designate service
 
 | template
 | Template - Overrides to use when creating Designate Resources
-| *designatev1.DesignateSpecCore
+| *<<designatespeccore,DesignateSpecCore>>
 | false
 
 | apiOverride
@@ -836,7 +808,7 @@ GaleraSection defines the desired state of Galera services
 
 | templates
 | Templates - Overrides to use when creating the Galera databases
-| *map[string]mariadbv1.GaleraSpecCore
+| *map[string]<<galeraspeccore,GaleraSpecCore>>
 | false
 |===
 
@@ -857,7 +829,7 @@ GlanceSection defines the desired state of Glance service
 
 | template
 | Template - Overrides to use when creating the Glance Service
-| *glancev1.GlanceSpecCore
+| *<<glancespeccore,GlanceSpecCore>>
 | false
 
 | apiOverrides
@@ -888,7 +860,7 @@ HeatSection defines the desired state of Heat services
 
 | template
 | Template - Overrides to use when creating the Heat services
-| *heatv1.HeatSpecCore
+| *<<heatspeccore,HeatSpecCore>>
 | false
 
 | apiOverride
@@ -919,7 +891,7 @@ HorizonSection defines the desired state of Horizon services
 
 | template
 | Template - Overrides to use when creating the Horizon services
-| *horizonv1.HorizonSpecCore
+| *<<horizonspeccore,HorizonSpecCore>>
 | false
 
 | apiOverride
@@ -945,7 +917,7 @@ IronicSection defines the desired state of Ironic services
 
 | template
 | Template - Overrides to use when creating the Ironic services
-| *ironicv1.IronicSpecCore
+| *<<ironicspeccore,IronicSpecCore>>
 | false
 
 | apiOverride
@@ -976,7 +948,7 @@ KeystoneSection defines the desired state of Keystone service
 
 | template
 | Template - Overrides to use when creating the Keystone service
-| *keystonev1.KeystoneAPISpecCore
+| *<<keystoneapispeccore,KeystoneAPISpecCore>>
 | false
 
 | apiOverride
@@ -1002,7 +974,7 @@ ManilaSection defines the desired state of Manila service
 
 | template
 | Template - Overrides to use when creating Manila Resources
-| *manilav1.ManilaSpecCore
+| *<<manilaspeccore,ManilaSpecCore>>
 | false
 
 | apiOverride
@@ -1028,7 +1000,7 @@ MemcachedSection defines the desired state of Memcached services
 
 | templates
 | Templates - Overrides to use when creating the Memcached databases
-| *map[string]memcachedv1.MemcachedSpecCore
+| *map[string]<<memcachedspeccore,MemcachedSpecCore>>
 | false
 |===
 
@@ -1049,7 +1021,7 @@ NeutronSection defines the desired state of Neutron service
 
 | template
 | Template - Overrides to use when creating the Neutron Service
-| *neutronv1.NeutronAPISpecCore
+| *<<neutronapispeccore,NeutronAPISpecCore>>
 | false
 
 | apiOverride
@@ -1091,7 +1063,7 @@ NovaSection defines the desired state of Nova services
 
 | template
 | Template - Overrides to use when creating the Nova services
-| *novav1.NovaSpec
+| *<<novaspec,NovaSpec>>
 | false
 
 | apiOverride
@@ -1122,7 +1094,7 @@ OctaviaSection defines the desired state of the Octavia service
 
 | template
 | Template - Overrides to use when creating Octavia Resources
-| *octaviav1.OctaviaSpecCore
+| *<<octaviaspeccore,OctaviaSpecCore>>
 | false
 
 | apiOverride
@@ -1143,7 +1115,7 @@ OpenStackClientSection defines the desired state of the OpenStackClient
 
 | template
 | Template - Overrides to use when creating the OpenStackClient Resource
-| v1beta1.OpenStackClientSpecCore
+| <<openstackclientspeccore,OpenStackClientSpecCore>>
 | false
 |===
 
@@ -1440,17 +1412,17 @@ OvnResources defines the desired state of OVN services
 
 | ovnDBCluster
 | OVNDBCluster - Overrides to use when creating the OVNDBCluster services
-| map[string]ovnv1.OVNDBClusterSpecCore
+| map[string]<<ovndbclusterspeccore,OVNDBClusterSpecCore>>
 | false
 
 | ovnNorthd
 | OVNNorthd - Overrides to use when creating the OVNNorthd service
-| ovnv1.OVNNorthdSpecCore
+| <<ovnnorthdspeccore,OVNNorthdSpecCore>>
 | false
 
 | ovnController
 | OVNController - Overrides to use when creating the OVNController service
-| ovnv1.OVNControllerSpecCore
+| <<ovncontrollerspeccore,OVNControllerSpecCore>>
 | false
 |===
 
@@ -1492,7 +1464,7 @@ PlacementSection defines the desired state of Placement service
 
 | template
 | Template - Overrides to use when creating the Placement API
-| *placementv1.PlacementAPISpecCore
+| *<<placementapispeccore,PlacementAPISpecCore>>
 | false
 
 | apiOverride
@@ -1560,7 +1532,7 @@ SwiftSection defines the desired state of Swift service
 
 | template
 | Template - Overrides to use when creating Swift Resources
-| *swiftv1.SwiftSpecCore
+| *<<swiftspeccore,SwiftSpecCore>>
 | false
 
 | proxyOverride
@@ -1707,7 +1679,7 @@ TelemetrySection defines the desired state of OpenStack Telemetry services
 
 | template
 | Template - Overrides to use when creating the OpenStack Telemetry services
-| *telemetryv1.TelemetrySpecCore
+| *<<telemetryspeccore,TelemetrySpecCore>>
 | false
 
 | aodhApiOverride
@@ -2008,11 +1980,6 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | *string
 | false
 
-| infraInstanceHaImage
-|
-| *string
-| false
-
 | ironicAPIImage
 |
 | *string
@@ -2207,7 +2174,7 @@ ContainerTemplate - struct that contains container image URLs for each service i
 <<custom-resources,Back to Custom Resources>>
 
 [#customcontainerimages]
-=== CustomContainerImages
+==== CustomContainerImages
 
 CustomContainerImages - struct for custom container images
 
@@ -2428,12 +2395,12 @@ BarbicanSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 |===
@@ -2771,7 +2738,7 @@ BarbicanKeystoneListenerStatus defines the observed state of BarbicanKeystoneLis
 | Field | Description | Scheme | Required
 
 | readyCount
-| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file ReadyCount of barbican API instances
+| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run \"make\" to regenerate code after modifying this file ReadyCount of barbican API instances
 | int32
 | false
 
@@ -2896,7 +2863,7 @@ BarbicanWorkerStatus defines the observed state of BarbicanWorker
 | Field | Description | Scheme | Required
 
 | readyCount
-| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file ReadyCount of barbican API instances
+| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run \"make\" to regenerate code after modifying this file ReadyCount of barbican API instances
 | int32
 | false
 
@@ -2958,17 +2925,17 @@ BarbicanComponentTemplate - Variables used by every sub-component of Barbican (e
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as a custom config file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
 | customServiceConfigSecrets
-| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/<service>/<service>.conf.d directory as a custom config file.
 | []string
 | false
 
@@ -3029,7 +2996,7 @@ BarbicanTemplate defines common Spec elements for all Barbican components includ
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
@@ -3169,6 +3136,8 @@ CinderSpec defines the desired state of Cinder
 [#cinderspecbase]
 ==== CinderSpecBase
 
+
+
 |===
 | Field | Description | Scheme | Required
 
@@ -3193,7 +3162,7 @@ CinderSpec defines the desired state of Cinder
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as a custom config file.
 | string
 | false
 
@@ -3334,22 +3303,6 @@ DBPurge struct is used to model the parameters exposed to the Cinder cronJob
 | Schedule defines the crontab format string to schedule the DBPurge cronJob
 | string
 | true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -3987,12 +3940,12 @@ CinderServiceTemplate defines the input parameters that can be defined for a giv
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as a custom config file.
 | string
 | false
 
 | customServiceConfigSecrets
-| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/<service>/<service>.conf.d directory as a custom config file.
 | []string
 | false
 
@@ -4040,22 +3993,6 @@ CinderTemplate defines common input parameters used by all Cinder services
 
 <<custom-resources,Back to Custom Resources>>
 
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the cinder service password from the Secret
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#designateservicetemplate]
 ==== DesignateServiceTemplate
 
@@ -4086,17 +4023,17 @@ DesignateServiceTemplate defines the input parameters that can be defined for a 
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as a custom config file.
 | string
 | false
 
 | customServiceConfigSecrets
-| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/<service>/<service>.conf.d directory as a custom config file.
 | []string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -4147,28 +4084,12 @@ DesignateTemplate defines common input parameters used by all Designate services
 | true
 
 | backendWorkerServerProtocol
-| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:worker']
+| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: \"UDP\", \"TCP\" Please Note: this MUST match what is in the /etc/designate.conf ['service:worker']
 | string
 | true
 
 | backendMdnsServerProtocol
-| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:mdns']
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the designate service password from the Secret
+| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: \"UDP\", \"TCP\" Please Note: this MUST match what is in the /etc/designate.conf ['service:mdns']
 | string
 | true
 |===
@@ -4338,12 +4259,12 @@ DesignateSpecBase -
 | true
 
 | backendWorkerServerProtocol
-| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:worker']
+| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: \"UDP\", \"TCP\" Please Note: this MUST match what is in the /etc/designate.conf ['service:worker']
 | string
 | true
 
 | backendMdnsServerProtocol
-| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: "UDP", "TCP" Please Note: this MUST match what is in the /etc/designate.conf ['service:mdns']
+| BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker & designate_mdns to/from the DNS server. Acceptable values are: \"UDP\", \"TCP\" Please Note: this MUST match what is in the /etc/designate.conf ['service:mdns']
 | string
 | true
 
@@ -4358,12 +4279,12 @@ DesignateSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -4371,6 +4292,11 @@ DesignateSpecBase -
 | Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 | corev1.ResourceRequirements
 | false
+
+| designateNetworkAttachment
+| DesignateNetworkAttachment is a NetworkAttachment resource name for the Designate Control Network
+| string
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -4492,22 +4418,6 @@ DesignateStatus defines the observed state of Designate
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
 | false
 |===
 
@@ -4714,6 +4624,26 @@ DesignateBackendbind9SpecBase -
 
 | serviceAccount
 | ServiceAccount - service account name used internally to provide Designate services the default SA name
+| string
+| true
+
+| customBindOptions
+| CustomBindOptions - custom bind9 options
+| []string
+| false
+
+| controlNetworkName
+| ControlNetworkName - specify which network attachment is to be used for control, notifys and zone transfers.
+| string
+| true
+
+| storageClass
+| StorageClass
+| string
+| false
+
+| storageRequest
+| StorageRequest
 | string
 | true
 |===
@@ -5336,22 +5266,6 @@ DesignateWorkerStatus defines the observed state of DesignateWorker
 
 <<custom-resources,Back to Custom Resources>>
 
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#glanceapitemplate]
 ==== GlanceAPITemplate
 
@@ -5376,12 +5290,12 @@ GlanceAPITemplate defines the desired state of GlanceAPI
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | customServiceConfigSecrets
-| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/<service>/<service>.conf.d directory as a custom config file.
 | []string
 | false
 
@@ -5457,6 +5371,8 @@ ImageCache - struct where the exposed imageCache params are defined
 [#storage]
 ==== Storage
 
+Storage -
+
 |===
 | Field | Description | Scheme | Required
 
@@ -5474,27 +5390,6 @@ ImageCache - struct where the exposed imageCache params are defined
 | External -
 | bool
 | false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#dbpurge-2]
-==== DBPurge
-
-DBPurge struct is used to model the parameters exposed to the Glance API CronJob
-
-|===
-| Field | Description | Scheme | Required
-
-| age
-| Age is the DBPurgeAge parameter and indicates the number of days of purging DB records
-| int
-| true
-
-| schedule
-| Schedule defines the crontab format string to schedule the DBPurge cronJob
-| string
-| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -5591,7 +5486,7 @@ GlanceSpec defines the desired state of Glance
 [#glancespeccore]
 ==== GlanceSpecCore
 
-GlanceSpec defines the desired state of Glance
+GlanceSpecCore defines the desired state of Glance
 
 |===
 | Field | Description | Scheme | Required
@@ -5637,12 +5532,12 @@ GlanceSpec defines the desired state of Glance
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | customServiceConfigSecrets
-| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/<service>/<service>.conf.d directory as a custom config file.
 | []string
 | false
 
@@ -5731,22 +5626,6 @@ GlanceStatus defines the observed state of Glance
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
 | false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the glance service password from the Secret
-| string
-| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -5936,22 +5815,6 @@ GlanceAPIStatus defines the observed state of GlanceAPI
 
 <<custom-resources,Back to Custom Resources>>
 
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#heatservicetemplate]
 ==== HeatServiceTemplate
 
@@ -5966,7 +5829,7 @@ HeatServiceTemplate -
 | true
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -5976,8 +5839,13 @@ HeatServiceTemplate -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
 | string
+| false
+
+| customServiceConfigSecrets
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/heat/heat.conf.d directory as a custom config file.
+| []string
 | false
 
 | resources
@@ -6014,27 +5882,6 @@ HeatTemplate -
 | passwordSelectors
 | PasswordSelectors - Selectors to identify the DB and ServiceUser password from the Secret
 | <<passwordselector,PasswordSelector>>
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector ..
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the heat service password from the Secret
-| string
-| true
-
-| authEncryptionKey
-| AuthEncryptionKey - Selector to get the heat auth encryption key from the Secret
-| string
 | true
 |===
 
@@ -6137,8 +5984,13 @@ HeatSpec defines the desired state of Heat
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 01-custom.conf file.
 | string
+| false
+
+| customServiceConfigSecrets
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/heat/heat.conf.d directory as a custom config file.
+| []string
 | false
 
 | preserveJobs
@@ -6147,7 +5999,7 @@ HeatSpec defines the desired state of Heat
 | true
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -6762,7 +6614,7 @@ HorizonSpecBase -
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -6884,12 +6736,12 @@ IronicServiceTemplate defines the common input parameters for Ironic services
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 |===
@@ -6911,22 +6763,6 @@ KeystoneEndpoints defines keystone endpoint parameters for service
 
 | public
 | Public endpoint URL
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the ironic service password from the Secret
 | string
 | true
 |===
@@ -7127,12 +6963,12 @@ IronicSpec defines the desired state of Ironic
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -7162,7 +6998,7 @@ IronicSpec defines the desired state of Ironic
 | true
 
 | rpcTransport
-| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE \-> ironic and ironic-inspector require oslo.messaging transport when not in standalone mode.
+| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE -> ironic and ironic-inspector require oslo.messaging transport when not in standalone mode.
 | string
 | true
 
@@ -7235,22 +7071,6 @@ IronicStatus defines the observed state of Ironic
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
 | false
 |===
 
@@ -7352,7 +7172,7 @@ IronicAPISpec defines the desired state of IronicAPI
 | false
 
 | rpcTransport
-| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE \-> ironic requires oslo.messaging transport when not in standalone mode.
+| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE -> ironic requires oslo.messaging transport when not in standalone mode.
 | string
 | true
 
@@ -7537,7 +7357,7 @@ IronicConductorSpec defines the desired state of IronicConductor
 | false
 
 | rpcTransport
-| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE \-> ironic requires oslo.messaging transport when not in standalone mode.
+| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE -> ironic requires oslo.messaging transport when not in standalone mode.
 | string
 | true
 
@@ -7754,7 +7574,7 @@ IronicInspectorSpec defines the desired state of IronicInspector
 | true
 
 | rpcTransport
-| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE \-> ironic-inspector requires oslo.messaging transport when not in standalone mode.
+| RPC transport type - Which RPC transport implementation to use between conductor and API services. 'oslo' to use oslo.messaging transport or 'json-rpc' to use JSON RPC transport. NOTE -> ironic-inspector requires oslo.messaging transport when not in standalone mode.
 | string
 | true
 |===
@@ -7851,12 +7671,12 @@ IronicInspectorTemplate defines the input parameters for Ironic Inspector servic
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -8033,22 +7853,6 @@ IronicNeutronAgentTemplate defines the input parameters for ML2 baremetal - iron
 
 <<custom-resources,Back to Custom Resources>>
 
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#keystoneapi]
 ==== KeystoneAPI
 
@@ -8098,6 +7902,8 @@ KeystoneAPIList contains a list of KeystoneAPI
 
 [#keystoneapispec]
 ==== KeystoneAPISpec
+
+
 
 |===
 | Field | Description | Scheme | Required
@@ -8178,6 +7984,16 @@ KeystoneAPISpec defines the desired state of KeystoneAPI
 | bool
 | true
 
+| fernetRotationDays
+| FernetRotationDays - Rotate fernet token keys every X days
+| *int32
+| true
+
+| fernetMaxActiveKeys
+| FernetMaxActiveKeys - Maximum number of fernet token keys after rotation
+| *int32
+| true
+
 | passwordSelectors
 | PasswordSelectors - Selectors to identify the AdminUser password from the Secret
 | <<passwordselector,PasswordSelector>>
@@ -8194,12 +8010,12 @@ KeystoneAPISpec defines the desired state of KeystoneAPI
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -8278,22 +8094,6 @@ KeystoneAPIStatus defines the observed state of KeystoneAPI
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 | int64
 | false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| admin
-| Admin - Selector to get the keystone Admin password from the Secret
-| string
-| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -8520,12 +8320,12 @@ ManilaServiceTemplate defines the input parameters that can be defined for a giv
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory a custom config file.
 | string
 | false
 
 | customServiceConfigSecrets
-| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/<service>/<service>.conf.d directory as a custom config file.
 | []string
 | false
 
@@ -8573,43 +8373,6 @@ ManilaTemplate defines common input parameters used by all Manila services
 
 <<custom-resources,Back to Custom Resources>>
 
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the manila service password from the Secret
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#dbpurge-2]
-==== DBPurge
-
-DBPurge struct is used to model the parameters exposed to the Manila API CronJob
-
-|===
-| Field | Description | Scheme | Required
-
-| age
-| Age is the DBPurgeAge parameter and indicates the number of days of purging DB records
-| int
-| true
-
-| schedule
-| Schedule defines the crontab format string to schedule the DBPurge cronJob
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#manila]
 ==== Manila
 
@@ -8645,7 +8408,7 @@ ManilaDebug contains flags related to multiple debug activities. See the individ
 | Field | Description | Scheme | Required
 
 | dbPurge
-| DBPurge increases log verbosity by executing the db_purge command with "--debug".
+| DBPurge increases log verbosity by executing the db_purge command with \"--debug\".
 | bool
 | false
 |===
@@ -8759,7 +8522,7 @@ ManilaSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory a custom config file.
 | string
 | false
 
@@ -8858,22 +8621,6 @@ ManilaStatus defines the observed state of Manila
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
 | false
 |===
 
@@ -9337,22 +9084,6 @@ ManilaShareTemplateCore -
 
 <<custom-resources,Back to Custom Resources>>
 
-[#adoptionredirectspec]
-==== AdoptionRedirectSpec
-
-AdoptionRedirectSpec defines redirection to a different DB instance during Adoption
-
-|===
-| Field | Description | Scheme | Required
-
-| host
-| MariaDB host to redirect to (IP or name)
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#galera]
 ==== Galera
 
@@ -9387,10 +9118,25 @@ GaleraAttributes holds startup information for a Galera host
 |===
 | Field | Description | Scheme | Required
 
+| uuid
+| UUID of the partition that is seen by the galera node
+| string
+| false
+
 | seqno
 | Last recorded replication sequence number in the DB
 | string
 | true
+
+| safe_to_bootstrap
+| This galera node can bootstrap a galera cluster
+| bool
+| false
+
+| no_grastate
+| This galera node has its state recovered from the DB
+| bool
+| false
 
 | gcomm
 | Gcomm URI used to connect to the galera cluster
@@ -9479,11 +9225,6 @@ GaleraSpec defines the desired state of Galera
 | Customize config using this parameter to change service defaults, or overwrite rendered information using raw MariaDB config format. The content gets added to /etc/my.cnf.d/galera_custom.cnf
 | string
 | false
-
-| adoptionRedirect
-| Adoption configuration
-| <<adoptionredirectspec,AdoptionRedirectSpec>>
-| true
 
 | tls
 | TLS settings for MySQL service and internal Galera replication
@@ -9757,22 +9498,6 @@ MariaDBDatabaseStatus defines the observed state of MariaDBDatabase
 
 <<custom-resources,Back to Custom Resources>>
 
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#neutronapi]
 ==== NeutronAPI
 
@@ -9894,8 +9619,18 @@ NeutronAPISpecCore -
 | bool
 | true
 
+| corePlugin
+| CorePlugin - Neutron core plugin to use. Using \"ml2\" if not set.
+| string
+| true
+
+| ml2MechanismDrivers
+| Ml2MechanismDrivers - list of ml2 drivers to enable. Using {\"ovn\"} if not set.
+| []string
+| true
+
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
@@ -9981,6 +9716,8 @@ NeutronAPIStatus defines the observed state of NeutronAPI
 [#neutronapitls]
 ==== NeutronApiTLS
 
+
+
 |===
 | Field | Description | Scheme | Required
 
@@ -10023,24 +9760,10 @@ NeutronExtraVolMounts exposes additional parameters processed by the neutron-ope
 
 <<custom-resources,Back to Custom Resources>>
 
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Database - Selector to get the neutron service password from the Secret
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#novacellimages]
 ==== NovaCellImages
+
+
 
 |===
 | Field | Description | Scheme | Required
@@ -10070,6 +9793,8 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 
 [#novaimages]
 ==== NovaImages
+
+
 
 |===
 | Field | Description | Scheme | Required
@@ -10111,7 +9836,7 @@ NovaServiceBase contains the fields that are needed for each nova service CRD
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -10124,32 +9849,6 @@ NovaServiceBase contains the fields that are needed for each nova service CRD
 | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
 | []string
 | false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the keystone service user password from the Secret
-| string
-| true
-
-| metadataSecret
-| MetadataSecret - the name of the field to get the metadata secret from the Secret
-| string
-| true
-
-| prefixMetadataCellsSecret
-| prefixMetadataCellsSecret - the prefix name of the field to get the metadata secret from the Secret for cells. Vale of metadata_proxy_shared_secret information for the nova-metadata service. This secret is shared between nova and neutron ovn-metadata inside selected cell and if this is not defined the global metadata_proxy_shared_secret secret will be used
-| string
-| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10225,7 +9924,7 @@ NovaSpecCore defines the template for NovaSpec used in OpenStackControlPlane
 | true
 
 | cellTemplates
-| Cells is a mapping of cell names to NovaCellTemplate objects defining the cells in the deployment. The "cell0" cell is a mandatory cell in every deployment. Moreover any real deployment needs at least one additional normal cell as "cell0" cannot have any computes.
+| Cells is a mapping of cell names to NovaCellTemplate objects defining the cells in the deployment. The \"cell0\" cell is a mandatory cell in every deployment. Moreover any real deployment needs at least one additional normal cell as \"cell0\" cannot have any computes.
 | map[string]<<novacelltemplate,NovaCellTemplate>>
 | true
 
@@ -10323,22 +10022,6 @@ NovaStatus defines the observed state of Nova
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 | int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
 | false
 |===
 
@@ -10527,7 +10210,7 @@ NovaAPITemplate defines the input parameters specified by the user to create a N
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -10641,7 +10324,7 @@ NovaCellSpec defines the desired state of NovaCell
 | Field | Description | Scheme | Required
 
 | cellName
-| CellName is the name of the Nova Cell. The value "cell0" has a special meaning. The "cell0" Cell cannot have compute nodes associated and the conductor in this cell acts as the super conductor for all the cells in the deployment.
+| CellName is the name of the Nova Cell. The value \"cell0\" has a special meaning. The \"cell0\" Cell cannot have compute nodes associated and the conductor in this cell acts as the super conductor for all the cells in the deployment.
 | string
 | true
 
@@ -10742,7 +10425,7 @@ NovaCellStatus defines the observed state of NovaCell
 | Field | Description | Scheme | Required
 
 | hash
-| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file Map of hashes to track e.g. job status
+| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run \"make\" to regenerate code after modifying this file Map of hashes to track e.g. job status
 | map[string]string
 | false
 
@@ -11024,7 +10707,7 @@ NovaComputeTemplate defines the input parameters specified by the user to create
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -11229,7 +10912,7 @@ NovaConductorTemplate defines the input parameters specified by the user to crea
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -11450,7 +11133,7 @@ NovaMetadataTemplate defines the input parameters specified by the user to creat
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -11650,7 +11333,7 @@ NovaNoVNCProxyTemplate defines the input parameters specified by the user to cre
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -11673,27 +11356,6 @@ NovaNoVNCProxyTemplate defines the input parameters specified by the user to cre
 | TLS - Parameters related to the TLS
 | <<tlssection,TLSSection>>
 | true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#tlssection-2]
-==== TLSSection
-
-TLSSection defines the desired state of TLS configuration
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Cert secret used for the nova novnc service endpoint
-| tls.GenericService
-| false
-
-| vencrypt
-| Vencrypt - cert secret containing the x509 certificate to be presented to the VNC server. The CommonName field should match the primary hostname of the controller node. If using a HA deployment, the Organization field can also be configured to a value that is common across all console proxy instances in the deployment. https://docs.openstack.org/nova/latest/admin/remote-console-access.html#novnc-proxy-server-configuration
-| tls.GenericService
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -11836,7 +11498,7 @@ NovaSchedulerStatus defines the observed state of NovaScheduler
 | Field | Description | Scheme | Required
 
 | hash
-| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file Map of hashes to track e.g. job status
+| INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run \"make\" to regenerate code after modifying this file Map of hashes to track e.g. job status
 | map[string]string
 | false
 
@@ -11882,7 +11544,7 @@ NovaSchedulerTemplate defines the input parameters specified by the user to crea
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -12021,12 +11683,12 @@ OctaviaAmphoraControllerSpecCore -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -12084,6 +11746,11 @@ OctaviaAmphoraControllerSpecCore -
 | OctaviaProviderSubnetCIDR -
 | string
 | true
+
+| octaviaProviderSubnetExtraCIDRs
+| OctaviaProviderSubnetExtraCIDRs -
+| []string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -12205,13 +11872,28 @@ OctaviaLbMgmtNetworks Settings for Octavia management networks
 | Field | Description | Scheme | Required
 
 | manageLbMgmtNetworks
-|
+| ManageLbMgmtNetworks - when True, octavia-operator creates the Neutron resources needed for its Management Network
 | bool
+| true
+
+| createDefaultLbMgmtNetwork
+| CreateDefaultLbMgmtNetwork - when True, octavia-operator creates a Management Network for the default Availability Zone of the control plane. Can be set to false when deploying OpenStack in DCN mode.
+| bool
+| true
+
+| lbMgmtRouterGateway
+| LbMgmtRouterGateway is the IP address of the Octavia router on the Provider network, it's optional and used only when the routing informations are not passed through the Network Attachment Definition
+| string
 | false
 
 | availabilityZones
 | Availability zones for the octavia management network resources
 | []string
+| false
+
+| availabilityZoneCIDRs
+| AvailabilityZoneCIDRs are the CIDRs of each management network associated with an Availability Zone (ex: {\"az\":\"172.34.0.0/24\", ...})
+| map[string]string
 | false
 |===
 
@@ -12328,12 +12010,12 @@ OctaviaSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -12376,6 +12058,11 @@ OctaviaSpecBase -
 | Apache Container Image URL
 | string
 | true
+
+| apiTimeout
+| Octavia API timeout
+| string
+| false
 
 | octaviaNetworkAttachment
 | OctaviaNetworkAttachment is a NetworkAttachment resource name for the Octavia Management Network
@@ -12477,43 +12164,6 @@ OctaviaStatus defines the observed state of Octavia
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| database
-| Database - Selector to get the octavia Database user password from the Secret
-| string
-| false
-
-| service
-| Service - Selector to get the service user password from the Secret
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
 | false
 |===
 
@@ -12646,12 +12296,12 @@ OctaviaAPISpecCore -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -12721,6 +12371,8 @@ OctaviaAPIStatus defines the observed state of OctaviaAPI
 
 [#octaviaapitls]
 ==== OctaviaApiTLS
+
+
 
 |===
 | Field | Description | Scheme | Required
@@ -12825,7 +12477,7 @@ OctaviaRsyslogSpecCore -
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -12895,6 +12547,8 @@ OctaviaRsyslogStatus defines the observed state of the Octavia Amphora Controlle
 
 [#octaviarsyslogtarget]
 ==== OctaviaRsyslogTarget
+
+
 
 |===
 | Field | Description | Scheme | Required
@@ -12968,7 +12622,7 @@ CPUReqs defines specific CPU hardware requests
 | Field | Description | Scheme | Required
 
 | arch
-| Arch is a scalar (string) because it wouldn't make sense to give it an "exact-match" option Can be either "x86_64" or "ppc64le" if included
+| Arch is a scalar (string) because it wouldn't make sense to give it an \"exact-match\" option Can be either \"x86_64\" or \"ppc64le\" if included
 | string
 | false
 
@@ -13020,7 +12674,7 @@ DiskReqs defines specific disk hardware requests
 | false
 
 | ssdReq
-| SSD is scalar (bool) because it wouldn't make sense to give it an "exact-match" option
+| SSD is scalar (bool) because it wouldn't make sense to give it an \"exact-match\" option
 | <<diskssdreq,DiskSSDReq>>
 | false
 |===
@@ -13139,10 +12793,15 @@ InstanceSpec Instance specific attributes
 |===
 | Field | Description | Scheme | Required
 
+| bmhLabelSelector
+| BmhLabelSelector allows for the selection of a particular BaremetalHost based on arbitrary labels
+| map[string]string
+| false
+
 | ctlPlaneIP
 | CtlPlaneIP - Control Plane IP in CIDR notation
 | string
-| true
+| false
 
 | userData
 | UserData - Host User Data
@@ -13152,11 +12811,6 @@ InstanceSpec Instance specific attributes
 | networkData
 | NetworkData - Host Network Data
 | *corev1.SecretReference
-| false
-
-| preprovisioningNetworkDataName
-| PreprovisioningNetworkDataName - NetwoData Secret name for Preprovisining in the local namespace
-| string
 | false
 |===
 
@@ -13279,16 +12933,6 @@ OpenStackBaremetalSetSpec defines the desired state of OpenStackBaremetalSet
 | string
 | false
 
-| userData
-| UserData holds the reference to the Secret containing the user data to be passed to the host before it boots. UserData can be set per host in BaremetalHosts or here. If none of these are provided it will use a default cloud-config.
-| *corev1.SecretReference
-| false
-
-| networkData
-| NetworkData holds the reference to the Secret containing network data to be passed to the hosts. NetworkData can be set per host in BaremetalHosts or here. If none of these are provided it will use default NetworkData to configure CtlPlaneIP.
-| *corev1.SecretReference
-| false
-
 | automatedCleaningMode
 | When set to disabled, automated cleaning will be avoided during provisioning and deprovisioning.
 | AutomatedCleaningMode
@@ -13340,7 +12984,7 @@ OpenStackBaremetalSetSpec defines the desired state of OpenStackBaremetalSet
 | false
 
 | passwordSecret
-| PasswordSecret the name of the secret used to optionally set the root pwd by adding NodeRootPassword: +++<base64 enc="" pwd="">+++to the secret data+++</base64>+++
+| PasswordSecret the name of the secret used to optionally set the root pwd by adding NodeRootPassword: <base64 enc pwd> to the secret data
 | *corev1.SecretReference
 | false
 
@@ -14089,38 +13733,6 @@ OVNNorthdStatus defines the observed state of OVNNorthd
 
 <<custom-resources,Back to Custom Resources>>
 
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the DB and AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the service user password from the Secret
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#placementapi]
 ==== PlacementAPI
 
@@ -14233,7 +13845,7 @@ PlacementAPISpecCore -
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | true
 
@@ -14452,22 +14064,6 @@ SwiftStatus defines the observed state of Swift
 
 <<custom-resources,Back to Custom Resources>>
 
-[#passwordselector-2]
-==== PasswordSelector
-
-PasswordSelector to identify the AdminUser password from the Secret
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Service - Selector to get the Swift service password from the Secret
-| string
-| true
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#proxyoverridespec]
 ==== ProxyOverrideSpec
 
@@ -14601,7 +14197,7 @@ SwiftProxySpecCore -
 | false
 
 | defaultConfigOverwrite
-| DefaultConfigOverwrite - can be used to add additionalfiles. Those get added to the service config dir in /etc/+++<servicename>+++-conf.d+++</servicename>+++
+| DefaultConfigOverwrite - can be used to add additionalfiles. Those get added to the service config dir in /etc/<servicename>-conf.d
 | map[string]string
 | false
 
@@ -14661,6 +14257,8 @@ SwiftProxyStatus defines the observed state of SwiftProxy
 
 [#swiftdisk]
 ==== SwiftDisk
+
+
 
 |===
 | Field | Description | Scheme | Required
@@ -14930,7 +14528,7 @@ SwiftStorageSpecCore -
 | true
 
 | defaultConfigOverwrite
-| DefaultConfigOverwrite - can be used to add additionalfiles. Those get added to the service config dir in /etc/+++<servicename>+++-conf.d+++</servicename>+++
+| DefaultConfigOverwrite - can be used to add additionalfiles. Those get added to the service config dir in /etc/<servicename>-conf.d
 | map[string]string
 | false
 |===
@@ -14968,22 +14566,6 @@ SwiftStorageStatus defines the observed state of SwiftStorage
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
 | false
 |===
 
@@ -15059,12 +14641,12 @@ Aodh defines the aodh component spec
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -15294,6 +14876,11 @@ Ceilometer is the Schema for the ceilometers API
 |
 | <<ceilometerstatus,CeilometerStatus>>
 | false
+
+| ksmStatus
+|
+| <<ksmstatus,KSMStatus>>
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15356,6 +14943,11 @@ CeilometerSpec defines the desired state of Ceilometer
 |
 | string
 | true
+
+| ksmImage
+|
+| string
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15389,12 +14981,12 @@ CeilometerSpecCore defines the desired state of Ceilometer. This version is used
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/<service>/<service>.conf.d directory as custom.conf file.
 | string
 | false
 
 | defaultConfigOverwrite
-| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
+| ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
 | map[string]string
 | false
 
@@ -15405,6 +14997,11 @@ CeilometerSpecCore defines the desired state of Ceilometer. This version is used
 
 | tls
 | TLS - Parameters related to the TLS
+| tls.SimpleService
+| false
+
+| ksmTls
+| KSMTLS - Parameters related to the TLS for kube-state-metrics
 | tls.SimpleService
 | false
 |===
@@ -15442,6 +15039,37 @@ CeilometerStatus defines the observed state of Ceilometer
 | networks
 | Networks in addtion to the cluster network, the service is attached to
 | []string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ksmstatus]
+==== KSMStatus
+
+KSMStatus defines the observed state of kube-state-metrics
+
+|===
+| Field | Description | Scheme | Required
+
+| readyCount
+| ReadyCount of ksm instances
+| int32
+| false
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
 | false
 
 | observedGeneration
@@ -15506,11 +15134,6 @@ LoggingSpec defines the desired state of Logging
 
 |===
 | Field | Description | Scheme | Required
-
-| ipaddr
-| IPAddr is the address where the service will listen on
-| string
-| true
 
 | port
 | Port is the port where the service will listen on
@@ -15647,7 +15270,7 @@ MetricStorageSpec defines the desired state of MetricStorage
 | false
 
 | customMonitoringStack
-| CustomMonitoringStack allows to deploy a custom monitoring stack when the options in "MonitoringStack" aren't enough
+| CustomMonitoringStack allows to deploy a custom monitoring stack when the options in \"MonitoringStack\" aren't enough
 | *obov1.MonitoringStackSpec
 | false
 
@@ -15732,32 +15355,6 @@ PersistentStorage defines storage options used for persistent storage
 | pvcStorageClass
 | PvcStorageClass The storage class to use for storing metrics
 | string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#storage-2]
-==== Storage
-
-Storage defines the options used for storage of metrics
-
-|===
-| Field | Description | Scheme | Required
-
-| strategy
-| Strategy to use for storage. Can be "persistent", "ephemeral" or empty, in which case a COO default is used
-| string
-| true
-
-| retention
-| Retention time for metrics
-| string
-| true
-
-| persistent
-| Used to specify the options of persistent storage when strategy = "persistent"
-| *<<persistentstorage,PersistentStorage>>
 | false
 |===
 
@@ -16573,6 +16170,11 @@ IPSetReservation defines reservation status per requested network
 | DNSDomain of the subnet
 | string
 | true
+
+| serviceNetwork
+| ServiceNetwork mapping
+| ServiceNetNameStr
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -16735,6 +16337,11 @@ Network definition
 | Subnets of the network
 | []<<subnet,Subnet>>
 | true
+
+| serviceNetwork
+| Service network mapping
+| ServiceNetNameStr
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
