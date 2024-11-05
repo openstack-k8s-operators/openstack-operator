@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -30,7 +31,8 @@ import (
 // OpenStackReconciler reconciles a OpenStack object
 type OpenStackReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme  *runtime.Scheme
+	Kclient kubernetes.Interface
 }
 
 //+kubebuilder:rbac:groups=operator.openstack.org,resources=openstacks,verbs=get;list;watch;create;update;patch;delete

@@ -196,6 +196,7 @@ cover: test ## Run tests and display functional test coverage
 .PHONY: build
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
+	go build -o bin/operator cmd/operator/main.go
 
 .PHONY: run
 run: export METRICS_PORT?=8080
