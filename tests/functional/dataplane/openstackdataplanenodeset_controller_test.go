@@ -23,6 +23,7 @@ import (
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
@@ -1430,6 +1431,72 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+	})
+
+	When("A NodeSet and Deployment are created with extraMounts with pvc template", func() {
+		BeforeEach(func() {
+			edpmVolClaimTemplate := corev1.PersistentVolumeClaimVolumeSource{
+				ClaimName: "edpm-ansible",
+				ReadOnly:  true,
+			}
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+			nodeSetSpec["preProvisioned"] = true
+			nodeSetSpec["services"] = []string{"bootstrap"}
+			nodeSetSpec["nodeTemplate"] = map[string]interface{}{
+				"extraMounts": []storage.VolMounts{
+					{
+						Mounts: []corev1.VolumeMount{
+							{
+								Name:      "edpm-ansible",
+								MountPath: "/usr/share/ansible/collections/ansible_collections/osp/edpm",
+							},
+						},
+						Volumes: []storage.Volume{
+							{
+								Name: "edpm-ansible",
+								VolumeSource: storage.VolumeSource{
+									PersistentVolumeClaim: &edpmVolClaimTemplate,
+								},
+							},
+						},
+					},
+				},
+				"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+				"ansible": map[string]interface{}{
+					"ansibleUser": "cloud-user",
+				},
+			}
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+
+		})
+		It("Should have ExtraMounts, SSH and Inventory volume mounts", func() {
+			Eventually(func(g Gomega) {
+				const bootstrapName string = "bootstrap"
+				// Make an AnsibleEE name for each service
+				ansibleeeName := types.NamespacedName{
+					Name: fmt.Sprintf(
+						bootstrapName + "-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name),
+					Namespace: namespace,
+				}
+				ansibleEE := GetAnsibleee(ansibleeeName)
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(3))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].Name).To(Equal("edpm-ansible"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("ssh-key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].Name).To(Equal("inventory"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.PersistentVolumeClaim.ClaimName).To(Equal("edpm-ansible"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
 
 			}, th.Timeout, th.Interval).Should(Succeed())
 		})
