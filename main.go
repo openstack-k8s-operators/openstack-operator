@@ -76,16 +76,15 @@ import (
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
+	operatorv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1"
 
 	ocp_configv1 "github.com/openshift/api/config/v1"
 	machineconfig "github.com/openshift/api/machineconfiguration/v1"
 	ocp_image "github.com/openshift/api/operator/v1alpha1"
 
-	operatorv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
-	operatorcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/operator"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	// +kubebuilder:scaffold:imports
 )
@@ -296,13 +295,6 @@ func main() {
 		checker = mgr.GetWebhookServer().StartedChecker()
 	}
 
-	if err = (&operatorcontrollers.OpenStackReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpenStack")
-		os.Exit(1)
-	}
 	// +kubebuilder:scaffold:builder
 	if err := mgr.AddHealthzCheck("healthz", checker); err != nil {
 		setupLog.Error(err, "unable to set up health check")
