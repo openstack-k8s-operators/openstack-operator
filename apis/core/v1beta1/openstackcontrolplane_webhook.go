@@ -860,6 +860,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Heat.Template = &heatv1.HeatSpecCore{}
 		}
 		r.Spec.Heat.Template.Default()
+		initializeOverrideSpec(&r.Spec.Heat.APIOverride.Route, true)
+		r.Spec.Heat.Template.SetDefaultRouteAnnotations(r.Spec.Heat.APIOverride.Route.Annotations)
+		initializeOverrideSpec(&r.Spec.Heat.CnfAPIOverride.Route, true)
+		r.Spec.Heat.Template.SetDefaultRouteAnnotations(r.Spec.Heat.CnfAPIOverride.Route.Annotations)
 	}
 
 	// Swift
