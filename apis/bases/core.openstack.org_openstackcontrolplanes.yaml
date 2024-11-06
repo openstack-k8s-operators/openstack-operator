@@ -9157,10 +9157,12 @@ spec:
                               type: string
                             type: array
                           createDefaultLbMgmtNetwork:
+                            default: true
                             type: boolean
                           lbMgmtRouterGateway:
                             type: string
                           manageLbMgmtNetworks:
+                            default: true
                             type: boolean
                         type: object
                       nodeSelector:
