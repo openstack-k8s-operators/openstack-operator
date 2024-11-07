@@ -4,3 +4,4 @@ metadata:
   name: bootstrap
 spec:
   playbook: osp.edpm.bootstrap
+  edpmServiceType: bootstrap

@@ -1236,7 +1236,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 			dataplanev1.SetupDefaults()
 			updateServiceSpec := map[string]interface{}{
-				"playbook": "osp.edpm.update",
+				"playbook":        "osp.edpm.update",
+				"edpmServiceType": "update",
 			}
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, updateServiceSpec)
 			DeferCleanup(th.DeleteService, dataplaneUpdateServiceName)

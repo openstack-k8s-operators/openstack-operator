@@ -4,3 +4,4 @@ metadata:
   name: install-os
 spec:
   playbook: osp.edpm.install_os
+  edpmServiceType: install-os

@@ -90,6 +90,7 @@ spec:
           command: sleep 1
           delegate_to: localhost
   deployOnAllNodeSets: true
+  edpmServiceType: "custom-global-service"
 ---
 apiVersion: v1
 kind: ConfigMap

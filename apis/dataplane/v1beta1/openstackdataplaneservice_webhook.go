@@ -44,15 +44,7 @@ var _ webhook.Defaulter = &OpenStackDataPlaneService{}
 func (r *OpenStackDataPlaneService) Default() {
 
 	openstackdataplaneservicelog.Info("default", "name", r.Name)
-	r.Spec.Default(r.Name)
 	r.DefaultLabels()
-}
-
-// Default - set defaults for this OpenStackDataPlaneService
-func (spec *OpenStackDataPlaneServiceSpec) Default(name string) {
-	if spec.EDPMServiceType == "" {
-		spec.EDPMServiceType = name
-	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
