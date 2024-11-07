@@ -53,7 +53,7 @@ type OpenstackDataPlaneServiceCert struct {
 	// not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If
 	// OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then
 	// OpenStackDataPlaneService.Name is used.
-	EDPMRoleServiceName string `json:"edpmRoleServiceName,omitempty"`
+	EDPMRoleServiceName string `json:"edpmRoleServiceName"`
 }
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
@@ -111,7 +111,8 @@ type OpenStackDataPlaneServiceSpec struct {
 	// corresponds to the ansible role name (without the "edpm_" prefix) used
 	// to manage the service. If not set, will default to the
 	// OpenStackDataPlaneService name.
-	EDPMServiceType string `json:"edpmServiceType,omitempty" yaml:"edpmServiceType,omitempty"`
+	// +kubebuilder:validation:Required
+	EDPMServiceType string `json:"edpmServiceType" yaml:"edpmServiceType"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService

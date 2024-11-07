@@ -4,3 +4,4 @@ metadata:
   name: validate-network
 spec:
   playbook: osp.edpm.validate_network
+  edpmServiceType: validate-network

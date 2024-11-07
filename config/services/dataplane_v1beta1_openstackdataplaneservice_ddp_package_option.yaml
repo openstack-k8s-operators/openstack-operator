@@ -4,3 +4,4 @@ metadata:
   name: ddp-package-option
 spec:
   playbook: osp.edpm.select_kernel_ddp_package
+  edpmServiceType: ddp-package-option
