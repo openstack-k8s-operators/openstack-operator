@@ -3,6 +3,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: generic-service1
 spec:
+  edpmServiceType: sleep
   caCerts: combined-ca-bundle
   tlsCerts:
     default:
@@ -22,6 +23,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: install-certs-ovr
 spec:
+  edpmServiceType: sleep
   addCertMounts: True
   playbookContents: |
     - hosts: localhost

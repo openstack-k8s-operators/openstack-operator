@@ -6,3 +6,4 @@ spec:
   playbook: osp.edpm.frr
   containerImageFields:
   - EdpmFrrImage
+  edpmServiceType: frr
