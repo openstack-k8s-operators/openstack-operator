@@ -55,6 +55,12 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - pods
   verbs:
   - create
@@ -662,32 +668,6 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - operator.openstack.org
-  resources:
-  - openstacks
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - operator.openstack.org
-  resources:
-  - openstacks/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - operator.openstack.org
-  resources:
-  - openstacks/status
-  verbs:
-  - get
-  - patch
-  - update
 - apiGroups:
   - ovn.openstack.org
   resources:
