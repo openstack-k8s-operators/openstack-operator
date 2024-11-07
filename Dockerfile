@@ -26,8 +26,10 @@ RUN if [ ! -f $CACHITO_ENV_FILE ]; then go mod download ; fi
 
 # Build manager
 RUN if [ -f $CACHITO_ENV_FILE ] ; then source $CACHITO_ENV_FILE ; fi ; env ${GO_BUILD_EXTRA_ENV_ARGS} go build ${GO_BUILD_EXTRA_ARGS} -a -o ${DEST_ROOT}/manager main.go
+RUN if [ -f $CACHITO_ENV_FILE ] ; then source $CACHITO_ENV_FILE ; fi ; env ${GO_BUILD_EXTRA_ENV_ARGS} go build ${GO_BUILD_EXTRA_ARGS} -a -o ${DEST_ROOT}/operator cmd/operator/main.go
 
 RUN cp -r config/services ${DEST_ROOT}/services
+RUN cp -r bindata ${DEST_ROOT}/bindata
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
@@ -65,9 +67,11 @@ WORKDIR /
 
 # Install operator binary to WORKDIR
 COPY --from=builder ${DEST_ROOT}/manager .
+COPY --from=builder ${DEST_ROOT}/operator .
 
 # Install services
 COPY --from=builder ${DEST_ROOT}/services ${OPERATOR_SERVICES}
+COPY --from=builder ${DEST_ROOT}/bindata /bindata
 
 USER $USER_ID
 

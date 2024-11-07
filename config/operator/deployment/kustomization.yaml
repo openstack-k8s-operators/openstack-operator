@@ -1,0 +1,16 @@
+resources:
+- deployment.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+- files:
+  - controller_operator_config.yaml
+  name: operator-config
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: controller
+  newName: quay.io/openstack-k8s-operators/openstack-operator
+  newTag: latest

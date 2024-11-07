@@ -39,6 +39,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20250107153542-fb9c65d9aa6f
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20250113133356-286a91287f17
 	github.com/openstack-k8s-operators/test-operator/api v0.5.1-0.20250113125805-be35b077304c
+	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/cluster-operator/v2 v2.11.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
@@ -84,7 +85,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.5.1-0.20250113155806-c6542cc4eb2b // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect
 	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/common v0.53.0 // indirect

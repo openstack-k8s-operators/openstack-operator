@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-operator
+  name: controller-operator-metrics-service-operator
+  namespace: system
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  selector:
+    openstack.org/operator-name: openstack-operator
