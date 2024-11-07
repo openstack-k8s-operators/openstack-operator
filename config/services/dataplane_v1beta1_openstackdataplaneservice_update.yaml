@@ -4,3 +4,4 @@ metadata:
   name: update
 spec:
   playbook: osp.edpm.update
+  edpmServiceType: update

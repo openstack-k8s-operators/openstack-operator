@@ -4,3 +4,4 @@ metadata:
   name: ceph-hci-pre
 spec:
   playbook: osp.edpm.ceph_hci_pre
+  edpmServiceType: ceph-hci-pre
