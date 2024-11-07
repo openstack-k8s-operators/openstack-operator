@@ -2,30 +2,30 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: controller-manager
+    control-plane: controller-operator
     openstack.org/operator-name: openstack
   name: system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
+  name: controller-operator
   namespace: system
   labels:
-    control-plane: controller-manager
-    openstack.org/operator-name: openstack
+    control-plane: controller-operator
+    openstack.org/operator-name: openstack-controller
 spec:
   selector:
     matchLabels:
-      openstack.org/operator-name: openstack
+      openstack.org/operator-name: openstack-controller
   replicas: 1
   template:
     metadata:
       annotations:
-        kubectl.kubernetes.io/default-container: manager
+        kubectl.kubernetes.io/default-container: operator
       labels:
-        control-plane: controller-manager
-        openstack.org/operator-name: openstack
+        control-plane: controller-operator
+        openstack.org/operator-name: openstack-controller
     spec:
       securityContext:
         runAsNonRoot: true
@@ -38,14 +38,18 @@ spec:
         #   type: RuntimeDefault
       containers:
       - command:
-        - /manager
+        - /operator
         args:
         - --leader-elect
         env:
         - name: OPENSTACK_RELEASE_VERSION
-          value: '{{ .OpenstackReleaseVersion }}'
-        image: '{{ .OperatorImage }}'
-        name: manager
+          value: 0.0.1
+        - name: ENABLE_WEBHOOKS
+          value: false
+        - name: OPERATOR_IMAGE_URL
+          value: quay.io/openstack-k8s-operators/openstack-operator:latest
+        image: controller:latest
+        name: operator
         securityContext:
           allowPrivilegeEscalation: false
         # TODO(user): uncomment for common cases that do not require escalating privileges
@@ -73,5 +77,5 @@ spec:
           requests:
             cpu: 10m
             memory: 128Mi
-      serviceAccountName: openstack-operator-controller-manager
+      serviceAccountName: controller-operator
       terminationGracePeriodSeconds: 10
