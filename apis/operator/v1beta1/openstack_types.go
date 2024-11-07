@@ -17,30 +17,32 @@ limitations under the License.
 package v1beta1
 
 import (
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // OpenStackSpec defines the desired state of OpenStack
 type OpenStackSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of OpenStack. Edit openstack_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
 }
 
 // OpenStackStatus defines the observed state of OpenStack
 type OpenStackStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
+	// Conditions
+	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
+	// DeployedOperatorCount - the number of operators deployed
+	DeployedOperatorCount *int `json:"deployedOperatorCount,omitempty"`
+
+	// ObservedGeneration - the most recent generation observed for this object.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"` // no spec yet so maybe we don't need this
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Deployed Operator Count",type=integer,JSONPath=`.status.deployedOperatorCount`
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
 // OpenStack is the Schema for the openstacks API
 type OpenStack struct {
 	metav1.TypeMeta   `json:",inline"`
