@@ -44,7 +44,6 @@ import (
 
 	operatorv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1"
 	operatorcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/operator"
-	// +kubebuilder:scaffold:imports
 )
 
 var (
@@ -55,7 +54,6 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(operatorv1beta1.AddToScheme(scheme))
-	// +kubebuilder:scaffold:scheme
 }
 
 func main() {
@@ -96,7 +94,7 @@ func main() {
 		},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "40ba705e.openstack.org",
+		LeaderElectionID:       "20ca801f.openstack.org",
 		WebhookServer: webhook.NewServer(
 			webhook.Options{
 				Port:    9443,
@@ -147,7 +145,8 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStack")
 		os.Exit(1)
 	}
-	// +kubebuilder:scaffold:builder
+	operatorcontrollers.SetupEnv()
+
 	if err := mgr.AddHealthzCheck("healthz", checker); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)

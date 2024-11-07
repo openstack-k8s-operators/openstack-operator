@@ -3,10 +3,9 @@ kind: OpenStack
 metadata:
   labels:
     app.kubernetes.io/name: openstack
-    app.kubernetes.io/instance: openstack-sample
+    app.kubernetes.io/instance: openstack
     app.kubernetes.io/part-of: openstack-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: openstack-operator
-  name: openstack-sample
-spec:
-  # TODO(user): Add fields here
+  name: openstack
+  namespace: openstack-operators
