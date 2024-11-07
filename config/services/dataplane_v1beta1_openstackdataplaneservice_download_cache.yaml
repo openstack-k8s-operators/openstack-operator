@@ -4,3 +4,4 @@ metadata:
   name: download-cache
 spec:
   playbook: osp.edpm.download_cache
+  edpmServiceType: download-cache
