@@ -30,6 +30,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	k8s_networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
@@ -124,6 +125,7 @@ func init() {
 	utilruntime.Must(ocp_configv1.AddToScheme(scheme))
 	utilruntime.Must(ocp_image.AddToScheme(scheme))
 	utilruntime.Must(machineconfig.AddToScheme(scheme))
+	utilruntime.Must(k8s_networkv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 

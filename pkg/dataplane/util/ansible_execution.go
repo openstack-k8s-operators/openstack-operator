@@ -31,6 +31,7 @@ import (
 	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	job "github.com/openstack-k8s-operators/lib-common/modules/common/job"
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
@@ -71,7 +72,19 @@ func AnsibleExecution(
 	}
 
 	ansibleEE.NetworkAttachments = aeeSpec.NetworkAttachments
-	ansibleEE.Annotations, err = nad.CreateNetworksAnnotation(deployment.Namespace, ansibleEE.NetworkAttachments)
+
+	nadList := []networkv1.NetworkAttachmentDefinition{}
+	for _, netAtt := range ansibleEE.NetworkAttachments {
+		nad, err := nad.GetNADWithName(ctx, helper, netAtt, deployment.Namespace)
+		if err != nil {
+			return err
+		}
+
+		if nad != nil {
+			nadList = append(nadList, *nad)
+		}
+	}
+	ansibleEE.Annotations, err = nad.EnsureNetworksAnnotation(nadList)
 	if err != nil {
 		return fmt.Errorf("failed to create NetworkAttachment annotation. Error: %w", err)
 	}
