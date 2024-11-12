@@ -802,7 +802,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
 		}
 		r.Spec.Neutron.Template.Default()
-		setOverrideSpec(&r.Spec.Neutron.APIOverride.Route, r.Spec.Neutron.Template.GetDefaultRouteAnnotations())
+		initializeOverrideSpec(&r.Spec.Neutron.APIOverride.Route, true)
+		r.Spec.Neutron.Template.SetDefaultRouteAnnotations(r.Spec.Neutron.APIOverride.Route.Annotations)
 	}
 
 	// Nova
