@@ -1,0 +1,214 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: ipsets.network.openstack.org
+spec:
+  group: network.openstack.org
+  names:
+    kind: IPSet
+    listKind: IPSetList
+    plural: ipsets
+    singular: ipset
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Ready
+      jsonPath: .status.conditions[0].status
+      name: Ready
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    - description: Reservation
+      jsonPath: .status.reservation
+      name: Reservation
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: IPSet is the Schema for the ipsets API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: IPSetSpec defines the desired state of IPSet
+            properties:
+              immutable:
+                default: false
+                description: |-
+                  Immutable, if `true` the validation webhook will block any update to the Spec, except of Spec.Immutable.
+                  This allows the caller to add safety mechanism to the object. If a change is required to the object,
+                  an extra update needs to be done to make updates possible.
+                type: boolean
+              networks:
+                description: Networks used to request IPs for
+                items:
+                  description: IPSetNetwork Type
+                  properties:
+                    defaultRoute:
+                      description: Use gateway from subnet as default route. There
+                        can only be one default route defined per IPSet.
+                      type: boolean
+                    fixedIP:
+                      description: Fixed Ip
+                      type: string
+                    name:
+                      description: Network Name
+                      pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                      type: string
+                    subnetName:
+                      description: Subnet Name
+                      pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                      type: string
+                  required:
+                  - name
+                  - subnetName
+                  type: object
+                type: array
+            required:
+            - networks
+            type: object
+          status:
+            description: IPSetStatus defines the observed state of IPSet
+            properties:
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this
+                  service. If the observed generation is less than the spec generation,
+                  then the controller has not processed the latest changes injected by
+                  the opentack-operator in the top-level CR (e.g. the ContainerImage)
+                format: int64
+                type: integer
+              reservations:
+                description: Reservation
+                items:
+                  description: IPSetReservation defines reservation status per requested
+                    network
+                  properties:
+                    address:
+                      description: Address contains the IP address
+                      type: string
+                    cidr:
+                      description: Cidr the cidr to use for this network
+                      type: string
+                    dnsDomain:
+                      description: DNSDomain of the subnet
+                      type: string
+                    gateway:
+                      description: Gateway optional gateway for the network
+                      type: string
+                    mtu:
+                      description: MTU of the network
+                      type: integer
+                    network:
+                      description: Network name
+                      pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                      type: string
+                    routes:
+                      description: Routes, list of networks that should be routed
+                        via network gateway.
+                      items:
+                        description: Route definition
+                        properties:
+                          destination:
+                            description: Destination, network CIDR
+                            type: string
+                          nexthop:
+                            description: Nexthop, gateway for the destination
+                            type: string
+                        required:
+                        - destination
+                        - nexthop
+                        type: object
+                      type: array
+                    serviceNetwork:
+                      description: ServiceNetwork mapping
+                      pattern: ^[a-z0-9][a-z0-9\-_]*[a-z0-9]$
+                      type: string
+                    subnet:
+                      description: Subnet name
+                      pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                      type: string
+                    vlan:
+                      description: Vlan ID
+                      type: integer
+                  required:
+                  - address
+                  - dnsDomain
+                  - network
+                  - subnet
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
