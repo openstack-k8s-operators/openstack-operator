@@ -1,0 +1,159 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: netconfigs.network.openstack.org
+spec:
+  group: network.openstack.org
+  names:
+    kind: NetConfig
+    listKind: NetConfigList
+    plural: netconfigs
+    shortNames:
+    - netcfg
+    - netscfg
+    singular: netconfig
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: NetConfig is the Schema for the netconfigs API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: NetConfigSpec defines the desired state of NetConfig
+            properties:
+              networks:
+                description: Networks, list of all networks of the deployment
+                items:
+                  description: Network definition
+                  properties:
+                    dnsDomain:
+                      description: DNSDomain name of the Network
+                      type: string
+                    mtu:
+                      default: 1500
+                      description: MTU of the network
+                      type: integer
+                    name:
+                      description: Name of the network, e.g. External, InternalApi,
+                        ...
+                      pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                      type: string
+                    serviceNetwork:
+                      description: Service network mapping
+                      pattern: ^[a-z0-9][a-z0-9\-_]*[a-z0-9]$
+                      type: string
+                    subnets:
+                      description: Subnets of the network
+                      items:
+                        description: Subnet definition
+                        properties:
+                          allocationRanges:
+                            description: |-
+                              AllocationRanges a list of AllocationRange for assignment. Allocation will start
+                              from first range, first address.
+                            items:
+                              description: AllocationRange definition
+                              properties:
+                                end:
+                                  description: End IP for the AllocationRange
+                                  type: string
+                                start:
+                                  description: Start IP for the AllocationRange
+                                  type: string
+                              required:
+                              - end
+                              - start
+                              type: object
+                            type: array
+                          cidr:
+                            description: Cidr the cidr to use for this network
+                            type: string
+                          dnsDomain:
+                            description: DNSDomain name of the subnet, allows to overwrite
+                              the DNSDomain of the Network
+                            type: string
+                          excludeAddresses:
+                            description: |-
+                              ExcludeAddresses a set of IPs that should be excluded from used as reservation, for both dynamic
+                              and static via IPSet FixedIP parameter
+                            items:
+                              type: string
+                            type: array
+                          gateway:
+                            description: Gateway optional gateway for the network
+                            type: string
+                          name:
+                            description: Name of the subnet
+                            pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                            type: string
+                          routes:
+                            description: Routes, list of networks that should be routed
+                              via network gateway.
+                            items:
+                              description: Route definition
+                              properties:
+                                destination:
+                                  description: Destination, network CIDR
+                                  type: string
+                                nexthop:
+                                  description: Nexthop, gateway for the destination
+                                  type: string
+                              required:
+                              - destination
+                              - nexthop
+                              type: object
+                            type: array
+                          vlan:
+                            description: Vlan ID
+                            maximum: 4094
+                            type: integer
+                        required:
+                        - allocationRanges
+                        - cidr
+                        - name
+                        type: object
+                      type: array
+                  required:
+                  - dnsDomain
+                  - name
+                  - subnets
+                  type: object
+                type: array
+            required:
+            - networks
+            type: object
+          status:
+            description: NetConfigStatus defines the observed state of NetConfig
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

@@ -1,0 +1,569 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: ansibletests.test.openstack.org
+spec:
+  group: test.openstack.org
+  names:
+    kind: AnsibleTest
+    listKind: AnsibleTestList
+    plural: ansibletests
+    singular: ansibletest
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AnsibleTestSpec defines the desired state of AnsibleTest
+            properties:
+              SELinuxLevel:
+                default: ""
+                description: |-
+                  A SELinuxLevel that should be used for test pods spawned by the test
+                  operator.
+                type: string
+              ansibleCollections:
+                default: ""
+                description: AnsibleCollections - extra ansible collections to instal
+                  in additionn to the ones exist in the requirements.yaml
+                type: string
+              ansibleExtraVars:
+                default: ""
+                description: AnsibleExtraVars - string to pass parameters to ansible
+                  using
+                type: string
+              ansibleGitRepo:
+                default: ""
+                description: AnsibleGitRepo - git repo to clone into container
+                type: string
+              ansibleInventory:
+                default: ""
+                description: AnsibleInventory - string that contains the inventory
+                  file content
+                type: string
+              ansiblePlaybookPath:
+                default: ""
+                description: AnsiblePlaybookPath - path to ansible playbook
+                type: string
+              ansibleVarFiles:
+                default: ""
+                description: AnsibleVarFiles - interface to create ansible var files
+                  Those get added to the
+                type: string
+              backoffLimit:
+                default: 0
+                description: BackoffLimit allows to define the maximum number of retried
+                  executions (defaults to 0).
+                format: int32
+                type: integer
+              computeSSHKeySecretName:
+                default: dataplane-ansible-ssh-private-key-secret
+                description: |-
+                  ComputeSSHKeySecretName is the name of the k8s secret that contains an ssh key for computes.
+                  The key is mounted to ~/.ssh/id_ecdsa in the ansible pod
+                type: string
+              containerImage:
+                default: ""
+                description: A URL of a container image that should be used by the
+                  test-operator for tests execution.
+                type: string
+              debug:
+                default: false
+                description: Run ansible playbook with -vvvv
+                type: boolean
+              extraConfigmapsMounts:
+                description: Extra configmaps for mounting inside the pod
+                items:
+                  properties:
+                    mountPath:
+                      description: Path within the container at which the volume should
+                        be mounted.
+                      type: string
+                    name:
+                      description: The name of an existing config map for mounting.
+                      maxLength: 253
+                      type: string
+                    subPath:
+                      default: ""
+                      description: Config map subpath for mounting, defaults to configmap
+                        root.
+                      type: string
+                  required:
+                  - mountPath
+                  - name
+                  - subPath
+                  type: object
+                type: array
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: |-
+                  This value contains a nodeSelector value that is applied to test pods
+                  spawned by the test operator.
+                type: object
+              openStackConfigMap:
+                default: openstack-config
+                description: OpenStackConfigMap is the name of the ConfigMap containing
+                  the clouds.yaml
+                type: string
+              openStackConfigSecret:
+                default: openstack-config-secret
+                description: OpenStackConfigSecret is the name of the Secret containing
+                  the secure.yaml
+                type: string
+              privileged:
+                default: false
+                description: |-
+                  Use with caution! This parameter specifies whether test-operator should spawn
+                  test pods with allowedPrivilegedEscalation: true, readOnlyRootFilesystem: false,
+                  runAsNonRoot: false, automountServiceAccountToken: true, and the default
+                  capabilities on top of capabilities that are usually needed by the test
+                  pods (NET_ADMIN, NET_RAW). This parameter is deemed insecure but it is
+                  needed for certain test-operator functionalities to work properly (e.g.:
+                  extraRPMs in Tempest CR, or certain set of tobiko tests).
+                type: boolean
+              resources:
+                default:
+                  limits:
+                    cpu: 4000m
+                    memory: 4Gi
+                  requests:
+                    cpu: 2000m
+                    memory: 2Gi
+                description: |-
+                  The desired amount of resources that should be assigned to each test pod
+                  spawned using the AnsibleTest CR. https://pkg.go.dev/k8s.io/api/core/v1#ResourceRequirements
+                properties:
+                  claims:
+                    description: |-
+                      Claims lists the names of resources, defined in spec.resourceClaims,
+                      that are used by this container.
+
+
+                      This is an alpha field and requires enabling the
+                      DynamicResourceAllocation feature gate.
+
+
+                      This field is immutable. It can only be set for containers.
+                    items:
+                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                      properties:
+                        name:
+                          description: |-
+                            Name must match the name of one entry in pod.spec.resourceClaims of
+                            the Pod where this field is used. It makes that resource available
+                            inside a container.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    x-kubernetes-list-type: map
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Limits describes the maximum amount of compute resources allowed.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Requests describes the minimum amount of compute resources required.
+                      If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                      otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                type: object
+              storageClass:
+                default: local-storage
+                description: StorageClass used to create any test-operator related
+                  PVCs.
+                type: string
+              tolerations:
+                description: |-
+                  This value contains a toleration that is applied to pods spawned by the
+                  test pods that are spawned by the test-operator.
+                items:
+                  description: |-
+                    The pod this Toleration is attached to tolerates any taint that matches
+                    the triple <key,value,effect> using the matching operator <operator>.
+                  properties:
+                    effect:
+                      description: |-
+                        Effect indicates the taint effect to match. Empty means match all taint effects.
+                        When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                      type: string
+                    key:
+                      description: |-
+                        Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                        If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                      type: string
+                    operator:
+                      description: |-
+                        Operator represents a key's relationship to the value.
+                        Valid operators are Exists and Equal. Defaults to Equal.
+                        Exists is equivalent to wildcard for value, so that a pod can
+                        tolerate all taints of a particular category.
+                      type: string
+                    tolerationSeconds:
+                      description: |-
+                        TolerationSeconds represents the period of time the toleration (which must be
+                        of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                        it is not set, which means tolerate the taint forever (do not evict). Zero and
+                        negative values will be treated as 0 (evict immediately) by the system.
+                      format: int64
+                      type: integer
+                    value:
+                      description: |-
+                        Value is the taint value the toleration matches to.
+                        If the operator is Exists, the value should be empty, otherwise just a regular string.
+                      type: string
+                  type: object
+                type: array
+              workflow:
+                description: A parameter that contains a workflow definition.
+                items:
+                  properties:
+                    SELinuxLevel:
+                      description: |-
+                        A SELinuxLevel that should be used for test pods spawned by the test
+                        operator.
+                      type: string
+                    ansibleCollections:
+                      description: AnsibleCollections - extra ansible collections
+                        to instal in additionn to the ones exist in the requirements.yaml
+                      type: string
+                    ansibleExtraVars:
+                      description: AnsibleExtraVars - interface to pass parameters
+                        to ansible using -e
+                      type: string
+                    ansibleGitRepo:
+                      description: AnsibleGitRepo - git repo to clone into container
+                      type: string
+                    ansibleInventory:
+                      description: AnsibleInventory - string that contains the inventory
+                        file content
+                      type: string
+                    ansiblePlaybookPath:
+                      description: AnsiblePlaybookPath - path to ansible playbook
+                      type: string
+                    ansibleVarFiles:
+                      description: |-
+                        AnsibleVarFiles - interface to create ansible var files Those get added to the
+                        service config dir in /etc/test_operator/<file> and passed to the ansible command using -e @/etc/test_operator/<file>
+                      type: string
+                    backoffLimit:
+                      default: 0
+                      description: BackoffLimit allows to define the maximum number
+                        of retried executions (defaults to 0).
+                      format: int32
+                      type: integer
+                    computeSSHKeySecretName:
+                      description: |-
+                        ComputeSSHKeySecretName is the name of the k8s secret that contains an ssh key for computes.
+                        The key is mounted to ~/.ssh/id_ecdsa in the ansible pod
+                      type: string
+                    containerImage:
+                      default: ""
+                      description: A URL of a container image that should be used
+                        by the test-operator for tests execution.
+                      type: string
+                    debug:
+                      description: Run ansible playbook with -vvvv
+                      type: boolean
+                    extraConfigmapsMounts:
+                      description: Extra configmaps for mounting inside the pod
+                      items:
+                        properties:
+                          mountPath:
+                            description: Path within the container at which the volume
+                              should be mounted.
+                            type: string
+                          name:
+                            description: The name of an existing config map for mounting.
+                            maxLength: 253
+                            type: string
+                          subPath:
+                            default: ""
+                            description: Config map subpath for mounting, defaults
+                              to configmap root.
+                            type: string
+                        required:
+                        - mountPath
+                        - name
+                        - subPath
+                        type: object
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        This value contains a nodeSelector value that is applied to test pods
+                        spawned by the test operator.
+                      type: object
+                    openStackConfigMap:
+                      default: openstack-config
+                      description: OpenStackConfigMap is the name of the ConfigMap
+                        containing the clouds.yaml
+                      type: string
+                    openStackConfigSecret:
+                      default: openstack-config-secret
+                      description: OpenStackConfigSecret is the name of the Secret
+                        containing the secure.yaml
+                      type: string
+                    privileged:
+                      description: |-
+                        Use with caution! This parameter specifies whether test-operator should spawn test
+                        pods with allowedPrivilegedEscalation: true and the default capabilities on
+                        top of capabilities that are usually needed by the test pods (NET_ADMIN, NET_RAW).
+                        This parameter is deemed insecure but it is needed for certain test-operator
+                        functionalities to work properly (e.g.: extraRPMs in Tempest CR, or certain set
+                        of tobiko tests).
+                      type: boolean
+                    resources:
+                      default:
+                        limits:
+                          cpu: 2000m
+                          memory: 2Gi
+                        requests:
+                          cpu: 1000m
+                          memory: 2Gi
+                      description: |-
+                        The desired amount of resources that should be assigned to each test pod
+                        spawned using the AnsibleTest CR. https://pkg.go.dev/k8s.io/api/core/v1#ResourceRequirements
+                      properties:
+                        claims:
+                          description: |-
+                            Claims lists the names of resources, defined in spec.resourceClaims,
+                            that are used by this container.
+
+
+                            This is an alpha field and requires enabling the
+                            DynamicResourceAllocation feature gate.
+
+
+                            This field is immutable. It can only be set for containers.
+                          items:
+                            description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                            properties:
+                              name:
+                                description: |-
+                                  Name must match the name of one entry in pod.spec.resourceClaims of
+                                  the Pod where this field is used. It makes that resource available
+                                  inside a container.
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          type: array
+                          x-kubernetes-list-map-keys:
+                          - name
+                          x-kubernetes-list-type: map
+                        limits:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: |-
+                            Limits describes the maximum amount of compute resources allowed.
+                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                          type: object
+                        requests:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: |-
+                            Requests describes the minimum amount of compute resources required.
+                            If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                            otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                          type: object
+                      type: object
+                    stepName:
+                      description: |-
+                        Name of a workflow step. The step name will be used for example to create
+                        a logs directory.
+                      maxLength: 100
+                      type: string
+                    storageClass:
+                      default: local-storage
+                      description: StorageClass used to create any test-operator related
+                        PVCs.
+                      type: string
+                    tolerations:
+                      description: |-
+                        This value contains a toleration that is applied to pods spawned by the
+                        test pods that are spawned by the test-operator.
+                      items:
+                        description: |-
+                          The pod this Toleration is attached to tolerates any taint that matches
+                          the triple <key,value,effect> using the matching operator <operator>.
+                        properties:
+                          effect:
+                            description: |-
+                              Effect indicates the taint effect to match. Empty means match all taint effects.
+                              When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                            type: string
+                          key:
+                            description: |-
+                              Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                              If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                            type: string
+                          operator:
+                            description: |-
+                              Operator represents a key's relationship to the value.
+                              Valid operators are Exists and Equal. Defaults to Equal.
+                              Exists is equivalent to wildcard for value, so that a pod can
+                              tolerate all taints of a particular category.
+                            type: string
+                          tolerationSeconds:
+                            description: |-
+                              TolerationSeconds represents the period of time the toleration (which must be
+                              of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                              it is not set, which means tolerate the taint forever (do not evict). Zero and
+                              negative values will be treated as 0 (evict immediately) by the system.
+                            format: int64
+                            type: integer
+                          value:
+                            description: |-
+                              Value is the taint value the toleration matches to.
+                              If the operator is Exists, the value should be empty, otherwise just a regular string.
+                            type: string
+                        type: object
+                      type: array
+                    workloadSSHKeySecretName:
+                      description: |-
+                        WorkloadSSHKeySecretName is the name of the k8s secret that contains an ssh key for the ansible workload.
+                        The key is mounted to ~/test_keypair.key in the ansible pod
+                      type: string
+                  required:
+                  - stepName
+                  type: object
+                type: array
+              workloadSSHKeySecretName:
+                default: ""
+                description: |-
+                  WorkloadSSHKeySecretName is the name of the k8s secret that contains an ssh key for the ansible workload.
+                  The key is mounted to ~/test_keypair.key in the ansible pod
+                type: string
+            required:
+            - ansibleGitRepo
+            - ansiblePlaybookPath
+            type: object
+          status:
+            description: CommonTestStatus defines the observed state of the controller
+            properties:
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
+              networkAttachments:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                description: NetworkAttachments status of the deployment pods
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

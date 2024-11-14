@@ -1,0 +1,612 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+    openstack.org/operator-name: openstack
+  name: '{{ .OperatorNamespace }}'
+---
+apiVersion: v1
+data:
+  controller_manager_config.yaml: |
+    apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+    kind: ControllerManagerConfig
+    health:
+      healthProbeBindAddress: :8081
+    metrics:
+      bindAddress: 127.0.0.1:8080
+    webhook:
+      port: 9443
+    leaderElection:
+      leaderElect: true
+      resourceName: 40ba705e.openstack.org
+kind: ConfigMap
+metadata:
+  name: openstack-operator-manager-config
+  namespace: '{{ .OperatorNamespace }}'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: webhook-service
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: openstack-operator
+  name: openstack-operator-webhook-service
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    openstack.org/operator-name: openstack
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+    openstack.org/operator-name: openstack
+  name: openstack-operator-controller-manager
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      openstack.org/operator-name: openstack
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: controller-manager
+        openstack.org/operator-name: openstack
+    spec:
+      containers:
+      - args:
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        command:
+        - /manager
+        env:
+        - name: RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
+        - name: RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+        - name: RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-api:current-podified
+        - name: RELATED_IMAGE_AODH_EVALUATOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-evaluator:current-podified
+        - name: RELATED_IMAGE_AODH_LISTENER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-listener:current-podified
+        - name: RELATED_IMAGE_AODH_NOTIFIER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-aodh-notifier:current-podified
+        - name: RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT
+          value: registry.redhat.io/ubi9/httpd-24:latest
+        - name: RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-barbican-api:current-podified
+        - name: RELATED_IMAGE_BARBICAN_KEYSTONE_LISTENER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-barbican-keystone-listener:current-podified
+        - name: RELATED_IMAGE_BARBICAN_WORKER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-barbican-worker:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-central:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ceilometer-notification:current-podified
+        - name: RELATED_IMAGE_CEILOMETER_MYSQLD_EXPORTER_IMAGE_URL_DEFAULT
+          value: quay.io/prometheus/mysqld-exporter:v0.16.0
+        - name: RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-k8s-operators/sg-core:v6.0.0
+        - name: RELATED_IMAGE_CINDER_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-api:current-podified
+        - name: RELATED_IMAGE_CINDER_BACKUP_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-backup:current-podified
+        - name: RELATED_IMAGE_CINDER_SCHEDULER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-scheduler:current-podified
+        - name: RELATED_IMAGE_CINDER_VOLUME_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cinder-volume:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-api:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_BACKENDBIND9_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-backend-bind9:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_CENTRAL_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-central:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_MDNS_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-mdns:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_PRODUCER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-producer:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_UNBOUND_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-unbound:current-podified
+        - name: RELATED_IMAGE_DESIGNATE_WORKER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-designate-worker:current-podified
+        - name: RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-frr:current-podified
+        - name: RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
+        - name: RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-cron:current-podified
+        - name: RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-multipathd:current-podified
+        - name: RELATED_IMAGE_EDPM_NEUTRON_DHCP_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified
+        - name: RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
+        - name: RELATED_IMAGE_EDPM_NEUTRON_OVN_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified
+        - name: RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified
+        - name: RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT
+          value: quay.io/prometheus/node-exporter:v1.5.0
+        - name: RELATED_IMAGE_EDPM_KEPLER_IMAGE_URL_DEFAULT
+          value: quay.io/sustainable_computing_io/kepler:release-0.7.12
+        - name: RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
+        - name: RELATED_IMAGE_GLANCE_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-glance-api:current-podified
+        - name: RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-heat-api:current-podified
+        - name: RELATED_IMAGE_HEAT_CFNAPI_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-heat-api-cfn:current-podified
+        - name: RELATED_IMAGE_HEAT_ENGINE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-heat-engine:current-podified
+        - name: RELATED_IMAGE_HORIZON_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-horizon:current-podified
+        - name: RELATED_IMAGE_INFRA_MEMCACHED_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-memcached:current-podified
+        - name: RELATED_IMAGE_INFRA_REDIS_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-redis:current-podified
+        - name: RELATED_IMAGE_IRONIC_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-api:current-podified
+        - name: RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-conductor:current-podified
+        - name: RELATED_IMAGE_IRONIC_INSPECTOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-inspector:current-podified
+        - name: RELATED_IMAGE_IRONIC_NEUTRON_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-neutron-agent:current-podified
+        - name: RELATED_IMAGE_IRONIC_PXE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ironic-pxe:current-podified
+        - name: RELATED_IMAGE_IRONIC_PYTHON_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/ironic-python-agent:current-podified
+        - name: RELATED_IMAGE_KEYSTONE_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-keystone:current-podified
+        - name: RELATED_IMAGE_MANILA_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-manila-api:current-podified
+        - name: RELATED_IMAGE_MANILA_SCHEDULER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-manila-scheduler:current-podified
+        - name: RELATED_IMAGE_MANILA_SHARE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-manila-share:current-podified
+        - name: RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
+        - name: RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-neutron-server:current-podified
+        - name: RELATED_IMAGE_NOVA_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
+        - name: RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified
+        - name: RELATED_IMAGE_NOVA_CONDUCTOR_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-conductor:current-podified
+        - name: RELATED_IMAGE_NOVA_NOVNC_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-novncproxy:current-podified
+        - name: RELATED_IMAGE_NOVA_SCHEDULER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-nova-scheduler:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-api:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_HEALTHMANAGER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-health-manager:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_HOUSEKEEPING_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-housekeeping:current-podified
+        - name: RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-octavia-worker:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
+        - name: RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified
+        - name: RELATED_IMAGE_OVN_CONTROLLER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
+        - name: RELATED_IMAGE_OVN_CONTROLLER_OVS_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-base:current-podified
+        - name: RELATED_IMAGE_OVN_NB_DBCLUSTER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-nb-db-server:current-podified
+        - name: RELATED_IMAGE_OVN_NORTHD_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-northd:current-podified
+        - name: RELATED_IMAGE_OVN_SB_DBCLUSTER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ovn-sb-db-server:current-podified
+        - name: RELATED_IMAGE_PLACEMENT_API_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-placement-api:current-podified
+        - name: RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
+        - name: RELATED_IMAGE_SWIFT_ACCOUNT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-account:current-podified
+        - name: RELATED_IMAGE_SWIFT_CONTAINER_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-container:current-podified
+        - name: RELATED_IMAGE_SWIFT_OBJECT_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-object:current-podified
+        - name: RELATED_IMAGE_SWIFT_PROXY_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-swift-proxy-server:current-podified
+        - name: RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-tempest-all:current-podified
+        - name: RELATED_IMAGE_TEST_TOBIKO_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
+        - name: RELATED_IMAGE_TEST_ANSIBLETEST_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified
+        - name: RELATED_IMAGE_TEST_HORIZONTEST_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-horizontest:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT
+          value: quay.io/openstack-k8s-operators/openstack-must-gather:latest
+        - name: OPENSTACK_RELEASE_VERSION
+          value: '{{ .OpenstackReleaseVersion }}'
+        image: '{{ .OperatorImage }}'
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
+      - args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=0
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
+        name: kube-rbac-proxy
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: openstack-operator-controller-manager
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: webhook-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: serving-cert
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: certificate
+    app.kubernetes.io/part-of: openstack-operator
+  name: openstack-operator-serving-cert
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - openstack-operator-webhook-service.{{ .OperatorNamespace }}.svc
+  - openstack-operator-webhook-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: openstack-operator-selfsigned-issuer
+  secretName: webhook-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: selfsigned-issuer
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: issuer
+    app.kubernetes.io/part-of: openstack-operator
+  name: openstack-operator-selfsigned-issuer
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  selfSigned: {}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: mutating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: mutatingingwebhookconfiguration
+    app.kubernetes.io/part-of: openstack-operator
+  name: openstack-operator-mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: mopenstackclient.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-core-openstack-org-v1beta1-openstackcontrolplane
+  failurePolicy: Fail
+  name: mopenstackcontrolplane.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackcontrolplanes
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-core-openstack-org-v1beta1-openstackversion
+  failurePolicy: Fail
+  name: mopenstackversion.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  name: mopenstackdataplanedeployment.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  name: mopenstackdataplanenodeset.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  name: mopenstackdataplaneservice.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+  sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: validating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: validatingwebhookconfiguration
+    app.kubernetes.io/part-of: openstack-operator
+  name: openstack-operator-validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: vopenstackclient.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-core-openstack-org-v1beta1-openstackcontrolplane
+  failurePolicy: Fail
+  name: vopenstackcontrolplane.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackcontrolplanes
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-core-openstack-org-v1beta1-openstackversion
+  failurePolicy: Fail
+  name: vopenstackversion.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  name: vopenstackdataplanedeployment.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  name: vopenstackdataplanenodeset.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  name: vopenstackdataplaneservice.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+  sideEffects: None

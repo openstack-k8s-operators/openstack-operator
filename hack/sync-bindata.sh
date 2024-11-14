@@ -177,7 +177,7 @@ metadata:
   name: ${OPERATOR_NAME}-leader-election-role
   namespace: '{{ .OperatorNamespace }}'
 ${LEADER_ELECTION_ROLE_RULES}
---- 
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
