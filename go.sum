@@ -144,8 +144,8 @@ github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.202
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20241120122537-78d219a20372/go.mod h1:O9pAzpJo2CT+wZgchU/fERxNL23zPR6+KOccviKbSNY=
 github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241119133501-af147950fdbb h1:2Q+0tHfTF+tyvOb0lvaeGi3Q7AkSxs7Ck1Cir+ziesY=
 github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241119133501-af147950fdbb/go.mod h1:UNtD7SqSmflXUs8bzUu+azWxaFSEGPpprb9U86FaGTY=
-github.com/openstack-k8s-operators/placement-operator/api v0.5.0 h1:N/09aDa+6xTkme3nbTpdbgLaCATifYcaHehsMCDuDT0=
-github.com/openstack-k8s-operators/placement-operator/api v0.5.0/go.mod h1:4cleawzE+/WdVDo52BDbLyaeiOnIITAL2KqOhTlnQwM=
+github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241122125843-ad42d8c488ae h1:5N9TqZ++GPWBBGD4RJ3QABdiOxpY9SzOKAjehMNvRaA=
+github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241122125843-ad42d8c488ae/go.mod h1:4cleawzE+/WdVDo52BDbLyaeiOnIITAL2KqOhTlnQwM=
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20241017142550-a3524acedd49 h1:/7SnnHfGCH/dwuZFNUx54zw4cnwv2w6hjONq16aoowM=
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20241017142550-a3524acedd49/go.mod h1:6Mq2N/KtNFW20L+PQC5qkeK8R8UGadmGBXL8HDY6lcg=
 github.com/openstack-k8s-operators/swift-operator/api v0.5.0 h1:XYeze8mKxaZQ6keWO0qdSr1eDt3QEt0ef1D8Ic7w3pg=
