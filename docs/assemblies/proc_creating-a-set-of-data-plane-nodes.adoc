@@ -168,13 +168,8 @@ data:
 
 +
 ----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: redhat-registry
-data:
-  username: <registry_username>
-  password: <registry_password>
+$ oc create secret generic redhat-registry \
+--from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
 ----
 +
 * Replace `<registry_username>` with the applicable user name.
@@ -198,13 +193,11 @@ spec:
           subscription-manager release --set=9.2
           subscription-manager repos --disable=*
           subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=openstack-17.1-for-rhel-9-x86_64-rpms --enable=fast-datapath-for-rhel-9-x86_64-rpms --enable=openstack-dev-preview-for-rhel-9-x86_64-rpms
-          podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
       ansibleVarsFrom:
       - prefix: subscription_manager_
         secretRef:
           name: subscription-manager
-      - prefix: registry_
-        secretRef:
+      - secretRef:
           name: redhat-registry
 ----
 

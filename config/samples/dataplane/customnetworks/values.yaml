@@ -13,7 +13,6 @@ data:
           # CHANGEME -- see https://access.redhat.com/solutions/253273
           # edpm_bootstrap_command: |
           #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
-          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
 
           neutron_public_interface_name: enp7s0
           ctlplane_dns_nameservers:

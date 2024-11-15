@@ -3,6 +3,10 @@ kind: TestAssert
 timeout: 900
 commands:
   - script: |
+      echo "Checking rotation of non API service certificates..."
+      NAMESPACE=$NAMESPACE bash ../../common/osp_check_noapi_service_certs.sh
+
+  - script: |
       echo "Get fingerprints of all service certs"
       oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_after
 

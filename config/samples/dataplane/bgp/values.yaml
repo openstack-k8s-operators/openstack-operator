@@ -13,7 +13,6 @@ data:
           # CHANGEME -- see https://access.redhat.com/solutions/253273
           # edpm_bootstrap_command: |
           #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
-          #       podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
           timesync_ntp_servers:
             - hostname: pool.ntp.org
           # edpm_network_config
