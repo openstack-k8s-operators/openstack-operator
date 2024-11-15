@@ -124,8 +124,8 @@ github.com/openstack-k8s-operators/mariadb-operator/api v0.5.0 h1:XBx1TuyKhgtWAi
 github.com/openstack-k8s-operators/mariadb-operator/api v0.5.0/go.mod h1:Uyc8m+72l3rVm6jKb8FRUrQbjMWyifc5m0K+Ge0QV80=
 github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20241112143215-294abc29ae85 h1:SOA+aOrNq3qqta4Hh6nwQACS5f5yHDunl4WczUkgA8I=
 github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20241112143215-294abc29ae85/go.mod h1:ARxoBFEgQUA+tM6Qu+TNDCArCN3kgG4WBI15pb2b1jc=
-github.com/openstack-k8s-operators/nova-operator/api v0.5.0 h1:DQLiGBWYYp7aq1f8/JEb5Xds5oGP1SPuwGuZS+g3Za4=
-github.com/openstack-k8s-operators/nova-operator/api v0.5.0/go.mod h1:E3DA4NEoTMqKDdgxEHut63BaHI0fSmRuVTMjGMqx1Z0=
+github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241122111943-e2caf725b1be h1:JogbffjFWunQI7s9sXcfUmL/1Of+PJjsOBy/gISTEbw=
+github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241122111943-e2caf725b1be/go.mod h1:E3DA4NEoTMqKDdgxEHut63BaHI0fSmRuVTMjGMqx1Z0=
 github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20241119144914-248c7edb4442 h1:pRY5uDsyG8grNGm2dKTVGtXIX4Bkhlx40CPuWgPPYkg=
 github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20241119144914-248c7edb4442/go.mod h1:6Z+1yna/RM9bCKkwd64pHxGrRpKFEhOtYUt1PDh6/xU=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20241120122537-78d219a20372 h1:MH2G7WNMhZZMDOyfv2a3M2XPEI+FRZPa8eCLiS9AHN4=
