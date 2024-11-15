@@ -67,6 +67,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template = &novav1.NovaSpec{}
 	}
 
+	if instance.Spec.Nova.Template.NodeSelector == nil {
+		instance.Spec.Nova.Template.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	// When component services got created check if there is the need to create routes and certificates
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova", Namespace: instance.Namespace}, nova); err != nil {
 		if !k8s_errors.IsNotFound(err) {
