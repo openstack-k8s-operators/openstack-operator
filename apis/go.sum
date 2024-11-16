@@ -88,6 +88,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
+github.com/olliewalsh/horizon-operator/api v0.0.0-20241113150844-bbacd69a9ec6 h1:0sp3h2PLReaMFJXlGmCzb2w4JpnhtbscYX+8citDyXM=
+github.com/olliewalsh/horizon-operator/api v0.0.0-20241113150844-bbacd69a9ec6/go.mod h1:K+9VJLuFNps6fsMjqEJjIP5T/F4lLgoQclG4tu4y7KA=
 github.com/onsi/ginkgo/v2 v2.20.1 h1:YlVIbqct+ZmnEph770q9Q7NVAz4wwIiVNahee6JyUzo=
 github.com/onsi/ginkgo/v2 v2.20.1/go.mod h1:lG9ey2Z29hR41WMVthyJBGUBcBhGOtoPF2VFMvBXFCI=
 github.com/onsi/gomega v1.34.1 h1:EUMJIKUjM8sKjYbtxQI9A4z2o+rruxnzNvpknOXie6k=
@@ -104,8 +106,6 @@ github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1
 github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1fdd7f486264/go.mod h1:bRqpa/WUQ7D99SAOXEPItxBobRP1oVUo93PWQukChIs=
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241112060409-5e91380094e6 h1:vxFlYgZD6jXGdGumhzyKRVgPwzBd4YxBOU0YrF9fxr8=
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241112060409-5e91380094e6/go.mod h1:+CUPkPcR8P4wpTlURPPsE9AD1uNYvvk0JsoIn5JLADM=
-github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241114094043-66396cca1abf h1:ZNttb7z+8vPXpmqsintXxxNSP1s8PWukND2oLPepJ4w=
-github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241114094043-66396cca1abf/go.mod h1:ezxV+6xd12IRKespGaDlJCUQ301yxrBlQUCEbeYQgSA=
 github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241114093759-47b4c2e6639e h1:IzKbAe3kIWXi9ZyBtMLOrQY5UTytf7RrA+bFQCdoKDc=
 github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241114093759-47b4c2e6639e/go.mod h1:6x5zgJJBjrOhsTtNALYrM2ecUH92kIoZbZ6w1fKHPfs=
 github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20241114095146-fcfd1c985034 h1:PtGZ55Oq58Ivt0dBJ0YNybcBe4Pwxc8jT+NbI3QIhnE=
