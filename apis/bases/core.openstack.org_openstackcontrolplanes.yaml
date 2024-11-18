@@ -9892,7 +9892,6 @@ spec:
                         type: string
                     required:
                     - apacheContainerImage
-                    - apiTimeout
                     - databaseInstance
                     - octaviaAPI
                     - octaviaNetworkAttachment
