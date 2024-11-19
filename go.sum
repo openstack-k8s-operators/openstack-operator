@@ -116,8 +116,8 @@ github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241120213010-3
 github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241120213010-335e32b1dc65/go.mod h1:J9oUh3eGBvAFfyUMiPxPRBSxAcO8rnwITN4RTh/It+8=
 github.com/openstack-k8s-operators/ironic-operator/api v0.5.0 h1:vbuylOv7NOkpjCD1BS2Bhyg2fMxJyuagXmg8jr61UCk=
 github.com/openstack-k8s-operators/ironic-operator/api v0.5.0/go.mod h1:qxdXTRt7kY6orSnFc/OTRHtqElNPuMV0W0KvMPHbE2s=
-github.com/openstack-k8s-operators/keystone-operator/api v0.5.0 h1:h/Ce2OjdNrkDh/rJuZPdOsxrsm2uC+E57Mmf34oyWR0=
-github.com/openstack-k8s-operators/keystone-operator/api v0.5.0/go.mod h1:saoorrsPo3DzDPGM6PJ8sQJBNuNRGCHjRHChRQmkoQ0=
+github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20241122131229-de8969562e62 h1:CIQGR9XLRj+kUPplJTWmKnp4EjeN0qzGrk5RdK1ZpfU=
+github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20241122131229-de8969562e62/go.mod h1:saoorrsPo3DzDPGM6PJ8sQJBNuNRGCHjRHChRQmkoQ0=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.5.0 h1:M6tou1UD+en6fcZtV64RPsDVdHH5up6oqtENDU8dRyE=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.5.0/go.mod h1:FxA/2ChDnVKgbZAyiiRLDGZB7WMcrHlOMBZYUQGgRf0=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.5.0 h1:Y2wAPS3TBQrjSbTrbtCjJUYL2spltyyjfzQ3bF7DRZ8=

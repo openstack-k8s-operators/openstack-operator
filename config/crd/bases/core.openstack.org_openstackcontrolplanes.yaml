@@ -7286,6 +7286,14 @@ spec:
                         format: int32
                         minimum: 1
                         type: integer
+                      httpdCustomization:
+                        properties:
+                          processNumber:
+                            default: 3
+                            format: int32
+                            minimum: 1
+                            type: integer
+                        type: object
                       memcachedInstance:
                         default: memcached
                         type: string
