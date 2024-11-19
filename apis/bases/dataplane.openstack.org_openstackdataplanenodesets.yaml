@@ -178,6 +178,10 @@ spec:
                     x-kubernetes-map-type: atomic
                   provisionServerName:
                     type: string
+                  provisionServerNodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   provisioningInterface:
                     type: string
                 required:

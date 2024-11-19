@@ -10024,6 +10024,53 @@ spec:
                               additionalProperties:
                                 type: string
                               type: object
+                            override:
+                              properties:
+                                service:
+                                  properties:
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                              type: object
                             probeIntervalToActive:
                               default: 60000
                               format: int32
@@ -15396,6 +15443,9 @@ spec:
                               secret: osp-secret
                               serviceUser: aodh
                             properties:
+                              apiTimeout:
+                                default: 60
+                                type: integer
                               customServiceConfig:
                                 default: '# add your customization here'
                                 type: string
@@ -15544,6 +15594,9 @@ spec:
                         type: object
                       ceilometer:
                         properties:
+                          apiTimeout:
+                            default: 60
+                            type: integer
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
