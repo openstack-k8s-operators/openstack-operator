@@ -14,7 +14,7 @@ require (
 	github.com/onsi/gomega v1.34.1
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114094618-6febb2d8d6a4
-	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241114094619-8cd575ca0e60
+	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241120063916-9e97663361d3
 	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20241114094900-9ce3c64786da
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1fdd7f486264
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241118124230-6202fa6a0fee
