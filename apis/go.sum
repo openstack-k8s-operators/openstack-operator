@@ -96,8 +96,8 @@ github.com/openshift/api v0.0.0-20240830023148-b7d0481c9094 h1:J1wuGhVxpsHykZBa6
 github.com/openshift/api v0.0.0-20240830023148-b7d0481c9094/go.mod h1:CxgbWAlvu2iQB0UmKTtRu1YfepRg1/vJ64n2DlIEVz4=
 github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114211344-1b231eb16c92 h1:RSMSbsV2yTWUp88ziavE7c5HPoopXU/fnCFS8+63X30=
 github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114211344-1b231eb16c92/go.mod h1:D/O5qFJ3x8ViMkT0jAfaWNqo8/7FcOJt6zOYh5BDlvs=
-github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241105155912-ff3f0d455309 h1:toTEZmyHvWJ3KoleDmF1zlEIcvJU21fBgB7d2vxrQaY=
-github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241105155912-ff3f0d455309/go.mod h1:s9V6ai3rkIPwYhUJTNNEWzPDIO5hTcfbHC1tutKgUGw=
+github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241122125843-c716f59e13f9 h1:3F29orjZbAAd+D8wkx0U0CtixkN89qBHKSYm7iSyXhc=
+github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241122125843-c716f59e13f9/go.mod h1:s9V6ai3rkIPwYhUJTNNEWzPDIO5hTcfbHC1tutKgUGw=
 github.com/openstack-k8s-operators/designate-operator/api v0.5.0 h1:ut8t+VefBZy/Xp2rer7PKa7EtcU5bVNsvx7bRMzGszI=
 github.com/openstack-k8s-operators/designate-operator/api v0.5.0/go.mod h1:aLc4dvPi5Bqb8FXnZ14YYRWFjZOmUdj+eJmaUPNZ5Qs=
 github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241119075400-402f7758bda3 h1:xGjBviDEnnMu9HTBPwk0hmxcbZD+xikv6HKiolmr0Yg=

@@ -8,7 +8,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114211344-1b231eb16c92
-	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241105155912-ff3f0d455309
+	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241122125843-c716f59e13f9
 	github.com/openstack-k8s-operators/designate-operator/api v0.5.0
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241119075400-402f7758bda3
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241028235411-eaf5b063654f
