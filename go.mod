@@ -18,7 +18,7 @@ require (
 	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20241114094900-9ce3c64786da
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1fdd7f486264
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241118124230-6202fa6a0fee
-	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241114094043-66396cca1abf
+	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241119161147-c38568cb3fb0
 	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241118112815-d52a058b34a8
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20241114211630-5b4dcbed9b37
 	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20241114094330-6d9f1d45f991
