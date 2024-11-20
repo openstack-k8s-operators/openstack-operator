@@ -1798,6 +1798,102 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("An OpenStackControlplane instance is created with nodeSelector", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+			nodeSelector := map[string]string{
+				"foo": "bar",
+			}
+			spec["nodeSelector"] = nodeSelector
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should set the galera nodeSelector", func() {
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should update the galera nodeSelector", func() {
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				newNodeSelector := map[string]string{
+					"foo2": "bar2",
+				}
+				OSCtlplane.Spec.NodeSelector = newNodeSelector
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should allow the galera nodeSelector to be overridden", func() {
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+				newNodeSelector := map[string]string{
+					"foo2": "bar2",
+				}
+				galeraTemplates := *(OSCtlplane.Spec.Galera.Templates)
+				dbTemplate := galeraTemplates[names.DBName.Name]
+				dbTemplate.NodeSelector = &newNodeSelector
+				galeraTemplates[names.DBName.Name] = dbTemplate
+
+				emptyNodeSelector := map[string]string{}
+				cell1Template := galeraTemplates[names.DBCell1Name.Name]
+				cell1Template.NodeSelector = &emptyNodeSelector
+				galeraTemplates[names.DBCell1Name.Name] = cell1Template
+
+				OSCtlplane.Spec.Galera.Templates = &galeraTemplates
+
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{}))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
 })
 
 var _ = Describe("OpenStackOperator Webhook", func() {
