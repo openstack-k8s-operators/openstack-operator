@@ -103,6 +103,10 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		instance.Spec.Keystone.Template.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
+	if instance.Spec.Keystone.Template.NodeSelector == nil {
+		instance.Spec.Keystone.Template.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	Log.Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec.KeystoneAPISpecCore)
@@ -110,9 +114,6 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneAPIImage
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
-		}
-		if keystoneAPI.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-			keystoneAPI.Spec.NodeSelector = instance.Spec.NodeSelector
 		}
 		if keystoneAPI.Spec.DatabaseInstance == "" {
 			//keystoneAPI.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here

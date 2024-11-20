@@ -18,10 +18,10 @@ require (
 	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20241114094900-9ce3c64786da
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1fdd7f486264
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241118124230-6202fa6a0fee
-	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241114094043-66396cca1abf
+	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241119161147-c38568cb3fb0
 	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241118112815-d52a058b34a8
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20241114211630-5b4dcbed9b37
-	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20241114094330-6d9f1d45f991
+	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20241119162247-18b741090348
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.5.0
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.5.1-0.20241114091812-6dc9fd0961dc
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20241114091812-6dc9fd0961dc
@@ -35,7 +35,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20241118111717-a1d460a6d81f
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
 	github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241118072048-45d5df9ad730
-	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241114101059-9566e1fd30de
+	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241119131546-e4c1ba679d22
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20241114094619-107d1aac9458
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20241118203716-9550c8740911
 	github.com/openstack-k8s-operators/test-operator/api v0.5.1-0.20241118150825-cd41d06be047
