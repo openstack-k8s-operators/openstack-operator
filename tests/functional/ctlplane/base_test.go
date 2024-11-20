@@ -409,6 +409,20 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	ironicTemplate := map[string]interface{}{
 		"ironicConductors": []interface{}{},
 	}
+	telemetryTemplate := map[string]interface{}{
+		"ceilometer": map[string]interface{}{
+			"enabled": false,
+		},
+		"metricStorage": map[string]interface{}{
+			"enabled": false,
+		},
+		"logging": map[string]interface{}{
+			"enabled": false,
+		},
+		"autoscaling": map[string]interface{}{
+			"enabled": false,
+		},
+	}
 
 	return map[string]interface{}{
 		"secret":       "osp-secret",
@@ -471,6 +485,10 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		},
 		"manila": map[string]interface{}{
 			"enabled": true,
+		},
+		"telemetry": map[string]interface{}{
+			"enabled":  true,
+			"template": telemetryTemplate,
 		},
 	}
 }
