@@ -88,6 +88,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
+github.com/olliewalsh/mariadb-operator/api v0.0.0-20241120005220-32fb0cf70317 h1:11V1kv1lK7bRCKhy+3qWZ7q5QKnDAj6nsAWykKuxLqk=
+github.com/olliewalsh/mariadb-operator/api v0.0.0-20241120005220-32fb0cf70317/go.mod h1:348EPtAdpE2LxHAH4bHdCMNP7HyX6DevwEsF9DQ0S2k=
 github.com/onsi/ginkgo/v2 v2.20.1 h1:YlVIbqct+ZmnEph770q9Q7NVAz4wwIiVNahee6JyUzo=
 github.com/onsi/ginkgo/v2 v2.20.1/go.mod h1:lG9ey2Z29hR41WMVthyJBGUBcBhGOtoPF2VFMvBXFCI=
 github.com/onsi/gomega v1.34.1 h1:EUMJIKUjM8sKjYbtxQI9A4z2o+rruxnzNvpknOXie6k=
@@ -120,8 +122,6 @@ github.com/openstack-k8s-operators/lib-common/modules/storage v0.5.1-0.202411140
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.5.1-0.20241114091812-6dc9fd0961dc/go.mod h1:tfgBeLRqmlH/NQkLPe7396rj+t0whv2wPuMb8Ttvh8w=
 github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20241117150431-21b7f58d9ddf h1:UsAefjZBqFl0dYMg/efe75ECm8cAwc/2FCEBPYjQfIY=
 github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20241117150431-21b7f58d9ddf/go.mod h1:0/qgnjufYIqe439/3aUU/cwnjDwdUlNR3jnRubLTD5o=
-github.com/openstack-k8s-operators/mariadb-operator/api v0.5.1-0.20241106141725-340c4d78fef0 h1:XrJID4tPlR1JCO7A7MPONGfVRmhgf6ktglmE1v7UlHM=
-github.com/openstack-k8s-operators/mariadb-operator/api v0.5.1-0.20241106141725-340c4d78fef0/go.mod h1:348EPtAdpE2LxHAH4bHdCMNP7HyX6DevwEsF9DQ0S2k=
 github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20241114104932-eae3f8cd032b h1:JMMPYDierS4YZdG9O/50kLihPQqmDz7p72btLy7Ibew=
 github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20241114104932-eae3f8cd032b/go.mod h1:Kfuu3g4PSFpEowdWhbnTgSlDpsBGswQf/WU/kKQKK7s=
 github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241119125634-42b7b8417b48 h1:eCvn/lCMqWTvlN74nFr7nG2EvZdvJPdSR9Ts2eTaM6c=

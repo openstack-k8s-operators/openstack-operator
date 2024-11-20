@@ -168,6 +168,10 @@ func reconcileGalera(
 		return galeraReady, nil
 	}
 
+	if spec.NodeSelector == nil {
+		spec.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	Log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
 		spec.DeepCopyInto(&galera.Spec.GaleraSpecCore)
