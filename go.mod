@@ -12,7 +12,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114211344-1b231eb16c92
+	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241122125559-6de316c14027
 	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241122125843-c716f59e13f9
 	github.com/openstack-k8s-operators/designate-operator/api v0.5.0
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241122125600-ef3dc51eea99
