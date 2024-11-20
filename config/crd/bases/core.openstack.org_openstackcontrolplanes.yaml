@@ -1828,9 +1828,6 @@ spec:
                             type: string
                           transportURLSecret:
                             type: string
-                        required:
-                        - controlNetworkName
-                        - storageRequest
                         type: object
                       designateCentral:
                         properties:
@@ -2313,7 +2310,6 @@ spec:
                     - designateBackendbind9
                     - designateCentral
                     - designateMdns
-                    - designateNetworkAttachment
                     - designateProducer
                     - designateWorker
                     - rabbitMqClusterName

@@ -13,11 +13,11 @@ require (
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114094618-6febb2d8d6a4
-	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241114094619-8cd575ca0e60
-	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20241114094900-9ce3c64786da
-	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1fdd7f486264
-	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241118124230-6202fa6a0fee
+	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241120105734-37d5a9b81262
+	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241120063916-9e97663361d3
+	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20241120164406-c06a12f2e42c
+	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241120062804-89e9fe93e886
+	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241120140156-1c476cfe7c63
 	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241119161147-c38568cb3fb0
 	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241118112815-d52a058b34a8
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20241114211630-5b4dcbed9b37
@@ -28,7 +28,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.5.1-0.20241114091812-6dc9fd0961dc
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.5.1-0.20241114091812-6dc9fd0961dc
 	github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20241117150431-21b7f58d9ddf
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.5.1-0.20241106141725-340c4d78fef0
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.5.1-0.20241120160542-4b457715f74e
 	github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20241114104932-eae3f8cd032b
 	github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241119125634-42b7b8417b48
 	github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20241115111947-2336829c2d73
