@@ -10926,7 +10926,8 @@ spec:
                       apacheContainerImage:
                         type: string
                       apiTimeout:
-                        type: string
+                        default: 120
+                        type: integer
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -10953,10 +10954,12 @@ spec:
                               type: string
                             type: array
                           createDefaultLbMgmtNetwork:
+                            default: true
                             type: boolean
                           lbMgmtRouterGateway:
                             type: string
                           manageLbMgmtNetworks:
+                            default: true
                             type: boolean
                         type: object
                       nodeSelector:
@@ -10965,6 +10968,8 @@ spec:
                         type: object
                       octaviaAPI:
                         properties:
+                          apiTimeout:
+                            type: integer
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
