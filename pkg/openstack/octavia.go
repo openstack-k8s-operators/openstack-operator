@@ -64,6 +64,10 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Octavia.Template = &octaviav1.OctaviaSpecCore{}
 	}
 
+	if instance.Spec.Octavia.Template.NodeSelector == nil {
+		instance.Spec.Octavia.Template.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Octavia.Template.OctaviaAPI.Override.Service == nil {
