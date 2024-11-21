@@ -15482,6 +15482,10 @@ spec:
                                 items:
                                   type: string
                                 type: array
+                              nodeSelector:
+                                additionalProperties:
+                                  type: string
+                                type: object
                               override:
                                 properties:
                                   service:
@@ -15576,7 +15580,6 @@ spec:
                                 type: object
                             required:
                             - databaseInstance
-                            - memcachedInstance
                             - secret
                             type: object
                           enabled:
@@ -15634,6 +15637,10 @@ spec:
                             items:
                               type: string
                             type: array
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
                           passwordSelector:
                             default:
                               ceilometerService: CeilometerPassword
@@ -16359,6 +16366,10 @@ spec:
                               secretName:
                                 type: string
                             type: object
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                     type: object
                 type: object
