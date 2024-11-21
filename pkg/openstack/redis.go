@@ -219,6 +219,10 @@ func reconcileRedis(
 		tlsCert = certSecret.Name
 	}
 
+	if spec.NodeSelector == nil {
+		spec.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), redis, func() error {
 		spec.DeepCopyInto(&redis.Spec.RedisSpecCore)
 		if tlsCert != "" {
