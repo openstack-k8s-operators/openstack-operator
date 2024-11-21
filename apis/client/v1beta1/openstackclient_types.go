@@ -49,8 +49,8 @@ type OpenStackClientSpecCore struct {
 	OpenStackConfigSecret *string `json:"openStackConfigSecret"`
 
 	// +kubebuilder:validation:Optional
-	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// NodeSelector to target subset of worker nodes
+	NodeSelector *map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec

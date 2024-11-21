@@ -47,6 +47,10 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.OpenStackClient.Template.NodeSelector == nil {
+		instance.Spec.OpenStackClient.Template.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	Log.Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
 		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec.OpenStackClientSpecCore)
