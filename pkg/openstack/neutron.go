@@ -141,15 +141,16 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Neutron.Template.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
+	if instance.Spec.Neutron.Template.NodeSelector == nil {
+		instance.Spec.Neutron.Template.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	Log.Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
 		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec.NeutronAPISpecCore)
 		neutronAPI.Spec.ContainerImage = *version.Status.ContainerImages.NeutronAPIImage
 		if neutronAPI.Spec.Secret == "" {
 			neutronAPI.Spec.Secret = instance.Spec.Secret
-		}
-		if neutronAPI.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-			neutronAPI.Spec.NodeSelector = instance.Spec.NodeSelector
 		}
 		if neutronAPI.Spec.DatabaseInstance == "" {
 			neutronAPI.Spec.DatabaseInstance = "openstack"
