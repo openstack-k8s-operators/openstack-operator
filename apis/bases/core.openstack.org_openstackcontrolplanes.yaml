@@ -14703,6 +14703,10 @@ spec:
                   templates:
                     additionalProperties:
                       properties:
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          type: object
                         replicas:
                           default: 1
                           format: int32
