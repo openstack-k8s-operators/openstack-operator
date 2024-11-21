@@ -1822,27 +1822,57 @@ var _ = Describe("OpenStackOperator controller", func() {
 				th.DeleteInstance,
 				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
 			)
+
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 		})
 
-		It("should set the galera nodeSelector", func() {
+		It("sets nodeSelector in resource specs", func() {
+			Eventually(func(g Gomega) {
+				osc := th.GetPod(names.OpenStackClientName)
+				g.Expect(osc.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				db := mariadb.GetGalera(names.DBName)
 				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
-				db := mariadb.GetGalera(names.DBCell1Name)
-				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
+
 		})
 
-		It("should update the galera nodeSelector", func() {
+		It("updates nodeSelector in resource specs when changed", func() {
+			Eventually(func(g Gomega) {
+				osc := th.GetPod(names.OpenStackClientName)
+				g.Expect(osc.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				db := mariadb.GetGalera(names.DBName)
 				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
-				db := mariadb.GetGalera(names.DBCell1Name)
-				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
@@ -1855,53 +1885,124 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
+				osc := th.GetPod(names.OpenStackClientName)
+				g.Expect(osc.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
 				db := mariadb.GetGalera(names.DBName)
 				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
-				db := mariadb.GetGalera(names.DBCell1Name)
-				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
 			}, timeout, interval).Should(Succeed())
 		})
 
-		It("should allow the galera nodeSelector to be overridden", func() {
+		It("allows nodeSelector service override", func() {
+			Eventually(func(g Gomega) {
+				osc := th.GetPod(names.OpenStackClientName)
+				g.Expect(osc.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				db := mariadb.GetGalera(names.DBName)
 				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
-				db := mariadb.GetGalera(names.DBCell1Name)
-				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 
-				newNodeSelector := map[string]string{
-					"foo2": "bar2",
+				oscNodeSelector := map[string]string{
+					"foo": "osc",
+				}
+				OSCtlplane.Spec.OpenStackClient.Template.NodeSelector = &oscNodeSelector
+
+				galeraNodeSelector := map[string]string{
+					"foo": "galera",
 				}
 				galeraTemplates := *(OSCtlplane.Spec.Galera.Templates)
 				dbTemplate := galeraTemplates[names.DBName.Name]
-				dbTemplate.NodeSelector = &newNodeSelector
+				dbTemplate.NodeSelector = &galeraNodeSelector
 				galeraTemplates[names.DBName.Name] = dbTemplate
-
-				emptyNodeSelector := map[string]string{}
-				cell1Template := galeraTemplates[names.DBCell1Name.Name]
-				cell1Template.NodeSelector = &emptyNodeSelector
-				galeraTemplates[names.DBCell1Name.Name] = cell1Template
-
 				OSCtlplane.Spec.Galera.Templates = &galeraTemplates
+
+				rmqNodeSelector := map[string]string{
+					"foo": "rmq",
+				}
+				rmqTemplates := *OSCtlplane.Spec.Rabbitmq.Templates
+				rmqTemplate := rmqTemplates[names.RabbitMQName.Name]
+				rmqTemplate.NodeSelector = &rmqNodeSelector
+				rmqTemplates[names.RabbitMQName.Name] = rmqTemplate
+				OSCtlplane.Spec.Rabbitmq.Templates = &rmqTemplates
 
 				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
 			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
-				db := mariadb.GetGalera(names.DBName)
-				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
+				osc := th.GetPod(names.OpenStackClientName)
+				g.Expect(osc.Spec.NodeSelector).To(Equal(map[string]string{"foo": "osc"}))
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
-				db := mariadb.GetGalera(names.DBCell1Name)
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "galera"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "rmq"}))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("allows nodeSelector service override to empty", func() {
+			Eventually(func(g Gomega) {
+				osc := th.GetPod(names.OpenStackClientName)
+				g.Expect(osc.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+				oscNodeSelector := map[string]string{}
+				OSCtlplane.Spec.OpenStackClient.Template.NodeSelector = &oscNodeSelector
+
+				galeraNodeSelector := map[string]string{}
+				galeraTemplates := *(OSCtlplane.Spec.Galera.Templates)
+				dbTemplate := galeraTemplates[names.DBName.Name]
+				dbTemplate.NodeSelector = &galeraNodeSelector
+				galeraTemplates[names.DBName.Name] = dbTemplate
+				OSCtlplane.Spec.Galera.Templates = &galeraTemplates
+
+				rmqNodeSelector := map[string]string{}
+				rmqTemplates := *OSCtlplane.Spec.Rabbitmq.Templates
+				rmqTemplate := rmqTemplates[names.RabbitMQName.Name]
+				rmqTemplate.NodeSelector = &rmqNodeSelector
+				rmqTemplates[names.RabbitMQName.Name] = rmqTemplate
+				OSCtlplane.Spec.Rabbitmq.Templates = &rmqTemplates
+
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				osc := th.GetPod(names.OpenStackClientName)
+				g.Expect(osc.Spec.NodeSelector).To(BeNil())
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
 				g.Expect(*db.Spec.NodeSelector).To(Equal(map[string]string{}))
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(BeNil())
 			}, timeout, interval).Should(Succeed())
 		})
 	})
