@@ -150,8 +150,8 @@ github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.2024101
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20241017142550-a3524acedd49/go.mod h1:6Mq2N/KtNFW20L+PQC5qkeK8R8UGadmGBXL8HDY6lcg=
 github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20241122125042-e71e20768f68 h1:z26u6ij/KbrupC4qJS2PvuPPyesev4twurIUksXuXO8=
 github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20241122125042-e71e20768f68/go.mod h1:jMHEP2K98nm4OwCW8b4i9Uqqv2GtUpU8PMYyHozsr/U=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20241120170327-df16dea2cae6 h1:BwaOcN/rM9qmrJmA6jJonHymssfKtFOn6wJGghDexUE=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20241120170327-df16dea2cae6/go.mod h1:1yPvSebSiduMJKNyIxTqOjgLoTlF+n4w+2d+9+Ofmu4=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20241122125043-2ef48ecf8aa7 h1:MzVUCepc/0S+NJUEpq0mjpszL646+sqWijPtuYmGxeQ=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20241122125043-2ef48ecf8aa7/go.mod h1:1yPvSebSiduMJKNyIxTqOjgLoTlF+n4w+2d+9+Ofmu4=
 github.com/openstack-k8s-operators/test-operator/api v0.5.1-0.20241120094846-34e4270601af h1:b3F4rmK7GsZ5meZHIMI0H7NUHcHV1d049m82SsEFOKc=
 github.com/openstack-k8s-operators/test-operator/api v0.5.1-0.20241120094846-34e4270601af/go.mod h1:8M321WSJuyKnKupMmMYdqlrs9WD6lmuuwQMiO8gTJLU=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
