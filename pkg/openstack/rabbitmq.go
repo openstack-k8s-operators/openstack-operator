@@ -310,6 +310,18 @@ func reconcileRabbitMQ(
 		tlsCert = certSecret.Name
 	}
 
+	if spec.Override.StatefulSet == nil {
+		spec.Override.StatefulSet = &defaultStatefulSet
+	}
+
+	if spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector == nil {
+		if spec.NodeSelector != nil {
+			spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector = *spec.NodeSelector
+		} else {
+			spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector = instance.Spec.NodeSelector
+		}
+	}
+
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 
 		rabbitmq.Spec.Image = *version.Status.ContainerImages.RabbitmqImage
@@ -360,11 +372,6 @@ func reconcileRabbitMQ(
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
 			Log.Info(fmt.Sprintf("Setting StorageClassName: " + instance.Spec.StorageClass))
 			rabbitmq.Spec.Persistence.StorageClassName = &instance.Spec.StorageClass
-		}
-
-		if rabbitmq.Spec.Override.StatefulSet == nil {
-			Log.Info("Setting StatefulSet")
-			rabbitmq.Spec.Override.StatefulSet = &defaultStatefulSet
 		}
 
 		if rabbitmq.Spec.Override.Service != nil &&
