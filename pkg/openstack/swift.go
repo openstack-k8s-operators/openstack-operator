@@ -46,6 +46,10 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		instance.Spec.Swift.Template = &swiftv1.SwiftSpecCore{}
 	}
 
+	if instance.Spec.Swift.Template.NodeSelector == nil {
+		instance.Spec.Swift.Template.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Swift.Template.SwiftProxy.Override.Service == nil {
