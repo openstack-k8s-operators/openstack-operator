@@ -24,7 +24,7 @@ require (
 	github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241119125634-42b7b8417b48
 	github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20241115111947-2336829c2d73
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20241118111717-a1d460a6d81f
-	github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241118072048-45d5df9ad730
+	github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241121095319-a34ad51b8446
 	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241119131546-e4c1ba679d22
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20241114094619-107d1aac9458
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20241118203716-9550c8740911

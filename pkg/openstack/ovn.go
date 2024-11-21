@@ -142,6 +142,10 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			dbcluster.TLS.SecretName = &certSecret.Name
 		}
 
+		if dbcluster.NodeSelector == nil {
+			dbcluster.NodeSelector = &instance.Spec.NodeSelector
+		}
+
 		Log.Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
 		op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNDBCluster, func() error {
 
@@ -154,9 +158,6 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 				OVNDBCluster.Spec.ContainerImage = *version.Status.ContainerImages.OvnSbDbclusterImage
 			}
 
-			if OVNDBCluster.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-				OVNDBCluster.Spec.NodeSelector = instance.Spec.NodeSelector
-			}
 			if OVNDBCluster.Spec.StorageClass == "" {
 				OVNDBCluster.Spec.StorageClass = instance.Spec.StorageClass
 			}
@@ -256,16 +257,16 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 	}
 	ovnNorthdSpec.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
+	if ovnNorthdSpec.NodeSelector == nil {
+		ovnNorthdSpec.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	Log.Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNNorthd, func() error {
 
 		instance.Spec.Ovn.Template.OVNNorthd.DeepCopyInto(&OVNNorthd.Spec.OVNNorthdSpecCore)
 
 		OVNNorthd.Spec.ContainerImage = *version.Status.ContainerImages.OvnNorthdImage
-
-		if OVNNorthd.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-			OVNNorthd.Spec.NodeSelector = instance.Spec.NodeSelector
-		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), OVNNorthd, helper.GetScheme())
 		if err != nil {
@@ -373,6 +374,10 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 	}
 	ovnControllerSpec.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
+	if ovnControllerSpec.NodeSelector == nil {
+		ovnControllerSpec.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	Log.Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNController, func() error {
 
@@ -380,10 +385,6 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 
 		OVNController.Spec.OvnContainerImage = *version.Status.ContainerImages.OvnControllerImage
 		OVNController.Spec.OvsContainerImage = *version.Status.ContainerImages.OvnControllerOvsImage
-
-		if OVNController.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-			OVNController.Spec.NodeSelector = instance.Spec.NodeSelector
-		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), OVNController, helper.GetScheme())
 		if err != nil {
