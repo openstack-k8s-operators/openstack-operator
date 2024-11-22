@@ -511,6 +511,9 @@ type RabbitmqTemplate struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// NodeSelector to target subset of worker nodes running this service
 	NodeSelector *map[string]string `json:"nodeSelector,omitempty"`
+
+	// +kubebuilder:validation:Required
+	Foo int `json:"foo"`
 }
 
 // OvnSection defines the desired state of OVN services
