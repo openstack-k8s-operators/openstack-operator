@@ -199,6 +199,10 @@ func reconcileMemcached(
 		tlsCert = certSecret.Name
 	}
 
+	if spec.NodeSelector == nil {
+		spec.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), memcached, func() error {
 		spec.DeepCopyInto(&memcached.Spec.MemcachedSpecCore)
 

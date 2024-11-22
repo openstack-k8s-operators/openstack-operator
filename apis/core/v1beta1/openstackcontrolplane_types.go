@@ -86,7 +86,7 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
+	// NodeSelector to target subset of worker nodes running control plane services
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -507,6 +507,10 @@ type RabbitmqTemplate struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Overrides to use when creating the Rabbitmq clusters
 	rabbitmqv2.RabbitmqClusterSpecCore `json:",inline"`
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// NodeSelector to target subset of worker nodes running this service
+	NodeSelector *map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // OvnSection defines the desired state of OVN services
