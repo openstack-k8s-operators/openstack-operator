@@ -17,18 +17,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/go-logr/logr"
-	"golang.org/x/exp/slices"
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -308,45 +305,16 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		},
 	}
 
+	spec := openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash)
+
 	op, err := controllerutil.CreateOrPatch(ctx, r.Client, osclient, func() error {
 		isPodUpdate := !osclient.ObjectMeta.CreationTimestamp.IsZero()
 		if !isPodUpdate {
-			osclient.Spec = openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash)
+			osclient.Spec = spec
 		} else {
-			hashupdate := false
-
-			f := func(e corev1.EnvVar) bool {
-				return e.Name == "CONFIG_HASH"
-			}
-			idx := slices.IndexFunc(osclient.Spec.Containers[0].Env, f)
-
-			if idx >= 0 && osclient.Spec.Containers[0].Env[idx].Value != configVarsHash {
-				hashupdate = true
-			}
-
-			switch {
-			case osclient.Spec.Containers[0].Image != instance.Spec.ContainerImage:
-				// if container image change force re-create by triggering NewForbidden
-				return k8s_errors.NewForbidden(
-					schema.GroupResource{Group: "", Resource: "pods"}, // Specify the group and resource type
-					osclient.Name,
-					errors.New("Cannot update Pod spec field - Spec.Containers[0].Image"), // Specify the error message
-				)
-			case hashupdate:
-				// if config hash changed, recreate the pod to use new config
-				return k8s_errors.NewForbidden(
-					schema.GroupResource{Group: "", Resource: "pods"}, // Specify the group and resource type
-					osclient.Name,
-					errors.New("Config changed recreate pod"), // Specify the error message
-				)
-			case !reflect.DeepEqual(osclient.Spec.NodeSelector, instance.Spec.NodeSelector):
-				// if NodeSelector change force re-create by triggering NewForbidden
-				return k8s_errors.NewForbidden(
-					schema.GroupResource{Group: "", Resource: "pods"}, // Specify the group and resource type
-					osclient.Name,
-					errors.New("Cannot update Pod spec field - Spec.NodeSelector"), // Specify the error message
-				)
-			}
+			osclient.Spec.Containers[0].Env = spec.Containers[0].Env
+			osclient.Spec.NodeSelector = spec.NodeSelector
+			osclient.Spec.Containers[0].Image = instance.Spec.ContainerImage
 		}
 
 		osclient.Labels = util.MergeStringMaps(osclient.Labels, clientLabels)
@@ -376,7 +344,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			}
 			Log.Info(fmt.Sprintf("OpenStackClient pod deleted due to change %s", err.Error()))
 
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		return ctrl.Result{}, fmt.Errorf("Failed to create or update pod %s: %w", osclient.Name, err)

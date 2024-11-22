@@ -106,11 +106,16 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.ManilaAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
+	if instance.Spec.Manila.Template.NodeSelector == nil {
+		instance.Spec.Manila.Template.NodeSelector = &instance.Spec.NodeSelector
+	}
+
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), manila, func() error {
 		instance.Spec.Manila.Template.ManilaSpecBase.DeepCopyInto(&manila.Spec.ManilaSpecBase)
 		instance.Spec.Manila.Template.ManilaAPI.DeepCopyInto(&manila.Spec.ManilaAPI.ManilaAPITemplateCore)
 		instance.Spec.Manila.Template.ManilaScheduler.DeepCopyInto(&manila.Spec.ManilaScheduler.ManilaSchedulerTemplateCore)
+		manila.Spec.NodeSelector = instance.Spec.Manila.Template.NodeSelector
 
 		manila.Spec.ManilaAPI.ContainerImage = *version.Status.ContainerImages.ManilaAPIImage
 		manila.Spec.ManilaScheduler.ContainerImage = *version.Status.ContainerImages.ManilaSchedulerImage
@@ -136,9 +141,6 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 		if manila.Spec.Secret == "" {
 			manila.Spec.Secret = instance.Spec.Secret
-		}
-		if manila.Spec.NodeSelector == nil && instance.Spec.NodeSelector != nil {
-			manila.Spec.NodeSelector = instance.Spec.NodeSelector
 		}
 		if manila.Spec.DatabaseInstance == "" {
 			//manila.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here

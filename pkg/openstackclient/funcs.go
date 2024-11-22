@@ -87,8 +87,8 @@ func ClientPodSpec(
 		},
 	}
 
-	if instance.Spec.NodeSelector != nil && len(instance.Spec.NodeSelector) > 0 {
-		podSpec.NodeSelector = instance.Spec.NodeSelector
+	if instance.Spec.NodeSelector != nil {
+		podSpec.NodeSelector = *instance.Spec.NodeSelector
 	}
 
 	return podSpec
