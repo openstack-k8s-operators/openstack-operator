@@ -853,6 +853,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
 		}
 		r.Spec.Telemetry.Template.Default()
+		initializeOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, true)
+		r.Spec.Telemetry.Template.Autoscaling.SetDefaultRouteAnnotations(r.Spec.Telemetry.AodhAPIOverride.Route.Annotations)
 	}
 
 	// Heat
