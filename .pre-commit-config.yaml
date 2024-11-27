@@ -25,6 +25,12 @@ repos:
       entry: make
       args: ['operator-lint']
       pass_filenames: false
+    - id: make-crd-schema-check
+      name: make-crd-schema-check
+      language: system
+      entry: make
+      args: ['crd-schema-check']
+      pass_filenames: false
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.4.0

@@ -477,3 +477,10 @@ run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 .PHONY: webhook-cleanup
 webhook-cleanup:
 	/bin/bash hack/clean_local_webhook.sh
+
+CRD_SCHEMA_CHECKER_VERSION ?= release-4.16
+
+PHONY: crd-schema-check
+crd-schema-check: manifests
+	INSTALL_DIR=$(LOCALBIN) CRD_SCHEMA_CHECKER_VERSION=$(CRD_SCHEMA_CHECKER_VERSION) hack/build-crd-schema-checker.sh
+	INSTALL_DIR=$(LOCALBIN) BASE_REF="$${PULL_BASE_SHA:-$(BRANCH)}" hack/crd-schema-checker.sh
