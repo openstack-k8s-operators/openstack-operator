@@ -3,7 +3,7 @@ kind: TestAssert
 commands:
   - script: |
       echo "Checking all pods have expected nodeselector"
-      EXPECTED_NODE_SELECTOR="node-role.kubernetes.io/worker:"
+      EXPECTED_NODE_SELECTOR="beta.kubernetes.io/os:linux node-role.kubernetes.io/worker:"
       BAD_OR_MISSING_NODE_SELECTOR=$(oc get pods -n $NAMESPACE -l service!=dnsmasq -o=go-template --template='{{ range .items }}{{ .metadata.name}}: {{ .spec.nodeSelector }}{{"\n"}}{{ end }}' | grep -v 'ovn-controller-.*-config' | sed -e '\!map\['"$EXPECTED_NODE_SELECTOR"'\]$!d')
       BAD_OR_MISSING_NODE_SELECTOR_COUNT=$(echo -n "$BAD_OR_MISSING_NODE_SELECTOR" | wc -l)
       if [ $BAD_OR_MISSING_NODE_SELECTOR_COUNT -ne 0 ]; then
