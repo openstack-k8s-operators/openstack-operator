@@ -2,4 +2,6 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:
   - script: |
+      oc annotate namespace $NAMESPACE openshift.io/node-selector="beta.kubernetes.io/os=linux"
+  - script: |
       oc kustomize ../../../../config/samples/nodeselectors/global | oc apply -n $NAMESPACE -f -
