@@ -321,6 +321,11 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		if _, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
 			return false, err
 		}
+
+		// for minor updates, update the ovn controller images to the one from the version
+		instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
+		instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
+
 		return true, nil
 	}
 
