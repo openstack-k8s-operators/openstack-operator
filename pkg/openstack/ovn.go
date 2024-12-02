@@ -322,10 +322,6 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 			return false, err
 		}
 
-		// for minor updates, update the ovn controller images to the one from the version
-		instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
-		instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
-
 		return true, nil
 	}
 
@@ -426,7 +422,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 func OVNControllerImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 
-	if controlPlane.Spec.Ovn.Enabled {
+	if controlPlane.Spec.Ovn.Enabled && len(controlPlane.Spec.Ovn.Template.OVNController.NicMappings) > 0 {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.OvnControllerImage, version.Status.ContainerImages.OvnControllerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OvnControllerOvsImage, version.Status.ContainerImages.OvnControllerOvsImage) {
 			Log.Info("OVN Controller images do not match")
