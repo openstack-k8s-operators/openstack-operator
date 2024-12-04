@@ -96,8 +96,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				g.Expect(version).Should(Not(BeNil()))
 
-				g.Expect(*version.Status.AvailableVersion).Should(Equal("0.0.1"))
-				g.Expect(version.Spec.TargetVersion).Should(Equal("0.0.1"))
+				// no condition which reflects an update is available
+				g.Expect(version.Status.Conditions.Has(corev1.OpenStackVersionMinorUpdateAvailable)).To(BeFalse())
+
+				g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring("0.0.1"))
+				g.Expect(version.Spec.TargetVersion).Should(ContainSubstring("0.0.1"))
 
 				g.Expect(version.Status.ContainerImages.AgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.AnsibleeeImage).ShouldNot(BeNil())
@@ -288,15 +291,15 @@ var _ = Describe("OpenStackOperator controller", func() {
 				targetOvnControllerVersion = *version.Status.ContainerImages.OvnControllerImage
 				g.Expect(version).Should(Not(BeNil()))
 
-				g.Expect(*version.Status.AvailableVersion).Should(Equal("0.0.1"))
-				g.Expect(version.Spec.TargetVersion).Should(Equal("0.0.1"))
-
+				g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring("0.0.1"))
+				g.Expect(version.Spec.TargetVersion).Should(ContainSubstring("0.0.1"))
+				updatedVersion = *version.Status.AvailableVersion
 			}, timeout, interval).Should(Succeed())
 
 			// inject an "old" version
 			Eventually(func(g Gomega) {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
-				version.Status.ContainerImageVersionDefaults[initialVersion] = version.Status.ContainerImageVersionDefaults["0.0.1"]
+				version.Status.ContainerImageVersionDefaults[initialVersion] = version.Status.ContainerImageVersionDefaults[updatedVersion]
 				version.Status.ContainerImageVersionDefaults[initialVersion].OvnControllerImage = &testOvnControllerImage
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
 
@@ -388,6 +391,15 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			// 1) switch to version 0.0.1, this triggers a minor update
 			osversion := GetOpenStackVersion(names.OpenStackVersionName)
+
+			// should have a condition which reflects an update is available
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionMinorUpdateAvailable,
+				k8s_corev1.ConditionTrue,
+			)
+
 			osversion.Spec.TargetVersion = updatedVersion
 			Expect(k8sClient.Update(ctx, osversion)).Should(Succeed())
 
@@ -533,7 +545,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 					k8s_corev1.ConditionTrue,
 				)
 				g.Expect(osversion.Status.DeployedVersion).Should(Equal(&updatedVersion)) // we're done here
-
+				// no condition which reflects an update is available
+				g.Expect(osversion.Status.Conditions.Has(corev1.OpenStackVersionMinorUpdateAvailable)).To(BeFalse())
 			}, timeout, interval).Should(Succeed())
 
 		})
