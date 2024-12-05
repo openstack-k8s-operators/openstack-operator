@@ -68,6 +68,9 @@ type OpenStackClientStatus struct {
 
 	//ObservedGeneration - the most recent generation observed for this object.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+
+	// Map of hashes to track e.g. pod spec
+	Hash map[string]string `json:"hash,omitempty"`
 }
 
 // +kubebuilder:object:root=true
