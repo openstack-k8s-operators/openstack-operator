@@ -183,6 +183,11 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			octavia.Spec.Secret = instance.Spec.Secret
 		}
 
+		if octavia.Spec.DatabaseInstance == "" {
+			// octavia.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
+			octavia.Spec.DatabaseInstance = "openstack" // FIXME: see above
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), octavia, helper.GetScheme())
 		if err != nil {
 			return err
