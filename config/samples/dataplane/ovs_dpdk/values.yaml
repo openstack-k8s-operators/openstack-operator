@@ -16,9 +16,6 @@ data:
     nodetemplate:
       ansible:
         vars:
-          # CHANGEME -- see https://access.redhat.com/solutions/253273
-          # edpm_bootstrap_command: |
-          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
           edpm_network_config_hide_sensitive_logs: false
           edpm_network_config_template: |
             ---

@@ -81,6 +81,7 @@ spec:
       hostName: edpm-compute-0
   preProvisioned: false
   services: #<11>
+    - redhat
     - bootstrap
     - download-cache
     - configure-network

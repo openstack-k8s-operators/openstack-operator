@@ -8,6 +8,7 @@ spec:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
   services:
+    - redhat
     - bootstrap
     - download-cache
     - configure-network
@@ -53,15 +54,11 @@ spec:
           configMapRef:
             name: neutron-edpm
         # CHANGEME -- see https://access.redhat.com/solutions/253273
-        # - prefix: subscription_manager_
-        #   secretRef:
+        # - secretRef:
         #     name: subscription-manager
         # - secretRef:
         #     name: redhat-registry
       ansibleVars:
-         # CHANGEME -- see https://access.redhat.com/solutions/253273
-         # edpm_bootstrap_command: |
-         #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
          edpm_nodes_validation_validate_controllers_icmp: false
          edpm_nodes_validation_validate_gateway_icmp: false
          gather_facts: false

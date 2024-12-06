@@ -79,6 +79,7 @@ spec:
           subnetName: subnet1
   preProvisioned: true #<9>
   services: #<10>
+    - redhat
     - bootstrap
     - download-cache
     - configure-network

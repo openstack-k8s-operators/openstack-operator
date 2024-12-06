@@ -30,6 +30,7 @@ The default list of services as they will appear on the `services` field on an
 
 ----
 services:
+  - redhat
   - download-cache
   - bootstrap
   - configure-network
