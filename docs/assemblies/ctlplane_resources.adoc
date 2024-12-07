@@ -41,6 +41,7 @@
 * <<ovnsection,OvnSection>>
 * <<placementsection,PlacementSection>>
 * <<rabbitmqsection,RabbitmqSection>>
+* <<rabbitmqtemplate,RabbitmqTemplate>>
 * <<redissection,RedisSection>>
 * <<swiftsection,SwiftSection>>
 * <<tlscastatus,TLSCAStatus>>
@@ -244,6 +245,7 @@
 * <<ironicneutronagentstatus,IronicNeutronAgentStatus>>
 * <<ironicneutronagenttemplate,IronicNeutronAgentTemplate>>
 * <<apioverridespec,APIOverrideSpec>>
+* <<httpdcustomization,HttpdCustomization>>
 * <<keystoneapi,KeystoneAPI>>
 * <<keystoneapilist,KeystoneAPIList>>
 * <<keystoneapispec,KeystoneAPISpec>>
@@ -417,6 +419,7 @@
 * <<ovsexternalids,OVSExternalIDs>>
 * <<ovndbcluster,OVNDBCluster>>
 * <<ovndbclusterlist,OVNDBClusterList>>
+* <<ovndbclusteroverridespec,OVNDBClusterOverrideSpec>>
 * <<ovndbclusterspec,OVNDBClusterSpec>>
 * <<ovndbclusterspeccore,OVNDBClusterSpecCore>>
 * <<ovndbclusterstatus,OVNDBClusterStatus>>
@@ -616,8 +619,8 @@ OpenStackClientSpecCore defines the desired state of OpenStackClient
 | true
 
 | nodeSelector
-| NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
-| map[string]string
+| NodeSelector to target subset of worker nodes
+| *map[string]string
 | false
 |===
 
@@ -1215,7 +1218,7 @@ OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
 | true
 
 | nodeSelector
-| NodeSelector to target subset of worker nodes running control plane services (currently only applies to KeystoneAPI and PlacementAPI)
+| NodeSelector to target subset of worker nodes running control plane services
 | map[string]string
 | false
 
@@ -1520,6 +1523,22 @@ RabbitmqSection defines the desired state of RabbitMQ service
 | Templates - Overrides to use when creating the Rabbitmq clusters
 | *map[string]<<rabbitmqtemplate,RabbitmqTemplate>>
 | true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#rabbitmqtemplate]
+==== RabbitmqTemplate
+
+RabbitmqTemplate definition
+
+|===
+| Field | Description | Scheme | Required
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -2387,17 +2406,17 @@ BarbicanSpec defines the desired state of Barbican
 | Field | Description | Scheme | Required
 
 | barbicanAPI
-|
+| BarbicanAPI - Spec definition for the  API services of this Barbican deployment
 | <<barbicanapitemplate,BarbicanAPITemplate>>
 | true
 
 | barbicanWorker
-|
+| BarbicanWorker - Spec definition for the Worker service of this Barbican deployment
 | <<barbicanworkertemplate,BarbicanWorkerTemplate>>
 | true
 
 | barbicanKeystoneListener
-|
+| BarbicanKeystoneListener - Spec definition for the KeystoneListener service of this Barbican deployment
 | <<barbicankeystonelistenertemplate,BarbicanKeystoneListenerTemplate>>
 | true
 |===
@@ -2419,7 +2438,7 @@ BarbicanSpecBase -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this component. Setting here overrides any global NodeSelector settings within the Barbican CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -2444,17 +2463,17 @@ BarbicanSpecCore defines the desired state of Barbican, for use with the OpenSta
 | Field | Description | Scheme | Required
 
 | barbicanAPI
-|
+| BarbicanAPI - Spec definition for the  API services of this Barbican deployment
 | <<barbicanapitemplatecore,BarbicanAPITemplateCore>>
 | true
 
 | barbicanWorker
-|
+| BarbicanWorker - Spec definition for the Worker service of this Barbican deployment
 | <<barbicanworkertemplatecore,BarbicanWorkerTemplateCore>>
 | true
 
 | barbicanKeystoneListener
-|
+| BarbicanKeystoneListener - Spec definition for the KeystoneListener service of this Barbican deployment
 | <<barbicankeystonelistenertemplatecore,BarbicanKeystoneListenerTemplateCore>>
 | true
 |===
@@ -2944,7 +2963,7 @@ BarbicanComponentTemplate - Variables used by every sub-component of Barbican (e
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this component. Setting here overrides any global NodeSelector settings within the Barbican CR.
-| map[string]string
+| *map[string]string
 | false
 
 | replicas
@@ -3022,11 +3041,6 @@ BarbicanTemplate defines common Spec elements for all Barbican components includ
 | PasswordSelectors - Selectors to identify the ServiceUser password from the Secret
 | <<passwordselector,PasswordSelector>>
 | true
-
-| customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
-| string
-| false
 
 | serviceAccount
 | ServiceAccount - service account name used internally to provide Barbican services the default SA name
@@ -3199,7 +3213,7 @@ CinderSpec defines the desired state of Cinder
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
+| *map[string]string
 | false
 
 | dbPurge
@@ -3978,7 +3992,7 @@ CinderServiceTemplate defines the input parameters that can be defined for a giv
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Cinder CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -4077,7 +4091,7 @@ DesignateServiceTemplate defines the input parameters that can be defined for a 
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Designate CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -4344,7 +4358,7 @@ DesignateSpecBase -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -5392,7 +5406,7 @@ GlanceAPITemplate defines the desired state of GlanceAPI
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -5650,7 +5664,7 @@ GlanceSpecCore defines the desired state of Glance
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -5994,7 +6008,7 @@ HeatServiceTemplate -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes for running the service
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -6190,7 +6204,7 @@ HeatSpec defines the desired state of Heat
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes for running the Heat services
-| map[string]string
+| *map[string]string
 | false
 
 | apiTimeout
@@ -6800,7 +6814,7 @@ HorizonSpecBase -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | defaultConfigOverwrite
@@ -6917,7 +6931,7 @@ IronicServiceTemplate defines the common input parameters for Ironic services
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Ironic CR
-| map[string]string
+| *map[string]string
 | false
 
 | resources
@@ -7210,7 +7224,7 @@ IronicSpec defines the desired state of Ironic
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
+| *map[string]string
 | false
 
 | storageClass
@@ -7884,7 +7898,7 @@ IronicInspectorTemplate defines the input parameters for Ironic Inspector servic
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Ironic CR
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -8091,6 +8105,22 @@ APIOverrideSpec to override the generated manifest of several child resources.
 
 <<custom-resources,Back to Custom Resources>>
 
+[#httpdcustomization]
+==== HttpdCustomization
+
+HttpdCustomization - customize the httpd service
+
+|===
+| Field | Description | Scheme | Required
+
+| processNumber
+| ProcessNumber - Number of processes running in keystone API
+| *int32
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#keystoneapi]
 ==== KeystoneAPI
 
@@ -8237,7 +8267,7 @@ KeystoneAPISpec defines the desired state of KeystoneAPI
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -8253,6 +8283,11 @@ KeystoneAPISpec defines the desired state of KeystoneAPI
 | defaultConfigOverwrite
 | ConfigOverwrite - interface to overwrite default config files like e.g. policy.json. But can also be used to add additional files. Those get added to the service config dir in /etc/+++<service>+++.+++</service>+++
 | map[string]string
+| false
+
+| httpdCustomization
+| HttpdCustomization - customize the httpd service
+| <<httpdcustomization,HttpdCustomization>>
 | false
 
 | resources
@@ -8568,7 +8603,7 @@ ManilaServiceTemplate defines the input parameters that can be defined for a giv
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Manila CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -8822,7 +8857,7 @@ ManilaSpecBase -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
+| *map[string]string
 | false
 
 | dbPurge
@@ -9523,7 +9558,7 @@ GaleraSpec defines the desired state of Galera
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -9890,6 +9925,11 @@ NeutronAPISpecCore -
 |===
 | Field | Description | Scheme | Required
 
+| apiTimeout
+| APITimeout for HAProxy, Apache
+| int
+| true
+
 | serviceUser
 | ServiceUser - optional username used for this service to register in neutron
 | string
@@ -9932,7 +9972,7 @@ NeutronAPISpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -10163,7 +10203,7 @@ NovaServiceBase contains the fields that are needed for each nova service CRD
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -10307,7 +10347,7 @@ NovaSpecCore defines the template for NovaSpec used in OpenStackControlPlane
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -10579,7 +10619,7 @@ NovaAPITemplate defines the input parameters specified by the user to create a N
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Nova CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -10708,7 +10748,7 @@ NovaCellSpec defines the desired state of NovaCell
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this services.
-| map[string]string
+| *map[string]string
 | false
 
 | serviceUser
@@ -10865,7 +10905,7 @@ NovaCellTemplate defines the input parameters specified by the user to create a 
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running cell.
-| map[string]string
+| *map[string]string
 | false
 
 | conductorServiceTemplate
@@ -11076,7 +11116,7 @@ NovaComputeTemplate defines the input parameters specified by the user to create
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Nova CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -11281,7 +11321,7 @@ NovaConductorTemplate defines the input parameters specified by the user to crea
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Nova CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -11502,7 +11542,7 @@ NovaMetadataTemplate defines the input parameters specified by the user to creat
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Nova CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -11702,7 +11742,7 @@ NovaNoVNCProxyTemplate defines the input parameters specified by the user to cre
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -11934,7 +11974,7 @@ NovaSchedulerTemplate defines the input parameters specified by the user to crea
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the Nova CR.
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -12073,7 +12113,7 @@ OctaviaAmphoraControllerSpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | customServiceConfig
@@ -12395,7 +12435,7 @@ OctaviaSpecBase -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -12455,8 +12495,8 @@ OctaviaSpecBase -
 
 | apiTimeout
 | Octavia API timeout
-| string
-| false
+| int
+| true
 
 | octaviaNetworkAttachment
 | OctaviaNetworkAttachment is a NetworkAttachment resource name for the Octavia Management Network
@@ -12718,7 +12758,7 @@ OctaviaAPISpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -12760,6 +12800,11 @@ OctaviaAPISpecCore -
 | TLS - Parameters related to the TLS
 | <<octaviaapitls,OctaviaApiTLS>>
 | false
+
+| apiTimeout
+| APITimeout for HAProxy and Apache defaults to OctaviaSpecCore APITimeout (seconds)
+| int
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -12902,7 +12947,7 @@ OctaviaRsyslogSpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | defaultConfigOverwrite
@@ -13366,8 +13411,13 @@ OpenStackBaremetalSetSpec defines the desired state of OpenStackBaremetalSet
 | false
 
 | provisionServerName
-| ProvisionServerName - Optional. If supplied will be used as the base Image for the baremetalset instead of baseImageURL.
+| ProvisionServerName - Optional. Existing OpenStackProvisionServer to use, else one would be created.
 | string
+| false
+
+| provisionServerNodeSelector
+| ProvisonServerNodeSelector to target subset of worker nodes running provision server
+| map[string]string
 | false
 
 | provisioningInterface
@@ -13752,7 +13802,7 @@ OVNControllerSpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | networkAttachment
@@ -13897,6 +13947,22 @@ OVNDBClusterList contains a list of OVNDBCluster
 
 <<custom-resources,Back to Custom Resources>>
 
+[#ovndbclusteroverridespec]
+==== OVNDBClusterOverrideSpec
+
+OVNDBClusterOverrideSpec to override the generated manifest of several child resources.
+
+|===
+| Field | Description | Scheme | Required
+
+| service
+| Override configuration for the Service created to serve traffic to the cluster.
+| *service.OverrideSpec
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#ovndbclusterspec]
 ==== OVNDBClusterSpec
 
@@ -13933,7 +13999,7 @@ OVNDBClusterSpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | logLevel
@@ -13979,6 +14045,11 @@ OVNDBClusterSpecCore -
 | tls
 | TLS - Parameters related to TLS
 | tls.SimpleService
+| false
+
+| override
+| Override, provides the ability to override the generated manifest of several child resources.
+| <<ovndbclusteroverridespec,OVNDBClusterOverrideSpec>>
 | false
 |===
 
@@ -14108,7 +14179,7 @@ OVNNorthdSpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | logLevel
@@ -14295,7 +14366,7 @@ PlacementAPISpecCore -
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | preserveJobs
@@ -14472,6 +14543,11 @@ SwiftSpecBase -
 | Memcached instance name.
 | string
 | true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -14685,6 +14761,11 @@ SwiftProxySpecCore -
 | Enables ceilometer in the swift proxy and creates required resources
 | bool
 | true
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -14854,6 +14935,11 @@ SwiftRingSpec defines the desired state of SwiftRing
 | TLS - Parameters related to the TLS
 | tls.Ca
 | false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15004,6 +15090,11 @@ SwiftStorageSpecCore -
 | DefaultConfigOverwrite - can be used to add additionalfiles. Those get added to the service config dir in /etc/+++<servicename>+++-conf.d+++</servicename>+++
 | map[string]string
 | false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15099,6 +15190,11 @@ Aodh defines the aodh component spec
 |===
 | Field | Description | Scheme | Required
 
+| apiTimeout
+| APITimeout for Route and Apache
+| int
+| true
+
 | rabbitMqClusterName
 | RabbitMQ instance name Needed to request a transportURL that is created and used in Aodh
 | string
@@ -15162,6 +15258,11 @@ Aodh defines the aodh component spec
 | tls
 | TLS - Parameters related to the TLS
 | tls.API
+| false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
 | false
 |===
 
@@ -15449,6 +15550,11 @@ CeilometerSpecCore defines the desired state of Ceilometer. This version is used
 |===
 | Field | Description | Scheme | Required
 
+| apiTimeout
+| APITimeout for Apache
+| int
+| true
+
 | rabbitMqClusterName
 | RabbitMQ instance name Needed to request a transportURL that is created and used in Telemetry
 | string
@@ -15492,6 +15598,11 @@ CeilometerSpecCore defines the desired state of Ceilometer. This version is used
 | ksmTls
 | KSMTLS - Parameters related to the TLS for kube-state-metrics
 | tls.SimpleService
+| false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
 | false
 |===
 
@@ -16077,6 +16188,11 @@ TelemetrySpecBase -
 | Logging - Parameters related to the logging
 | <<loggingsection,LoggingSection>>
 | false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service
+| *map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -16206,7 +16322,7 @@ MemcachedSpecCore - this version is used by the OpenStackControlplane CR (no con
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service
-| map[string]string
+| *map[string]string
 | false
 
 | tls
@@ -16498,7 +16614,7 @@ DNSMasqSpecCore - this version is used by the OpenStackControlplane CR (no conta
 
 | nodeSelector
 | NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
-| map[string]string
+| *map[string]string
 | false
 
 | dnsDataLabelSelectorValue

@@ -154,13 +154,8 @@ ifeval::["{build}" == "downstream"]
 . Register the operating system of the nodes that are not registered to the Red Hat Customer Portal, and enable repositories for your nodes:
 +
 ----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: subscription-manager
-data:
-  username: <subscription_manager_username>
-  password: <subscription_manager_password>
+$ oc create secret generic subscription-manager \
+--from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
 ----
 +
 * Replace `<subscription_manager_username>` with the applicable user name.
@@ -188,14 +183,8 @@ spec:
     ansible:
       ...
       ansibleVars:
-        edpm_bootstrap_command: |
-          subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
-          subscription-manager release --set=9.2
-          subscription-manager repos --disable=*
-          subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=openstack-17.1-for-rhel-9-x86_64-rpms --enable=fast-datapath-for-rhel-9-x86_64-rpms --enable=openstack-dev-preview-for-rhel-9-x86_64-rpms
       ansibleVarsFrom:
-      - prefix: subscription_manager_
-        secretRef:
+      - secretRef:
           name: subscription-manager
       - secretRef:
           name: redhat-registry
@@ -214,6 +203,21 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm-ipam
 spec:
+  ...
+  nodeTemplate:
+    ...
+    ansible:
+      ...
+      ansibleVars:
+        rhc_release: 9.2
+        rhc_repositories:
+            - {name: "*", state: disabled}
+            - {name: "rhel-9-for-x86_64-baseos-eus-rpms", state: enabled}
+            - {name: "rhel-9-for-x86_64-appstream-eus-rpms", state: enabled}
+            - {name: "rhel-9-for-x86_64-highavailability-eus-rpms", state: enabled}
+            - {name: "openstack-17.1-for-rhel-9-x86_64-rpms", state: enabled}
+            - {name: "fast-datapath-for-rhel-9-x86_64-rpms", state: enabled}
+            - {name: "openstack-dev-preview-for-rhel-9-x86_64-rpms", state: enabled}
   ...
   nodes:
     edpm-compute-0: <1>

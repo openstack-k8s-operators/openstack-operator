@@ -153,6 +153,7 @@ service to execute for the `edpm-compute` `NodeSet`.
  spec:
    services:
      - hello-world
+     - redhat
      - download-cache
      - bootstrap
      - configure-network
