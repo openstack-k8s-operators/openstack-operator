@@ -4,3 +4,4 @@ metadata:
   name: reboot-os
 spec:
   playbook: osp.edpm.reboot
+  edpmServiceType: reboot-os

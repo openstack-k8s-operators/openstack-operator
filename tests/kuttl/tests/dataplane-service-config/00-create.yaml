@@ -39,6 +39,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: kuttl-service
 spec:
+  edpmServiceType: sleep
   playbookContents: |
     - hosts: localhost
       gather_facts: no

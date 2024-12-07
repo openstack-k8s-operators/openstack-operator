@@ -10,3 +10,4 @@ spec:
   caCerts: combined-ca-bundle
   containerImageFields:
   - EdpmNeutronSriovAgentImage
+  edpmServiceType: neutron-sriov
