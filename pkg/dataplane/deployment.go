@@ -133,6 +133,14 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			}
 		}
 
+		// set additional ansible options
+		// don't fail if there is a problem with struct
+		// since it's purely optional
+		err = d.setAdditionalAEEOptions()
+		if err != nil {
+			log.Error(err, fmt.Sprintf("error: %e while parsing ansibleEeConfig, defaults will be used", err))
+		}
+
 		err = d.ConditionalDeploy(
 			readyCondition,
 			readyMessage,
@@ -494,4 +502,25 @@ func (d *Deployer) addServiceExtraMounts(
 	}
 
 	return d.AeeSpec, nil
+}
+
+func (d *Deployer) setAdditionalAEEOptions() error {
+	var test bool
+	cm, _, err := dataplaneutil.GetDataSourceCmSecret(d.Ctx, d.Helper, d.NodeSet.Namespace, d.Deployment.Spec.AnsibleEEConfig)
+
+	if err != nil || cm == nil {
+		d.AeeSpec.EnvConfigMapName = "openstack-aee-default-env"
+		return fmt.Errorf("aditional AEE options not found")
+	}
+
+	// Check presence of the key, type and contents
+	configMapName, test := cm.Data["envConfigMapName"]
+
+	if test && reflect.TypeOf(configMapName).Kind() == reflect.String && configMapName != "" {
+		d.AeeSpec.EnvConfigMapName = configMapName
+	} else {
+		d.AeeSpec.EnvConfigMapName = "openstack-aee-default-env"
+	}
+
+	return nil
 }
