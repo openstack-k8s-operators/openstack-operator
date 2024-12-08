@@ -1,0 +1,11 @@
+apiVersion: operator.openstack.org/v1beta1
+kind: OpenStack
+metadata:
+  labels:
+    app.kubernetes.io/name: openstack
+    app.kubernetes.io/instance: openstack
+    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: openstack-operator
+  name: openstack
+  namespace: openstack-operators
