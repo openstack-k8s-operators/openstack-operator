@@ -307,16 +307,19 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	spec := openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash)
 
+	podSpecHash, err := util.ObjectHash(spec)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	podSpecHashName := "podSpec"
+
 	op, err := controllerutil.CreateOrPatch(ctx, r.Client, osclient, func() error {
 		isPodUpdate := !osclient.ObjectMeta.CreationTimestamp.IsZero()
-		if !isPodUpdate {
+		currentPodSpecHash := instance.Status.Hash[podSpecHashName]
+		if !isPodUpdate || currentPodSpecHash != podSpecHash {
 			osclient.Spec = spec
-		} else {
-			osclient.Spec.Containers[0].Env = spec.Containers[0].Env
-			osclient.Spec.NodeSelector = spec.NodeSelector
-			osclient.Spec.Containers[0].Image = instance.Spec.ContainerImage
 		}
-
 		osclient.Labels = util.MergeStringMaps(osclient.Labels, clientLabels)
 
 		err = controllerutil.SetControllerReference(instance, osclient, r.Scheme)
@@ -359,6 +362,8 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			err.Error()))
 		return ctrl.Result{}, err
 	}
+
+	instance.Status.Hash, _ = util.SetHash(instance.Status.Hash, podSpecHashName, podSpecHash)
 
 	if op != controllerutil.OperationResultNone {
 		util.LogForObject(
