@@ -24,3 +24,4 @@ spec:
   caCerts: combined-ca-bundle
   containerImageFields:
   - EdpmNeutronMetadataAgentImage
+  edpmServiceType: neutron-metadata

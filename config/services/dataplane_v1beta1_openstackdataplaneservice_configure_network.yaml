@@ -4,3 +4,4 @@ metadata:
   name: configure-network
 spec:
   playbook: osp.edpm.configure_network
+  edpmServiceType: configure-network
