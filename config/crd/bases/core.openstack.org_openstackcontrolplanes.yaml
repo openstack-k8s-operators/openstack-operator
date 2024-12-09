@@ -3,8 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.1
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.14.0
   name: openstackcontrolplanes.core.openstack.org
 spec:
   group: core.openstack.org
@@ -3745,8 +3744,10 @@ spec:
                           required:
                           - containerImage
                           type: object
+                        default: {}
                         type: object
                       imageCache:
+                        default: {}
                         properties:
                           cleanerScheduler:
                             default: '*/30 * * * *'
@@ -4584,6 +4585,7 @@ spec:
                           type: string
                         type: object
                       extraMounts:
+                        default: []
                         items:
                           properties:
                             extraVol:
@@ -9108,6 +9110,7 @@ spec:
                   template:
                     properties:
                       amphoraCustomFlavors:
+                        default: []
                         items:
                           properties:
                             RAM:
@@ -9345,6 +9348,7 @@ spec:
                       octaviaHealthManager:
                         properties:
                           amphoraCustomFlavors:
+                            default: []
                             items:
                               properties:
                                 RAM:
@@ -9478,6 +9482,7 @@ spec:
                       octaviaHousekeeping:
                         properties:
                           amphoraCustomFlavors:
+                            default: []
                             items:
                               properties:
                                 RAM:
@@ -9699,6 +9704,7 @@ spec:
                       octaviaWorker:
                         properties:
                           amphoraCustomFlavors:
+                            default: []
                             items:
                               properties:
                                 RAM:
@@ -9934,8 +9940,10 @@ spec:
                       ovnController:
                         properties:
                           external-ids:
+                            default: {}
                             properties:
                               availability-zones:
+                                default: []
                                 items:
                                   type: string
                                 type: array
