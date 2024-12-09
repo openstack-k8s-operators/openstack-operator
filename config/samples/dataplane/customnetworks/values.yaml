@@ -10,10 +10,6 @@ data:
     nodetemplate:
       ansible:
         vars:
-          # CHANGEME -- see https://access.redhat.com/solutions/253273
-          # edpm_bootstrap_command: |
-          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
-
           neutron_public_interface_name: enp7s0
           ctlplane_dns_nameservers:
           - 192.168.1.254

@@ -12,9 +12,6 @@ data:
         vars:
           timesync_ntp_servers:
             - hostname: clock.redhat.com
-          # CHANGEME -- see https://access.redhat.com/solutions/253273
-          # edpm_bootstrap_command: |
-          #       subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
           edpm_iscsid_image: '{{ registry_url }}/openstack-iscsid:{{ image_tag }}'
           edpm_logrotate_crond_image: '{{ registry_url }}/openstack-cron:{{ image_tag }}'
           edpm_network_config_hide_sensitive_logs: false
