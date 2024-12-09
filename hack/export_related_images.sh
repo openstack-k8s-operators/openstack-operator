@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OPENSTACK_RELEASE_VERSION=0.0.1
+export OPENSTACK_RELEASE_VERSION=0.0.1-$(date +%s)
 export RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
 export RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
 export RELATED_IMAGE_KEYSTONE_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-keystone:current-podified
