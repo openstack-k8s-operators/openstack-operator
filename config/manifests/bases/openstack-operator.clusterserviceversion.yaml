@@ -609,6 +609,17 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
+    - description: OpenStack is the Schema for the openstacks API
+      displayName: Open Stack
+      kind: OpenStack
+      name: openstacks.operator.openstack.org
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
+      version: v1beta1
     - description: OpenStackVersion is the Schema for the openstackversionupdates
         API
       displayName: OpenStack Version
