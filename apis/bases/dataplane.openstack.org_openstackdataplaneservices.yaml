@@ -79,6 +79,8 @@ spec:
                 type: string
               playbookContents:
                 type: string
+              role:
+                type: string
               tlsCerts:
                 additionalProperties:
                   properties:
