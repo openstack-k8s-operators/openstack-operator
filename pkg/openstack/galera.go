@@ -7,6 +7,7 @@ import (
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -41,6 +42,7 @@ func ReconcileGaleras(
 
 	var failures = []string{}
 	var inprogress = []string{}
+	clusterDomain := clusterdns.GetDNSClusterDomain()
 
 	if instance.Spec.Galera.Templates == nil {
 		instance.Spec.Galera.Templates = ptr.To(map[string]mariadbv1.GaleraSpecCore{})
@@ -57,11 +59,11 @@ func ReconcileGaleras(
 			CertName:   fmt.Sprintf("galera-%s-svc", name),
 			Hostnames: []string{
 				hostname,
-				fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+				fmt.Sprintf("%s.%s", hostname, clusterDomain),
 				hostnameHeadless,
-				fmt.Sprintf("%s.%s", hostnameHeadless, ClusterInternalDomain),
+				fmt.Sprintf("%s.%s", hostnameHeadless, clusterDomain),
 				fmt.Sprintf("*.%s", hostnameHeadless),
-				fmt.Sprintf("*.%s.%s", hostnameHeadless, ClusterInternalDomain),
+				fmt.Sprintf("*.%s.%s", hostnameHeadless, clusterDomain),
 			},
 			// Note (dciabrin) from https://github.com/openstack-k8s-operators/openstack-operator/pull/678#issuecomment-1952459166
 			// the certificate created for galera should populate the 'organization' field,
@@ -69,7 +71,7 @@ func ReconcileGaleras(
 			// at the initial deployment because there is no SST involved when the DB is bootstrapped
 			// as there are no data to be transferred yet.
 			Subject: &certmgrv1.X509Subject{
-				Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, ClusterInternalDomain)},
+				Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, clusterDomain)},
 			},
 			Usages: []certmgrv1.KeyUsage{
 				"key encipherment",

@@ -19,6 +19,7 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
@@ -57,9 +58,6 @@ const (
 	// ooAppSelector service selector label added by the openstack-operator to service
 	// overrides
 	ooAppSelector = "osctlplane-service"
-
-	// ClusterInternalDomain - cluster internal dns domain
-	ClusterInternalDomain = "cluster.local"
 
 	// serviceCertSelector selector passed to cert-manager to set on the service cert secret
 	serviceCertSelector = "service-cert"
@@ -209,6 +207,7 @@ func EnsureEndpointConfig(
 	endpoints := Endpoints{
 		EndpointDetails: map[service.Endpoint]EndpointDetail{},
 	}
+	clusterDomain := clusterdns.GetDNSClusterDomain()
 
 	for _, svc := range svcs.Items {
 		ed := EndpointDetail{
@@ -316,7 +315,7 @@ func EnsureEndpointConfig(
 						CertName:   ed.Service.TLS.CertName,
 						Hostnames: []string{
 							fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace),
-							fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, ClusterInternalDomain),
+							fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, clusterDomain),
 						},
 						Ips:         nil,
 						Annotations: ed.Annotations,
@@ -366,7 +365,7 @@ func EnsureEndpointConfig(
 					CertName:   ed.Service.TLS.CertName,
 					Hostnames: []string{
 						fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace),
-						fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, ClusterInternalDomain),
+						fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, clusterDomain),
 					},
 					Ips:         nil,
 					Annotations: ed.Annotations,

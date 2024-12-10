@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 
@@ -73,6 +74,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 
 func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
+	dnsSuffix := clusterdns.GetDNSClusterDomain()
 
 	OVNDBClustersReady := len(instance.Spec.Ovn.Template.OVNDBCluster) != 0
 	for name, dbcluster := range instance.Spec.Ovn.Template.OVNDBCluster {
@@ -111,7 +113,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 				// Cert needs to be valid for the individual pods in the statefulset so make this a wildcard cert
 				Hostnames: []string{
 					fmt.Sprintf("*.%s.svc", instance.Namespace),
-					fmt.Sprintf("*.%s.svc.%s", instance.Namespace, ovnv1.DNSSuffix),
+					fmt.Sprintf("*.%s.svc.%s", instance.Namespace, dnsSuffix),
 				},
 				Ips: nil,
 				Usages: []certmgrv1.KeyUsage{
@@ -217,6 +219,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 	}
 	if instance.Spec.TLS.PodLevel.Enabled {
 		ovnNorthdSpec.TLS = OVNNorthd.Spec.TLS
+		dnsSuffix := clusterdns.GetDNSClusterDomain()
 
 		serviceName := ovnv1.ServiceNameOvnNorthd
 		// create certificate for ovnnorthd
@@ -225,7 +228,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 			CertName:   fmt.Sprintf("%s-ovndbs", "ovnnorthd"),
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
-				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ovnv1.DNSSuffix),
+				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, dnsSuffix),
 			},
 			Ips: nil,
 			Usages: []certmgrv1.KeyUsage{
@@ -338,6 +341,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		}
 	}
 	if instance.Spec.TLS.PodLevel.Enabled {
+		dnsSuffix := clusterdns.GetDNSClusterDomain()
 		ovnControllerSpec.TLS = OVNController.Spec.TLS
 
 		serviceName := ovnv1.ServiceNameOvnController
@@ -347,7 +351,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 			CertName:   fmt.Sprintf("%s-ovndbs", "ovncontroller"),
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
-				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, ovnv1.DNSSuffix),
+				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, dnsSuffix),
 			},
 			Ips: nil,
 			Usages: []certmgrv1.KeyUsage{
