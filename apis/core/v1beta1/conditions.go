@@ -478,6 +478,8 @@ const (
 	OpenStackVersionMinorUpdateControlplane condition.Type = "MinorUpdateControlplane"
 
 	OpenStackVersionMinorUpdateDataplane condition.Type = "MinorUpdateDataplane"
+
+	OpenStackVersionMinorUpdateAvailable condition.Type = "MinorUpdateAvailable"
 )
 
 // Version Messages used by API objects.
@@ -506,4 +508,7 @@ const (
 
 	// OpenStackVersionMinorUpdateReadyErrorMessage
 	OpenStackVersionMinorUpdateReadyErrorMessage = "error occured %s"
+
+	// OpenStackVersionMinorUpdateAvailableMessage
+	OpenStackVersionMinorUpdateAvailableMessage = "update available"
 )
