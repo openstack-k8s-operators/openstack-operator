@@ -3,12 +3,6 @@ kind: TestStep
 timeout: 60
 commands:
   - script: |
-      oc patch dnsmasq -n $NAMESPACE dnsmasq --type='json' -p='[{
-        "op": "replace",
-        "path": "/spec/nodeSelector",
-        "value": {"kubernetes.io/os":"linux"}
-      }]'
-  - script: |
       oc patch openstackcontrolplane -n $NAMESPACE openstack --type='json' -p='[{
         "op": "replace",
         "path": "/spec/nodeSelector",

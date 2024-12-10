@@ -82,6 +82,10 @@ spec:
                   - type
                   type: object
                 type: array
+              hash:
+                additionalProperties:
+                  type: string
+                type: object
               observedGeneration:
                 format: int64
                 type: integer

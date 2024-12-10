@@ -6,6 +6,7 @@ delete:
   name: openstack
 commands:
 - script: |
+    oc annotate namespace $NAMESPACE openshift.io/node-selector-
     oc delete --ignore-not-found=true -n $NAMESPACE pvc \
     srv-swift-storage-0
     oc delete secret --ignore-not-found=true combined-ca-bundle -n $NAMESPACE
