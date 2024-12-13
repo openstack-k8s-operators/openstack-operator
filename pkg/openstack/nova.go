@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -273,6 +274,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 
 				// create novncproxy vencrypt cert
 				if instance.Spec.TLS.PodLevel.Enabled {
+					clusterDomain := clusterdns.GetDNSClusterDomain()
 					serviceName := endpointDetails.EndpointDetails[service.EndpointPublic].Service.Spec.Name
 					hostname := fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace)
 					certRequest := certmanager.CertificateRequest{
@@ -281,10 +283,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 						CommonName: ptr.To(serviceName), // common name has a max length of 64bytes, therefore just set the short name
 						Hostnames: []string{
 							hostname,
-							fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+							fmt.Sprintf("%s.%s", hostname, clusterDomain),
 						},
 						Subject: &certmgrv1.X509Subject{
-							Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, ClusterInternalDomain)},
+							Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, clusterDomain)},
 						},
 						Usages: []certmgrv1.KeyUsage{
 							certmgrv1.UsageKeyEncipherment,

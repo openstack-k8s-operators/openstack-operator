@@ -7,6 +7,7 @@ import (
 
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
@@ -168,14 +169,15 @@ func reconcileMemcached(
 	tlsCert := ""
 	if instance.Spec.TLS.PodLevel.Enabled {
 		Log.Info("Reconciling Memcached TLS", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
+		clusterDomain := clusterdns.GetDNSClusterDomain()
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", memcached.Name),
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
 				fmt.Sprintf("*.%s.%s.svc", name, instance.Namespace),
-				fmt.Sprintf("%s.%s.svc.%s", name, instance.Namespace, ClusterInternalDomain),
-				fmt.Sprintf("*.%s.%s.svc.%s", name, instance.Namespace, ClusterInternalDomain),
+				fmt.Sprintf("%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
+				fmt.Sprintf("*.%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
 			},
 			Labels: map[string]string{serviceCertSelector: ""},
 		}

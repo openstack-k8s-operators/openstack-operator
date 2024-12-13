@@ -8,6 +8,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
@@ -180,17 +181,18 @@ func reconcileRedis(
 
 	tlsCert := ""
 	if instance.Spec.TLS.PodLevel.Enabled {
+		clusterDomain := clusterdns.GetDNSClusterDomain()
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", redis.Name),
 			Hostnames: []string{
 				fmt.Sprintf("redis-%s.%s.svc", name, instance.Namespace),
 				fmt.Sprintf("*.redis-%s.%s.svc", name, instance.Namespace),
-				fmt.Sprintf("redis-%s.%s.svc.%s", name, instance.Namespace, ClusterInternalDomain),
-				fmt.Sprintf("*.redis-%s.%s.svc.%s", name, instance.Namespace, ClusterInternalDomain),
+				fmt.Sprintf("redis-%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
+				fmt.Sprintf("*.redis-%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
 			},
 			Subject: &certmgrv1.X509Subject{
-				Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, ClusterInternalDomain)},
+				Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, clusterDomain)},
 			},
 			Usages: []certmgrv1.KeyUsage{
 				"key encipherment",

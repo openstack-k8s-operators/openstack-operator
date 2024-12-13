@@ -8,6 +8,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -259,13 +260,14 @@ func reconcileRabbitMQ(
 		},
 	}
 
+	clusterDomain := clusterdns.GetDNSClusterDomain()
 	hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 	hostnameHeadless := fmt.Sprintf("%s-nodes.%s.svc", name, instance.Namespace)
 	hostnames := []string{
 		hostname,
-		fmt.Sprintf("%s.%s", hostname, ClusterInternalDomain),
+		fmt.Sprintf("%s.%s", hostname, clusterDomain),
 		hostnameHeadless,
-		fmt.Sprintf("%s.%s", hostnameHeadless, ClusterInternalDomain),
+		fmt.Sprintf("%s.%s", hostnameHeadless, clusterDomain),
 	}
 	for i := 0; i < int(*spec.Replicas); i++ {
 		hostnames = append(hostnames, fmt.Sprintf("%s-server-%d.%s-nodes.%s", name, i, name, instance.Namespace))
@@ -278,7 +280,7 @@ func reconcileRabbitMQ(
 			CertName:   fmt.Sprintf("%s-svc", rabbitmq.Name),
 			Hostnames:  hostnames,
 			Subject: &certmgrv1.X509Subject{
-				Organizations: []string{fmt.Sprintf("%s.%s", rabbitmq.Namespace, ClusterInternalDomain)},
+				Organizations: []string{fmt.Sprintf("%s.%s", rabbitmq.Namespace, clusterDomain)},
 			},
 			Usages: []certmgrv1.KeyUsage{
 				certmgrv1.UsageKeyEncipherment,
