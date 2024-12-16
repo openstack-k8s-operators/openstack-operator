@@ -429,6 +429,22 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      enabledSecretStores:
+                        items:
+                          enum:
+                          - simple_crypto
+                          - pkcs11
+                          type: string
+                        maxItems: 2
+                        minItems: 1
+                        type: array
+                        x-kubernetes-list-type: set
+                      globalDefaultSecretStore:
+                        default: simple_crypto
+                        enum:
+                        - simple_crypto
+                        - pkcs11
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -444,6 +460,75 @@ spec:
                           simplecryptokek:
                             default: SimpleCryptoKEK
                             type: string
+                        type: object
+                      pkcs11:
+                        properties:
+                          AESGCMGenerateIV:
+                            default: true
+                            type: boolean
+                          HMACKeyType:
+                            default: CKK_GENERIC_SECRET
+                            type: string
+                          HMACKeygenMechanism:
+                            default: CKM_GENERIC_SECRET_KEY_GEN
+                            type: string
+                          HMACLabel:
+                            type: string
+                          HMACMechanism:
+                            default: CKM_SHA256_HMAC
+                            type: string
+                          MKEKLabel:
+                            type: string
+                          MKEKLength:
+                            default: 32
+                            type: integer
+                          OSLockingOK:
+                            default: false
+                            type: boolean
+                          alwaysSetCKASensitive:
+                            default: true
+                            type: boolean
+                          certificatesMountPoint:
+                            type: string
+                          certificatesSecret:
+                            type: string
+                          clientAddress:
+                            type: string
+                          encryptionMechanism:
+                            default: CKM_AES_GCM
+                            type: string
+                          keyWrapGenerateIV:
+                            default: true
+                            type: boolean
+                          keyWrapMechanism:
+                            default: CKM_AES_KEY_WRAP_KWP
+                            type: string
+                          libraryPath:
+                            type: string
+                          loggingLevel:
+                            default: 4
+                            maximum: 7
+                            minimum: 0
+                            type: integer
+                          loginSecret:
+                            type: string
+                          serverAddress:
+                            type: string
+                          slotId:
+                            type: string
+                          tokenLabels:
+                            type: string
+                          tokenSerialNumber:
+                            type: string
+                          type:
+                            type: string
+                        required:
+                        - HMACLabel
+                        - MKEKLabel
+                        - libraryPath
+                        - loginSecret
+                        - serverAddress
+                        - type
                         type: object
                       preserveJobs:
                         default: false
@@ -1868,6 +1953,11 @@ spec:
                                 default: DesignatePassword
                                 type: string
                             type: object
+                          redisHostIPs:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           replicas:
                             default: 1
                             format: int32
@@ -1928,6 +2018,9 @@ spec:
                             type: string
                           backendWorkerServerProtocol:
                             type: string
+                          controlNetworkName:
+                            default: designate
+                            type: string
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -1959,6 +2052,12 @@ spec:
                                 default: DesignatePassword
                                 type: string
                             type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
                           resources:
                             properties:
                               claims:
@@ -2047,6 +2146,11 @@ spec:
                                 default: DesignatePassword
                                 type: string
                             type: object
+                          redisHostIPs:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           replicas:
                             default: 1
                             format: int32
@@ -2267,6 +2371,9 @@ spec:
                         type: boolean
                       rabbitMqClusterName:
                         default: rabbitmq
+                        type: string
+                      redisServiceName:
+                        default: designate-redis
                         type: string
                       resources:
                         properties:
@@ -9312,6 +9419,9 @@ spec:
                           serviceUser:
                             default: octavia
                             type: string
+                          tenantName:
+                            default: service
+                            type: string
                           tls:
                             properties:
                               api:
@@ -15639,6 +15749,18 @@ spec:
                             default: true
                             type: boolean
                           ksmTls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
+                          mysqldExporterDatabaseAccountPrefix:
+                            default: mysqld-exporter
+                            type: string
+                          mysqldExporterEnabled:
+                            type: boolean
+                          mysqldExporterTLS:
                             properties:
                               caBundleSecretName:
                                 type: string
