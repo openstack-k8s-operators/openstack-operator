@@ -18,7 +18,7 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestSuite
 commands:
   - command: oc apply -n openstack-kuttl-tests -f https://raw.githubusercontent.com/openstack-k8s-operators/infra-operator/main/config/samples/network_v1beta1_netconfig.yaml
-  - command: oc apply -n openstack-kuttl-tests -f https://raw.githubusercontent.com/openstack-k8s-operators/infra-operator/main/config/samples/network_v1beta1_dnsmasq.yaml
+  - command: oc apply -n openstack-kuttl-tests -f https://raw.githubusercontent.com/stuggi/infra-operator/update_dnsmasq/config/samples/network_v1beta1_dnsmasq.yaml
   - script: |
       if [ ! -f ansibleee-ssh-key-id_rsa ]; then
           ssh-keygen -f ansibleee-ssh-key-id_rsa -N "" -t rsa -b 4096
