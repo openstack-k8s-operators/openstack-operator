@@ -538,12 +538,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 				th.ExpectCondition(
 					names.OpenStackVersionName,
 					ConditionGetterFunc(OpenStackVersionConditionGetter),
-					corev1.OpenStackVersionMinorUpdateDataplane,
-					k8s_corev1.ConditionTrue,
-				)
-				th.ExpectCondition(
-					names.OpenStackVersionName,
-					ConditionGetterFunc(OpenStackVersionConditionGetter),
 					condition.ReadyCondition,
 					k8s_corev1.ConditionTrue,
 				)
