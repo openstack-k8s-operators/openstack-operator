@@ -8,7 +8,6 @@ spec:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
   services:
-    - redhat
     - bootstrap
     - download-cache
     - configure-network
