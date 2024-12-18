@@ -4,3 +4,4 @@ metadata:
   name: configure-os
 spec:
   playbook: osp.edpm.configure_os
+  edpmServiceType: configure-os

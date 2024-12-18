@@ -3,8 +3,9 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-img-svc
 spec:
+  edpmServiceType: custom-image
   openStackAnsibleEERunnerImage: example.com/repo/runner-image:latest
-  role:
+  playbookContents:
     name: "test role"
     hosts: "all"
     strategy: "linear"
