@@ -65,6 +65,8 @@ spec:
                     type: string
                   ceilometerIpmiImage:
                     type: string
+                  ceilometerMysqldExporterImage:
+                    type: string
                   ceilometerNotificationImage:
                     type: string
                   ceilometerSgcoreImage:
@@ -272,6 +274,8 @@ spec:
                       type: string
                     ceilometerIpmiImage:
                       type: string
+                    ceilometerMysqldExporterImage:
+                      type: string
                     ceilometerNotificationImage:
                       type: string
                     ceilometerSgcoreImage:
@@ -443,6 +447,8 @@ spec:
                   ceilometerComputeImage:
                     type: string
                   ceilometerIpmiImage:
+                    type: string
+                  ceilometerMysqldExporterImage:
                     type: string
                   ceilometerNotificationImage:
                     type: string

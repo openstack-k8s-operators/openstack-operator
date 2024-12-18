@@ -16739,6 +16739,8 @@ spec:
                     type: string
                   ceilometerIpmiImage:
                     type: string
+                  ceilometerMysqldExporterImage:
+                    type: string
                   ceilometerNotificationImage:
                     type: string
                   ceilometerProxyImage:

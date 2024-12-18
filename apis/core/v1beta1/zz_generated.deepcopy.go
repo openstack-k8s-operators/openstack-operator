@@ -323,6 +323,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.CeilometerMysqldExporterImage != nil {
+		in, out := &in.CeilometerMysqldExporterImage, &out.CeilometerMysqldExporterImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.CinderAPIImage != nil {
 		in, out := &in.CinderAPIImage, &out.CinderAPIImage
 		*out = new(string)
