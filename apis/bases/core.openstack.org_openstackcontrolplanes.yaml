@@ -11108,6 +11108,9 @@ spec:
                           serviceUser:
                             default: octavia
                             type: string
+                          tenantName:
+                            default: service
+                            type: string
                           tls:
                             properties:
                               api:
