@@ -218,6 +218,9 @@ func (a *EEJob) BuildAeeJobSpec(
 	if len(service.Spec.Playbook) > 0 {
 		a.Playbook = service.Spec.Playbook
 	}
+	if len(service.Spec.Role) > 0 {
+		a.Role = service.Spec.Role
+	}
 
 	a.BackoffLimit = deployment.Spec.BackoffLimit
 	a.PreserveJobs = deployment.Spec.PreserveJobs
