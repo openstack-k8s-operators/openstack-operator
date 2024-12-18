@@ -47,6 +47,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.CeilometerNotificationImage = nil
 		instance.Status.ContainerImages.CeilometerSgcoreImage = nil
 		instance.Status.ContainerImages.CeilometerProxyImage = nil
+		instance.Status.ContainerImages.CeilometerMysqldExporterImage = nil
 		instance.Status.ContainerImages.AodhAPIImage = nil
 		instance.Status.ContainerImages.AodhEvaluatorImage = nil
 		instance.Status.ContainerImages.AodhNotifierImage = nil
@@ -84,9 +85,11 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
 		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS = telemetry.Spec.MetricStorage.PrometheusTLS
 		instance.Spec.Telemetry.Template.Ceilometer.TLS = telemetry.Spec.Ceilometer.TLS
+		instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS = telemetry.Spec.Ceilometer.MysqldExporterTLS
 	}
 	instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.Ceilometer.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	aodhSvcs, err := service.GetServicesListWithLabel(
@@ -123,6 +126,16 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		helper,
 		instance.Namespace,
 		map[string]string{common.AppSelector: "ceilometer"},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	mysqldExporterSvcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		map[string]string{common.AppSelector: "mysqld-exporter"},
 	)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -216,6 +229,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	if telemetry.Status.Conditions.IsTrue(telemetryv1.CeilometerReadyCondition) {
 		// NOTE: We don't have svc overrides for ceilometer objects.
+		// Ceilometer
 		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
@@ -235,6 +249,29 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 		// update TLS settings with cert secret
 		instance.Spec.Telemetry.Template.Ceilometer.TLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+
+		// MysqldExporter
+		if telemetry.Spec.Ceilometer.MysqldExporterEnabled != nil && *telemetry.Spec.Ceilometer.MysqldExporterEnabled {
+			endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+				ctx,
+				instance,
+				helper,
+				telemetry,
+				mysqldExporterSvcs,
+				nil,
+				corev1beta1.Override{},
+				corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+				false, // TODO (mschuppert) could be removed when all integrated service support TLS
+				tls.API{},
+			)
+			if err != nil {
+				return ctrlResult, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
+			// update TLS settings with cert secret
+			instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+		}
 	}
 
 	helper.GetLogger().Info("Reconciling Telemetry", telemetryNamespaceLabel, instance.Namespace, telemetryNameLabel, telemetryName)
@@ -259,6 +296,12 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
+
+		if version.Status.ContainerImages.CeilometerMysqldExporterImage != nil {
+			telemetry.Spec.Ceilometer.MysqldExporterImage = *version.Status.ContainerImages.CeilometerMysqldExporterImage
+		} else {
+			telemetry.Spec.Ceilometer.MysqldExporterImage = ""
+		}
 
 		if telemetry.Spec.Ceilometer.Secret == "" {
 			telemetry.Spec.Ceilometer.Secret = instance.Spec.Secret
@@ -302,6 +345,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.CeilometerNotificationImage = version.Status.ContainerImages.CeilometerNotificationImage
 		instance.Status.ContainerImages.CeilometerSgcoreImage = version.Status.ContainerImages.CeilometerSgcoreImage
 		instance.Status.ContainerImages.CeilometerProxyImage = version.Status.ContainerImages.CeilometerProxyImage
+		instance.Status.ContainerImages.CeilometerMysqldExporterImage = version.Status.ContainerImages.CeilometerMysqldExporterImage
 		instance.Status.ContainerImages.AodhAPIImage = version.Status.ContainerImages.AodhAPIImage
 		instance.Status.ContainerImages.AodhEvaluatorImage = version.Status.ContainerImages.AodhEvaluatorImage
 		instance.Status.ContainerImages.AodhNotifierImage = version.Status.ContainerImages.AodhNotifierImage
@@ -328,6 +372,7 @@ func TelemetryImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStac
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerNotificationImage, version.Status.ContainerImages.CeilometerNotificationImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerSgcoreImage, version.Status.ContainerImages.CeilometerSgcoreImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerProxyImage, version.Status.ContainerImages.CeilometerProxyImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerMysqldExporterImage, version.Status.ContainerImages.CeilometerMysqldExporterImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhAPIImage, version.Status.ContainerImages.AodhAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhEvaluatorImage, version.Status.ContainerImages.AodhEvaluatorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhNotifierImage, version.Status.ContainerImages.AodhNotifierImage) ||
