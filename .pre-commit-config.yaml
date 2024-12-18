@@ -26,11 +26,13 @@ repos:
       args: ['operator-lint']
       pass_filenames: false
     - id: make-crd-schema-check
+      require_serial: true
       name: make-crd-schema-check
       language: system
       entry: make
       args: ['crd-schema-check']
     - id: make-bindata
+      require_serial: true
       name: make-bindata
       language: system
       entry: make
