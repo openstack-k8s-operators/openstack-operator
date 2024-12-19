@@ -5,6 +5,12 @@
 #  -TODO: role data
 set -ex
 
+OUT_DATA=bindata
+EXTRACT_DIR=tmp/bindata
+
+mkdir -p "$EXTRACT_DIR"
+mkdir -p "$OUT_DATA/crds"
+
 function extract_bundle {
     local IN_DIR=$1
     local OUT_DIR=$2
@@ -13,11 +19,125 @@ function extract_bundle {
     done
 }
 
-OUT_DATA=bindata
-EXTRACT_DIR=tmp/bindata
 
-mkdir -p "$EXTRACT_DIR"
-mkdir -p "$OUT_DATA/crds"
+function extract_webhooks {
+local CSV_FILENAME=$1
+local OPERATOR_NAME=$2
+local TYPE=$3
+
+cat $CSV_FILENAME | yq -r ".spec.webhookdefinitions.[] | select(.type == \"$TYPE\")" | \
+    sed -e '/^containerPort:/d' | \
+    sed -e '/^deploymentName:/d' | \
+    sed -e '/^targetPort:/d' | \
+    sed -e '/^type:/d' | \
+    sed -e 's|^|  |' | sed -e 's|.*admissionReviewVersions:|- admissionReviewVersions:|' | \
+    sed -e 's|.*generateName:|  name:|' | \
+    sed -e 's|    - v1|  - v1|' | \
+    sed -e "s|.*webhookPath:|  clientConfig:\n    service:\n      name: ${OPERATOR_NAME}-webhook-service\n      namespace: '{{ .OperatorNamespace }}'\n      path:|"
+
+}
+
+
+function write_webhooks {
+local CSV_FILENAME=$1
+local OPERATOR_NAME=$2
+
+MUTATING_WEBHOOKS=$(extract_webhooks "$CSV_FILENAME" "$OPERATOR_NAME" "MutatingAdmissionWebhook")
+VALIDATING_WEBHOOKS=$(extract_webhooks "$CSV_FILENAME" "$OPERATOR_NAME" "ValidatingAdmissionWebhook")
+
+cat > operator/$OPERATOR_NAME-webhooks.yaml <<EOF_CAT
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: webhook-service
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: $OPERATOR_NAME
+  name: $OPERATOR_NAME-webhook-service
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    openstack.org/operator-name: ${OPERATOR_NAME//-operator}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: serving-cert
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: certificate
+    app.kubernetes.io/part-of: $OPERATOR_NAME
+  name: $OPERATOR_NAME-serving-cert
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - $OPERATOR_NAME-webhook-service.{{ .OperatorNamespace }}.svc
+  - $OPERATOR_NAME-webhook-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: $OPERATOR_NAME-selfsigned-issuer
+  secretName: $OPERATOR_NAME-webhook-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: selfsigned-issuer
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: issuer
+    app.kubernetes.io/part-of: $OPERATOR_NAME
+  name: $OPERATOR_NAME-selfsigned-issuer
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  selfSigned: {}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/$OPERATOR_NAME-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: mutating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: mutatingwebhookconfiguration
+    app.kubernetes.io/part-of: $OPERATOR_NAME
+  name: $OPERATOR_NAME-mutating-webhook-configuration
+webhooks:
+${MUTATING_WEBHOOKS}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/$OPERATOR_NAME-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: validating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: validatingwebhookconfiguration
+    app.kubernetes.io/part-of: $OPERATOR_NAME
+  name: $OPERATOR_NAME-validating-webhook-configuration
+webhooks:
+${VALIDATING_WEBHOOKS}
+EOF_CAT
+
+}
 
 for BUNDLE in $(hack/pin-bundle-images.sh | tr "," " "); do
     skopeo copy "docker://$BUNDLE" dir:${EXTRACT_DIR}/tmp;
@@ -30,12 +150,16 @@ grep -l CustomResourceDefinition manifests/* | xargs -I % sh -c 'cp % ./crds/'
 
 # extract role, clusterRole, and deployment from CSV's
 for X in $(ls manifests/*clusterserviceversion.yaml); do
-        echo $OPERATOR_NAME
         OPERATOR_NAME=$(echo $X | sed -e "s|manifests\/\([^\.]*\)\..*|\1|")
+        echo $OPERATOR_NAME
         LEADER_ELECTION_ROLE_RULES=$(cat $X | yq -r .spec.install.spec.permissions | sed -e 's|- rules:|rules:|' | sed -e 's|    ||' | sed -e '/  serviceAccountName.*/d'
 )
         CLUSTER_ROLE_RULES=$(cat $X | yq -r .spec.install.spec.clusterPermissions| sed -e 's|- rules:|rules:|' | sed -e 's|    ||' | sed -e '/  serviceAccountName.*/d'
 )
+
+if [[ "$OPERATOR_NAME" == "infra-operator" ]]; then
+    write_webhooks "$X" "$OPERATOR_NAME"
+fi
 
 mkdir -p rbac
 cat > rbac/$OPERATOR_NAME-rbac.yaml <<EOF_CAT

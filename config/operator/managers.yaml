@@ -30,7 +30,11 @@ spec:
         - /manager
         env:
         - name: ENABLE_WEBHOOKS
+{{ if eq $operatorName "infra" }}
+          value: 'true'
+{{ else }}
           value: 'false'
+{{ end }}
         image: {{ $operatorImage }}
         livenessProbe:
           httpGet:
@@ -54,6 +58,12 @@ spec:
             memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
+{{ if eq $operatorName "infra" }}
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
+{{ end }}
       - args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
@@ -78,5 +88,12 @@ spec:
         runAsNonRoot: true
       serviceAccountName: {{ $operatorName }}-operator-controller-manager
       terminationGracePeriodSeconds: 10
+{{ if eq $operatorName "infra" }}
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: {{ $operatorName }}-operator-webhook-server-cert
+{{ end }}
 ---
 {{ end }}
