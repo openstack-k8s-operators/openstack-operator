@@ -174,6 +174,8 @@ spec:
         replicas: 1
       designateCentral:
         replicas: 1
+      designateMdns:
+        replicas: 1
       designateWorker:
         replicas: 1
       designateProducer:
