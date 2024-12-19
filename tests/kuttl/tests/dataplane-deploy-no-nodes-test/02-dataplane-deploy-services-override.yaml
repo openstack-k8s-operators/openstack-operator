@@ -4,6 +4,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-svc
 spec:
+  edpmServiceType: sleep
   label: custom-svc
   playbookContents: |
     - hosts: localhost
