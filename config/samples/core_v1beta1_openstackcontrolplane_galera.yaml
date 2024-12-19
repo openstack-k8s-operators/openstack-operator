@@ -232,7 +232,7 @@ spec:
       designateProducer:
         replicas: 1
       designateMdns:
-        replicas: 0
+        replicas: 1
         networkAttachments:
           - designate
       designateBackendbind9:
