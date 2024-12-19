@@ -3,10 +3,11 @@
 # we do not have space for long examples here and want
 # to guide users to documentation instead
 resources:
-- core_v1beta1_openstackcontrolplane_empty.yaml
-- client_v1beta1_openstackclient_empty.yaml
-- core_v1beta1_openstackversion_empty.yaml
-- dataplane_v1beta1_openstackdataplanenodeset_empty.yaml
-- dataplane_v1beta1_openstackdataplaneservice_empty.yaml
-- dataplane_v1beta1_openstackdataplanedeployment_empty.yaml
+#- core_v1beta1_openstackcontrolplane_empty.yaml
+#- client_v1beta1_openstackclient_empty.yaml
+#- core_v1beta1_openstackversion_empty.yaml
+#- dataplane_v1beta1_openstackdataplanenodeset_empty.yaml
+#- dataplane_v1beta1_openstackdataplaneservice_empty.yaml
+#- dataplane_v1beta1_openstackdataplanedeployment_empty.yaml
+- operator_v1beta1_openstack.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

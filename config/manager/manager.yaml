@@ -43,8 +43,8 @@ spec:
         - --leader-elect
         env:
         - name: OPENSTACK_RELEASE_VERSION
-          value: 0.0.1
-        image: controller:latest
+          value: '{{ .OpenstackReleaseVersion }}'
+        image: '{{ .OperatorImage }}'
         name: manager
         securityContext:
           allowPrivilegeEscalation: false
@@ -73,5 +73,5 @@ spec:
           requests:
             cpu: 10m
             memory: 128Mi
-      serviceAccountName: controller-manager
+      serviceAccountName: openstack-operator-controller-manager
       terminationGracePeriodSeconds: 10
