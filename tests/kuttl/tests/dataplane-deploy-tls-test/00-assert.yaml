@@ -11,6 +11,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: tls-dnsnames
 spec:
+  edpmServiceType: sleep
   caCerts: combined-ca-bundle
   tlsCerts:
     default:
@@ -33,6 +34,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: install-certs-ovrd
 spec:
+  edpmServiceType: sleep
   addCertMounts: True
   playbookContents: |
     - hosts: localhost

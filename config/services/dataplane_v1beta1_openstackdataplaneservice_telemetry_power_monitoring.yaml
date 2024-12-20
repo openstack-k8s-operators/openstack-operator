@@ -16,3 +16,4 @@ spec:
   containerImageFields:
   - CeilometerIpmiImage
   - EdpmKeplerImage
+  edpmServiceType: telemetry-power-monitoring

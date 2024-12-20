@@ -514,7 +514,11 @@ func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
 		"metadata": map[string]interface{}{
 			"name":      name.Name,
 			"namespace": name.Namespace,
-		}}
+		},
+		"spec": map[string]interface{}{
+			"edpmServiceType": "notGlobal",
+		},
+	}
 }
 
 // Create an empty OpenStackDataPlaneService struct
@@ -531,6 +535,7 @@ func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]interfa
 		},
 		"spec": map[string]interface{}{
 			"deployOnAllNodeSets": true,
+			"edpmServiceType":     "global",
 		},
 	}
 }
