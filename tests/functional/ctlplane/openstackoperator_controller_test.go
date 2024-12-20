@@ -590,6 +590,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("api.aodh.openstack.org/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Nova.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Nova.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.nova.openstack.org/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Placement.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Placement.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.placement.openstack.org/timeout", "60s"))
 		})
 
 		It("should create selfsigned issuer and public+internal CA and issuer", func() {
@@ -867,6 +871,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("api.aodh.openstack.org/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Nova.APIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Nova.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Nova.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.nova.openstack.org/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Placement.APIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Placement.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Placement.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.placement.openstack.org/timeout", "60s"))
 		})
 
 		It("should create selfsigned issuer and public, internal, libvirt and ovn CA and issuer", func() {
