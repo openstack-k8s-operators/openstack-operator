@@ -117,6 +117,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.CeilometerNotificationImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CeilometerSgcoreImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CeilometerProxyImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.CeilometerMysqldExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CinderAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CinderBackupImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CinderSchedulerImage).ShouldNot(BeNil())
