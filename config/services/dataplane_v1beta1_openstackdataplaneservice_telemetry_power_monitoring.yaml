@@ -11,6 +11,7 @@ spec:
     default:
       contents:
       - ips
+      - dnsnames
   caCerts: combined-ca-bundle
   containerImageFields:
   - CeilometerIpmiImage
