@@ -8482,6 +8482,10 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      apiTimeout:
+                        default: 60
+                        minimum: 10
+                        type: integer
                       cellTemplates:
                         additionalProperties:
                           properties:
