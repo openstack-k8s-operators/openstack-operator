@@ -39,7 +39,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20241217165548-b58a81dcbe9f
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20241218005134-1df1718308d2
 	github.com/openstack-k8s-operators/test-operator/api v0.5.1-0.20241217155820-7797cdf07723
-	github.com/rabbitmq/cluster-operator/v2 v2.11.0
+	github.com/rabbitmq/cluster-operator/v2 v2.12.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	gopkg.in/yaml.v3 v3.0.1
