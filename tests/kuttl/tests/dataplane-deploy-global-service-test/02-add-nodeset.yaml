@@ -8,7 +8,6 @@ spec:
     bmhNamespace: openshift-machine-api
     cloudUserName: ""
     ctlplaneInterface: ""
-    ctlplaneNetmask: 255.255.255.0
     deploymentSSHSecret: ""
     hardwareReqs:
       cpuReqs:
