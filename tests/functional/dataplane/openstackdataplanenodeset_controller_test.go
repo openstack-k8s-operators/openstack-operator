@@ -301,7 +301,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						ProvisioningInterface: "",
 						CtlplaneInterface:     "",
 						CtlplaneGateway:       "",
-						CtlplaneNetmask:       "255.255.255.0",
 						BmhNamespace:          "openshift-machine-api",
 						HardwareReqs: baremetalv1.HardwareReqs{
 							CPUReqs: baremetalv1.CPUReqs{
@@ -440,7 +439,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						ProvisioningInterface: "",
 						CtlplaneInterface:     "",
 						CtlplaneGateway:       "",
-						CtlplaneNetmask:       "255.255.255.0",
 						BmhNamespace:          "openshift-machine-api",
 						HardwareReqs: baremetalv1.HardwareReqs{
 							CPUReqs: baremetalv1.CPUReqs{
@@ -892,7 +890,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						ProvisioningInterface: "",
 						CtlplaneInterface:     "",
 						CtlplaneGateway:       "",
-						CtlplaneNetmask:       "255.255.255.0",
 						BmhNamespace:          "openshift-machine-api",
 						HardwareReqs: baremetalv1.HardwareReqs{
 							CPUReqs: baremetalv1.CPUReqs{
