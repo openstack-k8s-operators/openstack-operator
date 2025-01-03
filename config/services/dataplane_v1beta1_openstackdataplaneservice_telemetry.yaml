@@ -16,3 +16,4 @@ spec:
   containerImageFields:
   - CeilometerComputeImage
   - EdpmNodeExporterImage
+  edpmServiceType: telemetry

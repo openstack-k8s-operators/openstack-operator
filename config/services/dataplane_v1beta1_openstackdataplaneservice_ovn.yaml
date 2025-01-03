@@ -23,3 +23,4 @@ spec:
   caCerts: combined-ca-bundle
   containerImageFields:
   - OvnControllerImage
+  edpmServiceType: ovn

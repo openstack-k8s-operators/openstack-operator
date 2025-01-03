@@ -4,3 +4,4 @@ metadata:
   name: ceph-client
 spec:
   playbook: osp.edpm.ceph_client
+  edpmServiceType: ceph-client

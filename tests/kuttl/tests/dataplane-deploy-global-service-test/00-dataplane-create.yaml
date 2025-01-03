@@ -80,6 +80,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-global-service
 spec:
+  edpmServiceType: sleep
   label: custom-global-service
   playbookContents: |
     - hosts: localhost

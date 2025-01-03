@@ -127,6 +127,8 @@ spec:
                   - contents
                   type: object
                 type: object
+            required:
+            - edpmServiceType
             type: object
           status:
             properties:
