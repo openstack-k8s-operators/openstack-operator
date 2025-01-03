@@ -388,8 +388,6 @@ oc: $(LOCALBIN) ## Download and install oc in local env
 MAKE_ENV := $(shell echo '$(.VARIABLES)' | awk -v RS=' ' '/^(IMAGE)|.*?(REGISTRY)$$/')
 SHELL_EXPORT = $(foreach v,$(MAKE_ENV),$(v)='$($(v))')
 
-.PHONY: catalog-prep
-catalog-prep:
 # These images MUST exist in a registry and be pull-able.
 BUNDLE_IMGS = "$(BUNDLE_IMG)$(shell $(SHELL_EXPORT) /bin/bash hack/pin-bundle-images.sh || echo bundle-fail-tag)"
 
@@ -405,7 +403,7 @@ endif
 # This recipe invokes 'opm' in 'semver' bundle add mode. For more information on add modes, see:
 # https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
 .PHONY: catalog-build
-catalog-build: opm catalog-prep ## Build a catalog image.
+catalog-build: opm ## Build a catalog image.
 	# FIXME: hardcoded bundle below should use go.mod pinned version for manila bundle
 	$(OPM) index add --container-tool podman --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
 
