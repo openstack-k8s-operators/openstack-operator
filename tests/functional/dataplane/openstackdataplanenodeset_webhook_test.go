@@ -12,8 +12,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	v1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
 var _ = Describe("DataplaneNodeSet Webhook", func() {
@@ -42,9 +40,9 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				"compute-0": map[string]interface{}{
 					"hostName": "compute-0"},
 			}
-			nodeSetSpec["baremetalSetTemplate"] = baremetalv1.OpenStackBaremetalSetSpec{
-				CloudUserName: "test-user",
-				BmhLabelSelector: map[string]string{
+			nodeSetSpec["baremetalSetTemplate"] = map[string]interface{}{
+				"cloudUserName": "test-user",
+				"bmhLabelSelector": map[string]string{
 					"app": "test-openstack",
 				},
 			}
@@ -54,11 +52,9 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		It("Should block changes to the BmhLabelSelector object in baremetalSetTemplate spec", func() {
 			Eventually(func(_ Gomega) string {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				instance.Spec.BaremetalSetTemplate = baremetalv1.OpenStackBaremetalSetSpec{
-					CloudUserName: "new-user",
-					BmhLabelSelector: map[string]string{
-						"app": "openstack1",
-					},
+				instance.Spec.BaremetalSetTemplate.CloudUserName = "new-user"
+				instance.Spec.BaremetalSetTemplate.BmhLabelSelector = map[string]string{
+					"app": "openstack1",
 				}
 				err := th.K8sClient.Update(th.Ctx, instance)
 				return fmt.Sprintf("%s", err)
@@ -70,14 +66,14 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = false
-			nodeSetSpec["baremetalSetTemplate"] = baremetalv1.OpenStackBaremetalSetSpec{
-				CloudUserName: "test-user",
-				BmhLabelSelector: map[string]string{
+			nodeSetSpec["baremetalSetTemplate"] = map[string]interface{}{
+				"cloudUserName": "test-user",
+				"bmhLabelSelector": map[string]string{
 					"app": "test-openstack",
 				},
-				BaremetalHosts: map[string]baremetalv1.InstanceSpec{
-					"compute-0": {
-						CtlPlaneIP: "192.168.1.12/24",
+				"baremetalHosts": map[string]interface{}{
+					"compute-0": map[string]interface{}{
+						"ctlPlaneIP": "192.168.1.12/24",
 					},
 				},
 			}
@@ -86,17 +82,11 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		It("Should allow changes to the CloudUserName", func() {
 			Eventually(func(_ Gomega) error {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				instance.Spec.BaremetalSetTemplate = baremetalv1.OpenStackBaremetalSetSpec{
-					CloudUserName: "new-user",
-					BmhLabelSelector: map[string]string{
-						"app": "test-openstack",
-					},
-					BaremetalHosts: map[string]baremetalv1.InstanceSpec{
-						"compute-0": {
-							CtlPlaneIP: "192.168.1.12/24",
-						},
-					},
+				instance.Spec.BaremetalSetTemplate.CloudUserName = "new-user"
+				instance.Spec.BaremetalSetTemplate.BmhLabelSelector = map[string]string{
+					"app": "test-openstack",
 				}
+
 				return th.K8sClient.Update(th.Ctx, instance)
 			}).Should(Succeed())
 		})
@@ -110,14 +100,14 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				"compute-0": map[string]interface{}{
 					"hostName": "compute-0"},
 			}
-			nodeSetSpec["baremetalSetTemplate"] = baremetalv1.OpenStackBaremetalSetSpec{
-				DomainName: "example.com",
-				BmhLabelSelector: map[string]string{
+			nodeSetSpec["baremetalSetTemplate"] = map[string]interface{}{
+				"domainName": "example.com",
+				"bmhLabelSelector": map[string]string{
 					"app": "test-openstack",
 				},
-				BaremetalHosts: map[string]baremetalv1.InstanceSpec{
-					"compute-0": {
-						CtlPlaneIP: "192.168.1.12/24",
+				"baremetalHosts": map[string]interface{}{
+					"compute-0": map[string]interface{}{
+						"ctlPlaneIP": "192.168.1.12/24",
 					},
 				},
 			}

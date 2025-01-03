@@ -30,7 +30,6 @@ import (
 	//revive:disable-next-line:dot-imports
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
-	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -292,85 +291,56 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				emptyNodeSpec := dataplanev1.OpenStackDataPlaneNodeSetSpec{
-					BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
-						BaremetalHosts:        nil,
-						OSImage:               "",
-						AutomatedCleaningMode: "metadata",
-						ProvisionServerName:   "",
-						ProvisioningInterface: "",
-						CtlplaneInterface:     "",
-						CtlplaneGateway:       "",
-						BmhNamespace:          "openshift-machine-api",
-						HardwareReqs: baremetalv1.HardwareReqs{
-							CPUReqs: baremetalv1.CPUReqs{
-								Arch:     "",
-								CountReq: baremetalv1.CPUCountReq{Count: 0, ExactMatch: false},
-								MhzReq:   baremetalv1.CPUMhzReq{Mhz: 0, ExactMatch: false},
-							},
-							MemReqs: baremetalv1.MemReqs{
-								GbReq: baremetalv1.MemGbReq{Gb: 0, ExactMatch: false},
-							},
-							DiskReqs: baremetalv1.DiskReqs{
-								GbReq:  baremetalv1.DiskGbReq{Gb: 0, ExactMatch: false},
-								SSDReq: baremetalv1.DiskSSDReq{SSD: false, ExactMatch: false},
-							},
-						},
-						PasswordSecret:   nil,
-						CloudUserName:    "",
-						DomainName:       "",
-						BootstrapDNS:     nil,
-						DNSSearchDomains: nil,
+				nodeTemplate := dataplanev1.NodeTemplate{
+					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+					ManagementNetwork:          "ctlplane",
+					Ansible: dataplanev1.AnsibleOpts{
+						AnsibleUser: "cloud-admin",
+						AnsibleHost: "",
+						AnsiblePort: 0,
+						AnsibleVars: nil,
 					},
-					NodeTemplate: dataplanev1.NodeTemplate{
-						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						ManagementNetwork:          "ctlplane",
-						Ansible: dataplanev1.AnsibleOpts{
-							AnsibleUser: "cloud-admin",
-							AnsibleHost: "",
-							AnsiblePort: 0,
-							AnsibleVars: nil,
+					ExtraMounts: nil,
+					Networks: []infrav1.IPSetNetwork{
+						{
+							Name:       "networkinternal",
+							SubnetName: "subnet1",
 						},
-						ExtraMounts: nil,
-						Networks: []infrav1.IPSetNetwork{
-							{
-								Name:       "networkinternal",
-								SubnetName: "subnet1",
-							},
-							{
-								Name:       "ctlplane",
-								SubnetName: "subnet1",
-							},
+						{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
 						},
 					},
-					Env:                nil,
-					PreProvisioned:     true,
-					NetworkAttachments: nil,
-					SecretMaxSize:      1048576,
-					TLSEnabled:         tlsEnabled,
-					Nodes: map[string]dataplanev1.NodeSection{
-						dataplaneNodeName.Name: {
-							HostName: dataplaneNodeName.Name,
-						},
-					},
-					Services: []string{
-						"download-cache",
-						"bootstrap",
-						"configure-network",
-						"validate-network",
-						"install-os",
-						"configure-os",
-						"ssh-known-hosts",
-						"run-os",
-						"reboot-os",
-						"install-certs",
-						"ovn",
-						"neutron-metadata",
-						"libvirt",
-						"nova",
-						"telemetry"},
 				}
-				Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
+
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate).Should(Equal(nodeTemplate))
+				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
+				Expect(dataplaneNodeSetInstance.Spec.TLSEnabled).Should(Equal(tlsEnabled))
+				nodes := map[string]dataplanev1.NodeSection{
+					dataplaneNodeName.Name: {
+						HostName: dataplaneNodeName.Name,
+					},
+				}
+				Expect(dataplaneNodeSetInstance.Spec.Nodes).Should(Equal(nodes))
+				services := []string{
+					"download-cache",
+					"bootstrap",
+					"configure-network",
+					"validate-network",
+					"install-os",
+					"configure-os",
+					"ssh-known-hosts",
+					"run-os",
+					"reboot-os",
+					"install-certs",
+					"ovn",
+					"neutron-metadata",
+					"libvirt",
+					"nova",
+					"telemetry"}
+
+				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
+				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
 			})
 
 			It("should have input not ready and unknown Conditions initialized", func() {
@@ -430,85 +400,56 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				emptyNodeSpec := dataplanev1.OpenStackDataPlaneNodeSetSpec{
-					BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
-						BaremetalHosts:        nil,
-						OSImage:               "",
-						AutomatedCleaningMode: "metadata",
-						ProvisionServerName:   "",
-						ProvisioningInterface: "",
-						CtlplaneInterface:     "",
-						CtlplaneGateway:       "",
-						BmhNamespace:          "openshift-machine-api",
-						HardwareReqs: baremetalv1.HardwareReqs{
-							CPUReqs: baremetalv1.CPUReqs{
-								Arch:     "",
-								CountReq: baremetalv1.CPUCountReq{Count: 0, ExactMatch: false},
-								MhzReq:   baremetalv1.CPUMhzReq{Mhz: 0, ExactMatch: false},
-							},
-							MemReqs: baremetalv1.MemReqs{
-								GbReq: baremetalv1.MemGbReq{Gb: 0, ExactMatch: false},
-							},
-							DiskReqs: baremetalv1.DiskReqs{
-								GbReq:  baremetalv1.DiskGbReq{Gb: 0, ExactMatch: false},
-								SSDReq: baremetalv1.DiskSSDReq{SSD: false, ExactMatch: false},
-							},
-						},
-						PasswordSecret:   nil,
-						CloudUserName:    "",
-						DomainName:       "",
-						BootstrapDNS:     nil,
-						DNSSearchDomains: nil,
+				nodeTemplate := dataplanev1.NodeTemplate{
+					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+					ManagementNetwork:          "ctlplane",
+					Ansible: dataplanev1.AnsibleOpts{
+						AnsibleUser: "cloud-admin",
+						AnsibleHost: "",
+						AnsiblePort: 0,
+						AnsibleVars: nil,
 					},
-					NodeTemplate: dataplanev1.NodeTemplate{
-						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Networks: []infrav1.IPSetNetwork{
-							{
-								Name:       "networkinternal",
-								SubnetName: "subnet1",
-							},
-							{
-								Name:       "ctlplane",
-								SubnetName: "subnet1",
-							},
+					ExtraMounts: nil,
+					Networks: []infrav1.IPSetNetwork{
+						{
+							Name:       "networkinternal",
+							SubnetName: "subnet1",
 						},
-						ManagementNetwork: "ctlplane",
-						Ansible: dataplanev1.AnsibleOpts{
-							AnsibleUser: "cloud-admin",
-							AnsibleHost: "",
-							AnsiblePort: 0,
-							AnsibleVars: nil,
-						},
-						ExtraMounts: nil,
-					},
-					Env:                nil,
-					PreProvisioned:     true,
-					NetworkAttachments: nil,
-					SecretMaxSize:      1048576,
-					TLSEnabled:         tlsEnabled,
-					Nodes: map[string]dataplanev1.NodeSection{
-						dataplaneNodeName.Name: {
-							HostName: dataplaneNodeName.Name,
+						{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
 						},
 					},
-					Services: []string{
-						"download-cache",
-						"bootstrap",
-						"configure-network",
-						"validate-network",
-						"install-os",
-						"configure-os",
-						"run-os",
-						"reboot-os",
-						"install-certs",
-						"ovn",
-						"neutron-metadata",
-						"libvirt",
-						"nova",
-						"telemetry",
-						"global-service"},
 				}
-				Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
+
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate).Should(Equal(nodeTemplate))
+				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
+				Expect(dataplaneNodeSetInstance.Spec.TLSEnabled).Should(Equal(tlsEnabled))
+				nodes := map[string]dataplanev1.NodeSection{
+					dataplaneNodeName.Name: {
+						HostName: dataplaneNodeName.Name,
+					},
+				}
+				Expect(dataplaneNodeSetInstance.Spec.Nodes).Should(Equal(nodes))
+				services := []string{
+					"download-cache",
+					"bootstrap",
+					"configure-network",
+					"validate-network",
+					"install-os",
+					"configure-os",
+					"run-os",
+					"reboot-os",
+					"install-certs",
+					"ovn",
+					"neutron-metadata",
+					"libvirt",
+					"nova",
+					"telemetry",
+					"global-service"}
+
+				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
+				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
 			})
 
 			It("should have input not ready and unknown Conditions initialized", func() {
@@ -881,89 +822,57 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				emptyNodeSpec := dataplanev1.OpenStackDataPlaneNodeSetSpec{
-					BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
-						BaremetalHosts:        nil,
-						OSImage:               "",
-						AutomatedCleaningMode: "metadata",
-						ProvisionServerName:   "",
-						ProvisioningInterface: "",
-						CtlplaneInterface:     "",
-						CtlplaneGateway:       "",
-						BmhNamespace:          "openshift-machine-api",
-						HardwareReqs: baremetalv1.HardwareReqs{
-							CPUReqs: baremetalv1.CPUReqs{
-								Arch:     "",
-								CountReq: baremetalv1.CPUCountReq{Count: 0, ExactMatch: false},
-								MhzReq:   baremetalv1.CPUMhzReq{Mhz: 0, ExactMatch: false},
-							},
-							MemReqs: baremetalv1.MemReqs{
-								GbReq: baremetalv1.MemGbReq{Gb: 0, ExactMatch: false},
-							},
-							DiskReqs: baremetalv1.DiskReqs{
-								GbReq:  baremetalv1.DiskGbReq{Gb: 0, ExactMatch: false},
-								SSDReq: baremetalv1.DiskSSDReq{SSD: false, ExactMatch: false},
-							},
-						},
-						PasswordSecret:   nil,
-						CloudUserName:    "",
-						DomainName:       "",
-						BootstrapDNS:     nil,
-						DNSSearchDomains: nil,
+				nodeTemplate := dataplanev1.NodeTemplate{
+					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+					ManagementNetwork:          "ctlplane",
+					Ansible: dataplanev1.AnsibleOpts{
+						AnsibleUser: "cloud-admin",
+						AnsibleHost: "",
+						AnsiblePort: 0,
+						AnsibleVars: nil,
 					},
-					NodeTemplate: dataplanev1.NodeTemplate{
-						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Networks: []infrav1.IPSetNetwork{
-							{
-								Name:       "networkinternal",
-								SubnetName: "subnet1",
-							},
-							{
-								Name:       "ctlplane",
-								SubnetName: "subnet1",
-							},
+					ExtraMounts: nil,
+					Networks: []infrav1.IPSetNetwork{
+						{
+							Name:       "networkinternal",
+							SubnetName: "subnet1",
 						},
-						ManagementNetwork: "ctlplane",
-						Ansible: dataplanev1.AnsibleOpts{
-							AnsibleUser: "cloud-admin",
-							AnsibleHost: "",
-							AnsiblePort: 0,
-							AnsibleVars: nil,
-						},
-						ExtraMounts: nil,
-						UserData:    nil,
-						NetworkData: nil,
-					},
-					Env:                nil,
-					PreProvisioned:     true,
-					NetworkAttachments: nil,
-					SecretMaxSize:      1048576,
-					TLSEnabled:         tlsEnabled,
-					Nodes: map[string]dataplanev1.NodeSection{
-						dataplaneNodeName.Name: {
-							HostName: dataplaneNodeName.Name,
+						{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
 						},
 					},
-					Services: []string{
-						"download-cache",
-						"bootstrap",
-						"configure-network",
-						"validate-network",
-						"install-os",
-						"configure-os",
-						"ssh-known-hosts",
-						"run-os",
-						"reboot-os",
-						"install-certs",
-						"ovn",
-						"neutron-metadata",
-						"libvirt",
-						"nova",
-						"telemetry"},
 				}
-				Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
-			})
 
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate).Should(Equal(nodeTemplate))
+				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
+				Expect(dataplaneNodeSetInstance.Spec.TLSEnabled).Should(Equal(tlsEnabled))
+				nodes := map[string]dataplanev1.NodeSection{
+					dataplaneNodeName.Name: {
+						HostName: dataplaneNodeName.Name,
+					},
+				}
+				Expect(dataplaneNodeSetInstance.Spec.Nodes).Should(Equal(nodes))
+				services := []string{
+					"download-cache",
+					"bootstrap",
+					"configure-network",
+					"validate-network",
+					"install-os",
+					"configure-os",
+					"ssh-known-hosts",
+					"run-os",
+					"reboot-os",
+					"install-certs",
+					"ovn",
+					"neutron-metadata",
+					"libvirt",
+					"nova",
+					"telemetry"}
+
+				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
+				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
+			})
 			It("should have input not ready and unknown Conditions initialized", func() {
 				th.ExpectCondition(
 					dataplaneNodeSetName,
