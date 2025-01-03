@@ -72,6 +72,9 @@ type OpenStackDataPlaneServiceSpec struct {
 	// Playbook is a path to the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
 
+	// Role is a path to the role that ansible will run on this execution
+	Role string `json:"role,omitempty"`
+
 	// CACerts - Secret containing the CA certificate chain
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MaxLength:=253
