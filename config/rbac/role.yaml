@@ -661,6 +661,7 @@ rules:
   verbs:
   - get
   - list
+  - watch
 - apiGroups:
   - ovn.openstack.org
   resources:
