@@ -171,8 +171,13 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 90
+                        type: integer
                       barbicanAPI:
                         properties:
+                          apiTimeout:
+                            type: integer
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -10444,6 +10449,10 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 60
+                        minimum: 10
+                        type: integer
                       customServiceConfig:
                         type: string
                       databaseAccount:
