@@ -95,15 +95,15 @@ spec:
         - ansible-runner
         - run
         - /runner
-        - -p
-        - playbook.yaml
+        - -r
+        - test role
         - -i
         - custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
         env:
-        - name: RUNNER_PLAYBOOK
+        - name: RUNNER_ROLE
           value: |2+
 
-            playbook.yaml
+            test role
 
         - name: RUNNER_EXTRA_VARS
           value: |2+

@@ -78,10 +78,29 @@ func (r *OpenStackDataPlaneService) ValidateCreate() (admission.Warnings, error)
 	return nil, nil
 }
 
-func (r *OpenStackDataPlaneServiceSpec) ValidateCreate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object creation.
+func (r *OpenStackDataPlaneServiceSpec) ValidateArtifact() field.ErrorList {
+	if len(r.Playbook) == len(r.PlaybookContents) && len(r.Playbook) == len(r.Role) && len(r.Playbook) == 0 {
+		return field.ErrorList{
+			field.Invalid(
+				field.NewPath("Playbook"),
+				r.Playbook, "Playbook, PlaybookContents and Role cannot be empty at the same time",
+			),
+			field.Invalid(
+				field.NewPath("PlaybookContents"),
+				r.Playbook, "Playbook, PlaybookContents and Role cannot be empty at the same time",
+			),
+			field.Invalid(
+				field.NewPath("Role"),
+				r.Playbook, "Playbook, PlaybookContents and Role cannot be empty at the same time",
+			),
+		}
+	}
 
 	return field.ErrorList{}
+}
+
+func (r *OpenStackDataPlaneServiceSpec) ValidateCreate() field.ErrorList {
+	return r.ValidateArtifact()
 }
 
 func (r *OpenStackDataPlaneService) ValidateUpdate(original runtime.Object) (admission.Warnings, error) {
@@ -100,9 +119,7 @@ func (r *OpenStackDataPlaneService) ValidateUpdate(original runtime.Object) (adm
 }
 
 func (r *OpenStackDataPlaneServiceSpec) ValidateUpdate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object creation.
-
-	return field.ErrorList{}
+	return r.ValidateArtifact()
 }
 
 func (r *OpenStackDataPlaneService) ValidateDelete() (admission.Warnings, error) {

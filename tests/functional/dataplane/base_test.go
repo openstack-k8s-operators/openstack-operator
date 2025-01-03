@@ -105,6 +105,9 @@ func CreateDataplaneServicesWithSameServiceType(name types.NamespacedName) {
 
 // Create an OpenStackDataPlaneService with a given NamespacedName, and a given unstructured spec
 func CreateDataPlaneServiceFromSpec(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+	if spec["playbook"] == nil && spec["playbookContents"] == nil && spec["role"] == nil {
+		spec["playbook"] = "test"
+	}
 	raw := map[string]interface{}{
 
 		"apiVersion": "dataplane.openstack.org/v1beta1",
@@ -514,6 +517,9 @@ func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
 		"metadata": map[string]interface{}{
 			"name":      name.Name,
 			"namespace": name.Namespace,
+		},
+		"spec": map[string]interface{}{
+			"playbook": "test",
 		}}
 }
 
@@ -531,6 +537,7 @@ func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]interfa
 		},
 		"spec": map[string]interface{}{
 			"deployOnAllNodeSets": true,
+			"playbook":            "test",
 		},
 	}
 }

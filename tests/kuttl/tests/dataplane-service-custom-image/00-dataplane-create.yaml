@@ -4,14 +4,7 @@ metadata:
   name: custom-img-svc
 spec:
   openStackAnsibleEERunnerImage: example.com/repo/runner-image:latest
-  role:
-    name: "test role"
-    hosts: "all"
-    strategy: "linear"
-    tasks:
-      - name: "test task"
-        import_role:
-          name: "test role"
+  role: "test role"
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
