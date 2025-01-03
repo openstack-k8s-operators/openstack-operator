@@ -1,0 +1,368 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: webhook-service
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: infra-operator
+  name: infra-operator-webhook-service
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    openstack.org/operator-name: infra
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: serving-cert
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: certificate
+    app.kubernetes.io/part-of: infra-operator
+  name: infra-operator-serving-cert
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - infra-operator-webhook-service.{{ .OperatorNamespace }}.svc
+  - infra-operator-webhook-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: infra-operator-selfsigned-issuer
+  secretName: infra-operator-webhook-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: selfsigned-issuer
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: issuer
+    app.kubernetes.io/part-of: infra-operator
+  name: infra-operator-selfsigned-issuer
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  selfSigned: {}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/infra-operator-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: mutating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: mutatingwebhookconfiguration
+    app.kubernetes.io/part-of: infra-operator
+  name: infra-operator-mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mdnsmasq.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - dnsmasqs
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-network-openstack-org-v1beta1-dnsmasq
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: minstanceha.kb.io
+  rules:
+    - apiGroups:
+        - client.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - instancehas
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-client-openstack-org-v1beta1-instanceha
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mipset.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - ipsets
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-network-openstack-org-v1beta1-ipset
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mmemcached.kb.io
+  rules:
+    - apiGroups:
+        - memcached.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - memcacheds
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-memcached-openstack-org-v1beta1-memcached
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mnetconfig.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - netconfigs
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-network-openstack-org-v1beta1-netconfig
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mredis.kb.io
+  rules:
+    - apiGroups:
+        - redis.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - redises
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-redis-openstack-org-v1beta1-redis
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mreservation.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - reservations
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-network-openstack-org-v1beta1-reservation
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/infra-operator-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: validating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: validatingwebhookconfiguration
+    app.kubernetes.io/part-of: infra-operator
+  name: infra-operator-validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vdnsmasq.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - dnsmasqs
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-network-openstack-org-v1beta1-dnsmasq
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vinstanceha.kb.io
+  rules:
+    - apiGroups:
+        - client.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - instancehas
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-client-openstack-org-v1beta1-instanceha
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vipset.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - ipsets
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-network-openstack-org-v1beta1-ipset
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vmemcached.kb.io
+  rules:
+    - apiGroups:
+        - memcached.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - memcacheds
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-memcached-openstack-org-v1beta1-memcached
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vnetconfig.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+        - DELETE
+      resources:
+        - netconfigs
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-network-openstack-org-v1beta1-netconfig
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vredis.kb.io
+  rules:
+    - apiGroups:
+        - redis.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - redises
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-redis-openstack-org-v1beta1-redis
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vreservation.kb.io
+  rules:
+    - apiGroups:
+        - network.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - reservations
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-network-openstack-org-v1beta1-reservation

@@ -1,0 +1,197 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: swiftstorages.swift.openstack.org
+spec:
+  group: swift.openstack.org
+  names:
+    kind: SwiftStorage
+    listKind: SwiftStorageList
+    plural: swiftstorages
+    singular: swiftstorage
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: NetworkAttachments
+      jsonPath: .status.networkAttachments
+      name: NetworkAttachments
+      type: string
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: SwiftStorage is the Schema for the swiftstorages API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SwiftStorageSpec defines the desired state of SwiftStorage
+            properties:
+              containerImageAccount:
+                description: Image URL for Swift account service
+                type: string
+              containerImageContainer:
+                description: Image URL for Swift container service
+                type: string
+              containerImageObject:
+                description: Image URL for Swift object service
+                type: string
+              containerImageProxy:
+                description: Image URL for Swift proxy service
+                type: string
+              containerSharderEnabled:
+                default: false
+                description: If the container sharder daemon is enabled.
+                type: boolean
+              defaultConfigOverwrite:
+                additionalProperties:
+                  type: string
+                description: |-
+                  DefaultConfigOverwrite - can be used to add additionalfiles. Those get
+                  added to the service config dir in /etc/<servicename>-conf.d
+                type: object
+              memcachedInstance:
+                default: memcached
+                description: Memcached instance name.
+                type: string
+              networkAttachments:
+                description: NetworkAttachments is a list of NetworkAttachment resource
+                  names to expose the services to the given network
+                items:
+                  type: string
+                type: array
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: NodeSelector to target subset of worker nodes running
+                  this service
+                type: object
+              replicas:
+                default: 1
+                format: int32
+                minimum: 0
+                type: integer
+              storageClass:
+                default: ""
+                description: Name of StorageClass to use for Swift PVs
+                type: string
+              storageRequest:
+                default: 10Gi
+                description: Minimum size for Swift PVs
+                type: string
+            required:
+            - containerImageAccount
+            - containerImageContainer
+            - containerImageObject
+            - containerImageProxy
+            - memcachedInstance
+            - replicas
+            - storageClass
+            - storageRequest
+            type: object
+          status:
+            description: SwiftStorageStatus defines the observed state of SwiftStorage
+            properties:
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
+              networkAttachments:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                description: NetworkAttachments status of the deployment pods
+                type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this
+                  service. If the observed generation is less than the spec generation,
+                  then the controller has not processed the latest changes injected by
+                  the openstack-operator in the top-level CR (e.g. the ContainerImage)
+                format: int64
+                type: integer
+              readyCount:
+                description: ReadyCount of SwiftStorage instances
+                format: int32
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
