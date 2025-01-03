@@ -23,7 +23,7 @@ require (
 	github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20241217182919-a3ded0c98722
 	github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241220125616-d7e33fc89841
 	github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20241217170121-a024e70d2575
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20241217095059-8c719f790765
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20250103041701-34b0d04d4d81
 	github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241219010012-02d4a8664afd
 	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241217165018-df31b237e2af
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20241218182118-b0eb827b3236
@@ -72,7 +72,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/metal3-io/baremetal-operator/apis v0.6.2 // indirect
+	github.com/metal3-io/baremetal-operator/apis v0.6.3 // indirect
 	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.5.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

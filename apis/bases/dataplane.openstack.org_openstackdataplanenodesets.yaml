@@ -97,7 +97,6 @@ spec:
                   ctlplaneInterface:
                     type: string
                   ctlplaneNetmask:
-                    default: 255.255.255.0
                     type: string
                   deploymentSSHSecret:
                     type: string
