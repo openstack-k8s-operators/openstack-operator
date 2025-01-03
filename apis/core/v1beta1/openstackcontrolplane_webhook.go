@@ -812,6 +812,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Nova.Template = &novav1.NovaSpec{}
 		}
 		r.Spec.Nova.Template.Default()
+		initializeOverrideSpec(&r.Spec.Nova.APIOverride.Route, true)
+		r.Spec.Nova.Template.SetDefaultRouteAnnotations(r.Spec.Nova.APIOverride.Route.Annotations)
 	}
 
 	// OVN
@@ -836,6 +838,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Placement.Template = &placementv1.PlacementAPISpecCore{}
 		}
 		r.Spec.Placement.Template.Default()
+		initializeOverrideSpec(&r.Spec.Placement.APIOverride.Route, true)
+		r.Spec.Placement.Template.SetDefaultRouteAnnotations(r.Spec.Placement.APIOverride.Route.Annotations)
 	}
 
 	// DNS
