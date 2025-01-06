@@ -28,7 +28,6 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 
 	//revive:disable-next-line:dot-imports
-	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
@@ -291,29 +290,21 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				nodeTemplate := dataplanev1.NodeTemplate{
-					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-					ManagementNetwork:          "ctlplane",
-					Ansible: dataplanev1.AnsibleOpts{
-						AnsibleUser: "cloud-admin",
-						AnsibleHost: "",
-						AnsiblePort: 0,
-						AnsibleVars: nil,
-					},
-					ExtraMounts: nil,
-					Networks: []infrav1.IPSetNetwork{
-						{
-							Name:       "networkinternal",
-							SubnetName: "subnet1",
-						},
-						{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
-						},
-					},
+				ansibleOpts := dataplanev1.AnsibleOpts{
+					AnsibleUser: "cloud-admin",
+					AnsibleHost: "",
+					AnsiblePort: 0,
+					AnsibleVars: nil,
 				}
-
-				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate).Should(Equal(nodeTemplate))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret).Should(
+					Equal("dataplane-ansible-ssh-private-key-secret"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.ManagementNetwork).Should(
+					Equal("ctlplane"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Ansible).Should(Equal(ansibleOpts))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Networks[0].Name).Should(
+					BeEquivalentTo("networkinternal"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Networks[1].Name).Should(
+					BeEquivalentTo("ctlplane"))
 				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
 				Expect(dataplaneNodeSetInstance.Spec.TLSEnabled).Should(Equal(tlsEnabled))
 				nodes := map[string]dataplanev1.NodeSection{
@@ -339,8 +330,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"nova",
 					"telemetry"}
 
-				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
+				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 			})
 
 			It("should have input not ready and unknown Conditions initialized", func() {
@@ -400,29 +391,21 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				nodeTemplate := dataplanev1.NodeTemplate{
-					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-					ManagementNetwork:          "ctlplane",
-					Ansible: dataplanev1.AnsibleOpts{
-						AnsibleUser: "cloud-admin",
-						AnsibleHost: "",
-						AnsiblePort: 0,
-						AnsibleVars: nil,
-					},
-					ExtraMounts: nil,
-					Networks: []infrav1.IPSetNetwork{
-						{
-							Name:       "networkinternal",
-							SubnetName: "subnet1",
-						},
-						{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
-						},
-					},
+				ansibleOpts := dataplanev1.AnsibleOpts{
+					AnsibleUser: "cloud-admin",
+					AnsibleHost: "",
+					AnsiblePort: 0,
+					AnsibleVars: nil,
 				}
-
-				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate).Should(Equal(nodeTemplate))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret).Should(
+					Equal("dataplane-ansible-ssh-private-key-secret"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.ManagementNetwork).Should(
+					Equal("ctlplane"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Ansible).Should(Equal(ansibleOpts))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Networks[0].Name).Should(
+					BeEquivalentTo("networkinternal"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Networks[1].Name).Should(
+					BeEquivalentTo("ctlplane"))
 				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
 				Expect(dataplaneNodeSetInstance.Spec.TLSEnabled).Should(Equal(tlsEnabled))
 				nodes := map[string]dataplanev1.NodeSection{
@@ -448,8 +431,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"telemetry",
 					"global-service"}
 
-				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
+				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 			})
 
 			It("should have input not ready and unknown Conditions initialized", func() {
@@ -712,20 +695,20 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("The individual node has a AnsibleUser override", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-				nodeOverrideSpec := dataplanev1.NodeSection{
-					HostName: dataplaneNodeName.Name,
-					Networks: []infrav1.IPSetNetwork{
+				nodeOverrideSpec := map[string]interface{}{
+					"hostName": dataplaneNodeName.Name,
+					"networks": []map[string]interface{}{
 						{
-							Name:       "networkinternal",
-							SubnetName: "subnet1",
+							"name":       "networkinternal",
+							"subnetName": "subnet1",
 						},
 						{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
+							"name":       "ctlplane",
+							"subnetName": "subnet1",
 						},
 					},
-					Ansible: dataplanev1.AnsibleOpts{
-						AnsibleUser: "test-user",
+					"ansible": map[string]interface{}{
+						"ansibleUser": "test-user",
 					},
 				}
 
@@ -737,7 +720,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"].(map[string]dataplanev1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
+				nodeSetSpec["nodes"] = map[string]interface{}{dataplaneNodeName.Name: nodeOverrideSpec}
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
@@ -822,29 +805,21 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				nodeTemplate := dataplanev1.NodeTemplate{
-					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-					ManagementNetwork:          "ctlplane",
-					Ansible: dataplanev1.AnsibleOpts{
-						AnsibleUser: "cloud-admin",
-						AnsibleHost: "",
-						AnsiblePort: 0,
-						AnsibleVars: nil,
-					},
-					ExtraMounts: nil,
-					Networks: []infrav1.IPSetNetwork{
-						{
-							Name:       "networkinternal",
-							SubnetName: "subnet1",
-						},
-						{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
-						},
-					},
+				ansibleOpts := dataplanev1.AnsibleOpts{
+					AnsibleUser: "cloud-admin",
+					AnsibleHost: "",
+					AnsiblePort: 0,
+					AnsibleVars: nil,
 				}
-
-				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate).Should(Equal(nodeTemplate))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret).Should(
+					Equal("dataplane-ansible-ssh-private-key-secret"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.ManagementNetwork).Should(
+					Equal("ctlplane"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Ansible).Should(Equal(ansibleOpts))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Networks[0].Name).Should(
+					BeEquivalentTo("networkinternal"))
+				Expect(dataplaneNodeSetInstance.Spec.NodeTemplate.Networks[1].Name).Should(
+					BeEquivalentTo("ctlplane"))
 				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
 				Expect(dataplaneNodeSetInstance.Spec.TLSEnabled).Should(Equal(tlsEnabled))
 				nodes := map[string]dataplanev1.NodeSection{
@@ -870,8 +845,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"nova",
 					"telemetry"}
 
-				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
+				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 			})
 			It("should have input not ready and unknown Conditions initialized", func() {
 				th.ExpectCondition(
@@ -1129,20 +1104,20 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
-				nodeOverrideSpec := dataplanev1.NodeSection{
-					HostName: dataplaneNodeName.Name,
-					Networks: []infrav1.IPSetNetwork{
+				nodeOverrideSpec := map[string]interface{}{
+					"hostName": dataplaneNodeName.Name,
+					"networks": []map[string]interface{}{
 						{
-							Name:       "networkinternal",
-							SubnetName: "subnet1",
+							"name":       "networkinternal",
+							"subnetName": "subnet1",
 						},
 						{
-							Name:       "ctlplane",
-							SubnetName: "subnet1",
+							"name":       "ctlplane",
+							"subnetName": "subnet1",
 						},
 					},
-					Ansible: dataplanev1.AnsibleOpts{
-						AnsibleUser: "test-user",
+					"ansible": map[string]interface{}{
+						"ansibleUser": "test-user",
 					},
 				}
 
@@ -1154,7 +1129,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"].(map[string]dataplanev1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
+				nodeSetSpec["nodes"] = map[string]interface{}{dataplaneNodeName.Name: nodeOverrideSpec}
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
