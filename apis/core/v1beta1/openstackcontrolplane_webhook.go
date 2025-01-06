@@ -908,6 +908,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
 		}
 		r.Spec.Barbican.Template.Default()
+		initializeOverrideSpec(&r.Spec.Barbican.APIOverride.Route, true)
+		r.Spec.Barbican.Template.SetDefaultRouteAnnotations(r.Spec.Barbican.APIOverride.Route.Annotations)
 	}
 
 	// Designate
