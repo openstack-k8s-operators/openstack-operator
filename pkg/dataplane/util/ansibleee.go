@@ -22,6 +22,8 @@ type EEJob struct {
 	PlaybookContents string `json:"playbookContents,omitempty"`
 	// Playbook is the playbook that ansible will run on this execution, accepts path or FQN from collection
 	Playbook string `json:"playbook,omitempty"`
+	// Role is the role that ansible will run on this execution, accepts path or FQN from collection
+	Role string `json:"role,omitempty"`
 	// Image is the container image that will execute the ansible command
 	Image string `json:"image,omitempty"`
 	// Name is the name of the execution job
@@ -78,12 +80,20 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 
 	args := a.Args
 
-	playbook := a.Playbook
 	if len(args) == 0 {
-		if len(playbook) == 0 {
-			playbook = CustomPlaybook
+		artifact := a.Playbook
+		param := "-p"
+		if len(artifact) == 0 {
+			if len(a.PlaybookContents) > 0 {
+				artifact = CustomPlaybook
+			} else if len(a.Role) > 0 {
+				artifact = a.Role
+				param = "-r"
+			} else {
+				return nil, fmt.Errorf("no playbook, playbookContents or role specified")
+			}
 		}
-		args = []string{"ansible-runner", "run", "/runner", "-p", playbook}
+		args = []string{"ansible-runner", "run", "/runner", param, artifact}
 	}
 
 	// ansible runner identifier
@@ -169,12 +179,15 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 		}
 	}
 
+	if len(a.Role) > 0 {
+		setRunnerEnvVar(h, "RUNNER_ROLE", a.Role, "role", job, hashes)
+	}
 	if len(a.PlaybookContents) > 0 {
 		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", a.PlaybookContents, "playbookContents", job, hashes)
-	} else if len(playbook) > 0 {
+	} else if len(a.Playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that PlaybookContents is empty before adding playbook
-		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
+		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", a.Playbook, "playbooks", job, hashes)
 	}
 
 	if len(a.CmdLine) > 0 {
