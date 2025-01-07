@@ -9,9 +9,8 @@ nodes, or other types of nodes.
 The openstack-operator provides a Kubernetes like abstraction and API for
 deploying the data plane. It uses the
 https://github.com/openstack-k8s-operators/openstack-baremetal-operator[openstack-baremetal-operator]
-to optionally provision baremetal. It then uses the
-https://github.com/openstack-k8s-operators/openstack-ansibleee-operator[openstack-ansibleee-operator]
-to execute Ansible to deploy, configure, and orchestrate software on the nodes.
+to optionally provision baremetal. It then creates Kubernetes jobs
+that execute Ansible to deploy, configure, and orchestrate software on the nodes.
 The software is typically RPM or container based using the `podman` container
 runtime.
 
