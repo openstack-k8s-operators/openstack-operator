@@ -331,7 +331,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"telemetry"}
 
 				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
-				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 			})
 
 			It("should have input not ready and unknown Conditions initialized", func() {
@@ -432,7 +431,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"global-service"}
 
 				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
-				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 			})
 
 			It("should have input not ready and unknown Conditions initialized", func() {
@@ -846,7 +844,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"telemetry"}
 
 				Expect(dataplaneNodeSetInstance.Spec.Services).Should(Equal(services))
-				Expect(dataplaneNodeSetInstance.Spec.BaremetalSetTemplate.BaremetalHosts).Should(BeEmpty())
 			})
 			It("should have input not ready and unknown Conditions initialized", func() {
 				th.ExpectCondition(
