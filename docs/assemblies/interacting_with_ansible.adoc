@@ -1,74 +1,42 @@
 = Interacting with Ansible
 
-When a dataplane service is executed during a role deployment, a corresponding
-https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/[OpenStackAnsibleEE]
-resource is created. The OpenStackAnsibleEE resource is the associated ansible
+When a dataplane service is executed during a deployment, a corresponding
+Kubernetes Job is created. This Kubernetes Job is the associated ansible
 execution with the service.
 
-OpenStackAnsibleEE resources are reconciled by
-https://github.com/openstack-k8s-operators/openstack-ansibleee-operator[openstack-ansibleee-operator].
 During reconciliation a
 https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/job-v1/[Job]
 resource is created which in turn creates a
 https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/[Pod] resource. The pod is started with an https://docs.ansible.com/automation-controller/latest/html/userguide/execution_environments.html[Ansible Execution Environment] image, and runs https://ansible.readthedocs.io/projects/runner/en/stable/[ansible-runner].
 
-== Retrieving and inspecting OpenStackAnsibleEE resources
+== Retrieving and inspecting Ansible Execution Jobs
 
-During (or after) a deployment the instances of OpenStackAnsibleEE can be
-retrieved from the API.
+The Kubernetes jobs are labelled with the name of the `OpenStackDataPlaneDeployment`.
+Jobs for each `OpenStackDataPlaneDeployment` can be seen by listing jobs by the label:
 
- oc get openstackansibleee
+ $ oc get job -l openstackdataplanedeployment=edpm-compute
+ NAME                                                 STATUS     COMPLETIONS   DURATION   AGE
+ bootstrap-edpm-compute-openstack-edpm-ipam           Complete   1/1           78s        25h
+ configure-network-edpm-compute-openstack-edpm-ipam   Complete   1/1           37s        25h
+ configure-os-edpm-compute-openstack-edpm-ipam        Complete   1/1           66s        25h
+ download-cache-edpm-compute-openstack-edpm-ipam      Complete   1/1           64s        25h
+ install-certs-edpm-compute-openstack-edpm-ipam       Complete   1/1           46s        25h
+ install-os-edpm-compute-openstack-edpm-ipam          Complete   1/1           57s        25h
+ libvirt-edpm-compute-openstack-edpm-ipam             Complete   1/1           2m37s      25h
+ neutron-metadata-edpm-compute-openstack-edpm-ipam    Complete   1/1           61s        25h
+ nova-edpm-compute-openstack-edpm-ipam                Complete   1/1           3m20s      25h
+ ovn-edpm-compute-openstack-edpm-ipam                 Complete   1/1           78s        25h
+ run-os-edpm-compute-openstack-edpm-ipam              Complete   1/1           33s        25h
+ ssh-known-hosts-edpm-compute                         Complete   1/1           19s        25h
+ telemetry-edpm-compute-openstack-edpm-ipam           Complete   1/1           2m5s       25h
+ validate-network-edpm-compute-openstack-edpm-ipam    Complete   1/1           16s        25h
 
-Sample output when the default list of services:
+Logs can be checked using `oc logs -f job/<job-name>`. For example, if we want to check the logs
+from the configure-network job:
 
- NAME                                                  NETWORKATTACHMENTS   STATUS   MESSAGE
- configure-network-edpm-compute                        True     Job completed
- configure-os-edpm-compute                             True     Job completed
- install-os-edpm-compute                               True     Job completed
- libvirt-edpm-compute                                  True     Job completed
- nova-edpm-compute                                     True     Job completed
- run-os-edpm-compute                                   True     Job completed
- telemetry-edpm-compute                                True     Job completed
- validate-network-edpm-compute                         True     Job completed
-
-Querying for pods with the OpenStackAnsibleEE label
-
- oc get pods -l app=openstackansibleee
-
-Sample output:
-
- configure-network-edpm-compute-j6r4l   0/1     Completed           0          3m36s
- validate-network-edpm-compute-6g7n9    0/1     Pending             0          0s
- validate-network-edpm-compute-6g7n9    0/1     ContainerCreating   0          11s
- validate-network-edpm-compute-6g7n9    1/1     Running             0          13s
-
-Querying for jobs, shows the corresponding job for each OpenStackAnsibleEE resource:
-
- oc get jobs -l app=openstackansibleee
-
-Sample output:
-
- NAME                             COMPLETIONS   DURATION   AGE
- configure-network-edpm-compute   1/1           8s         2m51s
- configure-os-edpm-compute        1/1           8s         2m27s
- install-os-edpm-compute          1/1           8s         2m35s
- libvirt-edpm-compute             1/1           8s         2m35s
- nova-edpm-compute                1/1           8s         2m35s
- run-os-edpm-compute              1/1           8s         2m19s
- telemetry-edpm-compute           1/1           8s         2m35s
- validate-network-edpm-compute    1/1           8s         2m43s
-
-Using the job name, the corresponding pod can be retrieved:
-
- oc get pods | grep configure-network-edpm-compute
-
-Sample output:
-
- configure-network-edpm-compute-2hshp   0/1     Completed            0                5m45s
-
-Using the job name, the ansible logs can be retrieved:
-
- oc logs job.batch/configure-network-edpm-compute
+ $ oc logs -f jobs/configure-network-edpm-compute-openstack-edpm-ipam | tail -n2
+PLAY RECAP *********************************************************************
+edpm-compute-0             : ok=22   changed=0    unreachable=0    failed=0    skipped=17   rescued=0    ignored=0
 
 == Controlling the Ansible execution
 
