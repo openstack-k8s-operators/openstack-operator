@@ -104,8 +104,8 @@ github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241218224517-6
 github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241218224517-634823bc2365/go.mod h1:xRoM6j/L1yvUhghhF/OL5GExWlahTf64Z5svidliqsE=
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241122125317-93eece5fcfa0 h1:uTTjp2S+U3uS5jyiggdw3jK5M1saB0NHRrh08kDdeIk=
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241122125317-93eece5fcfa0/go.mod h1:mANVocVuc9ww98iuDBKA6fd7sULOr/Po9ks/fUgOIqA=
-github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241122125601-2e200c1224ce h1:Sglm4ED/efLmnSMUYxCF4tDr/9Hhs1c4s5XvF2CmfOA=
-github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241122125601-2e200c1224ce/go.mod h1:6qGsJdObALYyH1G4mRLyRpmpTKsmTrKLGxx2hFUtU28=
+github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241223061744-9353ce7432b2 h1:ATAUFKoVh8FlawqlYlc4vZMIuSA3omoNLQyZlFC7sH8=
+github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20241223061744-9353ce7432b2/go.mod h1:6qGsJdObALYyH1G4mRLyRpmpTKsmTrKLGxx2hFUtU28=
 github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241122125042-ff0bda8161fe h1:NnrU4W0n117WGTaNroNivd3N1z5Si0n5UhB9v4z5WQ4=
 github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20241122125042-ff0bda8161fe/go.mod h1:nCCIj4rMVSj3Cwkwdc0snMhxOw/DmC42eWp8w+4WznU=
 github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20241122125317-56d6da8098be h1:Tf7pIIvh3JWSpxKkUqIPSf+z6pGTOUA4/SE3xYYu/ew=
@@ -128,8 +128,8 @@ github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241219091444-610
 github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20241219091444-6106bcbd82fc/go.mod h1:E3DA4NEoTMqKDdgxEHut63BaHI0fSmRuVTMjGMqx1Z0=
 github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20241217120113-c3290373c069 h1:h/MTNXyaFjce8v5Yh7MhZxXS4B/3Xew9WLb4lOH67RQ=
 github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20241217120113-c3290373c069/go.mod h1:6Z+1yna/RM9bCKkwd64pHxGrRpKFEhOtYUt1PDh6/xU=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20241218075221-839940189910 h1:slUwZPAjPzxVofa2eVelxSwIWyeFIdR5IwwR8lYTmIA=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20241218075221-839940189910/go.mod h1:O9pAzpJo2CT+wZgchU/fERxNL23zPR6+KOccviKbSNY=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20250102062629-844caef146b5 h1:kyx2d5xwhMxWNvRw4+ME/qlTa1dGZDpOQKZd0LnYxX4=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20250102062629-844caef146b5/go.mod h1:FogAtUzD4KFjTEnFuNSIWPHz2Kt91QQzUfvg6JINLCk=
 github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241122125317-6ca662dca481 h1:CwK2W1XNKQzwEYpOHiNFH+bI2HZuoAUwmGbkl7WACQA=
 github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20241122125317-6ca662dca481/go.mod h1:UNtD7SqSmflXUs8bzUu+azWxaFSEGPpprb9U86FaGTY=
 github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241122125843-ad42d8c488ae h1:5N9TqZ++GPWBBGD4RJ3QABdiOxpY9SzOKAjehMNvRaA=
