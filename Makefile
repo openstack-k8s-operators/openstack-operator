@@ -367,7 +367,7 @@ endif
 bundle: build manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
 	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/operator/deployment/ && $(KUSTOMIZE) edit set image controller=$(IMG) && \
-	$(KUSTOMIZE) edit add patch --kind Deployment --name controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]"
+	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]"
 	sed -i -e 's|operator:image|$(IMG)|' config/operator/deployment/deployment.yaml
 	$(KUSTOMIZE) build config/operator --load-restrictor='LoadRestrictionsNone' | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	$(OPERATOR_SDK) bundle validate ./bundle
