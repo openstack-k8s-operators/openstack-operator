@@ -8,5 +8,5 @@ roleRef:
   name: leader-election-role-operator
 subjects:
 - kind: ServiceAccount
-  name: controller-operator
+  name: openstack-operator-controller-operator
   namespace: system

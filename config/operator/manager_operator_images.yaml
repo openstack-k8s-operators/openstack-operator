@@ -5,7 +5,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-operator
+  name: openstack-operator-controller-operator
   namespace: system
 spec:
   template:

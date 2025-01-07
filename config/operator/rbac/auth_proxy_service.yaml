@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    control-plane: controller-operator
+    control-plane: openstack-operator-controller-operator
   name: controller-operator-metrics-service-operator
   namespace: system
 spec:
