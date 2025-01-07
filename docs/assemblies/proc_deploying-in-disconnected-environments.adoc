@@ -1,0 +1,50 @@
+[id="proc_deploying-in-disconnected-environments"]
+= Deploying OpenStack in a disconnected environment
+
+[role="_abstract"]
+== Process
+Deploying in disconnected environments can be achieved largely by following the OpenShift documentation for mirroring OLM Operators: https://docs.openshift.com/container-platform/4.16/installing/disconnected_install/installing-mirroring-installation-images.html#olm-mirror-catalog_installing-mirroring-installation-images
+
+== Technical Implementation
+The details provided in this section are for informational purposes only. Users should not need to interact with anything additional after completing the above mentioned OLM mirroring process.
+
+The `openstack-operator` contains a list of related images that will ensure all required images for the deployment are mirrored following the above OpenShift process. Once images are mirrored, the `ImageContentSourcePolicy` custom resource (CR) is created. This process results in a `MachineConfig` called `99-master-genereted-registries` being updated in the cluster. The `99-master-generated-registries` `MachineConfig` contains a `registries.conf` file that is applied to all of the OpenShift nodes in the cluster.
+
+In order for dataplane nodes to integrate cleanly with this process, openstack-operator checks for the existence of an `ImageContentSourcePolicy`. If one is found, it will read the `registries.conf` file from the `99-master-generated-registries` `MachineConfig`. The openstack-operator will then set two variables in the Ansible inventory for the nodes.
+
+[,yaml]
+----
+edpm_podman_disconnected_ocp
+edpm_podman_registries_conf
+----
+
+`edpm_podman_disconnected_ocp` is a boolean variable that is used to conditionally render `registries.conf` on the dataplane nodes during the deployment. While `edpm_podman_registries_conf` contains the contents of the `registries.conf` that were acquired from the `MachineConfig` in the cluster. The contents of this file will be written to  `/etc/containers/registries.conf` on each of the dataplane nodes. This ensures that our dataplane nodes are configured in a consistent manner with the OpenShift nodes.
+
+Since this configuration file is lifted directly from OpenShift, the dataplane nodes also have the same requirements as OpenShift for images - such as using image digests rather than image tags.
+This can be seen in the Ansible inventory secret for each of the `OpenStackDataPlaneNodeSet` objects in the cluster. Using `multipathd` as an example:
+
+[,yaml]
+----
+        edpm_podman_registries_conf: |
+          [...]
+            [[registry]]
+              prefix = ""
+              location = "registry.redhat.io/rhoso/openstack-multipathd-rhel9"
+
+              [[registry.mirror]]
+                location = "quay-mirror-registry.example.net:8443/olm/rhoso-openstack-multipathd-rhel9"
+                pull-from-mirror = "digest-only"
+          [...]
+----
+
+Note that the `pull-from-mirror` parameter is set to `digest-only`. This means that any attempt by podman to pull an image by a digest will result in the image being pulled from the specified mirror.
+
+Accordingly, image references in the `OpenStackVersion` CR are provided in the digest format, for example the multipathd image:
+
+[,bash]
+----
+$ oc get openstackversion -o jsonpath='{.items[].status.containerImages.edpmMultipathdImage}'
+"registry.redhat.io/rhoso/openstack-multipathd-rhel9@sha256:7df2e1ebe4ec6815173e49157848a63d28a64ffb0db8de6562c4633c0fbcdf3f"
+----
+
+Since all images are in the digest format for the `OpenStackVersion` resource, there is no additional action required by users to work in a disconnected environment.
