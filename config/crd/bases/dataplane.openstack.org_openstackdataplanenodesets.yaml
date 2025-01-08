@@ -167,6 +167,7 @@ spec:
                   osContainerImageUrl:
                     type: string
                   osImage:
+                    default: edpm-hardened-uefi.qcow2
                     type: string
                   passwordSecret:
                     properties:

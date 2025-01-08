@@ -1648,6 +1648,9 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 120
+                        type: integer
                       backendMdnsServerProtocol:
                         type: string
                       backendType:
@@ -1668,6 +1671,8 @@ spec:
                         type: object
                       designateAPI:
                         properties:
+                          apiTimeout:
+                            type: integer
                           backendMdnsServerProtocol:
                             type: string
                           backendType:
