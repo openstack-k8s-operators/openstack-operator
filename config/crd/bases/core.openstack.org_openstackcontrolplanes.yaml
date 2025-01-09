@@ -11022,6 +11022,8 @@ spec:
                           format: int32
                           minimum: 0
                           type: integer
+                        foo:
+                          type: integer
                         nodeSelector:
                           additionalProperties:
                             type: string
@@ -14839,6 +14841,8 @@ spec:
                                 type: string
                             type: object
                           type: array
+                      required:
+                      - foo
                       type: object
                     type: object
                 type: object
