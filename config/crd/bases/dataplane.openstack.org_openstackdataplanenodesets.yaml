@@ -96,8 +96,6 @@ spec:
                     type: string
                   ctlplaneInterface:
                     type: string
-                  ctlplaneNetmask:
-                    type: string
                   ctlplaneVlan:
                     type: integer
                   deploymentSSHSecret:
