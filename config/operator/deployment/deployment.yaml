@@ -42,12 +42,13 @@ spec:
         args:
         - --leader-elect
         env:
+        # we use kustomize to replace the first 2 envs here so do not reorder these
         - name: OPENSTACK_RELEASE_VERSION
           value: 0.0.1
-        - name: ENABLE_WEBHOOKS
-          value: false
         - name: OPERATOR_IMAGE_URL
           value: quay.io/openstack-k8s-operators/openstack-operator:latest
+        - name: ENABLE_WEBHOOKS
+          value: false
         image: controller:latest
         name: operator
         securityContext:
