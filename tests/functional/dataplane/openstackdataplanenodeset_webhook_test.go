@@ -41,7 +41,6 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 					"hostName": "compute-0"},
 			}
 			nodeSetSpec["baremetalSetTemplate"] = map[string]interface{}{
-				"cloudUserName": "test-user",
 				"bmhLabelSelector": map[string]string{
 					"app": "test-openstack",
 				},
@@ -52,7 +51,6 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		It("Should block changes to the BmhLabelSelector object in baremetalSetTemplate spec", func() {
 			Eventually(func(_ Gomega) string {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				instance.Spec.BaremetalSetTemplate.CloudUserName = "new-user"
 				instance.Spec.BaremetalSetTemplate.BmhLabelSelector = map[string]string{
 					"app": "openstack1",
 				}

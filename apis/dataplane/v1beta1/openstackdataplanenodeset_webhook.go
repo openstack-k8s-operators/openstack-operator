@@ -24,7 +24,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -79,6 +78,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 				node.HostName = strings.Join([]string{nodeName, domain}, ".")
 			}
 		}
+
 		spec.Nodes[nodeName] = *node.DeepCopy()
 	}
 
@@ -87,15 +87,6 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 		if spec.BaremetalSetTemplate.DeploymentSSHSecret == "" {
 			spec.BaremetalSetTemplate.DeploymentSSHSecret = spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 		}
-		nodeSetHostMap := make(map[string]baremetalv1.InstanceSpec)
-		for _, node := range spec.Nodes {
-			instanceSpec := baremetalv1.InstanceSpec{}
-			instanceSpec.BmhLabelSelector = node.BmhLabelSelector
-			instanceSpec.UserData = node.UserData
-			instanceSpec.NetworkData = node.NetworkData
-			nodeSetHostMap[node.HostName] = instanceSpec
-		}
-		spec.BaremetalSetTemplate.BaremetalHosts = nodeSetHostMap
 	} else if spec.NodeTemplate.Ansible.AnsibleUser == "" {
 		spec.NodeTemplate.Ansible.AnsibleUser = "cloud-admin"
 	}
@@ -220,9 +211,9 @@ func (r *OpenStackDataPlaneNodeSetSpec) ValidateUpdate(oldSpec *OpenStackDataPla
 	// If the BaremetalSetTemplate is changed, we will offload the parsing of these details
 	// to the openstack-baremetal-operator webhook to avoid duplicating logic.
 	if !reflect.DeepEqual(r.BaremetalSetTemplate, oldSpec.BaremetalSetTemplate) {
-
 		// Call openstack-baremetal-operator webhook Validate() to parse changes
-		err := r.BaremetalSetTemplate.Validate(oldSpec.BaremetalSetTemplate)
+		err := r.BaremetalSetTemplate.ValidateTemplate(
+			len(oldSpec.Nodes), oldSpec.BaremetalSetTemplate)
 		if err != nil {
 			errors = append(errors, field.Forbidden(
 				field.NewPath("spec.baremetalSetTemplate"),

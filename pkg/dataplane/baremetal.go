@@ -49,15 +49,12 @@ func DeployBaremetalSet(
 		},
 	}
 
-	if instance.Spec.BaremetalSetTemplate.BaremetalHosts == nil {
-		return false, fmt.Errorf("no baremetal hosts set in baremetalSetTemplate")
-	}
 	utils.LogForObject(helper, "Reconciling BaremetalSet", instance)
 	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
 		ownerLabels := labels.GetLabels(instance, labels.GetGroupLabel(NodeSetLabel), map[string]string{})
 		baremetalSet.Labels = utils.MergeStringMaps(baremetalSet.GetLabels(), ownerLabels)
-
-		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
+		baremetalSet.Spec.BaremetalHosts = make(map[string]baremetalv1.InstanceSpec)
+		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec.OpenStackBaremetalSetTemplateSpec)
 		// Set Images
 		if containerImages.OsContainerImage != nil && instance.Spec.BaremetalSetTemplate.OSContainerImageURL == "" {
 			baremetalSet.Spec.OSContainerImageURL = *containerImages.OsContainerImage
@@ -72,11 +69,14 @@ func DeployBaremetalSet(
 		for _, node := range instance.Spec.Nodes {
 			hostName := node.HostName
 			ipSet, ok := ipSets[hostName]
-			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]
 			if !ok {
 				err := fmt.Errorf("no IPSet found for host: %s", hostName)
 				return err
 			}
+			instanceSpec := baremetalv1.InstanceSpec{}
+			instanceSpec.BmhLabelSelector = node.BmhLabelSelector
+			instanceSpec.UserData = node.UserData
+			instanceSpec.NetworkData = node.NetworkData
 			for _, res := range ipSet.Status.Reservation {
 				if strings.ToLower(string(res.Network)) == dataplanev1.CtlPlaneNetwork {
 					_, ipNet, err := net.ParseCIDR(res.Cidr)

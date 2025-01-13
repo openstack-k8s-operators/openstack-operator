@@ -51,33 +51,6 @@ spec:
                     - metadata
                     - disabled
                     type: string
-                  baremetalHosts:
-                    additionalProperties:
-                      properties:
-                        bmhLabelSelector:
-                          additionalProperties:
-                            type: string
-                          type: object
-                        ctlPlaneIP:
-                          type: string
-                        networkData:
-                          properties:
-                            name:
-                              type: string
-                            namespace:
-                              type: string
-                          type: object
-                          x-kubernetes-map-type: atomic
-                        userData:
-                          properties:
-                            name:
-                              type: string
-                            namespace:
-                              type: string
-                          type: object
-                          x-kubernetes-map-type: atomic
-                      type: object
-                    type: object
                   bmhLabelSelector:
                     additionalProperties:
                       type: string
@@ -85,27 +58,15 @@ spec:
                   bmhNamespace:
                     default: openshift-machine-api
                     type: string
-                  bootstrapDns:
-                    items:
-                      type: string
-                    type: array
                   cloudUserName:
                     default: cloud-admin
-                    type: string
-                  ctlplaneGateway:
                     type: string
                   ctlplaneInterface:
                     type: string
                   ctlplaneNetmask:
                     type: string
-                  ctlplaneVlan:
-                    type: integer
                   deploymentSSHSecret:
                     type: string
-                  dnsSearchDomains:
-                    items:
-                      type: string
-                    type: array
                   domainName:
                     type: string
                   hardwareReqs:
