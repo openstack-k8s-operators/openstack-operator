@@ -4982,6 +4982,10 @@ spec:
                     type: boolean
                   template:
                     properties:
+                      apiTimeout:
+                        default: 600
+                        minimum: 60
+                        type: integer
                       customServiceConfig:
                         type: string
                       customServiceConfigSecrets:
