@@ -28,7 +28,7 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20241223152937-5c39b092c37f
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20250107153542-fb9c65d9aa6f
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20250108163617-ac5b1d6fba6f
-	github.com/rabbitmq/cluster-operator/v2 v2.11.0
+	github.com/rabbitmq/cluster-operator/v2 v2.12.0
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.71.0-rhobs1 // indirect
 	github.com/rhobs/observability-operator v0.3.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
