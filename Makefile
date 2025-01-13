@@ -131,14 +131,29 @@ help: ## Display this help.
 
 ##@ Development
 
+# (dprince) FIXME: controller-gen crd didn't seem to like multiple paths so I didn't split it. So we can continue using kubebuilder
+# I did split out the rbac for both binaries so we can use separate roles
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd$(CRDDESC_OVERRIDE) webhook paths="./..." output:crd:artifacts:config=config/crd/bases && \
+	mkdir -p config/operator/rbac && \
+	$(CONTROLLER_GEN) crd$(CRDDESC_OVERRIDE) output:crd:artifacts:config=config/crd/bases webhook paths="./..." && \
+	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./apis/client/...,./apis/core/...,./apis/dataplane/...,./controllers/client/...,./controllers/core/...,./controllers/dataplane/...,./pkg/...}" output:dir=config/rbac && \
+	$(CONTROLLER_GEN) rbac:roleName=operator-role paths="./controllers/operator/..." paths="./apis/operator/..." output:dir=config/operator/rbac && \
 	rm -f apis/bases/* && cp -a config/crd/bases apis/
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+.PHONY: bindata
+bindata: kustomize yq ## Build docker image with the manager.
+	mkdir -p bindata/crds bindata/rbac bindata/operator
+	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
+	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
+	cp config/operator/managers.yaml bindata/operator/
+	cp config/operator/rabbit.yaml bindata/operator/
+	$(KUSTOMIZE) build config/rbac > bindata/rbac/rbac.yaml
+	/bin/bash hack/sync-bindata.sh
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.
@@ -196,6 +211,7 @@ cover: test ## Run tests and display functional test coverage
 .PHONY: build
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
+	go build -o bin/operator cmd/operator/main.go
 
 .PHONY: run
 run: export METRICS_PORT?=8080
@@ -206,8 +222,18 @@ run: manifests generate fmt vet ## Run a controller from your host.
 	source hack/export_related_images.sh && \
 	go run ./main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)"
 
+.PHONY: run-operator
+run-operator: export METRICS_PORT?=8080
+run-operator: export HEALTH_PORT?=8081
+run-operator: export ENABLE_WEBHOOKS?=false
+run-operator: export BASE_BINDATA?=bindata
+run-operator: export OPERATOR_IMAGE_URL=${IMG}
+run-operator: manifests generate fmt vet ## Run a controller from your host.
+	source hack/export_operator_related_images.sh && \
+	go run ./cmd/operator/main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)"
+
 .PHONY: docker-build
-docker-build:  ## Build docker image with the manager.
+docker-build: ## Build docker image with the manager.
 	podman build -t ${IMG} . ${DOCKER_BUILD_ARGS}
 
 .PHONY: docker-push
@@ -272,7 +298,7 @@ GINKGO_TESTS ?= ./tests/... ./apis/client/... ./apis/core/... ./apis/dataplane/.
 KUTTL ?= $(LOCALBIN)/kubectl-kuttl
 
 ## Tool Versions
-KUSTOMIZE_VERSION ?= v3.8.7
+KUSTOMIZE_VERSION ?= v5.5.0 #(dprince: bumped to aquire new features like --load-restrictor)
 CONTROLLER_TOOLS_VERSION ?= v0.14.0
 CRD_MARKDOWN_VERSION ?= v0.0.3
 KUTTL_VERSION ?= 0.17.0
@@ -340,11 +366,10 @@ endif
 .PHONY: bundle
 bundle: build manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
 	$(OPERATOR_SDK) generate kustomize manifests -q
-	cd config/manager && \
-	$(KUSTOMIZE) edit set image controller=$(IMG) && \
-	$(KUSTOMIZE) edit add patch --kind Deployment --name controller-manager --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]"
-	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
-	cp dependencies.yaml ./bundle/metadata
+	cd config/operator/deployment/ && $(KUSTOMIZE) edit set image controller=$(IMG) && \
+	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
+	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/1\", \"value\": {\"name\": \"OPERATOR_IMAGE_URL\", \"value\": \"$(IMG)\"}}]"
+	$(KUSTOMIZE) build config/operator --load-restrictor='LoadRestrictionsNone' | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: bundle-build
