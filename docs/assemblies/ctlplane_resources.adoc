@@ -289,7 +289,6 @@
 * <<manilasharestatus,ManilaShareStatus>>
 * <<manilasharetemplate,ManilaShareTemplate>>
 * <<manilasharetemplatecore,ManilaShareTemplateCore>>
-* <<adoptionredirectspec,AdoptionRedirectSpec>>
 * <<galera,Galera>>
 * <<galeraattributes,GaleraAttributes>>
 * <<galeralist,GaleraList>>
@@ -471,6 +470,7 @@
 * <<ceilometerspec,CeilometerSpec>>
 * <<ceilometerspeccore,CeilometerSpecCore>>
 * <<ceilometerstatus,CeilometerStatus>>
+* <<ksmstatus,KSMStatus>>
 * <<logging,Logging>>
 * <<logginglist,LoggingList>>
 * <<loggingspec,LoggingSpec>>
@@ -2004,11 +2004,6 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | false
 
 | infraRedisImage
-|
-| *string
-| false
-
-| infraInstanceHaImage
 |
 | *string
 | false
@@ -4371,6 +4366,11 @@ DesignateSpecBase -
 | Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 | corev1.ResourceRequirements
 | false
+
+| designateNetworkAttachment
+| DesignateNetworkAttachment is a NetworkAttachment resource name for the Designate Control Network
+| string
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -4714,6 +4714,26 @@ DesignateBackendbind9SpecBase -
 
 | serviceAccount
 | ServiceAccount - service account name used internally to provide Designate services the default SA name
+| string
+| true
+
+| customBindOptions
+| CustomBindOptions - custom bind9 options
+| []string
+| false
+
+| controlNetworkName
+| ControlNetworkName - specify which network attachment is to be used for control, notifys and zone transfers.
+| string
+| true
+
+| storageClass
+| StorageClass
+| string
+| false
+
+| storageRequest
+| StorageRequest
 | string
 | true
 |===
@@ -5457,6 +5477,8 @@ ImageCache - struct where the exposed imageCache params are defined
 [#storage]
 ==== Storage
 
+Storage -
+
 |===
 | Field | Description | Scheme | Required
 
@@ -5591,7 +5613,7 @@ GlanceSpec defines the desired state of Glance
 [#glancespeccore]
 ==== GlanceSpecCore
 
-GlanceSpec defines the desired state of Glance
+GlanceSpecCore defines the desired state of Glance
 
 |===
 | Field | Description | Scheme | Required
@@ -5976,8 +5998,13 @@ HeatServiceTemplate -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
 | string
+| false
+
+| customServiceConfigSecrets
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/heat/heat.conf.d directory as a custom config file.
+| []string
 | false
 
 | resources
@@ -6034,6 +6061,11 @@ PasswordSelector ..
 
 | authEncryptionKey
 | AuthEncryptionKey - Selector to get the heat auth encryption key from the Secret
+| string
+| true
+
+| stackDomainAdminPassword
+| StackDomainAdminPassword - Selector to get the heat stack domain admin password from the Secret
 | string
 | true
 |===
@@ -6137,8 +6169,13 @@ HeatSpec defines the desired state of Heat
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 01-custom.conf file.
 | string
+| false
+
+| customServiceConfigSecrets
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/heat/heat.conf.d directory as a custom config file.
+| []string
 | false
 
 | preserveJobs
@@ -6155,6 +6192,11 @@ HeatSpec defines the desired state of Heat
 | NodeSelector to target subset of worker nodes for running the Heat services
 | map[string]string
 | false
+
+| apiTimeout
+| APITimeout for Route and Apache
+| int
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -8178,6 +8220,16 @@ KeystoneAPISpec defines the desired state of KeystoneAPI
 | bool
 | true
 
+| fernetRotationDays
+| FernetRotationDays - Rotate fernet token keys every X days
+| *int32
+| true
+
+| fernetMaxActiveKeys
+| FernetMaxActiveKeys - Maximum number of fernet token keys after rotation
+| *int32
+| true
+
 | passwordSelectors
 | PasswordSelectors - Selectors to identify the AdminUser password from the Secret
 | <<passwordselector,PasswordSelector>>
@@ -9337,22 +9389,6 @@ ManilaShareTemplateCore -
 
 <<custom-resources,Back to Custom Resources>>
 
-[#adoptionredirectspec]
-==== AdoptionRedirectSpec
-
-AdoptionRedirectSpec defines redirection to a different DB instance during Adoption
-
-|===
-| Field | Description | Scheme | Required
-
-| host
-| MariaDB host to redirect to (IP or name)
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#galera]
 ==== Galera
 
@@ -9387,10 +9423,25 @@ GaleraAttributes holds startup information for a Galera host
 |===
 | Field | Description | Scheme | Required
 
+| uuid
+| UUID of the partition that is seen by the galera node
+| string
+| false
+
 | seqno
 | Last recorded replication sequence number in the DB
 | string
 | true
+
+| safe_to_bootstrap
+| This galera node can bootstrap a galera cluster
+| bool
+| false
+
+| no_grastate
+| This galera node has its state recovered from the DB
+| bool
+| false
 
 | gcomm
 | Gcomm URI used to connect to the galera cluster
@@ -9479,11 +9530,6 @@ GaleraSpec defines the desired state of Galera
 | Customize config using this parameter to change service defaults, or overwrite rendered information using raw MariaDB config format. The content gets added to /etc/my.cnf.d/galera_custom.cnf
 | string
 | false
-
-| adoptionRedirect
-| Adoption configuration
-| <<adoptionredirectspec,AdoptionRedirectSpec>>
-| true
 
 | tls
 | TLS settings for MySQL service and internal Galera replication
@@ -9892,6 +9938,16 @@ NeutronAPISpecCore -
 | preserveJobs
 | PreserveJobs - do not delete jobs after they finished e.g. to check logs
 | bool
+| true
+
+| corePlugin
+| CorePlugin - Neutron core plugin to use. Using "ml2" if not set.
+| string
+| true
+
+| ml2MechanismDrivers
+| Ml2MechanismDrivers - list of ml2 drivers to enable. Using {"ovn"} if not set.
+| []string
 | true
 
 | customServiceConfig
@@ -12084,6 +12140,11 @@ OctaviaAmphoraControllerSpecCore -
 | OctaviaProviderSubnetCIDR -
 | string
 | true
+
+| octaviaProviderSubnetExtraCIDRs
+| OctaviaProviderSubnetExtraCIDRs -
+| []string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -12205,13 +12266,28 @@ OctaviaLbMgmtNetworks Settings for Octavia management networks
 | Field | Description | Scheme | Required
 
 | manageLbMgmtNetworks
-|
+| ManageLbMgmtNetworks - when True, octavia-operator creates the Neutron resources needed for its Management Network
 | bool
+| true
+
+| createDefaultLbMgmtNetwork
+| CreateDefaultLbMgmtNetwork - when True, octavia-operator creates a Management Network for the default Availability Zone of the control plane. Can be set to false when deploying OpenStack in DCN mode.
+| bool
+| true
+
+| lbMgmtRouterGateway
+| LbMgmtRouterGateway is the IP address of the Octavia router on the Provider network, it's optional and used only when the routing informations are not passed through the Network Attachment Definition
+| string
 | false
 
 | availabilityZones
 | Availability zones for the octavia management network resources
 | []string
+| false
+
+| availabilityZoneCIDRs
+| AvailabilityZoneCIDRs are the CIDRs of each management network associated with an Availability Zone (ex: {"az":"172.34.0.0/24", ...})
+| map[string]string
 | false
 |===
 
@@ -12376,6 +12452,11 @@ OctaviaSpecBase -
 | Apache Container Image URL
 | string
 | true
+
+| apiTimeout
+| Octavia API timeout
+| string
+| false
 
 | octaviaNetworkAttachment
 | OctaviaNetworkAttachment is a NetworkAttachment resource name for the Octavia Management Network
@@ -13139,10 +13220,15 @@ InstanceSpec Instance specific attributes
 |===
 | Field | Description | Scheme | Required
 
+| bmhLabelSelector
+| BmhLabelSelector allows for the selection of a particular BaremetalHost based on arbitrary labels
+| map[string]string
+| false
+
 | ctlPlaneIP
 | CtlPlaneIP - Control Plane IP in CIDR notation
 | string
-| true
+| false
 
 | userData
 | UserData - Host User Data
@@ -13152,11 +13238,6 @@ InstanceSpec Instance specific attributes
 | networkData
 | NetworkData - Host Network Data
 | *corev1.SecretReference
-| false
-
-| preprovisioningNetworkDataName
-| PreprovisioningNetworkDataName - NetwoData Secret name for Preprovisining in the local namespace
-| string
 | false
 |===
 
@@ -13277,16 +13358,6 @@ OpenStackBaremetalSetSpec defines the desired state of OpenStackBaremetalSet
 | agentImageUrl
 | AgentImageURL - Container image URL for the sidecar container that discovers provisioning network IPs
 | string
-| false
-
-| userData
-| UserData holds the reference to the Secret containing the user data to be passed to the host before it boots. UserData can be set per host in BaremetalHosts or here. If none of these are provided it will use a default cloud-config.
-| *corev1.SecretReference
-| false
-
-| networkData
-| NetworkData holds the reference to the Secret containing network data to be passed to the hosts. NetworkData can be set per host in BaremetalHosts or here. If none of these are provided it will use default NetworkData to configure CtlPlaneIP.
-| *corev1.SecretReference
 | false
 
 | automatedCleaningMode
@@ -15294,6 +15365,11 @@ Ceilometer is the Schema for the ceilometers API
 |
 | <<ceilometerstatus,CeilometerStatus>>
 | false
+
+| ksmStatus
+|
+| <<ksmstatus,KSMStatus>>
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15356,6 +15432,11 @@ CeilometerSpec defines the desired state of Ceilometer
 |
 | string
 | true
+
+| ksmImage
+|
+| string
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15407,6 +15488,11 @@ CeilometerSpecCore defines the desired state of Ceilometer. This version is used
 | TLS - Parameters related to the TLS
 | tls.SimpleService
 | false
+
+| ksmTls
+| KSMTLS - Parameters related to the TLS for kube-state-metrics
+| tls.SimpleService
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15442,6 +15528,37 @@ CeilometerStatus defines the observed state of Ceilometer
 | networks
 | Networks in addtion to the cluster network, the service is attached to
 | []string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#ksmstatus]
+==== KSMStatus
+
+KSMStatus defines the observed state of kube-state-metrics
+
+|===
+| Field | Description | Scheme | Required
+
+| readyCount
+| ReadyCount of ksm instances
+| int32
+| false
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
 | false
 
 | observedGeneration
@@ -15506,11 +15623,6 @@ LoggingSpec defines the desired state of Logging
 
 |===
 | Field | Description | Scheme | Required
-
-| ipaddr
-| IPAddr is the address where the service will listen on
-| string
-| true
 
 | port
 | Port is the port where the service will listen on
@@ -16573,6 +16685,11 @@ IPSetReservation defines reservation status per requested network
 | DNSDomain of the subnet
 | string
 | true
+
+| serviceNetwork
+| ServiceNetwork mapping
+| ServiceNetNameStr
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -16735,6 +16852,11 @@ Network definition
 | Subnets of the network
 | []<<subnet,Subnet>>
 | true
+
+| serviceNetwork
+| Service network mapping
+| ServiceNetNameStr
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>

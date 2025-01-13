@@ -126,6 +126,11 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | Time before the deployment is requeued in seconds
 | int
 | true
+
+| ansibleJobNodeSelector
+| AnsibleJobNodeSelector to target subset of worker nodes running the ansible jobs
+| map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -458,7 +463,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | caCerts
 | CACerts - Secret containing the CA certificate chain
 | string
-| false
+| true
 
 | openStackAnsibleEERunnerImage
 | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
@@ -713,6 +718,11 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 | []infranetworkv1.IPSetNetwork
 | false
 
+| bmhLabelSelector
+| BmhLabelSelector allows for a sub-selection of BaremetalHosts based on arbitrary labels for a node.
+| map[string]string
+| false
+
 | userData
 | UserData  node specific user-data
 | *corev1.SecretReference
@@ -735,11 +745,6 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 
 | managementNetwork
 | ManagementNetwork - Name of network to use for management (SSH/Ansible)
-| string
-| false
-
-| preprovisioningNetworkDataName
-| PreprovisioningNetworkDataName - NetworkData secret name in the local namespace for pre-provisioing
 | string
 | false
 |===

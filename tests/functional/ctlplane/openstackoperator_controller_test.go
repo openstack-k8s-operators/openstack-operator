@@ -574,6 +574,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 				Expect(OSCtlplane.Spec.Glance.APIOverride[name].Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 				Expect(OSCtlplane.Spec.Glance.APIOverride[name].Route.Annotations).Should(HaveKeyWithValue("api.glance.openstack.org/timeout", "60s"))
 			}
+			Expect(OSCtlplane.Spec.Heat.APIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Heat.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "600s"))
+			Expect(OSCtlplane.Spec.Heat.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.heat.openstack.org/timeout", "600s"))
+			Expect(OSCtlplane.Spec.Heat.CnfAPIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Heat.CnfAPIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "600s"))
+			Expect(OSCtlplane.Spec.Heat.CnfAPIOverride.Route.Annotations).Should(HaveKeyWithValue("api.heat.openstack.org/timeout", "600s"))
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Manila.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.manila.openstack.org/timeout", "60s"))
@@ -855,6 +861,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route).Should(Not(BeNil()))
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
 			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("api.aodh.openstack.org/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Heat.APIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Heat.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "600s"))
+			Expect(OSCtlplane.Spec.Heat.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.heat.openstack.org/timeout", "600s"))
+			Expect(OSCtlplane.Spec.Heat.CnfAPIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Heat.CnfAPIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "600s"))
+			Expect(OSCtlplane.Spec.Heat.CnfAPIOverride.Route.Annotations).Should(HaveKeyWithValue("api.heat.openstack.org/timeout", "600s"))
 		})
 
 		It("should create selfsigned issuer and public, internal, libvirt and ovn CA and issuer", func() {
