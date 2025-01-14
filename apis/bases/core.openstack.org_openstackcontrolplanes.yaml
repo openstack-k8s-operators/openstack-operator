@@ -1856,6 +1856,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          netUtilsImage:
+                            type: string
                           networkAttachments:
                             items:
                               type: string
@@ -2045,6 +2047,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          netUtilsImage:
+                            type: string
                           networkAttachments:
                             items:
                               type: string
@@ -6180,6 +6184,10 @@ spec:
                       adminUser:
                         default: admin
                         type: string
+                      apiTimeout:
+                        default: 60
+                        minimum: 10
+                        type: integer
                       customServiceConfig:
                         type: string
                       databaseAccount:
@@ -7283,6 +7291,14 @@ spec:
                   templates:
                     additionalProperties:
                       properties:
+                        cacheSize:
+                          default: 9932
+                          format: int32
+                          type: integer
+                        maxConn:
+                          default: 8192
+                          format: int32
+                          type: integer
                         nodeSelector:
                           additionalProperties:
                             type: string
