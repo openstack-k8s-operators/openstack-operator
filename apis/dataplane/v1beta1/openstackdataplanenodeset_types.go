@@ -37,7 +37,7 @@ import (
 type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Optional
 	// BaremetalSetTemplate Template for BaremetalSet for the NodeSet
-	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetSpec `json:"baremetalSetTemplate,omitempty"`
+	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetTemplateSpec `json:"baremetalSetTemplate,omitempty"`
 
 	// +kubebuilder:validation:Required
 	// NodeTemplate - node attributes specific to nodes defined by this resource. These
@@ -188,9 +188,8 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		condition.UnknownCondition(condition.ServiceAccountReadyCondition, condition.InitReason, condition.ServiceAccountReadyInitMessage),
 	)
 
-	// Only set Baremetal related conditions if we have baremetal hosts included in the
-	// baremetalSetTemplate.
-	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+	// Only set Baremetal related conditions if required
+	if !instance.Spec.PreProvisioned && len(instance.Spec.Nodes) > 0 {
 		cl = append(cl, *condition.UnknownCondition(NodeSetBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason))
 	}
 
