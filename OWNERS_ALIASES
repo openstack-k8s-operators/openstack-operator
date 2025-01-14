@@ -6,7 +6,7 @@ aliases:
   - frenzyfriday
   - viroel
   docs-approvers:
-  - igallagh-redhat
+  - Jenny-Anne
   openstack-approvers:
   - abays
   - dprince
