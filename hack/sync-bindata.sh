@@ -7,6 +7,7 @@ set -ex
 
 OUT_DATA=bindata
 EXTRACT_DIR=tmp/bindata
+LOCAL_BINARIES=${LOCAL_BINARIES:?}
 
 mkdir -p "$EXTRACT_DIR"
 mkdir -p "$OUT_DATA/crds"
@@ -25,7 +26,7 @@ local CSV_FILENAME=$1
 local OPERATOR_NAME=$2
 local TYPE=$3
 
-cat $CSV_FILENAME | yq -r ".spec.webhookdefinitions.[] | select(.type == \"$TYPE\")" | \
+cat $CSV_FILENAME | $LOCAL_BINARIES/yq -r ".spec.webhookdefinitions.[] | select(.type == \"$TYPE\")" | \
     sed -e '/^containerPort:/d' | \
     sed -e '/^deploymentName:/d' | \
     sed -e '/^targetPort:/d' | \
@@ -152,9 +153,9 @@ grep -l CustomResourceDefinition manifests/* | xargs -I % sh -c 'cp % ./crds/'
 for X in $(ls manifests/*clusterserviceversion.yaml); do
         OPERATOR_NAME=$(echo $X | sed -e "s|manifests\/\([^\.]*\)\..*|\1|")
         echo $OPERATOR_NAME
-        LEADER_ELECTION_ROLE_RULES=$(cat $X | yq -r .spec.install.spec.permissions | sed -e 's|- rules:|rules:|' | sed -e 's|    ||' | sed -e '/  serviceAccountName.*/d'
+        LEADER_ELECTION_ROLE_RULES=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.permissions | sed -e 's|- rules:|rules:|' | sed -e 's|    ||' | sed -e '/  serviceAccountName.*/d'
 )
-        CLUSTER_ROLE_RULES=$(cat $X | yq -r .spec.install.spec.clusterPermissions| sed -e 's|- rules:|rules:|' | sed -e 's|    ||' | sed -e '/  serviceAccountName.*/d'
+        CLUSTER_ROLE_RULES=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.clusterPermissions| sed -e 's|- rules:|rules:|' | sed -e 's|    ||' | sed -e '/  serviceAccountName.*/d'
 )
 
 if [[ "$OPERATOR_NAME" == "infra-operator" ]]; then
@@ -271,9 +272,9 @@ for X in $(ls manifests/*clusterserviceversion.yaml); do
         OPERATOR_NAME=$(echo $X | sed -e "s|manifests\/\([^\.]*\)\..*|\1|" | sed -e "s|-|_|g" | tr '[:lower:]' '[:upper:]' )
         echo $OPERATOR_NAME
         if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" ]]; then
-            IMAGE=$(cat $X | yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[0].image)
+            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[0].image)
         else
-            IMAGE=$(cat $X | yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[1].image)
+            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[1].image)
         fi
         echo $IMAGE
 

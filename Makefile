@@ -146,7 +146,8 @@ generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: bindata
-bindata: kustomize yq ## Build docker image with the manager.
+bindata: export LOCAL_BINARIES=$(LOCALBIN)
+bindata: kustomize yq ## Call sync bindata script
 	mkdir -p bindata/crds bindata/rbac bindata/operator
 	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
 	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
