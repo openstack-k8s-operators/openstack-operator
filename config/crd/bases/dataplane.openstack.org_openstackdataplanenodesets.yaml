@@ -63,8 +63,6 @@ spec:
                     type: string
                   ctlplaneInterface:
                     type: string
-                  ctlplaneNetmask:
-                    type: string
                   deploymentSSHSecret:
                     type: string
                   domainName:
