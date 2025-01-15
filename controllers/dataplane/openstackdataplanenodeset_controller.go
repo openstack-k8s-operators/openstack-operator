@@ -178,7 +178,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// this reconcile loop.
 	instance.InitConditions()
 	// Set ObservedGeneration since we've reset conditions
-	instance.Status.ObservedGeneration = instance.Generation
+	var generationChanged bool
+	if instance.Generation != instance.Status.ObservedGeneration {
+		instance.Status.ObservedGeneration = instance.Generation
+		generationChanged = true
+	}
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() { // update the Ready condition based on the sub conditions
@@ -381,7 +385,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(
-		ctx, helper, instance)
+		ctx, helper, instance, generationChanged)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -460,6 +464,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 func checkDeployment(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	generationChanged bool,
 ) (bool, bool, bool, string, error) {
 	// Get all completed deployments
 	var failedDeployment string
@@ -514,7 +519,12 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
 				isDeploymentRunning = true
 			} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
-				if deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash {
+				// If the nodeset configHash does not match with what's in the deployment and the
+				// generation metadata has changed i.e generation metatdata won't change when
+				// fields are removed from the CRD during an update that would not require a new
+				// deployment to run).
+				if deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash &&
+					generationChanged {
 					continue
 				}
 				isDeploymentReady = true
