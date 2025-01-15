@@ -1,0 +1,567 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: tobikoes.test.openstack.org
+spec:
+  group: test.openstack.org
+  names:
+    kind: Tobiko
+    listKind: TobikoList
+    plural: tobikoes
+    singular: tobiko
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TobikoSpec defines the desired state of Tobiko
+            properties:
+              SELinuxLevel:
+                default: ""
+                description: |-
+                  A SELinuxLevel that should be used for test pods spawned by the test
+                  operator.
+                type: string
+              backoffLimit:
+                default: 0
+                description: BackoffLimit allows to define the maximum number of retried
+                  executions (defaults to 0).
+                format: int32
+                type: integer
+              config:
+                default: ""
+                description: tobiko.conf
+                type: string
+              containerImage:
+                default: ""
+                description: A URL of a container image that should be used by the
+                  test-operator for tests execution.
+                type: string
+              debug:
+                default: false
+                description: |-
+                  Activate debug mode. When debug mode is activated any error encountered
+                  inside the test-pod causes that the pod will be kept alive indefinitely
+                  (stuck in "Running" phase) or until the corresponding Tobiko CR is deleted.
+                  This allows the user to debug any potential troubles with `oc rsh`.
+                type: boolean
+              extraConfigmapsMounts:
+                description: Extra configmaps for mounting inside the pod
+                items:
+                  properties:
+                    mountPath:
+                      description: Path within the container at which the volume should
+                        be mounted.
+                      type: string
+                    name:
+                      description: The name of an existing config map for mounting.
+                      maxLength: 253
+                      type: string
+                    subPath:
+                      default: ""
+                      description: Config map subpath for mounting, defaults to configmap
+                        root.
+                      type: string
+                  required:
+                  - mountPath
+                  - name
+                  - subPath
+                  type: object
+                type: array
+              kubeconfigSecretName:
+                description: |-
+                  Name of a secret that contains a kubeconfig. The kubeconfig is mounted under /var/lib/tobiko/.kube/config
+                  in the test pod.
+                type: string
+              networkAttachments:
+                description: |-
+                  NetworkAttachments is a list of NetworkAttachment resource names to expose
+                  the services to the given network
+                items:
+                  type: string
+                type: array
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: |-
+                  This value contains a nodeSelector value that is applied to test pods
+                  spawned by the test operator.
+                type: object
+              numProcesses:
+                default: 4
+                description: Number of processes/workers used to run tobiko tests
+                  - value 0 results in automatic decission
+                type: integer
+              parallel:
+                default: false
+                description: |-
+                  By default test-operator executes the test-pods sequentially if multiple
+                  instances of test-operator related CRs exist. To run test-pods in parallel
+                  set this option to true.
+                type: boolean
+              preventCreate:
+                default: false
+                description: Boolean specifying whether tobiko tests create new resources
+                  or re-use those previously created
+                type: boolean
+              privateKey:
+                default: ""
+                description: Private Key
+                type: string
+              privileged:
+                default: false
+                description: |-
+                  Use with caution! This parameter specifies whether test-operator should spawn
+                  test pods with allowedPrivilegedEscalation: true, readOnlyRootFilesystem: false,
+                  runAsNonRoot: false, automountServiceAccountToken: true, and the default
+                  capabilities on top of capabilities that are usually needed by the test
+                  pods (NET_ADMIN, NET_RAW). This parameter is deemed insecure but it is
+                  needed for certain test-operator functionalities to work properly (e.g.:
+                  extraRPMs in Tempest CR, or certain set of tobiko tests).
+                type: boolean
+              publicKey:
+                default: ""
+                description: Public Key
+                type: string
+              pytestAddopts:
+                default: ""
+                description: String including any options to pass to pytest when it
+                  runs tobiko tests
+                type: string
+              resources:
+                default:
+                  limits:
+                    cpu: 8000m
+                    memory: 8Gi
+                  requests:
+                    cpu: 4000m
+                    memory: 4Gi
+                description: |-
+                  The desired amount of resources that should be assigned to each test pod
+                  spawned using the Tobiko CR. https://pkg.go.dev/k8s.io/api/core/v1#ResourceRequirements
+                properties:
+                  claims:
+                    description: |-
+                      Claims lists the names of resources, defined in spec.resourceClaims,
+                      that are used by this container.
+
+
+                      This is an alpha field and requires enabling the
+                      DynamicResourceAllocation feature gate.
+
+
+                      This field is immutable. It can only be set for containers.
+                    items:
+                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                      properties:
+                        name:
+                          description: |-
+                            Name must match the name of one entry in pod.spec.resourceClaims of
+                            the Pod where this field is used. It makes that resource available
+                            inside a container.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    x-kubernetes-list-type: map
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Limits describes the maximum amount of compute resources allowed.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Requests describes the minimum amount of compute resources required.
+                      If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                      otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                type: object
+              storageClass:
+                default: local-storage
+                description: StorageClass used to create any test-operator related
+                  PVCs.
+                type: string
+              testenv:
+                default: py3
+                description: Test environment
+                type: string
+              tolerations:
+                description: |-
+                  This value contains a toleration that is applied to pods spawned by the
+                  test pods that are spawned by the test-operator.
+                items:
+                  description: |-
+                    The pod this Toleration is attached to tolerates any taint that matches
+                    the triple <key,value,effect> using the matching operator <operator>.
+                  properties:
+                    effect:
+                      description: |-
+                        Effect indicates the taint effect to match. Empty means match all taint effects.
+                        When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                      type: string
+                    key:
+                      description: |-
+                        Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                        If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                      type: string
+                    operator:
+                      description: |-
+                        Operator represents a key's relationship to the value.
+                        Valid operators are Exists and Equal. Defaults to Equal.
+                        Exists is equivalent to wildcard for value, so that a pod can
+                        tolerate all taints of a particular category.
+                      type: string
+                    tolerationSeconds:
+                      description: |-
+                        TolerationSeconds represents the period of time the toleration (which must be
+                        of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                        it is not set, which means tolerate the taint forever (do not evict). Zero and
+                        negative values will be treated as 0 (evict immediately) by the system.
+                      format: int64
+                      type: integer
+                    value:
+                      description: |-
+                        Value is the taint value the toleration matches to.
+                        If the operator is Exists, the value should be empty, otherwise just a regular string.
+                      type: string
+                  type: object
+                type: array
+              version:
+                default: ""
+                description: Tobiko version
+                type: string
+              workflow:
+                description: A parameter  that contains a workflow definition.
+                items:
+                  properties:
+                    SELinuxLevel:
+                      description: |-
+                        A SELinuxLevel that should be used for test pods spawned by the test
+                        operator.
+                      type: string
+                    backoffLimit:
+                      default: 0
+                      description: BackoffLimit allows to define the maximum number
+                        of retried executions (defaults to 0).
+                      format: int32
+                      type: integer
+                    config:
+                      description: tobiko.conf
+                      type: string
+                    containerImage:
+                      default: ""
+                      description: A URL of a container image that should be used
+                        by the test-operator for tests execution.
+                      type: string
+                    extraConfigmapsMounts:
+                      description: Extra configmaps for mounting inside the pod
+                      items:
+                        properties:
+                          mountPath:
+                            description: Path within the container at which the volume
+                              should be mounted.
+                            type: string
+                          name:
+                            description: The name of an existing config map for mounting.
+                            maxLength: 253
+                            type: string
+                          subPath:
+                            default: ""
+                            description: Config map subpath for mounting, defaults
+                              to configmap root.
+                            type: string
+                        required:
+                        - mountPath
+                        - name
+                        - subPath
+                        type: object
+                      type: array
+                    kubeconfigSecretName:
+                      description: |-
+                        Name of a secret that contains a kubeconfig. The kubeconfig is mounted under /var/lib/tobiko/.kube/config
+                        in the test pod.
+                      type: string
+                    networkAttachments:
+                      description: |-
+                        NetworkAttachments is a list of NetworkAttachment resource names to expose
+                        the services to the given network
+                      items:
+                        type: string
+                      type: array
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        This value contains a nodeSelector value that is applied to test pods
+                        spawned by the test operator.
+                      type: object
+                    numProcesses:
+                      description: Number of processes/workers used to run tobiko
+                        tests - value 0 results in automatic decission
+                      type: integer
+                    preventCreate:
+                      description: Boolean specifying whether tobiko tests create
+                        new resources or re-use those previously created
+                      type: boolean
+                    privateKey:
+                      description: Private Key
+                      type: string
+                    privileged:
+                      description: |-
+                        Use with caution! This parameter specifies whether test-operator should spawn test
+                        pods with allowedPrivilegedEscalation: true and the default capabilities on
+                        top of capabilities that are usually needed by the test pods (NET_ADMIN, NET_RAW).
+                        This parameter is deemed insecure but it is needed for certain test-operator
+                        functionalities to work properly (e.g.: extraRPMs in Tempest CR, or certain set
+                        of tobiko tests).
+                      type: boolean
+                    publicKey:
+                      description: Public Key
+                      type: string
+                    pytestAddopts:
+                      description: String including any options to pass to pytest
+                        when it runs tobiko tests
+                      type: string
+                    resources:
+                      default:
+                        limits:
+                          cpu: 8000m
+                          memory: 8Gi
+                        requests:
+                          cpu: 4000m
+                          memory: 4Gi
+                      description: |-
+                        The desired amount of resources that should be assigned to each test pod
+                        spawned using the Tobiko CR. https://pkg.go.dev/k8s.io/api/core/v1#ResourceRequirements
+                      properties:
+                        claims:
+                          description: |-
+                            Claims lists the names of resources, defined in spec.resourceClaims,
+                            that are used by this container.
+
+
+                            This is an alpha field and requires enabling the
+                            DynamicResourceAllocation feature gate.
+
+
+                            This field is immutable. It can only be set for containers.
+                          items:
+                            description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                            properties:
+                              name:
+                                description: |-
+                                  Name must match the name of one entry in pod.spec.resourceClaims of
+                                  the Pod where this field is used. It makes that resource available
+                                  inside a container.
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          type: array
+                          x-kubernetes-list-map-keys:
+                          - name
+                          x-kubernetes-list-type: map
+                        limits:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: |-
+                            Limits describes the maximum amount of compute resources allowed.
+                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                          type: object
+                        requests:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: |-
+                            Requests describes the minimum amount of compute resources required.
+                            If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                            otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                          type: object
+                      type: object
+                    stepName:
+                      default: ""
+                      description: A parameter that contains a definition of a single
+                        workflow step.
+                      maxLength: 100
+                      type: string
+                    storageClass:
+                      default: local-storage
+                      description: StorageClass used to create any test-operator related
+                        PVCs.
+                      type: string
+                    testenv:
+                      description: Test environment
+                      type: string
+                    tolerations:
+                      description: |-
+                        This value contains a toleration that is applied to pods spawned by the
+                        test pods that are spawned by the test-operator.
+                      items:
+                        description: |-
+                          The pod this Toleration is attached to tolerates any taint that matches
+                          the triple <key,value,effect> using the matching operator <operator>.
+                        properties:
+                          effect:
+                            description: |-
+                              Effect indicates the taint effect to match. Empty means match all taint effects.
+                              When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                            type: string
+                          key:
+                            description: |-
+                              Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                              If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                            type: string
+                          operator:
+                            description: |-
+                              Operator represents a key's relationship to the value.
+                              Valid operators are Exists and Equal. Defaults to Equal.
+                              Exists is equivalent to wildcard for value, so that a pod can
+                              tolerate all taints of a particular category.
+                            type: string
+                          tolerationSeconds:
+                            description: |-
+                              TolerationSeconds represents the period of time the toleration (which must be
+                              of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                              it is not set, which means tolerate the taint forever (do not evict). Zero and
+                              negative values will be treated as 0 (evict immediately) by the system.
+                            format: int64
+                            type: integer
+                          value:
+                            description: |-
+                              Value is the taint value the toleration matches to.
+                              If the operator is Exists, the value should be empty, otherwise just a regular string.
+                            type: string
+                        type: object
+                      type: array
+                    version:
+                      description: Tobiko version
+                      type: string
+                  required:
+                  - stepName
+                  type: object
+                type: array
+            type: object
+          status:
+            description: CommonTestStatus defines the observed state of the controller
+            properties:
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
+              networkAttachments:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                description: NetworkAttachments status of the deployment pods
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

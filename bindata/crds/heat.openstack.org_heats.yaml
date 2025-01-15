@@ -1,0 +1,922 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: heats.heat.openstack.org
+spec:
+  group: heat.openstack.org
+  names:
+    kind: Heat
+    listKind: HeatList
+    plural: heats
+    singular: heat
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Heat is the Schema for the heats API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HeatSpec defines the desired state of Heat
+            properties:
+              apiTimeout:
+                default: 600
+                description: APITimeout for Route and Apache
+                minimum: 60
+                type: integer
+              customServiceConfig:
+                description: |-
+                  CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                  or overwrite rendered information using raw OpenStack config format. The content gets added to
+                  to /etc/heat/heat.conf.d directory as 01-custom.conf file.
+                type: string
+              customServiceConfigSecrets:
+                description: |-
+                  CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets
+                  that contain sensitive service config data. The content of each Secret gets added to the
+                  /etc/heat/heat.conf.d directory as a custom config file.
+                items:
+                  type: string
+                type: array
+              databaseAccount:
+                default: heat
+                description: DatabaseAccount - optional MariaDBAccount used for heat
+                  DB, defaults to heat.
+                type: string
+              databaseInstance:
+                default: openstack
+                description: |-
+                  MariaDB instance name.
+                  Right now required by the maridb-operator to get the credentials from the instance to create the DB.
+                  Might not be required in future.
+                type: string
+              defaultConfigOverwrite:
+                additionalProperties:
+                  type: string
+                description: |-
+                  ConfigOverwrite - interface to overwrite default config files like e.g. policy.json.
+                  But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
+                  TODO: -> implement
+                type: object
+              heatAPI:
+                description: HeatAPI - Spec definition for the API service of this
+                  Heat deployment
+                properties:
+                  containerImage:
+                    description: ContainerImage - Container Image URL
+                    type: string
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
+                    type: string
+                  customServiceConfigSecrets:
+                    description: |-
+                      CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets
+                      that contain sensitive service config data. The content of each Secret gets added to the
+                      /etc/heat/heat.conf.d directory as a custom config file.
+                    items:
+                      type: string
+                    type: array
+                  defaultConfigOverwrite:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      ConfigOverwrite - interface to overwrite default config files like e.g. policy.json.
+                      But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
+                      TODO: -> implement
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: NodeSelector to target subset of worker nodes for
+                      running the service
+                    type: object
+                  override:
+                    description: Override, provides the ability to override the generated
+                      manifest of several child resources.
+                    properties:
+                      service:
+                        additionalProperties:
+                          description: |-
+                            RoutedOverrideSpec - a routed service override configuration for the Service created to serve traffic
+                            to the cluster. Allows for the manifest of the created Service to be overwritten with custom configuration.
+                          properties:
+                            endpointURL:
+                              type: string
+                            metadata:
+                              description: |-
+                                EmbeddedLabelsAnnotations is an embedded subset of the fields included in k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta.
+                                Only labels and annotations are included.
+                              properties:
+                                annotations:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Annotations is an unstructured key value map stored with a resource that may be
+                                    set by external tools to store and retrieve arbitrary metadata. They are not
+                                    queryable and should be preserved when modifying objects.
+                                    More info: http://kubernetes.io/docs/user-guide/annotations
+                                  type: object
+                                labels:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Map of string keys and values that can be used to organize and categorize
+                                    (scope and select) objects. May match selectors of replication controllers
+                                    and services.
+                                    More info: http://kubernetes.io/docs/user-guide/labels
+                                  type: object
+                              type: object
+                            spec:
+                              description: |-
+                                OverrideServiceSpec is a subset of the fields included in https://pkg.go.dev/k8s.io/api@v0.26.6/core/v1#ServiceSpec
+                                Limited to Type, SessionAffinity, LoadBalancerSourceRanges, ExternalName, ExternalTrafficPolicy, SessionAffinityConfig,
+                                IPFamilyPolicy, LoadBalancerClass and InternalTrafficPolicy
+                              properties:
+                                externalName:
+                                  description: |-
+                                    externalName is the external reference that discovery mechanisms will
+                                    return as an alias for this service (e.g. a DNS CNAME record). No
+                                    proxying will be involved.  Must be a lowercase RFC-1123 hostname
+                                    (https://tools.ietf.org/html/rfc1123) and requires `type` to be "ExternalName".
+                                  type: string
+                                externalTrafficPolicy:
+                                  description: |-
+                                    externalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on one of the Service's "externally-facing" addresses (NodePorts,
+                                    ExternalIPs, and LoadBalancer IPs). If set to "Local", the proxy will configure
+                                    the service in a way that assumes that external load balancers will take care
+                                    of balancing the service traffic between nodes, and so each node will deliver
+                                    traffic only to the node-local endpoints of the service, without masquerading
+                                    the client source IP. (Traffic mistakenly sent to a node with no endpoints will
+                                    be dropped.) The default value, "Cluster", uses the standard behavior of
+                                    routing to all endpoints evenly (possibly modified by topology and other
+                                    features). Note that traffic sent to an External IP or LoadBalancer IP from
+                                    within the cluster will always get "Cluster" semantics, but clients sending to
+                                    a NodePort from within the cluster may need to take traffic policy into account
+                                    when picking a node.
+                                  type: string
+                                internalTrafficPolicy:
+                                  description: |-
+                                    InternalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on the ClusterIP. If set to "Local", the proxy will assume that pods
+                                    only want to talk to endpoints of the service on the same node as the pod,
+                                    dropping the traffic if there are no local endpoints. The default value,
+                                    "Cluster", uses the standard behavior of routing to all endpoints evenly
+                                    (possibly modified by topology and other features).
+                                  type: string
+                                ipFamilyPolicy:
+                                  description: |-
+                                    IPFamilyPolicy represents the dual-stack-ness requested or required by
+                                    this Service. If there is no value provided, then this field will be set
+                                    to SingleStack. Services can be "SingleStack" (a single IP family),
+                                    "PreferDualStack" (two IP families on dual-stack configured clusters or
+                                    a single IP family on single-stack clusters), or "RequireDualStack"
+                                    (two IP families on dual-stack configured clusters, otherwise fail). The
+                                    ipFamilies and clusterIPs fields depend on the value of this field. This
+                                    field will be wiped when updating a service to type ExternalName.
+                                  type: string
+                                loadBalancerClass:
+                                  description: |-
+                                    loadBalancerClass is the class of the load balancer implementation this Service belongs to.
+                                    If specified, the value of this field must be a label-style identifier, with an optional prefix,
+                                    e.g. "internal-vip" or "example.com/internal-vip". Unprefixed names are reserved for end-users.
+                                    This field can only be set when the Service type is 'LoadBalancer'. If not set, the default load
+                                    balancer implementation is used, today this is typically done through the cloud provider integration,
+                                    but should apply for any default implementation. If set, it is assumed that a load balancer
+                                    implementation is watching for Services with a matching class. Any default load balancer
+                                    implementation (e.g. cloud providers) should ignore Services that set this field.
+                                    This field can only be set when creating or updating a Service to type 'LoadBalancer'.
+                                    Once set, it can not be changed. This field will be wiped when a service is updated to a non 'LoadBalancer' type.
+                                  type: string
+                                loadBalancerSourceRanges:
+                                  description: |-
+                                    If specified and supported by the platform, this will restrict traffic through the cloud-provider
+                                    load-balancer will be restricted to the specified client IPs. This field will be ignored if the
+                                    cloud-provider does not support the feature."
+                                    More info: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/
+                                  items:
+                                    type: string
+                                  type: array
+                                sessionAffinity:
+                                  description: |-
+                                    Supports "ClientIP" and "None". Used to maintain session affinity.
+                                    Enable client IP based session affinity.
+                                    Must be ClientIP or None.
+                                    Defaults to None.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+                                  type: string
+                                sessionAffinityConfig:
+                                  description: sessionAffinityConfig contains the
+                                    configurations of session affinity.
+                                  properties:
+                                    clientIP:
+                                      description: clientIP contains the configurations
+                                        of Client IP based session affinity.
+                                      properties:
+                                        timeoutSeconds:
+                                          description: |-
+                                            timeoutSeconds specifies the seconds of ClientIP type session sticky time.
+                                            The value must be >0 && <=86400(for 1 day) if ServiceAffinity == "ClientIP".
+                                            Default value is 10800(for 3 hours).
+                                          format: int32
+                                          type: integer
+                                      type: object
+                                  type: object
+                                type:
+                                  description: |-
+                                    type determines how the Service is exposed. Defaults to ClusterIP. Valid
+                                    options are ExternalName, ClusterIP, NodePort, and LoadBalancer.
+                                    "ClusterIP" allocates a cluster-internal IP address for load-balancing
+                                    to endpoints. Endpoints are determined by the selector or if that is not
+                                    specified, by manual construction of an Endpoints object or
+                                    EndpointSlice objects. If clusterIP is "None", no virtual IP is
+                                    allocated and the endpoints are published as a set of endpoints rather
+                                    than a virtual IP.
+                                    "NodePort" builds on ClusterIP and allocates a port on every node which
+                                    routes to the same endpoints as the clusterIP.
+                                    "LoadBalancer" builds on NodePort and creates an external load-balancer
+                                    (if supported in the current cloud) which routes to the same endpoints
+                                    as the clusterIP.
+                                    "ExternalName" aliases this service to the specified externalName.
+                                    Several other fields do not apply to ExternalName services.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+                                  type: string
+                              type: object
+                          type: object
+                        description: |-
+                          Override configuration for the Service created to serve traffic to the cluster.
+                          The key must be the endpoint type (public, internal)
+                        type: object
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas -
+                    format: int32
+                    maximum: 32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  tls:
+                    description: TLS - Parameters related to the TLS
+                    properties:
+                      api:
+                        description: API tls type which encapsulates for API services
+                        properties:
+                          internal:
+                            description: Internal GenericService - holds the secret
+                              for the internal endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                          public:
+                            description: Public GenericService - holds the secret
+                              for the public endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                        type: object
+                      caBundleSecretName:
+                        description: CaBundleSecretName - holding the CA certs in
+                          a pre-created bundle file
+                        type: string
+                    type: object
+                required:
+                - containerImage
+                type: object
+              heatCfnAPI:
+                description: HeatCfnAPI - Spec definition for the CfnAPI service of
+                  this Heat deployment
+                properties:
+                  containerImage:
+                    description: ContainerImage - Container Image URL
+                    type: string
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
+                    type: string
+                  customServiceConfigSecrets:
+                    description: |-
+                      CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets
+                      that contain sensitive service config data. The content of each Secret gets added to the
+                      /etc/heat/heat.conf.d directory as a custom config file.
+                    items:
+                      type: string
+                    type: array
+                  defaultConfigOverwrite:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      ConfigOverwrite - interface to overwrite default config files like e.g. policy.json.
+                      But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
+                      TODO: -> implement
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: NodeSelector to target subset of worker nodes for
+                      running the service
+                    type: object
+                  override:
+                    description: Override, provides the ability to override the generated
+                      manifest of several child resources.
+                    properties:
+                      service:
+                        additionalProperties:
+                          description: |-
+                            RoutedOverrideSpec - a routed service override configuration for the Service created to serve traffic
+                            to the cluster. Allows for the manifest of the created Service to be overwritten with custom configuration.
+                          properties:
+                            endpointURL:
+                              type: string
+                            metadata:
+                              description: |-
+                                EmbeddedLabelsAnnotations is an embedded subset of the fields included in k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta.
+                                Only labels and annotations are included.
+                              properties:
+                                annotations:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Annotations is an unstructured key value map stored with a resource that may be
+                                    set by external tools to store and retrieve arbitrary metadata. They are not
+                                    queryable and should be preserved when modifying objects.
+                                    More info: http://kubernetes.io/docs/user-guide/annotations
+                                  type: object
+                                labels:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Map of string keys and values that can be used to organize and categorize
+                                    (scope and select) objects. May match selectors of replication controllers
+                                    and services.
+                                    More info: http://kubernetes.io/docs/user-guide/labels
+                                  type: object
+                              type: object
+                            spec:
+                              description: |-
+                                OverrideServiceSpec is a subset of the fields included in https://pkg.go.dev/k8s.io/api@v0.26.6/core/v1#ServiceSpec
+                                Limited to Type, SessionAffinity, LoadBalancerSourceRanges, ExternalName, ExternalTrafficPolicy, SessionAffinityConfig,
+                                IPFamilyPolicy, LoadBalancerClass and InternalTrafficPolicy
+                              properties:
+                                externalName:
+                                  description: |-
+                                    externalName is the external reference that discovery mechanisms will
+                                    return as an alias for this service (e.g. a DNS CNAME record). No
+                                    proxying will be involved.  Must be a lowercase RFC-1123 hostname
+                                    (https://tools.ietf.org/html/rfc1123) and requires `type` to be "ExternalName".
+                                  type: string
+                                externalTrafficPolicy:
+                                  description: |-
+                                    externalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on one of the Service's "externally-facing" addresses (NodePorts,
+                                    ExternalIPs, and LoadBalancer IPs). If set to "Local", the proxy will configure
+                                    the service in a way that assumes that external load balancers will take care
+                                    of balancing the service traffic between nodes, and so each node will deliver
+                                    traffic only to the node-local endpoints of the service, without masquerading
+                                    the client source IP. (Traffic mistakenly sent to a node with no endpoints will
+                                    be dropped.) The default value, "Cluster", uses the standard behavior of
+                                    routing to all endpoints evenly (possibly modified by topology and other
+                                    features). Note that traffic sent to an External IP or LoadBalancer IP from
+                                    within the cluster will always get "Cluster" semantics, but clients sending to
+                                    a NodePort from within the cluster may need to take traffic policy into account
+                                    when picking a node.
+                                  type: string
+                                internalTrafficPolicy:
+                                  description: |-
+                                    InternalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on the ClusterIP. If set to "Local", the proxy will assume that pods
+                                    only want to talk to endpoints of the service on the same node as the pod,
+                                    dropping the traffic if there are no local endpoints. The default value,
+                                    "Cluster", uses the standard behavior of routing to all endpoints evenly
+                                    (possibly modified by topology and other features).
+                                  type: string
+                                ipFamilyPolicy:
+                                  description: |-
+                                    IPFamilyPolicy represents the dual-stack-ness requested or required by
+                                    this Service. If there is no value provided, then this field will be set
+                                    to SingleStack. Services can be "SingleStack" (a single IP family),
+                                    "PreferDualStack" (two IP families on dual-stack configured clusters or
+                                    a single IP family on single-stack clusters), or "RequireDualStack"
+                                    (two IP families on dual-stack configured clusters, otherwise fail). The
+                                    ipFamilies and clusterIPs fields depend on the value of this field. This
+                                    field will be wiped when updating a service to type ExternalName.
+                                  type: string
+                                loadBalancerClass:
+                                  description: |-
+                                    loadBalancerClass is the class of the load balancer implementation this Service belongs to.
+                                    If specified, the value of this field must be a label-style identifier, with an optional prefix,
+                                    e.g. "internal-vip" or "example.com/internal-vip". Unprefixed names are reserved for end-users.
+                                    This field can only be set when the Service type is 'LoadBalancer'. If not set, the default load
+                                    balancer implementation is used, today this is typically done through the cloud provider integration,
+                                    but should apply for any default implementation. If set, it is assumed that a load balancer
+                                    implementation is watching for Services with a matching class. Any default load balancer
+                                    implementation (e.g. cloud providers) should ignore Services that set this field.
+                                    This field can only be set when creating or updating a Service to type 'LoadBalancer'.
+                                    Once set, it can not be changed. This field will be wiped when a service is updated to a non 'LoadBalancer' type.
+                                  type: string
+                                loadBalancerSourceRanges:
+                                  description: |-
+                                    If specified and supported by the platform, this will restrict traffic through the cloud-provider
+                                    load-balancer will be restricted to the specified client IPs. This field will be ignored if the
+                                    cloud-provider does not support the feature."
+                                    More info: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/
+                                  items:
+                                    type: string
+                                  type: array
+                                sessionAffinity:
+                                  description: |-
+                                    Supports "ClientIP" and "None". Used to maintain session affinity.
+                                    Enable client IP based session affinity.
+                                    Must be ClientIP or None.
+                                    Defaults to None.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+                                  type: string
+                                sessionAffinityConfig:
+                                  description: sessionAffinityConfig contains the
+                                    configurations of session affinity.
+                                  properties:
+                                    clientIP:
+                                      description: clientIP contains the configurations
+                                        of Client IP based session affinity.
+                                      properties:
+                                        timeoutSeconds:
+                                          description: |-
+                                            timeoutSeconds specifies the seconds of ClientIP type session sticky time.
+                                            The value must be >0 && <=86400(for 1 day) if ServiceAffinity == "ClientIP".
+                                            Default value is 10800(for 3 hours).
+                                          format: int32
+                                          type: integer
+                                      type: object
+                                  type: object
+                                type:
+                                  description: |-
+                                    type determines how the Service is exposed. Defaults to ClusterIP. Valid
+                                    options are ExternalName, ClusterIP, NodePort, and LoadBalancer.
+                                    "ClusterIP" allocates a cluster-internal IP address for load-balancing
+                                    to endpoints. Endpoints are determined by the selector or if that is not
+                                    specified, by manual construction of an Endpoints object or
+                                    EndpointSlice objects. If clusterIP is "None", no virtual IP is
+                                    allocated and the endpoints are published as a set of endpoints rather
+                                    than a virtual IP.
+                                    "NodePort" builds on ClusterIP and allocates a port on every node which
+                                    routes to the same endpoints as the clusterIP.
+                                    "LoadBalancer" builds on NodePort and creates an external load-balancer
+                                    (if supported in the current cloud) which routes to the same endpoints
+                                    as the clusterIP.
+                                    "ExternalName" aliases this service to the specified externalName.
+                                    Several other fields do not apply to ExternalName services.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+                                  type: string
+                              type: object
+                          type: object
+                        description: |-
+                          Override configuration for the Service created to serve traffic to the cluster.
+                          The key must be the endpoint type (public, internal)
+                        type: object
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas -
+                    format: int32
+                    maximum: 32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  tls:
+                    description: TLS - Parameters related to the TLS
+                    properties:
+                      api:
+                        description: API tls type which encapsulates for API services
+                        properties:
+                          internal:
+                            description: Internal GenericService - holds the secret
+                              for the internal endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                          public:
+                            description: Public GenericService - holds the secret
+                              for the public endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                        type: object
+                      caBundleSecretName:
+                        description: CaBundleSecretName - holding the CA certs in
+                          a pre-created bundle file
+                        type: string
+                    type: object
+                required:
+                - containerImage
+                type: object
+              heatEngine:
+                description: HeatEngine - Spec definition for the Engine service of
+                  this Heat deployment
+                properties:
+                  containerImage:
+                    description: ContainerImage - Container Image URL
+                    type: string
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
+                    type: string
+                  customServiceConfigSecrets:
+                    description: |-
+                      CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets
+                      that contain sensitive service config data. The content of each Secret gets added to the
+                      /etc/heat/heat.conf.d directory as a custom config file.
+                    items:
+                      type: string
+                    type: array
+                  defaultConfigOverwrite:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      ConfigOverwrite - interface to overwrite default config files like e.g. policy.json.
+                      But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
+                      TODO: -> implement
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: NodeSelector to target subset of worker nodes for
+                      running the service
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas -
+                    format: int32
+                    maximum: 32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                required:
+                - containerImage
+                type: object
+              memcachedInstance:
+                default: memcached
+                description: Memcached instance name.
+                type: string
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: NodeSelector to target subset of worker nodes for running
+                  the Heat services
+                type: object
+              passwordSelectors:
+                default:
+                  authEncryptionKey: HeatAuthEncryptionKey
+                  service: HeatPassword
+                description: PasswordSelectors - Selectors to identify the DB and
+                  ServiceUser password from the Secret
+                properties:
+                  authEncryptionKey:
+                    default: HeatAuthEncryptionKey
+                    description: AuthEncryptionKey - Selector to get the heat auth
+                      encryption key from the Secret
+                    type: string
+                  service:
+                    default: HeatPassword
+                    description: Service - Selector to get the heat service password
+                      from the Secret
+                    type: string
+                  stackDomainAdminPassword:
+                    default: HeatStackDomainAdminPassword
+                    description: StackDomainAdminPassword - Selector to get the heat
+                      stack domain admin password from the Secret
+                    type: string
+                type: object
+              preserveJobs:
+                default: false
+                description: PreserveJobs - do not delete jobs after they finished
+                  e.g. to check logs
+                type: boolean
+              rabbitMqClusterName:
+                default: rabbitmq
+                description: |-
+                  RabbitMQ instance name
+                  Needed to request a transportURL that is created and used in Heat
+                type: string
+              secret:
+                description: |-
+                  Secret containing OpenStack password information for heat HeatDatabasePassword, HeatPassword
+                  and HeatAuthEncryptionKey
+                type: string
+              serviceUser:
+                default: heat
+                description: ServiceUser - optional username used for this service
+                  to register in heat
+                type: string
+            required:
+            - databaseInstance
+            - heatAPI
+            - heatCfnAPI
+            - heatEngine
+            - memcachedInstance
+            - rabbitMqClusterName
+            - secret
+            type: object
+          status:
+            description: HeatStatus defines the observed state of Heat
+            properties:
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              databaseHostname:
+                description: Heat Database Hostname
+                type: string
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
+              heatApiReadyCount:
+                description: ReadyCount of Heat API instance
+                format: int32
+                type: integer
+              heatCfnApiReadyCount:
+                description: ReadyCount of Heat CfnAPI instance
+                format: int32
+                type: integer
+              heatEngineReadyCount:
+                description: ReadyCount of Heat Engine instance
+                format: int32
+                type: integer
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this
+                  service. If the observed generation is less than the spec generation,
+                  then the controller has not processed the latest changes injected by
+                  the opentack-operator in the top-level CR (e.g. the ContainerImage)
+                format: int64
+                type: integer
+              transportURLSecret:
+                description: TransportURLSecret - Secret containing RabbitMQ transportURL
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

@@ -11,7 +11,7 @@
     }
   ],
   "postUpgradeTasks": {
-    "commands": ["make gowork", "make tidy", "make manifests generate"],
+    "commands": ["make gowork", "make tidy", "make manifests generate", "make bindata"],
     "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml"],
     "executionMode": "update"
   }

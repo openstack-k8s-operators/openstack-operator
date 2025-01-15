@@ -1,0 +1,229 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: galeras.mariadb.openstack.org
+spec:
+  group: mariadb.openstack.org
+  names:
+    kind: Galera
+    listKind: GaleraList
+    plural: galeras
+    singular: galera
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Ready
+      jsonPath: .status.conditions[0].status
+      name: Ready
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Galera is the Schema for the galeras API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GaleraSpec defines the desired state of Galera
+            properties:
+              containerImage:
+                description: Name of the galera container image to run (will be set
+                  to environmental default if empty)
+                type: string
+              customServiceConfig:
+                description: |-
+                  Customize config using this parameter to change service defaults,
+                  or overwrite rendered information using raw MariaDB config format.
+                  The content gets added to /etc/my.cnf.d/galera_custom.cnf
+                type: string
+              disableNonTLSListeners:
+                description: When TLS is configured, only allow connections to the
+                  DB over TLS
+                type: boolean
+              logToDisk:
+                description: Log Galera pod's output to disk
+                type: boolean
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: NodeSelector to target subset of worker nodes running
+                  this service
+                type: object
+              replicas:
+                default: 1
+                description: Size of the galera cluster deployment
+                format: int32
+                maximum: 3
+                minimum: 0
+                type: integer
+              secret:
+                description: Name of the secret to look for password keys
+                type: string
+              storageClass:
+                description: Storage class to host the mariadb databases
+                type: string
+              storageRequest:
+                description: Storage size allocated for the mariadb databases
+                type: string
+              tls:
+                description: TLS settings for MySQL service and internal Galera replication
+                properties:
+                  caBundleSecretName:
+                    description: CaBundleSecretName - holding the CA certs in a pre-created
+                      bundle file
+                    type: string
+                  secretName:
+                    description: SecretName - holding the cert, key for the service
+                    type: string
+                type: object
+            required:
+            - containerImage
+            - replicas
+            - secret
+            - storageClass
+            - storageRequest
+            type: object
+          status:
+            description: GaleraStatus defines the observed state of Galera
+            properties:
+              attributes:
+                additionalProperties:
+                  description: GaleraAttributes holds startup information for a Galera
+                    host
+                  properties:
+                    containerID:
+                      description: Identifier of the container at the time the gcomm
+                        URI was injected
+                      type: string
+                    gcomm:
+                      description: Gcomm URI used to connect to the galera cluster
+                      type: string
+                    no_grastate:
+                      description: This galera node has its state recovered from the
+                        DB
+                      type: boolean
+                    safe_to_bootstrap:
+                      description: This galera node can bootstrap a galera cluster
+                      type: boolean
+                    seqno:
+                      description: Last recorded replication sequence number in the
+                        DB
+                      type: string
+                    uuid:
+                      description: UUID of the partition that is seen by the galera
+                        node
+                      type: string
+                  required:
+                  - seqno
+                  type: object
+                description: A map of database node attributes for each pod
+                type: object
+              bootstrapped:
+                default: false
+                description: Is the galera cluster currently running
+                type: boolean
+              clusterProperties:
+                additionalProperties:
+                  type: string
+                description: Map of properties that require full cluster restart if
+                  changed
+                type: object
+              conditions:
+                description: Deployment Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track input changes
+                type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this
+                  service. If the observed generation is less than the spec generation,
+                  then the controller has not processed the latest changes injected by
+                  the opentack-operator in the top-level CR (e.g. the ContainerImage)
+                format: int64
+                type: integer
+              safeToBootstrap:
+                description: Name of the node that can safely bootstrap a cluster
+                type: string
+              stopRequired:
+                default: false
+                description: Does the galera cluster requires to be stopped globally
+                type: boolean
+            required:
+            - bootstrapped
+            - stopRequired
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

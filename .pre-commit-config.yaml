@@ -26,10 +26,17 @@ repos:
       args: ['operator-lint']
       pass_filenames: false
     - id: make-crd-schema-check
+      require_serial: true
       name: make-crd-schema-check
       language: system
       entry: make
       args: ['crd-schema-check']
+    - id: make-bindata
+      require_serial: true
+      name: make-bindata
+      language: system
+      entry: make
+      args: ['bindata']
       pass_filenames: false
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -47,6 +54,7 @@ repos:
     - id: destroyed-symlinks
     - id: check-yaml
       args: [-m]
+      exclude: '^bindata/operator|^config/operator'
     - id: check-json
     - id: detect-private-key
     - id: end-of-file-fixer
