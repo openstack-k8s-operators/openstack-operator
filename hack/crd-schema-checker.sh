@@ -3,8 +3,7 @@ set -euxo pipefail
 
 CHECKER=$INSTALL_DIR/crd-schema-checker
 
-# (TODO) Remove NoFieldRemoval after this PR merges
-DISABLED_VALIDATORS=NoMaps,NoFieldRemoval # TODO: https://issues.redhat.com/browse/OSPRH-12254
+DISABLED_VALIDATORS=NoMaps # TODO: https://issues.redhat.com/browse/OSPRH-12254
 
 CHECKER_ARGS=""
 if [[ ${DISABLED_VALIDATORS:+x} ]]; then
