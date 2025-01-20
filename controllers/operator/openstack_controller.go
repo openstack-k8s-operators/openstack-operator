@@ -62,15 +62,17 @@ func (r *OpenStackReconciler) GetLogger(ctx context.Context) logr.Logger {
 }
 
 var (
-	envRelatedOperatorImages (map[string]*string) // operatorName -> image
-	rabbitmqImage            string
-	operatorImage            string
-	openstackReleaseVersion  string
+	envRelatedOperatorImages         (map[string]*string) // operatorName -> image
+	envRelatedOpenStackServiceImages (map[string]*string) // full_related_image_name -> image
+	rabbitmqImage                    string
+	operatorImage                    string
+	openstackReleaseVersion          string
 )
 
 // SetupEnv -
 func SetupEnv() {
 	envRelatedOperatorImages = make(map[string]*string)
+	envRelatedOpenStackServiceImages = make(map[string]*string)
 	for _, name := range os.Environ() {
 		envArr := strings.Split(name, "=")
 
@@ -86,6 +88,8 @@ func SetupEnv() {
 				envRelatedOperatorImages[operatorName] = &envArr[1]
 			}
 			log.Log.Info("Found operator related image", "operator", operatorName, "image", envArr[1])
+		} else if strings.HasPrefix(envArr[0], "RELATED_IMAGE_") {
+			envRelatedOpenStackServiceImages[envArr[0]] = &envArr[1]
 		} else if envArr[0] == "OPERATOR_IMAGE_URL" {
 			operatorImage = envArr[1]
 		} else if envArr[0] == "OPENSTACK_RELEASE_VERSION" {
@@ -314,6 +318,7 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 	data.Data["RabbitmqImage"] = rabbitmqImage
 	data.Data["OperatorImage"] = operatorImage
 	data.Data["OpenstackReleaseVersion"] = openstackReleaseVersion
+	data.Data["OpenStackServiceRelatedImages"] = envRelatedOpenStackServiceImages
 	return r.renderAndApply(ctx, instance, data, "operator", true)
 }
 

@@ -14,3 +14,4 @@ patchesStrategicMerge:
 
 # Injects our custom images (ENV variable settings)
 - manager_operator_images.yaml
+- default_images.yaml
