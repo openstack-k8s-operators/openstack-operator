@@ -521,9 +521,9 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				isDeploymentRunning = true
 			} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
 				// If the nodeset configHash does not match with what's in the deployment and the
-				// generation metadata has changed i.e generation metatdata won't change when
+				// generation metadata has changed (i.e generation metatdata won't change when
 				// fields are removed from the CRD during an update that would not require a new
-				// deployment to run).
+				// deployment to run) asssume nodeset has changed requiring new deployment.
 				if deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash &&
 					generationChanged {
 					continue
