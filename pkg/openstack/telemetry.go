@@ -324,11 +324,16 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.NotificationImage = *version.Status.ContainerImages.CeilometerNotificationImage
 		telemetry.Spec.Ceilometer.SgCoreImage = *version.Status.ContainerImages.CeilometerSgcoreImage
 		telemetry.Spec.Ceilometer.ProxyImage = *version.Status.ContainerImages.CeilometerProxyImage
-		telemetry.Spec.Ceilometer.KSMImage = *version.Status.ContainerImages.KsmImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
+
+		if version.Status.ContainerImages.KsmImage != nil {
+			telemetry.Spec.Ceilometer.KSMImage = *version.Status.ContainerImages.KsmImage
+		} else {
+			telemetry.Spec.Ceilometer.KSMImage = ""
+		}
 
 		if version.Status.ContainerImages.CeilometerMysqldExporterImage != nil {
 			telemetry.Spec.Ceilometer.MysqldExporterImage = *version.Status.ContainerImages.CeilometerMysqldExporterImage
