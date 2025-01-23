@@ -10,9 +10,7 @@ testbin/*
 
 bundle/*
 bundle.Dockerfile
-bundle_extra_data
-custom-bundle.Dockerfile.pinned
-storage-bundle.Dockerfile.pinned
+config/operator/deployment/kustomization.yaml
 
 # Test binary, build with `go test -c`
 *.test
