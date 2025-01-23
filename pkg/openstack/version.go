@@ -135,6 +135,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			IronicPxeImage:                getImg(instance.Spec.CustomContainerImages.IronicPxeImage, defaults.IronicPxeImage),
 			IronicPythonAgentImage:        getImg(instance.Spec.CustomContainerImages.IronicPythonAgentImage, defaults.IronicPythonAgentImage),
 			KeystoneAPIImage:              getImg(instance.Spec.CustomContainerImages.KeystoneAPIImage, defaults.KeystoneAPIImage),
+			KsmImage:                      getImg(instance.Spec.CustomContainerImages.KsmImage, defaults.KsmImage),
 			ManilaAPIImage:                getImg(instance.Spec.CustomContainerImages.ManilaAPIImage, defaults.ManilaAPIImage),
 			ManilaSchedulerImage:          getImg(instance.Spec.CustomContainerImages.ManilaSchedulerImage, defaults.ManilaSchedulerImage),
 			MariadbImage:                  getImg(instance.Spec.CustomContainerImages.MariadbImage, defaults.MariadbImage),

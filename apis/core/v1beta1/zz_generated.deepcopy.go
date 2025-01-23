@@ -509,6 +509,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.KsmImage != nil {
+		in, out := &in.KsmImage, &out.KsmImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.ManilaAPIImage != nil {
 		in, out := &in.ManilaAPIImage, &out.ManilaAPIImage
 		*out = new(string)

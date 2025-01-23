@@ -126,6 +126,7 @@ type ContainerTemplate struct {
 	IronicPxeImage                *string `json:"ironicPxeImage,omitempty"`
 	IronicPythonAgentImage        *string `json:"ironicPythonAgentImage,omitempty"`
 	KeystoneAPIImage              *string `json:"keystoneAPIImage,omitempty"`
+	KsmImage                      *string `json:"ksmImage,omitempty"`
 	ManilaAPIImage                *string `json:"manilaAPIImage,omitempty"`
 	ManilaSchedulerImage          *string `json:"manilaSchedulerImage,omitempty"`
 	MariadbImage                  *string `json:"mariadbImage,omitempty"`

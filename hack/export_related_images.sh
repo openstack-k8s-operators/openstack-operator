@@ -35,6 +35,7 @@ export RELATED_IMAGE_CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT=quay.io/podified-
 export RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified
 export RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT=quay.io/openstack-k8s-operators/sg-core:v6.0.0
 export RELATED_IMAGE_CEILOMETER_MYSQLD_EXPORTER_IMAGE_URL_DEFAULT=quay.io/prometheus/mysqld-exporter:v0.16.0
+export RELATED_IMAGE_KSM_IMAGE_URL_DEFAULT=registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.0
 export RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-aodh-api:current-podified
 export RELATED_IMAGE_AODH_EVALUATOR_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-aodh-evaluator:current-podified
 export RELATED_IMAGE_AODH_NOTIFIER_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-aodh-notifier:current-podified
