@@ -19,12 +19,12 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250109233430-f208aa212181
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250107183423-65b8e596796a
 	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250106004957-8f2f2c4a1720
-	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250114103227-09deb192370f
+	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250123115751-98853871de94
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250107140737-1d83138767c2
 	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20250113154337-ece4d21f3ed9
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.5.0
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.5.1-0.20250113155806-c6542cc4eb2b
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250113155806-c6542cc4eb2b
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250128130522-53b65fcdadca
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.5.1-0.20250113155806-c6542cc4eb2b
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.5.1-0.20250113155806-c6542cc4eb2b
 	github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20250112074607-12e4c8fce4e1
@@ -44,9 +44,9 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.29.12
-	k8s.io/apimachinery v0.29.12
-	k8s.io/client-go v0.29.12
+	k8s.io/api v0.29.13
+	k8s.io/apimachinery v0.29.13
+	k8s.io/client-go v0.29.13
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 	sigs.k8s.io/controller-runtime v0.17.6
 )
@@ -108,8 +108,8 @@ require (
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiextensions-apiserver v0.29.12 // indirect
-	k8s.io/component-base v0.29.12 // indirect
+	k8s.io/apiextensions-apiserver v0.29.13 // indirect
+	k8s.io/component-base v0.29.13 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240322212309-b815d8309940 // indirect
 	sigs.k8s.io/gateway-api v1.0.0 // indirect

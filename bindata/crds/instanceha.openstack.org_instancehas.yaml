@@ -53,7 +53,6 @@ spec:
                   bundle file
                 type: string
               containerImage:
-                default: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
                 description: ContainerImage for the the InstanceHa container (will
                   be set to environmental default if empty)
                 type: string
