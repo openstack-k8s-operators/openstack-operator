@@ -156,7 +156,7 @@ func reconcileRabbitMQ(
 		},
 	}
 
-	IPv6Enabled, err := ocp.HasIPv6ClusterNetwork(ctx, helper)
+	IPv6Enabled, err := ocp.FirstClusterNetworkIsIPv6(ctx, helper)
 	if err != nil {
 		return mqFailed, ctrl.Result{}, err
 	}
