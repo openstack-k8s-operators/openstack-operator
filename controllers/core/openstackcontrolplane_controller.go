@@ -150,6 +150,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		Log.Error(err, "unable to acquire helper for OpenStackControlPlane")
 		return ctrl.Result{}, err
 	}
+	Log.Info("Blah")
 	//
 	// initialize Conditions
 	//

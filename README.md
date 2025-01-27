@@ -1,7 +1,7 @@
 # openstack-operator
 
 [![CodeQL](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml)
-
+Hi
 This is the primary operator for OpenStack. It is a "meta" operator, meaning it
 serves to coordinate the other operators for OpenStack by watching and configuring
 their CustomResources (CRs). Additionally installing this operator will automatically
