@@ -135,6 +135,9 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		// Bind9
 		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateBackendbind9SpecBase.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateBackendbind9SpecBase)
 		instance.Spec.Designate.Template.DesignateBackendbind9.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateBackendbind9.DesignateServiceTemplateCore)
+		// Unbound
+		instance.Spec.Designate.Template.DesignateUnbound.DesignateUnboundSpecBase.DeepCopyInto(&designate.Spec.DesignateUnbound.DesignateUnboundSpecBase)
+		instance.Spec.Designate.Template.DesignateUnbound.DesignateServiceTemplateCore.DeepCopyInto(&designate.Spec.DesignateUnbound.DesignateServiceTemplateCore)
 
 		designate.Spec.DesignateAPI.ContainerImage = *version.Status.ContainerImages.DesignateAPIImage
 		designate.Spec.DesignateCentral.ContainerImage = *version.Status.ContainerImages.DesignateCentralImage
