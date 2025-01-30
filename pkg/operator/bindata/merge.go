@@ -205,6 +205,10 @@ func mergeLabels(current, updated *uns.Unstructured) {
 		curLabels["openstack.openstack.org/managed"] = "true"
 	}
 
+	// remove the olm.managed label this allows cleanup of the operator objects
+	// from legacy service operator deployments prior to FR2
+	delete(curLabels, "olm.managed")
+
 	updated.SetLabels(curLabels)
 }
 
