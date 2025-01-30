@@ -31,6 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/go-logr/logr"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -41,6 +43,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -54,6 +57,18 @@ type OpenStackReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
 	Kclient kubernetes.Interface
+}
+
+var csvGVR = schema.GroupVersionResource{
+	Group:    "operators.coreos.com",
+	Version:  "v1alpha1",
+	Resource: "clusterserviceversions",
+}
+
+var subscriptionGVR = schema.GroupVersionResource{
+	Group:    "operators.coreos.com",
+	Version:  "v1alpha1",
+	Resource: "subscriptions",
 }
 
 // GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
@@ -110,6 +125,8 @@ func SetupEnv() {
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups="monitoring.coreos.com",resources=servicemonitors,verbs=list;get;watch;update;create
+// +kubebuilder:rbac:groups=operators.coreos.com,resources=clusterserviceversions,verbs=get;list;delete;
+// +kubebuilder:rbac:groups=operators.coreos.com,resources=subscriptions,verbs=get;list;delete;
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -229,11 +246,9 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// TODO: cleanup obsolete resources here (remove old CSVs, etc)
-	/*
-	   if err := r.cleanupObsoleteResources(ctx); err != nil {
-	           return ctrl.Result{}, err
-	   }
-	*/
+	if err := r.cleanupObsoleteResources(ctx, instance); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	if err := r.applyManifests(ctx, instance); err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -420,6 +435,65 @@ func (r *OpenStackReconciler) renderAndApply(
 		}
 	}
 	return nil
+}
+
+var serviceOperatorNames = []string{"barbican", "cinder", "designate", "glance", "heat", "horizon", "infra",
+	"ironic", "keystone", "manila", "mariadb", "neutron", "nova", "octavia", "openstack-baremetal", "ovn",
+	"placement", "rabbitmq-cluster", "swift", "telemetry"}
+
+func isServiceOperatorResource(name string) bool {
+	for _, item := range serviceOperatorNames {
+		if strings.Index(name, item) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// cleanupObsoleteResources - deletes CSVs for old service operator bundles
+func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
+
+	subscriptionList := &uns.UnstructuredList{}
+	subscriptionList.SetGroupVersionKind(subscriptionGVR.GroupVersion().WithKind("Subscription"))
+	err := r.Client.List(ctx, subscriptionList, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		Log.Error(err, "Unable to retrieve Subscriptions instances")
+		return err
+	}
+	for _, subscription := range subscriptionList.Items {
+		Log.Info("Found Subscription", "name", subscription.GetName())
+		if isServiceOperatorResource(subscription.GetName()) {
+			err = r.Client.Delete(ctx, &subscription)
+			if err != nil {
+				Log.Error(err, "Failed to delete existing Subscription")
+				return err
+			}
+		}
+		Log.Info("Subscription deleted successfully")
+	}
+
+	csvList := &uns.UnstructuredList{}
+	csvList.SetGroupVersionKind(csvGVR.GroupVersion().WithKind("ClusterServiceVersionList"))
+
+	err = r.Client.List(ctx, csvList, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		Log.Error(err, "Unable to retrieve CSV instances")
+		return err
+	}
+	for _, csv := range csvList.Items {
+		Log.Info("Found CSV", "name", csv.GetName())
+		if isServiceOperatorResource(csv.GetName()) {
+			err = r.Client.Delete(ctx, &csv)
+			if err != nil {
+				Log.Error(err, "Failed to delete existing CSV")
+				return err
+			}
+		}
+		Log.Info("CSV deleted successfully")
+	}
+	return nil
+
 }
 
 // SetupWithManager sets up the controller with the Manager.
