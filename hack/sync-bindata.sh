@@ -141,6 +141,9 @@ EOF_CAT
 }
 
 for BUNDLE in $(hack/pin-bundle-images.sh | tr "," " "); do
+    if [[ $BUNDLE == *"EMPTY_SHA"* ]]; then
+        continue
+    fi
     skopeo copy "docker://$BUNDLE" dir:${EXTRACT_DIR}/tmp;
     extract_bundle "${EXTRACT_DIR}/tmp" "${OUT_DATA}/"
 done

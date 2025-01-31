@@ -15886,6 +15886,9 @@ spec:
                           enabled:
                             default: true
                             type: boolean
+                          ksmEnabled:
+                            default: true
+                            type: boolean
                           ksmTls:
                             properties:
                               caBundleSecretName:
