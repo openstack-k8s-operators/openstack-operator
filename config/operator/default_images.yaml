@@ -3,13 +3,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
+  name: openstack-operator-controller-operator
   namespace: system
 spec:
   template:
     spec:
       containers:
-      - name: manager
+      - name: operator
         env:
         - name: RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest

@@ -151,6 +151,7 @@ bindata: kustomize yq ## Call sync bindata script
 	mkdir -p bindata/crds bindata/rbac bindata/operator
 	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
 	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
+	sed -i bindata/operator/operator.yaml -e "/envCustomImage/c\\{{ range \$$envName, \$$envValue := .OpenStackServiceRelatedImages }}\n        - name: {{ \$$envName }}\n          value: {{ \$$envValue }}\n{{ end }}"
 	cp config/operator/managers.yaml bindata/operator/
 	cp config/operator/rabbit.yaml bindata/operator/
 	$(KUSTOMIZE) build config/rbac > bindata/rbac/rbac.yaml
@@ -230,6 +231,7 @@ run-operator: export ENABLE_WEBHOOKS?=false
 run-operator: export BASE_BINDATA?=bindata
 run-operator: export OPERATOR_IMAGE_URL=${IMG}
 run-operator: manifests generate fmt vet ## Run a controller from your host.
+	source hack/export_related_images.sh && \
 	source hack/export_operator_related_images.sh && \
 	go run ./cmd/operator/main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)"
 
