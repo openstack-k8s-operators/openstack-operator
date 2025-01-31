@@ -107,13 +107,8 @@ rules:
   - operators.coreos.com
   resources:
   - clusterserviceversions
-  verbs:
-  - delete
-  - get
-  - list
-- apiGroups:
-  - operators.coreos.com
-  resources:
+  - installplans
+  - operators
   - subscriptions
   verbs:
   - delete
