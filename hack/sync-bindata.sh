@@ -297,3 +297,6 @@ rm -Rf "$EXTRACT_DIR"
 rm -Rf "$OUT_DATA/manifests"
 rm -Rf "$OUT_DATA/metadata"
 rm -Rf "$OUT_DATA/tests"
+
+# stage new files for addition via git
+git ls-files -o --exclude-standard | xargs --no-run-if-empty git add
