@@ -198,6 +198,12 @@ func mergeLabels(current, updated *uns.Unstructured) {
 	if gvk.Group == "apiextensions.k8s.io" && gvk.Kind == "CustomResourceDefinition" {
 		curLabels["openstack.openstack.org/crd"] = ""
 	}
+	// Validating/Mutating webhooks aren't namespaced meaning we can't own them directly
+	// via the initialization resource. This adds a custom label so that at least we
+	// can identify them for cleanup via a finalizer
+	if gvk.Group == "admissionregistration.k8s.io" && (gvk.Kind == "MutatingWebhookConfiguration" || gvk.Kind == "ValidatingWebhookConfiguration") {
+		curLabels["openstack.openstack.org/managed"] = "true"
+	}
 
 	updated.SetLabels(curLabels)
 }
