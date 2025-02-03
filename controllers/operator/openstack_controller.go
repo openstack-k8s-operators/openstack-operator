@@ -308,7 +308,7 @@ func (r *OpenStackReconciler) applyCRDs(ctx context.Context, instance *operatorv
 func (r *OpenStackReconciler) applyRBAC(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
 	data := bindata.MakeRenderData()
 	data.Data["OperatorNamespace"] = instance.Namespace
-	return r.renderAndApply(ctx, instance, data, "rbac", false)
+	return r.renderAndApply(ctx, instance, data, "rbac", true)
 }
 
 func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
