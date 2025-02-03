@@ -1,0 +1,148 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: webhook-service
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: openstack-baremetal-operator
+  name: openstack-baremetal-operator-webhook-service
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    openstack.org/operator-name: openstack-baremetal
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: serving-cert
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: certificate
+    app.kubernetes.io/part-of: openstack-baremetal-operator
+  name: openstack-baremetal-operator-serving-cert
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - openstack-baremetal-operator-webhook-service.{{ .OperatorNamespace }}.svc
+  - openstack-baremetal-operator-webhook-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: openstack-baremetal-operator-selfsigned-issuer
+  secretName: openstack-baremetal-operator-webhook-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: selfsigned-issuer
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: issuer
+    app.kubernetes.io/part-of: openstack-baremetal-operator
+  name: openstack-baremetal-operator-selfsigned-issuer
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  selfSigned: {}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-baremetal-operator-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: mutating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: mutatingwebhookconfiguration
+    app.kubernetes.io/part-of: openstack-baremetal-operator
+  name: openstack-baremetal-operator-mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mopenstackprovisionserver.kb.io
+  rules:
+    - apiGroups:
+        - baremetal.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - openstackprovisionservers
+  sideEffects: None
+  clientConfig:
+    service:
+      name: openstack-baremetal-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-baremetal-openstack-org-v1beta1-openstackprovisionserver
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-baremetal-operator-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: validating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: validatingwebhookconfiguration
+    app.kubernetes.io/part-of: openstack-baremetal-operator
+  name: openstack-baremetal-operator-validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vopenstackbaremetalset.kb.io
+  rules:
+    - apiGroups:
+        - baremetal.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+        - DELETE
+      resources:
+        - openstackbaremetalsets
+  sideEffects: None
+  clientConfig:
+    service:
+      name: openstack-baremetal-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-baremetal-openstack-org-v1beta1-openstackbaremetalset
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vopenstackprovisionserver.kb.io
+  rules:
+    - apiGroups:
+        - baremetal.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - openstackprovisionservers
+  sideEffects: None
+  clientConfig:
+    service:
+      name: openstack-baremetal-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-baremetal-openstack-org-v1beta1-openstackprovisionserver

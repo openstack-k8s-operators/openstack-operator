@@ -30,7 +30,7 @@ spec:
         - /manager
         env:
         - name: ENABLE_WEBHOOKS
-{{ if eq $operatorName "infra" }}
+{{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
           value: 'true'
 {{ else }}
           value: 'false'
@@ -58,7 +58,7 @@ spec:
             memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
-{{ if eq $operatorName "infra" }}
+{{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
@@ -88,7 +88,7 @@ spec:
         runAsNonRoot: true
       serviceAccountName: {{ $operatorName }}-operator-controller-manager
       terminationGracePeriodSeconds: 10
-{{ if eq $operatorName "infra" }}
+{{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
       volumes:
       - name: cert
         secret:

@@ -158,7 +158,7 @@ for X in $(ls manifests/*clusterserviceversion.yaml); do
         CLUSTER_ROLE_RULES=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.clusterPermissions| sed -e 's|- rules:|rules:|' | sed -e 's|    ||' | sed -e '/  serviceAccountName.*/d'
 )
 
-if [[ "$OPERATOR_NAME" == "infra-operator" ]]; then
+if [[ "$OPERATOR_NAME" == "infra-operator" || "$OPERATOR_NAME" == "openstack-baremetal-operator" ]]; then
     write_webhooks "$X" "$OPERATOR_NAME"
 fi
 
