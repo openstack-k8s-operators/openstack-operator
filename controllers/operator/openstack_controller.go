@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -250,7 +251,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// now that CRDs have been updated (with old olm.managed references removed)
 	// we can finally cleanup the old operators
 	if err := r.postCleanupObsoleteResources(ctx, instance); err != nil {
-		return ctrl.Result{}, err
+		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, err
 	}
 
 	// Check if all deployments are running
@@ -479,6 +480,10 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 		if isServiceOperatorResource(csv.GetName()) {
 			err = r.Client.Delete(ctx, &csv)
 			if err != nil {
+				if apierrors.IsNotFound(err) {
+					Log.Info("CSV not found on delete. Continuing...", "name", csv.GetName())
+					continue
+				}
 				return err
 			}
 			Log.Info("CSV deleted successfully", "name", csv.GetName())
@@ -496,6 +501,10 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 		if isServiceOperatorResource(subscription.GetName()) {
 			err = r.Client.Delete(ctx, &subscription)
 			if err != nil {
+				if apierrors.IsNotFound(err) {
+					Log.Info("Subscription not found on delete. Continuing...", "name", subscription.GetName())
+					continue
+				}
 				return err
 			}
 			Log.Info("Subscription deleted successfully", "name", subscription.GetName())
@@ -523,6 +532,10 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 			if isServiceOperatorResource(csvNames[0].(string)) {
 				err = r.Client.Delete(ctx, &installPlan)
 				if err != nil {
+					if apierrors.IsNotFound(err) {
+						Log.Info("Installplane not found on delete. Continuing...", "name", installPlan.GetName())
+						continue
+					}
 					return err
 				}
 				Log.Info("Installplan deleted successfully", "name", installPlan.GetName())
@@ -558,6 +571,46 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 	for _, operator := range operatorList.Items {
 		Log.Info("Found Operator", "name", operator.GetName())
 		if isServiceOperatorResource(operator.GetName()) {
+
+			refs, found, err := uns.NestedSlice(operator.Object, "status", "components", "refs")
+			if err != nil {
+				return err
+			}
+			if found {
+
+				// The horizon-operator.openstack-operators has references to old roles/bindings
+				// the code below will delete those references before continuing
+				for _, ref := range refs {
+					refData := ref.(map[string]interface{})
+					Log.Info("Deleting operator reference", "Reference", ref)
+					obj := uns.Unstructured{}
+					obj.SetName(refData["name"].(string))
+					obj.SetNamespace(refData["namespace"].(string))
+					apiParts := strings.Split(refData["apiVersion"].(string), "/")
+					objGvk := schema.GroupVersionResource{
+						Group:    apiParts[0],
+						Version:  apiParts[1],
+						Resource: refData["kind"].(string),
+					}
+					obj.SetGroupVersionKind(objGvk.GroupVersion().WithKind(refData["kind"].(string)))
+
+					// references from CRD's should be removed before this function is called
+					// but this is a safeguard as we do not want to delete them
+					if refData["kind"].(string) != "CustomResourceDefinition" {
+						err = r.Client.Delete(ctx, &obj)
+						if err != nil {
+							if apierrors.IsNotFound(err) {
+								Log.Info("Object not found on delete. Continuing...", "name", obj.GetName())
+								continue
+							}
+							return err
+						}
+					}
+				}
+
+				return fmt.Errorf("Requeuing/Found references for operator name: %s, refs: %v", operator.GetName(), refs)
+			}
+			// no refs found so we should be able to successfully delete the operator
 			err = r.Client.Delete(ctx, &operator)
 			if err != nil {
 				return err
