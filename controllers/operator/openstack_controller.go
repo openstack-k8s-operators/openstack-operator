@@ -138,7 +138,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	versionHelper, err := helper.NewHelper(
+	openstackHelper, err := helper.NewHelper(
 		instance,
 		r.Client,
 		r.Kclient,
@@ -177,12 +177,17 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		condition.RestoreLastTransitionTimes(
 			&instance.Status.Conditions, savedConditions)
 
-		err := versionHelper.PatchInstance(ctx, instance)
+		err := openstackHelper.PatchInstance(ctx, instance)
 		if err != nil {
 			_err = err
 			return
 		}
 	}()
+
+	// If we're not deleting this and the object doesn't have our finalizer, add it.
+	if instance.DeletionTimestamp.IsZero() && controllerutil.AddFinalizer(instance, openstackHelper.GetFinalizer()) || isNewInstance {
+		return ctrl.Result{}, err
+	}
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(operatorv1beta1.OpenStackOperatorReadyCondition, condition.InitReason, string(operatorv1beta1.OpenStackOperatorReadyInitMessage)),
@@ -217,6 +222,10 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			}
 			return ctrl.Result{}, nil
 		}
+	}
+
+	if !instance.DeletionTimestamp.IsZero() {
+		return r.reconcileDelete(ctx, instance, openstackHelper)
 	}
 
 	// TODO: cleanup obsolete resources here (remove old CSVs, etc)
@@ -260,6 +269,47 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	Log.Info("Reconcile complete.")
 	return ctrl.Result{}, nil
 
+}
+
+func (r *OpenStackReconciler) reconcileDelete(ctx context.Context, instance *operatorv1beta1.OpenStack, helper *helper.Helper) (ctrl.Result, error) {
+	Log := r.GetLogger(ctx)
+	Log.Info("Reconciling OpenStack initialization resource delete")
+
+	// validating webhook cleanup
+	valWebhooks, err := r.Kclient.AdmissionregistrationV1().ValidatingWebhookConfigurations().List(ctx, metav1.ListOptions{
+		LabelSelector: "openstack.openstack.org/managed=true",
+	})
+	if err != nil {
+		return ctrl.Result{}, errors.Wrap(err, "failed listing validating webhook configurations")
+	}
+	for _, webhook := range valWebhooks.Items {
+		err := r.Kclient.AdmissionregistrationV1().ValidatingWebhookConfigurations().Delete(ctx, webhook.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return ctrl.Result{}, errors.Wrap(err, "failed to cleanup webhook")
+		}
+		fmt.Println("Found ValidatingWebhookConfiguration:", webhook.Name)
+
+	}
+
+	// mutating webhook cleanup
+	mutWebhooks, err := r.Kclient.AdmissionregistrationV1().MutatingWebhookConfigurations().List(ctx, metav1.ListOptions{
+		LabelSelector: "openstack.openstack.org/managed=true",
+	})
+	if err != nil {
+		return ctrl.Result{}, errors.Wrap(err, "failed listing validating webhook configurations")
+	}
+	for _, webhook := range mutWebhooks.Items {
+		err := r.Kclient.AdmissionregistrationV1().MutatingWebhookConfigurations().Delete(ctx, webhook.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return ctrl.Result{}, errors.Wrap(err, "failed to cleanup webhook")
+		}
+		fmt.Println("Found MutatingWebhookConfiguration:", webhook.Name)
+
+	}
+
+	controllerutil.RemoveFinalizer(instance, helper.GetFinalizer())
+
+	return ctrl.Result{}, nil
 }
 
 // countDeployments -
@@ -308,7 +358,7 @@ func (r *OpenStackReconciler) applyCRDs(ctx context.Context, instance *operatorv
 func (r *OpenStackReconciler) applyRBAC(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
 	data := bindata.MakeRenderData()
 	data.Data["OperatorNamespace"] = instance.Namespace
-	return r.renderAndApply(ctx, instance, data, "rbac", false)
+	return r.renderAndApply(ctx, instance, data, "rbac", true)
 }
 
 func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
