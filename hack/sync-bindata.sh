@@ -5,6 +5,7 @@
 #  -TODO: role data
 set -ex
 
+BINDATA_GIT_ADD=${BINDATA_GIT_ADD:-""}
 OUT_DATA=bindata
 EXTRACT_DIR=tmp/bindata
 LOCAL_BINARIES=${LOCAL_BINARIES:?}
@@ -299,4 +300,6 @@ rm -Rf "$OUT_DATA/metadata"
 rm -Rf "$OUT_DATA/tests"
 
 # stage new files for addition via git
-git ls-files -o --exclude-standard | xargs --no-run-if-empty git add
+if [[ "$BINDATA_GIT_ADD" == "true" ]]; then
+    git ls-files -o --exclude-standard | xargs --no-run-if-empty git add
+fi
