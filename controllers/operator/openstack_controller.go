@@ -23,8 +23,10 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,6 +43,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -234,7 +237,6 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	           return ctrl.Result{}, err
 	   }
 	*/
-
 	if err := r.applyManifests(ctx, instance); err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -260,6 +262,12 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if deploymentsRunning < OperatorCount {
 		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", OperatorCount)
 		return ctrl.Result{}, nil
+	}
+
+	err = r.checkWebhooksActive(ctx, instance)
+	if err != nil {
+		Log.Info("Waiting for webhooks to become active...")
+		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 	}
 
 	instance.Status.Conditions.MarkTrue(
@@ -348,6 +356,58 @@ func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *oper
 	}
 
 	return nil
+}
+
+// checkWebhooksActive - function to check if webhooks are fully active as it seems the k8s API can take some time.
+// This function sends a dry run API request to the OpenStackVersion resource and infra-operator's Redis API
+// In both cases defaulting webhook behavior is validated to be working correctly
+func (r *OpenStackReconciler) checkWebhooksActive(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+
+	// check openstackversion
+	gvkVersion := schema.GroupVersionKind{
+		Group:   "core.openstack.org",
+		Version: "v1beta1",
+		Kind:    "OpenStackVersion",
+	}
+
+	openstackVersion := &uns.Unstructured{}
+	openstackVersion.SetGroupVersionKind(gvkVersion)
+	openstackVersion.SetName("openstack")
+	openstackVersion.SetNamespace(instance.Namespace)
+
+	err := r.Client.Create(ctx, openstackVersion, &client.CreateOptions{DryRun: []string{metav1.DryRunAll}})
+	if err != nil {
+		return err
+	}
+	// verify that the containerImage got set by defaulting webhooks
+	val, ok, err := uns.NestedString(openstackVersion.Object, "spec", "targetVersion")
+	if err != nil || !ok || val == "" {
+		return fmt.Errorf("waiting for webhooks to become active")
+	}
+
+	// check redis for the infra-operator
+	gvkRedis := schema.GroupVersionKind{
+		Group:   "redis.openstack.org",
+		Version: "v1beta1",
+		Kind:    "Redis",
+	}
+
+	redis := &uns.Unstructured{}
+	redis.SetGroupVersionKind(gvkRedis)
+	redis.SetName("redis")
+	redis.SetNamespace(instance.Namespace)
+
+	err = r.Client.Create(ctx, redis, &client.CreateOptions{DryRun: []string{metav1.DryRunAll}})
+	if err != nil {
+		return err
+	}
+	// verify that the containerImage got set by defaulting webhooks
+	val, ok, err = uns.NestedString(redis.Object, "spec", "containerImage")
+	if err != nil || !ok || val == "" {
+		return fmt.Errorf("waiting for webhooks to become active")
+	}
+	return nil
+
 }
 
 func (r *OpenStackReconciler) applyCRDs(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
