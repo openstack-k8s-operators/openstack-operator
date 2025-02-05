@@ -2554,8 +2554,6 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      containerImage:
-                        type: string
                       dnsDataLabelSelectorValue:
                         default: dnsdata
                         type: string
@@ -7426,6 +7424,20 @@ spec:
                           properties:
                             caBundleSecretName:
                               type: string
+                            mtls:
+                              properties:
+                                authCertSecret:
+                                  properties:
+                                    secretName:
+                                      type: string
+                                  type: object
+                                sslVerifyMode:
+                                  enum:
+                                  - None
+                                  - Request
+                                  - Require
+                                  type: string
+                              type: object
                             secretName:
                               type: string
                           type: object

@@ -82,6 +82,25 @@ spec:
                     description: CaBundleSecretName - holding the CA certs in a pre-created
                       bundle file
                     type: string
+                  mtls:
+                    properties:
+                      authCertSecret:
+                        description: Name of the secret containing the client cert
+                          used to perform mtls auth
+                        properties:
+                          secretName:
+                            description: SecretName - holding the cert, key for the
+                              service
+                            type: string
+                        type: object
+                      sslVerifyMode:
+                        description: Used to enforce client side tls cert validation
+                        enum:
+                        - None
+                        - Request
+                        - Require
+                        type: string
+                    type: object
                   secretName:
                     description: SecretName - holding the cert, key for the service
                     type: string
@@ -140,6 +159,9 @@ spec:
                   type: string
                 description: Map of hashes to track input changes
                 type: object
+              mtlsCert:
+                description: Name of the certificate used for MTLS
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this
