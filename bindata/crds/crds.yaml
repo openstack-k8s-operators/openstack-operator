@@ -555,6 +555,9 @@ spec:
                           service: BarbicanPassword
                           simplecryptokek: BarbicanSimpleCryptoKEK
                         properties:
+                          pkcs11pin:
+                            default: PKCS11Pin
+                            type: string
                           service:
                             default: BarbicanPassword
                             type: string
@@ -564,72 +567,16 @@ spec:
                         type: object
                       pkcs11:
                         properties:
-                          AESGCMGenerateIV:
-                            default: true
-                            type: boolean
-                          HMACKeyType:
-                            default: CKK_GENERIC_SECRET
+                          clientDataPath:
+                            default: /etc/hsm-client
                             type: string
-                          HMACKeygenMechanism:
-                            default: CKM_GENERIC_SECRET_KEY_GEN
+                          clientDataSecret:
                             type: string
-                          HMACLabel:
-                            type: string
-                          HMACMechanism:
-                            default: CKM_SHA256_HMAC
-                            type: string
-                          MKEKLabel:
-                            type: string
-                          MKEKLength:
-                            default: 32
-                            type: integer
-                          OSLockingOK:
-                            default: false
-                            type: boolean
-                          alwaysSetCKASensitive:
-                            default: true
-                            type: boolean
-                          certificatesMountPoint:
-                            type: string
-                          certificatesSecret:
-                            type: string
-                          clientAddress:
-                            type: string
-                          encryptionMechanism:
-                            default: CKM_AES_GCM
-                            type: string
-                          keyWrapGenerateIV:
-                            default: true
-                            type: boolean
-                          keyWrapMechanism:
-                            default: CKM_AES_KEY_WRAP_KWP
-                            type: string
-                          libraryPath:
-                            type: string
-                          loggingLevel:
-                            default: 4
-                            maximum: 7
-                            minimum: 0
-                            type: integer
                           loginSecret:
                             type: string
-                          serverAddress:
-                            type: string
-                          slotId:
-                            type: string
-                          tokenLabels:
-                            type: string
-                          tokenSerialNumber:
-                            type: string
-                          type:
-                            type: string
                         required:
-                        - HMACLabel
-                        - MKEKLabel
-                        - libraryPath
+                        - clientDataSecret
                         - loginSecret
-                        - serverAddress
-                        - type
                         type: object
                       preserveJobs:
                         default: false
@@ -6311,6 +6258,8 @@ spec:
                         type: integer
                       httpdCustomization:
                         properties:
+                          customConfigSecret:
+                            type: string
                           processNumber:
                             default: 3
                             format: int32
@@ -15886,6 +15835,9 @@ spec:
                           enabled:
                             default: true
                             type: boolean
+                          ksmEnabled:
+                            default: true
+                            type: boolean
                           ksmTls:
                             properties:
                               caBundleSecretName:
@@ -15909,6 +15861,7 @@ spec:
                             items:
                               type: string
                             type: array
+                            x-kubernetes-list-type: atomic
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -16631,6 +16584,11 @@ spec:
                                     type: string
                                 type: object
                             type: object
+                          networkAttachments:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           prometheusTls:
                             properties:
                               caBundleSecretName:

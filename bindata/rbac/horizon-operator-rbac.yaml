@@ -173,6 +173,14 @@ rules:
     - list
     - watch
 - apiGroups:
+    - keystone.openstack.org
+  resources:
+    - keystoneservices
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
     - memcached.openstack.org
   resources:
     - memcacheds

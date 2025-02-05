@@ -45,6 +45,7 @@ spec:
             type: string
           ksmStatus:
             description: KSMStatus defines the observed state of kube-state-metrics
+              [DEPRECATED, Status is used instead]
             properties:
               conditions:
                 description: Conditions
@@ -136,6 +137,10 @@ spec:
                 type: object
               ipmiImage:
                 type: string
+              ksmEnabled:
+                default: true
+                description: Whether kube-state-metrics should be deployed
+                type: boolean
               ksmImage:
                 type: string
               ksmTls:
@@ -180,6 +185,7 @@ spec:
                 items:
                   type: string
                 type: array
+                x-kubernetes-list-type: atomic
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -295,6 +301,15 @@ spec:
                   type: string
                 description: Map of hashes to track e.g. job status
                 type: object
+              ksmHash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
+              ksmReadyCount:
+                description: ReadyCount of kube-state-metrics instances
+                format: int32
+                type: integer
               mysqldExporterExportedGaleras:
                 description: List of galera CRs, which are being exported with mysqld_exporter
                 items:
