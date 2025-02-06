@@ -985,8 +985,7 @@ spec:
                     type: array
                   containerImage:
                     default: quay.io/podified-antelope-centos9/openstack-rsyslog:current-podified
-                    description: ContainerImage - Amphora Controller Container Image
-                      URL
+                    description: ContainerImage - Rsyslog Container Image URL
                     type: string
                   defaultConfigOverwrite:
                     additionalProperties:
@@ -996,6 +995,11 @@ spec:
                       But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
                       TODO: -> implement
                     type: object
+                  initContainerImage:
+                    default: quay.io/podified-antelope-centos9/openstack-octavia-health-manager:current-podified
+                    description: InitContainerImage - Rsyslog init Container Image
+                      URL for
+                    type: string
                   networkAttachments:
                     default:
                     - octavia

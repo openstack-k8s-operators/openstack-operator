@@ -15,6 +15,10 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - description: NetworkAttachments
+      jsonPath: .status.networkAttachments
+      name: NetworkAttachments
+      type: string
     - description: Status
       jsonPath: .status.conditions[0].status
       name: Status
@@ -1299,6 +1303,13 @@ spec:
                         type: string
                     type: object
                 type: object
+              networkAttachments:
+                description: NetworkAttachments is a list of NetworkAttachment resource
+                  names to expose the services to the given network
+                items:
+                  type: string
+                type: array
+                x-kubernetes-list-type: atomic
               prometheusTls:
                 description: TLS - Parameters related to the TLS
                 properties:
@@ -1357,6 +1368,11 @@ spec:
                   - type
                   type: object
                 type: array
+              networkAttachments:
+                additionalProperties:
+                  type: string
+                description: NetworkAttachments status of the Prometheus pods
+                type: object
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

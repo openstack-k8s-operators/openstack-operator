@@ -296,6 +296,9 @@ spec:
                 description: PasswordSelectors - Selectors to identify the ServiceUser
                   password from the Secret
                 properties:
+                  pkcs11pin:
+                    default: PKCS11Pin
+                    type: string
                   service:
                     default: BarbicanPassword
                     description: Service - Selector to get the barbican service user
@@ -306,114 +309,24 @@ spec:
                     type: string
                 type: object
               pkcs11:
-                description: BarbicanPKCS11Template - Includes all common HSM properties
+                description: BarbicanPKCS11Template - Includes common HSM properties
                 properties:
-                  AESGCMGenerateIV:
-                    default: true
-                    description: Generate IVs for CKM_AES_GCM mechanism
-                    type: boolean
-                  HMACKeyType:
-                    default: CKK_GENERIC_SECRET
-                    description: HMAC Key Type
+                  clientDataPath:
+                    default: /etc/hsm-client
+                    description: Location to which kolla will copy the data in ClientDataSecret.
                     type: string
-                  HMACKeygenMechanism:
-                    default: CKM_GENERIC_SECRET_KEY_GEN
-                    description: HMAC Keygen Mechanism
+                  clientDataSecret:
+                    description: |-
+                      The OpenShift secret that stores the HSM client data.
+                      These will be mounted to /var/lib/config-data/hsm
                     type: string
-                  HMACLabel:
-                    description: Label to identify HMAC key in the HSM (must not be
-                      the same as MKEK label)
-                    type: string
-                  HMACMechanism:
-                    default: CKM_SHA256_HMAC
-                    description: HMAC Mechanism. This replaces hsm_keywrap_mechanism
-                    type: string
-                  MKEKLabel:
-                    description: Label to identify master KEK in the HSM (must not
-                      be the same as HMAC label)
-                    type: string
-                  MKEKLength:
-                    default: 32
-                    description: Length in bytes of master KEK
-                    type: integer
-                  OSLockingOK:
-                    default: false
-                    description: Set os_locking_ok
-                    type: boolean
-                  alwaysSetCKASensitive:
-                    default: true
-                    description: Always set cka_sensitive
-                    type: boolean
-                  certificatesMountPoint:
-                    description: The mounting point where the certificates will be
-                      copied to (e.g., /usr/local/luna/config/certs).
-                    type: string
-                  certificatesSecret:
-                    description: The OpenShift secret that stores the HSM certificates.
-                    type: string
-                  clientAddress:
-                    description: The IP address of the client connecting to the HSM
-                      (X.Y.Z.K)
-                    type: string
-                  encryptionMechanism:
-                    default: CKM_AES_GCM
-                    description: Secret encryption mechanism
-                    type: string
-                  keyWrapGenerateIV:
-                    default: true
-                    description: Generate IVs for the key wrap mechanism
-                    type: boolean
-                  keyWrapMechanism:
-                    default: CKM_AES_KEY_WRAP_KWP
-                    description: Key wrap mechanism
-                    type: string
-                  libraryPath:
-                    description: Path to vendor's PKCS11 library
-                    type: string
-                  loggingLevel:
-                    default: 4
-                    description: Level of logging, where 0 means "no logging" and
-                      7 means "debug".
-                    maximum: 7
-                    minimum: 0
-                    type: integer
                   loginSecret:
                     description: OpenShift secret that stores the password to login
                       to the PKCS11 session
                     type: string
-                  serverAddress:
-                    description: The HSM's IPv4 address (X.Y.Z.K)
-                    type: string
-                  slotId:
-                    description: |-
-                      One of TokenSerialNumber, TokenLabels or SlotId must
-                      be defined.  SlotId is used if none of the others is defined
-                    type: string
-                  tokenLabels:
-                    description: |-
-                      Token labels used to identify the token to be used.
-                      One of TokenSerialNumber, TokenLabels or SlotId must
-                      be specified. TokenLabels takes priority over SlotId.
-                      This can be a comma separated string of labels
-                    type: string
-                  tokenSerialNumber:
-                    description: |-
-                      Token serial number used to identify the token to be used.
-                      One of TokenSerialNumber, TokenLabels or SlotId must
-                      be defined.  TokenSerialNumber takes priority over
-                      TokenLabels and SlotId
-                    type: string
-                  type:
-                    description: 'A string containing the HSM type (currently supported:
-                      "luna").'
-                    type: string
                 required:
-                - HMACLabel
-                - MKEKLabel
-                - libraryPath
+                - clientDataSecret
                 - loginSecret
-                - serverAddress
-                - type
                 type: object
               rabbitMqClusterName:
                 default: rabbitmq
