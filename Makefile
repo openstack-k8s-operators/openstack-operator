@@ -75,6 +75,11 @@ SHELL = /usr/bin/env bash -o pipefail
 # Extra vars which will be passed to the Docker-build
 DOCKER_BUILD_ARGS ?=
 
+# Ginkgo args
+GINKGO_REPEAT = --repeat 5
+GINKGO_RAND_ALL = --randomize-all
+GINKGO_CI_ARGS ?= $(GINKGO_REPEAT) $(GINKGO_RAND_ALL) --no-color
+
 .PHONY: all
 all: build
 
@@ -193,6 +198,10 @@ PROC_CMD = --procs $(PROCS)
 
 .PHONY: test
 test: manifests generate gowork fmt vet envtest ginkgo ginkgo-run ## Run ginkgo tests with dependencies.
+
+.PHONY: test-ci
+test-ci: GINKGO_ARGS = $(GINKGO_CI_ARGS)
+test-ci: manifests generate gowork fmt vet envtest ginkgo ginkgo-run ## Run ginkgo tests with dependencies.
 
 .PHONY: ginkgo-run
 ginkgo-run: ## Run ginkgo.
