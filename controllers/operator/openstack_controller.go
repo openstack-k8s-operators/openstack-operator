@@ -29,8 +29,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -42,6 +40,7 @@ import (
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/operator/bindata"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
+	discoveryv1 "k8s.io/api/discovery/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -111,6 +110,7 @@ func SetupEnv() {
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups="",resources=serviceaccounts;configmaps;namespaces,verbs="*"
 // +kubebuilder:rbac:groups=core,resources=services,verbs="*";
+// +kubebuilder:rbac:groups=discovery,resources=endpointslices,verbs="get;list";
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups="monitoring.coreos.com",resources=servicemonitors,verbs=list;get;watch;update;create
@@ -271,6 +271,20 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
+	// Check if Services are running and have an endpoint
+	ctrlResult, err := r.checkServiceEndpoints(ctx, instance)
+	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			operatorv1beta1.OpenStackOperatorReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			operatorv1beta1.OpenStackOperatorErrorMessage,
+			err))
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	instance.Status.Conditions.MarkTrue(
 		operatorv1beta1.OpenStackOperatorReadyCondition,
 		operatorv1beta1.OpenStackOperatorReadyMessage)
@@ -338,6 +352,42 @@ func (r *OpenStackReconciler) countDeployments(ctx context.Context, instance *op
 		}
 	}
 	return count, nil
+}
+
+// checkServiceEndpoints -
+func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instance *operatorv1beta1.OpenStack) (ctrl.Result, error) {
+
+	// NOTE: this is a static list for all operators with webhooks enabled
+	endpointNames := []string{"openstack-operator-webhook-service", "infra-operator-webhook-service", "openstack-baremetal-operator-webhook-service"}
+
+	for _, endpointName := range endpointNames {
+		endpointSlice := &discoveryv1.EndpointSlice{}
+		err := r.Client.Get(ctx, client.ObjectKey{Name: endpointName, Namespace: instance.Namespace}, endpointSlice)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				log.Log.Info("Webhook endpoint not found. Requeuing...", "name", endpointName)
+				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+			}
+			return ctrl.Result{}, err
+		}
+		if len(endpointSlice.Endpoints) == 0 {
+			log.Log.Info("Webhook endpoints not configured. Requeuing...", "name", endpointName)
+			return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+		}
+		for _, endpoint := range endpointSlice.Endpoints {
+			if len(endpoint.Addresses) == 0 {
+				log.Log.Info("Webhook endpoint addresses aren't healthy. Requeuing...", "name", endpointName)
+				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+			}
+			bFalse := false
+			if endpoint.Conditions.Ready == &bFalse || endpoint.Conditions.Serving == &bFalse {
+				log.Log.Info("Webhook endpoint addresses aren't serving. Requeuing...", "name", endpointName)
+				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+			}
+		}
+	}
+
+	return ctrl.Result{}, nil
 }
 
 func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
@@ -626,38 +676,8 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
-	deploymentFunc := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, o client.Object) []reconcile.Request {
-		Log := r.GetLogger(ctx)
-
-		instanceList := &operatorv1beta1.OpenStackList{}
-		err := r.Client.List(ctx, instanceList)
-		if err != nil {
-			Log.Error(err, "Unable to retrieve OpenStack instances")
-			return nil
-		}
-
-		if len(instanceList.Items) == 0 {
-			return nil
-		}
-
-		instance := &instanceList.Items[0]
-		if metav1.IsControlledBy(o, instance) {
-			Log.Info("Reconcile request for OpenStack instance", "instance", instance.Name)
-			return []reconcile.Request{
-				{
-					NamespacedName: client.ObjectKey{
-						Namespace: instance.Namespace,
-						Name:      instance.Name,
-					},
-				},
-			}
-		}
-
-		return nil
-	})
-
 	return ctrl.NewControllerManagedBy(mgr).
-		Watches(&appsv1.Deployment{}, deploymentFunc).
+		Owns(&appsv1.Deployment{}).
 		For(&operatorv1beta1.OpenStack{}).
 		Complete(r)
 }

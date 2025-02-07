@@ -68,6 +68,12 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - discovery
+  resources:
+  - endpointslices
+  verbs:
+  - get;list
+- apiGroups:
   - monitoring.coreos.com
   resources:
   - servicemonitors
