@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -30,6 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/go-logr/logr"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -41,6 +44,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -58,7 +62,7 @@ type OpenStackReconciler struct {
 
 // GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
 func (r *OpenStackReconciler) GetLogger(ctx context.Context) logr.Logger {
-	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackControlPlane")
+	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackOperator")
 }
 
 var (
@@ -110,6 +114,7 @@ func SetupEnv() {
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups="monitoring.coreos.com",resources=servicemonitors,verbs=list;get;watch;update;create
+// +kubebuilder:rbac:groups=operators.coreos.com,resources=clusterserviceversions;subscriptions;installplans;operators,verbs=get;list;delete;
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -228,12 +233,10 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return r.reconcileDelete(ctx, instance, openstackHelper)
 	}
 
-	// TODO: cleanup obsolete resources here (remove old CSVs, etc)
-	/*
-	   if err := r.cleanupObsoleteResources(ctx); err != nil {
-	           return ctrl.Result{}, err
-	   }
-	*/
+	// cleanup obsolete resources here (remove old CSVs, etc)
+	if err := r.cleanupObsoleteResources(ctx, instance); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	if err := r.applyManifests(ctx, instance); err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -243,6 +246,12 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			operatorv1beta1.OpenStackOperatorErrorMessage,
 			err))
 		return ctrl.Result{}, err
+	}
+
+	// now that CRDs have been updated (with old olm.managed references removed)
+	// we can finally cleanup the old operators
+	if err := r.postCleanupObsoleteResources(ctx, instance); err != nil {
+		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, err
 	}
 
 	// Check if all deployments are running
@@ -420,6 +429,198 @@ func (r *OpenStackReconciler) renderAndApply(
 		}
 	}
 	return nil
+}
+
+func isServiceOperatorResource(name string) bool {
+	//NOTE: test-operator was deployed as a independant package so it may or may not be installed
+	//NOTE: depending on how watcher-operator is released for FR2 and then in FR3 it may need to be
+	// added into this list in the future
+	serviceOperatorNames := []string{"barbican", "cinder", "designate", "glance", "heat", "horizon", "infra",
+		"ironic", "keystone", "manila", "mariadb", "neutron", "nova", "octavia", "openstack-baremetal", "ovn",
+		"placement", "rabbitmq-cluster", "swift", "telemetry", "test"}
+
+	for _, item := range serviceOperatorNames {
+		if strings.Index(name, item) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// cleanupObsoleteResources - deletes CSVs and subscriptions
+func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
+
+	csvGVR := schema.GroupVersionResource{
+		Group:    "operators.coreos.com",
+		Version:  "v1alpha1",
+		Resource: "clusterserviceversions",
+	}
+
+	subscriptionGVR := schema.GroupVersionResource{
+		Group:    "operators.coreos.com",
+		Version:  "v1alpha1",
+		Resource: "subscriptions",
+	}
+
+	installPlanGVR := schema.GroupVersionResource{
+		Group:    "operators.coreos.com",
+		Version:  "v1alpha1",
+		Resource: "installplans",
+	}
+
+	csvList := &uns.UnstructuredList{}
+	csvList.SetGroupVersionKind(csvGVR.GroupVersion().WithKind("ClusterServiceVersion"))
+	err := r.Client.List(ctx, csvList, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return err
+	}
+	for _, csv := range csvList.Items {
+		Log.Info("Found CSV", "name", csv.GetName())
+		if isServiceOperatorResource(csv.GetName()) {
+			err = r.Client.Delete(ctx, &csv)
+			if err != nil {
+				if apierrors.IsNotFound(err) {
+					Log.Info("CSV not found on delete. Continuing...", "name", csv.GetName())
+					continue
+				}
+				return err
+			}
+			Log.Info("CSV deleted successfully", "name", csv.GetName())
+		}
+	}
+
+	subscriptionList := &uns.UnstructuredList{}
+	subscriptionList.SetGroupVersionKind(subscriptionGVR.GroupVersion().WithKind("Subscription"))
+	err = r.Client.List(ctx, subscriptionList, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return err
+	}
+	for _, subscription := range subscriptionList.Items {
+		Log.Info("Found Subscription", "name", subscription.GetName())
+		if isServiceOperatorResource(subscription.GetName()) {
+			err = r.Client.Delete(ctx, &subscription)
+			if err != nil {
+				if apierrors.IsNotFound(err) {
+					Log.Info("Subscription not found on delete. Continuing...", "name", subscription.GetName())
+					continue
+				}
+				return err
+			}
+			Log.Info("Subscription deleted successfully", "name", subscription.GetName())
+		}
+	}
+
+	// lookup the installplan which has the clusterServiceVersionNames we removed above
+	// there will be just a single installPlan that has all of them referenced
+	installPlanList := &uns.UnstructuredList{}
+	installPlanList.SetGroupVersionKind(installPlanGVR.GroupVersion().WithKind("InstallPlan"))
+
+	err = r.Client.List(ctx, installPlanList, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return err
+	}
+	for _, installPlan := range installPlanList.Items {
+		Log.Info("Found installPlan", "name", installPlan.GetName())
+		// this should have a list containing the CSV names of all the old/legacy service operator CSVs
+		csvNames, found, err := uns.NestedSlice(installPlan.Object, "spec", "clusterServiceVersionNames")
+		if err != nil {
+			return err
+		}
+		if found {
+			// just checking for the first one should be sufficient
+			if isServiceOperatorResource(csvNames[0].(string)) {
+				err = r.Client.Delete(ctx, &installPlan)
+				if err != nil {
+					if apierrors.IsNotFound(err) {
+						Log.Info("Installplane not found on delete. Continuing...", "name", installPlan.GetName())
+						continue
+					}
+					return err
+				}
+				Log.Info("Installplan deleted successfully", "name", installPlan.GetName())
+			}
+		}
+	}
+
+	return nil
+
+}
+
+// postCleanupObsoleteResources - deletes CSVs for old service operator bundles
+func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
+
+	operatorGVR := schema.GroupVersionResource{
+		Group:    "operators.coreos.com",
+		Version:  "v1",
+		Resource: "operators",
+	}
+
+	// finally we can remove operator objects as all the refs have been cleaned up:
+	// 1) CSVs
+	// 2) Subscriptions
+	// 3) CRD olm.managed references removed
+	// 4) installPlan from old service operators removed
+	operatorList := &uns.UnstructuredList{}
+	operatorList.SetGroupVersionKind(operatorGVR.GroupVersion().WithKind("Operator"))
+	err := r.Client.List(ctx, operatorList, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return err
+	}
+	for _, operator := range operatorList.Items {
+		Log.Info("Found Operator", "name", operator.GetName())
+		if isServiceOperatorResource(operator.GetName()) {
+
+			refs, found, err := uns.NestedSlice(operator.Object, "status", "components", "refs")
+			if err != nil {
+				return err
+			}
+			if found {
+
+				// The horizon-operator.openstack-operators has references to old roles/bindings
+				// the code below will delete those references before continuing
+				for _, ref := range refs {
+					refData := ref.(map[string]interface{})
+					Log.Info("Deleting operator reference", "Reference", ref)
+					obj := uns.Unstructured{}
+					obj.SetName(refData["name"].(string))
+					obj.SetNamespace(refData["namespace"].(string))
+					apiParts := strings.Split(refData["apiVersion"].(string), "/")
+					objGvk := schema.GroupVersionResource{
+						Group:    apiParts[0],
+						Version:  apiParts[1],
+						Resource: refData["kind"].(string),
+					}
+					obj.SetGroupVersionKind(objGvk.GroupVersion().WithKind(refData["kind"].(string)))
+
+					// references from CRD's should be removed before this function is called
+					// but this is a safeguard as we do not want to delete them
+					if refData["kind"].(string) != "CustomResourceDefinition" {
+						err = r.Client.Delete(ctx, &obj)
+						if err != nil {
+							if apierrors.IsNotFound(err) {
+								Log.Info("Object not found on delete. Continuing...", "name", obj.GetName())
+								continue
+							}
+							return err
+						}
+					}
+				}
+
+				return fmt.Errorf("Requeuing/Found references for operator name: %s, refs: %v", operator.GetName(), refs)
+			}
+			// no refs found so we should be able to successfully delete the operator
+			err = r.Client.Delete(ctx, &operator)
+			if err != nil {
+				return err
+			}
+			Log.Info("Operator deleted successfully", "name", operator.GetName())
+		}
+	}
+
+	return nil
+
 }
 
 // SetupWithManager sets up the controller with the Manager.

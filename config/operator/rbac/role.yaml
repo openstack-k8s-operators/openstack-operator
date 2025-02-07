@@ -104,6 +104,17 @@ rules:
   - patch
   - update
 - apiGroups:
+  - operators.coreos.com
+  resources:
+  - clusterserviceversions
+  - installplans
+  - operators
+  - subscriptions
+  verbs:
+  - delete
+  - get
+  - list
+- apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - clusterrolebindings
