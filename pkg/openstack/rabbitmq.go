@@ -393,10 +393,17 @@ func reconcileRabbitMQ(
 			Log.Info("Setting AdditionalConfig")
 			// This is the same situation as RABBITMQ_UPGRADE_LOG above,
 			// except for the "main" rabbitmq log we can just force it to use the console.
+
+			// By default the prometheus and management endpoints always bind to ipv4.
+			// We need to set the correct address based on the IP version in use.
 			var settings []string
 			settings = append(settings, "log.console = true")
+			settings = append(settings, "prometheus.tcp.ip = ::")
+			settings = append(settings, "management.tcp.ip = ::")
 			if tlsCert != "" {
 				settings = append(settings, "ssl_options.verify = verify_none")
+				settings = append(settings, "prometheus.ssl.ip = ::")
+				// management ssl ip needs to be set in the AdvancedConfig
 			}
 			rabbitmq.Spec.Rabbitmq.AdditionalConfig = strings.Join(settings, "\n")
 		}
@@ -436,6 +443,7 @@ func reconcileRabbitMQ(
   ]},
   {rabbitmq_management, [
     {ssl_config, [
+      {ip,"::"},
       {cacertfile,"/etc/rabbitmq-tls/ca.crt"},
       {certfile,"/etc/rabbitmq-tls/tls.crt"},
       {keyfile,"/etc/rabbitmq-tls/tls.key"},
