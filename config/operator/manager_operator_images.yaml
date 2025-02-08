@@ -14,17 +14,17 @@ spec:
       - name: operator
         env:
         - name: RELATED_IMAGE_BARBICAN_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/barbican-operator@sha256:18980b0f85f4bfbdd41e2c5a05ac9eb3df208ac20f7d4b2f8fe0bb7c438c46d5
+          value: quay.io/openstack-k8s-operators/barbican-operator@sha256:b750e4b70a46c97bd0f7f4a0277643604b259ccc0cb97d15c5c85d5eaa29375a
         - name: RELATED_IMAGE_CINDER_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/cinder-operator@sha256:92cd06506f633fbd36e3b0d0e145835304f3f8e197515c90a05974faabe4d491
         - name: RELATED_IMAGE_DESIGNATE_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/designate-operator@sha256:16e1770edc2c621ac89fdca5a10d8110bd5b43249ad1aa3d0369c1892cb4053f
         - name: RELATED_IMAGE_GLANCE_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/glance-operator@sha256:3376b637ae0249423be1a8b539b7e7c54a285194fb8a9095062f24a65600c3d5
+          value: quay.io/openstack-k8s-operators/glance-operator@sha256:078d70e374de8b6c995683c28b9ab5575b829dd68e4cec8fd7d32d73eab65963
         - name: RELATED_IMAGE_HEAT_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/heat-operator@sha256:aa30e36c7cf183f3aa63e90794ea6cb2d191c29cf6825bba19a19e855a8360ed
+          value: quay.io/openstack-k8s-operators/heat-operator@sha256:a4df314e296869464709cbefb2c2a9fb7e35ebcdd8343ba078a2fdb737de9f55
         - name: RELATED_IMAGE_HORIZON_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/horizon-operator@sha256:a7fda492ec0dfd798bf1315b6ee828c4febe898aa918b6b0107664d6dcbd6a81
+          value: quay.io/openstack-k8s-operators/horizon-operator@sha256:6b5624f8c9daaf641661a9b36a7bf69e3b98f92b4d295c627eff777ad023a77e
         - name: RELATED_IMAGE_INFRA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/infra-operator@sha256:73741d7f4e713753311001cbea234ad77c70e834e7c2b03eec2ca37c372a9fcb
         - name: RELATED_IMAGE_IRONIC_OPERATOR_MANAGER_IMAGE_URL
@@ -42,9 +42,9 @@ spec:
         - name: RELATED_IMAGE_OCTAVIA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/octavia-operator@sha256:fef6a050193789bce817ceff852f4bf4a6f9ffbbd7b59494f1465f1c9d951c11
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:f515dbdddef5cd1c3318ad370d987b2a5a24e10310cdf61f5ff55676264ffd30
+          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:a417b9f38285f10e7b6bf28b0595fd39363b2b807d93247f6d2f12c87f4895db
         - name: RELATED_IMAGE_OVN_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/ovn-operator@sha256:b32720841ecf8460dad4a48760915b2bfa16b07156288917d86451a24a5eb7f9
+          value: quay.io/openstack-k8s-operators/ovn-operator@sha256:9cb088ff115420ccd234dab5242892f70dc27deba44c33587d98292c3757bef6
         - name: RELATED_IMAGE_PLACEMENT_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/placement-operator@sha256:f25a277c9ed1bb6fbe3fd4eb8b71d8a771dc5fc9aff9e0064ced552ba7b5fc9b
         - name: RELATED_IMAGE_RABBITMQ_CLUSTER_OPERATOR_MANAGER_IMAGE_URL
@@ -52,6 +52,6 @@ spec:
         - name: RELATED_IMAGE_SWIFT_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/swift-operator@sha256:65d6dd43bf86a5de20fa34debcf105e5b7282ffe5d5108322e252132e12ea6e2
         - name: RELATED_IMAGE_TELEMETRY_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/telemetry-operator@sha256:91ea9e8572089079c528d46b993383cf5adc498ac1498849bf3f002a63228943
+          value: quay.io/openstack-k8s-operators/telemetry-operator@sha256:5f8da83b6de422acef539cd5c26c03a7a1694c0d0247254a85fec0afbca46955
         - name: RELATED_IMAGE_TEST_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/test-operator@sha256:02489c6cf6a839478d19f7b0926e7ee701c95554e483a44fa759031bbee60929

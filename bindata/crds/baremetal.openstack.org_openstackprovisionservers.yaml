@@ -231,6 +231,10 @@ spec:
                 description: IP of the provisioning interface on the node running
                   the ProvisionServer pod
                 type: string
+              provisionIpError:
+                description: Any error reported by the provisioning agent during provisioning
+                  IP acquisition
+                type: string
               readyCount:
                 description: ReadyCount of provision server Apache instances
                 format: int32
