@@ -371,22 +371,22 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, err
 	}
 	containerImages := dataplaneutil.GetContainerImages(version)
-
+	provResult := deployment.ProvisionResult{}
 	// Reconcile BaremetalSet if required
 	if !instance.Spec.PreProvisioned {
 		// Reset the NodeSetBareMetalProvisionReadyCondition to unknown
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
 
-		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
+		provResult, err := deployment.DeployBaremetalSet(ctx, helper, instance,
 			allIPSets, dnsDetails.ServerAddresses, containerImages)
-		if err != nil || !isReady {
+		if err != nil || !provResult.IsProvisioned {
 			return ctrl.Result{}, err
 		}
 	}
 
 	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(
-		ctx, helper, instance, generationChanged)
+		ctx, helper, instance, generationChanged, provResult.BmhRefHash)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -430,6 +430,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		Log.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
+		instance.Status.DeployedBmhHash = provResult.BmhRefHash
 	} else if isDeploymentRunning {
 		Log.Info("Deployment still running...", "instance", instance)
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
@@ -465,7 +466,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 func checkDeployment(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	generationChanged bool,
+	generationChanged bool, bmhRefHash string,
 ) (bool, bool, bool, string, error) {
 	// Get all completed deployments
 	var failedDeployment string
@@ -524,8 +525,9 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				// generation metadata has changed (i.e generation metatdata won't change when
 				// fields are removed from the CRD during an update that would not require a new
 				// deployment to run) asssume nodeset has changed requiring new deployment.
-				if deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash &&
-					generationChanged {
+				if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash &&
+					generationChanged) ||
+					(!instance.Spec.PreProvisioned && instance.Status.DeployedBmhHash != bmhRefHash) {
 					continue
 				}
 				isDeploymentReady = true
@@ -794,6 +796,5 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetSpecConfigHash(instance *datapl
 	if err != nil {
 		return "", err
 	}
-
 	return configHash, nil
 }

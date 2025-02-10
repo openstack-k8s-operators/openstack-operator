@@ -18127,6 +18127,8 @@ spec:
                 type: object
               ctlplaneSearchDomain:
                 type: string
+              deployedBmhHash:
+                type: string
               deployedConfigHash:
                 type: string
               deployedVersion:
