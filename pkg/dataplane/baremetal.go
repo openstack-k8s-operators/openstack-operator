@@ -29,11 +29,17 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/labels"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 )
+
+type ProvisionResult struct {
+	IsProvisioned bool
+	BmhRefHash    string
+}
 
 // DeployBaremetalSet Deploy OpenStackBaremetalSet
 func DeployBaremetalSet(
@@ -41,7 +47,7 @@ func DeployBaremetalSet(
 	ipSets map[string]infranetworkv1.IPSet,
 	dnsAddresses []string,
 	containerImages openstackv1.ContainerImages,
-) (bool, error) {
+) (ProvisionResult, error) {
 	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.Name,
@@ -109,7 +115,7 @@ func DeployBaremetalSet(
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.NodeSetBaremetalProvisionErrorMessage,
 			err.Error())
-		return false, err
+		return ProvisionResult{}, err
 	}
 
 	// Check if baremetalSet is ready
@@ -119,10 +125,25 @@ func DeployBaremetalSet(
 			dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			dataplanev1.NodeSetBaremetalProvisionReadyWaitingMessage)
-		return false, nil
+		return ProvisionResult{}, nil
 	}
+
+	bmhRefHash, err := getBMHRefHash(baremetalSet)
+	if err != nil {
+		return ProvisionResult{}, err
+	}
+
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 		dataplanev1.NodeSetBaremetalProvisionReadyMessage)
-	return true, nil
+	return ProvisionResult{IsProvisioned: true, BmhRefHash: bmhRefHash}, nil
+}
+
+func getBMHRefHash(bmSet *baremetalv1.OpenStackBaremetalSet) (string, error) {
+	bmhRefHash, err := util.ObjectHash(bmSet.Status.BaremetalHosts)
+	if err != nil {
+		return "", err
+	}
+	return bmhRefHash, nil
+
 }

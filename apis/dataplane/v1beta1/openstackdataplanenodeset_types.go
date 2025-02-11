@@ -154,6 +154,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// DeployedVersion
 	DeployedVersion string `json:"deployedVersion,omitempty"`
+
+	//DeployedBmhHash - Hash of BMHs deployed
+	DeployedBmhHash string `json:"deployedBmhHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true
