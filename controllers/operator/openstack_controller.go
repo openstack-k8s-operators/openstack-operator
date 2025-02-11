@@ -354,6 +354,14 @@ func (r *OpenStackReconciler) countDeployments(ctx context.Context, instance *op
 	return count, nil
 }
 
+// containerImageMatch - returns true if the deployedContainerImage matches the operatorImage
+func containerImageMatch(instance *operatorv1beta1.OpenStack) bool {
+	if instance.Status.ContainerImage != nil && *instance.Status.ContainerImage == operatorImage {
+		return true
+	}
+	return false
+}
+
 func isWebhookEndpoint(name string) bool {
 	// NOTE: this is a static list for all operators with webhooks enabled
 	endpointNames := []string{"openstack-operator-webhook-service", "infra-operator-webhook-service", "openstack-baremetal-operator-webhook-service"}
@@ -402,15 +410,19 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 }
 
 func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
-	if err := r.applyCRDs(ctx, instance); err != nil {
-		log.Log.Error(err, "failed applying CRD manifests")
-		return err
-	}
+	// only apply CRDs and RBAC once per each containerImage change
+	if !containerImageMatch(instance) {
+		if err := r.applyCRDs(ctx, instance); err != nil {
+			log.Log.Error(err, "failed applying CRD manifests")
+			return err
+		}
 
-	if err := r.applyRBAC(ctx, instance); err != nil {
-		log.Log.Error(err, "failed applying RBAC manifests")
-		return err
+		if err := r.applyRBAC(ctx, instance); err != nil {
+			log.Log.Error(err, "failed applying RBAC manifests")
+			return err
+		}
 	}
+	instance.Status.ContainerImage = &operatorImage
 
 	if err := r.applyOperator(ctx, instance); err != nil {
 		log.Log.Error(err, "failed applying Operator manifests")
