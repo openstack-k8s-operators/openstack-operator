@@ -189,11 +189,6 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 	}()
 
-	// If we're not deleting this and the object doesn't have our finalizer, add it.
-	if instance.DeletionTimestamp.IsZero() && controllerutil.AddFinalizer(instance, openstackHelper.GetFinalizer()) || isNewInstance {
-		return ctrl.Result{}, err
-	}
-
 	cl := condition.CreateList(
 		condition.UnknownCondition(operatorv1beta1.OpenStackOperatorReadyCondition, condition.InitReason, string(operatorv1beta1.OpenStackOperatorReadyInitMessage)),
 	)
@@ -205,6 +200,11 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		condition.RequestedReason,
 		condition.SeverityInfo,
 		operatorv1beta1.OpenStackOperatorReadyRunningMessage))
+
+	// If we're not deleting this and the object doesn't have our finalizer, add it.
+	if instance.DeletionTimestamp.IsZero() && controllerutil.AddFinalizer(instance, openstackHelper.GetFinalizer()) || isNewInstance {
+		return ctrl.Result{}, err
+	}
 
 	// We only want one instance of OpenStack. Ignore anything after that.
 	if len(instanceList.Items) > 0 {
