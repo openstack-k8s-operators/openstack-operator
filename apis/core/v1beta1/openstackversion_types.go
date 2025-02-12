@@ -130,6 +130,7 @@ type ContainerTemplate struct {
 	ManilaAPIImage                *string `json:"manilaAPIImage,omitempty"`
 	ManilaSchedulerImage          *string `json:"manilaSchedulerImage,omitempty"`
 	MariadbImage                  *string `json:"mariadbImage,omitempty"`
+	NetUtilsImage                 *string `json:"netUtilsImage,omitempty"`
 	NeutronAPIImage               *string `json:"neutronAPIImage,omitempty"`
 	NovaAPIImage                  *string `json:"novaAPIImage,omitempty"`
 	NovaComputeImage              *string `json:"novaComputeImage,omitempty"`

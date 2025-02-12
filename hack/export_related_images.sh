@@ -57,6 +57,7 @@ export RELATED_IMAGE_SWIFT_PROXY_IMAGE_URL_DEFAULT=quay.io/podified-antelope-cen
 export RELATED_IMAGE_SWIFT_ACCOUNT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-swift-account:current-podified
 export RELATED_IMAGE_SWIFT_CONTAINER_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-swift-container:current-podified
 export RELATED_IMAGE_SWIFT_OBJECT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-swift-object:current-podified
+export RELATED_IMAGE_NET_UTILS_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-netutils:current-podified
 export RELATED_IMAGE_OCTAVIA_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-octavia-api:current-podified
 export RELATED_IMAGE_OCTAVIA_HOUSEKEEPING_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-octavia-housekeeping:current-podified
 export RELATED_IMAGE_OCTAVIA_HEALTHMANAGER_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-octavia-health-manager:current-podified

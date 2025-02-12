@@ -154,6 +154,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.ManilaAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.ManilaSchedulerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.MariadbImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.NetUtilsImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.NeutronAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.NovaAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.NovaComputeImage).ShouldNot(BeNil())
