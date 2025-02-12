@@ -16951,6 +16951,8 @@ spec:
                     type: string
                   octaviaHousekeepingImage:
                     type: string
+                  octaviaRsyslogImage:
+                    type: string
                   octaviaWorkerImage:
                     type: string
                   openstackClientImage:
@@ -18516,6 +18518,8 @@ spec:
                     type: string
                   octaviaHousekeepingImage:
                     type: string
+                  octaviaRsyslogImage:
+                    type: string
                   octaviaWorkerImage:
                     type: string
                   openstackClientImage:
@@ -18723,6 +18727,8 @@ spec:
                       type: string
                     octaviaHousekeepingImage:
                       type: string
+                    octaviaRsyslogImage:
+                      type: string
                     octaviaWorkerImage:
                       type: string
                     openstackClientImage:
@@ -18906,6 +18912,8 @@ spec:
                   octaviaHealthmanagerImage:
                     type: string
                   octaviaHousekeepingImage:
+                    type: string
+                  octaviaRsyslogImage:
                     type: string
                   octaviaWorkerImage:
                     type: string
