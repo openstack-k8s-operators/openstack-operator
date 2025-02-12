@@ -25,6 +25,10 @@ spec:
       displayName: OpenStack Client
       kind: OpenStackClient
       name: openstackclients.client.openstack.org
+      specDescriptors:
+      - description: List of environment variables to set in the container.
+        displayName: Env
+        path: env
       version: v1beta1
     - description: OpenStackControlPlane is the Schema for the openstackcontrolplanes
         API
@@ -323,6 +327,9 @@ spec:
           Resource
         displayName: Template
         path: openstackclient.template
+      - description: List of environment variables to set in the container.
+        displayName: Env
+        path: openstackclient.template.env
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn

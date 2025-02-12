@@ -17,6 +17,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -56,6 +57,16 @@ type OpenStackClientSpecCore struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Secret containing any CA certificates which should be added to deployment pods
 	tls.Ca `json:",inline"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +patchMergeKey=name
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=name
+	// +optional
+	// List of environment variables to set in the container.
+	Env []corev1.EnvVar `json:"env,omitempty" patchMergeKey:"name" patchStrategy:"merge"`
 }
 
 // OpenStackClientStatus defines the observed state of OpenStackClient
