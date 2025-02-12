@@ -58,6 +58,8 @@ spec:
                   - type
                   type: object
                 type: array
+              containerImage:
+                type: string
               deployedOperatorCount:
                 type: integer
               observedGeneration:

@@ -37,6 +37,9 @@ type OpenStackStatus struct {
 
 	// ObservedGeneration - the most recent generation observed for this object.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"` // no spec yet so maybe we don't need this
+
+	// ContainerImage - the container image that has been successfully deployed
+	ContainerImage *string `json:"containerImage,omitempty"`
 }
 
 // +kubebuilder:object:root=true
