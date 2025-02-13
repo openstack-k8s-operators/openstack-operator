@@ -12,5 +12,138 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: quay.io/openstack-k8s-operators/openstack-operator
-  newTag: latest
+  newName: quay.io/fpantano/openstack-operator
+  newTag: v0.0.6
+patches:
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.4-1737755656"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/fpantano/openstack-operator:v0.0.4"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.5-1738077037"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/fpantano/openstack-operator:v0.0.5"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.5-1738080606"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.5-1738081371"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.5-1738151976"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.5-1738155622"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/fpantano/glance-operator:v0.0.5"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.5-1738156154"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.5-1738156681"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738158223"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/fpantano/openstack-operator:v0.0.6"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738161638"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738577401"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738585831"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738592191"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738659293"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738666601"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1738762896"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1739480331"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.6-1739522461"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
