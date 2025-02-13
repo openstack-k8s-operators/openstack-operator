@@ -402,6 +402,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       barbicanKeystoneListener:
                         properties:
@@ -460,6 +467,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       barbicanWorker:
                         properties:
@@ -517,6 +531,13 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
                             type: object
                         type: object
                       customServiceConfig:
@@ -595,6 +616,13 @@ spec:
                       simpleCryptoBackendSecret:
                         default: osp-secret
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - barbicanAPI
                     - barbicanKeystoneListener
@@ -2577,6 +2605,13 @@ spec:
                         default: 1
                         format: int32
                         type: integer
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     type: object
                 type: object
               extraMounts:
@@ -3097,6 +3132,13 @@ spec:
                             caBundleSecretName:
                               type: string
                             secretName:
+                              type: string
+                          type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
                               type: string
                           type: object
                       required:
@@ -3899,6 +3941,13 @@ spec:
                                 caBundleSecretName:
                                   type: string
                               type: object
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
                             type:
                               default: split
                               enum:
@@ -3978,6 +4027,13 @@ spec:
                           storageClass:
                             type: string
                           storageRequest:
+                            type: string
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
                             type: string
                         type: object
                     required:
@@ -4389,6 +4445,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       heatCfnAPI:
                         properties:
@@ -4512,6 +4575,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       heatEngine:
                         properties:
@@ -4566,6 +4636,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       memcachedInstance:
                         default: memcached
@@ -4600,6 +4677,13 @@ spec:
                       serviceUser:
                         default: heat
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - databaseInstance
                     - heatAPI
@@ -5341,6 +5425,13 @@ spec:
                           secretName:
                             type: string
                         type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - memcachedInstance
                     - secret
@@ -5736,6 +5827,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       ironicConductors:
                         items:
@@ -5824,6 +5922,13 @@ spec:
                               type: string
                             storageRequest:
                               type: string
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
                           required:
                           - storageClass
                           - storageRequest
@@ -5996,6 +6101,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       ironicNeutronAgent:
                         properties:
@@ -6050,6 +6162,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -6082,6 +6201,13 @@ spec:
                       storageClass:
                         default: ""
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - databaseInstance
                     - ironicAPI
@@ -6400,6 +6526,13 @@ spec:
                                 type: object
                             type: object
                           caBundleSecretName:
+                            type: string
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
                             type: string
                         type: object
                       trustFlushArgs:
@@ -7183,6 +7316,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       manilaScheduler:
                         properties:
@@ -7237,6 +7377,13 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
                             type: object
                         type: object
                       manilaShares:
@@ -7294,6 +7441,13 @@ spec:
                                     x-kubernetes-int-or-string: true
                                   type: object
                               type: object
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
                           type: object
                         type: object
                       memcachedInstance:
@@ -7322,6 +7476,13 @@ spec:
                       serviceUser:
                         default: manila
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - manilaAPI
                     - manilaScheduler
@@ -7359,7 +7520,28 @@ spec:
                           properties:
                             caBundleSecretName:
                               type: string
+                            mtls:
+                              properties:
+                                authCertSecret:
+                                  properties:
+                                    secretName:
+                                      type: string
+                                  type: object
+                                sslVerifyMode:
+                                  enum:
+                                  - None
+                                  - Request
+                                  - Require
+                                  type: string
+                              type: object
                             secretName:
+                              type: string
+                          type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
                               type: string
                           type: object
                       required:
@@ -8145,6 +8327,13 @@ spec:
                               secretName:
                                 type: string
                             type: object
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
                         type: object
                     required:
                     - databaseInstance
@@ -14927,6 +15116,13 @@ spec:
                             secretName:
                               type: string
                           type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
                       type: object
                     type: object
                 type: object
@@ -15193,6 +15389,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         required:
                         - memcachedInstance
                         - rabbitMqClusterName
@@ -15262,11 +15465,25 @@ spec:
                           storageRequest:
                             default: 10Gi
                             type: string
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         required:
                         - memcachedInstance
                         - replicas
                         - storageClass
                         - storageRequest
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
                         type: object
                     required:
                     - memcachedInstance
