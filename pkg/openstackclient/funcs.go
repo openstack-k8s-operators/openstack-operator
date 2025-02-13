@@ -50,6 +50,16 @@ func ClientPodSpec(
 		envVars["PROMETHEUS_CA_CERT"] = env.SetValue(tls.DownstreamTLSCABundlePath)
 	}
 
+	if instance.Spec.Env != nil {
+		for idx := range instance.Spec.Env {
+			e := instance.Spec.Env[idx]
+			envVars[e.Name] = func(env *corev1.EnvVar) {
+				env.Value = e.Value
+				env.ValueFrom = e.ValueFrom
+			}
+		}
+	}
+
 	// create Volume and VolumeMounts
 	volumes := clientPodVolumes(instance)
 	volumeMounts := clientPodVolumeMounts()
