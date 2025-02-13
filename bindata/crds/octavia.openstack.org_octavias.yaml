@@ -515,6 +515,24 @@ spec:
                             type: string
                         type: object
                     type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                   transportURLSecret:
                     description: TransportURLSecret - Secret containing RabbitMQ transportURL
                     type: string
@@ -729,6 +747,24 @@ spec:
                       caBundleSecretName:
                         description: CaBundleSecretName - holding the CA certs in
                           a pre-created bundle file
+                        type: string
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
                         type: string
                     type: object
                   transportURLSecret:
@@ -947,6 +983,24 @@ spec:
                           a pre-created bundle file
                         type: string
                     type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                   transportURLSecret:
                     description: TransportURLSecret - Secret containing RabbitMQ transportURL
                     type: string
@@ -1014,6 +1068,18 @@ spec:
                     description: NodeSelector to target subset of worker nodes running
                       this service
                     type: object
+                  octaviaProviderSubnetCIDR:
+                    description: OctaviaProviderSubnetCIDR -
+                    type: string
+                  octaviaProviderSubnetExtraCIDRs:
+                    description: OctaviaProviderSubnetExtraCIDRs -
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  octaviaProviderSubnetGateway:
+                    description: OctaviaProviderSubnetGateway -
+                    type: string
                   resources:
                     description: |-
                       Resources - Compute Resources required by this service (Limits/Requests).
@@ -1098,6 +1164,24 @@ spec:
                       - protocol
                       type: object
                     type: array
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                 required:
                 - serviceAccount
                 type: object
@@ -1308,6 +1392,24 @@ spec:
                           a pre-created bundle file
                         type: string
                     type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                   transportURLSecret:
                     description: TransportURLSecret - Secret containing RabbitMQ transportURL
                     type: string
@@ -1435,6 +1537,23 @@ spec:
                 description: TenantName - the name of the OpenStack tenant that controls
                   the Octavia resources
                 type: string
+              topologyRef:
+                description: |-
+                  TopologyRef to apply the Topology defined by the associated CR referenced
+                  by name
+                properties:
+                  name:
+                    description: Name - The Topology CR name that the Service references
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace - The Namespace to fetch the Topology CR referenced
+                      NOTE: Namespace currently points by default to the same namespace where
+                      the Service is deployed. Customizing the namespace is not supported and
+                      webhooks prevent editing this field to a value different from the
+                      current project
+                    type: string
+                type: object
             required:
             - apacheContainerImage
             - databaseInstance

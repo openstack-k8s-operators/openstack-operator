@@ -337,6 +337,7 @@ spec:
                     properties:
                       apiTimeout:
                         default: 90
+                        minimum: 10
                         type: integer
                       barbicanAPI:
                         properties:
@@ -397,6 +398,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -469,6 +471,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       barbicanKeystoneListener:
                         properties:
@@ -527,6 +536,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       barbicanWorker:
                         properties:
@@ -584,6 +600,13 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
                             type: object
                         type: object
                       customServiceConfig:
@@ -662,6 +685,13 @@ spec:
                       simpleCryptoBackendSecret:
                         default: osp-secret
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - barbicanAPI
                     - barbicanKeystoneListener
@@ -856,6 +886,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -927,6 +958,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       cinderBackup:
                         properties:
@@ -980,6 +1018,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       cinderScheduler:
                         properties:
@@ -1032,6 +1077,13 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
                             type: object
                         type: object
                       cinderVolumes:
@@ -1087,6 +1139,13 @@ spec:
                                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                     x-kubernetes-int-or-string: true
                                   type: object
+                              type: object
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
                               type: object
                           type: object
                         type: object
@@ -1616,6 +1675,13 @@ spec:
                       serviceUser:
                         default: cinder
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - cinderAPI
                     - cinderScheduler
@@ -1847,6 +1913,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -1934,6 +2001,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -1976,6 +2050,57 @@ spec:
                           nodeSelector:
                             additionalProperties:
                               type: string
+                            type: object
+                          override:
+                            properties:
+                              services:
+                                items:
+                                  properties:
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                                type: array
+                                x-kubernetes-list-type: atomic
                             type: object
                           passwordSelectors:
                             default:
@@ -2033,6 +2158,13 @@ spec:
                             type: string
                           storageRequest:
                             type: string
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2129,6 +2261,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2167,6 +2306,57 @@ spec:
                           nodeSelector:
                             additionalProperties:
                               type: string
+                            type: object
+                          override:
+                            properties:
+                              services:
+                                items:
+                                  properties:
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                                type: array
+                                x-kubernetes-list-type: atomic
                             type: object
                           passwordSelectors:
                             default:
@@ -2223,6 +2413,13 @@ spec:
                           tls:
                             properties:
                               caBundleSecretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
                                 type: string
                             type: object
                           transportURLSecret:
@@ -2324,6 +2521,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2346,6 +2550,57 @@ spec:
                           nodeSelector:
                             additionalProperties:
                               type: string
+                            type: object
+                          override:
+                            properties:
+                              services:
+                                items:
+                                  properties:
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                                type: array
+                                x-kubernetes-list-type: atomic
                             type: object
                           replicas:
                             default: 1
@@ -2386,6 +2641,13 @@ spec:
                             type: object
                           serviceAccount:
                             type: string
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       designateWorker:
                         properties:
@@ -2475,6 +2737,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         type: object
@@ -2482,6 +2751,21 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      nsRecords:
+                        items:
+                          properties:
+                            hostname:
+                              minLength: 1
+                              type: string
+                            priority:
+                              minimum: 1
+                              type: integer
+                          required:
+                          - hostname
+                          - priority
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
                       passwordSelectors:
                         default:
                           service: DesignatePassword
@@ -2535,6 +2819,13 @@ spec:
                       serviceUser:
                         default: designate
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - databaseInstance
                     - designateAPI
@@ -2622,6 +2913,7 @@ spec:
                                     items:
                                       type: string
                                     type: array
+                                    x-kubernetes-list-type: atomic
                                   sessionAffinity:
                                     type: string
                                   sessionAffinityConfig:
@@ -2642,6 +2934,13 @@ spec:
                         default: 1
                         format: int32
                         type: integer
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     type: object
                 type: object
               extraMounts:
@@ -3162,6 +3461,13 @@ spec:
                             caBundleSecretName:
                               type: string
                             secretName:
+                              type: string
+                          type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
                               type: string
                           type: object
                       required:
@@ -3883,6 +4189,7 @@ spec:
                                             items:
                                               type: string
                                             type: array
+                                            x-kubernetes-list-type: atomic
                                           sessionAffinity:
                                             type: string
                                           sessionAffinityConfig:
@@ -3964,6 +4271,13 @@ spec:
                                 caBundleSecretName:
                                   type: string
                               type: object
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
                             type:
                               default: split
                               enum:
@@ -4043,6 +4357,13 @@ spec:
                           storageClass:
                             type: string
                           storageRequest:
+                            type: string
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
                             type: string
                         type: object
                     required:
@@ -4382,6 +4703,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -4454,6 +4776,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       heatCfnAPI:
                         properties:
@@ -4505,6 +4834,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -4575,6 +4905,13 @@ spec:
                                     type: object
                                 type: object
                               caBundleSecretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
                                 type: string
                             type: object
                         type: object
@@ -4631,6 +4968,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       memcachedInstance:
                         default: memcached
@@ -4665,6 +5009,13 @@ spec:
                       serviceUser:
                         default: heat
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - databaseInstance
                     - heatAPI
@@ -5341,6 +5692,7 @@ spec:
                                     items:
                                       type: string
                                     type: array
+                                    x-kubernetes-list-type: atomic
                                   sessionAffinity:
                                     type: string
                                   sessionAffinityConfig:
@@ -5404,6 +5756,13 @@ spec:
                           caBundleSecretName:
                             type: string
                           secretName:
+                            type: string
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
                             type: string
                         type: object
                     required:
@@ -5666,6 +6025,10 @@ spec:
                     type: object
                   template:
                     properties:
+                      apiTimeout:
+                        default: 60
+                        minimum: 10
+                        type: integer
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -5729,6 +6092,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -5799,6 +6163,13 @@ spec:
                                     type: object
                                 type: object
                               caBundleSecretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
                                 type: string
                             type: object
                         type: object
@@ -5889,6 +6260,13 @@ spec:
                               type: string
                             storageRequest:
                               type: string
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
                           required:
                           - storageClass
                           - storageRequest
@@ -5973,6 +6351,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -6061,6 +6440,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       ironicNeutronAgent:
                         properties:
@@ -6115,6 +6501,13 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -6147,6 +6540,13 @@ spec:
                       storageClass:
                         default: ""
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - databaseInstance
                     - ironicAPI
@@ -6376,6 +6776,7 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                     sessionAffinity:
                                       type: string
                                     sessionAffinityConfig:
@@ -6465,6 +6866,13 @@ spec:
                                 type: object
                             type: object
                           caBundleSecretName:
+                            type: string
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
                             type: string
                         type: object
                       trustFlushArgs:
@@ -7176,6 +7584,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -7248,6 +7657,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       manilaScheduler:
                         properties:
@@ -7302,6 +7718,13 @@ spec:
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 type: object
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
                             type: object
                         type: object
                       manilaShares:
@@ -7359,6 +7782,13 @@ spec:
                                     x-kubernetes-int-or-string: true
                                   type: object
                               type: object
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
                           type: object
                         type: object
                       memcachedInstance:
@@ -7387,6 +7817,13 @@ spec:
                       serviceUser:
                         default: manila
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - manilaAPI
                     - manilaScheduler
@@ -7439,6 +7876,13 @@ spec:
                                   type: string
                               type: object
                             secretName:
+                              type: string
+                          type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
                               type: string
                           type: object
                       required:
@@ -8129,6 +8573,7 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                     sessionAffinity:
                                       type: string
                                     sessionAffinityConfig:
@@ -8224,6 +8669,13 @@ spec:
                               secretName:
                                 type: string
                             type: object
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
                         type: object
                     required:
                     - databaseInstance
@@ -8560,6 +9012,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -8765,6 +9218,7 @@ spec:
                                               items:
                                                 type: string
                                               type: array
+                                              x-kubernetes-list-type: atomic
                                             sessionAffinity:
                                               type: string
                                             sessionAffinityConfig:
@@ -8873,6 +9327,7 @@ spec:
                                               items:
                                                 type: string
                                               type: array
+                                              x-kubernetes-list-type: atomic
                                             sessionAffinity:
                                               type: string
                                             sessionAffinityConfig:
@@ -9086,6 +9541,7 @@ spec:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                       sessionAffinity:
                                         type: string
                                       sessionAffinityConfig:
@@ -9498,6 +9954,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -9601,6 +10058,13 @@ spec:
                                   secretName:
                                     type: string
                                 type: object
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
                             type: object
                           transportURLSecret:
                             type: string
@@ -9733,6 +10197,13 @@ spec:
                           tls:
                             properties:
                               caBundleSecretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
                                 type: string
                             type: object
                           transportURLSecret:
@@ -9869,6 +10340,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         required:
@@ -9911,6 +10389,15 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          octaviaProviderSubnetCIDR:
+                            type: string
+                          octaviaProviderSubnetExtraCIDRs:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          octaviaProviderSubnetGateway:
+                            type: string
                           resources:
                             properties:
                               claims:
@@ -9962,6 +10449,13 @@ spec:
                               - protocol
                               type: object
                             type: array
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         required:
                         - serviceAccount
                         type: object
@@ -10091,6 +10585,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                           transportURLSecret:
                             type: string
                         required:
@@ -10164,6 +10665,13 @@ spec:
                       tenantName:
                         default: service
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - apacheContainerImage
                     - databaseInstance
@@ -10342,6 +10850,13 @@ spec:
                               secretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       ovnDBCluster:
                         additionalProperties:
@@ -10398,6 +10913,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -10466,6 +10982,13 @@ spec:
                                 secretName:
                                   type: string
                               type: object
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
                           required:
                           - dbType
                           - storageRequest
@@ -10526,6 +11049,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                               secretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
                                 type: string
                             type: object
                         type: object
@@ -10719,6 +11249,7 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                     sessionAffinity:
                                       type: string
                                     sessionAffinityConfig:
@@ -10805,6 +11336,13 @@ spec:
                                 type: object
                             type: object
                           caBundleSecretName:
+                            type: string
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
                             type: string
                         type: object
                     required:
@@ -15073,6 +15611,13 @@ spec:
                             secretName:
                               type: string
                           type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
                       type: object
                     type: object
                 type: object
@@ -15282,6 +15827,7 @@ spec:
                                           items:
                                             type: string
                                           type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -15337,6 +15883,13 @@ spec:
                                     type: object
                                 type: object
                               caBundleSecretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
                                 type: string
                             type: object
                         required:
@@ -15408,11 +15961,25 @@ spec:
                           storageRequest:
                             default: 10Gi
                             type: string
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         required:
                         - memcachedInstance
                         - replicas
                         - storageClass
                         - storageRequest
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
                         type: object
                     required:
                     - memcachedInstance
@@ -15875,6 +16442,7 @@ spec:
                                               items:
                                                 type: string
                                               type: array
+                                              x-kubernetes-list-type: atomic
                                             sessionAffinity:
                                               type: string
                                             sessionAffinityConfig:
@@ -15931,6 +16499,13 @@ spec:
                                         type: object
                                     type: object
                                   caBundleSecretName:
+                                    type: string
+                                type: object
+                              topologyRef:
+                                properties:
+                                  name:
+                                    type: string
+                                  namespace:
                                     type: string
                                 type: object
                             required:
@@ -16037,6 +16612,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                               secretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
                                 type: string
                             type: object
                         required:
@@ -16746,6 +17328,13 @@ spec:
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
                         type: object
                     type: object
                 type: object

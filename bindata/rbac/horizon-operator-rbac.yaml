@@ -219,6 +219,23 @@ rules:
   verbs:
     - use
 - apiGroups:
+    - security.openshift.io
+  resourceNames:
+    - hostmount-anyuid
+  resources:
+    - securitycontextconstraints
+  verbs:
+    - use
+- apiGroups:
+    - topology.openstack.org
+  resources:
+    - topologies
+  verbs:
+    - get
+    - list
+    - update
+    - watch
+- apiGroups:
     - authentication.k8s.io
   resources:
     - tokenreviews
