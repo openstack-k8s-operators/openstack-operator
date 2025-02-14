@@ -16921,6 +16921,8 @@ spec:
                     type: string
                   octaviaHousekeepingImage:
                     type: string
+                  octaviaRsyslogImage:
+                    type: string
                   octaviaWorkerImage:
                     type: string
                   openstackClientImage:
