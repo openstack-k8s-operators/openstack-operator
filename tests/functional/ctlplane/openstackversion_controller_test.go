@@ -165,6 +165,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.OctaviaHealthmanagerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.OctaviaHousekeepingImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.OctaviaWorkerImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.OctaviaRsyslogImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.OpenstackClientImage).ShouldNot(BeNil())
 				//fixme wire this one in
 				//g.Expect(version.Status.ContainerImages.OsContainerImage).ShouldNot(BeNil())
