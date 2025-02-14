@@ -149,7 +149,6 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 				}
 			}
 		}
-		sort.Strings(ips)
 
 		if service.Spec.TLSCerts[certKey].Issuer == "" {
 			// by default, use the internal root CA
