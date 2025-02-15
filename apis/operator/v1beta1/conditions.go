@@ -42,5 +42,4 @@ const (
 
 	// OpenStackOperatorReadyMessage
 	OpenStackOperatorReadyMessage = "OpenStackOperator completed"
-
 )

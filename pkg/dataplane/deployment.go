@@ -273,6 +273,16 @@ func (d *Deployer) addCertMounts(
 			}
 		}
 
+		if service.Spec.EDPMServiceType != service.Name && service.Spec.TLSCerts == nil {
+			if slices.Contains(services, service.Spec.EDPMServiceType) {
+				continue
+			}
+			service, err = GetService(d.Ctx, d.Helper, service.Spec.EDPMServiceType)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		if service.Spec.TLSCerts != nil && d.NodeSet.Spec.TLSEnabled {
 			// sort cert list to ensure mount list is consistent
 			certKeyList := make([]string, 0, len(service.Spec.TLSCerts))
