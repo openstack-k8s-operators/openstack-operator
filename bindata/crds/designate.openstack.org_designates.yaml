@@ -444,6 +444,24 @@ spec:
                           a pre-created bundle file
                         type: string
                     type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                   transportURLSecret:
                     description: Secret containing RabbitMq transport URL
                     type: string
@@ -626,6 +644,24 @@ spec:
                   storageRequest:
                     description: StorageRequest
                     type: string
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                   transportURLSecret:
                     description: Secret containing RabbitMq transport URL
                     type: string
@@ -801,6 +837,24 @@ spec:
                       caBundleSecretName:
                         description: CaBundleSecretName - holding the CA certs in
                           a pre-created bundle file
+                        type: string
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
                         type: string
                     type: object
                   transportURLSecret:
@@ -980,6 +1034,24 @@ spec:
                       caBundleSecretName:
                         description: CaBundleSecretName - holding the CA certs in
                           a pre-created bundle file
+                        type: string
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
                         type: string
                     type: object
                   transportURLSecret:
@@ -1164,6 +1236,24 @@ spec:
                           a pre-created bundle file
                         type: string
                     type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                   transportURLSecret:
                     description: Secret containing RabbitMq transport URL
                     type: string
@@ -1281,6 +1371,24 @@ spec:
                     description: ServiceAccount - service account name used internally
                       to provide Designate services the default SA name
                     type: string
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                 required:
                 - containerImage
                 type: object
@@ -1449,6 +1557,24 @@ spec:
                           a pre-created bundle file
                         type: string
                     type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
                   transportURLSecret:
                     description: Secret containing RabbitMq transport URL
                     type: string
@@ -1461,6 +1587,26 @@ spec:
                 description: NodeSelector to target subset of worker nodes running
                   this service
                 type: object
+              nsRecords:
+                description: NSRecords contains the list of nameserver records for
+                  the Designate pool
+                items:
+                  description: DesignateNSRecord defines a DNS nameserver record
+                  properties:
+                    hostname:
+                      description: Hostname of the nameserver
+                      minLength: 1
+                      type: string
+                    priority:
+                      description: Priority of the nameserver
+                      minimum: 1
+                      type: integer
+                  required:
+                  - hostname
+                  - priority
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
               passwordSelectors:
                 default:
                   service: DesignatePassword
@@ -1555,6 +1701,23 @@ spec:
                 description: ServiceUser - optional username used for this service
                   to register in designate
                 type: string
+              topologyRef:
+                description: |-
+                  TopologyRef to apply the Topology defined by the associated CR referenced
+                  by name
+                properties:
+                  name:
+                    description: Name - The Topology CR name that the Service references
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace - The Namespace to fetch the Topology CR referenced
+                      NOTE: Namespace currently points by default to the same namespace where
+                      the Service is deployed. Customizing the namespace is not supported and
+                      webhooks prevent editing this field to a value different from the
+                      current project
+                    type: string
+                type: object
             required:
             - databaseInstance
             - designateAPI

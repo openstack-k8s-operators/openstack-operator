@@ -222,6 +222,23 @@ spec:
                       bundle file
                     type: string
                 type: object
+              topologyRef:
+                description: |-
+                  TopologyRef to apply the Topology defined by the associated CR referenced
+                  by name
+                properties:
+                  name:
+                    description: Name - The Topology CR name that the Service references
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace - The Namespace to fetch the Topology CR referenced
+                      NOTE: Namespace currently points by default to the same namespace where
+                      the Service is deployed. Customizing the namespace is not supported and
+                      webhooks prevent editing this field to a value different from the
+                      current project
+                    type: string
+                type: object
               transportURLSecret:
                 description: Secret containing RabbitMq transport URL
                 type: string
@@ -283,6 +300,9 @@ spec:
                   type: string
                 description: Map of hashes to track e.g. job status
                 type: object
+              lastAppliedTopology:
+                description: LastAppliedTopology - the last applied Topology
+                type: string
               networkAttachments:
                 additionalProperties:
                   items:
