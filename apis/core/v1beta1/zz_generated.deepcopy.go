@@ -998,7 +998,7 @@ func (in *NovaSection) DeepCopyInto(out *NovaSection) {
 	*out = *in
 	if in.Template != nil {
 		in, out := &in.Template, &out.Template
-		*out = new(nova_operatorapiv1beta1.NovaSpec)
+		*out = new(nova_operatorapiv1beta1.NovaSpecCore)
 		(*in).DeepCopyInto(*out)
 	}
 	in.APIOverride.DeepCopyInto(&out.APIOverride)
