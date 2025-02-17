@@ -564,7 +564,7 @@ type NovaSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Nova services
-	Template *novav1.NovaSpec `json:"template,omitempty"`
+	Template *novav1.NovaSpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
