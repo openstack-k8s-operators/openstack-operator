@@ -42,7 +42,7 @@ spec:
         - name: RELATED_IMAGE_CEILOMETER_MYSQLD_EXPORTER_IMAGE_URL_DEFAULT
           value: quay.io/prometheus/mysqld-exporter:v0.16.0
         - name: RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT
-          value: quay.io/openstack-k8s-operators/sg-core:v6.0.0
+          value: quay.io/openstack-k8s-operators/sg-core:latest
         - name: RELATED_IMAGE_KSM_IMAGE_URL_DEFAULT
           value: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.0
         - name: RELATED_IMAGE_CINDER_API_IMAGE_URL_DEFAULT
