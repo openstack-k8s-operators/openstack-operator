@@ -205,7 +205,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			return ctrlResult, nil
 		}
 		// update TLS settings with cert secret
-		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 
 		// TODO: rewrite this once we have TLS on alertmanager
 		for _, alertmanagerSvc := range alertmanagerSvcs.Items {
