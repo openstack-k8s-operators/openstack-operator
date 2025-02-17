@@ -12,5 +12,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: quay.io/openstack-k8s-operators/openstack-operator
-  newTag: latest
+  newName: quay.io/mschuppe/openstack-operator
+  newTag: v0.0.33
+patches:
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.33-1739372660"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/mschuppe/openstack-operator:v0.0.33"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
