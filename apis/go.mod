@@ -28,7 +28,7 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20250226151941-eb9a7af9d246
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20250226122039-58e4ce79b373
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20250226185300-1af61276d1b2
-	github.com/rabbitmq/cluster-operator/v2 v2.11.0
+	github.com/rabbitmq/cluster-operator/v2 v2.11.0 // indirect
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.71.0-rhobs1 // indirect
 	github.com/rhobs/observability-operator v0.3.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -115,3 +115,5 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202408300231
 
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20241017142550-a3524acedd49 //allow-merging
+
+replace github.com/openstack-k8s-operators/infra-operator/apis => github.com/olliewalsh/infra-operator/apis v0.0.0-20250227182203-ae68df3e5df8
