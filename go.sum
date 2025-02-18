@@ -92,6 +92,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
+github.com/olliewalsh/infra-operator/apis v0.0.0-20250219173317-e9c406cfc5dc h1:qWaVm1/u4G/vDCxTG8mu3SGMuSJsu47o5aoBVeoCQyk=
+github.com/olliewalsh/infra-operator/apis v0.0.0-20250219173317-e9c406cfc5dc/go.mod h1:OB04fj6hcFoMbntn5VQjChDJBuESQMkDqNMwh7WOlQQ=
 github.com/onsi/ginkgo/v2 v2.20.1 h1:YlVIbqct+ZmnEph770q9Q7NVAz4wwIiVNahee6JyUzo=
 github.com/onsi/ginkgo/v2 v2.20.1/go.mod h1:lG9ey2Z29hR41WMVthyJBGUBcBhGOtoPF2VFMvBXFCI=
 github.com/onsi/gomega v1.34.1 h1:EUMJIKUjM8sKjYbtxQI9A4z2o+rruxnzNvpknOXie6k=
@@ -110,8 +112,6 @@ github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250129204831-17d
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250129204831-17deaa376556/go.mod h1:6egBIaHzwbzRHQxkkmHBkBRLHWrJ3eH1EhVuz5Z3dhU=
 github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250203063315-e5e6165191f8 h1:A5+uQ6KW8PQVlunD/tbrEaZRFeUQMOICVSE/ZaNry7g=
 github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250203063315-e5e6165191f8/go.mod h1:UGkrLEcGjc+q4tbUT00q4dHOMpcTaMqrs3CTXpetuyc=
-github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250213075932-926b10c39e96 h1:5ITGm8DPObxa5joxSAMnztcnIQm7CJcj/+d7unz3Nto=
-github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250213075932-926b10c39e96/go.mod h1:kkjcOSZ7jkHbVzxJd0nDQzjB+vqafuAMgSf7AnEXydw=
 github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250107140737-1d83138767c2 h1:nFbSN0goC+CWeHa7oRrOD+jOUmVNc+Nn/tGgjtCOjag=
 github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250107140737-1d83138767c2/go.mod h1:E2y4HZ0WVbDfvf+VBCtA+uy7c8uuR54ED8w5YvlHbYo=
 github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20250203105048-182afa0c45d8 h1:HIL7hIXZPuwMVr46jMoLxHToBHAplGWwOtR4FlMrCUU=
