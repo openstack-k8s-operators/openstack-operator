@@ -61,6 +61,7 @@ import (
 	core_ctrl "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 
 	ocp_configv1 "github.com/openshift/api/config/v1"
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	infra_test "github.com/openstack-k8s-operators/infra-operator/apis/test/helpers"
 	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	keystone_test "github.com/openstack-k8s-operators/keystone-operator/api/test/helpers"
@@ -276,6 +277,8 @@ var _ = BeforeSuite(func() {
 	err = ocp_configv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = topologyv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = rabbitmqv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme

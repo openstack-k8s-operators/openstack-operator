@@ -13,7 +13,7 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250226112225-45778defabec
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250225210325-6edf12a1fbc7
 	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250225210325-92d28ab9abbc
-	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250226120707-ee102640a845
+	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250228015408-e121baeaa3f3
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250226144146-bbcbf072b002
 	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20250226154712-e1738aa3a9be
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250227100238-bf6216121556
@@ -28,7 +28,6 @@ require (
 	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20250226151941-eb9a7af9d246
 	github.com/openstack-k8s-operators/swift-operator/api v0.5.1-0.20250226122039-58e4ce79b373
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20250226185300-1af61276d1b2
-	github.com/rabbitmq/cluster-operator/v2 v2.11.0
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.71.0-rhobs1 // indirect
 	github.com/rhobs/observability-operator v0.3.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -84,6 +83,7 @@ require (
 	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/common v0.53.0 // indirect
 	github.com/prometheus/procfs v0.13.0 // indirect
+	github.com/rabbitmq/cluster-operator/v2 v2.11.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/crypto v0.32.0 // indirect

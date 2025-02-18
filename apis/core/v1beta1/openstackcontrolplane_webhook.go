@@ -47,6 +47,7 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
@@ -372,6 +373,10 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 				maps.Keys(*r.Spec.Rabbitmq.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
+
+			for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
+				errors = append(errors, rabbitmqSpec.ValidateCreate(basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)...)
+			}
 		}
 	}
 
@@ -528,12 +533,22 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 	}
 
 	if r.Spec.Rabbitmq.Enabled {
+		if old.Rabbitmq.Templates == nil {
+			old.Rabbitmq.Templates = &map[string]rabbitmqv1.RabbitMqSpecCore{}
+		}
 		if r.Spec.Rabbitmq.Templates != nil {
 			err := common_webhook.ValidateDNS1123Label(
 				basePath.Child("rabbitmq").Child("templates"),
 				maps.Keys(*r.Spec.Rabbitmq.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
+		}
+		oldRabbitmqs := *old.Rabbitmq.Templates
+		for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
+
+			if oldRabbitmq, ok := oldRabbitmqs[rabbitmqName]; ok {
+				errors = append(errors, rabbitmqSpec.ValidateUpdate(oldRabbitmq, basePath.Child("rabbitmq").Child("templates").Key(rabbitmqName), r.Namespace)...)
+			}
 		}
 	}
 

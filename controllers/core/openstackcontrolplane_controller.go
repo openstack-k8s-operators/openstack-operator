@@ -48,11 +48,11 @@ import (
 
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
-	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
 	"github.com/go-logr/logr"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -103,6 +103,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=ovn.openstack.org,resources=ovnnorthds,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ovn.openstack.org,resources=ovncontrollers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=rabbitmq.com,resources=rabbitmqclusters,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=rabbitmq.openstack.org,resources=rabbitmqs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=telemetry.openstack.org,resources=telemetries,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=swift.openstack.org,resources=swifts,verbs=get;list;watch;create;update;patch;delete
@@ -591,7 +592,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 		Owns(&cinderv1.Cinder{}).
 		Owns(&manilav1.Manila{}).
 		Owns(&swiftv1.Swift{}).
-		Owns(&rabbitmqv2.RabbitmqCluster{}).
+		Owns(&rabbitmqv1.RabbitMq{}).
 		Owns(&ovnv1.OVNDBCluster{}).
 		Owns(&ovnv1.OVNNorthd{}).
 		Owns(&ovnv1.OVNController{}).
