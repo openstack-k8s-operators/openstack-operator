@@ -529,6 +529,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.NetUtilsImage != nil {
+		in, out := &in.NetUtilsImage, &out.NetUtilsImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.NeutronAPIImage != nil {
 		in, out := &in.NeutronAPIImage, &out.NeutronAPIImage
 		*out = new(string)

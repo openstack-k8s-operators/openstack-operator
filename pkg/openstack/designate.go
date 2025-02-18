@@ -40,6 +40,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.DesignateWorkerImage = nil
 		instance.Status.ContainerImages.DesignateBackendbind9Image = nil
 		instance.Status.ContainerImages.DesignateUnboundImage = nil
+		instance.Status.ContainerImages.NetUtilsImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -146,6 +147,8 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		designate.Spec.DesignateWorker.ContainerImage = *version.Status.ContainerImages.DesignateWorkerImage
 		designate.Spec.DesignateBackendbind9.ContainerImage = *version.Status.ContainerImages.DesignateBackendbind9Image
 		designate.Spec.DesignateUnbound.ContainerImage = *version.Status.ContainerImages.DesignateUnboundImage
+		designate.Spec.DesignateBackendbind9.NetUtilsImage = *version.Status.ContainerImages.NetUtilsImage
+		designate.Spec.DesignateMdns.NetUtilsImage = *version.Status.ContainerImages.NetUtilsImage
 
 		if designate.Spec.Secret == "" {
 			designate.Spec.Secret = instance.Spec.Secret
@@ -182,6 +185,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.DesignateWorkerImage = version.Status.ContainerImages.DesignateWorkerImage
 		instance.Status.ContainerImages.DesignateBackendbind9Image = version.Status.ContainerImages.DesignateBackendbind9Image
 		instance.Status.ContainerImages.DesignateUnboundImage = version.Status.ContainerImages.DesignateUnboundImage
+		instance.Status.ContainerImages.NetUtilsImage = version.Status.ContainerImages.NetUtilsImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneDesignateReadyCondition, corev1beta1.OpenStackControlPlaneDesignateReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(
