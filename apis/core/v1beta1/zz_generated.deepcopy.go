@@ -579,6 +579,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.OctaviaRsyslogImage != nil {
+		in, out := &in.OctaviaRsyslogImage, &out.OctaviaRsyslogImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.OpenstackClientImage != nil {
 		in, out := &in.OpenstackClientImage, &out.OpenstackClientImage
 		*out = new(string)

@@ -58,6 +58,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Status.ContainerImages.OctaviaHealthmanagerImage = nil
 		instance.Status.ContainerImages.OctaviaHousekeepingImage = nil
 		instance.Status.ContainerImages.OctaviaApacheImage = nil
+		instance.Status.ContainerImages.OctaviaRsyslogImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -174,12 +175,14 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Octavia.Template.OctaviaHousekeeping.DeepCopyInto(&octavia.Spec.OctaviaHousekeeping.OctaviaAmphoraControllerSpecCore)
 		instance.Spec.Octavia.Template.OctaviaHealthManager.DeepCopyInto(&octavia.Spec.OctaviaHealthManager.OctaviaAmphoraControllerSpecCore)
 		instance.Spec.Octavia.Template.OctaviaWorker.DeepCopyInto(&octavia.Spec.OctaviaWorker.OctaviaAmphoraControllerSpecCore)
+		instance.Spec.Octavia.Template.OctaviaRsyslog.DeepCopyInto(&octavia.Spec.OctaviaRsyslog.OctaviaRsyslogSpecCore)
 
 		octavia.Spec.OctaviaAPI.ContainerImage = *version.Status.ContainerImages.OctaviaAPIImage
 		octavia.Spec.OctaviaWorker.ContainerImage = *version.Status.ContainerImages.OctaviaWorkerImage
 		octavia.Spec.OctaviaHealthManager.ContainerImage = *version.Status.ContainerImages.OctaviaHealthmanagerImage
 		octavia.Spec.OctaviaHousekeeping.ContainerImage = *version.Status.ContainerImages.OctaviaHousekeepingImage
 		octavia.Spec.ApacheContainerImage = *version.Status.ContainerImages.OctaviaApacheImage
+		octavia.Spec.OctaviaRsyslog.ContainerImage = *version.Status.ContainerImages.OctaviaRsyslogImage
 
 		if octavia.Spec.Secret == "" {
 			octavia.Spec.Secret = instance.Spec.Secret
@@ -216,6 +219,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Status.ContainerImages.OctaviaHealthmanagerImage = version.Status.ContainerImages.OctaviaHealthmanagerImage
 		instance.Status.ContainerImages.OctaviaHousekeepingImage = version.Status.ContainerImages.OctaviaHousekeepingImage
 		instance.Status.ContainerImages.OctaviaApacheImage = version.Status.ContainerImages.ApacheImage
+		instance.Status.ContainerImages.OctaviaRsyslogImage = version.Status.ContainerImages.OctaviaRsyslogImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOctaviaReadyCondition, corev1beta1.OpenStackControlPlaneOctaviaReadyMessage)
 	} else {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -236,6 +240,7 @@ func OctaviaImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackC
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaWorkerImage, version.Status.ContainerImages.OctaviaWorkerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHealthmanagerImage, version.Status.ContainerImages.OctaviaHealthmanagerImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaHousekeepingImage, version.Status.ContainerImages.OctaviaHousekeepingImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaRsyslogImage, version.Status.ContainerImages.OctaviaRsyslogImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.OctaviaApacheImage, version.Status.ContainerImages.ApacheImage) {
 			Log.Info("Octavia images do not match")
 			return false
