@@ -345,7 +345,7 @@ type DNSMasqSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the DNSMasq service
-	Template *networkv1.DNSMasqSpec `json:"template,omitempty"`
+	Template *networkv1.DNSMasqSpecCore `json:"template,omitempty"`
 }
 
 // KeystoneSection defines the desired state of Keystone service

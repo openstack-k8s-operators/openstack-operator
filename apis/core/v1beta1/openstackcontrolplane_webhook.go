@@ -843,7 +843,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// DNS
 	if r.Spec.DNS.Enabled || r.Spec.DNS.Template != nil {
 		if r.Spec.DNS.Template == nil {
-			r.Spec.DNS.Template = &networkv1.DNSMasqSpec{}
+			r.Spec.DNS.Template = &networkv1.DNSMasqSpecCore{}
 		}
 
 		r.Spec.DNS.Template.Default()

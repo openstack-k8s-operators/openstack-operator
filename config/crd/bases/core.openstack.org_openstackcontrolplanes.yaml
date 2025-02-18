@@ -2390,8 +2390,6 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      containerImage:
-                        type: string
                       dnsDataLabelSelectorValue:
                         default: dnsdata
                         type: string
