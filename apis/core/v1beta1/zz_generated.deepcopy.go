@@ -734,7 +734,7 @@ func (in *DNSMasqSection) DeepCopyInto(out *DNSMasqSection) {
 	*out = *in
 	if in.Template != nil {
 		in, out := &in.Template, &out.Template
-		*out = new(networkv1beta1.DNSMasqSpec)
+		*out = new(networkv1beta1.DNSMasqSpecCore)
 		(*in).DeepCopyInto(*out)
 	}
 }
