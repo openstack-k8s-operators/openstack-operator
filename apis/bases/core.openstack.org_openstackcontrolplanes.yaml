@@ -11445,6 +11445,15 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          octaviaProviderSubnetCIDR:
+                            type: string
+                          octaviaProviderSubnetExtraCIDRs:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          octaviaProviderSubnetGateway:
+                            type: string
                           resources:
                             properties:
                               claims:
