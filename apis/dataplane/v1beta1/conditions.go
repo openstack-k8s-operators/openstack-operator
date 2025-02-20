@@ -92,14 +92,8 @@ const (
 	// NodeSet Deployment is finished and successful.
 	NodeSetDeploymentReadyCondition condition.Type = "NodeSetDeploymentReady"
 
-	// NodeSetDeploymentReadyMessage ready
-	NodeSetDeploymentReadyMessage = "Deployment ready for NodeSet"
-
 	// NodeSetDeploymentReadyWaitingMessage not yet ready
-	NodeSetDeploymentReadyWaitingMessage = "Deployment not yet ready for NodeSet"
-
-	// NodeSetDeploymentErrorMessage error
-	NodeSetDeploymentErrorMessage = "Deployment error occurred %s for NodeSet"
+	NodeSetDeploymentReadyWaitingMessage = "NodeSet setup ready, waiting for Deployment..."
 
 	// NodeSetServiceDeploymentReadyMessage ready
 	NodeSetServiceDeploymentReadyMessage = "Deployment ready for %s service"
