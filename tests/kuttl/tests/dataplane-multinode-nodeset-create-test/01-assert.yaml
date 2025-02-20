@@ -17,11 +17,11 @@ status:
       tenant: 172.19.0.150
   ctlplaneSearchDomain: ctlplane.example.com
   conditions:
-  - message: Deployment not started
+  - message: NodeSet setup ready, waiting for Deployment...
     reason: Requested
     status: "False"
     type: Ready
-  - message: Deployment not started
+  - message: NodeSet setup ready, waiting for Deployment...
     reason: Requested
     status: "False"
     type: DeploymentReady
