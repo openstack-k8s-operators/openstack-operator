@@ -37,7 +37,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 	Log := GetLogger(ctx)
 
 	if instance.Spec.DNS.Template == nil {
-		instance.Spec.DNS.Template = &networkv1.DNSMasqSpec{}
+		instance.Spec.DNS.Template = &networkv1.DNSMasqSpecCore{}
 	}
 
 	if instance.Spec.DNS.Template.NodeSelector == nil {
@@ -46,7 +46,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 
 	Log.Info("Reconciling DNSMasq", "DNSMasq.Namespace", instance.Namespace, "DNSMasq.Name", "dnsmasq")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), dnsmasq, func() error {
-		instance.Spec.DNS.Template.DeepCopyInto(&dnsmasq.Spec)
+		instance.Spec.DNS.Template.DeepCopyInto(&dnsmasq.Spec.DNSMasqSpecCore)
 		dnsmasq.Spec.ContainerImage = *version.Status.ContainerImages.InfraDnsmasqImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), dnsmasq, helper.GetScheme())
 		if err != nil {
