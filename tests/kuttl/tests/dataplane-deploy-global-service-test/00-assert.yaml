@@ -106,12 +106,12 @@ spec:
 status:
   observedGeneration: 1
   conditions:
-  - message: Deployment not started
+  - message: NodeSet setup ready, waiting for Deployment...
     reason: Requested
     severity: Info
     status: "False"
     type: Ready
-  - message: Deployment not started
+  - message: NodeSet setup ready, waiting for Deployment...
     reason: Requested
     severity: Info
     status: "False"
