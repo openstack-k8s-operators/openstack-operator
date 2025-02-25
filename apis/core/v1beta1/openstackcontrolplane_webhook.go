@@ -244,12 +244,12 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 
 	// Call internal validation logic for individual service operators
 	if r.Spec.Keystone.Enabled {
-		errors = append(errors, r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"))...)
+		errors = append(errors, r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Ironic.Enabled {
-		errors = append(errors, r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"))...)
+		errors = append(errors, r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Ironic.APIOverride.Route, basePath.Child("ironic").Child("apiOverride").Child("route"))...)
 	}
 
@@ -259,17 +259,17 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Placement.Enabled {
-		errors = append(errors, r.Spec.Placement.Template.ValidateCreate(basePath.Child("placement").Child("template"))...)
+		errors = append(errors, r.Spec.Placement.Template.ValidateCreate(basePath.Child("placement").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Placement.APIOverride.Route, basePath.Child("placement").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Barbican.Enabled {
-		errors = append(errors, r.Spec.Barbican.Template.ValidateCreate(basePath.Child("barbican").Child("template"))...)
+		errors = append(errors, r.Spec.Barbican.Template.ValidateCreate(basePath.Child("barbican").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Barbican.APIOverride.Route, basePath.Child("barbican").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Neutron.Enabled {
-		errors = append(errors, r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template"))...)
+		errors = append(errors, r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Neutron.APIOverride.Route, basePath.Child("neutron").Child("apiOverride").Child("route"))...)
 	}
 
@@ -282,7 +282,7 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"))...)
+		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"), r.Namespace)...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)
@@ -297,39 +297,39 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
 			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 		errors = append(errors, errs...)
-		errors = append(errors, r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template"))...)
+		errors = append(errors, r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Cinder.APIOverride.Route, basePath.Child("cinder").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Heat.Enabled {
-		errors = append(errors, r.Spec.Heat.Template.ValidateCreate(basePath.Child("heat").Child("template"))...)
+		errors = append(errors, r.Spec.Heat.Template.ValidateCreate(basePath.Child("heat").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Heat.APIOverride.Route, basePath.Child("heat").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Manila.Enabled {
-		errors = append(errors, r.Spec.Manila.Template.ValidateCreate(basePath.Child("manila").Child("template"))...)
+		errors = append(errors, r.Spec.Manila.Template.ValidateCreate(basePath.Child("manila").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Manila.APIOverride.Route, basePath.Child("manila").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Swift.Enabled {
-		errors = append(errors, r.Spec.Swift.Template.ValidateCreate(basePath.Child("swift").Child("template"))...)
+		errors = append(errors, r.Spec.Swift.Template.ValidateCreate(basePath.Child("swift").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Swift.ProxyOverride.Route, basePath.Child("swift").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Octavia.Enabled {
-		errors = append(errors, r.Spec.Octavia.Template.ValidateCreate(basePath.Child("octavia").Child("template"))...)
+		errors = append(errors, r.Spec.Octavia.Template.ValidateCreate(basePath.Child("octavia").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Octavia.APIOverride.Route, basePath.Child("octavia").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Designate.Enabled {
-		errors = append(errors, r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"))...)
+		errors = append(errors, r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
 	// Validation for remaining services...
 	if r.Spec.Galera.Enabled {
 		for key, s := range *r.Spec.Galera.Templates {
-			warn, err := s.ValidateCreate(basePath.Child("galera").Child("template").Key(key))
+			warn, err := s.ValidateCreate(basePath.Child("galera").Child("template").Key(key), r.Namespace)
 			errors = append(errors, err...)
 			warnings = append(warnings, warn...)
 		}
@@ -389,7 +389,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Keystone.Template == nil {
 			old.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"))...)
+		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
@@ -397,7 +397,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Ironic.Template == nil {
 			old.Ironic.Template = &ironicv1.IronicSpecCore{}
 		}
-		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(*old.Ironic.Template, basePath.Child("ironic").Child("template"))...)
+		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(*old.Ironic.Template, basePath.Child("ironic").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Ironic.APIOverride.Route, basePath.Child("ironic").Child("apiOverride").Child("route"))...)
 	}
 
@@ -413,7 +413,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Placement.Template == nil {
 			old.Placement.Template = &placementv1.PlacementAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Placement.Template.ValidateUpdate(*old.Placement.Template, basePath.Child("placement").Child("template"))...)
+		errors = append(errors, r.Spec.Placement.Template.ValidateUpdate(*old.Placement.Template, basePath.Child("placement").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Placement.APIOverride.Route, basePath.Child("placement").Child("apiOverride").Child("route"))...)
 	}
 
@@ -421,7 +421,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Barbican.Template == nil {
 			old.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
 		}
-		errors = append(errors, r.Spec.Barbican.Template.ValidateUpdate(*old.Barbican.Template, basePath.Child("barbican").Child("template"))...)
+		errors = append(errors, r.Spec.Barbican.Template.ValidateUpdate(*old.Barbican.Template, basePath.Child("barbican").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Barbican.APIOverride.Route, basePath.Child("barbican").Child("apiOverride").Child("route"))...)
 	}
 
@@ -429,7 +429,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Neutron.Template == nil {
 			old.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Neutron.Template.ValidateUpdate(*old.Neutron.Template, basePath.Child("neutron").Child("template"))...)
+		errors = append(errors, r.Spec.Neutron.Template.ValidateUpdate(*old.Neutron.Template, basePath.Child("neutron").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Neutron.APIOverride.Route, basePath.Child("neutron").Child("apiOverride").Child("route"))...)
 	}
 
@@ -445,7 +445,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"))...)
+		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"), r.Namespace)...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)
@@ -463,7 +463,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
 			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 		errors = append(errors, errs...)
-		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(*old.Cinder.Template, basePath.Child("cinder").Child("template"))...)
+		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(*old.Cinder.Template, basePath.Child("cinder").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Cinder.APIOverride.Route, basePath.Child("cinder").Child("apiOverride").Child("route"))...)
 	}
 
@@ -471,7 +471,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Heat.Template == nil {
 			old.Heat.Template = &heatv1.HeatSpecCore{}
 		}
-		errors = append(errors, r.Spec.Heat.Template.ValidateUpdate(*old.Heat.Template, basePath.Child("heat").Child("template"))...)
+		errors = append(errors, r.Spec.Heat.Template.ValidateUpdate(*old.Heat.Template, basePath.Child("heat").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Heat.APIOverride.Route, basePath.Child("heat").Child("apiOverride").Child("route"))...)
 	}
 
@@ -479,7 +479,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Manila.Template == nil {
 			old.Manila.Template = &manilav1.ManilaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Manila.Template.ValidateUpdate(*old.Manila.Template, basePath.Child("manila").Child("template"))...)
+		errors = append(errors, r.Spec.Manila.Template.ValidateUpdate(*old.Manila.Template, basePath.Child("manila").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Manila.APIOverride.Route, basePath.Child("manila").Child("apiOverride").Child("route"))...)
 	}
 
@@ -487,7 +487,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Swift.Template == nil {
 			old.Swift.Template = &swiftv1.SwiftSpecCore{}
 		}
-		errors = append(errors, r.Spec.Swift.Template.ValidateUpdate(*old.Swift.Template, basePath.Child("swift").Child("template"))...)
+		errors = append(errors, r.Spec.Swift.Template.ValidateUpdate(*old.Swift.Template, basePath.Child("swift").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Swift.ProxyOverride.Route, basePath.Child("swift").Child("apiOverride").Child("route"))...)
 	}
 
@@ -495,7 +495,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Octavia.Template == nil {
 			old.Octavia.Template = &octaviav1.OctaviaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Octavia.Template.ValidateUpdate(*old.Octavia.Template, basePath.Child("octavia").Child("template"))...)
+		errors = append(errors, r.Spec.Octavia.Template.ValidateUpdate(*old.Octavia.Template, basePath.Child("octavia").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Octavia.APIOverride.Route, basePath.Child("octavia").Child("apiOverride").Child("route"))...)
 	}
 
@@ -503,7 +503,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Designate.Template == nil {
 			old.Designate.Template = &designatev1.DesignateSpecCore{}
 		}
-		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"))...)
+		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 

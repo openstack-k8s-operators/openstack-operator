@@ -665,6 +665,13 @@ spec:
                   caBundleSecretName:
                     type: string
                 type: object
+              topologyRef:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
               transportURLSecret:
                 type: string
             required:
@@ -698,6 +705,13 @@ spec:
               hash:
                 additionalProperties:
                   type: string
+                type: object
+              lastAppliedTopology:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
                 type: object
               networkAttachments:
                 additionalProperties:
