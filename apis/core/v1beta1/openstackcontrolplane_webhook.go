@@ -48,6 +48,7 @@ import (
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
+	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -362,6 +363,20 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 				maps.Keys(*r.Spec.Rabbitmq.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
+
+			// When a TopologyRef CR is referenced, fail if a different Namespace is
+			// referenced because is not supported
+			for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
+				if rabbitmqSpec.TopologyRef != nil {
+					if err := topologyv1.ValidateTopologyNamespace(
+						rabbitmqSpec.TopologyRef.Namespace,
+						*basePath.Child("rabbitmq").Child("templates").Child(rabbitmqName),
+						r.Namespace,
+					); err != nil {
+						errors = append(errors, err)
+					}
+				}
+			}
 		}
 	}
 

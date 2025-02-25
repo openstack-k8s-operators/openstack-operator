@@ -2642,6 +2642,13 @@ spec:
                         default: 1
                         format: int32
                         type: integer
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     type: object
                 type: object
               extraMounts:
@@ -7439,6 +7446,13 @@ spec:
                                   type: string
                               type: object
                             secretName:
+                              type: string
+                          type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
                               type: string
                           type: object
                       required:
@@ -15017,6 +15031,8 @@ spec:
                           type: object
                         skipPostDeploySteps:
                           type: boolean
+                        storageClass:
+                          type: string
                         terminationGracePeriodSeconds:
                           default: 604800
                           format: int64
@@ -15047,6 +15063,13 @@ spec:
                                 type: string
                             type: object
                           type: array
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
                       type: object
                     type: object
                 type: object
@@ -15071,6 +15094,13 @@ spec:
                             caBundleSecretName:
                               type: string
                             secretName:
+                              type: string
+                          type: object
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
                               type: string
                           type: object
                       type: object
