@@ -53,6 +53,7 @@ type OpenstackDataPlaneServiceCert struct {
 	// not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If
 	// OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then
 	// OpenStackDataPlaneService.Name is used.
+	// DEPRECATED: Will be removed in a future release. Use EDPMServiceType instead.
 	EDPMRoleServiceName string `json:"edpmRoleServiceName,omitempty"`
 }
 
@@ -88,6 +89,7 @@ type OpenStackDataPlaneServiceSpec struct {
 	// CertsFrom - Service name used to obtain TLSCert and CACerts data. If both
 	// CertsFrom and either TLSCert or CACerts is set, then those fields take
 	// precedence.
+	// DEPRECATED: Will be removed in a future release. Use EDPMServiceType instead.
 	// +kubebuilder:validation:Optional
 	CertsFrom string `json:"certsFrom,omitempty" yaml:"certsFrom,omitempty"`
 
