@@ -189,16 +189,21 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		nodeSets.Items = append(nodeSets.Items, *nodeSetInstance)
 	}
 
-	// Check that all nodeSets are SetupReady
+	globalInventorySecrets := map[string]string{}
+	globalSSHKeySecrets := map[string]string{}
+
+	// Check that all NodeSets are ready and get TLS certs
 	for _, nodeSet := range nodeSets.Items {
+
+		// Add inventory secret to list of inventories for global services
+		globalInventorySecrets[nodeSet.Name] = fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
+		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+
 		if !nodeSet.Status.Conditions.IsTrue(dataplanev1.SetupReadyCondition) {
 			Log.Info("NodeSet SetupReadyCondition is not True", "NodeSet", nodeSet.Name)
 			return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 		}
-	}
 
-	// get TLS certs
-	for _, nodeSet := range nodeSets.Items {
 		if nodeSet.Spec.TLSEnabled {
 			var services []string
 			if len(instance.Spec.ServicesOverride) != 0 {
@@ -259,16 +264,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	deploymentErrMsg := ""
 	var nodesetServiceMap map[string][]string
 	backoffLimitReached := false
-
-	globalInventorySecrets := map[string]string{}
-	globalSSHKeySecrets := map[string]string{}
-
-	// Gathering individual inventory and ssh secrets for later use
-	for _, nodeSet := range nodeSets.Items {
-		// Add inventory secret to list of inventories for global services
-		globalInventorySecrets[nodeSet.Name] = fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
-		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-	}
 
 	if nodesetServiceMap, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
 		instance.Spec.ServicesOverride); err != nil {
