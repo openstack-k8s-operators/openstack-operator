@@ -189,16 +189,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		nodeSets.Items = append(nodeSets.Items, *nodeSetInstance)
 	}
 
-	// Check that all nodeSets are SetupReady
+	// Check that all NodeSets are ready and get TLS certs
 	for _, nodeSet := range nodeSets.Items {
 		if !nodeSet.Status.Conditions.IsTrue(dataplanev1.SetupReadyCondition) {
 			Log.Info("NodeSet SetupReadyCondition is not True", "NodeSet", nodeSet.Name)
 			return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 		}
-	}
-
-	// get TLS certs
-	for _, nodeSet := range nodeSets.Items {
 		if nodeSet.Spec.TLSEnabled {
 			var services []string
 			if len(instance.Spec.ServicesOverride) != 0 {
