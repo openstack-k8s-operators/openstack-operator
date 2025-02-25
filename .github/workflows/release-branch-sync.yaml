@@ -1,0 +1,12 @@
+name: Release Branch sync
+
+on:
+  push:
+    branches:
+      - '*'
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  call-build-workflow:
+    uses: openstack-k8s-operators/openstack-k8s-operators-ci/.github/workflows/release-branch-sync.yaml@main
