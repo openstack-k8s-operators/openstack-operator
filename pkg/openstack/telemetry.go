@@ -63,6 +63,14 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if instance.Spec.Telemetry.Template.TopologyRef == nil {
+		instance.Spec.Telemetry.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "telemetry", Namespace: instance.Namespace}, telemetry); err != nil {
 		if !k8s_errors.IsNotFound(err) {
 			return ctrl.Result{}, err
