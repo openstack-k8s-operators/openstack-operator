@@ -125,6 +125,8 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-manila-share:current-podified
         - name: RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
+        - name: RELATED_IMAGE_NET_UTILS_IMAGE_URL_DEFAULT
+          value: quay.io/podified-antelope-centos9/openstack-netutils:current-podified
         - name: RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-neutron-server:current-podified
         - name: RELATED_IMAGE_NOVA_API_IMAGE_URL_DEFAULT
