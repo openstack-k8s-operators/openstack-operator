@@ -18,12 +18,12 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250126100316-be560a599e2d
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250129204831-17deaa376556
 	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250203063315-e5e6165191f8
-	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250213075932-926b10c39e96
+	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250224135717-7d751fb24aaa
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250107140737-1d83138767c2
 	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20250203105048-182afa0c45d8
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.5.0
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.5.1-0.20250205143454-43504d7ad19a
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250205143454-43504d7ad19a
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250224130558-eb5a5d85bfdb
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.5.1-0.20250205143454-43504d7ad19a
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.5.1-0.20250205143454-43504d7ad19a
 	github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20250126093016-ccebb1946294
@@ -43,9 +43,9 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.29.13
-	k8s.io/apimachinery v0.29.13
-	k8s.io/client-go v0.29.13
+	k8s.io/api v0.29.14
+	k8s.io/apimachinery v0.29.14
+	k8s.io/client-go v0.29.14
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 	sigs.k8s.io/controller-runtime v0.17.6
 )
@@ -107,8 +107,8 @@ require (
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiextensions-apiserver v0.29.13 // indirect
-	k8s.io/component-base v0.29.13 // indirect
+	k8s.io/apiextensions-apiserver v0.29.14 // indirect
+	k8s.io/component-base v0.29.14 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240322212309-b815d8309940 // indirect
 	sigs.k8s.io/gateway-api v1.0.0 // indirect
@@ -125,3 +125,5 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202408300231
 
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20241017142550-a3524acedd49 //allow-merging
+
+replace github.com/openstack-k8s-operators/nova-operator/api => github.com/fmount/nova-operator/api v0.0.0-20250225102924-13c2cf4f46eb //allow-merging
