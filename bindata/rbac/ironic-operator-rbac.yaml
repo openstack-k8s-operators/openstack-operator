@@ -433,6 +433,15 @@ rules:
   verbs:
     - use
 - apiGroups:
+    - topology.openstack.org
+  resources:
+    - topologies
+  verbs:
+    - get
+    - list
+    - update
+    - watch
+- apiGroups:
     - authentication.k8s.io
   resources:
     - tokenreviews
