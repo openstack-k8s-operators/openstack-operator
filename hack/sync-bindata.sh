@@ -142,7 +142,13 @@ EOF_CAT
 }
 
 for BUNDLE in $(hack/pin-bundle-images.sh | tr "," " "); do
-    skopeo copy "docker://$BUNDLE" dir:${EXTRACT_DIR}/tmp;
+    n=0
+    until [ "$n" -ge 5 ]; do
+        skopeo copy "docker://$BUNDLE" dir:${EXTRACT_DIR}/tmp && break
+        echo "Command failed. retrying ... $n/5"
+        n=$((n+1))
+        sleep 15
+    done
     extract_bundle "${EXTRACT_DIR}/tmp" "${OUT_DATA}/"
 done
 
