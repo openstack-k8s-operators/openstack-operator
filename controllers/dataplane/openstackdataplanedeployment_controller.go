@@ -209,22 +209,21 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
 
 			for _, serviceName := range services {
-				service, err := deployment.GetService(ctx, helper, serviceName)
+				service, err := r.GetService(ctx, helper, instance, nsConditions, serviceName)
 				if err != nil {
-					instance.Status.Conditions.MarkFalse(
-						condition.InputReadyCondition,
-						condition.ErrorReason,
-						condition.SeverityError,
-						dataplanev1.ServiceErrorMessage,
-						err.Error())
-					nsConditions.MarkFalse(
-						dataplanev1.NodeSetDeploymentReadyCondition,
-						condition.ErrorReason,
-						condition.SeverityError,
-						dataplanev1.ServiceErrorMessage,
-						err.Error())
 					return ctrl.Result{}, err
 				}
+
+				// If there is a different EDPMServiceType set and TLSCerts is
+				// not also set, get the service referenced by EDPMServiceType
+				// instead and use its cert data.
+				if serviceName != service.Spec.EDPMServiceType && service.Spec.TLSCerts == nil {
+					service, err = r.GetService(ctx, helper, instance, nsConditions, service.Spec.EDPMServiceType)
+					if err != nil {
+						return ctrl.Result{}, err
+					}
+				}
+
 				if service.Spec.TLSCerts != nil {
 					for certKey := range service.Spec.TLSCerts {
 						result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
@@ -395,6 +394,32 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		Log.Error(err, "Error setting service hashes")
 	}
 	return ctrl.Result{}, nil
+}
+
+// GetService
+func (r *OpenStackDataPlaneDeploymentReconciler) GetService(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneDeployment,
+	nsConditions condition.Conditions,
+	serviceName string,
+) (dataplanev1.OpenStackDataPlaneService, error) {
+	service, err := deployment.GetService(ctx, helper, serviceName)
+	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			condition.InputReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1.ServiceErrorMessage,
+			err.Error())
+		nsConditions.MarkFalse(
+			dataplanev1.NodeSetDeploymentReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1.ServiceErrorMessage,
+			err.Error())
+	}
+	return service, err
 }
 
 func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
