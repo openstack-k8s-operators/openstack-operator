@@ -31,3 +31,7 @@ data:
     nodes:
       edpm-compute-0:
         hostName: edpm-compute-0
+        # arbitrary labels that must be set on a BaremetalSetHost in order for it to be
+        # selected for this node
+        bmhLabelSelector:
+          hostName: edpm-compute-0
