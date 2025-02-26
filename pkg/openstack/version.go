@@ -139,6 +139,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			ManilaAPIImage:                getImg(instance.Spec.CustomContainerImages.ManilaAPIImage, defaults.ManilaAPIImage),
 			ManilaSchedulerImage:          getImg(instance.Spec.CustomContainerImages.ManilaSchedulerImage, defaults.ManilaSchedulerImage),
 			MariadbImage:                  getImg(instance.Spec.CustomContainerImages.MariadbImage, defaults.MariadbImage),
+			NetUtilsImage:                 getImg(instance.Spec.CustomContainerImages.NetUtilsImage, defaults.NetUtilsImage),
 			NeutronAPIImage:               getImg(instance.Spec.CustomContainerImages.NeutronAPIImage, defaults.NeutronAPIImage),
 			NovaAPIImage:                  getImg(instance.Spec.CustomContainerImages.NovaAPIImage, defaults.NovaAPIImage),
 			NovaComputeImage:              getImg(instance.Spec.CustomContainerImages.NovaComputeImage, defaults.NovaComputeImage),

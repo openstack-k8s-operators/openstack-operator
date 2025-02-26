@@ -158,6 +158,8 @@ spec:
                     type: object
                   mariadbImage:
                     type: string
+                  netUtilsImage:
+                    type: string
                   neutronAPIImage:
                     type: string
                   novaAPIImage:
@@ -367,6 +369,8 @@ spec:
                       type: string
                     mariadbImage:
                       type: string
+                    netUtilsImage:
+                      type: string
                     neutronAPIImage:
                       type: string
                     novaAPIImage:
@@ -550,6 +554,8 @@ spec:
                       type: string
                     type: object
                   mariadbImage:
+                    type: string
+                  netUtilsImage:
                     type: string
                   neutronAPIImage:
                     type: string
