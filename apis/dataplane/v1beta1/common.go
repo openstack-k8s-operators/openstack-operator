@@ -79,7 +79,7 @@ type DataSource struct {
 type AnsibleOpts struct {
 	// AnsibleUser SSH user for Ansible connection
 	// +kubebuilder:validation:Optional
-	AnsibleUser string `json:"ansibleUser"`
+	AnsibleUser string `json:"ansibleUser,omitempty"`
 
 	// AnsibleHost SSH host for Ansible connection
 	// +kubebuilder:validation:Optional
