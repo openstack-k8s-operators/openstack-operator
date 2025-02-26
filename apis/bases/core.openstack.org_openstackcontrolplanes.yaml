@@ -17460,6 +17460,8 @@ spec:
                     type: string
                   edpmOvnBgpAgentImage:
                     type: string
+                  edpmPodmanExporterImage:
+                    type: string
                   glanceAPIImage:
                     type: string
                   heatAPIImage:

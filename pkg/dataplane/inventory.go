@@ -320,6 +320,9 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_telemetry_kepler_image"] == nil {
 		group.Vars["edpm_telemetry_kepler_image"] = containerImages.EdpmKeplerImage
 	}
+	if template.Ansible.AnsibleVars["edpm_telemetry_podman_exporter_image"] == nil {
+		group.Vars["edpm_telemetry_podman_exporter_image"] = containerImages.EdpmPodmanExporterImage
+	}
 
 	err := unmarshalAnsibleVars(template.Ansible.AnsibleVars, group.Vars)
 	if err != nil {

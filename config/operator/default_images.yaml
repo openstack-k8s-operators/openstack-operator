@@ -89,6 +89,8 @@ spec:
           value: quay.io/sustainable_computing_io/kepler:release-0.7.12
         - name: RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
+        - name: RELATED_IMAGE_EDPM_PODMAN_EXPORTER_IMAGE_URL_DEFAULT
+          value: quay.io/navidys/prometheus-podman-exporter:v1.10.1
         - name: RELATED_IMAGE_GLANCE_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-glance-api:current-podified
         - name: RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT
