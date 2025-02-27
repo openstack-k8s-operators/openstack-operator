@@ -138,6 +138,14 @@ spec:
                     description: Service - Selector to get the barbican service user
                       password from the Secret
                     type: string
+                  simplecryptoadditionalkeks:
+                    description: |-
+                      Fields containing additional Key Encryption Keys(KEK) used for the Simple Crypto backend
+                      It is expected that these fields will exist in the secret referenced in SimpleCryptoBackendSecret
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
                   simplecryptokek:
                     default: SimpleCryptoKEK
                     type: string

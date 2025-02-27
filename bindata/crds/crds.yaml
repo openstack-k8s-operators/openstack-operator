@@ -651,6 +651,11 @@ spec:
                           service:
                             default: BarbicanPassword
                             type: string
+                          simplecryptoadditionalkeks:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: set
                           simplecryptokek:
                             default: SimpleCryptoKEK
                             type: string
