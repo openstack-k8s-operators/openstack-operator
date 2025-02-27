@@ -12,7 +12,7 @@
   ],
   "postUpgradeTasks": {
     "commands": ["make gowork", "make tidy", "make manifests generate", "make bindata"],
-    "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml"],
+    "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml", "hack/*.sh"],
     "executionMode": "update"
   }
 }
