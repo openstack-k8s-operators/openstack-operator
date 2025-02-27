@@ -61,6 +61,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 	// OpenStackVersion, use the value from there, else use the default value.
 	if version != nil {
 		containerImages.AnsibleeeImage = version.Status.ContainerImages.AnsibleeeImage
+		containerImages.BootcOsContainerImage = version.Status.ContainerImages.BootcOsContainerImage
 		containerImages.CeilometerComputeImage = version.Status.ContainerImages.CeilometerComputeImage
 		containerImages.CeilometerIpmiImage = version.Status.ContainerImages.CeilometerIpmiImage
 		containerImages.EdpmFrrImage = version.Status.ContainerImages.EdpmFrrImage
@@ -83,6 +84,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.ApacheImage = version.Status.ContainerImages.ApacheImage
 	} else {
 		containerImages.AnsibleeeImage = dataplanev1.ContainerImages.AnsibleeeImage
+		containerImages.BootcOsContainerImage = dataplanev1.ContainerImages.BootcOsContainerImage
 		containerImages.CeilometerComputeImage = dataplanev1.ContainerImages.CeilometerComputeImage
 		containerImages.CeilometerIpmiImage = dataplanev1.ContainerImages.CeilometerIpmiImage
 		containerImages.EdpmFrrImage = dataplanev1.ContainerImages.EdpmFrrImage

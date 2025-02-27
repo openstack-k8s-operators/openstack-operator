@@ -17950,6 +17950,8 @@ spec:
                     type: string
                   barbicanWorkerImage:
                     type: string
+                  bootcOsContainerImage:
+                    type: string
                   ceilometerCentralImage:
                     type: string
                   ceilometerComputeImage:
