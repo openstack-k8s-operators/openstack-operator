@@ -9085,6 +9085,13 @@ spec:
                               caBundleSecretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       apiTimeout:
                         default: 60
@@ -9149,6 +9156,13 @@ spec:
                                         pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                         x-kubernetes-int-or-string: true
                                       type: object
+                                  type: object
+                                topologyRef:
+                                  properties:
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
                                   type: object
                               type: object
                             dbPurge:
@@ -9279,6 +9293,13 @@ spec:
                                     secretName:
                                       type: string
                                   type: object
+                                topologyRef:
+                                  properties:
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
+                                  type: object
                               type: object
                             noVNCProxyServiceTemplate:
                               properties:
@@ -9396,6 +9417,13 @@ spec:
                                           type: string
                                       type: object
                                   type: object
+                                topologyRef:
+                                  properties:
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
+                                  type: object
                               type: object
                             nodeSelector:
                               additionalProperties:
@@ -9460,9 +9488,23 @@ spec:
                                           x-kubernetes-int-or-string: true
                                         type: object
                                     type: object
+                                  topologyRef:
+                                    properties:
+                                      name:
+                                        type: string
+                                      namespace:
+                                        type: string
+                                    type: object
                                 required:
                                 - computeDriver
                                 type: object
+                              type: object
+                            topologyRef:
+                              properties:
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
                               type: object
                           required:
                           - cellDatabaseAccount
@@ -9602,6 +9644,13 @@ spec:
                               secretName:
                                 type: string
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       nodeSelector:
                         additionalProperties:
@@ -9679,12 +9728,26 @@ spec:
                                   x-kubernetes-int-or-string: true
                                 type: object
                             type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       secret:
                         type: string
                       serviceUser:
                         default: nova
                         type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
                     required:
                     - apiContainerImageURL
                     - computeContainerImageURL

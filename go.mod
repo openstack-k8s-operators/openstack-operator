@@ -18,18 +18,18 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250224115614-90f4be40dbe8
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250225040412-85d27d3c6729
 	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250225012432-71eddeaa4e91
-	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250224135717-7d751fb24aaa
+	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250226120707-ee102640a845
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250224101430-49ab890b73aa
 	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20250224101200-743a4b3fb404
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.5.1-0.20250224130558-eb5a5d85bfdb
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.5.1-0.20250224130558-eb5a5d85bfdb
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250225091304-b66d960fb024
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250225220922-3ead38b7284f
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.5.1-0.20250224130558-eb5a5d85bfdb
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.5.1-0.20250224130558-eb5a5d85bfdb
 	github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20250224103102-19721ac4f257
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.5.1-0.20250224101716-b42af3d653ba
 	github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20250224121612-3a76df1432c8
-	github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20250224221812-f1ecac7a3eee
+	github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20250226193946-9c6c30c7718e
 	github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20250224125936-003d70aa4d9a
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20250225064626-1d6b34a75b72
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
