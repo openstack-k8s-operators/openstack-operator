@@ -1255,6 +1255,7 @@ spec:
                             items:
                               type: string
                             type: array
+                            x-kubernetes-list-type: atomic
                           sessionAffinity:
                             description: |-
                               Supports "ClientIP" and "None". Used to maintain session affinity.
