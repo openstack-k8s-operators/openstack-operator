@@ -17699,6 +17699,8 @@ spec:
                     type: string
                   edpmOvnBgpAgentImage:
                     type: string
+                  edpmPodmanExporterImage:
+                    type: string
                   glanceAPIImage:
                     type: string
                   heatAPIImage:
@@ -19270,6 +19272,8 @@ spec:
                     type: string
                   edpmOvnBgpAgentImage:
                     type: string
+                  edpmPodmanExporterImage:
+                    type: string
                   glanceAPIImage:
                     type: string
                   heatAPIImage:
@@ -19483,6 +19487,8 @@ spec:
                       type: string
                     edpmOvnBgpAgentImage:
                       type: string
+                    edpmPodmanExporterImage:
+                      type: string
                     glanceAPIImage:
                       type: string
                     heatAPIImage:
@@ -19666,6 +19672,8 @@ spec:
                   edpmNodeExporterImage:
                     type: string
                   edpmOvnBgpAgentImage:
+                    type: string
+                  edpmPodmanExporterImage:
                     type: string
                   glanceAPIImage:
                     type: string

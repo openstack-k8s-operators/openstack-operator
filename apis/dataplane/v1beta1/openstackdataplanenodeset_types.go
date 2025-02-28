@@ -231,6 +231,7 @@ var ContainerImageDefaults = openstackv1.ContainerImages{
 		CeilometerIpmiImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-ipmi:current-podified"),
 		EdpmNodeExporterImage:         getStrPtr("quay.io/prometheus/node-exporter:v1.5.0"),
 		EdpmKeplerImage:               getStrPtr("quay.io/sustainable_computing_io/kepler:release-0.7.12"),
+		EdpmPodmanExporterImage:       getStrPtr("quay.io/navidys/prometheus-podman-exporter:v1.10.1"),
 		OsContainerImage:              getStrPtr("quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified"),
 	}}
 
@@ -256,6 +257,7 @@ func SetupDefaults() {
 			EdpmNeutronSriovAgentImage:    getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronSriovAgentImage),
 			EdpmNodeExporterImage:         getImageDefault("RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNodeExporterImage),
 			EdpmKeplerImage:               getImageDefault("RELATED_IMAGE_EDPM_KEPLER_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmKeplerImage),
+			EdpmPodmanExporterImage:       getImageDefault("RELATED_IMAGE_EDPM_PODMAN_EXPORTER_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmPodmanExporterImage),
 			EdpmOvnBgpAgentImage:          getImageDefault("RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmOvnBgpAgentImage),
 			CeilometerComputeImage:        getImageDefault("RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.CeilometerComputeImage),
 			CeilometerIpmiImage:           getImageDefault("RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT", ContainerImageDefaults.CeilometerIpmiImage),

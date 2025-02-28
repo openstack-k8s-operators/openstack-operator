@@ -111,6 +111,7 @@ type ContainerTemplate struct {
 	EdpmOvnBgpAgentImage          *string `json:"edpmOvnBgpAgentImage,omitempty"`
 	EdpmNodeExporterImage         *string `json:"edpmNodeExporterImage,omitempty"`
 	EdpmKeplerImage               *string `json:"edpmKeplerImage,omitempty"`
+	EdpmPodmanExporterImage       *string `json:"edpmPodmanExporterImage,omitempty"`
 	GlanceAPIImage                *string `json:"glanceAPIImage,omitempty"`
 	HeatAPIImage                  *string `json:"heatAPIImage,omitempty"`
 	HeatCfnapiImage               *string `json:"heatCfnapiImage,omitempty"`

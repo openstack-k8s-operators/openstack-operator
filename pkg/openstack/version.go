@@ -120,6 +120,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			EdpmOvnBgpAgentImage:          getImg(instance.Spec.CustomContainerImages.EdpmOvnBgpAgentImage, defaults.EdpmOvnBgpAgentImage),
 			EdpmNodeExporterImage:         getImg(instance.Spec.CustomContainerImages.EdpmNodeExporterImage, defaults.EdpmNodeExporterImage),
 			EdpmKeplerImage:               getImg(instance.Spec.CustomContainerImages.EdpmKeplerImage, defaults.EdpmKeplerImage),
+			EdpmPodmanExporterImage:       getImg(instance.Spec.CustomContainerImages.EdpmPodmanExporterImage, defaults.EdpmPodmanExporterImage),
 			GlanceAPIImage:                getImg(instance.Spec.CustomContainerImages.GlanceAPIImage, defaults.GlanceAPIImage),
 			HeatAPIImage:                  getImg(instance.Spec.CustomContainerImages.HeatAPIImage, defaults.HeatAPIImage),
 			HeatCfnapiImage:               getImg(instance.Spec.CustomContainerImages.HeatCfnapiImage, defaults.HeatCfnapiImage),
