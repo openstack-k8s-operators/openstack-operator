@@ -174,6 +174,14 @@ func reconcileGalera(
 		spec.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if spec.TopologyRef == nil {
+		spec.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	Log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
 		spec.DeepCopyInto(&galera.Spec.GaleraSpecCore)

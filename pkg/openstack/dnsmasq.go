@@ -44,6 +44,14 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 		instance.Spec.DNS.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if instance.Spec.DNS.Template.TopologyRef == nil {
+		instance.Spec.DNS.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	Log.Info("Reconciling DNSMasq", "DNSMasq.Namespace", instance.Namespace, "DNSMasq.Name", "dnsmasq")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), dnsmasq, func() error {
 		instance.Spec.DNS.Template.DeepCopyInto(&dnsmasq.Spec.DNSMasqSpecCore)

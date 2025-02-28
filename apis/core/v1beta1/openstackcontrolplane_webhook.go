@@ -55,6 +55,7 @@ import (
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
+	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 )
 
 var ctlplaneWebhookClient client.Client
@@ -117,6 +118,11 @@ func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 	}
 
 	allWarn, allErrs = r.ValidateCreateServices(basePath)
+
+	if err := r.ValidateTopology(basePath); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if len(allErrs) != 0 {
 		return allWarn, apierrors.NewInvalid(
 			schema.GroupKind{Group: "core.openstack.org", Kind: "OpenStackControlPlane"},
@@ -139,6 +145,10 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) (admission.Wa
 	basePath := field.NewPath("spec")
 	if err := r.ValidateUpdateServices(oldControlPlane.Spec, basePath); err != nil {
 		allErrs = append(allErrs, err...)
+	}
+
+	if err := r.ValidateTopology(basePath); err != nil {
+		allErrs = append(allErrs, err)
 	}
 
 	if len(allErrs) != 0 {
@@ -970,4 +980,15 @@ func validateTLSOverrideSpec(override **route.OverrideSpec, basePath *field.Path
 	}
 
 	return allErrs
+}
+
+func (r *OpenStackControlPlane) ValidateTopology(basePath *field.Path) *field.Error {
+	// When a TopologyRef CR is referenced, fail if a different Namespace is
+	// referenced because is not supported
+	if r.Spec.TopologyRef != nil {
+		if err := topologyv1.ValidateTopologyNamespace(r.Spec.TopologyRef.Namespace, *basePath, r.Namespace); err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -62,6 +62,7 @@ import (
 
 	ocp_configv1 "github.com/openshift/api/config/v1"
 	infra_test "github.com/openstack-k8s-operators/infra-operator/apis/test/helpers"
+	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	keystone_test "github.com/openstack-k8s-operators/keystone-operator/api/test/helpers"
 	certmanager_test "github.com/openstack-k8s-operators/lib-common/modules/certmanager/test/helpers"
 	common_test "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
@@ -273,6 +274,8 @@ var _ = BeforeSuite(func() {
 	err = networkv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = ocp_configv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = topologyv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme

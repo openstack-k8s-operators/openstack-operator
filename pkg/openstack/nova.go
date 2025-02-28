@@ -72,6 +72,14 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if instance.Spec.Nova.Template.TopologyRef == nil {
+		instance.Spec.Nova.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	// When component services got created check if there is the need to create routes and certificates
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova", Namespace: instance.Namespace}, nova); err != nil {
 		if !k8s_errors.IsNotFound(err) {

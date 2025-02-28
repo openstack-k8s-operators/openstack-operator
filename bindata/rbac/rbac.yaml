@@ -871,6 +871,15 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - topology.openstack.org
+  resources:
+  - topologies
+  verbs:
+  - get
+  - list
+  - update
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

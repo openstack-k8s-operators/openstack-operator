@@ -114,6 +114,14 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Designate.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if instance.Spec.Designate.Template.TopologyRef == nil {
+		instance.Spec.Designate.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	helper.GetLogger().Info("Reconciling Designate", "Designate.Namespace", instance.Namespace, "Designate.Name", "designate")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), designate, func() error {
 		// FIXME: the designate structs need some rework (images should be at the top level, not in the sub structs)

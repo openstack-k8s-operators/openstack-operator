@@ -54,6 +54,14 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Horizon.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if instance.Spec.Horizon.Template.TopologyRef == nil {
+		instance.Spec.Horizon.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	// add selector to service overrides
 	serviceOverrides := map[service.Endpoint]service.RoutedOverrideSpec{}
 	if instance.Spec.Horizon.Template.Override.Service != nil {

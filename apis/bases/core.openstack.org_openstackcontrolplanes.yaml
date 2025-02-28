@@ -17418,6 +17418,13 @@ spec:
                         type: object
                     type: object
                 type: object
+              topologyRef:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
             required:
             - secret
             - storageClass

@@ -66,6 +66,14 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Glance.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if instance.Spec.Glance.Template.TopologyRef == nil {
+		instance.Spec.Glance.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	// When component services got created check if there is the need to create a route
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: glanceName, Namespace: instance.Namespace}, glance); err != nil {
 		if !k8s_errors.IsNotFound(err) {

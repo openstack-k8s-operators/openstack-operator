@@ -148,6 +148,14 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			dbcluster.NodeSelector = &instance.Spec.NodeSelector
 		}
 
+		// When there's no Topology referenced in the Service Template, inject the
+		// top-level one
+		// NOTE: This does not check the Service subCRs: by default the generated
+		// subCRs inherit the top-level TopologyRef unless an override is present
+		if dbcluster.TopologyRef == nil {
+			dbcluster.TopologyRef = instance.Spec.TopologyRef
+		}
+
 		Log.Info("Reconciling OVNDBCluster", "OVNDBCluster.Namespace", instance.Namespace, "OVNDBCluster.Name", name)
 		op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), OVNDBCluster, func() error {
 
@@ -262,6 +270,14 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	if ovnNorthdSpec.NodeSelector == nil {
 		ovnNorthdSpec.NodeSelector = &instance.Spec.NodeSelector
+	}
+
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if ovnNorthdSpec.TopologyRef == nil {
+		ovnNorthdSpec.TopologyRef = instance.Spec.TopologyRef
 	}
 
 	Log.Info("Reconciling OVNNorthd", "OVNNorthd.Namespace", instance.Namespace, "OVNNorthd.Name", "ovnnorthd")
@@ -385,6 +401,14 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 
 	if ovnControllerSpec.NodeSelector == nil {
 		ovnControllerSpec.NodeSelector = &instance.Spec.NodeSelector
+	}
+
+	// When there's no Topology referenced in the Service Template, inject the
+	// top-level one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if ovnControllerSpec.TopologyRef == nil {
+		ovnControllerSpec.TopologyRef = instance.Spec.TopologyRef
 	}
 
 	Log.Info("Reconciling OVNController", "OVNController.Namespace", instance.Namespace, "OVNController.Name", "ovncontroller")

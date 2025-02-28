@@ -32,10 +32,12 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1 "k8s.io/api/core/v1"
 
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
+	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -115,6 +117,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=config.openshift.io,resources=networks,verbs=get;list;watch;
+// +kubebuilder:rbac:groups=topology.openstack.org,resources=topologies,verbs=get;list;watch;update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -285,6 +288,21 @@ func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Co
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
+	if instance.Spec.TopologyRef != nil {
+		if err := r.checkTopologyRef(ctx, helper,
+			instance.Spec.TopologyRef, instance.Namespace); err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				condition.TopologyReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				condition.TopologyReadyErrorMessage,
+				err.Error()))
+			return ctrl.Result{}, fmt.Errorf("waiting for Topology requirements: %w", err)
+		}
+		// TopologyRef != nil and exists and we're able to get it
+		instance.Status.Conditions.MarkTrue(condition.TopologyReadyCondition, condition.TopologyReadyMessage)
+	}
+
 	ctrlResult, err := openstack.ReconcileCAs(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -636,4 +654,26 @@ func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context,
 	}
 
 	return requests
+}
+
+// Verify the referenced topology exists
+func (r *OpenStackControlPlaneReconciler) checkTopologyRef(
+	ctx context.Context,
+	h *helper.Helper,
+	topologyRef *topologyv1.TopoRef,
+	namespace string,
+) error {
+	if topologyRef.Namespace == "" {
+		topologyRef.Namespace = namespace
+	}
+	_, _, err := topologyv1.GetTopologyByName(
+		ctx,
+		h,
+		topologyRef.Name,
+		topologyRef.Namespace,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }

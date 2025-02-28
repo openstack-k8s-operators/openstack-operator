@@ -2021,6 +2021,36 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("An OpenStackControlplane instance references a wrong topology", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["topologyRef"] = map[string]interface{}{
+				"name": "foo",
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+		It("points to a non existing topology CR", func() {
+			// Reconciliation does not succeed because TopologyReadyCondition
+			// is not marked as True
+			th.ExpectCondition(
+				names.OpenStackControlplaneName,
+				ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+				condition.ReadyCondition,
+				k8s_corev1.ConditionFalse,
+			)
+			// TopologyReadyCondition is Unknown as it waits for the Topology
+			// CR to be available
+			th.ExpectCondition(
+				names.OpenStackControlplaneName,
+				ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+				condition.TopologyReadyCondition,
+				k8s_corev1.ConditionFalse,
+			)
+		})
+	})
 })
 
 var _ = Describe("OpenStackOperator Webhook", func() {
@@ -2614,6 +2644,33 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		Expect(statusError.ErrStatus.Message).To(
 			ContainSubstring(
 				"Invalid value: \"foo_bar\": a lowercase RFC 1123 label must consist"),
+		)
+	})
+	It("Blocks creating ctlplane CRs with wrong topology namespace", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+		spec["topologyRef"] = map[string]interface{}{
+			"name":      "foo",
+			"namespace": "bar",
+		}
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(err.Error()).To(
+			ContainSubstring(
+				"Invalid value: \"namespace\": Customizing namespace field is not supported"),
 		)
 	})
 })

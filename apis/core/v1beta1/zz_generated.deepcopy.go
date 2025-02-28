@@ -30,6 +30,7 @@ import (
 	memcachedv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	redisv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
+	topologyv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	ironic_operatorapiv1beta1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	apiv1beta1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -1166,6 +1167,11 @@ func (in *OpenStackControlPlaneSpec) DeepCopyInto(out *OpenStackControlPlaneSpec
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
+	}
+	if in.TopologyRef != nil {
+		in, out := &in.TopologyRef, &out.TopologyRef
+		*out = new(topologyv1beta1.TopoRef)
+		**out = **in
 	}
 }
 

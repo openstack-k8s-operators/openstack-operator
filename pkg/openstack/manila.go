@@ -110,6 +110,14 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// There's no Topology referenced in Manila Template, inject the top-level
+	// one
+	// NOTE: This does not check the Service subCRs: by default the generated
+	// subCRs inherit the top-level TopologyRef unless an override is present
+	if instance.Spec.Manila.Template.TopologyRef == nil {
+		instance.Spec.Manila.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), manila, func() error {
 		instance.Spec.Manila.Template.ManilaSpecBase.DeepCopyInto(&manila.Spec.ManilaSpecBase)
