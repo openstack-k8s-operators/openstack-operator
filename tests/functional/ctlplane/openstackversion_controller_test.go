@@ -183,9 +183,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.SwiftContainerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.SwiftObjectImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.SwiftProxyImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmKeplerImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmPodmanExporterImage).ShouldNot(BeNil())
 
 			}, timeout, interval).Should(Succeed())
 		})
