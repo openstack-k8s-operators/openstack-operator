@@ -804,60 +804,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(keystoneAPI).Should(Not(BeNil()))
 			}, timeout, interval).Should(Succeed())
 		})
-		Describe("Rabbitmq inter node TLS config", func() {
-			It("should create and mount inter node tls config file", func() {
-				Eventually(func(g Gomega) {
-					cm := th.GetConfigMap(types.NamespacedName{
-						Namespace: names.RabbitMQName.Namespace,
-						Name:      names.RabbitMQName.Name + "-config-data",
-					})
-					g.Expect(cm).ShouldNot(BeNil())
-					g.Expect(cm.Data).Should(HaveKey("inter_node_tls.config"))
-				}, timeout, interval).Should(Succeed())
-				Eventually(func(g Gomega) {
-					rabbitmq := GetRabbitMQCluster(names.RabbitMQName)
-					g.Expect(rabbitmq).Should(Not(BeNil()))
-
-					var vFindings []k8s_corev1.Volume
-					g.Expect(rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Volumes).Should(
-						ContainElement(HaveField("Name", "config-data"), &vFindings),
-					)
-					g.Expect(vFindings[0].VolumeSource.ConfigMap.Items[0]).Should(And(
-						HaveField("Key", "inter_node_tls.config"),
-						HaveField("Path", "inter_node_tls.config"),
-					))
-
-					var vmFindings []k8s_corev1.VolumeMount
-					g.Expect(rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].VolumeMounts).Should(
-						ContainElement(HaveField("Name", "config-data"), &vmFindings),
-					)
-					g.Expect(vmFindings[0]).Should(And(
-						HaveField("SubPath", "inter_node_tls.config"),
-						HaveField("MountPath", "/etc/rabbitmq/inter-node-tls.config"),
-					))
-				}, timeout, interval).Should(Succeed())
-			})
-			It("should set the TLS arg env vars", func() {
-				Eventually(func(g Gomega) {
-					rabbitmq := GetRabbitMQCluster(names.RabbitMQName)
-					g.Expect(rabbitmq).Should(Not(BeNil()))
-
-					var findings []k8s_corev1.EnvVar
-					g.Expect(rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].Env).Should(
-						ContainElement(HaveField("Name", "RABBITMQ_CTL_ERL_ARGS"), &findings),
-					)
-					g.Expect(findings[0].Value).Should(ContainSubstring(
-						"-proto_dist inet_tls -ssl_dist_optfile /etc/rabbitmq/inter-node-tls.config",
-					))
-					g.Expect(rabbitmq.Spec.Override.StatefulSet.Spec.Template.Spec.Containers[0].Env).Should(
-						ContainElement(HaveField("Name", "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS"), &findings),
-					)
-					g.Expect(findings[0].Value).Should(ContainSubstring(
-						"-proto_dist inet_tls -ssl_dist_optfile /etc/rabbitmq/inter-node-tls.config",
-					))
-				}, timeout, interval).Should(Succeed())
-			})
-		})
 		// Default route timeouts are set
 		It("should have default timeout for the routes set", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
@@ -1870,7 +1816,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				rmq := GetRabbitMQCluster(names.RabbitMQName)
-				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+				g.Expect(*rmq.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 
 		})
@@ -1886,7 +1832,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				rmq := GetRabbitMQCluster(names.RabbitMQName)
-				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+				g.Expect(*rmq.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
@@ -1908,7 +1854,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				rmq := GetRabbitMQCluster(names.RabbitMQName)
-				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
+				g.Expect(*rmq.Spec.NodeSelector).To(Equal(map[string]string{"foo2": "bar2"}))
 			}, timeout, interval).Should(Succeed())
 		})
 
@@ -1923,7 +1869,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				rmq := GetRabbitMQCluster(names.RabbitMQName)
-				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+				g.Expect(*rmq.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
@@ -1965,7 +1911,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				rmq := GetRabbitMQCluster(names.RabbitMQName)
-				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "rmq"}))
+				g.Expect(*rmq.Spec.NodeSelector).To(Equal(map[string]string{"foo": "rmq"}))
 			}, timeout, interval).Should(Succeed())
 		})
 
@@ -1980,7 +1926,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				rmq := GetRabbitMQCluster(names.RabbitMQName)
-				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
+				g.Expect(*rmq.Spec.NodeSelector).To(Equal(map[string]string{"foo": "bar"}))
 			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
@@ -2016,7 +1962,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 			Eventually(func(g Gomega) {
 				rmq := GetRabbitMQCluster(names.RabbitMQName)
-				g.Expect(rmq.Spec.Override.StatefulSet.Spec.Template.Spec.NodeSelector).To(BeNil())
+				g.Expect(*rmq.Spec.NodeSelector).To(Equal(map[string]string{}))
 			}, timeout, interval).Should(Succeed())
 		})
 	})

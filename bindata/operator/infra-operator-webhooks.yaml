@@ -172,6 +172,26 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
+  name: mrabbitmq.kb.io
+  rules:
+    - apiGroups:
+        - rabbitmq.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - rabbitmqs
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-rabbitmq-openstack-org-v1beta1-rabbitmq
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
   name: mredis.kb.io
   rules:
     - apiGroups:
@@ -326,6 +346,26 @@ webhooks:
       name: infra-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
       path: /validate-network-openstack-org-v1beta1-netconfig
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vrabbitmq.kb.io
+  rules:
+    - apiGroups:
+        - rabbitmq.openstack.org
+      apiVersions:
+      - v1beta1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - rabbitmqs
+  sideEffects: None
+  clientConfig:
+    service:
+      name: infra-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-rabbitmq-openstack-org-v1beta1-rabbitmq
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail

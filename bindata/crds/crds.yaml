@@ -15653,6 +15653,13 @@ spec:
                                 type: string
                             type: object
                           type: array
+                        topologyRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
                       type: object
                     type: object
                 type: object

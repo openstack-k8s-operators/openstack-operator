@@ -27,7 +27,9 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
+	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -45,17 +47,11 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
-	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
-	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	// Container image fall-back defaults
-
-	// RabbitMqContainerImage is the fall-back container image for RabbitMQ
-	RabbitMqContainerImage = "quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified"
-
 	// IngressCaName -
 	IngressCaName = tls.DefaultCAPrefix + string(service.EndpointPublic)
 	// InternalCaName -
@@ -489,7 +485,7 @@ type RabbitmqSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Rabbitmq clusters
-	Templates *map[string]RabbitmqTemplate `json:"templates"`
+	Templates *map[string]rabbitmqv1.RabbitMqSpecCore `json:"templates"`
 }
 
 // MemcachedSection defines the desired state of Memcached services
@@ -504,18 +500,6 @@ type MemcachedSection struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Memcached databases
 	Templates *map[string]memcachedv1.MemcachedSpecCore `json:"templates,omitempty"`
-}
-
-// RabbitmqTemplate definition
-type RabbitmqTemplate struct {
-	// +kubebuilder:validation:Required
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// Overrides to use when creating the Rabbitmq clusters
-	rabbitmqv2.RabbitmqClusterSpecCore `json:",inline"`
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// NodeSelector to target subset of worker nodes running this service
-	NodeSelector *map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // OvnSection defines the desired state of OVN services

@@ -735,6 +735,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - rabbitmq.openstack.org
+  resources:
+  - rabbitmqs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - rolebindings
