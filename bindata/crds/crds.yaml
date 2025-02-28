@@ -17697,6 +17697,8 @@ spec:
                     type: string
                   edpmNodeExporterImage:
                     type: string
+                  edpmOpenstackNetworkExporterImage:
+                    type: string
                   edpmOvnBgpAgentImage:
                     type: string
                   edpmPodmanExporterImage:
@@ -19270,6 +19272,8 @@ spec:
                     type: string
                   edpmNodeExporterImage:
                     type: string
+                  edpmOpenstackNetworkExporterImage:
+                    type: string
                   edpmOvnBgpAgentImage:
                     type: string
                   edpmPodmanExporterImage:
@@ -19485,6 +19489,8 @@ spec:
                       type: string
                     edpmNodeExporterImage:
                       type: string
+                    edpmOpenstackNetworkExporterImage:
+                      type: string
                     edpmOvnBgpAgentImage:
                       type: string
                     edpmPodmanExporterImage:
@@ -19670,6 +19676,8 @@ spec:
                   edpmNeutronSriovAgentImage:
                     type: string
                   edpmNodeExporterImage:
+                    type: string
+                  edpmOpenstackNetworkExporterImage:
                     type: string
                   edpmOvnBgpAgentImage:
                     type: string
