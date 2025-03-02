@@ -74,6 +74,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmNodeExporterImage = version.Status.ContainerImages.EdpmNodeExporterImage
 		containerImages.EdpmKeplerImage = version.Status.ContainerImages.EdpmKeplerImage
 		containerImages.EdpmPodmanExporterImage = version.Status.ContainerImages.EdpmPodmanExporterImage
+		containerImages.EdpmOpenstackNetworkExporterImage = version.Status.ContainerImages.EdpmOpenstackNetworkExporterImage
 		containerImages.EdpmOvnBgpAgentImage = version.Status.ContainerImages.EdpmOvnBgpAgentImage
 		containerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
 		containerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
@@ -95,6 +96,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmNodeExporterImage = dataplanev1.ContainerImages.EdpmNodeExporterImage
 		containerImages.EdpmKeplerImage = dataplanev1.ContainerImages.EdpmKeplerImage
 		containerImages.EdpmPodmanExporterImage = dataplanev1.ContainerImages.EdpmPodmanExporterImage
+		containerImages.EdpmOpenstackNetworkExporterImage = dataplanev1.ContainerImages.EdpmOpenstackNetworkExporterImage
 		containerImages.EdpmOvnBgpAgentImage = dataplanev1.ContainerImages.EdpmOvnBgpAgentImage
 		containerImages.NovaComputeImage = dataplanev1.ContainerImages.NovaComputeImage
 		containerImages.OvnControllerImage = dataplanev1.ContainerImages.OvnControllerImage

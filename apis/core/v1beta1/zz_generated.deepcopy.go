@@ -441,6 +441,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.EdpmOpenstackNetworkExporterImage != nil {
+		in, out := &in.EdpmOpenstackNetworkExporterImage, &out.EdpmOpenstackNetworkExporterImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.GlanceAPIImage != nil {
 		in, out := &in.GlanceAPIImage, &out.GlanceAPIImage
 		*out = new(string)
