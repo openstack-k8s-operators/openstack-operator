@@ -418,7 +418,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 
 	if r.Spec.Nova.Enabled {
 		if old.Nova.Template == nil {
-			old.Nova.Template = &novav1.NovaSpec{}
+			old.Nova.Template = &novav1.NovaSpecCore{}
 		}
 		errors = append(errors, r.Spec.Nova.Template.ValidateUpdate(*old.Nova.Template, basePath.Child("nova").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Nova.APIOverride.Route, basePath.Child("nova").Child("apiOverride").Child("route"))...)
@@ -836,7 +836,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// Nova
 	if r.Spec.Nova.Enabled || r.Spec.Nova.Template != nil {
 		if r.Spec.Nova.Template == nil {
-			r.Spec.Nova.Template = &novav1.NovaSpec{}
+			r.Spec.Nova.Template = &novav1.NovaSpecCore{}
 		}
 		r.Spec.Nova.Template.Default()
 	}

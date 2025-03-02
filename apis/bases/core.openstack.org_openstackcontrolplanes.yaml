@@ -8790,8 +8790,6 @@ spec:
                     type: boolean
                   template:
                     properties:
-                      apiContainerImageURL:
-                        type: string
                       apiDatabaseAccount:
                         default: nova-api
                         type: string
@@ -9361,17 +9359,11 @@ spec:
                             cellMessageBusInstance: rabbitmq-cell1
                             hasAPIAccess: true
                         type: object
-                      computeContainerImageURL:
-                        type: string
-                      conductorContainerImageURL:
-                        type: string
                       keystoneInstance:
                         default: keystone
                         type: string
                       memcachedInstance:
                         default: memcached
-                        type: string
-                      metadataContainerImageURL:
                         type: string
                       metadataServiceTemplate:
                         default:
@@ -9497,8 +9489,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                      novncproxyContainerImageURL:
-                        type: string
                       passwordSelectors:
                         default:
                           service: NovaPassword
@@ -9516,8 +9506,6 @@ spec:
                       preserveJobs:
                         default: false
                         type: boolean
-                      schedulerContainerImageURL:
-                        type: string
                       schedulerServiceTemplate:
                         default:
                           replicas: 1
@@ -9590,12 +9578,6 @@ spec:
                             type: string
                         type: object
                     required:
-                    - apiContainerImageURL
-                    - computeContainerImageURL
-                    - conductorContainerImageURL
-                    - metadataContainerImageURL
-                    - novncproxyContainerImageURL
-                    - schedulerContainerImageURL
                     - secret
                     type: object
                 type: object

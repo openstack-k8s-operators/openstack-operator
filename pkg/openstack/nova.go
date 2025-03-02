@@ -65,7 +65,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	}
 
 	if instance.Spec.Nova.Template == nil {
-		instance.Spec.Nova.Template = &novav1.NovaSpec{}
+		instance.Spec.Nova.Template = &novav1.NovaSpecCore{}
 	}
 
 	if instance.Spec.Nova.Template.NodeSelector == nil {
@@ -346,7 +346,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// cell0 but cell0 should not have compute nodes registered. Eventually
 		// we need to support either rabbitmq vhosts or deploy a separate
 		// RabbitMQCluster per nova cell.
-		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec)
+		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec.NovaSpecCore)
 
 		nova.Spec.NovaImages.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
 		nova.Spec.NovaImages.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
