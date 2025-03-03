@@ -181,11 +181,12 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-swift-proxy-server:current-podified
         - name: RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-tempest-all:current-podified
-        - name: RELATED_IMAGE_TEST_TOBIKO_IMAGE_URL_DEFAULT
+          # NOTE: TEST_ images below do not get released downstream. They should not be prefixed with RELATED
+        - name: TEST_TOBIKO_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
-        - name: RELATED_IMAGE_TEST_ANSIBLETEST_IMAGE_URL_DEFAULT
+        - name: TEST_ANSIBLETEST_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified
-        - name: RELATED_IMAGE_TEST_HORIZONTEST_IMAGE_URL_DEFAULT
+        - name: TEST_HORIZONTEST_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-horizontest:current-podified
         - name: RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT
           value: quay.io/openstack-k8s-operators/openstack-must-gather:latest
