@@ -98,7 +98,6 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			CeilometerIpmiImage:               getImg(instance.Spec.CustomContainerImages.CeilometerIpmiImage, defaults.CeilometerIpmiImage),
 			CeilometerNotificationImage:       getImg(instance.Spec.CustomContainerImages.CeilometerNotificationImage, defaults.CeilometerNotificationImage),
 			CeilometerSgcoreImage:             getImg(instance.Spec.CustomContainerImages.CeilometerSgcoreImage, defaults.CeilometerSgcoreImage),
-			CeilometerMysqldExporterImage:     getImg(instance.Spec.CustomContainerImages.CeilometerMysqldExporterImage, defaults.CeilometerMysqldExporterImage),
 			CinderAPIImage:                    getImg(instance.Spec.CustomContainerImages.CinderAPIImage, defaults.CinderAPIImage),
 			CinderBackupImage:                 getImg(instance.Spec.CustomContainerImages.CinderBackupImage, defaults.CinderBackupImage),
 			CinderSchedulerImage:              getImg(instance.Spec.CustomContainerImages.CinderSchedulerImage, defaults.CinderSchedulerImage),
