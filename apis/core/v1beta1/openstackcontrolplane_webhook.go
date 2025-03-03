@@ -49,6 +49,7 @@ import (
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
+	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -56,7 +57,6 @@ import (
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
-	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 )
 
 var ctlplaneWebhookClient client.Client
@@ -788,6 +788,11 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
 		}
 		r.Spec.Ironic.Template.Default()
+
+		initializeOverrideSpec(&r.Spec.Ironic.APIOverride.Route, true)
+		initializeOverrideSpec(&r.Spec.Ironic.InspectorOverride.Route, true)
+		r.Spec.Ironic.Template.SetDefaultRouteAnnotations(r.Spec.Ironic.APIOverride.Route.Annotations)
+		r.Spec.Ironic.Template.SetDefaultInspectorRouteAnnotations(r.Spec.Ironic.InspectorOverride.Route.Annotations)
 	}
 
 	// Keystone
