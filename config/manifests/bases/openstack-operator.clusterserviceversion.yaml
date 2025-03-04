@@ -614,7 +614,7 @@ spec:
         - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
     - description: OpenStack is the Schema for the openstacks API
-      displayName: Open Stack
+      displayName: OpenStack
       kind: OpenStack
       name: openstacks.operator.openstack.org
       statusDescriptors:
