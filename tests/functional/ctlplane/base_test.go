@@ -26,13 +26,20 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
+	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 )
 
 type Names struct {
@@ -44,6 +51,11 @@ type Names struct {
 	MemcachedCertName           types.NamespacedName
 	CinderName                  types.NamespacedName
 	ManilaName                  types.NamespacedName
+	GlanceName                  types.NamespacedName
+	NeutronName                 types.NamespacedName
+	HorizonName                 types.NamespacedName
+	HeatName                    types.NamespacedName
+	TelemetryName               types.NamespacedName
 	DBName                      types.NamespacedName
 	DBCertName                  types.NamespacedName
 	DBCell1Name                 types.NamespacedName
@@ -71,6 +83,7 @@ type Names struct {
 	OVNDbServerNBName           types.NamespacedName
 	OVNDbServerSBName           types.NamespacedName
 	NeutronOVNCertName          types.NamespacedName
+	OpenStackTopology           []types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -130,9 +143,29 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cinder",
 		},
+		GlanceName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "glance",
+		},
 		ManilaName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "manila",
+		},
+		NeutronName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "neutron",
+		},
+		HorizonName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "horizon",
+		},
+		HeatName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "heat",
+		},
+		TelemetryName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "telemetry",
 		},
 		DBName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -197,6 +230,16 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		NeutronOVNCertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cert-neutron-ovndbs",
+		},
+		OpenStackTopology: []types.NamespacedName{
+			{
+				Namespace: openstackControlplaneName.Namespace,
+				Name:      "openstack-topology",
+			},
+			{
+				Namespace: openstackControlplaneName.Namespace,
+				Name:      "openstack-topology-alt",
+			},
 		},
 	}
 }
@@ -631,4 +674,96 @@ func SimulateControlplaneReady() {
 		th.Logger.Info("Simulated OpenStackClient ready")
 
 	}, timeout, interval).Should(Succeed())
+}
+
+// GetSampleTopologySpec - A sample (and opinionated) Topology Spec
+func GetSampleTopologySpec() map[string]interface{} {
+	// Build the topology Spec
+	topologySpec := map[string]interface{}{
+		"topologySpreadConstraints": []map[string]interface{}{
+			{
+				"maxSkew":           1,
+				"topologyKey":       k8s_corev1.LabelHostname,
+				"whenUnsatisfiable": "ScheduleAnyway",
+			},
+		},
+	}
+	return topologySpec
+}
+
+// CreateTopology - Creates a Topology CR based on the spec passed as input
+func CreateTopology(topology types.NamespacedName, spec map[string]interface{}) client.Object {
+	raw := map[string]interface{}{
+		"apiVersion": "topology.openstack.org/v1beta1",
+		"kind":       "Topology",
+		"metadata": map[string]interface{}{
+			"name":      topology.Name,
+			"namespace": topology.Namespace,
+		},
+		"spec": spec,
+	}
+	return th.CreateUnstructured(raw)
+}
+
+// GetGlance
+func GetGlance(name types.NamespacedName) *glancev1.Glance {
+	instance := &glancev1.Glance{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetCinder
+func GetCinder(name types.NamespacedName) *cinderv1.Cinder {
+	instance := &cinderv1.Cinder{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetNeutron
+func GetNeutron(name types.NamespacedName) *neutronv1.NeutronAPI {
+	instance := &neutronv1.NeutronAPI{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetManila
+func GetManila(name types.NamespacedName) *manilav1.Manila {
+	instance := &manilav1.Manila{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetHorizon
+func GetHorizon(name types.NamespacedName) *horizonv1.Horizon {
+	instance := &horizonv1.Horizon{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetHeat
+func GetHeat(name types.NamespacedName) *heatv1.Heat {
+	instance := &heatv1.Heat{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetTelemetry
+func GetTelemetry(name types.NamespacedName) *telemetryv1.Telemetry {
+	instance := &telemetryv1.Telemetry{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
 }
