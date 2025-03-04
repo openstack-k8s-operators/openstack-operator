@@ -6563,6 +6563,8 @@ spec:
                         minimum: 1
                         type: integer
                       httpdCustomization:
+                        default:
+                          processNumber: 3
                         properties:
                           customConfigSecret:
                             type: string
