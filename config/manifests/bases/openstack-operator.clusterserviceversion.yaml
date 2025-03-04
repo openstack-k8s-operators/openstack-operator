@@ -381,9 +381,6 @@ spec:
       - description: Templates - Overrides to use when creating the Rabbitmq clusters
         displayName: Templates
         path: rabbitmq.templates
-      - description: NodeSelector to target subset of worker nodes running this service
-        displayName: Node Selector
-        path: rabbitmq.templates.nodeSelector
       - description: Enabled - Whether the Redis service should be deployed and managed
         displayName: Enabled
         path: redis.enabled
