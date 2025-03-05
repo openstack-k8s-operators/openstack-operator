@@ -2,7 +2,7 @@
   "extends": [
     "github>openstack-k8s-operators/renovate-config:default.json5"
   ],
-  "baseBranches": ["main", "18.0-fr1"],
+  "baseBranches": ["main", "18.0-fr2"],
   "useBaseBranchConfig": "merge",
   "packageRules": [
     {
