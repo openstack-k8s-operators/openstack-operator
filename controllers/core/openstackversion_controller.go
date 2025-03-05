@@ -55,6 +55,10 @@ func SetupVersionDefaults() {
 		if strings.HasPrefix(envArr[0], "RELATED_IMAGE_") {
 			localVars[envArr[0]] = &envArr[1]
 		}
+		// we have some TEST_ env vars which specify images that aren't released downstream
+		if strings.HasPrefix(envArr[0], "TEST_") {
+			localVars[envArr[0]] = &envArr[1]
+		}
 	}
 	envAvailableVersion = corev1beta1.GetOpenStackReleaseVersion(os.Environ())
 	envContainerImages = localVars
