@@ -149,56 +149,29 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}()
 
 	// Ensure NodeSets
-	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
-	for _, nodeSet := range instance.Spec.NodeSets {
-
-		// Fetch the OpenStackDataPlaneNodeSet instance
-		nodeSetInstance := &dataplanev1.OpenStackDataPlaneNodeSet{}
-		err := r.Client.Get(
-			ctx,
-			types.NamespacedName{
-				Namespace: instance.GetNamespace(),
-				Name:      nodeSet,
-			},
-			nodeSetInstance)
-		if err != nil {
-			// NodeSet not found, force a requeue
-			if k8s_errors.IsNotFound(err) {
-				Log.Info("NodeSet not found", "NodeSet", nodeSet)
-				return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
-			}
-			instance.Status.Conditions.MarkFalse(
-				dataplanev1.SetupReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				dataplanev1.DataPlaneNodeSetErrorMessage,
-				err.Error())
-			// Error reading the object - requeue the request.
-			return ctrl.Result{}, err
+	nodeSets, err := r.listNodeSets(ctx, &Log, instance)
+	if err != nil {
+		if k8s_errors.IsNotFound(err) {
+			return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 		}
-		if err = nodeSetInstance.Spec.ValidateTLS(instance.GetNamespace(), r.Client, ctx); err != nil {
-			Log.Info("error while comparing TLS settings of nodeset %s with control plane: %w", nodeSet, err)
-			instance.Status.Conditions.MarkFalse(
-				dataplanev1.SetupReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				dataplanev1.DataPlaneNodeSetErrorMessage,
-				err.Error())
-			return ctrl.Result{}, err
-		}
-		nodeSets.Items = append(nodeSets.Items, *nodeSetInstance)
+		return ctrl.Result{}, err
 	}
 
-	// Check that all nodeSets are SetupReady
+	globalInventorySecrets := map[string]string{}
+	globalSSHKeySecrets := map[string]string{}
+
+	// Check that all NodeSets are ready and get TLS certs
 	for _, nodeSet := range nodeSets.Items {
+
+		// Add inventory secret to list of inventories for global services
+		globalInventorySecrets[nodeSet.Name] = fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
+		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+
 		if !nodeSet.Status.Conditions.IsTrue(dataplanev1.SetupReadyCondition) {
 			Log.Info("NodeSet SetupReadyCondition is not True", "NodeSet", nodeSet.Name)
 			return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 		}
-	}
 
-	// get TLS certs
-	for _, nodeSet := range nodeSets.Items {
 		if nodeSet.Spec.TLSEnabled {
 			var services []string
 			if len(instance.Spec.ServicesOverride) != 0 {
@@ -259,16 +232,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	deploymentErrMsg := ""
 	var nodesetServiceMap map[string][]string
 	backoffLimitReached := false
-
-	globalInventorySecrets := map[string]string{}
-	globalSSHKeySecrets := map[string]string{}
-
-	// Gathering individual inventory and ssh secrets for later use
-	for _, nodeSet := range nodeSets.Items {
-		// Add inventory secret to list of inventories for global services
-		globalInventorySecrets[nodeSet.Name] = fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
-		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-	}
 
 	if nodesetServiceMap, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
 		instance.Spec.ServicesOverride); err != nil {
@@ -389,7 +352,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	if version != nil {
 		instance.Status.DeployedVersion = version.Spec.TargetVersion
 	}
-	err = r.setHashes(ctx, helper, instance, nodeSets)
+	err = r.setHashes(ctx, helper, instance, *nodeSets)
 	if err != nil {
 		Log.Error(err, "Error setting service hashes")
 	}
@@ -522,4 +485,39 @@ func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manag
 		Watches(&certmgrv1.Certificate{},
 			handler.EnqueueRequestsFromMapFunc(certFn)).
 		Complete(r)
+}
+
+func (r *OpenStackDataPlaneDeploymentReconciler) listNodeSets(ctx context.Context, Log *logr.Logger, instance *dataplanev1.OpenStackDataPlaneDeployment) (*dataplanev1.OpenStackDataPlaneNodeSetList, error) {
+
+	var nodeSets = dataplanev1.OpenStackDataPlaneNodeSetList{}
+	var err error
+
+	for _, nodeSet := range instance.Spec.NodeSets {
+
+		// Fetch the OpenStackDataPlaneNodeSet instance
+		nodeSetInstance := &dataplanev1.OpenStackDataPlaneNodeSet{}
+		err := r.Client.Get(
+			ctx,
+			types.NamespacedName{
+				Namespace: instance.GetNamespace(),
+				Name:      nodeSet,
+			},
+			nodeSetInstance)
+		if err != nil {
+			Log.Info("NodeSet not found", "NodeSet", nodeSet)
+			return &nodeSets, err
+		}
+		if err = nodeSetInstance.Spec.ValidateTLS(instance.GetNamespace(), r.Client, ctx); err != nil {
+			Log.Info("error while comparing TLS settings of nodeset %s with control plane: %w", nodeSet, err)
+			instance.Status.Conditions.MarkFalse(
+				dataplanev1.SetupReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				dataplanev1.DataPlaneNodeSetErrorMessage,
+				err.Error())
+			return &nodeSets, err
+		}
+		nodeSets.Items = append(nodeSets.Items, *nodeSetInstance)
+	}
+	return &nodeSets, err
 }
