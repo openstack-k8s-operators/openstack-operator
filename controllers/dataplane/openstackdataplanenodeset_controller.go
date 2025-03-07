@@ -179,11 +179,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// this reconcile loop.
 	instance.InitConditions()
 	// Set ObservedGeneration since we've reset conditions
-	var generationChanged bool
-	if instance.Generation != instance.Status.ObservedGeneration {
-		instance.Status.ObservedGeneration = instance.Generation
-		generationChanged = true
-	}
+	instance.Status.ObservedGeneration = instance.Generation
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() { // update the Ready condition based on the sub conditions
@@ -386,7 +382,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(
-		ctx, helper, instance, generationChanged, provResult.BmhRefHash)
+		ctx, helper, instance, provResult.BmhRefHash)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -466,7 +462,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 func checkDeployment(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	generationChanged bool, bmhRefHash string,
+	bmhRefHash string,
 ) (bool, bool, bool, string, error) {
 	// Get all completed deployments
 	var failedDeployment string
@@ -521,12 +517,9 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
 				isDeploymentRunning = true
 			} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
-				// If the nodeset configHash does not match with what's in the deployment and the
-				// generation metadata has changed (i.e generation metatdata won't change when
-				// fields are removed from the CRD during an update that would not require a new
-				// deployment to run) asssume nodeset has changed requiring new deployment.
-				if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash &&
-					generationChanged) ||
+				// If the nodeset configHash does not match with what's in the deployment and
+				// deployedBmhHash is different from current bmhRefHash.
+				if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
 					(!instance.Spec.PreProvisioned && instance.Status.DeployedBmhHash != bmhRefHash) {
 					continue
 				}
