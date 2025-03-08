@@ -111,6 +111,11 @@ spec:
                   - subPath
                   type: object
                 type: array
+              extraFlag:
+                description: |-
+                  ExtraFlag is an extra flag that can be set to modify pytest command to
+                  exclude or include particular test(s)
+                type: string
               flavorName:
                 default: m1.tiny
                 description: FlavorName is the name of the OpenStack flavor to create
@@ -170,6 +175,11 @@ spec:
                 default: horizontest
                 description: ProjectName is the name of the OpenStack project for
                   Horizon tests.
+                type: string
+              projectNameXpath:
+                description: |-
+                  ProjectNameXpath is the xpath to select project name
+                  on the horizon dashboard based on the u/s or d/s theme
                 type: string
               repoUrl:
                 default: https://review.opendev.org/openstack/horizon
