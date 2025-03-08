@@ -43,6 +43,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
+	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
@@ -2890,4 +2891,92 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 				"Invalid value: \"namespace\": Customizing namespace field is not supported"),
 		)
 	})
+})
+
+var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
+	BeforeEach(func() {
+		// lib-common uses OPERATOR_TEMPLATES env var to locate the "templates"
+		// directory of the operator. We need to set them othervise lib-common
+		// will fail to generate the ConfigMap as it does not find common.sh
+		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
+		Expect(err).NotTo(HaveOccurred())
+
+		// create cluster config map which is used to validate if cluster supports fips
+		DeferCleanup(k8sClient.Delete, ctx, CreateClusterConfigCM())
+
+		// (mschuppert) create root CA secrets as there is no certmanager running.
+		// it is not used, just to make sure reconcile proceeds and creates the ca-bundle.
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAPublicName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAInternalName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAOvnName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCALibvirtName))
+		// create cert secrets for galera instances
+		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCertName))
+		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
+	})
+
+	When("openstack galera deleted", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			// not sure why we must need tls for galera, on commenting it, got below error
+			// Message: "galeras.mariadb.openstack.org \"openstack\" not found",
+			spec["tls"] = GetTLSPublicSpec()
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("cell should be deleted from CR", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Galera.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Rabbitmq.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Memcached.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Keystone.Enabled).Should(BeTrue())
+
+			// galera exists
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			// cell1 is present in galera
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				galeraTemplates := *(OSCtlplane.Spec.Galera.Templates)
+				g.Expect(galeraTemplates).Should(HaveLen(2))
+				delete(galeraTemplates, names.DBCell1Name.Name)
+				OSCtlplane.Spec.Galera.Templates = &galeraTemplates
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Only 1 cell in galera template
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				galeraTemplates := *(OSCtlplane.Spec.Galera.Templates)
+				g.Expect(galeraTemplates).Should(HaveLen(1))
+			}, timeout, interval).Should(Succeed())
+
+			// cell1 should not present in galera
+			Eventually(func(g Gomega) {
+				db := &mariadbv1.Galera{}
+				err := th.K8sClient.Get(ctx, names.DBCell1Name, db)
+				g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+
+			// rabbitmq exists
+			Eventually(func(g Gomega) {
+				rabbitmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rabbitmq).Should(Not(BeNil()))
+				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
+			}, timeout, interval).Should(Succeed())
+
+		})
+
+	})
+
 })
