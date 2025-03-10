@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -11,11 +12,13 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/object"
 
 	// Cannot use the following import due to linting error:
 	// Error: 	pkg/openstack/rabbitmq.go:10:2: use of internal package github.com/rabbitmq/cluster-operator/internal/status not allowed
 	//rabbitstatus "github.com/rabbitmq/cluster-operator/internal/status"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -37,6 +40,52 @@ const (
 	mqCreating mqStatus = iota
 	mqReady    mqStatus = iota
 )
+
+func deleteUndefinedRabbitMQs(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
+
+	log := GetLogger(ctx)
+	// Fetch the list of RabbitMQ objects
+	rabbitList := &rabbitmqv1.RabbitMqList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+	err := helper.GetClient().List(ctx, rabbitList, listOpts...)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("could not list rabbitmqs %w", err)
+	}
+
+	var delErrs []error
+	for _, rabbitObj := range rabbitList.Items {
+		// if it is not defined in the OpenStackControlPlane then delete it from k8s.
+		if _, exists := (*instance.Spec.Rabbitmq.Templates)[rabbitObj.Name]; !exists {
+			if object.CheckOwnerRefExist(instance.GetUID(), rabbitObj.OwnerReferences) {
+				log.Info("Deleting Rabbitmq", "", rabbitObj.Name)
+
+				certName := fmt.Sprintf("%s-svc", rabbitObj.Name)
+				err = DeleteCertificate(ctx, helper, instance.Namespace, certName)
+				if err != nil {
+					delErrs = append(delErrs, fmt.Errorf("rabbit cert deletion for '%s' failed, because: %w", certName, err))
+					continue
+				}
+
+				if _, err := EnsureDeleted(ctx, helper, &rabbitObj); err != nil {
+					delErrs = append(delErrs, fmt.Errorf("rabbitmq deletion for '%s' failed, because: %w", rabbitObj.Name, err))
+				}
+			}
+		}
+	}
+
+	if len(delErrs) > 0 {
+		delErrs := errors.Join(delErrs...)
+		return ctrl.Result{}, delErrs
+	}
+
+	return ctrl.Result{}, nil
+}
 
 // ReconcileRabbitMQs -
 func ReconcileRabbitMQs(
@@ -94,6 +143,17 @@ func ReconcileRabbitMQs(
 		)
 	}
 
+	_, errs := deleteUndefinedRabbitMQs(ctx, instance, helper)
+	if errs != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneRabbitMQReadyErrorMessage,
+			errs))
+		return ctrl.Result{}, errs
+	}
+
 	return ctrlResult, nil
 }
 
@@ -111,9 +171,9 @@ func reconcileRabbitMQ(
 			Namespace: instance.Namespace,
 		},
 	}
-	Log := GetLogger(ctx)
+	log := GetLogger(ctx)
 
-	Log.Info("Reconciling RabbitMQ", "RabbitMQ.Namespace", instance.Namespace, "RabbitMQ.Name", name)
+	log.Info("Reconciling RabbitMQ", "RabbitMQ.Namespace", instance.Namespace, "RabbitMQ.Name", name)
 	if !instance.Spec.Rabbitmq.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, rabbitmq); err != nil {
 			return mqFailed, ctrl.Result{}, err
@@ -199,7 +259,7 @@ func reconcileRabbitMQ(
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 		spec.DeepCopyInto(&rabbitmq.Spec.RabbitMqSpecCore)
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
-			Log.Info(fmt.Sprintf("Setting StorageClassName: " + instance.Spec.StorageClass))
+			log.Info(fmt.Sprintf("Setting StorageClassName: " + instance.Spec.StorageClass))
 			rabbitmq.Spec.Persistence.StorageClassName = &instance.Spec.StorageClass
 		}
 		if tlsCert != "" {
@@ -221,7 +281,7 @@ func reconcileRabbitMQ(
 		return mqFailed, ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		Log.Info(fmt.Sprintf("RabbitMQ %s - %s", rabbitmq.Name, op))
+		log.Info(fmt.Sprintf("RabbitMQ %s - %s", rabbitmq.Name, op))
 	}
 
 	if rabbitmq.Status.ObservedGeneration == rabbitmq.Generation && rabbitmq.IsReady() {
@@ -288,10 +348,10 @@ func removeConfigMapControllerReference(
 
 // RabbitmqImageMatch - return true if the rabbitmq images match on the ControlPlane and Version, or if Rabbitmq is not enabled
 func RabbitmqImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-	Log := GetLogger(ctx)
+	log := GetLogger(ctx)
 	if controlPlane.Spec.Rabbitmq.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.RabbitmqImage, version.Status.ContainerImages.RabbitmqImage) {
-			Log.Info("RabbitMQ image mismatch", "controlPlane.Status.ContainerImages.RabbitmqImage", controlPlane.Status.ContainerImages.RabbitmqImage, "version.Status.ContainerImages.RabbitmqImage", version.Status.ContainerImages.RabbitmqImage)
+			log.Info("RabbitMQ image mismatch", "controlPlane.Status.ContainerImages.RabbitmqImage", controlPlane.Status.ContainerImages.RabbitmqImage, "version.Status.ContainerImages.RabbitmqImage", version.Status.ContainerImages.RabbitmqImage)
 			return false
 		}
 	}
