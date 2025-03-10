@@ -11,7 +11,7 @@
     }
   ],
   "postUpgradeTasks": {
-    "commands": ["make gowork", "make tidy", "make manifests generate", "make bindata"],
+    "commands": ["git reset --hard HEAD","make force-bump","make gowork", "make tidy", "make manifests generate", "make bindata"],
     "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml", "hack/*.sh"],
     "executionMode": "update"
   }
