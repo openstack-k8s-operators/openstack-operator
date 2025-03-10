@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/base64"
 
+	"github.com/google/uuid"
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
 
 	k8s_corev1 "k8s.io/api/core/v1"
@@ -418,6 +419,34 @@ func GetTLSeCustomIssuerSpec() map[string]interface{} {
 			},
 		},
 	}
+}
+
+func GetDefaultGaleraSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"replicas":       1,
+		"logToDisk":      false,
+		"secret":         "osp-secret",
+		"storageClass":   "local-storage",
+		"storageRequest": "100M",
+		// "containerImage": "quay.io/podified-antelope-centos9/openstack-mariadb@sha256:8e81bb6f10eb86c625dd30bfe62d7e58c6c28949789476d3333c9d858c9819fc",
+		"containerImage": "",
+	}
+}
+
+func CreateGaleraConfig(namespace string, spec map[string]interface{}) client.Object {
+	name := uuid.New().String()
+
+	raw := map[string]interface{}{
+		"apiVersion": "mariadb.openstack.org/v1beta1",
+		"kind":       "Galera",
+		"metadata": map[string]interface{}{
+			"name":      name,
+			"namespace": namespace,
+		},
+		"spec": spec,
+	}
+
+	return th.CreateUnstructured(raw)
 }
 
 func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
