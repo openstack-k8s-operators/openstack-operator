@@ -6,9 +6,6 @@
 # ASSUMPTIONS:
 #
 # 1. Latest version of kuttl is installed at /usr/local/bin/kubectl-kuttl
-#    - wget https://github.com/kudobuilder/kuttl/releases/download/v0.11.1/kubectl-kuttl_0.11.1_linux_x86_64
-#    - mv kubectl-kuttl_0.11.1_linux_x86_64 /usr/local/bin/kubectl-kuttl
-#    - chmod 755 /usr/local/bin/kubectl-kuttl
 # 2. An OCP 4.10+ CRC cluster with Podified Operators has been deployed
 # 3. CLI user has access to $KUBECONFIG
 # 4. The environment variable INSTALL_YAMLS is set to the the path of the
@@ -32,8 +29,9 @@ commands:
       -n openstack-kuttl-tests \
       -o yaml | \
       oc apply -f -
-reportFormat: JSON
-reportName: kuttl-test-openstack
+reportFormat: xml
+reportName: kuttl-report-openstack
+reportGranularity: test
 namespace: openstack-kuttl-tests
 timeout: 1380
 parallel: 1
