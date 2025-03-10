@@ -32,10 +32,12 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	routev1 "github.com/openshift/api/route/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -69,6 +71,74 @@ var _ = Describe("OpenStackOperator controller", func() {
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
 	})
 
+	var (
+		galeraService = Entry("the galera service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := mariadb.GetGalera(names.DBName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		keystoneService = Entry("the keystone service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		rabbitService = Entry("the rabbitmq service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetRabbitMQCluster(names.RabbitMQName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		memcachedService = Entry("the memcached service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := infra.GetMemcached(names.MemcachedName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		glanceService = Entry("the glance service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetGlance(names.GlanceName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		cinderService = Entry("the cinder service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetCinder(names.CinderName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		manilaService = Entry("the manila service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetManila(names.ManilaName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		neutronService = Entry("the neutron service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetNeutron(names.NeutronName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		horizonService = Entry("the horizon service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetHorizon(names.HorizonName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		heatService = Entry("the heat service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetHeat(names.HeatName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		telemetryService = Entry("the telemetry service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetTelemetry(names.TelemetryName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+	)
 	//
 	// Validate TLS input settings
 	//
@@ -1997,6 +2067,207 @@ var _ = Describe("OpenStackOperator controller", func() {
 				k8s_corev1.ConditionFalse,
 			)
 		})
+	})
+
+	When("An OpenStackControlplane instance references an existing topology", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["topologyRef"] = map[string]string{
+				"name": names.OpenStackTopology[0].Name,
+			}
+			// Build the topology Spec
+			topologySpec := GetSampleTopologySpec()
+			// Create Test Topologies
+			for _, t := range names.OpenStackTopology {
+				CreateTopology(t, topologySpec)
+			}
+
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+			th.CreateSecret(types.NamespacedName{
+				Name:      "openstack-config-secret",
+				Namespace: namespace,
+			}, map[string][]byte{"secure.yaml": []byte("foo")})
+
+			th.CreateConfigMap(types.NamespacedName{
+				Name:      "openstack-config",
+				Namespace: namespace,
+			}, map[string]interface{}{
+				"clouds.yaml": string("foo"),
+				"OS_CLOUD":    "default",
+			})
+		})
+		It("points to an existing topology CR", func() {
+			// TopologyReadyCondition is True
+			th.ExpectCondition(
+				names.OpenStackControlplaneName,
+				ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+				condition.TopologyReadyCondition,
+				k8s_corev1.ConditionTrue,
+			)
+		})
+		DescribeTable("it is propagated to",
+			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
+				expectedTopology := &topologyv1.TopoRef{
+					Name:      names.OpenStackTopology[0].Name,
+					Namespace: names.OpenStackTopology[0].Namespace,
+				}
+
+				svc, toporef := serviceNameFunc()
+				// service exists and TopologyRef has been propagated
+				Eventually(func(g Gomega) {
+					g.Expect(svc).Should(Not(BeNil()))
+					g.Expect(toporef).To(Equal(expectedTopology))
+				}, timeout, interval).Should(Succeed())
+			},
+			// The entry list depends on the default enabled services in the
+			// default spec
+			galeraService,
+			keystoneService,
+			rabbitService,
+			memcachedService,
+			telemetryService,
+			glanceService,
+			cinderService,
+			manilaService,
+			neutronService,
+			horizonService,
+			heatService,
+		)
+		DescribeTable("An OpenStackControlplane updates the topology reference",
+			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
+				Eventually(func(g Gomega) {
+					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+					ctlplane.Spec.TopologyRef = &topologyv1.TopoRef{
+						Name:      names.OpenStackTopology[1].Name,
+						Namespace: names.Namespace,
+					}
+					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
+					svc, toporef := serviceNameFunc()
+					expectedTopology := &topologyv1.TopoRef{
+						Name:      names.OpenStackTopology[1].Name,
+						Namespace: names.OpenStackTopology[1].Namespace,
+					}
+					// service exists and TopologyRef has been propagated
+					g.Expect(svc).Should(Not(BeNil()))
+					g.Expect(toporef).To(Equal(expectedTopology))
+				}, timeout, interval).Should(Succeed())
+			},
+			galeraService,
+			keystoneService,
+			rabbitService,
+			memcachedService,
+			telemetryService,
+			glanceService,
+			cinderService,
+			manilaService,
+			neutronService,
+			horizonService,
+			heatService,
+		)
+		DescribeTable("An OpenStackControlplane Service (Glance) overrides the topology reference",
+			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
+				Eventually(func(g Gomega) {
+					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+					// Overrides a single resource
+					ctlplane.Spec.TopologyRef = &topologyv1.TopoRef{
+						Name:      names.OpenStackTopology[1].Name,
+						Namespace: names.Namespace,
+					}
+					ctlplane.Spec.Glance.Template.TopologyRef = &topologyv1.TopoRef{
+						Name:      names.OpenStackTopology[0].Name,
+						Namespace: names.Namespace,
+					}
+					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
+					svc, toporef := serviceNameFunc()
+					servicesExpectedTopology := &topologyv1.TopoRef{
+						Name:      names.OpenStackTopology[1].Name,
+						Namespace: names.OpenStackTopology[1].Namespace,
+					}
+					// Override glance TopologyRef with the previous value
+					glanceExpectedTopology := &topologyv1.TopoRef{
+						Name:      names.OpenStackTopology[0].Name,
+						Namespace: names.OpenStackTopology[0].Namespace,
+					}
+					// service exists and TopologyRef has been propagated
+					g.Expect(svc).Should(Not(BeNil()))
+					g.Expect(toporef).To(Equal(servicesExpectedTopology))
+
+					// glance exists and TopologyRef has not been propagated
+					glance := GetGlance(names.GlanceName)
+					g.Expect(glance).Should(Not(BeNil()))
+					g.Expect(glance.Spec.TopologyRef).To(Equal(glanceExpectedTopology))
+				}, timeout, interval).Should(Succeed())
+			},
+			// The entry list depends on the default enabled services in the
+			// default spec
+			galeraService,
+			keystoneService,
+			rabbitService,
+			memcachedService,
+			telemetryService,
+			cinderService,
+			manilaService,
+			neutronService,
+			horizonService,
+			heatService,
+		)
+		DescribeTable("An OpenStackControlplane removes the topology reference",
+			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
+				Eventually(func(g Gomega) {
+					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+					ctlplane.Spec.TopologyRef = nil
+					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
+
+					svc, toporef := serviceNameFunc()
+					// service exists and TopologyRef has been propagated
+					g.Expect(svc).Should(Not(BeNil()))
+					g.Expect(toporef).To(BeNil())
+				}, timeout, interval).Should(Succeed())
+			},
+			// The entry list depends on the default enabled services in the
+			// default spec
+			galeraService,
+			keystoneService,
+			rabbitService,
+			memcachedService,
+			telemetryService,
+			glanceService,
+			cinderService,
+			manilaService,
+			neutronService,
+			horizonService,
+			heatService,
+		)
 	})
 })
 

@@ -60,6 +60,17 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 	if envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"] != nil {
 		defaults.InfraDnsmasqImage = envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"]
 	}
+	// custom TEST_ images which aren't released downstream
+	if envImages["TEST_TOBIKO_IMAGE_URL_DEFAULT"] != nil {
+		defaults.TestTobikoImage = envImages["TEST_TOBIKO_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["TEST_ANSIBLETEST_IMAGE_URL_DEFAULT"] != nil {
+		defaults.TestAnsibletestImage = envImages["TEST_ANSIBLETEST_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["TEST_HORIZONTEST_IMAGE_URL_DEFAULT"] != nil {
+		defaults.TestHorizontestImage = envImages["TEST_HORIZONTEST_IMAGE_URL_DEFAULT"]
+	}
+
 	Log.Info("Initialize OpenStackVersion return defaults")
 	return defaults
 
@@ -98,7 +109,6 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			CeilometerIpmiImage:               getImg(instance.Spec.CustomContainerImages.CeilometerIpmiImage, defaults.CeilometerIpmiImage),
 			CeilometerNotificationImage:       getImg(instance.Spec.CustomContainerImages.CeilometerNotificationImage, defaults.CeilometerNotificationImage),
 			CeilometerSgcoreImage:             getImg(instance.Spec.CustomContainerImages.CeilometerSgcoreImage, defaults.CeilometerSgcoreImage),
-			CeilometerMysqldExporterImage:     getImg(instance.Spec.CustomContainerImages.CeilometerMysqldExporterImage, defaults.CeilometerMysqldExporterImage),
 			CinderAPIImage:                    getImg(instance.Spec.CustomContainerImages.CinderAPIImage, defaults.CinderAPIImage),
 			CinderBackupImage:                 getImg(instance.Spec.CustomContainerImages.CinderBackupImage, defaults.CinderBackupImage),
 			CinderSchedulerImage:              getImg(instance.Spec.CustomContainerImages.CinderSchedulerImage, defaults.CinderSchedulerImage),

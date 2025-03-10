@@ -381,9 +381,6 @@ spec:
       - description: Templates - Overrides to use when creating the Rabbitmq clusters
         displayName: Templates
         path: rabbitmq.templates
-      - description: NodeSelector to target subset of worker nodes running this service
-        displayName: Node Selector
-        path: rabbitmq.templates.nodeSelector
       - description: Enabled - Whether the Redis service should be deployed and managed
         displayName: Enabled
         path: redis.enabled
@@ -617,7 +614,7 @@ spec:
         - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
     - description: OpenStack is the Schema for the openstacks API
-      displayName: Open Stack
+      displayName: OpenStack
       kind: OpenStack
       name: openstacks.operator.openstack.org
       statusDescriptors:
