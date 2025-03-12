@@ -169,9 +169,6 @@ spec:
             path: inventory-0
           secretName: dataplanenodeset-edpm-compute-global
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   succeeded: 1
   uncountedTerminatedPods: {}
 ---
@@ -268,9 +265,6 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-global
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
@@ -369,14 +363,10 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-global
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
   uncountedTerminatedPods: {}
-
 ---
 apiVersion: batch/v1
 kind: Job
@@ -471,14 +461,10 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-global
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
   uncountedTerminatedPods: {}
-
 ---
 apiVersion: batch/v1
 kind: Job
@@ -573,14 +559,10 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-global
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
   uncountedTerminatedPods: {}
-
 ---
 apiVersion: batch/v1
 kind: Job
@@ -675,14 +657,10 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-global
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
   uncountedTerminatedPods: {}
-
 ---
 apiVersion: batch/v1
 kind: Job
