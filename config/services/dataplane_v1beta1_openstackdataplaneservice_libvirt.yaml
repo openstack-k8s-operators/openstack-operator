@@ -23,3 +23,4 @@ spec:
         - client auth
       issuer: osp-rootca-issuer-libvirt
   caCerts: combined-ca-bundle
+  edpmServiceType: libvirt

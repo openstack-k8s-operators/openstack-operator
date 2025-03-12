@@ -4,3 +4,4 @@ metadata:
   name: derive-pci-devicespec
 spec:
   playbook: osp.edpm.sriov_derive_device_spec
+  edpmServiceType: derive-pci-devicespec
