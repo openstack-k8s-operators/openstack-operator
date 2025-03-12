@@ -225,9 +225,6 @@ spec:
             path: inventory
           secretName: dataplanenodeset-openstack-edpm-tls
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   succeeded: 1
   uncountedTerminatedPods: {}
 ---
@@ -329,8 +326,5 @@ spec:
             path: inventory
           secretName: dataplanenodeset-openstack-edpm-tls
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   succeeded: 1
   uncountedTerminatedPods: {}
