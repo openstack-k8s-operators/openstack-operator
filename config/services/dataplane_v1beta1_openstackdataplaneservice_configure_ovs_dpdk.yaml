@@ -4,3 +4,4 @@ metadata:
   name: configure-ovs-dpdk
 spec:
   playbook: osp.edpm.configure_ovs_dpdk
+  edpmServiceType: configure-ovs-dpdk

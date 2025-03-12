@@ -7,3 +7,4 @@ spec:
     - secretRef:
         name: logging-compute-config-data
   playbook: osp.edpm.telemetry_logging
+  edpmServiceType: logging
