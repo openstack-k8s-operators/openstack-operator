@@ -160,9 +160,6 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
@@ -262,9 +259,6 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
@@ -365,9 +359,6 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
@@ -468,9 +459,6 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
@@ -571,9 +559,6 @@ spec:
             path: inventory
           secretName: dataplanenodeset-edpm-compute-no-nodes
 status:
-  conditions:
-  - status: "True"
-    type: Complete
   ready: 0
   succeeded: 1
   terminating: 0
