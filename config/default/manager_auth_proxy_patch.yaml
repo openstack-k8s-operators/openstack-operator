@@ -16,7 +16,7 @@ spec:
         # capabilities:
         #   drop:
         #     - "ALL"
-        image: quay.io/openstack-k8s-operators/kube-rbac-proxy:v0.16.0
+        image: kube-rbac-proxy:replace_me
         args:
         - "--secure-listen-address=0.0.0.0:8443"
         - "--upstream=http://127.0.0.1:8080/"
