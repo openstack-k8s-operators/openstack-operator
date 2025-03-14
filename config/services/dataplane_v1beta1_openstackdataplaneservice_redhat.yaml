@@ -4,3 +4,4 @@ metadata:
   name: redhat
 spec:
   playbook: osp.edpm.redhat
+  edpmServiceType: redhat

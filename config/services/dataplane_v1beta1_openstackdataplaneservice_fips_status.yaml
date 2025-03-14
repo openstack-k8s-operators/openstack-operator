@@ -5,3 +5,4 @@ metadata:
 spec:
   label: fips-status
   playbook: osp.edpm.fips_status
+  edpmServiceType: fips-status
