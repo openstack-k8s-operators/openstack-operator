@@ -920,6 +920,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Horizon.Template = &horizonv1.HorizonSpecCore{}
 		}
 
+		if r.Spec.Horizon.Template.Secret == "" {
+			r.Spec.Horizon.Template.Secret = r.Spec.Secret
+		}
+
 		r.Spec.Horizon.Template.Default()
 	}
 
