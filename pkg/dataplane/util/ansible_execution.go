@@ -167,14 +167,13 @@ func GetAnsibleExecution(ctx context.Context,
 
 // getAnsibleExecutionNamePrefix compute the name of the AnsibleEE
 func getAnsibleExecutionNamePrefix(serviceName string) string {
-	var executionNamePrefix string
 	AnsibleExecutionServiceNameLen := apimachineryvalidation.DNS1123LabelMaxLength - 10
+
 	if len(serviceName) > AnsibleExecutionServiceNameLen {
-		executionNamePrefix = serviceName[:AnsibleExecutionServiceNameLen]
-	} else {
-		executionNamePrefix = serviceName
+		return serviceName[:AnsibleExecutionServiceNameLen]
 	}
-	return executionNamePrefix
+
+	return serviceName
 }
 
 // GetAnsibleExecutionNameAndLabels Name and Labels of AnsibleEE
