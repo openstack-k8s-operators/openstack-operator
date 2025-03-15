@@ -152,6 +152,7 @@ bindata: kustomize yq ## Call sync bindata script
 	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
 	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
 	sed -i bindata/operator/operator.yaml -e "/envCustomImage/c\\{{ range \$$envName, \$$envValue := .OpenStackServiceRelatedImages }}\n        - name: {{ \$$envName }}\n          value: {{ \$$envValue }}\n{{ end }}"
+	sed -i bindata/operator/operator.yaml -e "s|kube-rbac-proxy:replace_me.*|'{{ .KubeRbacProxyImage }}'|"
 	cp config/operator/managers.yaml bindata/operator/
 	cp config/operator/rabbit.yaml bindata/operator/
 	$(KUSTOMIZE) build config/rbac > bindata/rbac/rbac.yaml
