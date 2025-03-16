@@ -69,6 +69,7 @@ var (
 	envRelatedOpenStackServiceImages (map[string]*string) // full_related_image_name -> image
 	rabbitmqImage                    string
 	operatorImage                    string
+	kubeRbacProxyImage               string
 	openstackReleaseVersion          string
 )
 
@@ -93,6 +94,8 @@ func SetupEnv() {
 			log.Log.Info("Found operator related image", "operator", operatorName, "image", envArr[1])
 		} else if strings.HasPrefix(envArr[0], "RELATED_IMAGE_") {
 			envRelatedOpenStackServiceImages[envArr[0]] = &envArr[1]
+		} else if envArr[0] == "KUBE_RBAC_PROXY" {
+			kubeRbacProxyImage = envArr[1]
 		} else if envArr[0] == "OPERATOR_IMAGE_URL" {
 			operatorImage = envArr[1]
 		} else if envArr[0] == "OPENSTACK_RELEASE_VERSION" {
@@ -449,6 +452,7 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 	data.Data["OperatorImages"] = envRelatedOperatorImages
 	data.Data["RabbitmqImage"] = rabbitmqImage
 	data.Data["OperatorImage"] = operatorImage
+	data.Data["KubeRbacProxyImage"] = kubeRbacProxyImage
 	data.Data["OpenstackReleaseVersion"] = openstackReleaseVersion
 	data.Data["OpenStackServiceRelatedImages"] = envRelatedOpenStackServiceImages
 	return r.renderAndApply(ctx, instance, data, "operator", true)
