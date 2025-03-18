@@ -15,6 +15,7 @@ if [ -n "$DOCKERFILE" ]; then
     cp "$DOCKERFILE" "${DOCKERFILE}.pinned"
     set -exo pipefail #in DOCKERFILE mode we like extra logging
 fi
+set -x #this will break things but lets see some logs
 
 #loop over each openstack-k8s-operators go.mod entry
 MOD_PATHS=$(go list -mod=readonly -m -json all | jq -r '. | select(.Path | contains("openstack")) | .Replace // . |.Path' | grep -v openstack-operator | grep -v lib-common)
