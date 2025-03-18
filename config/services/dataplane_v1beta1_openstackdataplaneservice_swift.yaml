@@ -11,3 +11,4 @@ spec:
         name: swift-storage-config-data
     - configMapRef:
         name: swift-ring-files
+  edpmServiceType: swift

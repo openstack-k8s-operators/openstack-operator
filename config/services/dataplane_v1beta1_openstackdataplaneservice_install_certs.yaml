@@ -5,3 +5,4 @@ metadata:
 spec:
   playbook: osp.edpm.install_certs
   addCertMounts: True
+  edpmServiceType: install-certs
