@@ -5,3 +5,4 @@ metadata:
 spec:
   playbook: osp.edpm.ssh_known_hosts
   deployOnAllNodeSets: true
+  edpmServiceType: ssh-known-hosts
