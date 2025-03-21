@@ -136,6 +136,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/ovn/ovsdb-config
           name: ovncontroller-config-0
           subPath: ovsdb-config
+        - mountPath: /var/lib/openstack/cacerts/ovn
+          name: ovn-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -157,6 +159,10 @@ spec:
             path: ovsdb-config
           name: ovncontroller-config
         name: ovncontroller-config-0
+      - name: ovn-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420

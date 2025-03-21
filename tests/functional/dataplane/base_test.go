@@ -166,6 +166,16 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 	)
 }
 
+// Create CABundleSecret
+func CreateCABundleSecret(name types.NamespacedName) *corev1.Secret {
+	return th.CreateSecret(
+		types.NamespacedName{Namespace: name.Namespace, Name: name.Name},
+		map[string][]byte{
+			"tls-ca-bundle.pem": []byte("blah"),
+		},
+	)
+}
+
 // Create OpenStackVersion
 func CreateOpenStackVersion(name types.NamespacedName) *unstructured.Unstructured {
 	raw := DefaultOpenStackVersion(name)
