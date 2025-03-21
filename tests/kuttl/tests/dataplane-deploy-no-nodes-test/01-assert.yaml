@@ -231,6 +231,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/bootstrap
+          name: bootstrap-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -244,6 +246,10 @@ spec:
       serviceAccountName: edpm-compute-no-nodes
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: bootstrap-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
@@ -631,6 +637,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/bootstrap
+          name: bootstrap-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/ovn
           name: ovn-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/neutron-metadata
@@ -658,6 +666,10 @@ spec:
       serviceAccountName: edpm-compute-no-nodes
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: bootstrap-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ovn-combined-ca-bundle
         secret:
           defaultMode: 420
@@ -770,6 +782,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/ovn/ovsdb-config
           name: ovncontroller-config-0
           subPath: ovsdb-config
+        - mountPath: /var/lib/openstack/cacerts/ovn
+          name: ovn-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -790,6 +804,10 @@ spec:
             path: ovsdb-config
           name: ovncontroller-config
         name: ovncontroller-config-0
+      - name: ovn-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
@@ -883,6 +901,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/neutron-metadata/nova-metadata-config.json
           name: nova-metadata-neutron-config-2
           subPath: nova-metadata-config.json
+        - mountPath: /var/lib/openstack/cacerts/neutron-metadata
+          name: neutron-metadata-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -924,6 +944,10 @@ spec:
           - key: nova-metadata-config.json
             path: nova-metadata-config.json
           secretName: nova-metadata-neutron-config
+      - name: neutron-metadata-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
@@ -1008,6 +1032,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/neutron-ovn/10-neutron-ovn.conf
           name: neutron-ovn-agent-neutron-config-0
           subPath: 10-neutron-ovn.conf
+        - mountPath: /var/lib/openstack/cacerts/neutron-ovn
+          name: neutron-ovn-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -1028,6 +1054,10 @@ spec:
           - key: 10-neutron-ovn.conf
             path: 10-neutron-ovn.conf
           secretName: neutron-ovn-agent-neutron-config
+      - name: neutron-ovn-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
@@ -1112,6 +1142,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/neutron-sriov/10-neutron-sriov.conf
           name: neutron-sriov-agent-neutron-config-0
           subPath: 10-neutron-sriov.conf
+        - mountPath: /var/lib/openstack/cacerts/neutron-sriov
+          name: neutron-sriov-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -1132,6 +1164,10 @@ spec:
           - key: 10-neutron-sriov.conf
             path: 10-neutron-sriov.conf
           secretName: neutron-sriov-agent-neutron-config
+      - name: neutron-sriov-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
@@ -1216,6 +1252,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/neutron-dhcp/10-neutron-dhcp.conf
           name: neutron-dhcp-agent-neutron-config-0
           subPath: 10-neutron-dhcp.conf
+        - mountPath: /var/lib/openstack/cacerts/neutron-dhcp
+          name: neutron-dhcp-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -1236,6 +1274,10 @@ spec:
           - key: 10-neutron-dhcp.conf
             path: 10-neutron-dhcp.conf
           secretName: neutron-dhcp-agent-neutron-config
+      - name: neutron-dhcp-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
@@ -1320,6 +1362,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/libvirt/LibvirtPassword
           name: libvirt-secret-0
           subPath: LibvirtPassword
+        - mountPath: /var/lib/openstack/cacerts/libvirt
+          name: libvirt-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -1340,6 +1384,10 @@ spec:
           - key: LibvirtPassword
             path: LibvirtPassword
           secretName: libvirt-secret
+      - name: libvirt-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
@@ -1433,6 +1481,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/nova/ssh-publickey
           name: nova-migration-ssh-key-1
           subPath: ssh-publickey
+        - mountPath: /var/lib/openstack/cacerts/nova
+          name: nova-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -1474,6 +1524,10 @@ spec:
           - key: ssh-publickey
             path: ssh-publickey
           secretName: nova-migration-ssh-key
+      - name: nova-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420

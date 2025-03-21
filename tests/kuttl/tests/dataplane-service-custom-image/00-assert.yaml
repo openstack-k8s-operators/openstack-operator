@@ -119,6 +119,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/custom-img-svc
+          name: custom-img-svc-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -133,6 +135,10 @@ spec:
       serviceAccountName: edpm-no-nodes-custom-svc
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: custom-img-svc-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
