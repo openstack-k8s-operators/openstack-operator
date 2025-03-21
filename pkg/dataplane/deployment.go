@@ -131,6 +131,22 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 				d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
 				return &ctrl.Result{}, err
 			}
+		} else if len(foundService.Spec.CACerts) > 0 {
+			// In general, we use the install-certs service (which has AddCertMounts=true
+			// to copy the cacerts over.  This may not be early enough for some services
+			// though.  In particular, we want the bootstrap service to copy the cacerts
+			// to the default location on the compute node.
+			d.AeeSpec, err = d.addCACertMount(foundService)
+			if err != nil {
+				nsConditions.Set(condition.FalseCondition(
+					readyCondition,
+					condition.ErrorReason,
+					condition.SeverityError,
+					readyErrorMessage,
+					err.Error()))
+				d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
+				return &ctrl.Result{}, err
+			}
 		}
 
 		err = d.ConditionalDeploy(
@@ -351,38 +367,51 @@ func (d *Deployer) addCertMounts(
 
 		// add mount for cacert bundle, even if TLS-E is not enabled
 		if len(service.Spec.CACerts) > 0 {
-			log.Info("Mounting CA cert bundle for service", "service", svc)
-			volMounts := storage.VolMounts{}
-			cacertSecret := &corev1.Secret{}
-			err := client.Get(d.Ctx, types.NamespacedName{Name: service.Spec.CACerts, Namespace: service.Namespace}, cacertSecret)
+			d.AeeSpec, err = d.addCACertMount(service)
 			if err != nil {
 				return d.AeeSpec, err
 			}
-			volumeName := fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts)
-			if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
-				hash := sha256.Sum224([]byte(volumeName))
-				volumeName = "cacert" + hex.EncodeToString(hash[:])
-			}
-			cacertVolume := storage.Volume{
-				Name: volumeName,
-				VolumeSource: storage.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: service.Spec.CACerts,
-					},
-				},
-			}
-
-			cacertVolumeMount := corev1.VolumeMount{
-				Name:      volumeName,
-				MountPath: path.Join(CACertPaths, service.Spec.EDPMServiceType),
-			}
-
-			volMounts.Volumes = append(volMounts.Volumes, cacertVolume)
-			volMounts.Mounts = append(volMounts.Mounts, cacertVolumeMount)
-			d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
 		}
 	}
 
+	return d.AeeSpec, nil
+}
+
+func (d *Deployer) addCACertMount(
+	service dataplanev1.OpenStackDataPlaneService,
+) (*dataplanev1.AnsibleEESpec, error) {
+	log := d.Helper.GetLogger()
+	client := d.Helper.GetClient()
+
+	log.Info("Mounting CA cert bundle for service", "service", service)
+	volMounts := storage.VolMounts{}
+	cacertSecret := &corev1.Secret{}
+	err := client.Get(d.Ctx, types.NamespacedName{Name: service.Spec.CACerts, Namespace: service.Namespace}, cacertSecret)
+	if err != nil {
+		return d.AeeSpec, err
+	}
+	volumeName := fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts)
+	if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
+		hash := sha256.Sum224([]byte(volumeName))
+		volumeName = "cacert" + hex.EncodeToString(hash[:])
+	}
+	cacertVolume := storage.Volume{
+		Name: volumeName,
+		VolumeSource: storage.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: service.Spec.CACerts,
+			},
+		},
+	}
+
+	cacertVolumeMount := corev1.VolumeMount{
+		Name:      volumeName,
+		MountPath: path.Join(CACertPaths, service.Spec.EDPMServiceType),
+	}
+
+	volMounts.Volumes = append(volMounts.Volumes, cacertVolume)
+	volMounts.Mounts = append(volMounts.Mounts, cacertVolumeMount)
+	d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
 	return d.AeeSpec, nil
 }
 
