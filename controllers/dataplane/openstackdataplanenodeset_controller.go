@@ -367,14 +367,14 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, err
 	}
 	containerImages := dataplaneutil.GetContainerImages(version)
-	provResult := deployment.ProvisionResult{}
+	var provResult deployment.ProvisionResult
 	// Reconcile BaremetalSet if required
 	if !instance.Spec.PreProvisioned {
 		// Reset the NodeSetBareMetalProvisionReadyCondition to unknown
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
 
-		provResult, err := deployment.DeployBaremetalSet(ctx, helper, instance,
+		provResult, err = deployment.DeployBaremetalSet(ctx, helper, instance,
 			allIPSets, dnsDetails.ServerAddresses, containerImages)
 		if err != nil || !provResult.IsProvisioned {
 			return ctrl.Result{}, err
@@ -517,10 +517,11 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
 				isDeploymentRunning = true
 			} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
-				// If the nodeset configHash does not match with what's in the deployment and
+				// If the nodeset configHash does not match with what's in the deployment or
 				// deployedBmhHash is different from current bmhRefHash.
 				if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
-					(!instance.Spec.PreProvisioned && instance.Status.DeployedBmhHash != bmhRefHash) {
+					(!instance.Spec.PreProvisioned && instance.Status.DeployedBmhHash != "" &&
+						instance.Status.DeployedBmhHash != bmhRefHash) {
 					continue
 				}
 				isDeploymentReady = true
