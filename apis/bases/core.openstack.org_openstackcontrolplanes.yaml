@@ -40,6 +40,23 @@ spec:
             type: object
           spec:
             properties:
+              applicationCredential:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  expirationDays:
+                    default: 14
+                    minimum: 2
+                    type: integer
+                  gracePeriodDays:
+                    default: 7
+                    minimum: 1
+                    type: integer
+                type: object
+                x-kubernetes-validations:
+                - message: gracePeriodDays must be smaller than expirationDays
+                  rule: self.gracePeriodDays < self.expirationDays
               barbican:
                 properties:
                   apiOverride:
@@ -166,6 +183,25 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -668,6 +704,25 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -3447,6 +3502,25 @@ spec:
                           type: object
                       type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -8343,6 +8417,25 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -9141,6 +9234,25 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   cellOverride:
                     additionalProperties:
                       properties:
@@ -11574,6 +11686,25 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -16027,6 +16158,25 @@ spec:
                 type: string
               swift:
                 properties:
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -16639,6 +16789,25 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
