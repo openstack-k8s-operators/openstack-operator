@@ -12,5 +12,48 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: quay.io/openstack-k8s-operators/openstack-operator
-  newTag: latest
+  newName: quay.io/rh-ee-vfisarov/openstack-operator
+  newTag: v0.0.1
+patches:
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/1/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.3.0-1744882474"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/1/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/openstack-k8s-operators/openstack-operator:latest"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/1/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.3.0-1744883041"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/1/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.3.0-1744883133"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/1/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.3.0-1745922411"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/1/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.0.1-1748436359"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/1/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/rh-ee-vfisarov/openstack-operator:v0.0.1"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-operator
+    namespace: system
