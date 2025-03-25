@@ -6,12 +6,16 @@ import (
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/go-logr/logr"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	pod "github.com/openstack-k8s-operators/lib-common/modules/common/pod"
+	pvc "github.com/openstack-k8s-operators/lib-common/modules/common/pvc"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -206,6 +210,8 @@ func reconcileGalera(
 		return galeraReady, nil
 	}
 
+	PrintGaleraPodToPVCMap(ctx, helper.GetClient(), helper.GetLogger(), galera.Namespace, galera.Name)
+
 	return galeraCreating, nil
 }
 
@@ -221,3 +227,41 @@ func GaleraImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackCo
 
 	return true
 }
+
+// PrintGaleraPodToPVCMap logs the association between Galera Pods and their PVCs
+func PrintGaleraPodToPVCMap(ctx context.Context, cli client.Client, log logr.Logger, namespace string, galeraName string) {
+	labels := map[string]string{
+		"app":         "galera",
+		"galera/name": galeraName,
+	}
+
+	podList, err := pod.GetPodListWithLabel(ctx, cli, labels, namespace)
+	if err != nil {
+		log.Error(err, "Failed to get Galera Pods")
+		return
+	}
+
+	pvcList, err := pvc.GetPVCs(ctx, cli, namespace, labels)
+	if err != nil {
+		log.Error(err, "Failed to get Galera PVCs")
+		return
+	}
+
+	pvcMap := make(map[string]corev1.PersistentVolumeClaim)
+	for _, pvc := range pvcList.Items {
+		pvcMap[pvc.Name] = pvc
+	}
+
+	log.Info("Mapping Galera Pods to their PVCs")
+
+	for _, p := range podList.Items {
+		podName := p.Name
+		expectedPVC := fmt.Sprintf("datadir-%s", podName)
+		if pvc, ok := pvcMap[expectedPVC]; ok {
+			log.Info("Pod to PVC mapping found", "pod", podName, "pvc", pvc.Name)
+		} else {
+			log.Info("No PVC found for Pod", "pod", podName)
+		}
+	}
+}
+
