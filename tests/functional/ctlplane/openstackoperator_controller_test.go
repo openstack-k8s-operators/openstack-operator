@@ -2917,12 +2917,27 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCALibvirtName))
 		// create cert secrets for galera instances
 		DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCertName))
-		// DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
 		th.CreateCertSecret(names.DBCell1CertName)
 	})
 
 	When("openstack galera and rabbitmq deletion by cell", func() {
+
+		var extGaleraName types.NamespacedName
+		var extRabbitName types.NamespacedName
+
 		BeforeEach(func() {
+			extGalera := CreateGaleraConfig(namespace, GetDefaultGaleraSpec())
+			extGaleraName.Name = extGalera.GetName()
+			extGaleraName.Namespace = extGalera.GetNamespace()
+			DeferCleanup(th.DeleteInstance, extGalera)
+
+			extRabbitMq := CreateRabbitMQConfig(namespace, GetDefaultRabbitMQSpec())
+			extRabbitName.Name = extRabbitMq.GetName()
+			extRabbitName.Namespace = extRabbitMq.GetNamespace()
+			DeferCleanup(th.DeleteInstance, extRabbitMq)
+
+			th.Logger.Info("external Rabbit", "", extRabbitName)
+
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			// not sure why we must need tls for galera, on commenting it, got below error
 			// Message: "galeras.mariadb.openstack.org \"openstack\" not found",
@@ -2945,6 +2960,13 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 			// cell1 is present in galera
 			Eventually(func(g Gomega) {
 				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// external galera exists
+			Eventually(func(g Gomega) {
+				th.Logger.Info("external galera", "", extGaleraName)
+				db := mariadb.GetGalera(extGaleraName)
 				g.Expect(db).Should(Not(BeNil()))
 			}, timeout, interval).Should(Succeed())
 
@@ -2971,6 +2993,12 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 				g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
 			}, timeout, interval).Should(Succeed())
 
+			// external galera exists even after openstack-cell1 deletion
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(extGaleraName)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
 		})
 
 		It("cell1 rabbitmq should be deleted from CR", func() {
@@ -2979,6 +3007,14 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 			// rabbitmq exists
 			Eventually(func(g Gomega) {
 				rabbitmq := GetRabbitMQCluster(names.RabbitMQCell1Name)
+				g.Expect(rabbitmq).Should(Not(BeNil()))
+				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
+			}, timeout, interval).Should(Succeed())
+
+			// external rabbitmq exists
+			Eventually(func(g Gomega) {
+				th.Logger.Info("external Rabbit", "", extRabbitName)
+				rabbitmq := GetRabbitMQCluster(extRabbitName)
 				g.Expect(rabbitmq).Should(Not(BeNil()))
 				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
 			}, timeout, interval).Should(Succeed())
@@ -3004,6 +3040,13 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 				db := &rabbitmqv1.RabbitMq{}
 				err := th.K8sClient.Get(ctx, names.RabbitMQCell1Name, db)
 				g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+
+			// external rabbitmq exists even after rabbitmq-cell1 deletion
+			Eventually(func(g Gomega) {
+				rabbitmq := GetRabbitMQCluster(extRabbitName)
+				g.Expect(rabbitmq).Should(Not(BeNil()))
+				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
 			}, timeout, interval).Should(Succeed())
 
 		})
