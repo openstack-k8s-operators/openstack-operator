@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	yaml "gopkg.in/yaml.v3"
@@ -37,9 +36,6 @@ type EEJob struct {
 	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
 	// it will run with default serviceaccount
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
-	// Inventory is the primary inventory that the ansible playbook will use to launch the job.
-	// Further inventories may be provided as ExtraMount in the `/runner/inventory/` path.
-	Inventory string `json:"inventory,omitempty"`
 	// Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored.
 	Args []string `json:"args,omitempty"`
 	// NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
@@ -151,32 +147,6 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 	}
 	if len(a.ServiceAccountName) > 0 {
 		job.Spec.Template.Spec.ServiceAccountName = a.ServiceAccountName
-	}
-	// Set primary inventory if specified as string
-	existingInventoryMounts := ""
-	if len(a.Inventory) > 0 {
-		setRunnerEnvVar(h, "RUNNER_INVENTORY", a.Inventory, "inventory", job, hashes)
-		existingInventoryMounts = CustomInventory
-	}
-	// Report additional inventory paths mounted as volumes
-	// AnsibleEE will later attempt to use them all together with the primary
-	// If any of the additional inventories uses location of the primary inventory
-	// provided by the dataplane operator raise an error.
-	if len(a.ExtraMounts) > 0 {
-		for _, inventory := range a.ExtraMounts {
-			for _, mount := range inventory.Mounts {
-				// Report when we mount other inventories as that alters ansible execution
-				if strings.HasPrefix(mount.MountPath, "/runner/inventory/") {
-					h.GetLogger().Info(fmt.Sprintf("additional inventory %s mounted", mount.Name))
-					if searchIndex := strings.Index(existingInventoryMounts, mount.MountPath); searchIndex != -1 {
-						return nil, fmt.Errorf(
-							"inventory mount %s overrides existing inventory location",
-							mount.Name)
-					}
-					existingInventoryMounts = existingInventoryMounts + fmt.Sprintf(",%s", mount.MountPath)
-				}
-			}
-		}
 	}
 
 	if len(a.Role) > 0 {
