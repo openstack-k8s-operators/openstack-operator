@@ -795,3 +795,34 @@ func hasCertInOverrideSpec(overrideSpec route.OverrideSpec) bool {
 		overrideSpec.Spec.TLS.Certificate != "" &&
 		overrideSpec.Spec.TLS.Key != ""
 }
+
+func DeleteCertificate(
+	ctx context.Context,
+	helper *helper.Helper,
+	namespace string,
+	certName string) error {
+
+	cert := certmanager.NewCertificate(
+		&certmgrv1.Certificate{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      certName,
+				Namespace: namespace,
+			},
+		},
+		5*time.Second,
+	)
+
+	helper.GetLogger().Info(fmt.Sprintf("Deleting cert %s", certName))
+	return cert.Delete(ctx, helper)
+}
+
+func DeleteSecret(
+	ctx context.Context,
+	helper *helper.Helper,
+	namespace string,
+	secretName string,
+) error {
+
+	helper.GetLogger().Info(fmt.Sprintf("Deleting secret %s", secretName))
+	return secret.DeleteSecretsWithName(ctx, helper, secretName, namespace)
+}
