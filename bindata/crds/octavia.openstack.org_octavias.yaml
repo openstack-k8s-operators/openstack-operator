@@ -1039,7 +1039,6 @@ spec:
                       type: object
                     type: array
                   containerImage:
-                    default: quay.io/podified-antelope-centos9/openstack-rsyslog:current-podified
                     description: ContainerImage - Rsyslog Container Image URL
                     type: string
                   defaultConfigOverwrite:
@@ -1051,7 +1050,6 @@ spec:
                       TODO: -> implement
                     type: object
                   initContainerImage:
-                    default: quay.io/podified-antelope-centos9/openstack-octavia-health-manager:current-podified
                     description: InitContainerImage - Rsyslog init Container Image
                       URL for
                     type: string
