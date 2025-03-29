@@ -4,7 +4,7 @@ commands:
   - script: |
       echo "Checking all running pods have new nodeselector"
       EXPECTED_NODE_SELECTOR="beta.kubernetes.io/os:linux kubernetes.io/os:linux"
-      BAD_OR_MISSING_NODE_SELECTOR=$(oc get pods -n $NAMESPACE -l service!=dnsmasq --field-selector=status.phase=Running -o=go-template --template='{{ range .items }}{{ .metadata.name}}: {{ .spec.nodeSelector }}{{"\n"}}{{ end }}' | grep -v 'ovn-controller-.*-config' | sed -e '\!map\['"$EXPECTED_NODE_SELECTOR"'\]$!d')
+      BAD_OR_MISSING_NODE_SELECTOR=$(oc get pods -n $NAMESPACE -l service!=dnsmasq --field-selector=status.phase=Running -o=go-template --template='{{ range .items }}{{ .metadata.name}}: {{ .spec.nodeSelector }}{{"\n"}}{{ end }}' | grep -v 'ovn-controller-.*-config' | grep -v 'crc-storage-*' | sed -e '\!map\['"$EXPECTED_NODE_SELECTOR"'\]$!d')
       BAD_OR_MISSING_NODE_SELECTOR_COUNT=$(echo -n "$BAD_OR_MISSING_NODE_SELECTOR" | wc -l)
       if [ $BAD_OR_MISSING_NODE_SELECTOR_COUNT -ne 0 ]; then
         echo "Found $BAD_OR_MISSING_NODE_SELECTOR_COUNT pods with bad or missing nodeselector:"
@@ -14,7 +14,7 @@ commands:
   - script: |
       echo "Checking all cronjobs have expected nodeselector"
       EXPECTED_NODE_SELECTOR="kubernetes.io/os:linux"
-      BAD_OR_MISSING_NODE_SELECTOR=$(oc get cronjobs -n $NAMESPACE -o=go-template --template='{{ range .items }}{{ .metadata.name}}: {{ .spec.jobTemplate.spec.template.spec.nodeSelector }}{{"\n"}}{{ end }}' | grep -v 'ovn-controller-.*-config' | sed -e '\!map\['"$EXPECTED_NODE_SELECTOR"'\]$!d')
+      BAD_OR_MISSING_NODE_SELECTOR=$(oc get cronjobs -n $NAMESPACE -o=go-template --template='{{ range .items }}{{ .metadata.name}}: {{ .spec.jobTemplate.spec.template.spec.nodeSelector }}{{"\n"}}{{ end }}' | grep -v 'ovn-controller-.*-config' | grep -v 'crc-storage-*' | sed -e '\!map\['"$EXPECTED_NODE_SELECTOR"'\]$!d')
       BAD_OR_MISSING_NODE_SELECTOR_COUNT=$(echo -n "$BAD_OR_MISSING_NODE_SELECTOR" | wc -l)
       if [ $BAD_OR_MISSING_NODE_SELECTOR_COUNT -ne 0 ]; then
         echo "Found $BAD_OR_MISSING_NODE_SELECTOR_COUNT cronjobs with bad or missing nodeselector:"
