@@ -94,8 +94,8 @@ func DeployBaremetalSet(
 					if res.Gateway == nil {
 						return fmt.Errorf("%s gateway is missing", dataplanev1.CtlPlaneNetwork)
 					}
-					baremetalSet.Spec.CtlplaneGateway = *res.Gateway
-					baremetalSet.Spec.CtlplaneVlan = res.Vlan
+					instanceSpec.CtlplaneGateway = *res.Gateway
+					instanceSpec.CtlplaneVlan = res.Vlan
 					baremetalSet.Spec.BootstrapDNS = dnsAddresses
 					baremetalSet.Spec.DNSSearchDomains = []string{res.DNSDomain}
 				}

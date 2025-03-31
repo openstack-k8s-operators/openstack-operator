@@ -83,6 +83,13 @@ spec:
                     ctlPlaneIP:
                       description: CtlPlaneIP - Control Plane IP in CIDR notation
                       type: string
+                    ctlplaneGateway:
+                      description: 'CtlplaneGateway - IP of gateway for ctrlplane
+                        network (TODO: acquire this is another manner?)'
+                      type: string
+                    ctlplaneVlan:
+                      description: CtlplaneVlan - Vlan for ctlplane network
+                      type: integer
                     networkData:
                       description: NetworkData - Host Network Data
                       properties:
