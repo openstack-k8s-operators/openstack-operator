@@ -18,16 +18,21 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
+	routev1 "github.com/openshift/api/route/v1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/object"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -39,6 +44,74 @@ import (
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+func deleteUndefinedNoVNCProxyCertsByCellName(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
+
+	log := GetLogger(ctx)
+	// Fetch the list of certificates
+	allCerts := &certmgrv1.CertificateList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+	err := helper.GetClient().List(ctx, allCerts, listOpts...)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("could not get certs %w", err)
+	}
+
+	allRoutes := &routev1.RouteList{}
+	listOpts = []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+	err = helper.GetClient().List(ctx, allRoutes, listOpts...)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("could not get routes %w", err)
+	}
+
+	novncproxyPrefix := "nova-novncproxy-cell"
+
+	var delErrs []error
+	for _, cert := range allCerts.Items {
+		if strings.HasPrefix(cert.Name, novncproxyPrefix) {
+			cell := strings.Split(cert.Name, "-")[2]
+			if _, exists := (instance.Spec.Nova.Template.CellTemplates)[cell]; !exists {
+				if object.CheckOwnerRefExist(instance.GetUID(), cert.OwnerReferences) {
+
+					log.Info("Deleting novncproxy cert for %s", "", cell)
+					err = DeleteCertificate(ctx, helper, instance.Namespace, cert.Name)
+					if err != nil {
+						delErrs = append(delErrs, fmt.Errorf("novncproxy cert deletion for '%s' failed, because: %w", cert.Name, err))
+					}
+				}
+			}
+		}
+	}
+
+	for _, route := range allRoutes.Items {
+		if strings.HasPrefix(route.Name, novncproxyPrefix) {
+			cell := strings.Split(route.Name, "-")[2]
+			if _, exists := (instance.Spec.Nova.Template.CellTemplates)[cell]; !exists {
+				if object.CheckOwnerRefExist(instance.GetUID(), route.OwnerReferences) {
+					log.Info("Deleting novncproxy route for %s", "", cell)
+					_, err := EnsureDeleted(ctx, helper, &route)
+					if err != nil {
+						delErrs = append(delErrs, fmt.Errorf("novncproxy route deletion for '%s' failed, because: %w", route.Name, err))
+					}
+				}
+			}
+		}
+	}
+
+	if len(delErrs) > 0 {
+		delErrs := errors.Join(delErrs...)
+		return ctrl.Result{}, delErrs
+	}
+
+	return ctrl.Result{}, nil
+}
 
 // ReconcileNova -
 func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
@@ -394,6 +467,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			corev1beta1.OpenStackControlPlaneNovaReadyRunningMessage))
 	}
 
+	_, err = deleteUndefinedNoVNCProxyCertsByCellName(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 	return ctrl.Result{}, nil
 }
 
