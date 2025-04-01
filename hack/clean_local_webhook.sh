@@ -5,6 +5,8 @@ oc delete validatingwebhookconfiguration vopenstackcontrolplane.kb.io --ignore-n
 oc delete mutatingwebhookconfiguration mopenstackcontrolplane.kb.io --ignore-not-found
 oc delete validatingwebhookconfiguration/vopenstackclient.kb.io --ignore-not-found
 oc delete mutatingwebhookconfiguration/mopenstackclient.kb.io --ignore-not-found
+oc delete validatingwebhookconfiguration/vopenstackversion.kb.io --ignore-not-found
+oc delete mutatingwebhookconfiguration/mopenstackversion.kb.io --ignore-not-found
 oc delete validatingwebhookconfiguration/vopenstackdataplanenodeset.kb.io --ignore-not-found
 oc delete validatingwebhookconfiguration/vopenstackdataplanedeployment.kb.io --ignore-not-found
 oc delete validatingwebhookconfiguration/vopenstackdataplaneservice.kb.io --ignore-not-found
