@@ -7,13 +7,13 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
-	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20250302155609-3997188f112f
+	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250324160823-3a222ba31afc
 	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20250302155609-585e397553b1
 	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20250303154130-9b21fc4c7fed
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250302183007-b32e442d87fa
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250302171552-edef3e1cb85d
-	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250304025253-8d04ef5f3ff9
-	github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250301104950-9a202ca63f62
+	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250321224641-efe2fd617758
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250319162810-463dd75a4cc4
 	github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250303132458-6952fcf52f13
 	github.com/openstack-k8s-operators/keystone-operator/api v0.5.1-0.20250304114258-f5fc2ffa57b3
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250315090821-34e570d2d5fb
