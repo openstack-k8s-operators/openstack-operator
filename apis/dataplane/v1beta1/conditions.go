@@ -93,7 +93,7 @@ const (
 	NodeSetDeploymentReadyCondition condition.Type = "NodeSetDeploymentReady"
 
 	// NodeSetDeploymentReadyWaitingMessage not yet ready
-	NodeSetDeploymentReadyWaitingMessage = "NodeSet setup ready, waiting for Deployment..."
+	NodeSetDeploymentReadyWaitingMessage = "NodeSet setup ready, waiting for OpenStackDataPlaneDeployment..."
 
 	// NodeSetServiceDeploymentReadyMessage ready
 	NodeSetServiceDeploymentReadyMessage = "Deployment ready for %s service"

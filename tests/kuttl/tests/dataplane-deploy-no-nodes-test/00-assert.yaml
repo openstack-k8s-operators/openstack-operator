@@ -38,11 +38,11 @@ spec:
 status:
   observedGeneration: 1
   conditions:
-  - message: NodeSet setup ready, waiting for Deployment...
+  - message: NodeSet setup ready, waiting for OpenStackDataPlaneDeployment...
     reason: Requested
     status: "False"
     type: Ready
-  - message: NodeSet setup ready, waiting for Deployment...
+  - message: NodeSet setup ready, waiting for OpenStackDataPlaneDeployment...
     reason: Requested
     status: "False"
     type: DeploymentReady

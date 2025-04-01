@@ -308,7 +308,7 @@ $ oc create -f openstack-edpm.yaml
 ----
 $ oc get openstackdataplanenodeset
 NAME           		STATUS MESSAGE
-openstack-edpm-ipam 	False  NodeSet setup ready, waiting for Deployment...
+openstack-edpm-ipam 	False  NodeSet setup ready, waiting for OpenStackDataPlaneDeployment...
 ----
 
 . Verify that the `Secret` resource was created for the node set:

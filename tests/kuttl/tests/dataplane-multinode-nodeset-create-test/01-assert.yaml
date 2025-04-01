@@ -17,11 +17,11 @@ status:
       tenant: 172.19.0.150
   ctlplaneSearchDomain: ctlplane.example.com
   conditions:
-  - message: NodeSet setup ready, waiting for Deployment...
+  - message: NodeSet setup ready, waiting for OpenStackDataPlaneDeployment...
     reason: Requested
     status: "False"
     type: Ready
-  - message: NodeSet setup ready, waiting for Deployment...
+  - message: NodeSet setup ready, waiting for OpenStackDataPlaneDeployment...
     reason: Requested
     status: "False"
     type: DeploymentReady
