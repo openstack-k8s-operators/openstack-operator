@@ -155,6 +155,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// DeployedVersion
 	DeployedVersion string `json:"deployedVersion,omitempty"`
 
+	// bmhRefHash - Current hash of the BMHs
+	BmhRefHash string `json:"bmhRefHash,omitempty"`
+
 	//DeployedBmhHash - Hash of BMHs deployed
 	DeployedBmhHash string `json:"deployedBmhHash,omitempty"`
 }
