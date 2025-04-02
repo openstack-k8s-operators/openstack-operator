@@ -17920,6 +17920,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              bmhRefHashes:
+                additionalProperties:
+                  type: string
+                type: object
               conditions:
                 items:
                   properties:
@@ -18900,6 +18904,8 @@ spec:
                     type: string
                   type: object
                 type: object
+              bmhRefHash:
+                type: string
               conditions:
                 items:
                   properties:
