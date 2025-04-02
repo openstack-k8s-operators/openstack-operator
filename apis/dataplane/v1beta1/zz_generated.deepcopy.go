@@ -425,6 +425,13 @@ func (in *OpenStackDataPlaneDeploymentStatus) DeepCopyInto(out *OpenStackDataPla
 			(*out)[key] = val
 		}
 	}
+	if in.BmhRefHashes != nil {
+		in, out := &in.BmhRefHashes, &out.BmhRefHashes
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.ContainerImages != nil {
 		in, out := &in.ContainerImages, &out.ContainerImages
 		*out = make(map[string]string, len(*in))

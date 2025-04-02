@@ -90,6 +90,9 @@ type OpenStackDataPlaneDeploymentStatus struct {
 	// NodeSetHashes
 	NodeSetHashes map[string]string `json:"nodeSetHashes,omitempty" optional:"true"`
 
+	// BmhRefHashes
+	BmhRefHashes map[string]string `json:"bmhRefHashes,omitempty" optional:"true"`
+
 	// ContainerImages
 	ContainerImages map[string]string `json:"containerImages,omitempty"`
 
@@ -184,5 +187,8 @@ func (instance *OpenStackDataPlaneDeployment) InitHashesAndImages() {
 	}
 	if instance.Status.ContainerImages == nil {
 		instance.Status.ContainerImages = make(map[string]string)
+	}
+	if instance.Status.BmhRefHashes == nil {
+		instance.Status.BmhRefHashes = make(map[string]string)
 	}
 }
