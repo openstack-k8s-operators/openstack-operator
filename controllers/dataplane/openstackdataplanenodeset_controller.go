@@ -379,10 +379,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		if err != nil || !provResult.IsProvisioned {
 			return ctrl.Result{}, err
 		}
+		instance.Status.BmhRefHash = provResult.BmhRefHash
 	}
 
 	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(
-		ctx, helper, instance, provResult.BmhRefHash)
+		ctx, helper, instance)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -426,7 +427,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		Log.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
-		instance.Status.DeployedBmhHash = provResult.BmhRefHash
+		instance.Status.DeployedBmhHash = instance.Status.BmhRefHash
 	} else if isDeploymentRunning {
 		Log.Info("Deployment still running...", "instance", instance)
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
@@ -462,7 +463,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 func checkDeployment(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	bmhRefHash string,
 ) (bool, bool, bool, string, error) {
 	// Get all completed deployments
 	var failedDeployment string
@@ -520,8 +520,8 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				// If the nodeset configHash does not match with what's in the deployment or
 				// deployedBmhHash is different from current bmhRefHash.
 				if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
-					(!instance.Spec.PreProvisioned && instance.Status.DeployedBmhHash != "" &&
-						instance.Status.DeployedBmhHash != bmhRefHash) {
+					(!instance.Spec.PreProvisioned &&
+						deployment.Status.BmhRefHashes[instance.Name] != instance.Status.BmhRefHash) {
 					continue
 				}
 				isDeploymentReady = true

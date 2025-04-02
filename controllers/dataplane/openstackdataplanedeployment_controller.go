@@ -320,6 +320,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				dataplanev1.NodeSetDeploymentReadyCondition,
 				condition.DeploymentReadyMessage)
 			instance.Status.NodeSetHashes[nodeSet.Name] = nodeSet.Status.ConfigHash
+			instance.Status.BmhRefHashes[nodeSet.Name] = nodeSet.Status.BmhRefHash
 		}
 	}
 
