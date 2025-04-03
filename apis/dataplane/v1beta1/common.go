@@ -130,6 +130,10 @@ type NodeSection struct {
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
 	// +kubebuilder:validation:Optional
 	ManagementNetwork string `json:"managementNetwork,omitempty"`
+
+	// CtlplaneInterface - Interface on the provisioned nodes to use for ctlplane network
+	// +kubebuilder:validation:Optional
+	CtlplaneInterface string `json:"ctlplaneInterface,omitempty"`
 }
 
 // NodeTemplate is a specification of the node attributes that override top level attributes.

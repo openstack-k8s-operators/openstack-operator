@@ -18816,6 +18816,8 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    ctlplaneInterface:
+                      type: string
                     hostName:
                       type: string
                     managementNetwork:

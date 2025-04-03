@@ -83,6 +83,7 @@ func DeployBaremetalSet(
 			instanceSpec.BmhLabelSelector = node.BmhLabelSelector
 			instanceSpec.UserData = node.UserData
 			instanceSpec.NetworkData = node.NetworkData
+			instanceSpec.CtlplaneInterface = node.CtlplaneInterface
 			for _, res := range ipSet.Status.Reservation {
 				if strings.ToLower(string(res.Network)) == dataplanev1.CtlPlaneNetwork {
 					_, ipNet, err := net.ParseCIDR(res.Cidr)
