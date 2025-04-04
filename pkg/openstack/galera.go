@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -10,8 +11,10 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/object"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -28,6 +31,53 @@ const (
 	galeraReady    galeraStatus = iota
 )
 
+func deleteUndefinedGaleras(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
+
+	log := GetLogger(ctx)
+	// Fetch the list of Galera objects
+	galeraList := &mariadbv1.GaleraList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+	err := helper.GetClient().List(ctx, galeraList, listOpts...)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("could not get galeras %w", err)
+	}
+
+	var delErrs []error
+	for _, galeraObj := range galeraList.Items {
+		// if it is not defined in the OpenStackControlPlane then delete it from k8s.
+		if _, exists := (*instance.Spec.Galera.Templates)[galeraObj.Name]; !exists {
+			if object.CheckOwnerRefExist(instance.GetUID(), galeraObj.OwnerReferences) {
+				log.Info("Deleting Galera", "", galeraObj.Name)
+
+				certName := fmt.Sprintf("galera-%s-svc", galeraObj.Name)
+				err = DeleteCertificate(ctx, helper, instance.Namespace, certName)
+				if err != nil {
+					delErrs = append(delErrs, fmt.Errorf("galera cert deletion for '%s' failed, because: %w", certName, err))
+					continue
+				}
+
+				if _, err := EnsureDeleted(ctx, helper, &galeraObj); err != nil {
+					delErrs = append(delErrs, fmt.Errorf("galera deletion for '%s' failed, because: %w", galeraObj.Name, err))
+				}
+
+			}
+		}
+	}
+
+	if len(delErrs) > 0 {
+		delErrs := errors.Join(delErrs...)
+		return ctrl.Result{}, delErrs
+	}
+
+	return ctrl.Result{}, nil
+}
+
 // ReconcileGaleras -
 func ReconcileGaleras(
 	ctx context.Context,
@@ -35,7 +85,7 @@ func ReconcileGaleras(
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
-	Log := GetLogger(ctx)
+	log := GetLogger(ctx)
 	if !instance.Spec.Galera.Enabled {
 		return ctrl.Result{}, nil
 	}
@@ -127,18 +177,29 @@ func ReconcileGaleras(
 		return ctrl.Result{}, fmt.Errorf(errors)
 
 	} else if len(inprogress) > 0 {
-		Log.Info("Galera in progress")
+		log.Info("Galera in progress")
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneMariaDBReadyRunningMessage))
 	} else {
-		Log.Info("Galera ready condition is true")
+		log.Info("Galera ready condition is true")
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
 			corev1beta1.OpenStackControlPlaneMariaDBReadyMessage,
 		)
+	}
+
+	_, errs := deleteUndefinedGaleras(ctx, instance, helper)
+	if errs != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneMariaDBReadyErrorMessage,
+			errs))
+		return ctrl.Result{}, errs
 	}
 
 	return ctrl.Result{}, nil
@@ -159,7 +220,7 @@ func reconcileGalera(
 			Namespace: instance.Namespace,
 		},
 	}
-	Log := GetLogger(ctx)
+	log := GetLogger(ctx)
 
 	if !instance.Spec.Galera.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, galera); err != nil {
@@ -182,7 +243,7 @@ func reconcileGalera(
 		spec.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	Log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
+	log.Info("Reconciling Galera", "Galera.Namespace", instance.Namespace, "Galera.Name", name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
 		spec.DeepCopyInto(&galera.Spec.GaleraSpecCore)
 		galera.Spec.ContainerImage = *version.Status.ContainerImages.MariadbImage
@@ -198,7 +259,7 @@ func reconcileGalera(
 		return galeraFailed, err
 	}
 	if op != controllerutil.OperationResultNone {
-		Log.Info(fmt.Sprintf("Galera %s - %s", galera.Name, op))
+		log.Info(fmt.Sprintf("Galera %s - %s", galera.Name, op))
 	}
 
 	if galera.Status.ObservedGeneration == galera.Generation && galera.IsReady() {
@@ -211,10 +272,10 @@ func reconcileGalera(
 
 // GaleraImageMatch - return true if the Galera images match on the ControlPlane and Version, or if Galera is not enabled
 func GaleraImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
-	Log := GetLogger(ctx)
+	log := GetLogger(ctx)
 	if controlPlane.Spec.Galera.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.MariadbImage, version.Status.ContainerImages.MariadbImage) {
-			Log.Info("Galera images do not match", "controlPlane.Status.ContainerImages.MariadbImage", controlPlane.Status.ContainerImages.MariadbImage, "version.Status.ContainerImages.MariadbImage", version.Status.ContainerImages.MariadbImage)
+			log.Info("Galera images do not match", "controlPlane.Status.ContainerImages.MariadbImage", controlPlane.Status.ContainerImages.MariadbImage, "version.Status.ContainerImages.MariadbImage", version.Status.ContainerImages.MariadbImage)
 			return false
 		}
 	}
