@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
-	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250328055331-d757b615a9bc
+	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250403085714-2d383f6e66b1
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250401072930-6daa9349c4ab
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250401153931-b02b9ed4470e
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250401084938-4842c7d15244

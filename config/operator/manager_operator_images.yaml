@@ -14,7 +14,7 @@ spec:
       - name: operator
         env:
         - name: RELATED_IMAGE_BARBICAN_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/barbican-operator@sha256:3dfc34f1de00f5e8d24aa1b9dafa0a20f2a0b4e101d23234ed022aeaf154c19a
+          value: quay.io/openstack-k8s-operators/barbican-operator@sha256:f5c8863f5915aa2f8a314fdde0a6ec96712820044caf4ad86e7f8f0228261270
         - name: RELATED_IMAGE_CINDER_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/cinder-operator@sha256:090d66ce4c1e70a2d5047c3165fd853e2a641a5cc8e90ca9e7823d4ef360bdb7
         - name: RELATED_IMAGE_DESIGNATE_OPERATOR_MANAGER_IMAGE_URL
