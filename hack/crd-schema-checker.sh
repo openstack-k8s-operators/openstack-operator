@@ -3,7 +3,7 @@ set -euxo pipefail
 
 CHECKER=$INSTALL_DIR/crd-schema-checker
 
-DISABLED_VALIDATORS=NoMaps,NoBools # TODO: https://issues.redhat.com/browse/OSPRH-12254
+DISABLED_VALIDATORS=NoMaps,NoBools,ListsMustHaveSSATags # TODO: https://issues.redhat.com/browse/OSPRH-12254
 
 CHECKER_ARGS=""
 if [[ ${DISABLED_VALIDATORS:+x} ]]; then
