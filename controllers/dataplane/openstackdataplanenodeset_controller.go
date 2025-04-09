@@ -462,23 +462,18 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 }
 
 func checkDeployment(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-) (bool, bool, bool, string, error) {
+	instance *dataplanev1.OpenStackDataPlaneNodeSet) (isDeploymentReady bool, isDeploymentRunning bool, isDeploymentFailed bool, failedDeploymentName string, err error) {
+
 	// Get all completed deployments
-	var failedDeployment string
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
 	}
-	err := helper.GetClient().List(ctx, deployments, opts...)
+	err = helper.GetClient().List(ctx, deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return false, false, false, failedDeployment, err
+		return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
 	}
-
-	var isDeploymentReady bool
-	var isDeploymentRunning bool
-	var isDeploymentFailed bool
 
 	// Sort deployments from oldest to newest by the LastTransitionTime of
 	// their DeploymentReadyCondition
@@ -512,7 +507,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			if condition.IsError(deploymentCondition) {
 				err = fmt.Errorf(deploymentCondition.Message)
 				isDeploymentFailed = true
-				failedDeployment = deployment.Name
+				failedDeploymentName = deployment.Name
 				break
 			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
 				isDeploymentRunning = true
@@ -557,7 +552,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 					err := helper.GetClient().Get(ctx, name, service)
 					if err != nil {
 						helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
-						return false, false, false, failedDeployment, err
+						return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
 					}
 
 					if service.Spec.EDPMServiceType != "update" {
@@ -573,7 +568,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		}
 	}
 
-	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err
+	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
