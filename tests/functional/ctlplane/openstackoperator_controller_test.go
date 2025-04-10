@@ -45,9 +45,11 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {
@@ -2931,6 +2933,19 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 			th.CreateCertSecret(names.RabbitMQCertName)
 			th.CreateCertSecret(names.RabbitMQCell1CertName)
 
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+
+			// vnproxy certs
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NoVNCProxyCell1CertPublicRouteName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NoVNCProxyCell1CertPublicSvcName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NoVNCProxyCell1CertVencryptName))
+
 			extGalera := CreateGaleraConfig(namespace, GetDefaultGaleraSpec())
 			extGaleraName.Name = extGalera.GetName()
 			extGaleraName.Namespace = extGalera.GetNamespace()
@@ -3083,6 +3098,18 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 				err := th.K8sClient.Get(ctx, names.RabbitMQCell1Name, db)
 				g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
 			}, timeout, interval).Should(Succeed())
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+
+			// vnproxy certs
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NoVNCProxyCell1CertPublicRouteName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NoVNCProxyCell1CertPublicSvcName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NoVNCProxyCell1CertVencryptName))
 
 			// cert is deleted too
 			crtmgr.AssertCertDoesNotExist(certName)
@@ -3099,6 +3126,47 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 				g.Expect(rabbitmq).Should(Not(BeNil()))
 				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
 			}, timeout, interval).Should(Succeed())
+
+		})
+
+		It("cell1 certs should be deleted from CR", func() {
+
+			// enable Nova and dependencies
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.Nova.Enabled = true
+				OSCtlplane.Spec.Nova.Template = &novav1.NovaSpecCore{}
+				// enable "Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Placement" too
+
+				OSCtlplane.Spec.Keystone.Enabled = true
+				OSCtlplane.Spec.Glance.Enabled = true
+				OSCtlplane.Spec.Neutron.Enabled = true
+				OSCtlplane.Spec.Placement.Enabled = true
+				// th.Logger.Info("", "number 5", "")
+
+				// th.Logger.Info("", ">>> pre-update", OSCtlplane)
+
+				if OSCtlplane.Spec.Placement.Template == nil {
+					OSCtlplane.Spec.Placement.Template = &placementv1.PlacementAPISpecCore{}
+					OSCtlplane.Spec.Placement.Template.APITimeout = 10
+				}
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+			// certNames := []types.NamespacedName{
+			// 	{Name: "cert-nova-novncproxy-cell1-public-route", Namespace: namespace},
+			// 	{Name: "cert-nova-novncproxy-cell1-public-svc", Namespace: namespace},
+			// 	{Name: "cert-nova-novncproxy-cell1-vencrypt", Namespace: namespace},
+			// }
+
+			// Eventually(func(g Gomega) {
+			// 	for _, certName := range certNames {
+			// 		cert := crtmgr.GetCert(certName)
+			// 		th.Logger.Info(">>> cert", "", cert.Name)
+			// 	}
+			// }, timeout, interval).Should(Succeed())
 
 		})
 
