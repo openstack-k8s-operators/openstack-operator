@@ -26,6 +26,7 @@ import (
 
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
+	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -37,6 +38,7 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -2894,4 +2896,212 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 				"Invalid value: \"namespace\": Customizing namespace field is not supported"),
 		)
 	})
+})
+
+var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
+	BeforeEach(func() {
+		// lib-common uses OPERATOR_TEMPLATES env var to locate the "templates"
+		// directory of the operator. We need to set them othervise lib-common
+		// will fail to generate the ConfigMap as it does not find common.sh
+		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
+		Expect(err).NotTo(HaveOccurred())
+
+		// create cluster config map which is used to validate if cluster supports fips
+		DeferCleanup(k8sClient.Delete, ctx, CreateClusterConfigCM())
+
+		// (mschuppert) create root CA secrets as there is no certmanager running.
+		// it is not used, just to make sure reconcile proceeds and creates the ca-bundle.
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAPublicName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAInternalName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAOvnName))
+		DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCALibvirtName))
+	})
+
+	When("openstack galera and rabbitmq deletion by cell", func() {
+
+		var extGaleraName types.NamespacedName
+		var extRabbitName types.NamespacedName
+
+		BeforeEach(func() {
+			// create cert secrets for galera instances
+			th.CreateCertSecret(names.DBCertName)
+			th.CreateCertSecret(names.DBCell1CertName)
+
+			// create cert secrets for rabbitmq instances
+			th.CreateCertSecret(names.RabbitMQCertName)
+			th.CreateCertSecret(names.RabbitMQCell1CertName)
+
+			extGalera := CreateGaleraConfig(namespace, GetDefaultGaleraSpec())
+			extGaleraName.Name = extGalera.GetName()
+			extGaleraName.Namespace = extGalera.GetNamespace()
+			DeferCleanup(th.DeleteInstance, extGalera)
+
+			extRabbitMq := CreateRabbitMQConfig(namespace, GetDefaultRabbitMQSpec())
+			extRabbitName.Name = extRabbitMq.GetName()
+			extRabbitName.Namespace = extRabbitMq.GetNamespace()
+			DeferCleanup(th.DeleteInstance, extRabbitMq)
+
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			// not sure why we must need tls for galera, on commenting it, got below error
+			// Message: "galeras.mariadb.openstack.org \"openstack\" not found",
+			spec["tls"] = GetTLSPublicSpec()
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("cell1 galera should be deleted from CR", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Galera.Enabled).Should(BeTrue())
+
+			var secretName types.NamespacedName
+			var certName types.NamespacedName
+
+			// galera exists
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			// cell1 is present in galera
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+
+				secretName = types.NamespacedName{Name: *db.Spec.TLS.SecretName, Namespace: namespace}
+				secret := th.GetSecret(secretName)
+
+				certName = types.NamespacedName{Name: "galera-openstack-cell1-svc", Namespace: namespace}
+				cert := crtmgr.GetCert(certName)
+
+				g.Expect(db).Should(Not(BeNil()))
+				g.Expect(secret).Should(Not(BeNil()))
+				g.Expect(cert).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// external galera exists
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(extGaleraName)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				galeraTemplates := *(OSCtlplane.Spec.Galera.Templates)
+				g.Expect(galeraTemplates).Should(HaveLen(2))
+				delete(galeraTemplates, names.DBCell1Name.Name)
+				OSCtlplane.Spec.Galera.Templates = &galeraTemplates
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Only 1 cell in galera template
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				galeraTemplates := *(OSCtlplane.Spec.Galera.Templates)
+				g.Expect(galeraTemplates).Should(HaveLen(1))
+			}, timeout, interval).Should(Succeed())
+
+			// cell1.galera should not exists in db
+			Eventually(func(g Gomega) {
+				db := &mariadbv1.Galera{}
+				err := th.K8sClient.Get(ctx, names.DBCell1Name, db)
+				g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+
+			// cert is deleted too
+			crtmgr.AssertCertDoesNotExist(certName)
+
+			// secret is not deleted
+			Eventually(func(g Gomega) {
+				secret := th.GetSecret(secretName)
+				g.Expect(secret).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// external galera exists even after openstack-cell1 deletion
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(extGaleraName)
+				g.Expect(db).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+		})
+
+		It("cell1 rabbitmq should be deleted from CR", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Rabbitmq.Enabled).Should(BeTrue())
+
+			var secretName types.NamespacedName
+			var certName types.NamespacedName
+
+			// enable TLS
+			Eventually(func(g Gomega) {
+				OSCtlplane = GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.TLS.PodLevel.Enabled = true
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// rabbitmq exists
+			Eventually(func(g Gomega) {
+				rabbitmq := GetRabbitMQCluster(names.RabbitMQCell1Name)
+
+				secretName = types.NamespacedName{Name: "cert-rabbitmq-cell1-svc", Namespace: namespace}
+				secret := th.GetSecret(secretName)
+
+				certName = types.NamespacedName{Name: "rabbitmq-cell1-svc", Namespace: namespace}
+				cert := crtmgr.GetCert(certName)
+
+				g.Expect(rabbitmq).Should(Not(BeNil()))
+				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
+				g.Expect(secret).Should(Not(BeNil()))
+				g.Expect(cert).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// external rabbitmq exists
+			Eventually(func(g Gomega) {
+				rabbitmq := GetRabbitMQCluster(extRabbitName)
+				g.Expect(rabbitmq).Should(Not(BeNil()))
+				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				rabbitTemplates := *(OSCtlplane.Spec.Rabbitmq.Templates)
+				g.Expect(rabbitTemplates).Should(HaveLen(2))
+				delete(rabbitTemplates, names.RabbitMQCell1Name.Name)
+				OSCtlplane.Spec.Rabbitmq.Templates = &rabbitTemplates
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Only 1 cell in rabbitmq template
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				rabbitTemplates := *(OSCtlplane.Spec.Rabbitmq.Templates)
+				g.Expect(rabbitTemplates).Should(HaveLen(1))
+			}, timeout, interval).Should(Succeed())
+
+			// cell1.rabbitmq should not exists in db
+			Eventually(func(g Gomega) {
+				db := &rabbitmqv1.RabbitMq{}
+				err := th.K8sClient.Get(ctx, names.RabbitMQCell1Name, db)
+				g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+
+			// cert is deleted too
+			crtmgr.AssertCertDoesNotExist(certName)
+
+			// secret is not deleted
+			Eventually(func(g Gomega) {
+				secret := th.GetSecret(secretName)
+				g.Expect(secret).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// external rabbitmq exists even after rabbitmq-cell1 deletion
+			Eventually(func(g Gomega) {
+				rabbitmq := GetRabbitMQCluster(extRabbitName)
+				g.Expect(rabbitmq).Should(Not(BeNil()))
+				g.Expect(rabbitmq.Spec.Replicas).Should(Equal(ptr.To[int32](1)))
+			}, timeout, interval).Should(Succeed())
+
+		})
+
+	})
+
 })

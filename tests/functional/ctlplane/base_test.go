@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/base64"
 
+	"github.com/google/uuid"
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
 
 	k8s_corev1 "k8s.io/api/core/v1"
@@ -418,6 +419,56 @@ func GetTLSeCustomIssuerSpec() map[string]interface{} {
 			},
 		},
 	}
+}
+
+func GetDefaultGaleraSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"replicas":       1,
+		"logToDisk":      false,
+		"secret":         "osp-secret",
+		"storageClass":   "local-storage",
+		"storageRequest": "100M",
+		"containerImage": "",
+	}
+}
+
+func CreateGaleraConfig(namespace string, spec map[string]interface{}) client.Object {
+	name := uuid.New().String()
+
+	raw := map[string]interface{}{
+		"apiVersion": "mariadb.openstack.org/v1beta1",
+		"kind":       "Galera",
+		"metadata": map[string]interface{}{
+			"name":      name,
+			"namespace": namespace,
+		},
+		"spec": spec,
+	}
+
+	return th.CreateUnstructured(raw)
+}
+
+func GetDefaultRabbitMQSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"replicas":       1,
+		"containerImage": "",
+	}
+}
+
+func CreateRabbitMQConfig(namespace string, spec map[string]interface{}) client.Object {
+	name := uuid.New().String()
+
+	raw := map[string]interface{}{
+		"apiVersion": "rabbitmq.openstack.org/v1beta1",
+		"kind":       "RabbitMq",
+		"metadata": map[string]interface{}{
+			"name":      name,
+			"namespace": namespace,
+		},
+		"spec": spec,
+	}
+
+	return th.CreateUnstructured(raw)
 }
 
 func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
