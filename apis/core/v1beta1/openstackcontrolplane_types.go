@@ -128,6 +128,11 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// NotificationsBusSection - Parameters related to the Notifications Bus services
+	NotificationsBus NotificationsBusSection `json:"notificationsBus,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Memcached - Parameters related to the Memcached service
 	Memcached MemcachedSection `json:"memcached,omitempty"`
 
@@ -484,8 +489,30 @@ type RabbitmqSection struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// Templates - Overrides to use when creating the Rabbitmq clusters
+	// Templates - Overrides to use when creating the Rabbitmq clusters for RPC and (optionally) Notifications.
 	Templates *map[string]rabbitmqv1.RabbitMqSpecCore `json:"templates"`
+}
+
+// NotificationsBusSection defines the desired state of AMQP messaging Bus Services for producers and consumers of notifications
+type NotificationsBusSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether Notifications Bus Service should be configured for all services that need it.
+	// When enabled, leaves a possibility for each service to override the configuration, or disable notifications only for itself.
+	// When disabled, leaves the notification drivers of all services unconfigured and emitting no notifications at all.
+	// A Disabled value ignores any overrides provided in the services templates.
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=""
+	// RabbitMQCluster is the name of RabbitMQ Cluster CR to select a Messages
+	// Bus Service instance used by all services that produce or consume notifications.
+	// Avoid colocating it with RabbitMQ services used for PRC.
+	// If empty, no configuration will be pushed down for services, which provides backward compatibility during upgrades.
+	// When also unconfigured in the services templates, the services apply their default behavoir.
+	// A regular value is pushed down for all services. Services may override it in templates.
+	RabbitMQCluster string `json:"rabbitMQCluster"`
 }
 
 // MemcachedSection defines the desired state of Memcached services
