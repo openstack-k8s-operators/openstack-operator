@@ -19349,6 +19349,7 @@ spec:
                 type: integer
               services:
                 default:
+                - redhat
                 - download-cache
                 - bootstrap
                 - configure-network
