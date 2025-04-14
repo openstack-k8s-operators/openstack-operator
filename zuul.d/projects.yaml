@@ -8,3 +8,5 @@
       jobs:
         - openstack-operator-tempest-multinode
         - openstack-operator-docs-preview
+        - openstack-operator-kuttl:
+            voting: false

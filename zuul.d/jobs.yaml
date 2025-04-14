@@ -8,6 +8,26 @@
       doc_available: false
 
 - job:
+    name: openstack-operator-kuttl
+    parent: cifmw-base-multinode-kuttl
+    dependencies: ["openstack-k8s-operators-content-provider"]
+    attempts: 1
+    required-projects:
+      - github.com/openstack-k8s-operators/openstack-operator
+    irrelevant-files:
+      - .*/*.md
+      - ^\..*$
+      - ^LICENSE$
+      - ^OWNERS$
+      - ^OWNERS_ALIASES$
+      - ^PROJECT$
+      - ^README.md$
+      - tests?\/functional
+    vars:
+      cifmw_kuttl_tests_operator_list:
+        - openstack
+
+- job:
     name: openstack-operator-tempest-multinode
     parent: podified-multinode-edpm-deployment-crc-3comp
     dependencies: ["openstack-k8s-operators-content-provider"]
