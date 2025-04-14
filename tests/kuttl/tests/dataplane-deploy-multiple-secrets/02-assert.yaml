@@ -298,6 +298,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/generic-service1
+          name: generic-service1-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -311,6 +313,10 @@ spec:
       serviceAccountName: openstack-edpm-tls
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: generic-service1-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420

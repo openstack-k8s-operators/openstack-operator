@@ -101,6 +101,8 @@ spec:
         - mountPath: /var/lib/openstack/configs/kuttl-service/30-kuttl-service.conf
           name: kuttl-service-cm-2-0
           subPath: 30-kuttl-service.conf
+        - mountPath: /var/lib/openstack/cacerts/kuttl-service
+          name: kuttl-service-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -164,6 +166,10 @@ spec:
             path: 30-kuttl-service.conf
           name: kuttl-service-cm-2
         name: kuttl-service-cm-2-0
+      - name: kuttl-service-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420

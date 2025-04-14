@@ -58,6 +58,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneNodeSetName types.NamespacedName
 	var dataplaneSecretName types.NamespacedName
 	var dataplaneSSHSecretName types.NamespacedName
+	var caBundleSecretName types.NamespacedName
 	var dataplaneNetConfigName types.NamespacedName
 	var dnsMasqName types.NamespacedName
 	var dataplaneNodeName types.NamespacedName
@@ -92,6 +93,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		dataplaneSSHSecretName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "dataplane-ansible-ssh-private-key-secret",
+		}
+		caBundleSecretName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "combined-ca-bundle",
 		}
 		dataplaneNetConfigName = types.NamespacedName{
 			Namespace: namespace,
@@ -571,6 +576,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -597,6 +603,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -616,6 +623,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -635,6 +643,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -654,6 +663,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -675,6 +685,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -727,6 +738,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -753,6 +765,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -772,6 +785,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -979,6 +993,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1005,6 +1020,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1024,6 +1040,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1043,6 +1060,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1062,6 +1080,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1083,6 +1102,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1135,6 +1155,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1161,6 +1182,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1180,6 +1202,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
 				SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1258,6 +1281,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			DeferCleanup(th.DeleteInstance, CreateOpenStackVersion(openstackVersionName))
 
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			SimulateDNSMasqComplete(dnsMasqName)
 			SimulateIPSetComplete(dataplaneNodeName)
 			SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1292,6 +1316,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			SimulateDNSMasqComplete(dnsMasqName)
 			SimulateIPSetComplete(dataplaneNodeName)
 			SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1307,12 +1332,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					Namespace: namespace,
 				}
 				ansibleEE := GetAnsibleee(ansibleeeName)
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(2))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].Name).To(Equal("ssh-key"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("inventory"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(3))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].Name).To(Equal("bootstrap-combined-ca-bundle"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("ssh-key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].Name).To(Equal("inventory"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.SecretName).To(Equal("combined-ca-bundle"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
 
 			}, th.Timeout, th.Interval).Should(Succeed())
 		})
@@ -1356,6 +1383,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			SimulateDNSMasqComplete(dnsMasqName)
 			SimulateIPSetComplete(dataplaneNodeName)
 			SimulateDNSDataComplete(dataplaneNodeSetName)
@@ -1371,14 +1399,16 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					Namespace: namespace,
 				}
 				ansibleEE := GetAnsibleee(ansibleeeName)
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(3))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(4))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].Name).To(Equal("edpm-ansible"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("ssh-key"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].Name).To(Equal("inventory"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("bootstrap-combined-ca-bundle"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].Name).To(Equal("ssh-key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[3].Name).To(Equal("inventory"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.PersistentVolumeClaim.ClaimName).To(Equal("edpm-ansible"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.SecretName).To(Equal("combined-ca-bundle"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
 
 			}, th.Timeout, th.Interval).Should(Succeed())
 		})
