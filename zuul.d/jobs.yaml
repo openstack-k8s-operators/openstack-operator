@@ -32,8 +32,8 @@
     parent: podified-multinode-edpm-deployment-crc-3comp
     dependencies: ["openstack-k8s-operators-content-provider"]
     vars:
-      cifmw_operator_build_golang_ct: "docker.io/library/golang:1.21"
-      cifmw_operator_build_golang_alt_ct: "quay.rdoproject.org/openstack-k8s-operators/golang:1.21"
+      cifmw_operator_build_golang_ct: "docker.io/library/golang:1.22"
+      cifmw_operator_build_golang_alt_ct: "quay.rdoproject.org/openstack-k8s-operators/golang:1.22"
       cifmw_tempest_tempestconf_config:
           # NOTE(alee) these tests will fail with barbican in the mix
           # while cinder/nova is not configured to talk to barbican
