@@ -15,7 +15,7 @@ jobs:
     uses: openstack-k8s-operators/openstack-k8s-operators-ci/.github/workflows/reusable-build-operator.yaml@main
     with:
       operator_name: openstack
-      go_version: 1.21.x
+      go_version: 1.23.x
       operator_sdk_version: 1.31.0
       bundle_dockerfile: ./bundle.Dockerfile
     secrets:
