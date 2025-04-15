@@ -9,5 +9,6 @@ jobs:
     with:
       operator_name: openstack
       branch_name: ${{ github.ref_name }}
+      custom_image: quay.io/openstack-k8s-operators/openstack-k8s-operators-ci-build-tools:golang-1.23
     secrets:
       FORCE_BUMP_PULL_REQUEST_PAT: ${{ secrets.FORCE_BUMP_PULL_REQUEST_PAT }}
