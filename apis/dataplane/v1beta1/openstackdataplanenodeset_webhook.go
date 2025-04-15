@@ -198,6 +198,17 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admissio
 			}
 		}
 	}
+	if oldNodeSet.Status.DeploymentStatuses != nil {
+		for deployName, deployConditions := range oldNodeSet.Status.DeploymentStatuses {
+			deployCondition := deployConditions.Get(NodeSetDeploymentReadyCondition)
+			if !deployConditions.IsTrue(NodeSetDeploymentReadyCondition) && condition.IsError(deployCondition) {
+				return admission.Warnings{
+					fmt.Sprintf(`the NodeSet has been updated, but there is a failing OpenStackDataPlaneDeployment in the cluster: %s
+						    This will block updates to the Ansible inventory until the failing deployment has been deleted.`, deployName),
+				}, nil
+			}
+		}
+	}
 
 	return nil, nil
 }
