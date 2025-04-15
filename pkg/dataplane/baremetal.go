@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package deployment provides functionality for OpenStack dataplane baremetal deployment operations
 package deployment
 
 import (
@@ -29,13 +30,13 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/labels"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 )
 
+// ProvisionResult represents the result of a baremetal provisioning operation
 type ProvisionResult struct {
 	IsProvisioned bool
 	BmhRefHash    string
@@ -143,7 +144,7 @@ func DeployBaremetalSet(
 }
 
 func getBMHRefHash(bmSet *baremetalv1.OpenStackBaremetalSet) (string, error) {
-	bmhRefHash, err := util.ObjectHash(bmSet.Status.BaremetalHosts)
+	bmhRefHash, err := utils.ObjectHash(bmSet.Status.BaremetalHosts)
 	if err != nil {
 		return "", err
 	}
