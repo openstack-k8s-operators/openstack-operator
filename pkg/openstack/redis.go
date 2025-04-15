@@ -147,7 +147,7 @@ func ReconcileRedis(
 			corev1beta1.OpenStackControlPlaneRedisReadyErrorMessage,
 			errors))
 
-		return ctrlResult, fmt.Errorf(errors)
+		return ctrlResult, fmt.Errorf("%s", errors)
 
 	} else if len(inprogress) > 0 {
 		// We want to mirror the condition of the highest priority from the Redis resources into the instance

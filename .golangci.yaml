@@ -1,3 +1,5 @@
+version: 2
+
 linters:
   # Enable specific linter
   # https://golangci-lint.run/usage/linters/#enabled-by-default
@@ -5,7 +7,11 @@ linters:
     - errorlint
     - revive
     - ginkgolinter
-    - gofmt
     - govet
+
+formatters:
+  enable:
+    - gofmt
+
 run:
   timeout: 5m

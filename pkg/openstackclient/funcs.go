@@ -10,6 +10,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package openstackclient provides functionality for managing OpenStack client resources
 package openstackclient
 
 import (
