@@ -38,7 +38,6 @@ import (
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 
 	// corev1 "k8s.io/api/core/v1"
-	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -114,7 +113,7 @@ func AddServiceOpenStackOperatorLabel(svcOverride service.RoutedOverrideSpec, va
 	return svcOverride
 }
 
-// Endpoints
+// Endpoints represents service endpoint details and TLS CA configuration
 type Endpoints struct {
 	EndpointDetails map[service.Endpoint]EndpointDetail
 	tls.Ca
@@ -180,7 +179,7 @@ func GetRoutesListWithLabel(
 	}
 
 	if err := h.GetClient().List(ctx, routeList, listOpts...); err != nil {
-		err = fmt.Errorf("Error listing routes for %s: %w", labelSelectorMap, err)
+		err = fmt.Errorf("error listing routes for %s: %w", labelSelectorMap, err)
 		return nil, err
 	}
 
@@ -239,7 +238,7 @@ func EnsureEndpointConfig(
 		switch ed.Type {
 		case service.EndpointPublic:
 			// If the service has the create ingress annotation and its a default ClusterIP service -> create route
-			ed.Route.Create = svc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "true" &&
+			ed.Route.Create = svc.Annotations[service.AnnotationIngressCreateKey] == "true" &&
 				svc.Spec.Type == k8s_corev1.ServiceTypeClusterIP
 
 			if ingressOverride.Route != nil {
@@ -293,7 +292,7 @@ func EnsureEndpointConfig(
 				// a LoadBalancer (MetalLB) for the public endpoints.
 				if !ed.Route.Create && (tlsConfig.API.Public.SecretName != nil && *tlsConfig.API.Public.SecretName != "") {
 					ed.Service.TLS.SecretName = tlsConfig.API.Public.SecretName
-					_, err := ed.Service.TLS.GenericService.ValidateCertSecret(ctx, helper, instance.GetNamespace())
+					_, err := ed.Service.TLS.ValidateCertSecret(ctx, helper, instance.GetNamespace())
 					if err != nil {
 						if k8s_errors.IsNotFound(err) {
 							return endpoints, ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
@@ -451,7 +450,7 @@ func (ed *EndpointDetail) ensureRoute(
 			owner := metav1.GetControllerOf(&r.ObjectMeta)
 
 			// Delete the route if the service was changed not to expose a route
-			if svc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "false" &&
+			if svc.Annotations[service.AnnotationIngressCreateKey] == "false" &&
 				r.Spec.To.Name == ed.Name &&
 				owner != nil && owner.UID == instance.GetUID() {
 				// Delete any other owner refs from ref list to not block deletion until owners are gone
@@ -461,7 +460,7 @@ func (ed *EndpointDetail) ensureRoute(
 				if ed.Service.TLS.Enabled {
 					err = DeleteCertificate(ctx, helper, instance.Namespace, ed.Route.TLS.CertName)
 					if err != nil && !k8s_errors.IsNotFound(err) {
-						err = fmt.Errorf("Error deleting route certificate %s: %w", ed.Route.TLS.CertName, err)
+						err = fmt.Errorf("error deleting route certificate %s: %w", ed.Route.TLS.CertName, err)
 						return ctrl.Result{}, err
 					}
 				}
@@ -469,7 +468,7 @@ func (ed *EndpointDetail) ensureRoute(
 				// Delete route
 				err := helper.GetClient().Delete(ctx, &r)
 				if err != nil && !k8s_errors.IsNotFound(err) {
-					err = fmt.Errorf("Error deleting route %s: %w", r.Name, err)
+					err = fmt.Errorf("error deleting route %s: %w", r.Name, err)
 					return ctrl.Result{}, err
 				}
 
@@ -495,7 +494,7 @@ func (ed *EndpointDetail) ensureRoute(
 			ed.Service.OverrideSpec.EmbeddedLabelsAnnotations = &service.EmbeddedLabelsAnnotations{}
 		}
 
-		if labelVal, ok := ed.Service.OverrideSpec.EmbeddedLabelsAnnotations.Labels[ooAppSelector]; ok {
+		if labelVal, ok := ed.Service.OverrideSpec.Labels[ooAppSelector]; ok {
 			ed.Labels = map[string]string{ooAppSelector: labelVal}
 		}
 
@@ -532,7 +531,7 @@ func (ed *EndpointDetail) CreateRoute(
 	// initialize the route with any custom provided route override
 	// per default use the service name as targetPortName if we don't have the annotation.
 	targetPortName := ed.Service.Spec.Name
-	if name, ok := ed.Service.Spec.ObjectMeta.Annotations[service.AnnotationIngressTargetPortNameKey]; ok && name != "" {
+	if name, ok := ed.Service.Spec.Annotations[service.AnnotationIngressTargetPortNameKey]; ok && name != "" {
 		targetPortName = name
 	}
 	enptRoute, err := route.NewRoute(
@@ -717,7 +716,7 @@ func (e *Endpoints) GetEndptCertSecret(endpt service.Endpoint) *string {
 	return endptTLSSecret
 }
 
-// Set up any defaults used by service operator defaulting logic
+// SetupServiceOperatorDefaults sets up any defaults used by service operator defaulting logic
 func SetupServiceOperatorDefaults() {
 	// Acquire environmental defaults and initialize service operators that
 	// require each respective default
@@ -780,6 +779,7 @@ func SetupServiceOperatorDefaults() {
 	barbicanv1.SetupDefaults()
 }
 
+// GetIssuerCertSecret retrieves the certificate secret from the issuer
 func GetIssuerCertSecret(
 	ctx context.Context,
 	helper *helper.Helper,
@@ -820,6 +820,7 @@ func serviceExists(route string, services *k8s_corev1.ServiceList) bool {
 	return false
 }
 
+// DeleteCertificate deletes a certificate from the specified namespace
 func DeleteCertificate(
 	ctx context.Context,
 	helper *helper.Helper,
@@ -840,9 +841,10 @@ func DeleteCertificate(
 	return cert.Delete(ctx, helper)
 }
 
+// DeleteCertsAndRoutes deletes certificates and routes for the OpenStack control plane
 func DeleteCertsAndRoutes(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1.OpenStackControlPlane,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 

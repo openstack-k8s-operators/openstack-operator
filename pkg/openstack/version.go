@@ -42,7 +42,7 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 				fieldName += strings.ToLower(matches[i])[1:]
 			}
 			// format API so we adhere to go linting standards
-			fieldName = strings.Replace(fieldName, "Api", "API", -1)
+			fieldName = strings.ReplaceAll(fieldName, "Api", "API")
 		}
 		//Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
@@ -214,7 +214,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 	return containerImages
 }
 
-// InitializeOpenStackVersionImageDefaults - initializes OpenStackVersion CR with default container images
+// InitializeOpenStackVersionServiceDefaults initializes OpenStackVersion CR with default container images
 func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1.ServiceDefaults {
 	Log := GetLogger(ctx)
 	Log.Info("Initialize OpenStackVersion Service Defaults")

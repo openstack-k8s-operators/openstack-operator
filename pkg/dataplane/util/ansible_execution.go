@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+// Package util provides utility functions for OpenStack dataplane operations
+package util //nolint:revive // util is an acceptable package name in this context
 
 import (
 	"context"
@@ -198,6 +199,7 @@ func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneSer
 	return executionName, labels
 }
 
+// BuildAeeJobSpec builds the job specification for Ansible Execution Environment
 func (a *EEJob) BuildAeeJobSpec(
 	aeeSpec *dataplanev1.AnsibleEESpec,
 	deployment *dataplanev1.OpenStackDataPlaneDeployment,
@@ -228,6 +230,7 @@ func (a *EEJob) BuildAeeJobSpec(
 	a.DetermineAeeImage(aeeSpec)
 }
 
+// FormatAEECmdLineArguments formats command line arguments for Ansible Execution Environment
 func (a *EEJob) FormatAEECmdLineArguments(aeeSpec *dataplanev1.AnsibleEESpec) {
 	var cmdLineArguments strings.Builder
 
@@ -246,6 +249,7 @@ func (a *EEJob) FormatAEECmdLineArguments(aeeSpec *dataplanev1.AnsibleEESpec) {
 	}
 }
 
+// FormatAEEExtraVars formats extra variables for Ansible Execution Environment
 func (a *EEJob) FormatAEEExtraVars(
 	aeeSpec *dataplanev1.AnsibleEESpec,
 	service *dataplanev1.OpenStackDataPlaneService,
@@ -278,6 +282,7 @@ func (a *EEJob) FormatAEEExtraVars(
 	}
 }
 
+// DetermineAeeImage determines the appropriate image for Ansible Execution Environment
 func (a *EEJob) DetermineAeeImage(aeeSpec *dataplanev1.AnsibleEESpec) {
 	if len(aeeSpec.OpenStackAnsibleEERunnerImage) > 0 {
 		a.Image = aeeSpec.OpenStackAnsibleEERunnerImage
@@ -286,7 +291,8 @@ func (a *EEJob) DetermineAeeImage(aeeSpec *dataplanev1.AnsibleEESpec) {
 	}
 }
 
-// SetAeeSshMounts - Using the information provided from the NodeSet, Service and AnsibleEE Spec. We determine the required
+// SetAeeSSHMounts determines the required SSH key mounts for the Ansible Execution Job.
+// Using the information provided from the NodeSet, Service and AnsibleEE Spec, it determines the required
 // ssh key mounts that are required for the Ansible Execution Job. This function takes a pointer to the storage.VolMounts
 // struct and updates them as per the required ssh key related mounts.
 func SetAeeSSHMounts(
@@ -328,6 +334,7 @@ func SetAeeSSHMounts(
 	}
 }
 
+// SetAeeInvMounts sets up inventory mounts for Ansible Execution Environment
 func SetAeeInvMounts(
 	nodeSet client.Object,
 	service *dataplanev1.OpenStackDataPlaneService,
@@ -364,6 +371,7 @@ func SetAeeInvMounts(
 	}
 }
 
+// CreateVolume creates a volume configuration for Ansible Execution Environment mounts
 func CreateVolume(ansibleEEMounts *storage.VolMounts, volumeName string, volumeMountPath string, secretName string, keyToPathKey string) {
 	volume := storage.Volume{
 		Name: volumeName,
@@ -383,6 +391,7 @@ func CreateVolume(ansibleEEMounts *storage.VolMounts, volumeName string, volumeM
 	ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, volume)
 }
 
+// CreateVolumeMount creates a volume mount configuration for Ansible Execution Environment
 func CreateVolumeMount(ansibleEEMounts *storage.VolMounts, volumeMountName string, volumeMountPath string, volumeMountSubPath string) {
 	volumeMount := corev1.VolumeMount{
 		Name:      volumeMountName,

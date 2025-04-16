@@ -1,4 +1,4 @@
-package util
+package util //nolint:revive // util is an acceptable package name in this context
 
 import (
 	"encoding/json"
@@ -95,7 +95,7 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 	// ansible runner identifier
 	// if the flag is set we use resource name as an argument
 	// https://ansible-runner.readthedocs.io/en/stable/intro/#artifactdir
-	if !(util.StringInSlice("-i", args) || util.StringInSlice("--ident", args)) {
+	if !util.StringInSlice("-i", args) && !util.StringInSlice("--ident", args) {
 		identifier := a.Name
 		args = append(args, []string{"-i", identifier}...)
 	}
@@ -111,7 +111,7 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 		}},
 	}
 
-	if a.NodeSelector != nil && len(a.NodeSelector) > 0 {
+	if len(a.NodeSelector) > 0 {
 		podSpec.NodeSelector = a.NodeSelector
 	}
 

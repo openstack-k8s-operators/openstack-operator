@@ -2367,7 +2367,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			openStackControlPlane := &corev1.OpenStackControlPlane{}
-			openStackControlPlane.ObjectMeta.Namespace = names.Namespace
+			openStackControlPlane.Namespace = names.Namespace
 			openStackControlPlane.Name = names.OpenStackVersionName2.Name
 			err = k8sClient.Delete(ctx, openStackControlPlane)
 			Expect(err).ShouldNot(HaveOccurred())

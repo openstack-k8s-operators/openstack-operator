@@ -148,7 +148,7 @@ func ReconcileGaleras(
 			return ctrlResult, nil
 		}
 
-		spec.TLS.Ca.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+		spec.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 		spec.TLS.SecretName = ptr.To(certSecret.Name)
 
 		status, err := reconcileGalera(ctx, instance, version, helper, name, &spec)
@@ -174,7 +174,7 @@ func ReconcileGaleras(
 			corev1beta1.OpenStackControlPlaneMariaDBReadyErrorMessage,
 			errors))
 
-		return ctrl.Result{}, fmt.Errorf(errors)
+		return ctrl.Result{}, fmt.Errorf("%s", errors)
 
 	} else if len(inprogress) > 0 {
 		log.Info("Galera in progress")
