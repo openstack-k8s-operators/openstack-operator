@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package lightspeed provides utilities and functions for OpenStack Lightspeed operations
 package lightspeed
 
 import (
@@ -34,7 +35,6 @@ import (
 
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	lightspeedv1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
-	lightspeedv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -115,7 +115,7 @@ func IsOLSOperatorInstalled(ctx context.Context, helper *common_helper.Helper) (
 // PatchOLSConfig patches OLSConfig with information from OpenStackLightspeed instance.
 func PatchOLSConfig(
 	helper *common_helper.Helper,
-	instance *lightspeedv1beta1.OpenStackLightspeed,
+	instance *lightspeedv1.OpenStackLightspeed,
 	olsConfig *uns.Unstructured,
 	indexID string,
 ) error {
@@ -234,7 +234,7 @@ func IsOLSConfigReady(ctx context.Context, helper *common_helper.Helper) (bool, 
 func ResolveIndexID(
 	ctx context.Context,
 	helper *common_helper.Helper,
-	instance *lightspeedv1beta1.OpenStackLightspeed,
+	instance *lightspeedv1.OpenStackLightspeed,
 ) (string, ctrl.Result, error) {
 	result, err := createOLSJob(ctx, helper, instance)
 	if err != nil {
@@ -290,7 +290,7 @@ func extractEnvFromPodLogs(ctx context.Context, pod *corev1.Pod, envVarName stri
 	if err != nil {
 		return "", err
 	}
-	defer podLogs.Close()
+	defer func() { _ = podLogs.Close() }()
 
 	buf := new(strings.Builder)
 	_, err = io.Copy(buf, podLogs)
@@ -318,7 +318,7 @@ func extractEnvFromPodLogs(ctx context.Context, pod *corev1.Pod, envVarName stri
 func createOLSJob(
 	ctx context.Context,
 	helper *common_helper.Helper,
-	instance *lightspeedv1beta1.OpenStackLightspeed,
+	instance *lightspeedv1.OpenStackLightspeed,
 ) (ctrl.Result, error) {
 	imageHash := sha256.Sum256([]byte(instance.Spec.RAGImage))
 	imageHashStr := fmt.Sprintf("%x", imageHash)
@@ -371,7 +371,7 @@ func createOLSJob(
 	return ctrl.Result{}, nil
 }
 
-func requeueWaitingPod(helper *common_helper.Helper, instance *lightspeedv1beta1.OpenStackLightspeed) (string, ctrl.Result, error) {
+func requeueWaitingPod(helper *common_helper.Helper, instance *lightspeedv1.OpenStackLightspeed) (string, ctrl.Result, error) {
 	instance.Status.Conditions.Set(condition.FalseCondition(
 		lightspeedv1.OpenStackLightspeedReadyCondition,
 		condition.RequestedReason,

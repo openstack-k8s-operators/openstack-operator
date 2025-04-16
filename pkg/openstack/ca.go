@@ -718,7 +718,7 @@ func getCAFromSecret(
 func getOperatorCABundle(caFile string) ([]byte, error) {
 	contents, err := os.ReadFile(caFile)
 	if err != nil {
-		return nil, fmt.Errorf("File reading error %w", err)
+		return nil, fmt.Errorf("file reading error %w", err)
 	}
 
 	return contents, nil

@@ -128,7 +128,7 @@ func ReconcileRabbitMQs(
 			corev1beta1.OpenStackControlPlaneRabbitMQReadyErrorMessage,
 			errors))
 
-		return ctrl.Result{}, fmt.Errorf(errors)
+		return ctrl.Result{}, fmt.Errorf("%s", errors)
 
 	} else if len(inprogress) > 0 {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -259,7 +259,7 @@ func reconcileRabbitMQ(
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 		spec.DeepCopyInto(&rabbitmq.Spec.RabbitMqSpecCore)
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
-			log.Info(fmt.Sprintf("Setting StorageClassName: " + instance.Spec.StorageClass))
+			log.Info(fmt.Sprintf("Setting StorageClassName: %s", instance.Spec.StorageClass))
 			rabbitmq.Spec.Persistence.StorageClassName = &instance.Spec.StorageClass
 		}
 		if tlsCert != "" {

@@ -222,7 +222,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 }
 
-// IronicImagesCheck - return true if the ironic images match on the ControlPlane and Version, or if Ironic is not enabled
+// IronicImageMatch returns true if the ironic images match on the ControlPlane and Version, or if Ironic is not enabled
 func IronicImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Ironic.Enabled {

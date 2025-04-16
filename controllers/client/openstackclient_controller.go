@@ -11,6 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package client contains the OpenStackClient controller implementation
 package client
 
 import (
@@ -87,7 +88,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	Log := r.GetLogger(ctx)
 
 	instance := &clientv1.OpenStackClient{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
+	err := r.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			Log.Info("OpenStackClient CR not found")
@@ -271,7 +272,8 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 					condition.TLSInputReadyCondition,
 					condition.RequestedReason,
 					condition.SeverityInfo,
-					fmt.Sprintf(condition.TLSInputReadyWaitingMessage, instance.Spec.CaBundleSecretName)))
+					condition.TLSInputReadyWaitingMessage,
+					instance.Spec.CaBundleSecretName))
 				return ctrl.Result{}, nil
 			}
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -320,7 +322,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	podSpecHashName := "podSpec"
 
 	op, err := controllerutil.CreateOrPatch(ctx, r.Client, osclient, func() error {
-		isPodUpdate := !osclient.ObjectMeta.CreationTimestamp.IsZero()
+		isPodUpdate := !osclient.CreationTimestamp.IsZero()
 		currentPodSpecHash := instance.Status.Hash[podSpecHashName]
 		if !isPodUpdate || currentPodSpecHash != podSpecHash {
 			osclient.Spec = spec
@@ -348,14 +350,14 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			// openstackclient pod
 			if err := r.Delete(ctx, osclient); err != nil && !k8s_errors.IsNotFound(err) {
 				// Error deleting the object
-				return ctrl.Result{}, fmt.Errorf("Error deleting OpenStackClient pod %s: %w", osclient.Name, err)
+				return ctrl.Result{}, fmt.Errorf("error deleting OpenStackClient pod %s: %w", osclient.Name, err)
 			}
 			Log.Info(fmt.Sprintf("OpenStackClient pod deleted due to change %s", err.Error()))
 
 			return ctrl.Result{Requeue: true}, nil
 		}
 
-		return ctrl.Result{}, fmt.Errorf("Failed to create or update pod %s: %w", osclient.Name, err)
+		return ctrl.Result{}, fmt.Errorf("failed to create or update pod %s: %w", osclient.Name, err)
 	}
 
 	if err != nil {
@@ -383,9 +385,9 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		terminatingDuration := time.Since(osclient.DeletionTimestamp.Time)
 		if terminatingDuration > time.Minute*3 {
 			// Force delete only truly stuck pods
-			err := r.Client.Delete(ctx, osclient, client.GracePeriodSeconds(0))
+			err := r.Delete(ctx, osclient, client.GracePeriodSeconds(0))
 			if err != nil {
-				return ctrl.Result{}, fmt.Errorf("Failed to force delete pod: %w", err)
+				return ctrl.Result{}, fmt.Errorf("failed to force delete pod: %w", err)
 			}
 		}
 	}
@@ -480,7 +482,7 @@ func (r *OpenStackClientReconciler) SetupWithManager(
 		listOpts := []client.ListOption{
 			client.InNamespace(o.GetNamespace()),
 		}
-		if err := r.Client.List(ctx, openstackclients, listOpts...); err != nil {
+		if err := r.List(ctx, openstackclients, listOpts...); err != nil {
 			Log.Error(err, "Unable to retrieve OpenstackClient CRs %v")
 			return nil
 		}
