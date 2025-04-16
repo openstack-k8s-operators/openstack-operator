@@ -134,7 +134,7 @@ func ReconcileRedis(
 			corev1beta1.OpenStackControlPlaneRedisReadyErrorMessage,
 			errors))
 
-		return ctrlResult, fmt.Errorf(errors)
+		return ctrlResult, fmt.Errorf("%s", errors)
 
 	} else if len(inprogress) > 0 {
 		instance.Status.Conditions.Set(condition.FalseCondition(

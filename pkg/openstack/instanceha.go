@@ -13,10 +13,13 @@ import (
 )
 
 const (
+	// InstanceHaConfigMap is the name of the ConfigMap used for instance HA configuration
 	InstanceHaConfigMap = "infra-instanceha-config"
-	InstanceHaImageKey  = "instanceha-image"
+	// InstanceHaImageKey is the key used for the instance HA image in the ConfigMap
+	InstanceHaImageKey = "instanceha-image"
 )
 
+// ReconcileInstanceHa reconciles the instance HA configuration for the OpenStack control plane
 func ReconcileInstanceHa(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	customData := map[string]string{
 		InstanceHaImageKey: *getImg(version.Status.ContainerImages.OpenstackClientImage, &missingImageDefault),

@@ -81,6 +81,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	return ctrl.Result{}, nil
 }
 
+// ReconcileOVNDbClusters reconciles the OVN database clusters for the OpenStack control plane
 func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 	dnsSuffix := clusterdns.GetDNSClusterDomain()
@@ -171,9 +172,10 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			dbcluster.DeepCopyInto(&OVNDBCluster.Spec.OVNDBClusterSpecCore)
 
 			// we always set these to match OpenStackVersion
-			if dbcluster.DBType == ovnv1.NBDBType {
+			switch dbcluster.DBType {
+			case ovnv1.NBDBType:
 				OVNDBCluster.Spec.ContainerImage = *version.Status.ContainerImages.OvnNbDbclusterImage
-			} else if dbcluster.DBType == ovnv1.SBDBType {
+			case ovnv1.SBDBType:
 				OVNDBCluster.Spec.ContainerImage = *version.Status.ContainerImages.OvnSbDbclusterImage
 			}
 
@@ -208,6 +210,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 
 }
 
+// ReconcileOVNNorthd reconciles the OVN Northd service for the OpenStack control plane
 func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
@@ -329,6 +332,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 }
 
+// ReconcileOVNController reconciles the OVN Controller service for the OpenStack control plane
 func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
