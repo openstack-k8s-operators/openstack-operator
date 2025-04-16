@@ -9179,6 +9179,15 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationsBus:
+                properties:
+                  enabled:
+                    default: true
+                    type: boolean
+                  rabbitMQCluster:
+                    default: ""
+                    type: string
+                type: object
               nova:
                 properties:
                   apiOverride:
