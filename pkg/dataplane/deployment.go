@@ -207,7 +207,7 @@ func (d *Deployer) ConditionalDeploy(
 			readyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			readyWaitingMessage))
+			"%s", readyWaitingMessage))
 
 	}
 
@@ -234,7 +234,7 @@ func (d *Deployer) ConditionalDeploy(
 			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 			nsConditions.Set(condition.TrueCondition(
 				readyCondition,
-				readyMessage))
+				"%s", readyMessage))
 		} else if ansibleJob.Status.Failed > *ansibleJob.Spec.BackoffLimit {
 			errorMsg := fmt.Sprintf("execution.name %s execution.namespace %s failed pods: %d", ansibleJob.Name, ansibleJob.Namespace, ansibleJob.Status.Failed)
 			for _, condition := range ansibleJob.Status.Conditions {
@@ -246,7 +246,7 @@ func (d *Deployer) ConditionalDeploy(
 				errorMsg = fmt.Sprintf("backoff limit reached for execution.name %s execution.namespace %s execution.condition.message: %s", ansibleJob.Name, ansibleJob.Namespace, ansibleCondition.Message)
 			}
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
-			err = fmt.Errorf(errorMsg)
+			err = fmt.Errorf("%s", errorMsg)
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.Reason(ansibleCondition.Reason),
@@ -259,7 +259,7 @@ func (d *Deployer) ConditionalDeploy(
 				readyCondition,
 				condition.RequestedReason,
 				condition.SeverityInfo,
-				readyWaitingMessage))
+				"%s", readyWaitingMessage))
 		}
 	}
 	d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions

@@ -78,7 +78,9 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	servicesPath, found := os.LookupEnv("OPERATOR_SERVICES")
 	if !found {
 		servicesPath = "config/services"
-		os.Setenv("OPERATOR_SERVICES", servicesPath)
+		if err := os.Setenv("OPERATOR_SERVICES", servicesPath); err != nil {
+			return fmt.Errorf("failed to set OPERATOR_SERVICES environment variable: %w", err)
+		}
 		util.LogForObject(
 			helper, "OPERATOR_SERVICES not set in env when reconciling ", instance,
 			"defaulting to ", servicesPath)
@@ -150,7 +152,7 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	return nil
 }
 
-// Dedupe services to deploy
+// DedupeServices deduplicates services to deploy.
 // Multiple Services of same ServiceType/ServiceName in a nodeset
 // Global Services in multiple NodeSets for a deployment
 func DedupeServices(ctx context.Context, helper *helper.Helper,
