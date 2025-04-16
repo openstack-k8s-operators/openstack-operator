@@ -1,0 +1,11 @@
+name: Manually Trigger a Force Bump PR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  call-build-workflow:
+    uses: openstack-k8s-operators/openstack-k8s-operators-ci/.github/workflows/force-bump-pull-request.yaml@main
+    with:
+      operator_name: openstack
+      branch_name: ${{ github.ref_name }}
