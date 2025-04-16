@@ -338,7 +338,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			severity,
 			condition.DeploymentReadyErrorMessage,
 			deploymentErrMsg)
-		return ctrl.Result{}, fmt.Errorf(deploymentErrMsg)
+		return ctrl.Result{}, fmt.Errorf("%s", deploymentErrMsg)
 	}
 
 	if shouldRequeue {

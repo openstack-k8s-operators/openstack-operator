@@ -1327,8 +1327,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				const bootstrapName string = "bootstrap"
 				// Make an AnsibleEE name for each service
 				ansibleeeName := types.NamespacedName{
-					Name: fmt.Sprintf(
-						bootstrapName + "-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name),
+					Name: fmt.Sprintf("%s-%s-%s",
+						bootstrapName, dataplaneDeploymentName.Name, dataplaneNodeSetName.Name),
 					Namespace: namespace,
 				}
 				ansibleEE := GetAnsibleee(ansibleeeName)
@@ -1394,8 +1394,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				const bootstrapName string = "bootstrap"
 				// Make an AnsibleEE name for each service
 				ansibleeeName := types.NamespacedName{
-					Name: fmt.Sprintf(
-						bootstrapName + "-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name),
+					Name: fmt.Sprintf("%s-%s-%s",
+						bootstrapName, dataplaneDeploymentName.Name, dataplaneNodeSetName.Name),
 					Namespace: namespace,
 				}
 				ansibleEE := GetAnsibleee(ansibleeeName)

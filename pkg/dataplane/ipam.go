@@ -198,7 +198,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			err.Error())
+			"%s", err.Error())
 		return dnsDetails, err
 	}
 	if dnsDetails.ClusterAddresses == nil {
@@ -348,7 +348,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	if len(netConfigList.Items) == 0 {
 		errMsg := "no NetConfig CR exists yet"
 		util.LogForObject(helper, errMsg, instance)
-		return nil, nil, fmt.Errorf(errMsg)
+		return nil, nil, fmt.Errorf("%s", errMsg)
 	}
 	netServiceNetMap := BuildNetServiceNetMap(netConfigList.Items[0])
 	allIPSets := make(map[string]infranetworkv1.IPSet)
@@ -371,7 +371,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			}
 			if !foundCtlPlane {
 				msg := fmt.Sprintf("ctlplane network should be defined for node %s", nodeName)
-				return nil, netServiceNetMap, fmt.Errorf(msg)
+				return nil, netServiceNetMap, fmt.Errorf("%s", msg)
 			}
 			ipSet := &infranetworkv1.IPSet{
 				ObjectMeta: metav1.ObjectMeta{
@@ -395,7 +395,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 		} else {
 			msg := fmt.Sprintf("No Networks defined for node %s or template", nodeName)
 			util.LogForObject(helper, msg, instance)
-			return nil, netServiceNetMap, fmt.Errorf(msg)
+			return nil, netServiceNetMap, fmt.Errorf("%s", msg)
 		}
 	}
 	return allIPSets, netServiceNetMap, nil

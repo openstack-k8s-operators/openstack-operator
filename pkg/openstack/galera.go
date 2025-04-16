@@ -174,7 +174,7 @@ func ReconcileGaleras(
 			corev1beta1.OpenStackControlPlaneMariaDBReadyErrorMessage,
 			errors))
 
-		return ctrl.Result{}, fmt.Errorf(errors)
+		return ctrl.Result{}, fmt.Errorf("%s", errors)
 
 	} else if len(inprogress) > 0 {
 		log.Info("Galera in progress")

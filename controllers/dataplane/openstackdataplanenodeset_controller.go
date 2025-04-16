@@ -276,7 +276,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			condition.InputReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityError,
-			err.Error())
+			"%s", err.Error())
 		return result, err
 	} else if (result != ctrl.Result{}) {
 		instance.Status.Conditions.MarkFalse(
@@ -455,7 +455,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			deployErrorMsg)
+			"%s", deployErrorMsg)
 	}
 
 	return ctrl.Result{}, err
@@ -505,7 +505,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
 			deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
 			if condition.IsError(deploymentCondition) {
-				err = fmt.Errorf(deploymentCondition.Message)
+				err = fmt.Errorf("%s", deploymentCondition.Message)
 				isDeploymentFailed = true
 				failedDeploymentName = deployment.Name
 				break
