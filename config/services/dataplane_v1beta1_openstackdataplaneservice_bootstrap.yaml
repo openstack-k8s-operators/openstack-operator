@@ -5,3 +5,4 @@ metadata:
 spec:
   playbook: osp.edpm.bootstrap
   edpmServiceType: bootstrap
+  caCerts: combined-ca-bundle

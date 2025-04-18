@@ -340,6 +340,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/tls-dnsnames
+          name: tls-dnsnames-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -353,6 +355,10 @@ spec:
       serviceAccountName: openstack-edpm-tls
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: tls-dnsnames-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420

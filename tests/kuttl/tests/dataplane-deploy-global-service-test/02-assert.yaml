@@ -233,6 +233,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
+        - mountPath: /var/lib/openstack/cacerts/bootstrap
+          name: bootstrap-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -246,6 +248,10 @@ spec:
       serviceAccountName: edpm-compute-beta-nodeset
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: bootstrap-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420
