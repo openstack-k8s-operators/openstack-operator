@@ -93,6 +93,8 @@ spec:
         volumeMounts:
         - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
           name: edpm-ansible
+        - mountPath: /var/lib/openstack/cacerts/test-service
+          name: test-service-combined-ca-bundle
         - mountPath: /runner/env/ssh_key
           name: ssh-key
           subPath: ssh_key
@@ -111,6 +113,10 @@ spec:
         persistentVolumeClaim:
           claimName: edpm-ansible
           readOnly: true
+      - name: test-service-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
       - name: ssh-key
         secret:
           defaultMode: 420

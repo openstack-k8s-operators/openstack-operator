@@ -24,6 +24,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	var dataplaneDeploymentName types.NamespacedName
 	var dataplaneNodeSetName types.NamespacedName
 	var dataplaneSSHSecretName types.NamespacedName
+	var caBundleSecretName types.NamespacedName
 	var neutronOvnMetadataSecretName types.NamespacedName
 	var novaNeutronMetadataSecretName types.NamespacedName
 	var novaCellComputeConfigSecretName types.NamespacedName
@@ -58,6 +59,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		dataplaneSSHSecretName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "dataplane-ansible-ssh-private-key-secret",
+		}
+		caBundleSecretName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "combined-ca-bundle",
 		}
 		neutronOvnMetadataSecretName = types.NamespacedName{
 			Namespace: namespace,
@@ -110,6 +115,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A dataplaneDeployment is created with matching NodeSet", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -249,6 +255,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A dataplaneDeployment is created with two NodeSets", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -430,9 +437,9 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
 					if service.Spec.DeployOnAllNodeSets {
-						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(4))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(5))
 					} else {
-						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(2))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(3))
 					}
 					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
@@ -469,9 +476,9 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
 					if service.Spec.DeployOnAllNodeSets {
-						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(4))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(5))
 					} else {
-						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(2))
+						g.Expect(ansibleEE.Spec.Template.Spec.Volumes).Should(HaveLen(3))
 					}
 					ansibleEE.Status.Succeeded = 1
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
@@ -501,6 +508,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A dataplaneDeployment is created with a missing nodeset", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -638,6 +646,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		BeforeEach(func() {
 			CreateDataplaneServicesWithSameServiceType(dataplaneServiceName)
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -720,6 +729,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A dataplaneDeployment is created with two NodeSets both containing same globalservice", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -951,6 +961,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		BeforeEach(func() {
 			CreateDataplaneServicesWithSameServiceType(dataplaneServiceName)
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -1051,6 +1062,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A dataplaneDeployment is created with serviceoverride containing single global service", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -1258,6 +1270,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A dataplaneDeployment is created with serviceoverride containing global service", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -1480,6 +1493,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A dataplaneDeployment is created with non-existent service in nodeset", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -1575,6 +1589,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A user sets TLSEnabled to true with control plane with PodLevel TLS disabled", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -1674,6 +1689,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	When("A user sets TLSEnabled to true with control plane PodLevel TLS enabled", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
