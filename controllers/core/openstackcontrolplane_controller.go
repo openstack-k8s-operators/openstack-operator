@@ -528,6 +528,19 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, errs := openstack.DeleteCertsAndRoutes(ctx, instance, helper)
+	if errs != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneCertCleanupReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneCertCleanupReadyErrorMessage,
+			errs))
+		return ctrlResult, errs
+	}
+
+	instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneCertCleanupReadyCondition)
+
 	return ctrl.Result{}, nil
 }
 

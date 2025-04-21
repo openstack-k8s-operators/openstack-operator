@@ -2,7 +2,9 @@ package openstack
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -22,6 +24,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/object"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -33,6 +36,9 @@ import (
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+
+	// corev1 "k8s.io/api/core/v1"
+	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -805,6 +811,15 @@ func hasCertInOverrideSpec(overrideSpec route.OverrideSpec) bool {
 		overrideSpec.Spec.TLS.Key != ""
 }
 
+func serviceExists(route string, services *k8s_corev1.ServiceList) bool {
+	for _, svc := range services.Items {
+		if svc.Name == route {
+			return true
+		}
+	}
+	return false
+}
+
 func DeleteCertificate(
 	ctx context.Context,
 	helper *helper.Helper,
@@ -823,4 +838,78 @@ func DeleteCertificate(
 
 	helper.GetLogger().Info(fmt.Sprintf("Deleting cert %s", certName))
 	return cert.Delete(ctx, helper)
+}
+
+func DeleteCertsAndRoutes(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
+
+	log := GetLogger(ctx)
+
+	// Retrieve all routes, certs and services in the namespace
+	routes, err := GetRoutesListWithLabel(ctx, helper, instance.Namespace, nil)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("could not get routes: %w", err)
+	}
+
+	certs := &certmgrv1.CertificateList{}
+	if err := helper.GetClient().List(ctx, certs, client.InNamespace(instance.Namespace)); err != nil {
+		return ctrl.Result{}, fmt.Errorf("could not get certificates: %w", err)
+	}
+
+	services := &k8s_corev1.ServiceList{}
+	if err := helper.GetClient().List(ctx, services, client.InNamespace(instance.Namespace)); err != nil {
+		return ctrl.Result{}, fmt.Errorf("could not get services: %w", err)
+	}
+
+	var delErrs []error
+	for _, route := range routes.Items {
+
+		if !object.CheckOwnerRefExist(instance.GetUID(), route.OwnerReferences) {
+			continue
+		}
+
+		if serviceExists(route.Spec.To.Name, services) {
+			continue
+		}
+
+		// Delete certs by service and route-name
+		for _, cert := range certs.Items {
+			if _, ok := cert.Labels[serviceCertSelector]; ok && strings.Contains(cert.Name, route.Name) {
+				if object.CheckOwnerRefExist(instance.GetUID(), cert.OwnerReferences) {
+					log.Info("Deleting certificate", ":", cert.Name)
+					err := DeleteCertificate(ctx, helper, instance.Namespace, cert.Name)
+					if err != nil {
+						delErrs = append(delErrs, fmt.Errorf("cert deletion for '%s' failed, because: %w", cert.Name, err))
+					}
+				}
+			}
+
+			// NOTE(auniyal): This is specifically to cleanup novncproxy certs, others service certs do not use commonName as of now
+			// TODO: this can be removed once we can map service, route and certs with `osctlplane-service` label
+			if strings.Contains(cert.Spec.CommonName, route.Name) {
+				if object.CheckOwnerRefExist(instance.GetUID(), cert.OwnerReferences) {
+					log.Info("Deleting certificate", ":", cert.Name)
+					err := DeleteCertificate(ctx, helper, instance.Namespace, cert.Name)
+					if err != nil {
+						delErrs = append(delErrs, fmt.Errorf("cert deletion for '%s' failed, because: %w", cert.Name, err))
+					}
+				}
+			}
+		}
+
+		log.Info("Deleting route", ":", route.Name)
+		_, err := EnsureDeleted(ctx, helper, &route)
+		if err != nil {
+			delErrs = append(delErrs, fmt.Errorf("route deletion for '%s' failed, because: %w", route.Name, err))
+		}
+	}
+
+	if len(delErrs) > 0 {
+		return ctrl.Result{}, errors.Join(delErrs...)
+	}
+
+	return ctrl.Result{}, nil
 }
