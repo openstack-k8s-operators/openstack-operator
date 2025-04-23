@@ -168,6 +168,8 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
+		//Log all the conditions
+
 		// update the Ready condition based on the sub conditions
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
@@ -242,33 +244,80 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		instance.Status.DeployedVersion = &version.Spec.TargetVersion
 		return ctrl.Result{}, nil
 	} else {
-		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
-			Log.Info("Minor update OVN on the ControlPlane")
-			ctrlResult, err := r.reconcileOVNControllers(ctx, instance, version, helper)
-			if err != nil {
-				return ctrl.Result{}, err
-			} else if (ctrlResult != ctrl.Result{}) {
-				return ctrlResult, nil
-			}
-			instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
-			return ctrl.Result{}, nil
-		} else if version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane) &&
-			!version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
 
-			Log.Info("Minor update on the ControlPlane")
-			ctrlResult, err := r.reconcileNormal(ctx, instance, version, helper)
+		// OVN
+		Log.Info("Minor update OVN on the ControlPlane")
+		ctrlResult, err := r.reconcileOVNControllers(ctx, instance, version, helper)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		} else {
+			instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
+			if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
+				return ctrlResult, nil
+			}
+		}
+
+		// only if OVN dataplane is updated
+		if version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane) {
+			Log.Info("Minor update in progress")
+
+			// RabbitMQ
+			ctrlResult, err := openstack.ReconcileRabbitMQs(ctx, instance, version, helper)
 			if err != nil {
 				return ctrl.Result{}, err
 			} else if (ctrlResult != ctrl.Result{}) {
 				return ctrlResult, nil
+			} else {
+				if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateRabbitMQ) {
+					Log.Info("Returning for RabbitMQ minor update reconcile")
+					return ctrlResult, nil
+				}
 			}
-			// this will allow reconcileNormal to proceed in subsequent reconciles
-			instance.Status.DeployedVersion = &version.Spec.TargetVersion
-			return ctrl.Result{}, nil
-		} else {
-			Log.Info("Skipping reconcile. Waiting on minor update to proceed.")
-			return ctrl.Result{}, nil
+
+			// Galara
+			ctrlResult, err = openstack.ReconcileGaleras(ctx, instance, version, helper)
+			if err != nil {
+				return ctrl.Result{}, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			} else {
+				if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateMariaDB) {
+					Log.Info("Returning for Galara minor update reconcile")
+					return ctrlResult, nil
+				}
+			}
+			// Keystone API
+			ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, version, helper)
+			if err != nil {
+				return ctrl.Result{}, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			} else {
+				if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateKeystone) {
+					Log.Info("Returning for KeystoneAPI minor update reconcile")
+					return ctrlResult, nil
+				}
+			}
+
+			// the rest of the controlplane
+			ctrlResult, err = r.reconcileNormal(ctx, instance, version, helper)
+			if err != nil {
+				return ctrl.Result{}, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			} else {
+				// this will allow reconcileNormal to proceed in subsequent reconciles
+				instance.Status.DeployedVersion = &version.Spec.TargetVersion
+				if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
+					Log.Info("Returning for ControlPlane minor update reconcile")
+					return ctrlResult, nil
+				}
+			}
 		}
+		return ctrl.Result{}, nil
+
 	}
 }
 

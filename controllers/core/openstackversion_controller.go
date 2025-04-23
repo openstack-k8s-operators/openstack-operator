@@ -157,8 +157,12 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	)
 	// no minor update conditions unless we have a deployed version
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
-		cl = append(cl, *condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+		cl = append(cl,
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateRabbitMQ, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateMariaDB, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateKeystone, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateControlplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 		)
@@ -259,6 +263,51 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
+		// minor update for RabbitMQ
+		if !openstack.RabbitmqImageMatch(ctx, controlPlane, instance) ||
+			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition) {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackVersionMinorUpdateRabbitMQ,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+			Log.Info("Minor update for RabbitMQ in progress")
+			return ctrl.Result{}, nil
+		}
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackVersionMinorUpdateRabbitMQ,
+			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
+		// minor update for MariaDB
+		if !openstack.GaleraImageMatch(ctx, controlPlane, instance) ||
+			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition) {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackVersionMinorUpdateMariaDB,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+			Log.Info("Minor update for MariaDB in progress")
+			return ctrl.Result{}, nil
+		}
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackVersionMinorUpdateMariaDB,
+			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
+		// minor update for Keystone API
+		if !openstack.KeystoneImageMatch(ctx, controlPlane, instance) ||
+			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition) {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackVersionMinorUpdateKeystone,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+			Log.Info("Minor update for Keystone in progress")
+			return ctrl.Result{}, nil
+		}
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackVersionMinorUpdateKeystone,
+			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
 		// minor update for Controlplane in progress
 		if !controlPlane.IsReady() {
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -281,10 +330,10 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 				errMsgBadMatches))
 
 		}
-
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateControlplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+		Log.Info("Minor update for ControlPlane completed")
 
 		if !openstack.DataplaneNodesetsDeployed(instance, dataplaneNodesets) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -299,6 +348,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateDataplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
 	}
 
 	if controlPlane.IsReady() {

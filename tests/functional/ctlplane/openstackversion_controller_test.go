@@ -200,7 +200,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 		initialVersion := "old"
 		updatedVersion := "0.0.1"
 		targetOvnControllerVersion := ""
-		testOvnControllerImage := "foo/bar:0.0.2"
+		targetRabbitMQVersion := ""
+		targetMariaDBVersion := ""
+		targetKeystoneAPIVersion := ""
+		testOvnControllerImage := "foo/ovn:0.0.2"
+		testRabbitMQImage := "foo/rabbit:0.0.2"
+		testMariaDBImage := "foo/maria:0.0.2"
+		testKeystoneAPIImage := "foo/keystone:0.0.2"
 
 		// a lightweight controlplane spec we'll use for minor update testing
 		// we are missing some test helpers to simulate ready state so once we have
@@ -299,6 +305,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				// capture this here as we'll need it below (this one comes from RELATED_IMAGES in hack/export_related_images.sh)
 				targetOvnControllerVersion = *version.Status.ContainerImages.OvnControllerImage
+				targetRabbitMQVersion = *version.Status.ContainerImages.RabbitmqImage
+				targetMariaDBVersion = *version.Status.ContainerImages.MariadbImage
+				targetKeystoneAPIVersion = *version.Status.ContainerImages.KeystoneAPIImage
 				g.Expect(version).Should(Not(BeNil()))
 
 				g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring("0.0.1"))
@@ -311,6 +320,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				version.Status.ContainerImageVersionDefaults[initialVersion] = version.Status.ContainerImageVersionDefaults[updatedVersion]
 				version.Status.ContainerImageVersionDefaults[initialVersion].OvnControllerImage = &testOvnControllerImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].RabbitmqImage = &testRabbitMQImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].MariadbImage = &testMariaDBImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].KeystoneAPIImage = &testKeystoneAPIImage
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
 
 				th.Logger.Info("Version injected", "on", names.OpenStackVersionName)
@@ -340,6 +352,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(osversion.Status.DeployedVersion).Should(BeNil())
 				// but the images should stay the same as we haven't switched to it yet
 				g.Expect(*osversion.Status.ContainerImages.OvnControllerImage).Should(Equal(testOvnControllerImage))
+				g.Expect(*osversion.Status.ContainerImages.RabbitmqImage).Should(Equal(testRabbitMQImage))
+				g.Expect(*osversion.Status.ContainerImages.MariadbImage).Should(Equal(testMariaDBImage))
+				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(testKeystoneAPIImage))
 
 			}, timeout, interval).Should(Succeed())
 
@@ -397,7 +412,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// 3) simulate the OVN controller image getting updated on the dataplane
 		// 4) verify that the rest of the container images get updated on the controlplane
 		// 5) simulate 1 more dataplanenodeset update to finish the minor update workflow
-		It("updating targetVersion triggers a minor update workflow", func() {
+		It("updating targetVersion triggers a minor update workflow", Serial, func() {
 
 			// 1) switch to version 0.0.1, this triggers a minor update
 			osversion := GetOpenStackVersion(names.OpenStackVersionName)
@@ -429,13 +444,25 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 				g.Expect(*osversion.Status.AvailableVersion).Should(Equal(updatedVersion))
 				g.Expect(osversion.Spec.TargetVersion).Should(Equal(updatedVersion))
-				// the target OVN Controller image should be set
+				// the target OVN Controller, RabbitMQ, MariaDB and KeystoneAPI image should be set on the Version object
 				g.Expect(*osversion.Status.ContainerImages.OvnControllerImage).Should(Equal(targetOvnControllerVersion))
+				g.Expect(*osversion.Status.ContainerImages.RabbitmqImage).Should(Equal(targetRabbitMQVersion))
+				g.Expect(*osversion.Status.ContainerImages.MariadbImage).Should(Equal(targetMariaDBVersion))
+				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(targetKeystoneAPIVersion))
 
 			}, timeout, interval).Should(Succeed())
 
 			// 2) now we check that the target OVN version gets set on the OVN Controller
-			SimulateControlplaneReady()
+
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionMinorUpdateOVNControlplane,
+				k8s_corev1.ConditionFalse,
+			)
+
+			ovn.SimulateOVNControllerReady(names.OVNControllerName)
+
 			Eventually(func(g Gomega) {
 				th.ExpectCondition(
 					names.OpenStackControlplaneName,
@@ -495,7 +522,77 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			}, timeout, interval).Should(Succeed())
 
-			// 4) verify that the rest of the container images get updated on the controlplane
+			// 4a) RabbitMQ, first we wait for the condition to show up on the version resource
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionMinorUpdateRabbitMQ,
+				k8s_corev1.ConditionFalse,
+			)
+
+			SimulateRabbitmqReady()
+
+			Eventually(func(g Gomega) {
+				// verify the rabbitmq minor update condition is set on the openstackversion object
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateRabbitMQ,
+					k8s_corev1.ConditionTrue,
+				)
+
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(*OSCtlplane.Status.ContainerImages.RabbitmqImage).Should(Equal(targetRabbitMQVersion))
+
+			}, timeout*4, interval).Should(Succeed())
+
+			// 4b) Galera
+
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionMinorUpdateMariaDB,
+				k8s_corev1.ConditionFalse,
+			)
+
+			SimulateGalaraReady()
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateMariaDB,
+					k8s_corev1.ConditionTrue,
+				)
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(*OSCtlplane.Status.ContainerImages.MariadbImage).Should(Equal(targetMariaDBVersion))
+
+			}, timeout, interval).Should(Succeed())
+
+			// 4c) Keystone
+
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionMinorUpdateKeystone,
+				k8s_corev1.ConditionFalse,
+			)
+
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateKeystone,
+					k8s_corev1.ConditionTrue,
+				)
+
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(OSCtlplane.Status.ContainerImages.KeystoneAPIImage).Should(Equal(osversion.Status.ContainerImages.KeystoneAPIImage))
+
+			}, timeout, interval).Should(Succeed())
+
+			// 4d) verify that the rest of the container images get updated on the controlplane
 			// this would occur automatically via the watch on the DataPlaneNodeSet's by openstackcontrolplane
 			// so once the administrator executes the DataplaneDeployment and that finishes the controlplane will update the images immediately
 			SimulateControlplaneReady()
@@ -517,6 +614,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				osversion := GetOpenStackVersion(names.OpenStackVersionName)
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				// verify images match for deployed services on the controlplane
+				g.Expect(OSCtlplane.Status.ContainerImages.RabbitmqImage).Should(Equal(osversion.Status.ContainerImages.RabbitmqImage))
 				g.Expect(OSCtlplane.Status.ContainerImages.MariadbImage).Should(Equal(osversion.Status.ContainerImages.MariadbImage))
 				g.Expect(OSCtlplane.Status.ContainerImages.KeystoneAPIImage).Should(Equal(osversion.Status.ContainerImages.KeystoneAPIImage))
 				g.Expect(OSCtlplane.Status.ContainerImages.InfraMemcachedImage).Should(Equal(osversion.Status.ContainerImages.InfraMemcachedImage))

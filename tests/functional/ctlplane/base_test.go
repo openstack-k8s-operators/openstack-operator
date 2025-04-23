@@ -654,13 +654,38 @@ func GetRabbitMQCluster(name types.NamespacedName) *rabbitmqv1.RabbitMq {
 	return instance
 }
 
-func SimulateControlplaneReady() {
-	instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+func SimulateRabbitmqReady() {
 
-	if instance.Spec.Keystone.Enabled {
-		keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+	instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+	if instance.Spec.Rabbitmq.Enabled {
+		// FIXME add helpers to infra-operator to simulate rabbitmq
+		Eventually(func(g Gomega) {
+
+			for rabbitName := range *instance.Spec.Rabbitmq.Templates {
+				rabbitmqNamespacedName := types.NamespacedName{
+					Namespace: names.Namespace,
+					Name:      rabbitName,
+				}
+
+				rabbit := &rabbitmqv1.RabbitMq{}
+				g.Expect(th.K8sClient.Get(th.Ctx, rabbitmqNamespacedName, rabbit)).Should(Succeed())
+				rabbit.Status.ObservedGeneration = rabbit.Generation
+				rabbit.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, rabbit)).To(Succeed())
+
+				th.Logger.Info("Simulated RabbitMq ready", "on", rabbit.Name)
+
+			}
+
+		}, timeout, interval).Should(Succeed())
 	}
 
+}
+
+func SimulateGalaraReady() {
+
+	instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 	if instance.Spec.Galera.Enabled {
 		// FIXME add helpers to mariadb-operator to simulate galera!
 		Eventually(func(g Gomega) {
@@ -682,25 +707,16 @@ func SimulateControlplaneReady() {
 		}, timeout, interval).Should(Succeed())
 	}
 
-	if instance.Spec.Rabbitmq.Enabled {
-		// FIXME add helpers to infra-operator to simulate rabbitmq
-		Eventually(func(g Gomega) {
+}
 
-			for rabbitName := range *instance.Spec.Rabbitmq.Templates {
-				rabbitmqNamespacedName := types.NamespacedName{
-					Namespace: names.Namespace,
-					Name:      rabbitName,
-				}
+func SimulateControlplaneReady() {
+	instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 
-				rabbit := &rabbitmqv1.RabbitMq{}
-				g.Expect(th.K8sClient.Get(th.Ctx, rabbitmqNamespacedName, rabbit)).Should(Succeed())
-				rabbit.Status.ObservedGeneration = rabbit.Generation
-				rabbit.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
-				g.Expect(th.K8sClient.Status().Update(th.Ctx, rabbit)).To(Succeed())
-				th.Logger.Info("Simulated RabbitMq ready", "on", rabbitName)
-			}
+	SimulateRabbitmqReady()
+	SimulateGalaraReady()
 
-		}, timeout, interval).Should(Succeed())
+	if instance.Spec.Keystone.Enabled {
+		keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
 	}
 
 	if instance.Spec.Memcached.Enabled {
