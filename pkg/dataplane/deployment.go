@@ -23,13 +23,13 @@ import (
 	"fmt"
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	slices "golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
