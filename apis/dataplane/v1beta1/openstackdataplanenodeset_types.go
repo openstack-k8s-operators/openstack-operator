@@ -19,8 +19,8 @@ package v1beta1
 import (
 	"context"
 	"fmt"
+	"slices"
 
-	"golang.org/x/exp/slices"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
