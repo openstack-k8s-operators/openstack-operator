@@ -19,11 +19,11 @@ package dataplane
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"golang.org/x/exp/slices"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
