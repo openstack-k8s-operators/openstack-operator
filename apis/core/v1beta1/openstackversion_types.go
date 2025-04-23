@@ -185,6 +185,7 @@ type OpenStackVersionStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:shortName=osv;osvs
 // +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Version"
 // +kubebuilder:printcolumn:name="Target Version",type=string,JSONPath=`.spec.targetVersion`
 // +kubebuilder:printcolumn:name="Available Version",type=string,JSONPath=`.status.availableVersion`
