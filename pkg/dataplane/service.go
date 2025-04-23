@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"slices"
 	"strings"
 
-	"golang.org/x/exp/slices"
 	yaml "gopkg.in/yaml.v3"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
