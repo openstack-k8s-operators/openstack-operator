@@ -9,3 +9,5 @@ jobs:
     with:
       operator_name: openstack
       branch_name: ${{ github.ref_name }}
+    secrets:
+      FORCE_BUMP_PULL_REQUEST_PAT: ${{ secrets.FORCE_BUMP_PULL_REQUEST_PAT }}

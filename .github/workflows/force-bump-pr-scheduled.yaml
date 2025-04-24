@@ -10,3 +10,5 @@ jobs:
     uses: openstack-k8s-operators/openstack-k8s-operators-ci/.github/workflows/force-bump-branches.yaml@main
     with:
       operator_name: openstack
+    secrets:
+      FORCE_BUMP_PULL_REQUEST_PAT: ${{ secrets.FORCE_BUMP_PULL_REQUEST_PAT }}
