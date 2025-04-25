@@ -242,6 +242,11 @@ spec:
                 description: 'ServiceUser - service user name (TODO: beagles, do we
                   need this at all)'
                 type: string
+              tenantDomainName:
+                default: Default
+                description: TenantDomainName - the name of the OpenStack domain associated
+                  with the tenant
+                type: string
               tenantName:
                 default: service
                 description: TenantName - the name of the OpenStack tenant that controls
