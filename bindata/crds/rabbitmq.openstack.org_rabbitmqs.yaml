@@ -9593,6 +9593,14 @@ spec:
                       from.
                     type: string
                 type: object
+              queueType:
+                default: Mirrored
+                description: QueueType to eventually apply the ha-all policy to the
+                  cluster
+                enum:
+                - None
+                - Mirrored
+                type: string
               rabbitmq:
                 description: Configuration options for RabbitMQ Pods created in the
                   cluster.
@@ -9982,6 +9990,10 @@ spec:
                   the opentack-operator in the top-level CR (e.g. the ContainerImage)
                 format: int64
                 type: integer
+              queueType:
+                description: QueueType - store whether default ha-all policy is present
+                  or not
+                type: string
             type: object
         type: object
     served: true

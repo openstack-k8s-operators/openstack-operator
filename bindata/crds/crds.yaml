@@ -15969,6 +15969,12 @@ spec:
                             storageClassName:
                               type: string
                           type: object
+                        queueType:
+                          default: Mirrored
+                          enum:
+                          - None
+                          - Mirrored
+                          type: string
                         rabbitmq:
                           properties:
                             additionalConfig:
