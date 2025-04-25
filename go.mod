@@ -15,15 +15,15 @@ require (
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250420191847-e319e9595ef2
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250420191047-e5fca2a0dfb0
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250420191049-05151a06d5ff
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250420164438-58bdb73311cd
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250425080212-4e187a6eb0fe
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250420192417-355d9b4e9e2d
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250418072531-a2271e111a13
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250416140801-46d35b7999b2
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250422055748-825e3d94da81
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250420190456-11c91336d893
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250420193521-f2b86a82d7e8
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20250419062702-0acec6a591c8
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20250419062702-0acec6a591c8
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250419062702-0acec6a591c8
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250423055245-3cb2ae8df6f0
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20250419062702-0acec6a591c8
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20250419062702-0acec6a591c8
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20250420182059-822f0dda237b
