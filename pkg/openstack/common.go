@@ -451,6 +451,15 @@ func (ed *EndpointDetail) ensureRoute(
 				// Delete any other owner refs from ref list to not block deletion until owners are gone
 				r.SetOwnerReferences([]metav1.OwnerReference{instanceRef})
 
+				// Delete certificate for the route
+				if ed.Service.TLS.Enabled {
+					err = DeleteCertificate(ctx, helper, instance.Namespace, ed.Route.TLS.CertName)
+					if err != nil && !k8s_errors.IsNotFound(err) {
+						err = fmt.Errorf("Error deleting route certificate %s: %w", ed.Route.TLS.CertName, err)
+						return ctrl.Result{}, err
+					}
+				}
+
 				// Delete route
 				err := helper.GetClient().Delete(ctx, &r)
 				if err != nil && !k8s_errors.IsNotFound(err) {
