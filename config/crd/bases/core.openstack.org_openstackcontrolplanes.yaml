@@ -9921,6 +9921,9 @@ spec:
                           serviceUser:
                             default: octavia
                             type: string
+                          tenantDomainName:
+                            default: Default
+                            type: string
                           tenantName:
                             default: service
                             type: string
@@ -10079,6 +10082,9 @@ spec:
                           serviceUser:
                             default: octavia
                             type: string
+                          tenantDomainName:
+                            default: Default
+                            type: string
                           tenantName:
                             default: service
                             type: string
@@ -10219,6 +10225,9 @@ spec:
                             type: string
                           serviceUser:
                             default: octavia
+                            type: string
+                          tenantDomainName:
+                            default: Default
                             type: string
                           tenantName:
                             default: service
@@ -10465,6 +10474,9 @@ spec:
                           serviceUser:
                             default: octavia
                             type: string
+                          tenantDomainName:
+                            default: Default
+                            type: string
                           tenantName:
                             default: service
                             type: string
@@ -10549,6 +10561,9 @@ spec:
                         type: string
                       sshPubkey:
                         default: octavia-ssh-pubkey
+                        type: string
+                      tenantDomainName:
+                        default: Default
                         type: string
                       tenantName:
                         default: service
@@ -15321,6 +15336,12 @@ spec:
                             storageClassName:
                               type: string
                           type: object
+                        queueType:
+                          default: Mirrored
+                          enum:
+                          - None
+                          - Mirrored
+                          type: string
                         rabbitmq:
                           properties:
                             additionalConfig:
