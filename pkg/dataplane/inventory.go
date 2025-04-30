@@ -39,7 +39,6 @@ import (
 // getAnsibleVarsFrom gets ansible vars from ConfigMap/Secret
 func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
-	var value interface{}
 
 	for _, dataSource := range ansible.AnsibleVarsFrom {
 		configMap, secret, err := util.GetDataSourceCmSecret(ctx, helper, namespace, dataSource)
@@ -47,41 +46,67 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 			return result, err
 		}
 
-		// AnsibleVars will override AnsibleVarsFrom variables.
-		// Process AnsibleVarsFrom first then allow AnsibleVars to replace existing values.
 		if configMap != nil {
-			for k, v := range configMap.Data {
-				if len(dataSource.Prefix) > 0 {
-					k = dataSource.Prefix + k
-				}
-
-				// Attempt to unmarshal the value into json. If that fails,
-				// assume it's a plain string.
-				err := json.Unmarshal([]byte(v), &value)
-				if err != nil {
-					value = v
-				}
-				result[k] = value
+			err := processConfigMapData(configMap.Data, dataSource.Prefix, result)
+			if err != nil {
+				return result, err
 			}
 		}
 
 		if secret != nil {
-			for k, v := range secret.Data {
-				if len(dataSource.Prefix) > 0 {
-					k = dataSource.Prefix + k
-				}
-				// Attempt to unmarshal the value into json. If that fails,
-				// assume it's a plain string.
-				err := json.Unmarshal(v, &value)
-				if err != nil {
-					value = string(v)
-				}
-				result[k] = value
+			err := processSecretData(secret.Data, dataSource.Prefix, result)
+			if err != nil {
+				return result, err
 			}
 		}
-
 	}
 	return result, nil
+}
+
+// processConfigMapData processes the key-value pairs from ConfigMap and adds them to the result map.
+func processConfigMapData(data map[string]string, prefix string, result map[string]any) error {
+
+	var value any
+
+	for k, v := range data {
+		if len(prefix) > 0 {
+			k = prefix + k
+		}
+
+		decoder := json.NewDecoder(strings.NewReader(v))
+		decoder.UseNumber()
+
+		err := decoder.Decode(&value)
+		if err != nil {
+			value = v
+		}
+		result[k] = value
+	}
+
+	return nil
+}
+
+// processSecretData processes the key-value pairs from Secret and adds them to the result map.
+func processSecretData(data map[string][]byte, prefix string, result map[string]any) error {
+
+	var value any
+
+	for k, v := range data {
+		if len(prefix) > 0 {
+			k = prefix + k
+		}
+
+		decoder := json.NewDecoder(strings.NewReader(string(v[:])))
+		decoder.UseNumber()
+
+		err := decoder.Decode(&value)
+		if err != nil {
+			value = string(v)
+		}
+		result[k] = value
+	}
+
+	return nil
 }
 
 // GenerateNodeSetInventory yields a parsed Inventory for role
