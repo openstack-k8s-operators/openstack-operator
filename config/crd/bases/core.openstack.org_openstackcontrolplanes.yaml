@@ -9018,6 +9018,7 @@ spec:
               notificationsBus:
                 properties:
                   rabbitMqClusterName:
+                    default: rabbitmq
                     type: string
                 type: object
               nova:
@@ -9980,6 +9981,8 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      notificationsBusInstance:
+                        type: string
                       passwordSelectors:
                         default:
                           service: NovaPassword

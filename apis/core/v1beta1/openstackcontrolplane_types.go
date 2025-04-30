@@ -498,15 +498,14 @@ type RabbitmqSection struct {
 // NotificationsBusSection defines the desired state of AMQP messaging Bus Services for producers and consumers of notifications
 type NotificationsBusSection struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=rabbitmq
 	// The name of RabbitMQ Cluster CR to select a Messaging
 	// Bus Service instance used by all services that produce or consume notifications.
-	// Avoid colocating it with RabbitMQ services used for PRC.
+	// Avoid colocating it with RabbitMQ services used for RPC.
 	// That instance will be pushed down for services, unless overriden in templates.
-	// An empty value disables notifications drivers, and makes the services emitting no notifications at all.
-	// When undefined, no configuration will be pushed down for services, which provides backward compatibility during upgrades,
-	// and leaves a possibility for services to override the configuration, stick with its default behavior, or disable notifications only for itself.
-        // Services that support this global configuration interface include: Nova
-	RabbitMqClusterName *string `json:"rabbitMqClusterName,omitempty"`
+	// TODO: An empty value disables notifications drivers, and makes the services emitting no notifications at all.
+	// Services that support this global configuration interface include: Nova
+	RabbitMqClusterName string `json:"rabbitMqClusterName"`
 }
 
 // MemcachedSection defines the desired state of Memcached services
