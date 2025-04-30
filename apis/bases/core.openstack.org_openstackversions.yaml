@@ -11,6 +11,9 @@ spec:
     kind: OpenStackVersion
     listKind: OpenStackVersionList
     plural: openstackversions
+    shortNames:
+    - osv
+    - osvs
     singular: openstackversion
   scope: Namespaced
   versions:
