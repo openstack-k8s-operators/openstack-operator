@@ -44,47 +44,49 @@ import (
 )
 
 type Names struct {
-	Namespace                   string
-	OpenStackControlplaneName   types.NamespacedName
-	OpenStackVersionName        types.NamespacedName
-	KeystoneAPIName             types.NamespacedName
-	MemcachedName               types.NamespacedName
-	MemcachedCertName           types.NamespacedName
-	CinderName                  types.NamespacedName
-	ManilaName                  types.NamespacedName
-	GlanceName                  types.NamespacedName
-	NeutronName                 types.NamespacedName
-	HorizonName                 types.NamespacedName
-	HeatName                    types.NamespacedName
-	TelemetryName               types.NamespacedName
-	DBName                      types.NamespacedName
-	DBCertName                  types.NamespacedName
-	DBCell1Name                 types.NamespacedName
-	DBCell1CertName             types.NamespacedName
-	RabbitMQName                types.NamespacedName
-	RabbitMQCertName            types.NamespacedName
-	RabbitMQCell1Name           types.NamespacedName
-	RabbitMQCell1CertName       types.NamespacedName
-	ServiceAccountName          types.NamespacedName
-	RoleName                    types.NamespacedName
-	RoleBindingName             types.NamespacedName
-	RootCAPublicName            types.NamespacedName
-	RootCAInternalName          types.NamespacedName
-	RootCAOvnName               types.NamespacedName
-	RootCALibvirtName           types.NamespacedName
-	SelfSignedIssuerName        types.NamespacedName
-	CustomIssuerName            types.NamespacedName
-	CustomServiceCertSecretName types.NamespacedName
-	CABundleName                types.NamespacedName
-	OpenStackClientName         types.NamespacedName
-	OVNNorthdName               types.NamespacedName
-	OVNNorthdCertName           types.NamespacedName
-	OVNControllerName           types.NamespacedName
-	OVNControllerCertName       types.NamespacedName
-	OVNDbServerNBName           types.NamespacedName
-	OVNDbServerSBName           types.NamespacedName
-	NeutronOVNCertName          types.NamespacedName
-	OpenStackTopology           []types.NamespacedName
+	Namespace                     string
+	OpenStackControlplaneName     types.NamespacedName
+	OpenStackVersionName          types.NamespacedName
+	KeystoneAPIName               types.NamespacedName
+	MemcachedName                 types.NamespacedName
+	MemcachedCertName             types.NamespacedName
+	CinderName                    types.NamespacedName
+	ManilaName                    types.NamespacedName
+	GlanceName                    types.NamespacedName
+	NeutronName                   types.NamespacedName
+	HorizonName                   types.NamespacedName
+	HeatName                      types.NamespacedName
+	TelemetryName                 types.NamespacedName
+	DBName                        types.NamespacedName
+	DBCertName                    types.NamespacedName
+	DBCell1Name                   types.NamespacedName
+	DBCell1CertName               types.NamespacedName
+	RabbitMQName                  types.NamespacedName
+	RabbitMQCertName              types.NamespacedName
+	RabbitMQNotificationsCertName types.NamespacedName
+	RabbitMQCell1Name             types.NamespacedName
+	RabbitMQCell1CertName         types.NamespacedName
+	RabbitMQNotificationsName     types.NamespacedName
+	ServiceAccountName            types.NamespacedName
+	RoleName                      types.NamespacedName
+	RoleBindingName               types.NamespacedName
+	RootCAPublicName              types.NamespacedName
+	RootCAInternalName            types.NamespacedName
+	RootCAOvnName                 types.NamespacedName
+	RootCALibvirtName             types.NamespacedName
+	SelfSignedIssuerName          types.NamespacedName
+	CustomIssuerName              types.NamespacedName
+	CustomServiceCertSecretName   types.NamespacedName
+	CABundleName                  types.NamespacedName
+	OpenStackClientName           types.NamespacedName
+	OVNNorthdName                 types.NamespacedName
+	OVNNorthdCertName             types.NamespacedName
+	OVNControllerName             types.NamespacedName
+	OVNControllerCertName         types.NamespacedName
+	OVNDbServerNBName             types.NamespacedName
+	OVNDbServerSBName             types.NamespacedName
+	NeutronOVNCertName            types.NamespacedName
+	OpenStackTopology             []types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -192,9 +194,17 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cert-rabbitmq-svc",
 		},
+		RabbitMQNotificationsCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-rabbitmq-notifications-svc",
+		},
 		RabbitMQCell1Name: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rabbitmq-cell1",
+		},
+		RabbitMQNotificationsName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "rabbitmq-notifications",
 		},
 		RabbitMQCell1CertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -484,6 +494,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		names.RabbitMQCell1Name.Name: map[string]interface{}{
 			"replicas": 1,
 		},
+		names.RabbitMQNotificationsName.Name: map[string]interface{}{
+			"replicas": 1,
+		},
 	}
 	galeraTemplate := map[string]interface{}{
 		names.DBName.Name: map[string]interface{}{
@@ -525,6 +538,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"secret":       "osp-secret",
 		"storageClass": "local-storage",
+		// "notificationsBus": map[string]interface{}{
+		// 	"rabbitMqClusterName": ptr.To("rabbitmq-notifications"),
+		// },
 		"galera": map[string]interface{}{
 			"enabled":   true,
 			"templates": galeraTemplate,
