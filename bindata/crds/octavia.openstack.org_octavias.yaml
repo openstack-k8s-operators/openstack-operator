@@ -472,6 +472,11 @@ spec:
                     default: octavia
                     description: ServiceUser - service user name
                     type: string
+                  tenantDomainName:
+                    default: Default
+                    description: TenantDomainName - the name of the OpenStack domain
+                      associated with the tenant
+                    type: string
                   tenantName:
                     default: service
                     description: TenantName - the name of the OpenStack tenant that
@@ -737,6 +742,11 @@ spec:
                     description: 'ServiceUser - service user name (TODO: beagles,
                       do we need this at all)'
                     type: string
+                  tenantDomainName:
+                    default: Default
+                    description: TenantDomainName - the name of the OpenStack domain
+                      associated with the tenant
+                    type: string
                   tenantName:
                     default: service
                     description: TenantName - the name of the OpenStack tenant that
@@ -970,6 +980,11 @@ spec:
                     default: octavia
                     description: 'ServiceUser - service user name (TODO: beagles,
                       do we need this at all)'
+                    type: string
+                  tenantDomainName:
+                    default: Default
+                    description: TenantDomainName - the name of the OpenStack domain
+                      associated with the tenant
                     type: string
                   tenantName:
                     default: service
@@ -1378,6 +1393,11 @@ spec:
                     description: 'ServiceUser - service user name (TODO: beagles,
                       do we need this at all)'
                     type: string
+                  tenantDomainName:
+                    default: Default
+                    description: TenantDomainName - the name of the OpenStack domain
+                      associated with the tenant
+                    type: string
                   tenantName:
                     default: service
                     description: TenantName - the name of the OpenStack tenant that
@@ -1530,6 +1550,11 @@ spec:
                 description: |-
                   LoadBalancerSSHPubKey - The name of the ConfigMap containing the
                   pubilc key for connecting to the amphorae via SSH
+                type: string
+              tenantDomainName:
+                default: Default
+                description: TenantDomainName - the name of the OpenStack domain associated
+                  with the tenant
                 type: string
               tenantName:
                 default: service
