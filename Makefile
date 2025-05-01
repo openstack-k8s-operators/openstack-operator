@@ -368,7 +368,7 @@ endif
 endif
 
 .PHONY: bundle
-bundle: build manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
+bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
 	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/operator/deployment/ && $(KUSTOMIZE) edit set image controller=$(IMG) && \
 	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/1/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
