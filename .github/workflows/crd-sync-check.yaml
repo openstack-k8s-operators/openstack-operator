@@ -1,0 +1,34 @@
+# a simple boolean to check of a CRD sync check is needed
+name: CRD sync check
+
+on:
+  schedule:
+    - cron: '0 */2 * * *' # every 2 hours
+  workflow_dispatch:
+
+jobs:
+
+  crd-sync-check:
+    if: github.repository_owner == 'openstack-k8s-operators'
+    name: CRD sync check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref_name }}
+
+    - name: run make force-bump
+      shell: bash
+      run: |
+        BRANCH='${{ github.ref_name }}' make force-bump
+
+    - name: run make bindata
+      shell: bash
+      run: |
+        make bindata
+
+    - name: Fail if there are local CRD changes requiring a CRD sync
+      run: |
+        git diff --quiet bindata/crds
