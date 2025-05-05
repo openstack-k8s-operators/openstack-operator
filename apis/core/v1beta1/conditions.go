@@ -467,13 +467,19 @@ const (
 	OpenStackControlPlaneInstanceHaCMReadyMessage = "OpenStackControlPlane InstanceHa CM is available"
 )
 
-// Version Conditions used by API objects.
+// Version Conditions used by to drive minor updates
 const (
 	OpenStackVersionInitialized condition.Type = "Initialized"
 
 	OpenStackVersionMinorUpdateOVNDataplane condition.Type = "MinorUpdateOVNDataplane"
 
 	OpenStackVersionMinorUpdateOVNControlplane condition.Type = "MinorUpdateOVNControlplane"
+
+	OpenStackVersionMinorUpdateRabbitMQ condition.Type = "MinorUpdateRabbitMQ"
+
+	OpenStackVersionMinorUpdateMariaDB condition.Type = "MinorUpdateMariaDB"
+
+	OpenStackVersionMinorUpdateKeystone condition.Type = "MinorUpdateKeystone"
 
 	OpenStackVersionMinorUpdateControlplane condition.Type = "MinorUpdateControlplane"
 

@@ -285,7 +285,7 @@ func reconcileRabbitMQ(
 	}
 
 	if rabbitmq.Status.ObservedGeneration == rabbitmq.Generation && rabbitmq.IsReady() {
-		instance.Status.ContainerImages.InfraMemcachedImage = version.Status.ContainerImages.InfraMemcachedImage
+		instance.Status.ContainerImages.RabbitmqImage = version.Status.ContainerImages.RabbitmqImage
 		return mqReady, ctrl.Result{}, nil
 	}
 
