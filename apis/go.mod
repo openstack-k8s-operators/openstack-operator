@@ -33,6 +33,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/mod v0.20.0
 	golang.org/x/tools v0.24.0 // indirect
 	k8s.io/api v0.29.15
 	k8s.io/apimachinery v0.29.15
@@ -115,3 +116,5 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202408300231
 
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20241017142550-a3524acedd49 //allow-merging
+
+replace github.com/openstack-k8s-operators/glance-operator/api => github.com/fmount/glance-operator/api v0.1.2-0.20250502133016-1b9e7f5e4180

@@ -18,6 +18,9 @@ package v1beta1
 
 import (
 	"regexp"
+	"strings"
+	"golang.org/x/mod/semver"
+	"fmt"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -253,4 +256,39 @@ func GetOpenStackReleaseVersion(envVars []string) string {
 		util.GetEnvVar("OPERATOR_CONDITION_NAME", ""),
 	)
 
+}
+
+// GetDeployedSemVersion - returns the current deployed version. It can be used
+// to compare it against an available version and take decisions based on it
+func (v *OpenStackVersion) GetDeployedSemVer() string {
+	if v.Status.DeployedVersion == nil {
+		return ""
+	}
+	if strings.HasPrefix(*v.Status.DeployedVersion, "^v") {
+		// we don't need to normalize the string
+		return  *v.Status.DeployedVersion
+	}
+	return  fmt.Sprintf("v%s", *v.Status.DeployedVersion)
+}
+
+// IsGreaterSemVer - returns true when deployedVersion is greater than the
+// targetVersion passed as input
+func (v *OpenStackVersion) IsGreaterSemVer(targetVer string) bool{
+	deployedVersion := v.GetDeployedSemVer()
+	// return false if there's no deployedVersion
+	if deployedVersion == "" {
+		return false
+	}
+	return semver.Compare(deployedVersion, targetVer) > 0
+}
+
+// IsLowerSemVer - returns true when deployedVersion is lower than a targetVersion
+// that is used to compare it
+func (v *OpenStackVersion) IsLowerSemVer(targetVer string) bool{
+	deployedVersion := v.GetDeployedSemVer()
+	// return false if there's no deployedVersion
+	if deployedVersion == "" {
+		return false
+	}
+	return semver.Compare(deployedVersion, targetVer) < 0
 }
