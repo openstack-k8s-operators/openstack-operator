@@ -36,6 +36,10 @@ spec:
 {{ else }}
           value: 'false'
 {{ end }}
+{{ range $envName, $envValue := .ManagerOptions }}
+        - name: {{ $envName }}
+          value: {{ $envValue }}
+{{ end }}
         image: {{ $operatorImage }}
         livenessProbe:
           httpGet:

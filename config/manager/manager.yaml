@@ -44,6 +44,12 @@ spec:
         env:
         - name: OPENSTACK_RELEASE_VERSION
           value: '{{ .OpenstackReleaseVersion }}'
+        - name: LEASE_DURATION
+          value: 137
+        - name: RENEW_DEADLINE
+          value: 107
+        - name: RETRY_PERIOD
+          value: 26
         envCustomImage: replace_me #NOTE: this is used via the Makefile to inject a custom template loop that kustomize won't allow
         image: '{{ .OperatorImage }}'
         name: manager
