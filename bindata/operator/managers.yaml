@@ -1,5 +1,8 @@
 {{ $namespace := .OperatorNamespace }}
 {{ $kubeRbacProxyImage := .KubeRbacProxyImage }}
+{{ $leaseDuration := .LeaseDuration }}
+{{ $renewDeadline := .RenewDeadline }}
+{{ $retryPeriod := .RetryPeriod }}
 {{ range $operatorName, $operatorImage := .OperatorImages }}
 apiVersion: apps/v1
 kind: Deployment
@@ -36,6 +39,12 @@ spec:
 {{ else }}
           value: 'false'
 {{ end }}
+        - name: LEASE_DURATION
+          value: '{{ $leaseDuration }}'
+        - name: RENEW_DEADLINE
+          value: '{{ $renewDeadline }}'
+        - name: RETRY_PERIOD
+          value: '{{ $retryPeriod }}'
         image: {{ $operatorImage }}
         livenessProbe:
           httpGet:
