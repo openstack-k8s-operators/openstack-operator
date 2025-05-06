@@ -20,6 +20,8 @@ import (
 	"context"
 	"encoding/base64"
 
+	"k8s.io/utils/ptr"
+
 	"github.com/google/uuid"
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
 
@@ -56,6 +58,8 @@ type Names struct {
 	NeutronName                   types.NamespacedName
 	HorizonName                   types.NamespacedName
 	HeatName                      types.NamespacedName
+	NovaName                      types.NamespacedName
+	PlacementName                 types.NamespacedName
 	TelemetryName                 types.NamespacedName
 	DBName                        types.NamespacedName
 	DBCertName                    types.NamespacedName
@@ -169,6 +173,14 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		TelemetryName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "telemetry",
+		},
+		NovaName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "nova",
+		},
+		PlacementName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "placement",
 		},
 		DBName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -538,9 +550,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"secret":       "osp-secret",
 		"storageClass": "local-storage",
-		// "notificationsBus": map[string]interface{}{
-		// 	"rabbitMqClusterName": ptr.To("rabbitmq-notifications"),
-		// },
+		"notificationsBus": map[string]interface{}{
+			"rabbitMqClusterName": ptr.To("rabbitmq-notifications"),
+		},
 		"galera": map[string]interface{}{
 			"enabled":   true,
 			"templates": galeraTemplate,
