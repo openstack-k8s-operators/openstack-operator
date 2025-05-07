@@ -80,6 +80,25 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
+	// When there's no NotificationsBusInstance referenced in the Service Template,
+	// inject the top-level one. Allow overriding notifications bus instance locally
+	// in the services templates, unless it is "" top scope, which always wins.
+
+	// TODO(bogdando): extend this to other services as they start supporting this interface
+	// TODO(bogdando): add webhook validation of the nova's value as an emitter should be matching the consumer's (ceiloneter) value
+	if instance.Spec.NotificationsBus.RabbitMqClusterName != nil {
+		if instance.Spec.Nova.Template.NotificationsBusInstance == nil {
+			instance.Spec.Nova.Template.NotificationsBusInstance = instance.Spec.NotificationsBus.RabbitMqClusterName
+		}
+		if *instance.Spec.NotificationsBus.RabbitMqClusterName == "" {
+			// NOTE(bogdando): a special handling that should forcefully disable notifications for all services.
+			// We do not do that centrally from this place, but we expect that from the services controllers.
+			Log.Info("Requested to disable notifications for Nova", "Nova.Namespace",
+				instance.Namespace, "Nova.Name", nova.Name)
+			instance.Spec.Nova.Template.NotificationsBusInstance = ptr.To("")
+		}
+	}
+
 	// When component services got created check if there is the need to create routes and certificates
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova", Namespace: instance.Namespace}, nova); err != nil {
 		if !k8s_errors.IsNotFound(err) {

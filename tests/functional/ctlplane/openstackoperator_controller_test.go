@@ -30,6 +30,7 @@ import (
 
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
@@ -40,14 +41,17 @@ import (
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
+
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {
@@ -828,6 +832,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
@@ -1141,6 +1146,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
@@ -1268,6 +1274,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
@@ -1807,6 +1814,172 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("A OpenStackControlplane instance is created with top-scope notifications config pushed down", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			// turn off unrelated to this test case services
+			spec["horizon"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["cinder"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["swift"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["redis"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["ironic"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["designate"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["barbican"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["manila"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["heat"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["watcher"] = map[string]interface{}{
+				"enabled": false,
+			}
+
+			// NOTE(bogdando): DBs certs need to be created here as well, but those are leaking from the other non-isolated tests
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			th.CreateSecret(types.NamespacedName{
+				Name:      "openstack-config-secret",
+				Namespace: namespace,
+			}, map[string][]byte{"secure.yaml": []byte("foo")})
+
+			th.CreateConfigMap(types.NamespacedName{
+				Name:      "openstack-config",
+				Namespace: namespace,
+			}, map[string]interface{}{
+				"clouds.yaml": string("foo"),
+				"OS_CLOUD":    "default",
+			})
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+			SimulateControlplaneReady()
+
+			// enable Nova with dependencies, disable TLS
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.TLS.PodLevel.Enabled = false
+				OSCtlplane.Spec.Keystone.Enabled = true
+				OSCtlplane.Spec.Glance.Enabled = true
+				OSCtlplane.Spec.Neutron.Enabled = true
+				OSCtlplane.Spec.Placement.Enabled = true
+				OSCtlplane.Spec.Placement.Template = &placementv1.PlacementAPISpecCore{}
+				OSCtlplane.Spec.Placement.Template.APITimeout = 60
+				OSCtlplane.Spec.Nova.Enabled = true
+				OSCtlplane.Spec.Nova.Template = &novav1.NovaSpecCore{}
+				OSCtlplane.Spec.Nova.Template.APITimeout = 60
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// nova := &novav1.Nova{}
+			// Eventually(func(g Gomega) {
+			// 	g.Expect(k8sClient.Get(ctx, names.NovaName, nova)).Should(Succeed())
+			// 	g.Expect(nova).ShouldNot(BeNil())
+			// 	nova.Status.ObservedGeneration = nova.Generation
+			// 	nova.Status.Conditions.MarkTrue(novav1.NovaAPIReadyCondition, "Ready")
+			// 	g.Expect(th.K8sClient.Status().Update(th.Ctx, nova)).To(Succeed())
+			// 	th.Logger.Info("Simulated nova ready", "on", names.NovaName)
+			// }, timeout, interval).Should(Succeed())
+
+			// not in SimulateControlplaneReady(), but never works (and is not needed here) anyways
+			// Eventually(func(_ Gomega) {
+			// 	th.ExpectCondition(
+			// 		names.OpenStackControlplaneName,
+			// 		ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+			// 		corev1.OpenStackControlPlaneNovaReadyCondition,
+			// 		k8s_corev1.ConditionTrue,
+			// 	)
+			// }, timeout, interval).Should(Succeed())
+		})
+
+		It("should have nova and deps enabled with nova notifications bus instance configured by inheritance", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Nova.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Galera.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Rabbitmq.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Memcached.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Keystone.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Placement.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Glance.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.Neutron.Enabled).Should(BeTrue())
+
+			Expect(*OSCtlplane.Spec.Nova.Template.NotificationsBusInstance).Should(Equal("rabbitmq-notifications"))
+		})
+	})
+
+	// When("A OpenStackControlplane instance is created with notifications config override", func() {
+	// 	BeforeEach(func() {
+	// 		spec := GetDefaultOpenStackControlPlaneSpec()
+	// 		spec["notificationsBus"] = map[string]interface{}{
+	// 			"rabbitMqClusterName": ptr.To("rabbitmq-notifications-top-scope"),
+	// 		}
+	// 		spec["nova"] = map[string]interface{}{
+	// 			"enabled": false,
+	// 			"template": map[string]interface{}{
+	// 				"notificationsBusInstance": ptr.To("rabbitmq-custom"),
+	// 			},
+	// 		}
+	// 		DeferCleanup(
+	// 			th.DeleteInstance,
+	// 			CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+	// 		)
+	// 	})
+
+	// 	It("should have Nova notifications bus instance configured from local templates", func() {
+	// 		OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+	// 		Expect(*OSCtlplane.Spec.Nova.Template.NotificationsBusInstance).Should(Equal("rabbitmq-custom"))
+	// 	})
+	// })
+
+	// When("A OpenStackControlplane instance is created with notifications config force-disabled", func() {
+	// 	BeforeEach(func() {
+	// 		spec := GetDefaultOpenStackControlPlaneSpec()
+	// 		spec["notificationsBus"] = map[string]interface{}{
+	// 			"rabbitMqClusterName": ptr.To(""),
+	// 		}
+	// 		spec["nova"] = map[string]interface{}{
+	// 			"enabled": false,
+	// 			"template": map[string]interface{}{
+	// 				"notificationsBusInstance": ptr.To("rabbitmq-maybe"),
+	// 			},
+	// 		}
+	// 		DeferCleanup(
+	// 			th.DeleteInstance,
+	// 			CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+	// 		)
+	// 	})
+
+	// 	It("should have Nova enabled and its notifications bus instance configured for a special empty value", func() {
+	// 		OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+	// 		Expect(*OSCtlplane.Spec.Nova.Template.NotificationsBusInstance).Should(Equal(""))
+	// 	})
+	// })
+
 	When("OpenStackControlplane instance is deleted", func() {
 		BeforeEach(func() {
 			DeferCleanup(
@@ -2089,6 +2262,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
@@ -2929,6 +3103,7 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 
 			// create cert secrets for rabbitmq instances
 			th.CreateCertSecret(names.RabbitMQCertName)
+			th.CreateCertSecret(names.RabbitMQNotificationsCertName)
 			th.CreateCertSecret(names.RabbitMQCell1CertName)
 
 			extGalera := CreateGaleraConfig(namespace, GetDefaultGaleraSpec())
@@ -3064,17 +3239,17 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 			Eventually(func(g Gomega) {
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				rabbitTemplates := *(OSCtlplane.Spec.Rabbitmq.Templates)
-				g.Expect(rabbitTemplates).Should(HaveLen(2))
+				g.Expect(rabbitTemplates).Should(HaveLen(3))
 				delete(rabbitTemplates, names.RabbitMQCell1Name.Name)
 				OSCtlplane.Spec.Rabbitmq.Templates = &rabbitTemplates
 				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
 			}, timeout, interval).Should(Succeed())
 
-			// Only 1 cell in rabbitmq template
+			// Only 1 cell and notifications bus in rabbitmq template
 			Eventually(func(g Gomega) {
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				rabbitTemplates := *(OSCtlplane.Spec.Rabbitmq.Templates)
-				g.Expect(rabbitTemplates).Should(HaveLen(1))
+				g.Expect(rabbitTemplates).Should(HaveLen(2))
 			}, timeout, interval).Should(Succeed())
 
 			// cell1.rabbitmq should not exists in db
