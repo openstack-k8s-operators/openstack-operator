@@ -14,6 +14,8 @@ github.com/evanphx/json-patch v5.7.0+incompatible h1:vgGkfT/9f8zE6tvSCe74nfpAVDQ
 github.com/evanphx/json-patch v5.7.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch/v5 v5.9.0 h1:kcBlZQbplgElYIlo/n1hJbls2z/1awpXxpRi0/FOJfg=
 github.com/evanphx/json-patch/v5 v5.9.0/go.mod h1:VNkHZ/282BpEyt/tObQO8s5CMPmYYq14uClGH4abBuQ=
+github.com/fmount/glance-operator/api v0.1.2-0.20250502133016-1b9e7f5e4180 h1:crRHrF0uDIYm8es2Ya/ELO1el/uKOzY+NcdnEISQCLI=
+github.com/fmount/glance-operator/api v0.1.2-0.20250502133016-1b9e7f5e4180/go.mod h1:dA/dH8jFvqX90KHPC9LN9RDOMRE+boriwwDjMMUJkL4=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
 github.com/gabriel-vasile/mimetype v1.4.8 h1:FfZ3gj38NjllZIeJAmMhr+qKL8Wu+nOoI3GqacKw1NM=
@@ -104,8 +106,6 @@ github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250423054052-7
 github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250423054052-76f811364c48/go.mod h1:wA+iwrJQzpsMslseJZgEgqdTGlrYytNX2XkI4SQQNLw=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250422103124-9adfe79423df h1:+OMlbs1XNLVF6U8Xk0YmlofKlvDizt3YV+OQkxx9InY=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250422103124-9adfe79423df/go.mod h1:KkjCmRFNnIKxJcWZC96bk3CsmZmT0nyGJzOCF6Qzvy8=
-github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250407064150-1cff0f51b44d h1:DivsLnqDoMFnAWOOkOCoj9ilCM+6pFXRjvz4fSFSvJw=
-github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250407064150-1cff0f51b44d/go.mod h1:IRp2nEGLIQj9gZSc5aMJr5Wec9yBhr//6y7W41ur4KQ=
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250423034234-f96998c6fdac h1:HrBh3wx0po8AbTxH/+ZT6P51FQyvAssjQqhgPsbVE8Q=
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250423034234-f96998c6fdac/go.mod h1:H7Cd+GRpWmm+Viqu2eqNMGhK7qTE7SpSVo6qz1Gksec=
 github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250421055257-62660c8c5cba h1:ZJSh4+IWoojgMeY2Pe2kaG3lLPPxT81X9tSEV2Ke3hM=

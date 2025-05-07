@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"strconv"
 )
 
 const (
@@ -23,17 +24,32 @@ const (
 	// label set by the service operator as in case of split glanceAPI type the
 	// the label on public svc gets set to -external and internal instance svc
 	// to -internal instead of the glance top level glanceType split
-	svcSelector = "tlGlanceAPI"
+	svcSelector   = "tlGlanceAPI"
+	targetVersion = "v18.0.9"
 )
 
 // ReconcileGlance -
 func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	glanceName, altGlanceName := instance.GetServiceName(corev1beta1.GlanceName, instance.Spec.Glance.UniquePodNames)
-	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
+	apiAnnotations := map[string]string{}
+
+	// Set WSGI annotation to either deploy GlanceAPI in wsgi mode or httpd +
+	// ProxyPass
+	//
+	// - wsgi=true for both greenfield deployments and when a minor update is
+	//   performed from a version greater than v18.0.9
+	//
+	// - wsgi=false keeps the httpd + proxypass deployment method.
+	//   This is required when a minor update from a version < FR3 is performed
+	apiAnnotations["wsgi"] = GlanceWSGIAnnotation(version, targetVersion)
+
+	// Ensure the alternate glance CR doesn't exist, as the ramdomPodNames flag may have
+	// been toggled
 	glance := &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      altGlanceName,
-			Namespace: instance.Namespace,
+			Name:        altGlanceName,
+			Namespace:   instance.Namespace,
+			Annotations: apiAnnotations,
 		},
 	}
 	if res, err := EnsureDeleted(ctx, helper, glance); err != nil {
@@ -42,8 +58,9 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	glance = &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      glanceName,
-			Namespace: instance.Namespace,
+			Name:        glanceName,
+			Namespace:   instance.Namespace,
+			Annotations: apiAnnotations,
 		},
 	}
 	Log := GetLogger(ctx)
@@ -171,6 +188,9 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
 		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec.GlanceSpecCore)
 		glance.Spec.ContainerImage = *version.Status.ContainerImages.GlanceAPIImage
+		// Set apiAnnotations in the Glance CR: this is currently used to
+		// influence
+		glance.SetAnnotations(apiAnnotations)
 		if glance.Spec.Secret == "" {
 			glance.Spec.Secret = instance.Spec.Secret
 		}
@@ -242,4 +262,21 @@ func GlanceImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackCo
 	}
 
 	return true
+}
+
+// GlanceWSGIAnnotation -
+func GlanceWSGIAnnotation(version *corev1beta1.OpenStackVersion, targetVersion string) string {
+	wsgi := true
+	// if there is no deployed version, it is a greenfield scenario and we can
+	// deploy in wsgi mode (which is the default)
+	if version.Status.DeployedVersion == nil {
+		return strconv.FormatBool(wsgi)
+	}
+	// Do not deploy Glance in wsgi mode, but keep http+ProxyPass model when the
+	// version is lower than FR3 (18.0.9). This is required because the previous
+	// Glance ContainerImage is incompatitble with WSGI.
+	if version.IsLowerSemVer(targetVersion) {
+		wsgi = false
+	}
+	return strconv.FormatBool(wsgi)
 }
