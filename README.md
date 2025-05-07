@@ -1,7 +1,8 @@
 # openstack-operator
 
 [![CodeQL](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml)
-[![CRD sync check](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml)
+[![CRD sync check main](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml)
+[![CRD sync check olive](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-olive.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-olive.yaml)
 
 This is the primary operator for OpenStack. It is a "meta" operator, meaning it
 serves to coordinate the other operators for OpenStack by watching and configuring

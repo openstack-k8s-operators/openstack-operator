@@ -5,6 +5,15 @@ on:
   schedule:
     - cron: '0 */2 * * *' # every 2 hours
   workflow_dispatch:
+    inputs:
+      branch_name:
+        default: 'main'
+        type: string
+  workflow_call:
+    inputs:
+      branch_name:
+        default: 'main'
+        type: string
 
 jobs:
 
@@ -14,21 +23,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    - name: Set branch
+      id: set_branch
+      run: |
+        BRANCH_NAME="${{ inputs.branch_name || github.ref_name }}"
+        echo "branch name set to: $BRANCH_NAME"
+        echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.ref_name }}
+        ref: ${{ steps.set_branch.outputs.branch_name  }}
 
     - name: run make force-bump
       shell: bash
       run: |
-        BRANCH='${{ github.ref_name }}' make force-bump
+        BRANCH='${{ steps.set_branch.outputs.branch_name }}' make force-bump
 
     - name: run make bindata
       shell: bash
       run: |
         make bindata
 
-    - name: Fail if there are local CRD changes requiring a CRD sync
+    - name: Fail if there are local CRD changes in bindata/crds
       run: |
         git diff --quiet bindata/crds

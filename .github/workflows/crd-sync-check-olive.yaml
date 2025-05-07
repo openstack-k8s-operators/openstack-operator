@@ -1,0 +1,13 @@
+name: CRD sync check olive branch
+
+on:
+  schedule:
+    - cron: '0 */2 * * *' # every 2 hours
+  workflow_dispatch:
+
+jobs:
+  call-build-workflow:
+    if: github.repository_owner == 'openstack-k8s-operators'
+    uses: ./.github/workflows/crd-sync-check.yaml
+    with:
+      branch_name: olive
