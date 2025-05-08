@@ -1896,17 +1896,17 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
 			}, timeout, interval).Should(Succeed())
 
-			// nova := &novav1.Nova{}
-			// Eventually(func(g Gomega) {
-			// 	g.Expect(k8sClient.Get(ctx, names.NovaName, nova)).Should(Succeed())
-			// 	g.Expect(nova).ShouldNot(BeNil())
-			// 	nova.Status.ObservedGeneration = nova.Generation
-			// 	nova.Status.Conditions.MarkTrue(novav1.NovaAPIReadyCondition, "Ready")
-			// 	g.Expect(th.K8sClient.Status().Update(th.Ctx, nova)).To(Succeed())
-			// 	th.Logger.Info("Simulated nova ready", "on", names.NovaName)
-			// }, timeout, interval).Should(Succeed())
+			nova := &novav1.Nova{}
+			Eventually(func(g Gomega) {
+				g.Expect(k8sClient.Get(ctx, names.NovaName, nova)).Should(Succeed())
+				g.Expect(nova).ShouldNot(BeNil())
+				nova.Status.ObservedGeneration = nova.Generation
+				nova.Status.Conditions.MarkTrue(novav1.NovaAPIReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, nova)).To(Succeed())
+				th.Logger.Info("Simulated nova ready", "on", names.NovaName)
+			}, timeout, interval).Should(Succeed())
 
-			// not in SimulateControlplaneReady(), but never works (and is not needed here) anyways
+			// // not in SimulateControlplaneReady(), but never works (and is not needed here) anyways
 			// Eventually(func(_ Gomega) {
 			// 	th.ExpectCondition(
 			// 		names.OpenStackControlplaneName,
@@ -1914,7 +1914,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// 		corev1.OpenStackControlPlaneNovaReadyCondition,
 			// 		k8s_corev1.ConditionTrue,
 			// 	)
-			// }, timeout, interval).Should(Succeed())
+			// }, timeout*10, interval).Should(Succeed())
 		})
 
 		It("should have nova and deps enabled with nova notifications bus instance configured by inheritance", func() {
