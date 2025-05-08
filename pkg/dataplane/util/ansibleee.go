@@ -111,7 +111,7 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 		}},
 	}
 
-	if a.NodeSelector != nil && len(a.NodeSelector) > 0 {
+	if len(a.NodeSelector) > 0 {
 		podSpec.NodeSelector = a.NodeSelector
 	}
 

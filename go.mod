@@ -1,6 +1,6 @@
 module github.com/openstack-k8s-operators/openstack-operator
 
-go 1.21
+go 1.22
 
 require (
 	github.com/cert-manager/cert-manager v1.14.7
@@ -42,7 +42,6 @@ require (
 	github.com/rabbitmq/cluster-operator/v2 v2.11.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.15
 	k8s.io/apimachinery v0.29.15
@@ -96,6 +95,7 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.18.0 // indirect
