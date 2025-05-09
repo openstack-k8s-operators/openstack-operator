@@ -61,6 +61,8 @@ spec:
                     type: string
                   barbicanWorkerImage:
                     type: string
+                  bootcOsContainerImage:
+                    type: string
                   ceilometerCentralImage:
                     type: string
                   ceilometerComputeImage:
@@ -280,6 +282,8 @@ spec:
                       type: string
                     barbicanWorkerImage:
                       type: string
+                    bootcOsContainerImage:
+                      type: string
                     ceilometerCentralImage:
                       type: string
                     ceilometerComputeImage:
@@ -463,6 +467,8 @@ spec:
                   barbicanKeystoneListenerImage:
                     type: string
                   barbicanWorkerImage:
+                    type: string
+                  bootcOsContainerImage:
                     type: string
                   ceilometerCentralImage:
                     type: string

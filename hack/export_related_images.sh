@@ -73,6 +73,7 @@ export RELATED_IMAGE_DESIGNATE_UNBOUND_IMAGE_URL_DEFAULT=quay.io/podified-antelo
 export RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-barbican-api:current-podified
 export RELATED_IMAGE_BARBICAN_WORKER_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-barbican-worker:current-podified
 export RELATED_IMAGE_BARBICAN_KEYSTONE_LISTENER_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-barbican-keystone-listener:current-podified
+export RELATED_IMAGE_BOOTC_OS_CONTAINER_IMAGE_URL_DEFAULT=quay.io/openstack-k8s-operators/edpm-bootc:current-podified
 export RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-frr:current-podified
 export RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
 export RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-cron:current-podified
