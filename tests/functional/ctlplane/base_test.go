@@ -614,7 +614,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"barbican": map[string]interface{}{
 			"enabled": false,
 		},
-		"openstackclient": map[string]interface{}{},
+		// "openstackclient": map[string]interface{}{
+		// 	"enabled": true,
+		// },
 		"manila": map[string]interface{}{
 			"enabled":  true,
 			"template": manilaTemplate,
