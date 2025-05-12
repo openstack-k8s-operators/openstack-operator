@@ -13,7 +13,7 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250407064150-1cff0f51b44d
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250509023421-ae77c00926c7
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250509022835-28d7c16c3cea
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250509194427-81d3a41eb9ca
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250512104855-47f817ef8ff8
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250505201920-2f6d0b9f6aed
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250506083817-ce591b464a0f
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250508141203-be026d3164f7
