@@ -194,6 +194,22 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 	return containerImages
 }
 
+// InitializeOpenStackVersionImageDefaults - initializes OpenStackVersion CR with default container images
+func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1.ServiceDefaults {
+	Log := GetLogger(ctx)
+	Log.Info("Initialize OpenStackVersion Service Defaults")
+
+	defaults := &corev1beta1.ServiceDefaults{}
+
+	// NOTE: defaults change over time, older OpenStackVersion defaults would default to false (FR2 for example),
+	// but get set to true here for FR3 available versions and thus provide a way for services to migrate
+	// to new deployment topologies
+	trueString := "true"
+	defaults.GlanceWsgi = &trueString // all new glance deployments use WSGI by default (FR3 and later)
+
+	return defaults
+}
+
 // ReconcileVersion - reconciles OpenStackVersion CR
 func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, *corev1beta1.OpenStackVersion, error) {
 	version := &corev1beta1.OpenStackVersion{
