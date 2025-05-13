@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"strings"
 
+	ocpidms "github.com/openshift/api/config/v1"
 	mc "github.com/openshift/api/machineconfiguration/v1"
-	ocpimage "github.com/openshift/api/operator/v1alpha1"
+	ocpicsp "github.com/openshift/api/operator/v1alpha1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -35,22 +36,29 @@ type machineConfigIgnition struct {
 	} `json:"storage"`
 }
 
-// IsDisconnectedOCP - Will retrieve a ImageContentSourcePolicyList. If the list is not
+// IsDisconnectedOCP - Will retrieve a CR's related to disconnected OCP deployments. If the list is not
 // empty, we can infer that the OCP cluster is a disconnected deployment.
 func IsDisconnectedOCP(ctx context.Context, helper *helper.Helper) (bool, error) {
-	icspList := ocpimage.ImageContentSourcePolicyList{}
+	icspList := ocpicsp.ImageContentSourcePolicyList{}
+	idmsList := ocpidms.ImageDigestMirrorSetList{}
 
 	listOpts := []client.ListOption{}
-	err := helper.GetClient().List(ctx, &icspList, listOpts...)
+
+	var err error
+	err = helper.GetClient().List(ctx, &icspList, listOpts...)
+	if err != nil {
+		return false, err
+	}
+	err = helper.GetClient().List(ctx, &idmsList, listOpts...)
 	if err != nil {
 		return false, err
 	}
 
-	if len(icspList.Items) != 0 {
-		return true, nil
+	if len(icspList.Items) != 0 || len(idmsList.Items) != 0 {
+		return true, err
 	}
 
-	return false, nil
+	return false, err
 }
 
 // GetMCRegistryConf - will unmarshal the MachineConfig ignition file the machineConfigIgnition object.
