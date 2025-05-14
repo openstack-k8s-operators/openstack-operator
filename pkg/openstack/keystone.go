@@ -128,6 +128,15 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 			keystoneAPI.Spec.DatabaseInstance = "openstack" //FIXME: see above
 		}
 
+		// Append globally defined extraMounts to the service's own list.
+		for _, ev := range instance.Spec.ExtraMounts {
+			keystoneAPI.Spec.ExtraMounts = append(keystoneAPI.Spec.ExtraMounts, keystonev1.KeystoneExtraMounts{
+				Name:      ev.Name,
+				Region:    ev.Region,
+				VolMounts: ev.VolMounts,
+			})
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), keystoneAPI, helper.GetScheme())
 		if err != nil {
 			return err
