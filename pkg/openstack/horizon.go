@@ -157,6 +157,15 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			horizon.Spec.Secret = instance.Spec.Secret
 		}
 
+		// Append globally defined extraMounts to the service's own list.
+		for _, ev := range instance.Spec.ExtraMounts {
+			horizon.Spec.ExtraMounts = append(horizon.Spec.ExtraMounts, horizonv1.HorizonExtraVolMounts{
+				Name:      ev.Name,
+				Region:    ev.Region,
+				VolMounts: ev.VolMounts,
+			})
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), horizon, helper.GetScheme())
 		if err != nil {
 			return err
