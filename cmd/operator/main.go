@@ -42,6 +42,7 @@ import (
 
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/operator"
 	operatorv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1"
 	operatorcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/operator"
 )
@@ -87,7 +88,7 @@ func main() {
 		c.NextProtos = []string{"http/1.1"}
 	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	options := ctrl.Options{
 		Scheme: scheme,
 		Metrics: metricsserver.Options{
 			BindAddress: metricsAddr,
@@ -111,7 +112,15 @@ func main() {
 		// if you are doing or is intended to do any operation such as perform cleanups
 		// after the manager stops then its usage might be unsafe.
 		// LeaderElectionReleaseOnCancel: true,
-	})
+	}
+
+	err = operator.SetManagerOptions(&options, setupLog)
+	if err != nil {
+		setupLog.Error(err, "unable to set manager options")
+		os.Exit(1)
+	}
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)

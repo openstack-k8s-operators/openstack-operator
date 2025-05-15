@@ -69,6 +69,12 @@ spec:
           value: quay.io/openstack-k8s-operators/openstack-operator:latest
         - name: ENABLE_WEBHOOKS
           value: false
+        - name: LEASE_DURATION
+          value: 30
+        - name: RENEW_DEADLINE
+          value: 20
+        - name: RETRY_PERIOD
+          value: 5
         image: controller:latest
         name: operator
         securityContext:

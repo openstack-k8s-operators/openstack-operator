@@ -71,6 +71,9 @@ var (
 	operatorImage                    string
 	kubeRbacProxyImage               string
 	openstackReleaseVersion          string
+	leaseDuration                    string
+	renewDeadline                    string
+	retryPeriod                      string
 )
 
 // SetupEnv -
@@ -100,7 +103,14 @@ func SetupEnv() {
 			operatorImage = envArr[1]
 		} else if envArr[0] == "OPENSTACK_RELEASE_VERSION" {
 			openstackReleaseVersion = envArr[1]
+		} else if envArr[0] == "LEASE_DURATION" {
+			leaseDuration = envArr[1]
+		} else if envArr[0] == "RENEW_DEADLINE" {
+			renewDeadline = envArr[1]
+		} else if envArr[0] == "RETRY_PERIOD" {
+			retryPeriod = envArr[1]
 		}
+
 	}
 }
 
@@ -454,6 +464,9 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 	data.Data["OperatorImage"] = operatorImage
 	data.Data["KubeRbacProxyImage"] = kubeRbacProxyImage
 	data.Data["OpenstackReleaseVersion"] = openstackReleaseVersion
+	data.Data["LeaseDuration"] = leaseDuration
+	data.Data["RenewDeadline"] = renewDeadline
+	data.Data["RetryPeriod"] = retryPeriod
 	data.Data["OpenStackServiceRelatedImages"] = envRelatedOpenStackServiceImages
 	return r.renderAndApply(ctx, instance, data, "operator", true)
 }
