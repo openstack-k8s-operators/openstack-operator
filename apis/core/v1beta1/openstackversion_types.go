@@ -84,6 +84,7 @@ type ContainerTemplate struct {
 	BarbicanAPIImage                  *string `json:"barbicanAPIImage,omitempty"`
 	BarbicanKeystoneListenerImage     *string `json:"barbicanKeystoneListenerImage,omitempty"`
 	BarbicanWorkerImage               *string `json:"barbicanWorkerImage,omitempty"`
+	BootcOsContainerImage             *string `json:"bootcOsContainerImage,omitempty"`
 	CeilometerCentralImage            *string `json:"ceilometerCentralImage,omitempty"`
 	CeilometerComputeImage            *string `json:"ceilometerComputeImage,omitempty"`
 	CeilometerIpmiImage               *string `json:"ceilometerIpmiImage,omitempty"`

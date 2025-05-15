@@ -112,6 +112,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.BarbicanAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.BarbicanKeystoneListenerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.BarbicanWorkerImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.BootcOsContainerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CeilometerCentralImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CeilometerComputeImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.CeilometerNotificationImage).ShouldNot(BeNil())
