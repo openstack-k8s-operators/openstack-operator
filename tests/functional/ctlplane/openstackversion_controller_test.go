@@ -275,6 +275,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
 
 			// (mschuppert) create root CA secrets as there is no certmanager running.

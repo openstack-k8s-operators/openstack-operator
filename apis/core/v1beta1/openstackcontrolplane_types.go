@@ -128,6 +128,11 @@ type OpenStackControlPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// NotificationsBusSection - Parameters related to the Notifications Bus services
+	NotificationsBus NotificationsBusSection `json:"notificationsBus,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Memcached - Parameters related to the Memcached service
 	Memcached MemcachedSection `json:"memcached,omitempty"`
 
@@ -484,8 +489,23 @@ type RabbitmqSection struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// Templates - Overrides to use when creating the Rabbitmq clusters
+	// Templates - Overrides to use when creating the Rabbitmq clusters for RPC and (optionally) Notifications.
 	Templates *map[string]rabbitmqv1.RabbitMqSpecCore `json:"templates"`
+}
+
+// TODO(bogdando): keep this updated as the list of services that support this interface extends.
+
+// NotificationsBusSection defines the desired state of AMQP messaging Bus Services for producers and consumers of notifications
+type NotificationsBusSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=rabbitmq
+	// The name of RabbitMQ Cluster CR to select a Messaging
+	// Bus Service instance used by all services that produce or consume notifications.
+	// Avoid colocating it with RabbitMQ services used for RPC.
+	// That instance will be pushed down for services, unless overriden in templates.
+	// TODO: An empty value disables notifications drivers, and makes the services emitting no notifications at all.
+	// Services that support this global configuration interface include: Nova
+	RabbitMqClusterName string `json:"rabbitMqClusterName"`
 }
 
 // MemcachedSection defines the desired state of Memcached services

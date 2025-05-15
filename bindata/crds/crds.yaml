@@ -9179,6 +9179,12 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationsBus:
+                properties:
+                  rabbitMqClusterName:
+                    default: rabbitmq
+                    type: string
+                type: object
               nova:
                 properties:
                   apiOverride:
@@ -10139,6 +10145,8 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      notificationsBusInstance:
+                        type: string
                       passwordSelectors:
                         default:
                           service: NovaPassword
