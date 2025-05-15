@@ -233,6 +233,13 @@ spec:
             type: object
           status:
             properties:
+              availableServiceDefaults:
+                additionalProperties:
+                  properties:
+                    glanceWsgi:
+                      type: string
+                  type: object
+                type: object
               availableVersion:
                 type: string
               conditions:
@@ -638,6 +645,11 @@ spec:
               observedGeneration:
                 format: int64
                 type: integer
+              serviceDefaults:
+                properties:
+                  glanceWsgi:
+                    type: string
+                type: object
             type: object
         type: object
     served: true

@@ -164,6 +164,12 @@ type ContainerTemplate struct {
 	TestAnsibletestImage              *string `json:"testAnsibletestImage,omitempty"`
 }
 
+// ServiceDefaults - struct that contains defaults for OSP services that can change over time
+// but are associated with a specific OpenStack release version
+type ServiceDefaults struct {
+	GlanceWsgi *string `json:"glanceWsgi,omitempty"`
+}
+
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
 type OpenStackVersionStatus struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
@@ -178,6 +184,12 @@ type OpenStackVersionStatus struct {
 
 	// where we keep track of the container images for previous versions
 	ContainerImageVersionDefaults map[string]*ContainerDefaults `json:"containerImageVersionDefaults,omitempty"`
+
+	// AvailableServiceDefaults - struct that contains defaults for OSP services for each discovered available version
+	AvailableServiceDefaults map[string]*ServiceDefaults `json:"availableServiceDefaults,omitempty"`
+
+	// ServiceDefaults - struct that contains current defaults for OSP services
+	ServiceDefaults ServiceDefaults `json:"serviceDefaults,omitempty"`
 
 	//ObservedGeneration - the most recent generation observed for this object.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
