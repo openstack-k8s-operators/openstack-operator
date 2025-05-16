@@ -21,14 +21,25 @@ func mergeAppCred(
 	out := global
 	if svc != nil {
 		out.Enabled = svc.Enabled
-		// only override expiry/grace if the user actually set them
+
+		// only override expiry/grace if specified
 		if svc.ExpirationDays != nil {
 			out.ExpirationDays = svc.ExpirationDays
 		}
 		if svc.GracePeriodDays != nil {
 			out.GracePeriodDays = svc.GracePeriodDays
 		}
+
+		// only override Roles if user set them
+		if len(svc.Roles) > 0 {
+			out.Roles = svc.Roles
+		}
+		// only override Unrestricted if user set it
+		if svc.Unrestricted != nil {
+			out.Unrestricted = svc.Unrestricted
+		}
 	}
+
 	return out
 }
 
@@ -119,6 +130,30 @@ func ReconcileApplicationCredentials(
 			acObj.Spec.GracePeriodDays = *effective.GracePeriodDays
 			acObj.Spec.Secret = services[svc.Key].SecretName
 			acObj.Spec.PasswordSelector = services[svc.Key].PasswordSelector
+			acObj.Spec.Roles = effective.Roles
+			acObj.Spec.Unrestricted = *effective.Unrestricted
+			// build accessRules: use user-supplied if present, otherwise default to
+			// “identity /auth/tokens POST” so this AC can only fetch a Keystone token.
+			var rules []keystonev1.ACRule
+			if svc.ACSection != nil && len(svc.ACSection.AccessRules) > 0 {
+				for _, ar := range svc.ACSection.AccessRules {
+					if ar.Service == "" {
+						continue
+					}
+					rules = append(rules, keystonev1.ACRule{
+						Service: ar.Service,
+						Path:    ar.Path,
+						Method:  ar.Method,
+					})
+				}
+			} else {
+				rules = []keystonev1.ACRule{{
+					Service: "identity",
+					Path:    "/auth/tokens",
+					Method:  "POST",
+				}}
+			}
+			acObj.Spec.AccessRules = rules
 
 			return controllerutil.SetControllerReference(
 				helper.GetBeforeObject(), acObj, helper.GetScheme(),

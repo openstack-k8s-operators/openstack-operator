@@ -878,6 +878,17 @@ type ApplicationCredentialSection struct {
 	// +kubebuilder:default=7
 	// +kubebuilder:validation:Minimum=1
 	GracePeriodDays *int `json:"gracePeriodDays,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"admin","service"}
+	// +kubebuilder:validation:MinItems=1
+	// Roles to assign to the ApplicationCredential
+	Roles []string `json:"roles,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Whether the AC should be unrestricted
+	Unrestricted *bool `json:"unrestricted,omitempty"`
 }
 
 // +kubebuilder:validation:XValidation:rule="!(has(self.expirationDays) && has(self.gracePeriodDays)) || self.gracePeriodDays < self.expirationDays",message="gracePeriodDays must be smaller than expirationDays"
@@ -894,6 +905,33 @@ type ServiceAppCredSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
 	GracePeriodDays *int `json:"gracePeriodDays,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Roles to assign to the ApplicationCredential
+	Roles []string `json:"roles,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Whether the AC should be unrestricted
+	Unrestricted *bool `json:"unrestricted,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Set service specific AC access rules
+	AccessRules []ACRule `json:"accessRules,omitempty"`
+}
+
+// ACRule sets access rules for AC
+type ACRule struct {
+	// Service is the OpenStack service type
+	// +kubebuilder:validation:Optional
+	Service string `json:"service"`
+
+	// Path is the API path to allow
+	// +kubebuilder:validation:Optional
+	Path string `json:"path,omitempty"`
+
+	// Method is the HTTP verb to allow (defaults to all if empty)
+	// +kubebuilder:validation:Optional
+	Method string `json:"method,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

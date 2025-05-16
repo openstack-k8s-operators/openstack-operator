@@ -53,6 +53,17 @@ spec:
                     default: 7
                     minimum: 1
                     type: integer
+                  roles:
+                    default:
+                    - admin
+                    - service
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+                  unrestricted:
+                    default: false
+                    type: boolean
                 type: object
                 x-kubernetes-validations:
                 - message: gracePeriodDays must be smaller than expirationDays
@@ -188,6 +199,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -197,6 +219,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -709,6 +737,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -718,6 +757,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -3507,6 +3552,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -3516,6 +3572,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -8422,6 +8484,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -8431,6 +8504,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -9239,6 +9318,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -9248,6 +9338,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -11691,6 +11787,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -11700,6 +11807,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -16163,6 +16276,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -16172,6 +16296,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -16794,6 +16924,17 @@ spec:
                       enabled: false
                     nullable: true
                     properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              type: string
+                            path:
+                              type: string
+                            service:
+                              type: string
+                          type: object
+                        type: array
                       enabled:
                         default: false
                         type: boolean
@@ -16803,6 +16944,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
