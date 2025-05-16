@@ -869,15 +869,26 @@ type ApplicationCredentialSection struct {
 
 	// ExpirationDays sets the lifetime in days for the AC
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=14
+	// +kubebuilder:default=365
 	// +kubebuilder:validation:Minimum=2
 	ExpirationDays *int `json:"expirationDays,omitempty"`
 
 	// GracePeriodDays sets how many days before expiration the AC should be rotated
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=7
+	// +kubebuilder:default=182
 	// +kubebuilder:validation:Minimum=1
 	GracePeriodDays *int `json:"gracePeriodDays,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={"admin","service"}
+	// +kubebuilder:validation:MinItems=1
+	// Roles to assign to the ApplicationCredential
+	Roles []string `json:"roles,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Whether the AC should be unrestricted
+	Unrestricted *bool `json:"unrestricted,omitempty"`
 }
 
 // +kubebuilder:validation:XValidation:rule="!(has(self.expirationDays) && has(self.gracePeriodDays)) || self.gracePeriodDays < self.expirationDays",message="gracePeriodDays must be smaller than expirationDays"
@@ -894,6 +905,14 @@ type ServiceAppCredSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
 	GracePeriodDays *int `json:"gracePeriodDays,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Roles to assign to the ApplicationCredential
+	Roles []string `json:"roles,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Whether the AC should be unrestricted
+	Unrestricted *bool `json:"unrestricted,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

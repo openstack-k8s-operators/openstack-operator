@@ -210,13 +210,24 @@ spec:
                     default: false
                     type: boolean
                   expirationDays:
-                    default: 14
+                    default: 365
                     minimum: 2
                     type: integer
                   gracePeriodDays:
-                    default: 7
+                    default: 182
                     minimum: 1
                     type: integer
+                  roles:
+                    default:
+                    - admin
+                    - service
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+                  unrestricted:
+                    default: false
+                    type: boolean
                 type: object
                 x-kubernetes-validations:
                 - message: gracePeriodDays must be smaller than expirationDays
@@ -361,6 +372,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -882,6 +899,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -3680,6 +3703,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -8595,6 +8624,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -9412,6 +9447,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -11864,6 +11905,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -16336,6 +16383,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays
@@ -16967,6 +17020,12 @@ spec:
                       gracePeriodDays:
                         minimum: 1
                         type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
                     type: object
                     x-kubernetes-validations:
                     - message: gracePeriodDays must be smaller than expirationDays

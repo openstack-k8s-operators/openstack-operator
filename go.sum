@@ -1,5 +1,5 @@
-github.com/Deydra71/keystone-operator/api v0.0.0-20250514070500-15fcdb912b2c h1:DXnHQg/+AjMsoJqvQEusjkyjOsOPGbKJ8uRVLyTkseQ=
-github.com/Deydra71/keystone-operator/api v0.0.0-20250514070500-15fcdb912b2c/go.mod h1:VPkYswnrCtlSMTeYjgxTOpfNN7zvxqa+kZ8EWDJaFrg=
+github.com/Deydra71/keystone-operator/api v0.0.0-20250519123217-49620096eb19 h1:P93G634OZTX/Fr6g27G0zZioRCxqLxgKEz9xV5NAALI=
+github.com/Deydra71/keystone-operator/api v0.0.0-20250519123217-49620096eb19/go.mod h1:VPkYswnrCtlSMTeYjgxTOpfNN7zvxqa+kZ8EWDJaFrg=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cert-manager/cert-manager v1.14.7 h1:C2L59sMGMdSpd8SPx5qfPAL7ejZaNxJBRd24S7Ws5Ek=
