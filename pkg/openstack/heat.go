@@ -180,6 +180,15 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		if heat.Spec.Secret == "" {
 			heat.Spec.Secret = instance.Spec.Secret
 		}
+		// Append globally defined extraMounts to the service's own list.
+
+		for _, ev := range instance.Spec.ExtraMounts {
+			heat.Spec.ExtraMounts = append(heat.Spec.ExtraMounts, heatv1.HeatExtraVolMounts{
+				Name:      ev.Name,
+				Region:    ev.Region,
+				VolMounts: ev.VolMounts,
+			})
+		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), heat, helper.GetScheme())
 		if err != nil {
