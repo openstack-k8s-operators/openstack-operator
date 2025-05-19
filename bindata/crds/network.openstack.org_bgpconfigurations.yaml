@@ -52,7 +52,7 @@ spec:
                 items:
                   description: FRRNodeConfigurationSelectorType -
                   properties:
-                    frrConfigurationNamespace:
+                    nodeName:
                       description: NodeName -  name of the node object as seen by
                         running the `oc get nodes` command
                       type: string
