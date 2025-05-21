@@ -3,6 +3,7 @@
 {{ $leaseDuration := .LeaseDuration }}
 {{ $renewDeadline := .RenewDeadline }}
 {{ $retryPeriod := .RetryPeriod }}
+{{ $managerMemoryLimit := .ManagerMemoryLimit }}
 {{ range $operatorName, $operatorImage := .OperatorImages }}
 apiVersion: apps/v1
 kind: Deployment
@@ -62,7 +63,7 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 256Mi
+            memory: '{{ $managerMemoryLimit }}'
           requests:
             cpu: 10m
             memory: 128Mi

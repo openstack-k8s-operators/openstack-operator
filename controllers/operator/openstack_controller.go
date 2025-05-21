@@ -74,6 +74,7 @@ var (
 	leaseDuration                    string
 	renewDeadline                    string
 	retryPeriod                      string
+	managerMemoryLimit               string
 )
 
 // SetupEnv -
@@ -109,8 +110,9 @@ func SetupEnv() {
 			renewDeadline = envArr[1]
 		} else if envArr[0] == "RETRY_PERIOD" {
 			retryPeriod = envArr[1]
+		} else if envArr[0] == "MANAGER_MEMORY_LIMIT" {
+			managerMemoryLimit = envArr[1]
 		}
-
 	}
 }
 
@@ -467,6 +469,7 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 	data.Data["LeaseDuration"] = leaseDuration
 	data.Data["RenewDeadline"] = renewDeadline
 	data.Data["RetryPeriod"] = retryPeriod
+	data.Data["ManagerMemoryLimit"] = managerMemoryLimit
 	data.Data["OpenStackServiceRelatedImages"] = envRelatedOpenStackServiceImages
 	return r.renderAndApply(ctx, instance, data, "operator", true)
 }

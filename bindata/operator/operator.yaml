@@ -107,7 +107,7 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 256Mi
+            memory: '{{ .ManagerMemoryLimit }}'
           requests:
             cpu: 10m
             memory: 128Mi

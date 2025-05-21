@@ -75,6 +75,8 @@ spec:
           value: 20
         - name: RETRY_PERIOD
           value: 5
+        - name: MANAGER_MEMORY_LIMIT
+          value: 512Mi
         image: controller:latest
         name: operator
         securityContext:
