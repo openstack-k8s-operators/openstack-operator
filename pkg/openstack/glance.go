@@ -180,6 +180,16 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		if glance.Spec.Storage.StorageClass == "" {
 			glance.Spec.Storage.StorageClass = instance.Spec.StorageClass
 		}
+
+		if glance.GetAnnotations() == nil {
+			glance.SetAnnotations(make(map[string]string))
+		}
+		if version.Status.ServiceDefaults.GlanceWsgi != nil && *version.Status.ServiceDefaults.GlanceWsgi == "true" {
+			glance.GetAnnotations()[glancev1.GlanceWSGILabel] = "true"
+		} else {
+			glance.GetAnnotations()[glancev1.GlanceWSGILabel] = "false"
+		}
+
 		// Append globally defined extraMounts to the service's own list.
 		for _, ev := range instance.Spec.ExtraMounts {
 			glance.Spec.ExtraMounts = append(glance.Spec.ExtraMounts, glancev1.GlanceExtraVolMounts{
