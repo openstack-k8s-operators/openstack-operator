@@ -23,12 +23,15 @@ import (
 const (
 	// OpenStackOperatorReadyCondition Status=True condition which indicates if operators have been deployed
 	OpenStackOperatorReadyCondition condition.Type = "OpenStackOperatorReadyCondition"
+
+	// OpenStackOperatorDeploymentsReadyCondition Status=True condition which indicates if operator deployments are ready
+	OpenStackOperatorDeploymentsReadyCondition condition.Type = "OpenStackOperatorDeploymentsReadyCondition"
 )
 
 // Common Messages used by Openstack operator
 const (
 	//
-	// OpenStackOperator condition messages
+	// OpenStackOperatorReady condition messages
 	//
 
 	// OpenStackOperatorErrorMessage
@@ -42,4 +45,20 @@ const (
 
 	// OpenStackOperatorReadyMessage
 	OpenStackOperatorReadyMessage = "OpenStackOperator completed"
+
+	//
+	// OpenStackOperatorDeploymentsReady condition messages
+	//
+
+	// OpenStackOperatorDeploymentsErrorMessage
+	OpenStackOperatorDeploymentsErrorMessage = "OpenStackOperatorDeployments error occured %s"
+
+	// OpenStackOperatorDeploymentsReadyInitMessage
+	OpenStackOperatorDeploymentsReadyInitMessage = "OpenStackOperatorDeployments not started"
+
+	// OpenStackOperatorDeploymentsReadyRunningMessage
+	OpenStackOperatorDeploymentsReadyRunningMessage = "OpenStackOperatorDeployments still in progress: %s"
+
+	// OpenStackOperatorDeploymentsReadyMessage
+	OpenStackOperatorDeploymentsReadyMessage = "OpenStackOperatorDeployments completed"
 )
