@@ -504,7 +504,7 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"databaseInstance": "openstack",
 		"secret":           "osp-secret",
 		"passwordSelectors": map[string]interface{}{
-			"AuthEncryptionKey": "HeatAuthEncryptionKey",
+			"authEncryptionKey": "HeatAuthEncryptionKey",
 		},
 	}
 	telemetryTemplate := map[string]interface{}{
@@ -519,6 +519,22 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		},
 		"autoscaling": map[string]interface{}{
 			"enabled": false,
+		},
+	}
+	manilaTemplate := map[string]interface{}{
+		"rabbitMqClusterName": "rabbitmq",
+		"memcachedInstance":   "memcached",
+		"databaseAccount":     "account",
+		"manilaAPI": map[string]interface{}{
+			"replicas": 1,
+		},
+		"manilaScheduler": map[string]interface{}{
+			"replicas": 1,
+		},
+		"manilaShares": map[string]interface{}{
+			"share1": map[string]interface{}{
+				"replicas": 1,
+			},
 		},
 	}
 
@@ -578,11 +594,10 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"barbican": map[string]interface{}{
 			"enabled": false,
 		},
-		"openstackclient": map[string]interface{}{
-			"enabled": true,
-		},
+		"openstackclient": map[string]interface{}{},
 		"manila": map[string]interface{}{
-			"enabled": true,
+			"enabled":  true,
+			"template": manilaTemplate,
 		},
 		"heat": map[string]interface{}{
 			"enabled":  true,

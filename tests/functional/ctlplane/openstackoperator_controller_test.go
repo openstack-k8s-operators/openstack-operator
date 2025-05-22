@@ -1459,22 +1459,6 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			spec["tls"] = GetTLSPublicSpec()
-			spec["manila"] = map[string]interface{}{
-				"enabled": true,
-				"template": map[string]interface{}{
-					"manilaAPI": map[string]interface{}{
-						"replicas": 1,
-					},
-					"manilaScheduler": map[string]interface{}{
-						"replicas": 1,
-					},
-					"manilaShares": map[string]interface{}{
-						"share1": map[string]interface{}{
-							"replicas": 1,
-						},
-					},
-				},
-			}
 			DeferCleanup(
 				th.DeleteInstance,
 				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
