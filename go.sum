@@ -104,8 +104,8 @@ github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20250505135219-b
 github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20250505135219-b4ff765055a7/go.mod h1:iIrafh9Nb5BiOwGFvi11G8duk+Z0SfDhW8BKPqrjR2Y=
 github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20250505135218-9e2504c8dd47 h1:n9OEX2SWcU9NeaBscadVbHaUphmgQ40NLWXsoQoo1sw=
 github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20250505135218-9e2504c8dd47/go.mod h1:PmoNmbsbb/f/dZ55/N2t6LJFu9x8fbDIrIpmmYYq87E=
-github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250512070536-9861aaafc30c h1:Ob1yE480pn4a7c6QZ2CIW5BkXTp3gvxdS4pNHNuRVT8=
-github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250512070536-9861aaafc30c/go.mod h1:9nOwqfg5sFJWXgABY+/eLZNcVwi6WCWVR4EVwxN8Cyw=
+github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250522125510-d460a0e8ba58 h1:s+jDrcIOYV0+PP2akKSKltsC5gfUJk3glkNe/2Aak1c=
+github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250522125510-d460a0e8ba58/go.mod h1:9nOwqfg5sFJWXgABY+/eLZNcVwi6WCWVR4EVwxN8Cyw=
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250520115633-4e8b7a01e833 h1:gxBuSPmFcPzHJSODEgyN2mgciUdee6z1JkD81iuUkp4=
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250520115633-4e8b7a01e833/go.mod h1:zpmUOoLWshUxW+TZPccO05mdM0MeLZBfg4YrkD/pm24=
 github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250519154450-e75d2912aa53 h1:TfS30WeBR4y8e59WFE1A3ecmpp+5798dcKowu3foHmI=
