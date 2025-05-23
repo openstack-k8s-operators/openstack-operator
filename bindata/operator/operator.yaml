@@ -107,10 +107,10 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 256Mi
+            memory: 1Gi
           requests:
             cpu: 10m
-            memory: 128Mi
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:
