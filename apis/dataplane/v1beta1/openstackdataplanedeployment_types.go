@@ -71,6 +71,12 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleJobNodeSelector to target subset of worker nodes running the ansible jobs
 	AnsibleJobNodeSelector map[string]string `json:"ansibleJobNodeSelector,omitempty"`
+
+	// Additional configuration options for AnsibleExecutionEnvironment
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
+	AnsibleEEConfig DataSource `json:"ansibleEeConfig,omitempty"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
