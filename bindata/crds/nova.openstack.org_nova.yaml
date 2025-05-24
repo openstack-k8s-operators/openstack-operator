@@ -1624,6 +1624,15 @@ spec:
                   NodeSelector here acts as a default value and can be overridden by service
                   specific NodeSelector Settings.
                 type: object
+              notificationsBusInstance:
+                description: |-
+                  NotificationsBusInstance is the name of the RabbitMqCluster CR to select
+                  the Message Bus Service instance used by the Nova top level services and all cells to publish notifications.
+                  If undefined, the value will be inherited from OpenStackControlPlane.
+                  An empty value "" leaves the notification drivers unconfigured and emitting no notifications at all.
+                  Avoid colocating it with RabbitMqClusterName, APIMessageBusInstance or CellMessageBusInstance used for RPC.
+                  For particular Nova cells, notifications cannot be disabled, nor configured differently.
+                type: string
               novncproxyContainerImageURL:
                 description: NoVNCContainerImageURL
                 type: string
