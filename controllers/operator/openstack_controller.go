@@ -204,6 +204,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(operatorv1beta1.OpenStackOperatorReadyCondition, condition.InitReason, string(operatorv1beta1.OpenStackOperatorReadyInitMessage)),
+		condition.UnknownCondition(operatorv1beta1.OpenStackOperatorDeploymentsReadyCondition, condition.InitReason, string(operatorv1beta1.OpenStackOperatorDeploymentsReadyInitMessage)),
 	)
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.ObservedGeneration = instance.Generation
@@ -268,7 +269,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Check if all deployments are running
-	deploymentsRunning, err := r.countDeployments(ctx, instance)
+	deploymentsRunning, deploymentsPending, err := r.countDeployments(ctx, instance)
 	instance.Status.DeployedOperatorCount = &deploymentsRunning
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -280,9 +281,19 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 	if deploymentsRunning < OperatorCount {
-		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", OperatorCount)
+		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", OperatorCount, "pending", deploymentsPending)
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			operatorv1beta1.OpenStackOperatorDeploymentsReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			operatorv1beta1.OpenStackOperatorDeploymentsReadyRunningMessage,
+			deploymentsPending))
 		return ctrl.Result{}, nil
 	}
+
+	instance.Status.Conditions.MarkTrue(
+		operatorv1beta1.OpenStackOperatorDeploymentsReadyCondition,
+		operatorv1beta1.OpenStackOperatorDeploymentsReadyMessage)
 
 	// Check if Services are running and have an endpoint
 	ctrlResult, err := r.checkServiceEndpoints(ctx, instance)
@@ -349,11 +360,12 @@ func (r *OpenStackReconciler) reconcileDelete(ctx context.Context, instance *ope
 }
 
 // countDeployments -
-func (r *OpenStackReconciler) countDeployments(ctx context.Context, instance *operatorv1beta1.OpenStack) (int, error) {
+func (r *OpenStackReconciler) countDeployments(ctx context.Context, instance *operatorv1beta1.OpenStack) (int, []string, error) {
 	deployments := &appsv1.DeploymentList{}
+	pending := []string{}
 	err := r.Client.List(ctx, deployments, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
-		return 0, err
+		return 0, pending, err
 	}
 
 	count := 0
@@ -361,10 +373,15 @@ func (r *OpenStackReconciler) countDeployments(ctx context.Context, instance *op
 		if metav1.IsControlledBy(&deployment, instance) {
 			if deployment.Status.ReadyReplicas > 0 {
 				count++
+			} else {
+				name := strings.Replace(deployment.Name, "-operator-controller-manager", "", 1)
+				name = strings.Replace(name, "-cluster-operator-manager", "", 1)
+				pending = append(pending, name)
 			}
 		}
 	}
-	return count, nil
+	sort.Strings(pending)
+	return count, pending, nil
 }
 
 // containerImageMatch - returns true if the deployedContainerImage matches the operatorImage
