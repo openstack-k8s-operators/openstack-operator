@@ -9,7 +9,7 @@
 
 - job:
     name: openstack-operator-kuttl
-    parent: cifmw-base-multinode-kuttl
+    parent: cifmw-multinode-kuttl
     dependencies: ["openstack-k8s-operators-content-provider"]
     attempts: 1
     required-projects:
