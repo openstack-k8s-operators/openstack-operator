@@ -73,6 +73,7 @@ for database in "${!database_secrets[@]}"; do
 
     for port in $ports; do
         echo "Connecting to $database on port $port..."
+        sleep 5
 
         pod_cert=$(oc rsh -n "$NAMESPACE" openstackclient openssl s_client -starttls mysql -connect "$cluster_ip:$port" </dev/null 2>/dev/null | sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p')
 

@@ -10,6 +10,8 @@ commands:
         echo "Found $BAD_OR_MISSING_NODE_SELECTOR_COUNT pods with bad or missing nodeselector:"
         echo "$BAD_OR_MISSING_NODE_SELECTOR"
         exit 1
+      else
+        sleep 5
       fi
   - script: |
       echo "Checking all cronjobs have expected nodeselector"
@@ -20,4 +22,6 @@ commands:
         echo "Found $BAD_OR_MISSING_NODE_SELECTOR_COUNT cronjobs with bad or missing nodeselector:"
         echo "$BAD_OR_MISSING_NODE_SELECTOR"
         exit 1
+      else
+        sleep 5
       fi
