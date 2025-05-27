@@ -30,6 +30,7 @@ import (
 
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
@@ -40,6 +41,7 @@ import (
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
+
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -1789,6 +1791,153 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Eventually(func(g Gomega) {
 				conditions := OpenStackControlPlaneConditionGetter(names.OpenStackControlplaneName)
 				g.Expect(conditions.Has(corev1.OpenStackControlPlaneOVNReadyCondition)).To(BeFalse())
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			// NOTE(bogdando): DBs certs need to be created here as well, but those are already existing somehow
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			DeferCleanup(k8sClient.Delete, ctx,
+				th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")}))
+			DeferCleanup(k8sClient.Delete, ctx,
+				th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
+
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			// enable dependencies
+			spec["nova"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"apiTimeout": 60,
+					"cellTemplates": map[string]interface{}{
+						"cell0": map[string]interface{}{},
+					},
+				},
+			}
+			spec["galera"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["memcached"] = map[string]interface{}{
+				"enabled": true,
+				"templates": map[string]interface{}{
+					"memcached": map[string]interface{}{
+						"replicas": 1,
+					},
+				},
+			}
+			spec["rabbitmq"] = map[string]interface{}{
+				"enabled": true,
+				"templates": map[string]interface{}{
+					"rabbitmq": map[string]interface{}{
+						"replicas": 1,
+					},
+				},
+			}
+			spec["keystone"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["glance"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["neutron"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["placement"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"apiTimeout": 60,
+				},
+			}
+			// turn off unrelated to this test case services
+			spec["horizon"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["cinder"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["swift"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["redis"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["ironic"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["designate"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["barbican"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["manila"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["heat"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": false,
+			}
+
+			Eventually(func(g Gomega) {
+				g.Expect(CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec)).Should(Not(BeNil()))
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+				SimulateControlplaneReady()
+			}, timeout, interval).Should(Succeed())
+
+			DeferCleanup(
+				th.DeleteInstance,
+				GetOpenStackControlPlane(names.OpenStackControlplaneName),
+			)
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Status.ObservedGeneration = OSCtlplane.Generation
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneMemcachedReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneRabbitMQReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneNeutronReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneGlanceReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlanePlacementAPIReadyCondition, "Ready")
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+				th.Logger.Info("Simulated nova dependencies ready", "on", names.OpenStackControlplaneName)
+			}, timeout, interval).Should(Succeed())
+
+			// nova to become ready
+			Eventually(func(g Gomega) {
+				conditions := OpenStackControlPlaneConditionGetter(names.OpenStackControlplaneName)
+				g.Expect(conditions.Has(corev1.OpenStackControlPlaneNovaReadyCondition)).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have configured nova", func() {
+			nova := &novav1.Nova{}
+			Eventually(func(g Gomega) {
+				g.Expect(k8sClient.Get(ctx, names.NovaName, nova)).Should(Succeed())
+				g.Expect(nova).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have configured nova from the service template", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Eventually(func(g Gomega) {
+				OSCtlplane.Spec.Nova.Template.APIDatabaseInstance = "custom-db"
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			nova := &novav1.Nova{}
+			Eventually(func(g Gomega) {
+				g.Expect(k8sClient.Get(ctx, names.NovaName, nova)).Should(Succeed())
+				g.Expect(nova).ShouldNot(BeNil())
+				g.Expect(nova.Spec.APIDatabaseInstance).Should(Equal("custom-db"))
 			}, timeout, interval).Should(Succeed())
 		})
 	})
