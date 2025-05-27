@@ -58,6 +58,7 @@ type Names struct {
 	HorizonName                        types.NamespacedName
 	HeatName                           types.NamespacedName
 	NovaName                           types.NamespacedName
+	PlacementName                      types.NamespacedName
 	TelemetryName                      types.NamespacedName
 	DBName                             types.NamespacedName
 	DBCertName                         types.NamespacedName
@@ -65,31 +66,33 @@ type Names struct {
 	DBCell1CertName                    types.NamespacedName
 	RabbitMQName                       types.NamespacedName
 	RabbitMQCertName                   types.NamespacedName
+	RabbitMQNotificationsCertName      types.NamespacedName
 	RabbitMQCell1Name                  types.NamespacedName
 	RabbitMQCell1CertName              types.NamespacedName
 	NoVNCProxyCell1CertPublicRouteName types.NamespacedName
 	NoVNCProxyCell1CertPublicSvcName   types.NamespacedName
 	NoVNCProxyCell1CertVencryptName    types.NamespacedName
-	ServiceAccountName                 types.NamespacedName
-	RoleName                           types.NamespacedName
-	RoleBindingName                    types.NamespacedName
-	RootCAPublicName                   types.NamespacedName
-	RootCAInternalName                 types.NamespacedName
-	RootCAOvnName                      types.NamespacedName
-	RootCALibvirtName                  types.NamespacedName
-	SelfSignedIssuerName               types.NamespacedName
-	CustomIssuerName                   types.NamespacedName
-	CustomServiceCertSecretName        types.NamespacedName
-	CABundleName                       types.NamespacedName
-	OpenStackClientName                types.NamespacedName
-	OVNNorthdName                      types.NamespacedName
-	OVNNorthdCertName                  types.NamespacedName
-	OVNControllerName                  types.NamespacedName
-	OVNControllerCertName              types.NamespacedName
-	OVNDbServerNBName                  types.NamespacedName
-	OVNDbServerSBName                  types.NamespacedName
-	NeutronOVNCertName                 types.NamespacedName
-	OpenStackTopology                  []types.NamespacedName
+	RabbitMQNotificationsName     types.NamespacedName
+	ServiceAccountName            types.NamespacedName
+	RoleName                      types.NamespacedName
+	RoleBindingName               types.NamespacedName
+	RootCAPublicName              types.NamespacedName
+	RootCAInternalName            types.NamespacedName
+	RootCAOvnName                 types.NamespacedName
+	RootCALibvirtName             types.NamespacedName
+	SelfSignedIssuerName          types.NamespacedName
+	CustomIssuerName              types.NamespacedName
+	CustomServiceCertSecretName   types.NamespacedName
+	CABundleName                  types.NamespacedName
+	OpenStackClientName           types.NamespacedName
+	OVNNorthdName                 types.NamespacedName
+	OVNNorthdCertName             types.NamespacedName
+	OVNControllerName             types.NamespacedName
+	OVNControllerCertName         types.NamespacedName
+	OVNDbServerNBName             types.NamespacedName
+	OVNDbServerSBName             types.NamespacedName
+	NeutronOVNCertName            types.NamespacedName
+	OpenStackTopology             []types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -181,6 +184,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "nova",
 		},
+		PlacementName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "placement",
+		},
 		DBName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "openstack",
@@ -205,9 +212,17 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cert-rabbitmq-svc",
 		},
+		RabbitMQNotificationsCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-rabbitmq-notifications-svc",
+		},
 		RabbitMQCell1Name: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "rabbitmq-cell1",
+		},
+		RabbitMQNotificationsName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "rabbitmq-notifications",
 		},
 		RabbitMQCell1CertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -507,6 +522,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"replicas": 1,
 		},
 		names.RabbitMQCell1Name.Name: map[string]interface{}{
+			"replicas": 1,
+		},
+		names.RabbitMQNotificationsName.Name: map[string]interface{}{
 			"replicas": 1,
 		},
 	}
