@@ -57,6 +57,7 @@ type Names struct {
 	NeutronName                        types.NamespacedName
 	HorizonName                        types.NamespacedName
 	HeatName                           types.NamespacedName
+	NovaName                           types.NamespacedName
 	TelemetryName                      types.NamespacedName
 	DBName                             types.NamespacedName
 	DBCertName                         types.NamespacedName
@@ -175,6 +176,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		TelemetryName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "telemetry",
+		},
+		NovaName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "nova",
 		},
 		DBName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -614,9 +619,7 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		"barbican": map[string]interface{}{
 			"enabled": false,
 		},
-		// "openstackclient": map[string]interface{}{
-		// 	"enabled": true,
-		// },
+		"openstackclient": map[string]interface{}{},
 		"manila": map[string]interface{}{
 			"enabled":  true,
 			"template": manilaTemplate,
