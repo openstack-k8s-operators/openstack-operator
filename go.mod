@@ -26,7 +26,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.5.1-0.20250429142319-453fcb22aa51
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.5.1-0.20250429142319-453fcb22aa51
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.5.1-0.20250429142319-453fcb22aa51
-	github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20250512100019-093e4e1761d5
+	github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20250526102308-6ad1d889fc1b
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.5.1-0.20250512070835-cee940f15bf8
 	github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20250520115348-cf6310689e58
 	github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20250520124107-b6a870724e0f
@@ -35,7 +35,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20250515082924-91a4e95349ad
 	github.com/openstack-k8s-operators/placement-operator/api v0.5.1-0.20250524073251-0e658ae71e49
-	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250505154423-cbdc523702ac
+	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250526102307-07572d07567f
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.5.1-0.20250324113602-5517274b6007
 	github.com/openstack-k8s-operators/test-operator/api v0.6.0
 	github.com/pkg/errors v0.9.1
