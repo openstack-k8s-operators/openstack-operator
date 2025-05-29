@@ -40,6 +40,16 @@ function check_keystone_endpoint {
     fi
 }
 
+get_issuer_cn() {
+    local host_port="$1"
+    local output
+
+    output=$(openssl s_client -connect "$host_port" </dev/null 2>/dev/null |
+        openssl x509 -noout -issuer 2>/dev/null)
+
+    echo "$output" | sed -n 's/^.*CN[[:space:]]*=[[:space:]]*\([^,]*\).*$/\1/p'
+}
+
 keystone_url=$(openstack endpoint list -c URL -f value | grep 'keystone-public')
 keystone_host_port=$(extract_host_port "$keystone_url")
 
@@ -60,11 +70,14 @@ for url in $(openstack endpoint list -c URL -f value | grep "$endpoint_filter");
     host_port=$(extract_host_port "$url")
 
     echo "Checking $host_port ..."
-    if [[ "$ENDPOINT_TYPE" == "public" ]]; then
-        ISSUER=$(echo | openssl s_client -connect "$host_port" 2>/dev/null | openssl x509 -noout -issuer | sed -n 's/^.*CN=\([^,]*\).*$/\1/p' | sed 's/ //g')
-    else
-        ISSUER=$(openssl s_client -connect $host_port </dev/null 2>/dev/null | openssl x509 -issuer -noout -in /dev/stdin | sed 's/ //g')
-    fi
+    for retry in {1..5}; do
+        echo "Retrying $retry on getting issuer $host_port..."
+        ISSUER=$(get_issuer_cn "$host_port")
+        if [[ -n "$ISSUER" ]]; then
+            break
+        fi
+        sleep 20
+    done
 
     if [[ "$ISSUER" != "$EXPECTED_ISSUER" ]]; then
         ISSUER_MISMATCHES+="$host_port issued by $ISSUER, expected $EXPECTED_ISSUER\n"
