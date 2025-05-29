@@ -17,11 +17,13 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	"regexp"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -265,4 +267,19 @@ func GetOpenStackReleaseVersion(envVars []string) string {
 		util.GetEnvVar("OPERATOR_CONDITION_NAME", ""),
 	)
 
+}
+
+// GetOpenStackVersions - returns the OpenStackVersion resource(s) associated with the namespace
+func GetOpenStackVersions(namespace string, k8sClient client.Client) (*OpenStackVersionList, error) {
+	versionList := &OpenStackVersionList{}
+
+	listOpts := []client.ListOption{
+		client.InNamespace(namespace),
+	}
+
+	if err := k8sClient.List(context.TODO(), versionList, listOpts...); err != nil {
+		return nil, err
+	}
+
+	return versionList, nil
 }

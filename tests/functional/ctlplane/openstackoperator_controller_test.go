@@ -1832,6 +1832,78 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("OpenStackControlplane instance is created and an OpenStackVersion already exists with an arbitrary name", func() {
+		BeforeEach(func() {
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackVersion(names.OpenStackVersionName2, GetDefaultOpenStackVersionSpec()),
+			)
+		})
+
+		It("rejects the OpenStackControlPlane if its name is not that same as the OpenStackVersion's name", func() {
+			raw := map[string]interface{}{
+				"apiVersion": "core.openstack.org/v1beta1",
+				"kind":       "OpenStackControlPlane",
+				"metadata": map[string]interface{}{
+					"name":      names.OpenStackControlplaneName.Name,
+					"namespace": names.Namespace,
+				},
+				"spec": GetDefaultOpenStackControlPlaneSpec(),
+			}
+
+			unstructuredObj := &unstructured.Unstructured{Object: raw}
+			_, err := controllerutil.CreateOrPatch(
+				th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+			Expect(err).Should(HaveOccurred())
+			var statusError *k8s_errors.StatusError
+			Expect(errors.As(err, &statusError)).To(BeTrue())
+			Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+			Expect(statusError.ErrStatus.Message).To(
+				ContainSubstring(
+					"must have same name as the existing"),
+			)
+
+			// we remove the finalizer as this is needed when the OpenStackControlplane
+			// does not create the OpenStackVersion itself
+			DeferCleanup(
+				OpenStackVersionRemoveFinalizer,
+				ctx,
+				names.OpenStackVersionName2,
+			)
+		})
+
+		It("accepts the OpenStackControlPlane if its name is the same as the OpenStackVersion's name", func() {
+			raw := map[string]interface{}{
+				"apiVersion": "core.openstack.org/v1beta1",
+				"kind":       "OpenStackControlPlane",
+				"metadata": map[string]interface{}{
+					"name":      names.OpenStackVersionName2.Name,
+					"namespace": names.Namespace,
+				},
+				"spec": GetDefaultOpenStackControlPlaneSpec(),
+			}
+
+			unstructuredObj := &unstructured.Unstructured{Object: raw}
+			_, err := controllerutil.CreateOrPatch(
+				th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+			Expect(err).ShouldNot(HaveOccurred())
+
+			openStackControlPlane := &corev1.OpenStackControlPlane{}
+			openStackControlPlane.ObjectMeta.Namespace = names.Namespace
+			openStackControlPlane.Name = names.OpenStackVersionName2.Name
+			err = k8sClient.Delete(ctx, openStackControlPlane)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			// we remove the finalizer as this is needed when the OpenStackControlplane
+			// does not create the OpenStackVersion itself
+			DeferCleanup(
+				OpenStackVersionRemoveFinalizer,
+				ctx,
+				names.OpenStackVersionName2,
+			)
+		})
+	})
+
 	When("An OpenStackControlplane instance is created with nodeSelector", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
