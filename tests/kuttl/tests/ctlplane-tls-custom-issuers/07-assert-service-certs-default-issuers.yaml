@@ -8,7 +8,7 @@ commands:
 
   - script: |
       echo "Checking issuer of internal certificates..."
-      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_check_cert_issuer.sh "issuer=CN=rootca-internal" "internal"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_check_cert_issuer.sh "rootca-internal" "internal"
 
   - script: |
       echo "Checking issuer of ingress certificates..."
