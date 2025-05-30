@@ -1,0 +1,45 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+assert:
+  # check ac-barbican
+  - command: >
+      oc wait --for=condition=Ready
+        appcred ac-barbican
+        -n $NAMESPACE --timeout=60s
+  - command: >
+      oc get appcred ac-barbican
+        -n $NAMESPACE
+        -o jsonpath='{.spec.expirationDays}' | grep -x 200
+  - command: >
+      oc get appcred ac-barbican
+        -n $NAMESPACE
+        -o jsonpath='{.spec.gracePeriodDays}' | grep -x 90
+  - command: >
+      oc get appcred ac-barbican
+        -n $NAMESPACE
+        -o jsonpath='{.spec.roles[*]}' | grep -w service
+  - command: >
+      oc get appcred ac-barbican
+        -n $NAMESPACE
+        -o jsonpath='{.spec.unrestricted}' | grep -x false
+  # check ac-cinder
+  - command: >
+      oc wait --for=condition=Ready
+        appcred ac-cinder
+        -n $NAMESPACE --timeout=60s
+  - command: >
+      oc get appcred ac-cinder
+        -n $NAMESPACE
+        -o jsonpath='{.spec.expirationDays}' | grep -x 10
+  - command: >
+      oc get appcred ac-cinder
+        -n $NAMESPACE
+        -o jsonpath='{.spec.gracePeriodDays}' | grep -x 5
+  - command: >
+      oc get appcred ac-cinder
+        -n $NAMESPACE
+        -o jsonpath='{.spec.roles[*]}' | grep -w admin | grep -w service
+  - command: >
+      oc get appcred ac-cinder
+        -n $NAMESPACE
+        -o jsonpath='{.spec.unrestricted}' | grep -x true

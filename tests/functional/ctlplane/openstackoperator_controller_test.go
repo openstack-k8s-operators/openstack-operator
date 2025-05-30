@@ -3087,5 +3087,43 @@ var _ = Describe("OpenStackOperator controller galera and rabbitmq", func() {
 		})
 
 	})
+})
 
+var _ = Describe("Application Credentials are enabled in control plane", func() {
+	When("global application credentials are enabled", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["applicationCredential"] = map[string]interface{}{"enabled": true}
+			spec["cinder"] = map[string]interface{}{
+				"enabled": true,
+				"applicationCredential": map[string]interface{}{
+					"enabled":         true,
+					"expirationDays":  100,
+					"gracePeriodDays": 50,
+					"roles":           []string{"custom", "role"},
+					"unrestricted":    true,
+				},
+			}
+
+			DeferCleanup(th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should fill defaults", func() {
+			cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(cp.Spec.ApplicationCredential.Enabled).To(BeTrue())
+			Expect(*cp.Spec.ApplicationCredential.ExpirationDays).To(Equal(365))
+			Expect(*cp.Spec.ApplicationCredential.GracePeriodDays).To(Equal(182))
+			Expect(cp.Spec.ApplicationCredential.Roles).To(ConsistOf("service"))
+			Expect(*cp.Spec.ApplicationCredential.Unrestricted).To(BeFalse())
+
+			ac := cp.Spec.Cinder.ApplicationCredential
+			Expect(*ac.ExpirationDays).To(Equal(100))
+			Expect(*ac.GracePeriodDays).To(Equal(50))
+			Expect(ac.Roles).To(ConsistOf("custom", "role"))
+			Expect(*ac.Unrestricted).To(BeTrue())
+
+		})
+	})
 })
