@@ -2231,7 +2231,6 @@ spec:
                       maxLength: 100
                       type: string
                     storageClass:
-                      default: local-storage
                       description: StorageClass used to create any test-operator related
                         PVCs.
                       type: string
