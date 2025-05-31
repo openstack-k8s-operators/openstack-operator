@@ -17,7 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	"context"
 	"os"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -26,7 +25,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	goClient "sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -100,13 +98,9 @@ func (r *OpenStackVersion) ValidateCreate() (admission.Warnings, error) {
 		)
 	}
 
-	versionList := &OpenStackVersionList{}
+	versionList, err := GetOpenStackVersions(r.Namespace, versionWebhookClient)
 
-	listOpts := []client.ListOption{
-		client.InNamespace(r.Namespace),
-	}
-
-	if err := versionWebhookClient.List(context.TODO(), versionList, listOpts...); err != nil {
+	if err != nil {
 
 		return nil, apierrors.NewForbidden(
 			schema.GroupResource{

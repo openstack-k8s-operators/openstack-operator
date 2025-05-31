@@ -10,7 +10,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -221,12 +220,19 @@ func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	Log := GetLogger(ctx)
 
-	// return if OpenStackVersion CR already exists
-	if err := helper.GetClient().Get(ctx, types.NamespacedName{
-		Name:      instance.Name,
-		Namespace: instance.Namespace,
-	},
-		version); err == nil {
+	versionList, err := corev1beta1.GetOpenStackVersions(instance.Namespace, helper.GetClient())
+
+	if err != nil {
+		return ctrl.Result{}, nil, err
+	}
+
+	// This should be impossible because of the webhook, but we'll check to be sure
+	if len(versionList.Items) > 1 {
+		return ctrl.Result{}, nil, fmt.Errorf(
+			"multiple (%d) OpenStackVersions found in namespace %s: only one may be present",
+			len(versionList.Items), instance.Namespace)
+	} else if len(versionList.Items) == 1 {
+		version = &versionList.Items[0]
 		Log.Info(fmt.Sprintf("OpenStackVersion found. Name: %s", version.Name))
 	} else {
 		Log.Info(fmt.Sprintf("OpenStackVersion does not exist. Creating: %s", version.Name))

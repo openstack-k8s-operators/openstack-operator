@@ -1830,6 +1830,67 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("OpenStackControlplane instance is created and an OpenStackVersion already exists with an arbitrary name", func() {
+		BeforeEach(func() {
+			// create secrets and configmaps for services (needed so RabbitMQ CR is created and we can
+			// check for one of their presences to verify that OpenStackVersion passed initialization)
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")}))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackVersion(names.OpenStackVersionName2, GetDefaultOpenStackVersionSpec()),
+			)
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, GetDefaultOpenStackControlPlaneSpec()),
+			)
+		})
+
+		It("doesn't create a new OpenStackVersion", func() {
+
+			// openstackversion with different name than openstackcontrolplane exists
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName2)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.OwnerReferences).Should(HaveLen(1))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName2,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+
+				// openstackversion with openstackcontrolplane name doesn't exist (and therefore wasn't newly created)
+				openStackVersion := &corev1.OpenStackVersion{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.OpenStackControlplaneName, openStackVersion)).To(Not(Succeed()))
+			}, timeout, interval).Should(Succeed())
+
+			// openStackClient exists (it can only reach this point if openstackversion initialization reconciliation succeeds)
+			Eventually(func(g Gomega) {
+				openstackClient := GetOpenStackClient(names.OpenStackClientName)
+				g.Expect(openstackClient).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// Simulate the control plane being ready
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+			SimulateControlplaneReady()
+
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName2)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.Status.DeployedVersion).To(Equal(&osversion.Spec.TargetVersion))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
 	When("An OpenStackControlplane instance is created with nodeSelector", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()

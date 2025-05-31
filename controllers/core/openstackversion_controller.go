@@ -18,6 +18,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -221,18 +222,26 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	Log.Info("OpenStackVersion Initialized")
 
 	// lookup the current Controlplane object
-	controlPlane := &corev1beta1.OpenStackControlPlane{}
-	err = r.Client.Get(ctx, client.ObjectKey{
-		Namespace: instance.Namespace,
-		Name:      instance.Name,
-	}, controlPlane)
-	if err != nil {
-		if k8s_errors.IsNotFound(err) {
-			Log.Info("Controlplane not found:", "instance name", instance.Name)
-			return ctrl.Result{}, nil
-		}
+	controlPlaneList := &corev1beta1.OpenStackControlPlaneList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.Namespace),
+	}
+
+	if err := r.Client.List(ctx, controlPlaneList, listOpts...); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	// This should be impossible because of the webhook, but we'll check to be sure
+	if len(controlPlaneList.Items) > 1 {
+		return ctrl.Result{}, fmt.Errorf(
+			"multiple (%d) OpenStackControlPlanes found in namespace %s: only one may be present",
+			len(controlPlaneList.Items), instance.Namespace)
+	} else if len(controlPlaneList.Items) == 0 {
+		Log.Info("Controlplane not found:", "instance name", instance.Name)
+		return ctrl.Result{}, nil
+	}
+
+	controlPlane := &controlPlaneList.Items[0]
 
 	// lookup nodesets
 	dataplaneNodesets, err := openstack.GetDataplaneNodesets(ctx, controlPlane, versionHelper)

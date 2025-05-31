@@ -47,6 +47,7 @@ type Names struct {
 	Namespace                   string
 	OpenStackControlplaneName   types.NamespacedName
 	OpenStackVersionName        types.NamespacedName
+	OpenStackVersionName2       types.NamespacedName
 	KeystoneAPIName             types.NamespacedName
 	MemcachedName               types.NamespacedName
 	MemcachedCertName           types.NamespacedName
@@ -94,6 +95,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		OpenStackVersionName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      openstackControlplaneName.Name, // same name as controlplane
+		},
+		OpenStackVersionName2: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "arbitrary-openstackversion", // different name than controlplane
 		},
 		RootCAPublicName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -755,6 +760,13 @@ func SimulateControlplaneReady() {
 		th.SimulatePodReady(names.OpenStackClientName)
 		th.Logger.Info("Simulated OpenStackClient ready")
 
+	}, timeout, interval).Should(Succeed())
+
+	// simulate Ready condition=True
+	Eventually(func(g Gomega) {
+		instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+		instance.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+		g.Expect(th.K8sClient.Status().Update(th.Ctx, instance)).To(Succeed())
 	}, timeout, interval).Should(Succeed())
 }
 
