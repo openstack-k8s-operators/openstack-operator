@@ -102,10 +102,10 @@ github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.2025050513521
 github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20250505135218-9e2504c8dd47/go.mod h1:PmoNmbsbb/f/dZ55/N2t6LJFu9x8fbDIrIpmmYYq87E=
 github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250524075204-7f0919ea86d4 h1:k1ygvuSMODbMKJPSGODeUHq9dEbSXHJI/8wZdDgk/5E=
 github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250524075204-7f0919ea86d4/go.mod h1:9nOwqfg5sFJWXgABY+/eLZNcVwi6WCWVR4EVwxN8Cyw=
-github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250520115633-4e8b7a01e833 h1:gxBuSPmFcPzHJSODEgyN2mgciUdee6z1JkD81iuUkp4=
-github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250520115633-4e8b7a01e833/go.mod h1:zpmUOoLWshUxW+TZPccO05mdM0MeLZBfg4YrkD/pm24=
-github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250524080306-1d08bf82a065 h1:zaBuqxrkWoK3AgSPtDsLnYHjf6y6cCcEvivLYI9li7M=
-github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250524080306-1d08bf82a065/go.mod h1:kajFZBeDdytw8H0948pUOSoI67QNVMiyybmzvZ2wwcw=
+github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250530192023-2db001d36d96 h1:+KyAH0uso8JxRFK/BlmHxQYw+x4OEUwQRCohqJul1Ow=
+github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250530192023-2db001d36d96/go.mod h1:zpmUOoLWshUxW+TZPccO05mdM0MeLZBfg4YrkD/pm24=
+github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250530192246-b58990022c92 h1:JQophJsmAVWnvJMtiG5bAuWZ8pfIAo5sbvsVDtQvR4A=
+github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250530192246-b58990022c92/go.mod h1:kajFZBeDdytw8H0948pUOSoI67QNVMiyybmzvZ2wwcw=
 github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250509085724-f145148f2c92 h1:aVonArQ2F9kNyAuvUrGWc6Kac9F4ohzTBf/N27x784g=
 github.com/openstack-k8s-operators/infra-operator/apis v0.5.1-0.20250509085724-f145148f2c92/go.mod h1:IAk2+sedWN9NsjbMn/KB0ne8pZ3Jxs/uE90qxP4J2Nk=
 github.com/openstack-k8s-operators/ironic-operator/api v0.5.1-0.20250524065706-0f6bb825cb3a h1:FxhIB3+mx1Qy9U56xzHoJgji1VGH+Xy2kNpidKsU/Rs=
