@@ -1,0 +1,89 @@
+name: Build catalog for OLM upgrade testing
+
+on:
+  workflow_run:
+    workflows: ["openstack operator image builder"]
+    types:
+      - completed
+    secrets:
+      IMAGENAMESPACE:
+        required: true
+      QUAY_USERNAME:
+        required: true
+      QUAY_PASSWORD:
+        required: true
+      REDHATIO_USERNAME:
+        required: true
+      REDHATIO_PASSWORD:
+        required: true
+
+env:
+  imageregistry: 'quay.io'
+  imagenamespace: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
+  latesttag: latest
+
+jobs:
+  build-catalog:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ inputs.go_version }}
+        cache: false
+
+    - name: Checkout openstack-operator repository
+      uses: actions/checkout@v4
+      with:
+        path: ./openstack-operator
+
+    - name: Install opm
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        source: github
+        opm: 'latest'
+
+    - name: Log in to Quay Registry
+      uses: redhat-actions/podman-login@v1
+      with:
+        registry: ${{ env.imageregistry }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_PASSWORD }}
+
+    - name: Log in to Red Hat Registry
+      uses: redhat-actions/podman-login@v1
+      with:
+        registry: registry.redhat.io
+        username: ${{ secrets.REDHATIO_USERNAME }}
+        password: ${{ secrets.REDHATIO_PASSWORD }}
+
+    - name: Create the catalog index
+      shell: bash
+      run: ./openstack-operator/hack/catalog-build-olm-upgrade.sh
+      env:
+        #FIXME: these should be pulled from a YAML config in the main operator directory?
+        MAIN_VERSION: 0.3.0
+        FEATURE_RELEASE_VERSION: 0.2.0
+        FEATURE_RELEASE_BRANCH: 18.0-fr2
+        BUNDLE:  ${{ env.imageregistry }}/${{ env.imagenamespace }}/openstack-operator-bundle:${{ github.sha }}
+
+    - name: Buildah Action
+      id: build-operator-index-upgrade
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: openstack-operator-index-upgrade
+        tags: ${{ env.latesttag }} ${{ github.sha }}
+        containerfiles: |
+          ./catalog.Dockerfile
+
+    - name: Push openstack-operator-index-upgrade To ${{ env.imageregistry }}
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-operator-index-upgrade.outputs.image }}
+        tags: ${{ steps.build-operator-index-upgrade.outputs.tags }}
+        registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_PASSWORD }}
