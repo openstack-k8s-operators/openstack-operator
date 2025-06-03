@@ -60,12 +60,21 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
         resources:
+{{ if (eq $operatorName "infra") }}
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 10m
+            memory: 512Mi
+{{ else }}
           limits:
             cpu: 500m
             memory: 256Mi
           requests:
             cpu: 10m
             memory: 128Mi
+{{ end }}
         securityContext:
           allowPrivilegeEscalation: false
 {{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
