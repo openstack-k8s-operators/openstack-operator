@@ -149,6 +149,9 @@ const (
 
 	// OpenStackControlPlaneInstanceHaCMReadyCondition Status=True condition which indicates if InstanceHa CM is ready
 	OpenStackControlPlaneInstanceHaCMReadyCondition condition.Type = "OpenStackControlPlaneInstanceHaCMReadyCondition"
+
+	// OpenStackControlPlaneCertCleanupReadyCondition Status=True condition which indicates global certification cleanup is Ready
+	OpenStackControlPlaneCertCleanupReadyCondition condition.Type = "OpenStackControlPlaneCertCleanupReadyCondition"
 )
 
 // Common Messages used by API objects.
@@ -279,6 +282,9 @@ const (
 
 	// OpenStackControlPlaneNovaReadyErrorMessage
 	OpenStackControlPlaneNovaReadyErrorMessage = "OpenStackControlPlane Nova error occured %s"
+
+	// OpenStackControlPlaneCertCleanupReadyErrorMessage
+	OpenStackControlPlaneCertCleanupReadyErrorMessage = "OpenStackControlPlane Cert cleanup error occured %s"
 
 	// OpenStackControlPlaneHeatReadyInitMessage
 	OpenStackControlPlaneHeatReadyInitMessage = "OpenStackControlPlane Heat not started"
