@@ -1,0 +1,7 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: update-system
+spec:
+  playbook: osp.edpm.update_system
+  edpmServiceType: update-system

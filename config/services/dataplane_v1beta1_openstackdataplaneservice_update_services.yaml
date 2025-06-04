@@ -1,0 +1,7 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: update-services
+spec:
+  playbook: osp.edpm.update_services
+  edpmServiceType: update-services
