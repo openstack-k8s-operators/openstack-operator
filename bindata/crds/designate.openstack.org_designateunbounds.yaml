@@ -311,6 +311,22 @@ spec:
                 description: ServiceAccount - service account name used internally
                   to provide Designate services the default SA name
                 type: string
+              stubZones:
+                description: Allows configuring stub zone entries in the managed Unbound
+                  servers for the managed nameservers.
+                items:
+                  properties:
+                    name:
+                      type: string
+                    options:
+                      additionalProperties:
+                        type: string
+                      type: object
+                  required:
+                  - name
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
               topologyRef:
                 description: |-
                   TopologyRef to apply the Topology defined by the associated CR referenced
