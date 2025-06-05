@@ -13,8 +13,8 @@ require (
 	github.com/onsi/gomega v1.34.1
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20250524065422-f4a7451d1bf3
-	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20250505135219-b4ff765055a7
-	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20250505135218-9e2504c8dd47
+	github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20250601113139-c52404b71de4
+	github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20250601113140-aa757e613f20
 	github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20250524075204-7f0919ea86d4
 	github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20250530192023-2db001d36d96
 	github.com/openstack-k8s-operators/horizon-operator/api v0.5.1-0.20250530192246-b58990022c92
@@ -28,9 +28,9 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.5.1-0.20250429142319-453fcb22aa51
 	github.com/openstack-k8s-operators/manila-operator/api v0.5.1-0.20250526102308-6ad1d889fc1b
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.5.1-0.20250512070835-cee940f15bf8
-	github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20250520115348-cf6310689e58
+	github.com/openstack-k8s-operators/neutron-operator/api v0.5.1-0.20250601113435-7f10cb5aa83f
 	github.com/openstack-k8s-operators/nova-operator/api v0.5.1-0.20250520124107-b6a870724e0f
-	github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20250520065326-7786251e5dfb
+	github.com/openstack-k8s-operators/octavia-operator/api v0.5.1-0.20250601113706-3acc6d7d6d32
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.5.1-0.20250513053454-0e15fa647f5e
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.5.1-0.20250515082924-91a4e95349ad
