@@ -111,6 +111,33 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              endpoints:
+                description: Endpoints - current status of latest configured endpoints
+                  for the service
+                items:
+                  description: Endpoint -
+                  properties:
+                    id:
+                      description: ID - endpoint id
+                      type: string
+                    interface:
+                      description: Interface - public, internal, admin
+                      type: string
+                    url:
+                      description: URL - endpoint url
+                      type: string
+                  required:
+                  - id
+                  - interface
+                  - url
+                  type: object
+                type: array
+              observedGeneration:
+                description: ObservedGeneration - the most recent generation observed
+                  for this service. If the observed generation is less than the spec
+                  generation, then the controller has not processed the latest changes.
+                format: int64
+                type: integer
               serviceID:
                 type: string
             type: object

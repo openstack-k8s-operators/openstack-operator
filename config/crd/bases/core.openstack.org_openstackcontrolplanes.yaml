@@ -2482,6 +2482,20 @@ spec:
                             type: object
                           serviceAccount:
                             type: string
+                          stubZones:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                                options:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                              required:
+                              - name
+                              type: object
+                            type: array
+                            x-kubernetes-list-type: atomic
                           topologyRef:
                             properties:
                               name:
