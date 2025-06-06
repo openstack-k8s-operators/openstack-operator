@@ -66,6 +66,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneConfigHash string
 	var dataplaneGlobalServiceName types.NamespacedName
 	var dataplaneUpdateServiceName types.NamespacedName
+	var newDataplaneUpdateServiceName types.NamespacedName
 
 	defaultEdpmServiceList := []string{
 		"edpm_frr_image",
@@ -116,6 +117,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		}
 		dataplaneUpdateServiceName = types.NamespacedName{
 			Name:      "update",
+			Namespace: namespace,
+		}
+		newDataplaneUpdateServiceName = types.NamespacedName{
+			Name:      "update-services",
 			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_SERVICES", "../../../config/services")
@@ -1290,6 +1295,54 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				// Make an AnsibleEE name for each service
 				ansibleeeName := types.NamespacedName{
 					Name:      "update-edpm-deployment-edpm-compute-nodeset",
+					Namespace: namespace,
+				}
+				ansibleEE := GetAnsibleee(ansibleeeName)
+				ansibleEE.Status.Succeeded = 1
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+		})
+		It("NodeSet.Status.DeployedVersion should be set to latest version", Label("update"), func() {
+			Eventually(func() string {
+				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				return dataplaneNodeSetInstance.Status.DeployedVersion
+			}).Should(Equal("0.0.1"))
+		})
+	})
+
+	When("A DataPlaneNodeSet is created with NoNodes and a MinorUpdateServices OpenStackDataPlaneDeployment is created", func() {
+		BeforeEach(func() {
+
+			dataplanev1.SetupDefaults()
+			updateServiceSpec := map[string]interface{}{
+				"playbook": "osp.edpm.update_services",
+			}
+			CreateDataPlaneServiceFromSpec(newDataplaneUpdateServiceName, updateServiceSpec)
+			DeferCleanup(th.DeleteService, newDataplaneUpdateServiceName)
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(false)))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, MinorUpdateServicesDataPlaneDeploymentSpec()))
+			openstackVersionName := types.NamespacedName{
+				Name:      "openstackversion",
+				Namespace: namespace,
+			}
+			err := os.Setenv("OPENSTACK_RELEASE_VERSION", "0.0.1")
+			Expect(err).NotTo(HaveOccurred())
+			openstackv1.SetupVersionDefaults()
+			DeferCleanup(th.DeleteInstance, CreateOpenStackVersion(openstackVersionName))
+
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+
+			Eventually(func(g Gomega) {
+				// Make an AnsibleEE name for each service
+				ansibleeeName := types.NamespacedName{
+					Name:      "update-services-edpm-deployment-edpm-compute-nodeset",
 					Namespace: namespace,
 				}
 				ansibleEE := GetAnsibleee(ansibleeeName)
