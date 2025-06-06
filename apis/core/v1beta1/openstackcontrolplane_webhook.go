@@ -83,7 +83,6 @@ var _ webhook.Validator = &OpenStackControlPlane{}
 func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 	openstackcontrolplanelog.Info("validate create", "name", r.Name)
 
-	var allErrs field.ErrorList
 	var allWarn []string
 	basePath := field.NewPath("spec")
 
@@ -118,7 +117,15 @@ func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 		)
 	}
 
-	allWarn, allErrs = r.ValidateCreateServices(basePath)
+	allErrs, err := r.ValidateVersion()
+
+	// Version validation can generate non-field errors, so we consider those first
+	if err != nil {
+		return nil, err
+	}
+
+	allWarn, errs := r.ValidateCreateServices(basePath)
+	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
 		allErrs = append(allErrs, err)
@@ -670,6 +677,56 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 	}
 
 	return allErrs
+}
+
+func (r *OpenStackControlPlane) ValidateVersion() (field.ErrorList, error) {
+	var allErrs field.ErrorList
+
+	openStackVersionList, err := GetOpenStackVersions(r.Namespace, ctlplaneWebhookClient)
+
+	if err != nil {
+		return allErrs, apierrors.NewForbidden(
+			schema.GroupResource{
+				Group:    GroupVersion.WithKind("OpenStackControlPlane").Group,
+				Resource: GroupVersion.WithKind("OpenStackControlPlane").Kind,
+			}, r.GetName(), &field.Error{
+				Type:     field.ErrorTypeForbidden,
+				Field:    "",
+				BadValue: r.Name,
+				Detail:   err.Error(),
+			},
+		)
+	}
+
+	if len(openStackVersionList.Items) > 0 {
+		if len(openStackVersionList.Items) > 1 {
+			return allErrs, apierrors.NewForbidden(
+				schema.GroupResource{
+					Group:    GroupVersion.WithKind("OpenStackControlPlane").Group,
+					Resource: GroupVersion.WithKind("OpenStackControlPlane").Kind,
+				}, r.GetName(), &field.Error{
+					Type:     field.ErrorTypeForbidden,
+					Field:    "",
+					BadValue: r.Name,
+					Detail: fmt.Sprintf(
+						"multiple (%d) OpenStackVersions found in namespace %s: only one may be present.  Please rectify before creating OpenStackControlPlane",
+						len(openStackVersionList.Items), r.Namespace),
+				},
+			)
+
+		}
+
+		openStackVersion := openStackVersionList.Items[0]
+
+		if openStackVersion.Name != r.Name {
+			err := field.Invalid(field.NewPath("metadata").Child("name"),
+				r.Name, fmt.Sprintf("OpenStackControlPlane '%s' must have same name as the existing '%s' OpenStackVersion",
+					r.Name, openStackVersion.Name))
+			allErrs = append(allErrs, err)
+		}
+	}
+
+	return allErrs, nil
 }
 
 // +kubebuilder:webhook:path=/mutate-core-openstack-org-v1beta1-openstackcontrolplane,mutating=true,failurePolicy=fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta1,name=mopenstackcontrolplane.kb.io,admissionReviewVersions=v1

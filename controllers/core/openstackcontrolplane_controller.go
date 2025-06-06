@@ -203,8 +203,21 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	Log.Info("Looking up the current OpenStackVersion")
 	ctrlResult, version, err := openstack.ReconcileVersion(ctx, instance, helper)
 	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
+		// It appears that openstack.ReconcileVersion never returns a non-empty ctrlResult,
+		// but we'll put this condition update here just in case it ever changes
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyRunningMessage))
 		return ctrlResult, nil
 	}
 
@@ -216,7 +229,13 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		Log,
 	)
 	if err != nil {
-		Log.Error(err, "unable to create helper")
+		Log.Error(err, "unable to create version helper")
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyErrorMessage,
+			err.Error()))
 		return ctrl.Result{}, err
 	}
 
@@ -227,8 +246,15 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 
 	// wait until the version is initialized so we have images on the version.Status
 	if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionInitialized) {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyRunningMessage))
 		return ctrlResult, nil
 	}
+
+	instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyCondition, corev1beta1.OpenStackControlPlaneOpenStackVersionInitializationReadyMessage)
 
 	if instance.Status.DeployedVersion == nil || version.Spec.TargetVersion == *instance.Status.DeployedVersion { //revive:disable:indent-error-flow
 		// green field deployment or no minor update in progress

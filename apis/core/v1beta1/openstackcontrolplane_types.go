@@ -912,6 +912,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneBarbicanReadyCondition, condition.InitReason, OpenStackControlPlaneBarbicanReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneRedisReadyCondition, condition.InitReason, OpenStackControlPlaneRedisReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneOpenStackVersionInitializationReadyCondition, condition.InitReason, OpenStackControlPlaneOpenStackVersionInitializationReadyInitMessage),
 
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),

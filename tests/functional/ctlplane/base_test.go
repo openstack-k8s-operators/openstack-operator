@@ -47,6 +47,7 @@ type Names struct {
 	Namespace                          string
 	OpenStackControlplaneName          types.NamespacedName
 	OpenStackVersionName               types.NamespacedName
+	OpenStackVersionName2              types.NamespacedName
 	KeystoneAPIName                    types.NamespacedName
 	MemcachedName                      types.NamespacedName
 	MemcachedCertName                  types.NamespacedName
@@ -97,6 +98,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		OpenStackVersionName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      openstackControlplaneName.Name, // same name as controlplane
+		},
+		OpenStackVersionName2: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "arbitrary-openstackversion", // different name than controlplane
 		},
 		RootCAPublicName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,

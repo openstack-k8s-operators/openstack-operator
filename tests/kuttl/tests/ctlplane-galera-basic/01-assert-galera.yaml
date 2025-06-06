@@ -257,6 +257,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneOVNReady
+  - message: OpenStackControlPlane OpenStackVersion initialized
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneOpenStackVersionInitializationReadyCondition
   - message: OpenStackControlPlane PlacementAPI completed
     reason: Ready
     status: "True"
