@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -17,6 +18,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+var count int
 
 // ReconcilePlacementAPI -
 func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
@@ -105,6 +108,13 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
 		}
+		if count != 10 {
+			Log.Info("XXX delaying placement endpoint update")
+			time.Sleep(10 * time.Second)
+			count++
+			return ctrl.Result{Requeue: true}, nil
+		}
+		Log.Info("XXX continues with placement endpoint update")
 		// set service overrides
 		instance.Spec.Placement.Template.Override.Service = endpointDetails.GetEndpointServiceOverrides()
 		// update TLS settings with cert secret
