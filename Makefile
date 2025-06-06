@@ -188,7 +188,13 @@ golangci-lint:
 	$(LOCALBIN)/golangci-lint run --fix
 
 MAX_PROCS := 5
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
 NUM_PROCS := $(shell expr $(shell nproc --ignore 2) / 2)
+endif
+ifeq ($(UNAME_S),Darwin)
+NUM_PROCS := $(shell expr $(shell sysctl -n hw.logicalcpu) / 2)
+endif
 PROCS ?= $(shell if [ $(NUM_PROCS) -gt $(MAX_PROCS) ]; then echo $(MAX_PROCS); else echo $(NUM_PROCS); fi)
 PROC_CMD = --procs $(PROCS)
 
