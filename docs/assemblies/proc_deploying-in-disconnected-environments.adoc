@@ -8,9 +8,9 @@ Deploying in disconnected environments can be achieved largely by following the 
 == Technical Implementation
 The details provided in this section are for informational purposes only. Users should not need to interact with anything additional after completing the above mentioned OLM mirroring process.
 
-The `openstack-operator` contains a list of related images that will ensure all required images for the deployment are mirrored following the above OpenShift process. Once images are mirrored, the `ImageContentSourcePolicy` custom resource (CR) is created. This process results in a `MachineConfig` called `99-master-genereted-registries` being updated in the cluster. The `99-master-generated-registries` `MachineConfig` contains a `registries.conf` file that is applied to all of the OpenShift nodes in the cluster.
+The `openstack-operator` contains a list of related images that will ensure all required images for the deployment are mirrored following the above OpenShift process. Once images are mirrored, either an `ImageContentSourcePolicy` custom resource (CR), or a `ImageDigestMirrorSet` CR is created. This process results in a `MachineConfig` called `99-master-genereted-registries` being updated in the cluster. The `99-master-generated-registries` `MachineConfig` contains a `registries.conf` file that is applied to all of the OpenShift nodes in the cluster.
 
-In order for dataplane nodes to integrate cleanly with this process, openstack-operator checks for the existence of an `ImageContentSourcePolicy`. If one is found, it will read the `registries.conf` file from the `99-master-generated-registries` `MachineConfig`. The openstack-operator will then set two variables in the Ansible inventory for the nodes.
+In order for dataplane nodes to integrate cleanly with this process, openstack-operator checks for the existence of an `ImageContentSourcePolicy` or an `ImageDigestMirrorSet`. If one is found, it will read the `registries.conf` file from the `99-master-generated-registries` `MachineConfig`. The openstack-operator will then set two variables in the Ansible inventory for the nodes.
 
 [,yaml]
 ----
