@@ -182,6 +182,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			OctaviaWorkerImage:            getImg(instance.Spec.CustomContainerImages.OctaviaWorkerImage, defaults.OctaviaWorkerImage),
 			OctaviaRsyslogImage:           getImg(instance.Spec.CustomContainerImages.OctaviaRsyslogImage, defaults.OctaviaRsyslogImage),
 			OpenstackClientImage:          getImg(instance.Spec.CustomContainerImages.OpenstackClientImage, defaults.OpenstackClientImage),
+			OpenstackLightspeedImage:      getImg(instance.Spec.CustomContainerImages.OpenstackLightspeedImage, defaults.OpenstackLightspeedImage),
 			OsContainerImage:              getImg(instance.Spec.CustomContainerImages.OsContainerImage, defaults.OsContainerImage),
 			OvnControllerImage:            getImg(instance.Spec.CustomContainerImages.OvnControllerImage, defaults.OvnControllerImage),
 			OvnControllerOvsImage:         getImg(instance.Spec.CustomContainerImages.OvnControllerOvsImage, defaults.OvnControllerOvsImage),
