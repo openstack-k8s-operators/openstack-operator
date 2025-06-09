@@ -744,15 +744,9 @@ func SimulateGalaraReady() {
 
 }
 
-func SimulateControlplaneReady() {
+func SimulateMemcachedReady() {
+
 	instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-
-	SimulateRabbitmqReady()
-	SimulateGalaraReady()
-
-	if instance.Spec.Keystone.Enabled {
-		keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
-	}
 
 	if instance.Spec.Memcached.Enabled {
 		if instance.Spec.TLS.PodLevel.Enabled {
@@ -761,6 +755,19 @@ func SimulateControlplaneReady() {
 			infra.SimulateMemcachedReady(names.MemcachedName)
 
 		}
+	}
+
+}
+
+func SimulateControlplaneReady() {
+	instance := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+	SimulateRabbitmqReady()
+	SimulateGalaraReady()
+	SimulateMemcachedReady()
+
+	if instance.Spec.Keystone.Enabled {
+		keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
 	}
 
 	if instance.Spec.Ovn.Enabled {
