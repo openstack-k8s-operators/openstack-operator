@@ -223,6 +223,26 @@ webhooks:
     service:
       name: openstack-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-lightspeed-openstack-org-v1beta1-openstacklightspeed
+  failurePolicy: Fail
+  name: mopenstacklightspeed.kb.io
+  rules:
+  - apiGroups:
+    - lightspeed.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstacklightspeeds
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
       path: /mutate-core-openstack-org-v1beta1-openstackcontrolplane
   failurePolicy: Fail
   name: mopenstackcontrolplane.kb.io
@@ -351,6 +371,26 @@ webhooks:
     - UPDATE
     resources:
     - openstackclients
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-lightspeed-openstack-org-v1beta1-openstacklightspeed
+  failurePolicy: Fail
+  name: vopenstacklightspeed.kb.io
+  rules:
+  - apiGroups:
+    - lightspeed.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstacklightspeeds
   sideEffects: None
 - admissionReviewVersions:
   - v1

@@ -90,6 +90,9 @@ const (
 	// OpenStackControlPlaneClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackControlPlaneClientReadyCondition condition.Type = "OpenStackControlPlaneClientReady"
 
+	// OpenStackControlPlaneLightspeedReadyCondition Status=True condition which indicates if OpenStackLightspeed is configured and operational
+	OpenStackControlPlaneLightspeedReadyCondition condition.Type = "OpenStackControlPlaneLightspeedReady"
+
 	// OpenStackClientReadyCondition Status=True condition which indicates if OpenStackClient is configured and operational
 	OpenStackClientReadyCondition condition.Type = "OpenStackClientReady"
 
@@ -324,6 +327,15 @@ const (
 
 	// OpenStackControlPlaneClientReadyErrorMessage
 	OpenStackControlPlaneClientReadyErrorMessage = "OpenStackControlPlane Client error occured %s"
+
+	// OpenStackControlPlaneLightSpeedReadyErrorMessage
+	OpenStackControlPlaneLightSpeedReadyErrorMessage = "OpenStackControlPlane LightSpeed error occured %s"
+
+	// OpenStackControlPlaneLightSpeedReadyRunningMessage
+	OpenStackControlPlaneLightSpeedReadyRunningMessage = "OpenStackControlPlane LightSpeed in progress"
+
+	// OpenStackControlPlaneLightSpeedReadyMessage
+	OpenStackControlPlaneLightSpeedReadyMessage = "OpenStackControlPlane LightSpeed completed"
 
 	// OpenStackControlPlaneHorizonReadyInitMessage
 	OpenStackControlPlaneHorizonReadyInitMessage = "OpenStackControlPlane Horizon not started"

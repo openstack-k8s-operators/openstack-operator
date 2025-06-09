@@ -330,6 +330,22 @@ spec:
       - description: List of environment variables to set in the container.
         displayName: Env
         path: openstackclient.template.env
+      - description: OpenStackLightspeed - Parameters related to the OpenStackLightspeed
+        displayName: OpenStack Lightspeed
+        path: openstacklightspeed
+      - description: Enabled - Whether the OpenStack LightSpeed service should be
+          deployed and managed
+        displayName: Enabled
+        path: openstacklightspeed.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the OpenStackLightspeed
+          Resource
+        displayName: Template
+        path: openstacklightspeed.template
+      - description: Type of the provider serving the LLM
+        displayName: Provider Type
+        path: openstacklightspeed.template.llmEndpointType
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn
@@ -612,6 +628,16 @@ spec:
         path: conditions
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
+      version: v1beta1
+    - description: OpenStackLightspeed is the Schema for the openstacklightspeeds
+        API
+      displayName: Open Stack Lightspeed
+      kind: OpenStackLightspeed
+      name: openstacklightspeeds.lightspeed.openstack.org
+      specDescriptors:
+      - description: Type of the provider serving the LLM
+        displayName: Provider Type
+        path: llmEndpointType
       version: v1beta1
     - description: OpenStack is the Schema for the openstacks API
       displayName: OpenStack
