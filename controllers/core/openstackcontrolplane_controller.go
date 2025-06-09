@@ -314,6 +314,20 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 					return ctrlResult, nil
 				}
 			}
+
+			// Memcached
+			ctrlResult, err = openstack.ReconcileMemcacheds(ctx, instance, version, helper)
+			if err != nil {
+				return ctrl.Result{}, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			} else {
+				if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateMemcached) {
+					Log.Info("Returning for Memcached minor update reconcile")
+					return ctrlResult, nil
+				}
+			}
+
 			// Keystone API
 			ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, version, helper)
 			if err != nil {
