@@ -187,6 +187,8 @@ spec:
           value: quay.io/podified-master-centos9/openstack-watcher-applier:current-podified
         - name: RELATED_IMAGE_WATCHER_DECISION_ENGINE_IMAGE_URL_DEFAULT
           value: quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_LIGHTSPEED_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-lightspeed/rag-content:os-docs-2024.2
           # NOTE: TEST_ images below do not get released downstream. They should not be prefixed with RELATED
         - name: TEST_TOBIKO_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
