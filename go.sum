@@ -152,6 +152,8 @@ github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.2025073110051
 github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250731100510-eb1934ea2786/go.mod h1:462IbW/UydmvLhQNfZPmDafav23FxibUiA34yGxtR9k=
 github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20250716173033-399c3fd847d8 h1:j4PSOl9okzET5AjVIhqTXWawKbgQO3WnCZhCok4kwqM=
 github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20250716173033-399c3fd847d8/go.mod h1:MoBtDQ4FFH6jaTRRdadgEVhH/TjnyrfiOFnsC/wz6Aw=
+github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20250730131205-1720b37fea7f h1:6I2FFzRAws3Udu0QSer/bZq0xluKBXdJ0E7bFrxDtcQ=
+github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20250730131205-1720b37fea7f/go.mod h1:XTKoOjXqybRkS7gwi02VxkQmDWud4OUKivWi9TJ+8Uk=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

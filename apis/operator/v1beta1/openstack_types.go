@@ -46,6 +46,7 @@ const (
 	SwiftOperatorName              = "swift"
 	TelemetryOperatorName          = "telemetry"
 	TestOperatorName               = "test"
+	WatcherOperatorName            = "watcher"
 	// ReplicasEnabled - default replicas count when enabled
 	ReplicasEnabled int32 = 1
 	// ReplicasDisabled - replicas when disabled
@@ -173,6 +174,9 @@ var (
 		{
 			Name: TestOperatorName,
 		},
+		{
+			Name: WatcherOperatorName,
+		},
 	}
 )
 
@@ -189,7 +193,7 @@ type OpenStackSpec struct {
 type OperatorSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:validation:Enum:=openstack;barbican;cinder;designate;glance;heat;horizon;infra;ironic;keystone;manila;mariadb;neutron;nova;octavia;openstack-baremetal;ovn;placement;rabbitmq-cluster;swift;telemetry;test
+	// +kubebuilder:validation:Enum:=openstack;barbican;cinder;designate;glance;heat;horizon;infra;ironic;keystone;manila;mariadb;neutron;nova;octavia;openstack-baremetal;ovn;placement;rabbitmq-cluster;swift;telemetry;test;watcher
 	// Name of the service operators.
 	Name string `json:"name"`
 
