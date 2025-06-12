@@ -38,6 +38,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250616164206-55a392d9960a
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250610090515-ca121a83a21c
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20250617101426-ac3151661f64
+	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20250610103939-ad2626858b6d
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/cluster-operator/v2 v2.11.0
 	github.com/stretchr/testify v1.10.0

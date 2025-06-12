@@ -1,0 +1,1020 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  creationTimestamp: null
+  name: watchers.watcher.openstack.org
+spec:
+  group: watcher.openstack.org
+  names:
+    kind: Watcher
+    listKind: WatcherList
+    plural: watchers
+    singular: watcher
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Watcher is the Schema for the watchers API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: WatcherSpec defines the desired state of Watcher
+            properties:
+              apiContainerImageURL:
+                description: APIContainerImageURL
+                type: string
+              apiOverride:
+                description: |-
+                  APIOverride, provides the ability to override the generated
+                  manifest of several child resources.
+                properties:
+                  route:
+                    description: Route overrides to use when creating the public service
+                      endpoint
+                    properties:
+                      metadata:
+                        description: |-
+                          EmbeddedLabelsAnnotations is an embedded subset of the fields included in k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta.
+                          Only labels and annotations are included.
+                          New labels/annotations get merged with the ones created by the operator. If a privided
+                          annotation/label is the same as one created by the service operator, the ones provided
+                          via this override will replace the one from the operator.
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            description: |-
+                              Annotations is an unstructured key value map stored with a resource that may be
+                              set by external tools to store and retrieve arbitrary metadata. They are not
+                              queryable and should be preserved when modifying objects.
+                              More info: http://kubernetes.io/docs/user-guide/annotations
+                            type: object
+                          labels:
+                            additionalProperties:
+                              type: string
+                            description: |-
+                              Map of string keys and values that can be used to organize and categorize
+                              (scope and select) objects. May match selectors of replication controllers
+                              and services.
+                              More info: http://kubernetes.io/docs/user-guide/labels
+                            type: object
+                        type: object
+                      spec:
+                        description: |-
+                          Spec defines the behavior of a Route.
+                          https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+
+
+                          The spec will be merged using StrategicMergePatch
+                            - Provided parameters will override the ones from the original spec.
+                            - Required parameters of sub structs have to be named.
+                            - For parameters which are list of struct it depends on the patchStrategy defined on the list
+                              https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/#notes-on-the-strategic-merge-patch
+                              If `patchStrategy:"merge"` is set, src and dst list gets merged, otherwise they get replaced.
+                        properties:
+                          alternateBackends:
+                            description: |-
+                              alternateBackends allows up to 3 additional backends to be assigned to the route.
+                              Only the Service kind is allowed, and it will be defaulted to Service.
+                              Use the weight field in RouteTargetReference object to specify relative preference.
+                            items:
+                              description: |-
+                                TargetReference specifies the target that resolve into endpoints. Only the 'Service'
+                                kind is allowed. Use 'weight' field to emphasize one over others.
+                                Copy of RouteTargetReference in https://github.com/openshift/api/blob/master/route/v1/types.go,
+                                parameters set to be optional, have omitempty, and no default.
+                              properties:
+                                kind:
+                                  description: The kind of target that the route is
+                                    referring to. Currently, only 'Service' is allowed
+                                  enum:
+                                  - Service
+                                  - ""
+                                  type: string
+                                name:
+                                  description: name of the service/target that is
+                                    being referred to. e.g. name of the service
+                                  type: string
+                                weight:
+                                  description: |-
+                                    weight as an integer between 0 and 256, default 100, that specifies the target's relative weight
+                                    against other target reference objects. 0 suppresses requests to this backend.
+                                  format: int32
+                                  maximum: 256
+                                  minimum: 0
+                                  type: integer
+                              type: object
+                            maxItems: 3
+                            type: array
+                          host:
+                            description: |-
+                              host is an alias/DNS that points to the service. Optional.
+                              If not specified a route name will typically be automatically
+                              chosen.
+                              Must follow DNS952 subdomain conventions.
+                            maxLength: 253
+                            pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                            type: string
+                          path:
+                            description: path that the router watches for, to route
+                              traffic for to the service. Optional
+                            pattern: ^/
+                            type: string
+                          port:
+                            description: |-
+                              If specified, the port to be used by the router. Most routers will use all
+                              endpoints exposed by the service by default - set this value to instruct routers
+                              which port to use.
+                            properties:
+                              targetPort:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                description: |-
+                                  The target port on pods selected by the service this route points to.
+                                  If this is a string, it will be looked up as a named port in the target
+                                  endpoints port list. Required
+                                x-kubernetes-int-or-string: true
+                            required:
+                            - targetPort
+                            type: object
+                          subdomain:
+                            description: |-
+                              subdomain is a DNS subdomain that is requested within the ingress controller's
+                              domain (as a subdomain). If host is set this field is ignored. An ingress
+                              controller may choose to ignore this suggested name, in which case the controller
+                              will report the assigned name in the status.ingress array or refuse to admit the
+                              route. If this value is set and the server does not support this field host will
+                              be populated automatically. Otherwise host is left empty. The field may have
+                              multiple parts separated by a dot, but not all ingress controllers may honor
+                              the request. This field may not be changed after creation except by a user with
+                              the update routes/custom-host permission.
+
+
+                              Example: subdomain `frontend` automatically receives the router subdomain
+                              `apps.mycluster.com` to have a full hostname `frontend.apps.mycluster.com`.
+                            maxLength: 253
+                            pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                            type: string
+                          tls:
+                            description: The tls field provides the ability to configure
+                              certificates and termination for the route.
+                            properties:
+                              caCertificate:
+                                description: caCertificate provides the cert authority
+                                  certificate contents
+                                type: string
+                              certificate:
+                                description: |-
+                                  certificate provides certificate contents. This should be a single serving certificate, not a certificate
+                                  chain. Do not include a CA certificate.
+                                type: string
+                              destinationCACertificate:
+                                description: |-
+                                  destinationCACertificate provides the contents of the ca certificate of the final destination.  When using reencrypt
+                                  termination this file should be provided in order to have routers use it for health checks on the secure connection.
+                                  If this field is not specified, the router may provide its own destination CA and perform hostname validation using
+                                  the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically
+                                  verify.
+                                type: string
+                              externalCertificate:
+                                description: |-
+                                  externalCertificate provides certificate contents as a secret reference.
+                                  This should be a single serving certificate, not a certificate
+                                  chain. Do not include a CA certificate. The secret referenced should
+                                  be present in the same namespace as that of the Route.
+                                  Forbidden when `certificate` is set.
+                                properties:
+                                  name:
+                                    description: |-
+                                      name of the referent.
+                                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    type: string
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              insecureEdgeTerminationPolicy:
+                                description: |-
+                                  insecureEdgeTerminationPolicy indicates the desired behavior for insecure connections to a route. While
+                                  each router may make its own decisions on which ports to expose, this is normally port 80.
+
+
+                                  If a route does not specify insecureEdgeTerminationPolicy, then the default behavior is "None".
+
+
+                                  * Allow - traffic is sent to the server on the insecure port (edge/reencrypt terminations only).
+
+
+                                  * None - no traffic is allowed on the insecure port (default).
+
+
+                                  * Redirect - clients are redirected to the secure port.
+                                enum:
+                                - Allow
+                                - None
+                                - Redirect
+                                - ""
+                                type: string
+                              key:
+                                description: key provides key file contents
+                                type: string
+                              termination:
+                                description: |-
+                                  termination indicates termination type.
+
+
+                                  * edge - TLS termination is done by the router and http is used to communicate with the backend (default)
+                                  * passthrough - Traffic is sent straight to the destination without the router providing TLS termination
+                                  * reencrypt - TLS termination is done by the router and https is used to communicate with the backend
+
+
+                                  Note: passthrough termination is incompatible with httpHeader actions
+                                enum:
+                                - edge
+                                - reencrypt
+                                - passthrough
+                                type: string
+                            required:
+                            - termination
+                            type: object
+                            x-kubernetes-validations:
+                            - message: 'cannot have both spec.tls.termination: passthrough
+                                and spec.tls.insecureEdgeTerminationPolicy: Allow'
+                              rule: 'has(self.termination) && has(self.insecureEdgeTerminationPolicy)
+                                ? !((self.termination==''passthrough'') && (self.insecureEdgeTerminationPolicy==''Allow''))
+                                : true'
+                          to:
+                            description: |-
+                              to is an object the route should use as the primary backend. Only the Service kind
+                              is allowed, and it will be defaulted to Service. If the weight field (0-256 default 100)
+                              is set to zero, no traffic will be sent to this backend.
+                            properties:
+                              kind:
+                                description: The kind of target that the route is
+                                  referring to. Currently, only 'Service' is allowed
+                                enum:
+                                - Service
+                                - ""
+                                type: string
+                              name:
+                                description: name of the service/target that is being
+                                  referred to. e.g. name of the service
+                                type: string
+                              weight:
+                                description: |-
+                                  weight as an integer between 0 and 256, default 100, that specifies the target's relative weight
+                                  against other target reference objects. 0 suppresses requests to this backend.
+                                format: int32
+                                maximum: 256
+                                minimum: 0
+                                type: integer
+                            type: object
+                          wildcardPolicy:
+                            description: |-
+                              Wildcard policy if any for the route.
+                              Currently only 'Subdomain' or 'None' is allowed.
+                            enum:
+                            - None
+                            - Subdomain
+                            - ""
+                            type: string
+                        type: object
+                    type: object
+                  tls:
+                    description: TLS - overrides tls parameters for public endpoint
+                    properties:
+                      secretName:
+                        description: |-
+                          Name of a Secret in the same Namespace as the service, containing the server's private key, public certificate
+                          and CA certificate for TLS.
+                          The Secret must store these as tls.key, tls.crt and ca.crt respectively.
+                        type: string
+                    type: object
+                type: object
+              apiServiceTemplate:
+                default:
+                  replicas: 1
+                description: APIServiceTemplate - define the watcher-api service
+                properties:
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/<service>/<service>.conf.d directory as a custom config file.
+                    type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      NodeSelector to target subset of worker nodes running this component. Setting here overrides
+                      any global NodeSelector settings within the Watcher CR.
+                    type: object
+                  override:
+                    description: |-
+                      Override, provides the ability to override the generated manifest of
+                      several child resources.
+                    properties:
+                      service:
+                        additionalProperties:
+                          description: |-
+                            RoutedOverrideSpec - a routed service override configuration for the Service created to serve traffic
+                            to the cluster. Allows for the manifest of the created Service to be overwritten with custom configuration.
+                          properties:
+                            endpointURL:
+                              type: string
+                            metadata:
+                              description: |-
+                                EmbeddedLabelsAnnotations is an embedded subset of the fields included in k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta.
+                                Only labels and annotations are included.
+                              properties:
+                                annotations:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Annotations is an unstructured key value map stored with a resource that may be
+                                    set by external tools to store and retrieve arbitrary metadata. They are not
+                                    queryable and should be preserved when modifying objects.
+                                    More info: http://kubernetes.io/docs/user-guide/annotations
+                                  type: object
+                                labels:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Map of string keys and values that can be used to organize and categorize
+                                    (scope and select) objects. May match selectors of replication controllers
+                                    and services.
+                                    More info: http://kubernetes.io/docs/user-guide/labels
+                                  type: object
+                              type: object
+                            spec:
+                              description: |-
+                                OverrideServiceSpec is a subset of the fields included in https://pkg.go.dev/k8s.io/api@v0.26.6/core/v1#ServiceSpec
+                                Limited to Type, SessionAffinity, LoadBalancerSourceRanges, ExternalName, ExternalTrafficPolicy, SessionAffinityConfig,
+                                IPFamilyPolicy, LoadBalancerClass and InternalTrafficPolicy
+                              properties:
+                                externalName:
+                                  description: |-
+                                    externalName is the external reference that discovery mechanisms will
+                                    return as an alias for this service (e.g. a DNS CNAME record). No
+                                    proxying will be involved.  Must be a lowercase RFC-1123 hostname
+                                    (https://tools.ietf.org/html/rfc1123) and requires `type` to be "ExternalName".
+                                  type: string
+                                externalTrafficPolicy:
+                                  description: |-
+                                    externalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on one of the Service's "externally-facing" addresses (NodePorts,
+                                    ExternalIPs, and LoadBalancer IPs). If set to "Local", the proxy will configure
+                                    the service in a way that assumes that external load balancers will take care
+                                    of balancing the service traffic between nodes, and so each node will deliver
+                                    traffic only to the node-local endpoints of the service, without masquerading
+                                    the client source IP. (Traffic mistakenly sent to a node with no endpoints will
+                                    be dropped.) The default value, "Cluster", uses the standard behavior of
+                                    routing to all endpoints evenly (possibly modified by topology and other
+                                    features). Note that traffic sent to an External IP or LoadBalancer IP from
+                                    within the cluster will always get "Cluster" semantics, but clients sending to
+                                    a NodePort from within the cluster may need to take traffic policy into account
+                                    when picking a node.
+                                  type: string
+                                internalTrafficPolicy:
+                                  description: |-
+                                    InternalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on the ClusterIP. If set to "Local", the proxy will assume that pods
+                                    only want to talk to endpoints of the service on the same node as the pod,
+                                    dropping the traffic if there are no local endpoints. The default value,
+                                    "Cluster", uses the standard behavior of routing to all endpoints evenly
+                                    (possibly modified by topology and other features).
+                                  type: string
+                                ipFamilyPolicy:
+                                  description: |-
+                                    IPFamilyPolicy represents the dual-stack-ness requested or required by
+                                    this Service. If there is no value provided, then this field will be set
+                                    to SingleStack. Services can be "SingleStack" (a single IP family),
+                                    "PreferDualStack" (two IP families on dual-stack configured clusters or
+                                    a single IP family on single-stack clusters), or "RequireDualStack"
+                                    (two IP families on dual-stack configured clusters, otherwise fail). The
+                                    ipFamilies and clusterIPs fields depend on the value of this field. This
+                                    field will be wiped when updating a service to type ExternalName.
+                                  type: string
+                                loadBalancerClass:
+                                  description: |-
+                                    loadBalancerClass is the class of the load balancer implementation this Service belongs to.
+                                    If specified, the value of this field must be a label-style identifier, with an optional prefix,
+                                    e.g. "internal-vip" or "example.com/internal-vip". Unprefixed names are reserved for end-users.
+                                    This field can only be set when the Service type is 'LoadBalancer'. If not set, the default load
+                                    balancer implementation is used, today this is typically done through the cloud provider integration,
+                                    but should apply for any default implementation. If set, it is assumed that a load balancer
+                                    implementation is watching for Services with a matching class. Any default load balancer
+                                    implementation (e.g. cloud providers) should ignore Services that set this field.
+                                    This field can only be set when creating or updating a Service to type 'LoadBalancer'.
+                                    Once set, it can not be changed. This field will be wiped when a service is updated to a non 'LoadBalancer' type.
+                                  type: string
+                                loadBalancerSourceRanges:
+                                  description: |-
+                                    If specified and supported by the platform, this will restrict traffic through the cloud-provider
+                                    load-balancer will be restricted to the specified client IPs. This field will be ignored if the
+                                    cloud-provider does not support the feature."
+                                    More info: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                                sessionAffinity:
+                                  description: |-
+                                    Supports "ClientIP" and "None". Used to maintain session affinity.
+                                    Enable client IP based session affinity.
+                                    Must be ClientIP or None.
+                                    Defaults to None.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+                                  type: string
+                                sessionAffinityConfig:
+                                  description: sessionAffinityConfig contains the
+                                    configurations of session affinity.
+                                  properties:
+                                    clientIP:
+                                      description: clientIP contains the configurations
+                                        of Client IP based session affinity.
+                                      properties:
+                                        timeoutSeconds:
+                                          description: |-
+                                            timeoutSeconds specifies the seconds of ClientIP type session sticky time.
+                                            The value must be >0 && <=86400(for 1 day) if ServiceAffinity == "ClientIP".
+                                            Default value is 10800(for 3 hours).
+                                          format: int32
+                                          type: integer
+                                      type: object
+                                  type: object
+                                type:
+                                  description: |-
+                                    type determines how the Service is exposed. Defaults to ClusterIP. Valid
+                                    options are ExternalName, ClusterIP, NodePort, and LoadBalancer.
+                                    "ClusterIP" allocates a cluster-internal IP address for load-balancing
+                                    to endpoints. Endpoints are determined by the selector or if that is not
+                                    specified, by manual construction of an Endpoints object or
+                                    EndpointSlice objects. If clusterIP is "None", no virtual IP is
+                                    allocated and the endpoints are published as a set of endpoints rather
+                                    than a virtual IP.
+                                    "NodePort" builds on ClusterIP and allocates a port on every node which
+                                    routes to the same endpoints as the clusterIP.
+                                    "LoadBalancer" builds on NodePort and creates an external load-balancer
+                                    (if supported in the current cloud) which routes to the same endpoints
+                                    as the clusterIP.
+                                    "ExternalName" aliases this service to the specified externalName.
+                                    Several other fields do not apply to ExternalName services.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+                                  type: string
+                              type: object
+                          type: object
+                        description: |-
+                          Override configuration for the Service created to serve traffic to
+                          the cluster.
+                          The key must be the endpoint type (public, internal)
+                        type: object
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas of WatcherAPI service to run
+                    format: int32
+                    maximum: 32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  tls:
+                    description: TLS - Parameters related to the TLS
+                    properties:
+                      api:
+                        description: API tls type which encapsulates for API services
+                        properties:
+                          internal:
+                            description: Internal GenericService - holds the secret
+                              for the internal endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                          public:
+                            description: Public GenericService - holds the secret
+                              for the public endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                        type: object
+                      caBundleSecretName:
+                        description: CaBundleSecretName - holding the CA certs in
+                          a pre-created bundle file
+                        type: string
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
+                type: object
+              applierContainerImageURL:
+                description: ApplierContainerImageURL
+                type: string
+              applierServiceTemplate:
+                default:
+                  replicas: 1
+                description: WatcherApplierTemplate - define the watcher-applier service
+                properties:
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/<service>/<service>.conf.d directory as a custom config file.
+                    type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      NodeSelector to target subset of worker nodes running this component. Setting here overrides
+                      any global NodeSelector settings within the Watcher CR.
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas of WatcherApplier service to run
+                    format: int32
+                    maximum: 1
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
+                type: object
+              customServiceConfig:
+                description: |-
+                  CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                  or overwrite rendered information using raw OpenStack config format. The content gets added to
+                  to /etc/<service>/<service>.conf.d directory as a custom config file.
+                type: string
+              databaseAccount:
+                default: watcher
+                description: DatabaseAccount - MariaDBAccount CR name used for watcher
+                  DB, defaults to watcher
+                type: string
+              databaseInstance:
+                description: |-
+                  MariaDB instance name
+                  Required to use the mariadb-operator instance to create the DB and user
+                type: string
+              dbPurge:
+                description: DBPurge defines the parameters for the Watcher DB purging
+                  cron job
+                properties:
+                  purgeAge:
+                    default: 90
+                    description: |-
+                      PurgeAge defines the minimum age of soft-deleted records in days that can be
+                      deleted from the shadow tables
+                    minimum: 1
+                    type: integer
+                  schedule:
+                    default: 0 1 * * *
+                    description: |-
+                      Schedule defines when to run the Watcher DB Purge job in a cron format.
+                      By default it runs everyday at 01:00.
+                    type: string
+                type: object
+              decisionengineContainerImageURL:
+                description: DecisionEngineContainerImageURL
+                type: string
+              decisionengineServiceTemplate:
+                default:
+                  replicas: 1
+                description: DecisionEngineServiceTemplate - define the watcher-decision-engine
+                  service
+                properties:
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/<service>/<service>.conf.d directory as a custom config file.
+                    type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      NodeSelector to target subset of worker nodes running this component. Setting here overrides
+                      any global NodeSelector settings within the Watcher CR.
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas of WatcherDecisionEngine service to run
+                    format: int32
+                    maximum: 1
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
+                type: object
+              memcachedInstance:
+                default: memcached
+                description: MemcachedInstance is the name of the Memcached CR that
+                  all watcher service will use.
+                type: string
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: |-
+                  NodeSelector to target subset of worker nodes running this component. Setting here overrides
+                  any global NodeSelector settings within the Watcher CR.
+                type: object
+              passwordSelectors:
+                default:
+                  service: WatcherPassword
+                description: PasswordSelectors - Selectors to identify the ServiceUser
+                  password from the Secret
+                properties:
+                  service:
+                    default: WatcherPassword
+                    description: Service - Selector to get the watcher service user
+                      password from the Secret
+                    type: string
+                type: object
+              preserveJobs:
+                default: false
+                description: PreserveJobs - do not delete jobs after they finished
+                  e.g. to check logs
+                type: boolean
+              prometheusSecret:
+                default: metric-storage-prometheus-endpoint
+                description: Secret containing prometheus connection parameters
+                type: string
+              rabbitMqClusterName:
+                default: rabbitmq
+                description: |-
+                  RabbitMQ instance name
+                  Needed to request a transportURL that is created and used in Watcher
+                type: string
+              secret:
+                default: osp-secret
+                description: Secret containing all passwords / keys needed
+                type: string
+              serviceUser:
+                default: watcher
+                description: ServiceUser - optional username used for this service
+                  to register in keystone
+                type: string
+              topologyRef:
+                description: |-
+                  TopologyRef to apply the Topology defined by the associated CR referenced
+                  by name
+                properties:
+                  name:
+                    description: Name - The Topology CR name that the Service references
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace - The Namespace to fetch the Topology CR referenced
+                      NOTE: Namespace currently points by default to the same namespace where
+                      the Service is deployed. Customizing the namespace is not supported and
+                      webhooks prevent editing this field to a value different from the
+                      current project
+                    type: string
+                type: object
+            required:
+            - apiContainerImageURL
+            - apiServiceTemplate
+            - applierContainerImageURL
+            - applierServiceTemplate
+            - databaseInstance
+            - dbPurge
+            - decisionengineContainerImageURL
+            - decisionengineServiceTemplate
+            - rabbitMqClusterName
+            type: object
+          status:
+            description: WatcherStatus defines the observed state of Watcher
+            properties:
+              apiServiceReadyCount:
+                description: APIServiceReadyCount defines the number or replicas ready
+                  from watcher-api
+                format: int32
+                type: integer
+              applierServiceReadyCount:
+                description: ApplierServiceReadyCount defines the number or replicas
+                  ready from watcher-applier
+                format: int32
+                type: integer
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              decisionengineServiceReadyCount:
+                description: DecisionEngineServiceReadyCount defines the number or
+                  replicas ready from watcher-decision-engine
+                format: int32
+                type: integer
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this
+                  service. If the observed generation is less than the spec generation,
+                  then the controller has not processed the latest changes injected by
+                  the opentack-operator in the top-level CR (e.g. the ContainerImage)
+                format: int64
+                type: integer
+              serviceID:
+                description: ServiceID - The ID of the watcher service registered
+                  in keystone
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

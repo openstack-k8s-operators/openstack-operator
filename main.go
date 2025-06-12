@@ -59,6 +59,9 @@ import (
 	// Note(lpiwowar): Please, do not remove! This import is necessary in order
 	// to make the test-operator part of the openstack-operator-index.
 	_ "github.com/openstack-k8s-operators/test-operator/api/v1beta1"
+	// Note(amoralej): Do not remove followint line, import required to add
+	// watcher to the openstack-operator
+	_ "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 	rabbitmqclusterv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
