@@ -168,6 +168,11 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
+		// Don't update the status, if reconciler Panics
+		if r := recover(); r != nil {
+			Log.Info(fmt.Sprintf("panic during reconcile %v\n", r))
+			panic(r)
+		}
 		//Log all the conditions
 
 		// update the Ready condition based on the sub conditions
