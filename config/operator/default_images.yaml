@@ -40,7 +40,7 @@ spec:
         - name: RELATED_IMAGE_CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ceilometer-notification:current-podified
         - name: RELATED_IMAGE_CEILOMETER_MYSQLD_EXPORTER_IMAGE_URL_DEFAULT
-          value: quay.io/prometheus/mysqld-exporter:v0.16.0
+          value: quay.io/prometheus/mysqld-exporter:v0.15.1
         - name: RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT
           value: quay.io/openstack-k8s-operators/sg-core:latest
         - name: RELATED_IMAGE_KSM_IMAGE_URL_DEFAULT
