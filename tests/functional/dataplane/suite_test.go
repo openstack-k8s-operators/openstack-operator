@@ -106,6 +106,8 @@ var _ = BeforeSuite(func() {
 	Expect(err).ShouldNot(HaveOccurred())
 	imageContentSourcePolicyCRDs, err := test.GetCRDDirFromModule("github.com/openshift/api", gomod, "operator/v1alpha1/zz_generated.crd-manifests/")
 	Expect(err).ShouldNot(HaveOccurred())
+	imageDigestMirrorSetCRDs, err := test.GetCRDDirFromModule("github.com/openshift/api", gomod, "config/v1/zz_generated.crd-manifests/0000_10_config-operator_01_imagedigestmirrorsets.crd.yaml")
+	Expect(err).ShouldNot(HaveOccurred())
 	machineConfigCRDs, err := test.GetCRDDirFromModule("github.com/openshift/api", gomod, "machineconfiguration/v1/zz_generated.crd-manifests/0000_80_machine-config_01_machineconfigs.crd.yaml")
 	Expect(err).ShouldNot(HaveOccurred())
 
@@ -118,6 +120,7 @@ var _ = BeforeSuite(func() {
 			certmgrv1CRDs,
 			openstackCRDs,
 			imageContentSourcePolicyCRDs,
+			imageDigestMirrorSetCRDs,
 			machineConfigCRDs,
 		},
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
