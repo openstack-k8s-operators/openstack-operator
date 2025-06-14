@@ -741,6 +741,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationBusInstance:
+                type: string
               passwordSelectors:
                 default:
                   service: GlancePassword
@@ -841,6 +843,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationBusSecret:
+                type: string
               observedGeneration:
                 format: int64
                 type: integer

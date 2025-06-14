@@ -4333,6 +4333,8 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      notificationBusInstance:
+                        type: string
                       passwordSelectors:
                         default:
                           service: GlancePassword
