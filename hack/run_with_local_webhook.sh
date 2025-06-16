@@ -402,4 +402,4 @@ if [ -n "${CSV_NAME}" ]; then
 fi
 
 source hack/export_related_images.sh && \
-go run ./main.go -metrics-bind-address ":${METRICS_PORT}" -health-probe-bind-address ":${HEALTH_PORT}"
+go run ./main.go -metrics-bind-address ":${METRICS_PORT}" -health-probe-bind-address ":${HEALTH_PORT}" -pprof-bind-address ":${PPROF_PORT}"
