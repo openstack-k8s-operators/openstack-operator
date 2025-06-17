@@ -105,7 +105,11 @@ spec:
           allowPrivilegeEscalation: false
       securityContext:
         runAsNonRoot: true
+{{ if (eq $operatorName "orc") }}
+      serviceAccountName: {{ $operatorName }}-controller-manager
+{{ else }}
       serviceAccountName: {{ $operatorName }}-operator-controller-manager
+{{ end }}
       terminationGracePeriodSeconds: 10
 {{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
       volumes:
