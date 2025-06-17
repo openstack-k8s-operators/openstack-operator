@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"strings"
 	"time"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -458,6 +459,15 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		return ctrl.Result{}, err
 	}
 
+	caBundlePEM, err := bundle.getBundlePEM()
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to create CA bundle PEM: %w", err)
+	}
+	caOnlyBundlePEM, err := caOnlyBundle.getBundlePEM()
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to create CA only bundle PEM: %w", err)
+	}
+
 	saSecretTemplate := []util.Template{
 		{
 			Name:               tls.CABundleSecret,
@@ -471,8 +481,8 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			},
 			ConfigOptions: nil,
 			CustomData: map[string]string{
-				tls.CABundleKey:         bundle.getBundlePEM(),
-				tls.InternalCABundleKey: caOnlyBundle.getBundlePEM(),
+				tls.CABundleKey:         caBundlePEM,
+				tls.InternalCABundleKey: caOnlyBundlePEM,
 			},
 			SkipSetOwner: true, // TODO: (mschuppert) instead add e.g. keystoneapi to secret to prevent keystoneapi on cleanup to switch to not ready
 		},
@@ -796,16 +806,25 @@ func (cab *caBundle) getCertsFromPEM(PEMdata []byte) error {
 	return nil
 }
 
-// Create PEM bundle from certificates
-func (cab *caBundle) getBundlePEM() string {
-	var bundleData string
+func (cab *caBundle) getBundlePEM() (string, error) {
+	var b strings.Builder
 
 	for _, cert := range cab.certs {
-		bundleData += "# " + cert.cert.Issuer.CommonName + "\n" +
-			string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert.cert.Raw}))
+		b.WriteString("# ")
+		b.WriteString(cert.cert.Issuer.CommonName)
+		b.WriteByte('\n')
+
+		block := &pem.Block{
+			Type:  "CERTIFICATE",
+			Bytes: cert.cert.Raw,
+		}
+
+		if err := pem.Encode(&b, block); err != nil {
+			return "", fmt.Errorf("failed to encode bundle PEM for %w", err)
+		}
 	}
 
-	return bundleData
+	return b.String(), nil
 }
 
 func addIssuerLabelAnnotation(
