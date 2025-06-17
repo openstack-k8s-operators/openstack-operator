@@ -168,6 +168,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateRabbitMQ, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateMariaDB, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
+			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateMemcached, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateKeystone, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateControlplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
 			*condition.UnknownCondition(corev1beta1.OpenStackVersionMinorUpdateDataplane, condition.InitReason, string(corev1beta1.OpenStackVersionMinorUpdateInitMessage)),
@@ -312,6 +313,21 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateMariaDB,
+			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
+		// minor update for Memcached
+		if !openstack.MemcachedImageMatch(ctx, controlPlane, instance) ||
+			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneMemcachedReadyCondition) {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackVersionMinorUpdateMemcached,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+			Log.Info("Minor update for Memcached in progress")
+			return ctrl.Result{}, nil
+		}
+		instance.Status.Conditions.MarkTrue(
+			corev1beta1.OpenStackVersionMinorUpdateMemcached,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
 		// minor update for Keystone API
