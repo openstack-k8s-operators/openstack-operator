@@ -545,11 +545,9 @@ func (r *OpenStackReconciler) renderAndApply(
 
 func isServiceOperatorResource(name string) bool {
 	//NOTE: test-operator was deployed as a independant package so it may or may not be installed
-	//NOTE: depending on how watcher-operator is released for FR2 and then in FR3 it may need to be
-	// added into this list in the future
 	serviceOperatorNames := []string{"barbican", "cinder", "designate", "glance", "heat", "horizon", "infra",
 		"ironic", "keystone", "manila", "mariadb", "neutron", "nova", "octavia", "openstack-baremetal", "ovn",
-		"placement", "rabbitmq-cluster", "swift", "telemetry", "test"}
+		"placement", "rabbitmq-cluster", "swift", "telemetry", "test", "watcher"}
 
 	for _, item := range serviceOperatorNames {
 		if strings.Index(name, item) == 0 {
