@@ -18803,6 +18803,12 @@ spec:
                     type: string
                   testTobikoImage:
                     type: string
+                  watcherAPIImage:
+                    type: string
+                  watcherApplierImage:
+                    type: string
+                  watcherDecisionEngineImage:
+                    type: string
                 type: object
               deployedOVNVersion:
                 type: string
