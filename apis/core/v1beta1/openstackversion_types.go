@@ -166,6 +166,9 @@ type ContainerTemplate struct {
 	TestTobikoImage                   *string `json:"testTobikoImage,omitempty"`
 	TestHorizontestImage              *string `json:"testHorizontestImage,omitempty"`
 	TestAnsibletestImage              *string `json:"testAnsibletestImage,omitempty"`
+	WatcherAPIImage                   *string `json:"watcherAPIImage,omitempty"`
+	WatcherApplierImage               *string `json:"watcherApplierImage,omitempty"`
+	WatcherDecisionEngineImage        *string `json:"watcherDecisionEngineImage,omitempty"`
 }
 
 // ServiceDefaults - struct that contains defaults for OSP services that can change over time

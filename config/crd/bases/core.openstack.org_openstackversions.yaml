@@ -227,6 +227,12 @@ spec:
                     type: string
                   testTobikoImage:
                     type: string
+                  watcherAPIImage:
+                    type: string
+                  watcherApplierImage:
+                    type: string
+                  watcherDecisionEngineImage:
+                    type: string
                 type: object
               targetVersion:
                 type: string
@@ -451,6 +457,12 @@ spec:
                       type: string
                     testTobikoImage:
                       type: string
+                    watcherAPIImage:
+                      type: string
+                    watcherApplierImage:
+                      type: string
+                    watcherDecisionEngineImage:
+                      type: string
                   type: object
                 type: object
               containerImages:
@@ -644,6 +656,12 @@ spec:
                   testTempestImage:
                     type: string
                   testTobikoImage:
+                    type: string
+                  watcherAPIImage:
+                    type: string
+                  watcherApplierImage:
+                    type: string
+                  watcherDecisionEngineImage:
                     type: string
                 type: object
               deployedVersion:

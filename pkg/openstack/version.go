@@ -199,6 +199,9 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			TestTobikoImage:               getImg(instance.Spec.CustomContainerImages.TestTobikoImage, defaults.TestTobikoImage),
 			TestHorizontestImage:          getImg(instance.Spec.CustomContainerImages.TestHorizontestImage, defaults.TestHorizontestImage),
 			TestAnsibletestImage:          getImg(instance.Spec.CustomContainerImages.TestAnsibletestImage, defaults.TestAnsibletestImage),
+			WatcherAPIImage:               getImg(instance.Spec.CustomContainerImages.WatcherAPIImage, defaults.WatcherAPIImage),
+			WatcherApplierImage:           getImg(instance.Spec.CustomContainerImages.WatcherApplierImage, defaults.WatcherApplierImage),
+			WatcherDecisionEngineImage:    getImg(instance.Spec.CustomContainerImages.WatcherDecisionEngineImage, defaults.WatcherDecisionEngineImage),
 		}}
 	if containerImages.CinderVolumeImages == nil {
 		containerImages.CinderVolumeImages = make(map[string]*string)
