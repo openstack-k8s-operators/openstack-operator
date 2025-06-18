@@ -152,6 +152,16 @@ for BUNDLE in $(hack/pin-bundle-images.sh | tr "," " "); do
     extract_bundle "${EXTRACT_DIR}/tmp" "${OUT_DATA}/"
 done
 
+#FIXME: there should be a mechanism to promote ORC builds
+# ORC
+until [ "$n" -ge 5 ]; do
+    skopeo copy "docker://quay.io/dprince/orc-bundle:latest" dir:${EXTRACT_DIR}/tmp && break
+    echo "Command failed. retrying ... $n/5"
+    n=$((n+1))
+    sleep 15
+done
+extract_bundle "${EXTRACT_DIR}/tmp" "${OUT_DATA}/"
+
 cd "$OUT_DATA"
 # copy CRDS into crds basedir
 grep -l CustomResourceDefinition manifests/* | xargs -I % sh -c 'cp % ./crds/'
@@ -278,7 +288,7 @@ EOF_CAT
 for X in $(ls manifests/*clusterserviceversion.yaml); do
         OPERATOR_NAME=$(echo $X | sed -e "s|manifests\/\([^\.]*\)\..*|\1|" | sed -e "s|-|_|g" | tr '[:lower:]' '[:upper:]' )
         echo $OPERATOR_NAME
-        if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" ]]; then
+        if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" || $OPERATOR_NAME == "ORC" ]]; then
             IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[0].image)
         else
             IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[1].image)

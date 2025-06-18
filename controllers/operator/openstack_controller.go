@@ -95,6 +95,8 @@ func SetupEnv() {
 				envRelatedOperatorImages[operatorName] = &envArr[1]
 			}
 			log.Log.Info("Found operator related image", "operator", operatorName, "image", envArr[1])
+		} else if envArr[0] == "RELATED_IMAGE_ORC_MANAGER_IMAGE_URL" {
+			envRelatedOperatorImages["orc"] = &envArr[1]
 		} else if strings.HasPrefix(envArr[0], "RELATED_IMAGE_") {
 			envRelatedOpenStackServiceImages[envArr[0]] = &envArr[1]
 		} else if envArr[0] == "KUBE_RBAC_PROXY" {
