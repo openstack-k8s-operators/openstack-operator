@@ -51,6 +51,11 @@ spec:
               containerImage:
                 description: Image URL for Swift proxy service
                 type: string
+              enabled:
+                default: true
+                description: Enabled - Whether SwiftRing service should be deployed
+                  and managed
+                type: boolean
               minPartHours:
                 default: 1
                 description: Minimum number of hours to restrict moving a partition
@@ -70,6 +75,14 @@ spec:
                 format: int64
                 minimum: 1
                 type: integer
+              ringConfigMaps:
+                default:
+                - swift-ring-files
+                description: List of ring ConfigMaps
+                items:
+                  type: string
+                type: array
+                x-kubernetes-list-type: atomic
               ringReplicas:
                 default: 1
                 description: Number of Swift data replicas (=copies)

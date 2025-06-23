@@ -269,6 +269,14 @@ spec:
                 format: int32
                 minimum: 0
                 type: integer
+              ringConfigMaps:
+                default:
+                - swift-ring-files
+                description: List of ring ConfigMaps
+                items:
+                  type: string
+                type: array
+                x-kubernetes-list-type: atomic
               secret:
                 default: osp-secret
                 description: Secret containing OpenStack password information for
