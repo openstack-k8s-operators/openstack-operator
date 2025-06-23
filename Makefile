@@ -167,7 +167,7 @@ vet: gowork ## Run go vet against code.
 	go vet ./...
 	go vet ./apis/...
 
-BRANCH ?= main
+BRANCH ?= 18.0-fr3
 .PHONY: force-bump
 force-bump: ## Force bump after tagging
 	for dep in $$(cat go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator|^replace' | awk '{print $$1}'); do \
