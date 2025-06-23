@@ -68,6 +68,14 @@ spec:
                 description: NodeSelector to target subset of worker nodes running
                   this service
                 type: object
+              ringConfigMaps:
+                default:
+                - swift-ring-files
+                description: List of ring ConfigMaps
+                items:
+                  type: string
+                type: array
+                x-kubernetes-list-type: atomic
               storageClass:
                 default: ""
                 description: |-
@@ -295,6 +303,14 @@ spec:
                     format: int32
                     minimum: 0
                     type: integer
+                  ringConfigMaps:
+                    default:
+                    - swift-ring-files
+                    description: List of ring ConfigMaps
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
                   secret:
                     default: osp-secret
                     description: Secret containing OpenStack password information
@@ -368,6 +384,11 @@ spec:
                   containerImage:
                     description: Image URL for Swift proxy service
                     type: string
+                  enabled:
+                    default: true
+                    description: Enabled - Whether SwiftRing service should be deployed
+                      and managed
+                    type: boolean
                   minPartHours:
                     default: 1
                     description: Minimum number of hours to restrict moving a partition
@@ -387,6 +408,14 @@ spec:
                     format: int64
                     minimum: 1
                     type: integer
+                  ringConfigMaps:
+                    default:
+                    - swift-ring-files
+                    description: List of ring ConfigMaps
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
                   ringReplicas:
                     default: 1
                     description: Number of Swift data replicas (=copies)
@@ -455,6 +484,14 @@ spec:
                     format: int32
                     minimum: 0
                     type: integer
+                  ringConfigMaps:
+                    default:
+                    - swift-ring-files
+                    description: List of ring ConfigMaps
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
                   storageClass:
                     default: ""
                     description: Name of StorageClass to use for Swift PVs

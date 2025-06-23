@@ -16832,6 +16832,13 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      ringConfigMaps:
+                        default:
+                        - swift-ring-files
+                        items:
+                          type: string
+                        type: array
+                        x-kubernetes-list-type: atomic
                       storageClass:
                         default: ""
                         type: string
@@ -16926,6 +16933,13 @@ spec:
                             format: int32
                             minimum: 0
                             type: integer
+                          ringConfigMaps:
+                            default:
+                            - swift-ring-files
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           secret:
                             default: osp-secret
                             type: string
@@ -16966,6 +16980,9 @@ spec:
                         type: object
                       swiftRing:
                         properties:
+                          enabled:
+                            default: true
+                            type: boolean
                           minPartHours:
                             default: 1
                             format: int64
@@ -16980,6 +16997,13 @@ spec:
                             format: int64
                             minimum: 1
                             type: integer
+                          ringConfigMaps:
+                            default:
+                            - swift-ring-files
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           ringReplicas:
                             default: 1
                             format: int64
@@ -17020,6 +17044,13 @@ spec:
                             format: int32
                             minimum: 0
                             type: integer
+                          ringConfigMaps:
+                            default:
+                            - swift-ring-files
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           storageClass:
                             default: ""
                             type: string
