@@ -202,10 +202,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 		targetOvnControllerVersion := ""
 		targetRabbitMQVersion := ""
 		targetMariaDBVersion := ""
+		targetMemcachedVersion := ""
 		targetKeystoneAPIVersion := ""
 		testOvnControllerImage := "foo/ovn:0.0.2"
 		testRabbitMQImage := "foo/rabbit:0.0.2"
 		testMariaDBImage := "foo/maria:0.0.2"
+		testMemcachedImage := "foo/memcached:0.0.2"
 		testKeystoneAPIImage := "foo/keystone:0.0.2"
 
 		// a lightweight controlplane spec we'll use for minor update testing
@@ -307,6 +309,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				targetOvnControllerVersion = *version.Status.ContainerImages.OvnControllerImage
 				targetRabbitMQVersion = *version.Status.ContainerImages.RabbitmqImage
 				targetMariaDBVersion = *version.Status.ContainerImages.MariadbImage
+				targetMemcachedVersion = *version.Status.ContainerImages.InfraMemcachedImage
 				targetKeystoneAPIVersion = *version.Status.ContainerImages.KeystoneAPIImage
 				g.Expect(version).Should(Not(BeNil()))
 
@@ -322,6 +325,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				version.Status.ContainerImageVersionDefaults[initialVersion].OvnControllerImage = &testOvnControllerImage
 				version.Status.ContainerImageVersionDefaults[initialVersion].RabbitmqImage = &testRabbitMQImage
 				version.Status.ContainerImageVersionDefaults[initialVersion].MariadbImage = &testMariaDBImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].InfraMemcachedImage = &testMemcachedImage
 				version.Status.ContainerImageVersionDefaults[initialVersion].KeystoneAPIImage = &testKeystoneAPIImage
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
 
@@ -354,6 +358,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(*osversion.Status.ContainerImages.OvnControllerImage).Should(Equal(testOvnControllerImage))
 				g.Expect(*osversion.Status.ContainerImages.RabbitmqImage).Should(Equal(testRabbitMQImage))
 				g.Expect(*osversion.Status.ContainerImages.MariadbImage).Should(Equal(testMariaDBImage))
+				g.Expect(*osversion.Status.ContainerImages.InfraMemcachedImage).Should(Equal(testMemcachedImage))
 				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(testKeystoneAPIImage))
 
 			}, timeout, interval).Should(Succeed())
@@ -448,6 +453,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(*osversion.Status.ContainerImages.OvnControllerImage).Should(Equal(targetOvnControllerVersion))
 				g.Expect(*osversion.Status.ContainerImages.RabbitmqImage).Should(Equal(targetRabbitMQVersion))
 				g.Expect(*osversion.Status.ContainerImages.MariadbImage).Should(Equal(targetMariaDBVersion))
+				g.Expect(*osversion.Status.ContainerImages.InfraMemcachedImage).Should(Equal(targetMemcachedVersion))
 				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(targetKeystoneAPIVersion))
 
 			}, timeout, interval).Should(Succeed())
@@ -568,7 +574,29 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			}, timeout, interval).Should(Succeed())
 
-			// 4c) Keystone
+			// 4c) Memcached
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionMinorUpdateMemcached,
+				k8s_corev1.ConditionFalse,
+			)
+
+			SimulateMemcachedReady()
+
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateMemcached,
+					k8s_corev1.ConditionTrue,
+				)
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(*OSCtlplane.Status.ContainerImages.InfraMemcachedImage).Should(Equal(targetMemcachedVersion))
+
+			}, timeout, interval).Should(Succeed())
+
+			// 4d) Keystone
 
 			th.ExpectCondition(
 				names.OpenStackVersionName,
