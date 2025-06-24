@@ -2,9 +2,9 @@
 #NOTE: this script is used by the catalog-openstack-operator-upgrades.yaml
 set -ex
 
-MAIN_VERSION=${MAIN_VERSION:-"0.3.0"}
-FEATURE_RELEASE_VERSION=${FEATURE_RELEASE_VERSION:-"0.2.0"}
-FEATURE_RELEASE_BRANCH=${FEATURE_RELEASE_BRANCH:-"18.0-fr2"}
+MAIN_VERSION=${MAIN_VERSION:-"0.4.0"}
+FEATURE_RELEASE_VERSION=${FEATURE_RELEASE_VERSION:-"0.3.0"}
+FEATURE_RELEASE_BRANCH=${FEATURE_RELEASE_BRANCH:-"18.0-fr3"}
 BUNDLE=${BUNDLE:-"quay.io/openstack-k8s-operators/openstack-operator-bundle:latest"}
 
 [ -d "catalog" ] && rm -Rf catalog
