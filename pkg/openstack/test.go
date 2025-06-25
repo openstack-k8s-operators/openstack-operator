@@ -25,7 +25,6 @@ const (
 )
 
 func ReconcileTest(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
-	missingImageDefault := ""
 	customData := map[string]string{
 		TempestImageKey:     *getImg(version.Status.ContainerImages.TestTempestImage, &missingImageDefault),
 		TobikoImageKey:      *getImg(version.Status.ContainerImages.TestTobikoImage, &missingImageDefault),

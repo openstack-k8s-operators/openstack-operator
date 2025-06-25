@@ -15,6 +15,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+var (
+	missingImageDefault string
+)
+
 // InitializeOpenStackVersionImageDefaults - initializes OpenStackVersion CR with default container images
 func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[string]*string) *corev1beta1.ContainerDefaults {
 	Log := GetLogger(ctx)
