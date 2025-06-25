@@ -500,6 +500,8 @@ const (
 
 	OpenStackVersionMinorUpdateMariaDB condition.Type = "MinorUpdateMariaDB"
 
+	OpenStackVersionMinorUpdateMemcached condition.Type = "MinorUpdateMemcached"
+
 	OpenStackVersionMinorUpdateKeystone condition.Type = "MinorUpdateKeystone"
 
 	OpenStackVersionMinorUpdateControlplane condition.Type = "MinorUpdateControlplane"
