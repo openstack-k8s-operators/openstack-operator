@@ -337,17 +337,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
 
-		if version.Status.ContainerImages.KsmImage != nil {
-			telemetry.Spec.Ceilometer.KSMImage = *version.Status.ContainerImages.KsmImage
-		} else {
-			telemetry.Spec.Ceilometer.KSMImage = ""
-		}
-
-		if version.Status.ContainerImages.CeilometerMysqldExporterImage != nil {
-			telemetry.Spec.Ceilometer.MysqldExporterImage = *version.Status.ContainerImages.CeilometerMysqldExporterImage
-		} else {
-			telemetry.Spec.Ceilometer.MysqldExporterImage = ""
-		}
+		telemetry.Spec.Ceilometer.KSMImage = *getImg(version.Status.ContainerImages.KsmImage, &missingImageDefault)
+		telemetry.Spec.Ceilometer.MysqldExporterImage = *getImg(version.Status.ContainerImages.CeilometerMysqldExporterImage, &missingImageDefault)
 
 		if telemetry.Spec.Ceilometer.Secret == "" {
 			telemetry.Spec.Ceilometer.Secret = instance.Spec.Secret

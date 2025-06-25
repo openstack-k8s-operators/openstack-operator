@@ -190,7 +190,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		octavia.Spec.OctaviaHealthManager.ContainerImage = *version.Status.ContainerImages.OctaviaHealthmanagerImage
 		octavia.Spec.OctaviaHousekeeping.ContainerImage = *version.Status.ContainerImages.OctaviaHousekeepingImage
 		octavia.Spec.ApacheContainerImage = *version.Status.ContainerImages.OctaviaApacheImage
-		octavia.Spec.OctaviaRsyslog.ContainerImage = *version.Status.ContainerImages.OctaviaRsyslogImage
+		octavia.Spec.OctaviaRsyslog.ContainerImage = *getImg(version.Status.ContainerImages.OctaviaRsyslogImage, &missingImageDefault)
 		octavia.Spec.OctaviaRsyslog.InitContainerImage = *version.Status.ContainerImages.OctaviaHealthmanagerImage
 
 		if octavia.Spec.Secret == "" {
