@@ -33,6 +33,82 @@ spec:
           metadata:
             type: object
           spec:
+            properties:
+              operatorOverrides:
+                items:
+                  properties:
+                    controllerManager:
+                      properties:
+                        resources:
+                          properties:
+                            claims:
+                              items:
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                - name
+                                type: object
+                              type: array
+                              x-kubernetes-list-map-keys:
+                              - name
+                              x-kubernetes-list-type: map
+                            limits:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              type: object
+                            requests:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              type: object
+                          type: object
+                      type: object
+                    name:
+                      enum:
+                      - openstack
+                      - barbican
+                      - cinder
+                      - designate
+                      - glance
+                      - heat
+                      - horizon
+                      - infra
+                      - ironic
+                      - keystone
+                      - manila
+                      - mariadb
+                      - neutron
+                      - nova
+                      - octavia
+                      - openstack-baremetal
+                      - ovn
+                      - placement
+                      - rabbitmq-cluster
+                      - swift
+                      - telemetry
+                      - test
+                      minLength: 1
+                      type: string
+                    replicas:
+                      format: int32
+                      maximum: 1
+                      minimum: 0
+                      type: integer
+                  required:
+                  - name
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
             type: object
           status:
             properties:
@@ -62,8 +138,14 @@ spec:
                 type: string
               deployedOperatorCount:
                 type: integer
+              disabledOperatorCount:
+                type: integer
+              enabledOperatorCount:
+                type: integer
               observedGeneration:
                 format: int64
+                type: integer
+              totalOperatorCount:
                 type: integer
             type: object
         type: object

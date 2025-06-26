@@ -6,9 +6,9 @@ metadata:
     app.kubernetes.io/name: rabbitmq-cluster-operator
     app.kubernetes.io/part-of: rabbitmq
   name: rabbitmq-cluster-operator-manager
-  namespace: {{ .OperatorNamespace }}
+  namespace: {{ .RabbitmqOperator.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ .RabbitmqOperator.Deployment.Replicas }}
   selector:
     matchLabels:
       app.kubernetes.io/name: rabbitmq-cluster-operator
@@ -27,13 +27,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: LEASE_DURATION
-          value: '{{ .LeaseDuration }}'
-        - name: RENEW_DEADLINE
-          value: '{{ .RenewDeadline }}'
-        - name: RETRY_PERIOD
-          value: '{{ .RetryPeriod }}'
-        image: {{ .RabbitmqImage }}
+{{- range .RabbitmqOperator.Deployment.Manager.Env }}
+        - name: '{{ .Name }}'
+          value: '{{ .Value }}'
+{{- end }}
+        image: {{ .RabbitmqOperator.Deployment.Manager.Image }}
         name: operator
         ports:
         - containerPort: 9782
@@ -41,10 +39,10 @@ spec:
           protocol: TCP
         resources:
           limits:
-            cpu: 200m
-            memory: 500Mi
+            cpu: {{ .RabbitmqOperator.Deployment.Manager.Resources.Limits.CPU }}
+            memory: {{ .RabbitmqOperator.Deployment.Manager.Resources.Limits.Memory }}
           requests:
-            cpu: 5m
-            memory: 64Mi
+            cpu: {{ .RabbitmqOperator.Deployment.Manager.Resources.Requests.CPU }}
+            memory: {{ .RabbitmqOperator.Deployment.Manager.Resources.Requests.Memory }}
       serviceAccountName: rabbitmq-cluster-operator-controller-manager
       terminationGracePeriodSeconds: 10
