@@ -9678,6 +9678,9 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationsBus:
+                default: rabbitmq
+                type: string
               nova:
                 properties:
                   apiOverride:
