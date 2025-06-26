@@ -151,8 +151,11 @@ bindata: kustomize yq ## Call sync bindata script
 	mkdir -p bindata/crds bindata/rbac bindata/operator
 	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
 	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
-	sed -i bindata/operator/operator.yaml -e "/envCustomImage/c\\{{ range \$$envName, \$$envValue := .OpenStackServiceRelatedImages }}\n        - name: {{ \$$envName }}\n          value: {{ \$$envValue }}\n{{ end }}"
-	sed -i bindata/operator/operator.yaml -e "s|kube-rbac-proxy:replace_me.*|'{{ .KubeRbacProxyImage }}'|"
+	sed -i bindata/operator/operator.yaml -e "s|replicas:.*|replicas: {{ .OpenStackOperator.Deployment.Replicas }}|"
+	sed -i bindata/operator/operator.yaml -e "/envCustom/c\\{{- range .OpenStackOperator.Deployment.Manager.Env }}\n        - name: '{{ .Name }}'\n          value: '{{ .Value }}'\n{{- end }}"
+	sed -i bindata/operator/operator.yaml -e "/customLimits/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.Memory }}"
+	sed -i bindata/operator/operator.yaml -e "/customRequests/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.Memory }}"
+	sed -i bindata/operator/operator.yaml -e "s|kube-rbac-proxy:replace_me.*|'{{ .OpenStackOperator.Deployment.KubeRbacProxy.Image }}'|"
 	cp config/operator/managers.yaml bindata/operator/
 	cp config/operator/rabbit.yaml bindata/operator/
 	$(KUSTOMIZE) build config/rbac > bindata/rbac/rbac.yaml
@@ -200,7 +203,7 @@ ginkgo-run: ## Run ginkgo.
 	source hack/export_related_images.sh && \
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) -v debug --bin-dir $(LOCALBIN) use $(ENVTEST_K8S_VERSION) -p path)" \
 	OPERATOR_TEMPLATES="$(PWD)/templates" \
-	$(GINKGO) --trace --cover --coverpkg=./pkg/openstack,./pkg/openstackclient,./pkg/util,./pkg/dataplane/...,./controllers/...,./apis/client/v1beta1,./apis/core/v1beta1,./apis/dataplane/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
+	$(GINKGO) --trace --cover --coverpkg=./pkg/operator,./pkg/openstack,./pkg/openstackclient,./pkg/util,./pkg/dataplane/...,./controllers/...,./apis/client/v1beta1,./apis/core/v1beta1,./apis/dataplane/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
 
 .PHONY: test-all
 test-all: test golint golangci golangci-lint ## Run all tests.

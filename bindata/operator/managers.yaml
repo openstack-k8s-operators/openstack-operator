@@ -1,30 +1,24 @@
-{{ $namespace := .OperatorNamespace }}
-{{ $kubeRbacProxyImage := .KubeRbacProxyImage }}
-{{ $leaseDuration := .LeaseDuration }}
-{{ $renewDeadline := .RenewDeadline }}
-{{ $retryPeriod := .RetryPeriod }}
-{{ $openstackServiceRelatedImages := .OpenStackServiceRelatedImages }}
-{{ range $operatorName, $operatorImage := .OperatorImages }}
+{{ range .ServiceOperators }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     control-plane: controller-manager
-    openstack.org/operator-name: {{ $operatorName }}
-  name: {{ $operatorName }}-operator-controller-manager
-  namespace: {{ $namespace }}
+    openstack.org/operator-name: {{ .Name }}
+  name: {{ .Name }}-operator-controller-manager
+  namespace: {{ .Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ .Deployment.Replicas }}
   selector:
     matchLabels:
-      openstack.org/operator-name: {{ $operatorName }}
+      openstack.org/operator-name: {{ .Name }}
   template:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
       labels:
         control-plane: controller-manager
-        openstack.org/operator-name: {{ $operatorName }}
+        openstack.org/operator-name: {{ .Name }}
     spec:
       containers:
       - args:
@@ -34,25 +28,11 @@ spec:
         command:
         - /manager
         env:
-        - name: ENABLE_WEBHOOKS
-{{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
-          value: 'true'
-{{ else }}
-          value: 'false'
-{{ end }}
-        - name: LEASE_DURATION
-          value: '{{ $leaseDuration }}'
-        - name: RENEW_DEADLINE
-          value: '{{ $renewDeadline }}'
-        - name: RETRY_PERIOD
-          value: '{{ $retryPeriod }}'
-{{ if (eq $operatorName "openstack-baremetal") }}
-{{ range $envName, $envValue := $openstackServiceRelatedImages }}
-        - name: {{ $envName }}
-          value: {{ $envValue }}
-{{ end }}
-{{ end }}
-        image: {{ $operatorImage }}
+{{- range .Deployment.Manager.Env }}
+        - name: {{ .Name }}
+          value: '{{ .Value }}'
+{{- end }}
+        image: {{ .Deployment.Manager.Image }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -67,35 +47,26 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
         resources:
-{{ if (eq $operatorName "infra") }}
           limits:
-            cpu: 500m
-            memory: 1Gi
+            cpu: {{ .Deployment.Manager.Resources.Limits.CPU }}
+            memory: {{ .Deployment.Manager.Resources.Limits.Memory }}
           requests:
-            cpu: 10m
-            memory: 512Mi
-{{ else }}
-          limits:
-            cpu: 500m
-            memory: 256Mi
-          requests:
-            cpu: 10m
-            memory: 128Mi
-{{ end }}
+            cpu: {{ .Deployment.Manager.Resources.Requests.CPU }}
+            memory: {{ .Deployment.Manager.Resources.Requests.Memory }}
         securityContext:
           allowPrivilegeEscalation: false
-{{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
+{{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
-{{ end }}
+{{- end }}
       - args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
         - --logtostderr=true
         - --v=0
-        image: {{ $kubeRbacProxyImage }}
+        image: {{ .Deployment.KubeRbacProxy.Image }}
         name: kube-rbac-proxy
         ports:
         - containerPort: 8443
@@ -103,23 +74,23 @@ spec:
           protocol: TCP
         resources:
           limits:
-            cpu: 500m
-            memory: 128Mi
+            cpu: {{ .Deployment.KubeRbacProxy.Resources.Limits.CPU }}
+            memory: {{ .Deployment.KubeRbacProxy.Resources.Limits.Memory }}
           requests:
-            cpu: 5m
-            memory: 64Mi
+            cpu: {{ .Deployment.KubeRbacProxy.Resources.Requests.CPU }}
+            memory: {{ .Deployment.KubeRbacProxy.Resources.Requests.Memory }}
         securityContext:
           allowPrivilegeEscalation: false
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: {{ $operatorName }}-operator-controller-manager
+      serviceAccountName: {{ .Name }}-operator-controller-manager
       terminationGracePeriodSeconds: 10
-{{ if or (eq $operatorName "infra") (eq $operatorName "openstack-baremetal") }}
+{{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
       volumes:
       - name: cert
         secret:
           defaultMode: 420
-          secretName: {{ $operatorName }}-operator-webhook-server-cert
+          secretName: {{ .Name }}-operator-webhook-server-cert
 {{ end }}
 ---
 {{ end }}
