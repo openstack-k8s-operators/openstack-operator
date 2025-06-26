@@ -3,6 +3,7 @@
 {{ $leaseDuration := .LeaseDuration }}
 {{ $renewDeadline := .RenewDeadline }}
 {{ $retryPeriod := .RetryPeriod }}
+{{ $openstackServiceRelatedImages := .OpenStackServiceRelatedImages }}
 {{ range $operatorName, $operatorImage := .OperatorImages }}
 apiVersion: apps/v1
 kind: Deployment
@@ -45,6 +46,12 @@ spec:
           value: '{{ $renewDeadline }}'
         - name: RETRY_PERIOD
           value: '{{ $retryPeriod }}'
+{{ if (eq $operatorName "openstack-baremetal") }}
+{{ range $envName, $envValue := $openstackServiceRelatedImages }}
+        - name: {{ $envName }}
+          value: {{ $envValue }}
+{{ end }}
+{{ end }}
         image: {{ $operatorImage }}
         livenessProbe:
           httpGet:
