@@ -87,25 +87,3 @@ jobs:
         registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_PASSWORD }}
-        digestfile: digest.txt
-
-    # tag the quay.io image with the digest so it is preserved
-    - name: Set OPERATOR_INDEX_IMAGE_DIGEST for Operator and tag
-      shell: bash
-      run: |
-        DIGEST=$(cat digest.txt | sed -e 's|sha256:||')
-        echo "OPERATOR_INDEX_IMAGE_DIGEST=$DIGEST" >> $GITHUB_ENV
-        podman tag "${REGISTRY}/${IMAGE}:${GITHUB_SHA}" "${REGISTRY}/${IMAGE}:${DIGEST}"
-      env:
-        REGISTRY:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        IMAGE: openstack-operator-index-upgrade
-        GITHUB_SHA: ${{ github.sha }}
-
-    - name: Push tag with digest ${{ env.OPERATOR_INDEX_IMAGE_DIGEST }}
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: openstack-operator-index-upgrade
-        tags: ${{ env.OPERATOR_INDEX_IMAGE_DIGEST }}
-        registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
