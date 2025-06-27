@@ -7,13 +7,13 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
-	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250623133839-c44802e85033
+	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250626075020-dae6f5c33dc9
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250623134037-bce8067f284a
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250623134038-034ac9010036
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250625211333-0913bd5599dd
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250623134038-189ddfcdeacf
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250623134039-cd9d6c60f812
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250623134040-c52983398998
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250623134041-af6417925619
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250626084237-ff8bcd258e1a
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250623134042-abd059329396
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250623134042-91132f1a9d4d
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250605082218-a58074898dd7
@@ -27,7 +27,7 @@ require (
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20250623134049-ee16b9218206
 	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20250623134050-97368f870cf2
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250623134050-9b8d74ec10a9
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250623134051-348c05f29dd8
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250626083419-cfaeaa693462
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.71.0-rhobs1 // indirect
 	github.com/rhobs/observability-operator v0.3.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
