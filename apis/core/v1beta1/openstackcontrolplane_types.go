@@ -43,6 +43,7 @@ import (
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
+	lightspeedv1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -198,6 +199,11 @@ type OpenStackControlPlaneSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="OpenStack Client"
 	// OpenStackClient - Parameters related to the OpenStackClient
 	OpenStackClient OpenStackClientSection `json:"openstackclient,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="OpenStack Lightspeed"
+	// OpenStackLightspeed - Parameters related to the OpenStackLightspeed
+	OpenStackLightspeed OpenStackLightspeedSection `json:"openstacklightspeed,omitempty"`
 
 	// ExtraMounts containing conf files and credentials that should be provided
 	// to the underlying operators.
@@ -796,6 +802,20 @@ type OpenStackClientSection struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the OpenStackClient Resource
 	Template v1beta1.OpenStackClientSpecCore `json:"template,omitempty"`
+}
+
+// OpenStackLightspeedSection defines the desired state of the OpenStackLightspeed
+type OpenStackLightspeedSection struct {
+	// +kubebuilder:validation:Optional
+	// Enabled - Whether the OpenStack LightSpeed service should be deployed and managed
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating the OpenStackLightspeed Resource
+	Template *lightspeedv1.OpenStackLightspeedCore `json:"template,omitempty"`
 }
 
 // OpenStackControlPlaneStatus defines the observed state of OpenStackControlPlane

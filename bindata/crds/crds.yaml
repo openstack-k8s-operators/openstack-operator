@@ -11821,6 +11821,39 @@ spec:
                     - openStackConfigSecret
                     type: object
                 type: object
+              openstacklightspeed:
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  template:
+                    properties:
+                      TLSCACertBundle:
+                        type: string
+                      llmCredentials:
+                        type: string
+                      llmEndpoint:
+                        type: string
+                      llmEndpointType:
+                        enum:
+                        - azure_openai
+                        - bam
+                        - openai
+                        - watsonx
+                        - rhoai_vllm
+                        - rhelai_vllm
+                        - fake_provider
+                        type: string
+                      modelName:
+                        type: string
+                    required:
+                    - TLSCACertBundle
+                    - llmCredentials
+                    - llmEndpoint
+                    - llmEndpointType
+                    - modelName
+                    type: object
+                type: object
               ovn:
                 properties:
                   enabled:
@@ -18801,6 +18834,8 @@ spec:
                     type: string
                   openstackClientImage:
                     type: string
+                  openstackLightspeedImage:
+                    type: string
                   osContainerImage:
                     type: string
                   ovnControllerImage:
@@ -20199,6 +20234,95 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+  name: openstacklightspeeds.lightspeed.openstack.org
+spec:
+  group: lightspeed.openstack.org
+  names:
+    kind: OpenStackLightspeed
+    listKind: OpenStackLightspeedList
+    plural: openstacklightspeeds
+    singular: openstacklightspeed
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              TLSCACertBundle:
+                type: string
+              llmCredentials:
+                type: string
+              llmEndpoint:
+                type: string
+              llmEndpointType:
+                enum:
+                - azure_openai
+                - bam
+                - openai
+                - watsonx
+                - rhoai_vllm
+                - rhelai_vllm
+                - fake_provider
+                type: string
+              modelName:
+                type: string
+              ragImage:
+                type: string
+            required:
+            - TLSCACertBundle
+            - llmCredentials
+            - llmEndpoint
+            - llmEndpointType
+            - modelName
+            - ragImage
+            type: object
+          status:
+            properties:
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    severity:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                format: int64
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
   name: openstackversions.core.openstack.org
 spec:
   group: core.openstack.org
@@ -20385,6 +20509,8 @@ spec:
                   octaviaWorkerImage:
                     type: string
                   openstackClientImage:
+                    type: string
+                  openstackLightspeedImage:
                     type: string
                   osContainerImage:
                     type: string
@@ -20608,6 +20734,8 @@ spec:
                       type: string
                     openstackClientImage:
                       type: string
+                    openstackLightspeedImage:
+                      type: string
                     osContainerImage:
                       type: string
                     ovnControllerImage:
@@ -20799,6 +20927,8 @@ spec:
                   octaviaWorkerImage:
                     type: string
                   openstackClientImage:
+                    type: string
+                  openstackLightspeedImage:
                     type: string
                   osContainerImage:
                     type: string

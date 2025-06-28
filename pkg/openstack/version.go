@@ -186,6 +186,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			TestTobikoImage:                   getImg(instance.Spec.CustomContainerImages.TestTobikoImage, defaults.TestTobikoImage),
 			TestHorizontestImage:              getImg(instance.Spec.CustomContainerImages.TestHorizontestImage, defaults.TestHorizontestImage),
 			TestAnsibletestImage:              getImg(instance.Spec.CustomContainerImages.TestAnsibletestImage, defaults.TestAnsibletestImage),
+			OpenstackLightspeedImage:          getImg(instance.Spec.CustomContainerImages.OpenstackLightspeedImage, defaults.OpenstackLightspeedImage),
 		}}
 	if containerImages.CinderVolumeImages == nil {
 		containerImages.CinderVolumeImages = make(map[string]*string)
@@ -315,6 +316,9 @@ func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1be
 	}
 	if OctaviaImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Octavia")
+	}
+	if LightspeedImageMatch(ctx, controlPlane, version) {
+		failedMatches = append(failedMatches, "OpenstackLightspeed")
 	}
 	if ClientImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "OpenstackClient")
