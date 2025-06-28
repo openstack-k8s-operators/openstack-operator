@@ -509,6 +509,8 @@ const (
 	OpenStackVersionMinorUpdateDataplane condition.Type = "MinorUpdateDataplane"
 
 	OpenStackVersionMinorUpdateAvailable condition.Type = "MinorUpdateAvailable"
+
+	OpenStackVersionAtLatestKnown condition.Type = "AtLatestKnown"
 )
 
 // Version Messages used by API objects.
@@ -540,4 +542,7 @@ const (
 
 	// OpenStackVersionMinorUpdateAvailableMessage
 	OpenStackVersionMinorUpdateAvailableMessage = "update available"
+
+	// OpenStackVersionMinorUpdateAtLatestKnownMessage
+	OpenStackVersionMinorUpdateAtLatestKnownMessage = "at latest known"
 )
