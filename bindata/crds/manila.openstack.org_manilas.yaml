@@ -823,6 +823,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationBusInstance:
+                type: string
               passwordSelectors:
                 default:
                   service: ManilaPassword
@@ -896,6 +898,8 @@ spec:
                   format: int32
                   type: integer
                 type: object
+              notificationURLSecret:
+                type: string
               observedGeneration:
                 format: int64
                 type: integer
