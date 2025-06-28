@@ -543,6 +543,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationURLSecret:
+                type: string
               override:
                 properties:
                   service:
