@@ -14,7 +14,7 @@ require (
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250626075020-dae6f5c33dc9
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250623134037-bce8067f284a
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250625211333-0913bd5599dd
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250626124419-7177d14e206f
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250623134038-189ddfcdeacf
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250623134039-cd9d6c60f812
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250623134040-c52983398998
@@ -36,7 +36,7 @@ require (
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20250623134049-ee16b9218206
 	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20250623134050-97368f870cf2
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250623134050-9b8d74ec10a9
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250626083419-cfaeaa693462
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250626151737-fbabbc4d62d5
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20250623134052-b44946e0fa56
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/cluster-operator/v2 v2.11.0
