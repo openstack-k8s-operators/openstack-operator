@@ -243,6 +243,10 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 		if !(r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
 			reqs = "RabbitMQ, Keystone"
 		}
+	case "Telemetry.CloudKitty":
+		if !(r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "RabbitMQ, Keystone"
+		}
 	}
 
 	// If "reqs" is not the empty string, we have missing requirements

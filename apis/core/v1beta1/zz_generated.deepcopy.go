@@ -346,6 +346,16 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.CloudKittyAPIImage != nil {
+		in, out := &in.CloudKittyAPIImage, &out.CloudKittyAPIImage
+		*out = new(string)
+		**out = **in
+	}
+	if in.CloudKittyProcImage != nil {
+		in, out := &in.CloudKittyProcImage, &out.CloudKittyProcImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.DesignateAPIImage != nil {
 		in, out := &in.DesignateAPIImage, &out.DesignateAPIImage
 		*out = new(string)
@@ -1703,6 +1713,7 @@ func (in *TelemetrySection) DeepCopyInto(out *TelemetrySection) {
 		(*in).DeepCopyInto(*out)
 	}
 	in.AodhAPIOverride.DeepCopyInto(&out.AodhAPIOverride)
+	in.CloudKittyAPIOverride.DeepCopyInto(&out.CloudKittyAPIOverride)
 	in.PrometheusOverride.DeepCopyInto(&out.PrometheusOverride)
 	in.AlertmanagerOverride.DeepCopyInto(&out.AlertmanagerOverride)
 }

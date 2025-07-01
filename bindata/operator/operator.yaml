@@ -82,10 +82,7 @@ spec:
           value: '{{ .RenewDeadline }}'
         - name: RETRY_PERIOD
           value: '{{ .RetryPeriod }}'
-{{ range $envName, $envValue := .OpenStackServiceRelatedImages }}
-        - name: {{ $envName }}
-          value: {{ $envValue }}
-{{ end }}
+        envCustomImage: replace_me
         image: '{{ .OperatorImage }}'
         livenessProbe:
           httpGet:
@@ -122,7 +119,7 @@ spec:
         - --upstream=http://127.0.0.1:8080/
         - --logtostderr=true
         - --v=0
-        image: '{{ .KubeRbacProxyImage }}'
+        image: kube-rbac-proxy:replace_me
         name: kube-rbac-proxy
         ports:
         - containerPort: 8443

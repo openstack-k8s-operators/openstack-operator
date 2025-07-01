@@ -83,6 +83,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  cloudkittyAPIImage:
+                    type: string
+                  cloudkittyProcImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -307,6 +311,10 @@ spec:
                       type: string
                     cinderVolumeImage:
                       type: string
+                    cloudkittyAPIImage:
+                      type: string
+                    cloudkittyProcImage:
+                      type: string
                     designateAPIImage:
                       type: string
                     designateBackendbind9Image:
@@ -495,6 +503,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  cloudkittyAPIImage:
+                    type: string
+                  cloudkittyProcImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
