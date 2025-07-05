@@ -1162,6 +1162,17 @@ spec:
                   - extraVol
                   type: object
                 type: array
+              federatedRealmConfig:
+                description: |-
+                  Secret containing the configuration for federated realms
+                  This is only needed when multiple realms are federated.
+                type: string
+              federationMountPath:
+                description: |-
+                  Mount path for federation config files
+                  This is only needed when multiple realms are federated.
+                  If not specified, "/etc/httpd/conf" is used
+                type: string
               fernetMaxActiveKeys:
                 default: 5
                 description: FernetMaxActiveKeys - Maximum number of fernet token
