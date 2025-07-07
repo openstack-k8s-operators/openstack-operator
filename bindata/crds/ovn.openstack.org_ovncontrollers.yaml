@@ -64,6 +64,9 @@ spec:
                     type: array
                   enable-chassis-as-gateway:
                     default: true
+                    description: |-
+                      DEPRECATED: To be removed in the next API version
+                      Any value set to this field is ignored
                     type: boolean
                   ovn-bridge:
                     default: br-int

@@ -875,6 +875,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationBusInstance:
+                type: string
               passwordSelectors:
                 default:
                   service: CinderPassword
@@ -965,6 +967,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationURLSecret:
+                type: string
               observedGeneration:
                 format: int64
                 type: integer
