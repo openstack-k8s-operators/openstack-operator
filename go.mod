@@ -15,7 +15,7 @@ require (
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250626075020-dae6f5c33dc9
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250623134037-bce8067f284a
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250627145037-aab1156f296e
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250623134038-189ddfcdeacf
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250703101425-7bb4dc0a75cb
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250623134039-cd9d6c60f812
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250623134040-c52983398998
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250626084237-ff8bcd258e1a
@@ -33,7 +33,7 @@ require (
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20250623134046-bab75c6d5715
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20250623134047-13588826f6d6
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
-	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20250623134049-ee16b9218206
+	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20250630081913-8ee2ac940c4d
 	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20250623134050-97368f870cf2
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250623134050-9b8d74ec10a9
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250626151737-fbabbc4d62d5
