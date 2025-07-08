@@ -1144,6 +1144,10 @@ spec:
                   - extraVol
                   type: object
                 type: array
+              memcachedInstance:
+                default: memcached
+                description: Memcached instance name.
+                type: string
               nodeSelector:
                 additionalProperties:
                   type: string
