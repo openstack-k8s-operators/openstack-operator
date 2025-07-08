@@ -670,13 +670,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) machineConfigWatcherFn(
 	kind := strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)
 	const registryMachineConfigName string = "99-master-generated-registries"
 
-	mcNamespacedName := types.NamespacedName{
-		Name:      registryMachineConfigName,
-		Namespace: "",
-	}
-
-	if err := r.Get(ctx, mcNamespacedName, obj); err != nil {
-		Log.Error(err, fmt.Sprintf("Unable to retrieve MachingConfig %s", registryMachineConfigName))
+	if obj.GetName() != registryMachineConfigName {
 		return nil
 	}
 
