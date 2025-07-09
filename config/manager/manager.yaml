@@ -42,16 +42,8 @@ spec:
         args:
         - --leader-elect
         env:
-        - name: OPENSTACK_RELEASE_VERSION
-          value: '{{ .OpenstackReleaseVersion }}'
-        - name: LEASE_DURATION
-          value: '{{ .LeaseDuration }}'
-        - name: RENEW_DEADLINE
-          value: '{{ .RenewDeadline }}'
-        - name: RETRY_PERIOD
-          value: '{{ .RetryPeriod }}'
-        envCustomImage: replace_me #NOTE: this is used via the Makefile to inject a custom template loop that kustomize won't allow
-        image: '{{ .OperatorImage }}'
+        - envCustom: replace_me #NOTE: this is used via the Makefile to inject a custom template loop that kustomize won't allow
+        image: '{{ .OpenStackOperator.Deployment.Manager.Image }}'
         name: manager
         securityContext:
           allowPrivilegeEscalation: false
@@ -75,10 +67,8 @@ spec:
         # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
         resources:
           limits:
-            cpu: 500m
-            memory: 1Gi
+            customLimits: replace_me #NOTE: this is used via the Makefile to inject a custom template that kustomize won't allow
           requests:
-            cpu: 10m
-            memory: 512Mi
+            customRequests: replace_me #NOTE: this is used via the Makefile to inject a custom template that kustomize won't allow
       serviceAccountName: openstack-operator-controller-manager
       terminationGracePeriodSeconds: 10

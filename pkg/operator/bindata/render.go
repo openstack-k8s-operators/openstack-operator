@@ -11,6 +11,7 @@ import (
 	//sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/pkg/errors"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -60,10 +61,40 @@ func RenderDir(manifestDir string, d *RenderData) ([]*unstructured.Unstructured,
 	return out, nil
 }
 
+// hasEnvVar checks if an EnvVar with a specific name exists in a slice.
+func hasEnvVar(envVars []corev1.EnvVar, name string) bool {
+	for _, env := range envVars {
+		if env.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+// isEnvVarTrue checks if an EnvVar with a specific name exists
+// and if its value is "true" (case-insensitive).
+func isEnvVarTrue(envVars []corev1.EnvVar, name string) bool {
+	for _, env := range envVars {
+		if env.Name == name {
+			// Found the right env var, now check its value.
+			// Using ToLower for a case-insensitive comparison ("true", "True", etc.)
+			return strings.ToLower(env.Value) == "true"
+		}
+	}
+	// Return false if the env var was not found at all.
+	return false
+}
+
 // RenderTemplate reads, renders, and attempts to parse a yaml or
 // json file representing one or more k8s api objects
 func RenderTemplate(path string, d *RenderData) ([]*unstructured.Unstructured, error) {
-	tmpl := template.New(path).Option("missingkey=error")
+	// Create a FuncMap to register our function.
+	funcMap := template.FuncMap{
+		"hasEnvVar":    hasEnvVar,
+		"isEnvVarTrue": isEnvVarTrue,
+	}
+
+	tmpl := template.New(path).Option("missingkey=error").Funcs(funcMap)
 	if d.Funcs != nil {
 		tmpl.Funcs(d.Funcs)
 	}
