@@ -21,12 +21,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -37,19 +39,17 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	operatorv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1"
+	"github.com/openstack-k8s-operators/openstack-operator/pkg/operator"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/operator/bindata"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-)
-
-const (
-	OperatorCount = 22
 )
 
 // OpenStackReconciler reconciles a OpenStack object
@@ -67,7 +67,6 @@ func (r *OpenStackReconciler) GetLogger(ctx context.Context) logr.Logger {
 var (
 	envRelatedOperatorImages         (map[string]*string) // operatorName -> image
 	envRelatedOpenStackServiceImages (map[string]*string) // full_related_image_name -> image
-	rabbitmqImage                    string
 	operatorImage                    string
 	kubeRbacProxyImage               string
 	openstackReleaseVersion          string
@@ -88,12 +87,7 @@ func SetupEnv() {
 			operatorName = strings.TrimSuffix(operatorName, "_OPERATOR_MANAGER_IMAGE_URL")
 			operatorName = strings.ToLower(operatorName)
 			operatorName = strings.ReplaceAll(operatorName, "_", "-")
-			// rabbitmq-cluster is a special case with an alternate deployment template
-			if operatorName == "rabbitmq-cluster" {
-				rabbitmqImage = envArr[1]
-			} else {
-				envRelatedOperatorImages[operatorName] = &envArr[1]
-			}
+			envRelatedOperatorImages[operatorName] = &envArr[1]
 			log.Log.Info("Found operator related image", "operator", operatorName, "image", envArr[1])
 		} else if strings.HasPrefix(envArr[0], "RELATED_IMAGE_") {
 			envRelatedOpenStackServiceImages[envArr[0]] = &envArr[1]
@@ -101,6 +95,7 @@ func SetupEnv() {
 			kubeRbacProxyImage = envArr[1]
 		} else if envArr[0] == "OPERATOR_IMAGE_URL" {
 			operatorImage = envArr[1]
+			envRelatedOperatorImages[operatorv1beta1.OpenStackOperatorName] = &operatorImage
 		} else if envArr[0] == "OPENSTACK_RELEASE_VERSION" {
 			openstackReleaseVersion = envArr[1]
 		} else if envArr[0] == "LEASE_DURATION" {
@@ -110,7 +105,6 @@ func SetupEnv() {
 		} else if envArr[0] == "RETRY_PERIOD" {
 			retryPeriod = envArr[1]
 		}
-
 	}
 }
 
@@ -213,6 +207,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	)
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.ObservedGeneration = instance.Generation
+	instance.Status.TotalOperatorCount = ptr.To(len(operatorv1beta1.OperatorList))
 
 	instance.Status.Conditions.Set(condition.FalseCondition(
 		operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -285,8 +280,8 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			err))
 		return ctrl.Result{}, err
 	}
-	if deploymentsRunning < OperatorCount {
-		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", OperatorCount, "pending", deploymentsPending)
+	if deploymentsRunning < *instance.Status.EnabledOperatorCount {
+		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", *instance.Status.EnabledOperatorCount, "pending", deploymentsPending)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			operatorv1beta1.OpenStackOperatorDeploymentsReadyCondition,
 			condition.RequestedReason,
@@ -422,7 +417,24 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 	}
 
 	for _, endpointSlice := range endpointSliceList.Items {
-		if isWebhookEndpoint(endpointSlice.GetName()) {
+		endpointSliceName := endpointSlice.GetName()
+
+		if isWebhookEndpoint(endpointSliceName) {
+			// is deployment disabled ?
+			disabled := false
+			for _, op := range instance.Spec.OperatorOverrides {
+				if strings.HasPrefix(endpointSliceName, op.Name+"-operator") &&
+					op.Replicas != nil && *op.Replicas == 0 {
+
+					disabled = true
+					log.Log.Info(fmt.Sprintf("Webhook %s disabled, skipping endpoint slice check", endpointSliceName), "name", endpointSlice.GetName())
+					break
+				}
+			}
+			if disabled {
+				continue
+			}
+
 			if len(endpointSlice.Endpoints) == 0 {
 				log.Log.Info("Webhook endpoint not configured. Requeuing...", "name", endpointSlice.GetName())
 				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
@@ -479,17 +491,176 @@ func (r *OpenStackReconciler) applyRBAC(ctx context.Context, instance *operatorv
 }
 
 func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	kubeRbacProxyContainer := operator.Container{
+		Image: kubeRbacProxyImage,
+		Resources: operator.Resource{
+			Limits: &operator.ResourceList{
+				CPU:    operatorv1beta1.DefaultRbacProxyCPULimit.String(),
+				Memory: operatorv1beta1.DefaultRbacProxyMemoryLimit.String(),
+			},
+			Requests: &operator.ResourceList{
+				CPU:    operatorv1beta1.DefaultRbacProxyCPURequests.String(),
+				Memory: operatorv1beta1.DefaultRbacProxyMemoryRequests.String(),
+			},
+		},
+	}
+	defaultEnv := []corev1.EnvVar{
+		{
+			Name:  "LEASE_DURATION",
+			Value: leaseDuration,
+		},
+		{
+			Name:  "RENEW_DEADLINE",
+			Value: renewDeadline,
+		},
+		{
+			Name:  "RETRY_PERIOD",
+			Value: retryPeriod,
+		}}
+
+	relatedImagesEnv := []corev1.EnvVar{}
+	// maps are not sorted in go, make sure to add the images in a sorted way,
+	// otherwise the env vars content will change regularly
+	keys := make([]string, 0, len(envRelatedOpenStackServiceImages))
+	for k := range envRelatedOpenStackServiceImages {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+	for _, name := range keys {
+		if img, ok := envRelatedOpenStackServiceImages[name]; ok && img != nil {
+			relatedImagesEnv = append(relatedImagesEnv,
+				corev1.EnvVar{
+					Name:  name,
+					Value: *img,
+				})
+		}
+	}
+
+	// all othere serviceOperators
+	operators := []operator.Operator{} // operator details
+	disabledOperators := 0
+	enabledOperators := 0
+	for _, op := range operatorv1beta1.OperatorList {
+		if img, ok := envRelatedOperatorImages[op.Name]; ok && img != nil {
+			// set global defaults
+			serviceOp := operator.Operator{
+				Name:      op.Name,
+				Namespace: instance.Namespace,
+				Deployment: operator.Deployment{
+					Replicas: ptr.To(operatorv1beta1.ReplicasEnabled),
+					Manager: operator.Container{
+						Image: *img,
+						Env:   defaultEnv,
+						Resources: operator.Resource{
+							Limits: &operator.ResourceList{
+								CPU:    operatorv1beta1.DefaultManagerCPULimit.String(),
+								Memory: operatorv1beta1.DefaultManagerMemoryLimit.String(),
+							},
+							Requests: &operator.ResourceList{
+								CPU:    operatorv1beta1.DefaultManagerCPURequests.String(),
+								Memory: operatorv1beta1.DefaultManagerMemoryRequests.String(),
+							},
+						},
+					},
+					KubeRbacProxy: kubeRbacProxyContainer,
+				},
+			}
+
+			switch op.Name {
+			case operatorv1beta1.OpenStackOperatorName:
+				// set the release version on the openstack-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "OPENSTACK_RELEASE_VERSION",
+						Value: openstackReleaseVersion,
+					})
+				// set related images on the openstack-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					relatedImagesEnv...)
+			case operatorv1beta1.OpenStackBaremetalOperatorName:
+				// enable webhooks on the openstack-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "ENABLE_WEBHOOKS",
+						Value: "true",
+					})
+				// set related images on the openstack-baremetal-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					relatedImagesEnv...)
+			case operatorv1beta1.InfraOperatorName:
+				// enable webhooks on the infra-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "ENABLE_WEBHOOKS",
+						Value: "true",
+					})
+			default:
+				// disable webhooks per default
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "ENABLE_WEBHOOKS",
+						Value: "false",
+					})
+			}
+
+			// set operator defaults if defined
+			operator.SetOverrides(op, &serviceOp)
+
+			// set user overrides
+			opOvr := operator.HasOverrides(instance.Spec.OperatorOverrides, op.Name)
+			if opOvr != nil {
+				operator.SetOverrides(*opOvr, &serviceOp)
+			}
+
+			operators = append(operators, serviceOp)
+
+			if *serviceOp.Deployment.Replicas == 0 {
+				disabledOperators++
+			} else {
+				enabledOperators++
+			}
+		}
+	}
+	instance.Status.DisabledOperatorCount = &disabledOperators
+	instance.Status.EnabledOperatorCount = &enabledOperators
+
+	// serviceOperators a copy of operators details, without openstack-operator and rabbitmq-cluster-operator
+	// which get removed bellow when creating openstackOperator and rabbitmqOperator, since they use dedicated
+	// templates
+	serviceOperators := operators
+
+	// openstack-operator-controller-manager
+	openstackOperator := operator.Operator{}
+	idx, op := operator.GetOperator(serviceOperators, operatorv1beta1.OpenStackOperatorName)
+	if idx >= 0 {
+		openstackOperator = op
+		// remove openstackOperator from serviceOperators
+		serviceOperators = append(serviceOperators[:idx], serviceOperators[idx+1:]...)
+	}
+
+	// rabbitmq-cluster-operator
+	rabbitmqOperator := operator.Operator{}
+	idx, op = operator.GetOperator(serviceOperators, operatorv1beta1.RabbitMQOperatorName)
+	if idx >= 0 {
+		rabbitmqOperator = op
+		// remove rabbitmq-cluster-operator from serviceOperators
+		serviceOperators = append(serviceOperators[:idx], serviceOperators[idx+1:]...)
+	}
+
 	data := bindata.MakeRenderData()
+
+	// global stuff
 	data.Data["OperatorNamespace"] = instance.Namespace
-	data.Data["OperatorImages"] = envRelatedOperatorImages
-	data.Data["RabbitmqImage"] = rabbitmqImage
-	data.Data["OperatorImage"] = operatorImage
-	data.Data["KubeRbacProxyImage"] = kubeRbacProxyImage
-	data.Data["OpenstackReleaseVersion"] = openstackReleaseVersion
-	data.Data["LeaseDuration"] = leaseDuration
-	data.Data["RenewDeadline"] = renewDeadline
-	data.Data["RetryPeriod"] = retryPeriod
-	data.Data["OpenStackServiceRelatedImages"] = envRelatedOpenStackServiceImages
+
+	// rabbitmaq-cluster-operator-manager image rabbit.yaml
+	data.Data["RabbitmqOperator"] = rabbitmqOperator
+
+	// openstack-operator-controller-manager image operator.yaml
+	data.Data["OpenStackOperator"] = openstackOperator
+
+	// service operators
+	data.Data["ServiceOperators"] = serviceOperators // -> service operator images managers.yaml
+
 	return r.renderAndApply(ctx, instance, data, "operator", true)
 }
 
@@ -544,15 +715,11 @@ func (r *OpenStackReconciler) renderAndApply(
 }
 
 func isServiceOperatorResource(name string) bool {
-	//NOTE: test-operator was deployed as a independant package so it may or may not be installed
-	//NOTE: depending on how watcher-operator is released for FR2 and then in FR3 it may need to be
-	// added into this list in the future
-	serviceOperatorNames := []string{"barbican", "cinder", "designate", "glance", "heat", "horizon", "infra",
-		"ironic", "keystone", "manila", "mariadb", "neutron", "nova", "octavia", "openstack-baremetal", "ovn",
-		"placement", "rabbitmq-cluster", "swift", "telemetry", "test"}
-
-	for _, item := range serviceOperatorNames {
-		if strings.Index(name, item) == 0 {
+	for _, item := range operatorv1beta1.OperatorList {
+		if item.Name == operatorv1beta1.OpenStackOperatorName {
+			continue
+		}
+		if strings.Index(name, item.Name) == 0 {
 			return true
 		}
 	}
