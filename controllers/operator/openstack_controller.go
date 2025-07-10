@@ -864,7 +864,12 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 					Log.Info("Deleting operator reference", "Reference", ref)
 					obj := uns.Unstructured{}
 					obj.SetName(refData["name"].(string))
-					obj.SetNamespace(refData["namespace"].(string))
+
+					// Some of the references are not namespaced, so we need to check if the namespace is present
+					if namespace, ok := refData["namespace"]; ok {
+						obj.SetNamespace(namespace.(string))
+					}
+
 					apiParts := strings.Split(refData["apiVersion"].(string), "/")
 					objGvk := schema.GroupVersionResource{
 						Group:    apiParts[0],
