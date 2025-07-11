@@ -20,6 +20,11 @@ network_config:
     mtu: {{ min_viable_mtu }}
     # force the MAC address of the bridge to this interface
     primary: true
+{% if edpm_network_config_nmstate %}
+    # this ovs_extra configuration fixes OSPRH-17551, but it will be not needed when FDP-1472 is resolved
+    ovs_extra:
+      - "set interface eth1 external-ids:ovn-egress-iface=true"
+{% -endif %}
 {% for network in nodeset_networks %}
   - type: vlan
     mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
