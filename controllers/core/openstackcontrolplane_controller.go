@@ -610,7 +610,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileDelete(ctx context.Context, i
 const (
 	passwordSecretField               = ".spec.secret"
 	tlsCABundleSecretNameField        = ".spec.tls.caBundleSecretName"
-	tlsIngressCACustomIssuer          = ".spec.tls.ingerss.ca.customIssuer"
+	tlsIngressCACustomIssuer          = ".spec.tls.ingress.ca.customIssuer"
 	tlsPodLevelInternalCACustomIssuer = ".spec.tls.podLevel.internal.ca.customIssuer"
 	tlsPodLevelOvnCACustomIssuer      = ".spec.tls.podLevel.ovn.ca.customIssuer"
 )
