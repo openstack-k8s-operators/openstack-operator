@@ -1141,6 +1141,10 @@ spec:
                   - extraVol
                   type: object
                 type: array
+              memcachedInstance:
+                default: memcached
+                description: Memcached instance name.
+                type: string
               networkAttachments:
                 description: NetworkAttachments is a list of NetworkAttachment resource
                   names to expose the services to the given network
