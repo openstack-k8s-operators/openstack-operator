@@ -127,6 +127,14 @@ type OpenStackControlPlaneSpec struct {
 	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=rabbitmq
+	// NotificationsBus - the name of RabbitMQ Cluster CR to select a Messaging
+	// Bus Service instance used by all services that produce or consume notifications.
+	// Avoid colocating it with RabbitMQ services used for PRC.
+	// That instance will be pushed down for services, unless overriden in templates.
+	NotificationsBus string `json:"notificationsBus"`
+
+	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Memcached - Parameters related to the Memcached service
 	Memcached MemcachedSection `json:"memcached,omitempty"`
@@ -484,7 +492,7 @@ type RabbitmqSection struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// Templates - Overrides to use when creating the Rabbitmq clusters
+	// Templates - Overrides to use when creating the Rabbitmq clusters for RPC and (optionally) Notifications.
 	Templates *map[string]rabbitmqv1.RabbitMqSpecCore `json:"templates"`
 }
 
