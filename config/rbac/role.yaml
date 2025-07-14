@@ -857,3 +857,15 @@ rules:
   - list
   - update
   - watch
+- apiGroups:
+  - watcher.openstack.org
+  resources:
+  - watchers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
