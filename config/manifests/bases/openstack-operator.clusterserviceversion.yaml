@@ -504,6 +504,24 @@ spec:
       - description: Cert - defines details for cert config
         displayName: Cert
         path: tls.podLevel.ovn.cert
+      - description: Watcher - Parameters related to the Watcher service
+        displayName: Watcher
+        path: watcher
+      - description: APIOverride, provides the ability to override the generated manifest
+          of several child resources.
+        displayName: APIOverride
+        path: watcher.apiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: watcher.apiOverride.tls
+      - description: Enabled - Whether Watcher service should be deployed and managed
+        displayName: Enabled
+        path: watcher.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Template - Overrides to use when creating the Watcher service
+        displayName: Template
+        path: watcher.template
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

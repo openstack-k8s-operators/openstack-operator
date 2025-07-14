@@ -41,6 +41,7 @@ import (
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
+	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 )
 
 type Names struct {
@@ -59,6 +60,7 @@ type Names struct {
 	HeatName                           types.NamespacedName
 	NovaName                           types.NamespacedName
 	TelemetryName                      types.NamespacedName
+	WatcherName                        types.NamespacedName
 	DBName                             types.NamespacedName
 	DBCertName                         types.NamespacedName
 	DBCell1Name                        types.NamespacedName
@@ -90,6 +92,9 @@ type Names struct {
 	OVNDbServerSBName                  types.NamespacedName
 	NeutronOVNCertName                 types.NamespacedName
 	OpenStackTopology                  []types.NamespacedName
+	WatcherCertPublicRouteName         types.NamespacedName
+	WatcherCertPublicSvcName           types.NamespacedName
+	WatcherCertInternalName            types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -181,6 +186,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "nova",
 		},
+		WatcherName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "watcher",
+		},
 		DBName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "openstack",
@@ -266,6 +275,18 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 				Namespace: openstackControlplaneName.Namespace,
 				Name:      "openstack-topology-alt",
 			},
+		},
+		WatcherCertPublicRouteName: types.NamespacedName{
+			Name:      "cert-watcher-public-route",
+			Namespace: openstackControlplaneName.Namespace,
+		},
+		WatcherCertPublicSvcName: types.NamespacedName{
+			Name:      "cert-watcher-public-svc",
+			Namespace: openstackControlplaneName.Namespace,
+		},
+		WatcherCertInternalName: types.NamespacedName{
+			Name:      "cert-watcher-internal-svc",
+			Namespace: openstackControlplaneName.Namespace,
 		},
 	}
 }
@@ -632,6 +653,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"enabled":  true,
 			"template": telemetryTemplate,
 		},
+		"watcher": map[string]interface{}{
+			"enabled": false,
+		},
 	}
 }
 
@@ -876,6 +900,15 @@ func GetHeat(name types.NamespacedName) *heatv1.Heat {
 // GetTelemetry
 func GetTelemetry(name types.NamespacedName) *telemetryv1.Telemetry {
 	instance := &telemetryv1.Telemetry{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetWatcher
+func GetWatcher(name types.NamespacedName) *watcherv1.Watcher {
+	instance := &watcherv1.Watcher{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())

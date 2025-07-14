@@ -357,6 +357,10 @@ func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1be
 		failedMatches = append(failedMatches, "Telemetry")
 	}
 
+	if WatcherImageMatch(ctx, controlPlane, version) {
+		failedMatches = append(failedMatches, "Watcher")
+	}
+
 	if len(failedMatches) == 0 {
 		return true, nil
 	}

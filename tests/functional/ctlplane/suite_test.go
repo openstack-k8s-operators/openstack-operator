@@ -56,6 +56,7 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
+	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 
 	client_ctrl "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	core_ctrl "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
@@ -179,6 +180,9 @@ var _ = BeforeSuite(func() {
 	Expect(err).ShouldNot(HaveOccurred())
 	ocpconfigv1CRDs, err := test.GetOpenShiftCRDDir("config/v1", gomod)
 	Expect(err).ShouldNot(HaveOccurred())
+	watcherCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/watcher-operator/api", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -206,6 +210,7 @@ var _ = BeforeSuite(func() {
 			rabbitmqv2CRDs,
 			certmgrv1CRDs,
 			ocpconfigv1CRDs,
+			watcherCRDs,
 		},
 		ErrorIfCRDPathMissing: true,
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
@@ -279,6 +284,8 @@ var _ = BeforeSuite(func() {
 	err = topologyv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = rabbitmqv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = watcherv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme
