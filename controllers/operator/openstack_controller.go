@@ -59,7 +59,7 @@ type OpenStackReconciler struct {
 	Kclient kubernetes.Interface
 }
 
-// GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
 func (r *OpenStackReconciler) GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackOperator")
 }
@@ -406,11 +406,13 @@ func isWebhookEndpoint(name string) bool {
 // checkServiceEndpoints -
 func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instance *operatorv1beta1.OpenStack) (ctrl.Result, error) {
 
+	Log := r.GetLogger(ctx)
+
 	endpointSliceList := &discoveryv1.EndpointSliceList{}
 	err := r.Client.List(ctx, endpointSliceList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			log.Log.Info("Webhook endpoint not found. Requeuing...")
+			Log.Info("Webhook endpoint not found. Requeuing...")
 			return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 		}
 		return ctrl.Result{}, err
@@ -427,7 +429,7 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 					op.Replicas != nil && *op.Replicas == 0 {
 
 					disabled = true
-					log.Log.Info(fmt.Sprintf("Webhook %s disabled, skipping endpoint slice check", endpointSliceName), "name", endpointSlice.GetName())
+					Log.Info(fmt.Sprintf("Webhook %s disabled, skipping endpoint slice check", endpointSliceName), "name", endpointSlice.GetName())
 					break
 				}
 			}
@@ -436,17 +438,17 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 			}
 
 			if len(endpointSlice.Endpoints) == 0 {
-				log.Log.Info("Webhook endpoint not configured. Requeuing...", "name", endpointSlice.GetName())
+				Log.Info("Webhook endpoint not configured. Requeuing...", "name", endpointSlice.GetName())
 				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 			}
 			for _, endpoint := range endpointSlice.Endpoints {
 				if len(endpoint.Addresses) == 0 {
-					log.Log.Info("Webhook endpoint addresses aren't healthy. Requeuing...", "name", endpointSlice.GetName())
+					Log.Info("Webhook endpoint addresses aren't healthy. Requeuing...", "name", endpointSlice.GetName())
 					return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 				}
 				bFalse := false
 				if endpoint.Conditions.Ready == &bFalse || endpoint.Conditions.Serving == &bFalse {
-					log.Log.Info("Webhook endpoint addresses aren't serving. Requeuing...", "name", endpointSlice.GetName())
+					Log.Info("Webhook endpoint addresses aren't serving. Requeuing...", "name", endpointSlice.GetName())
 					return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 				}
 			}
@@ -457,22 +459,23 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 }
 
 func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
 	// only apply CRDs and RBAC once per each containerImage change
 	if !containerImageMatch(instance) {
 		if err := r.applyCRDs(ctx, instance); err != nil {
-			log.Log.Error(err, "failed applying CRD manifests")
+			Log.Error(err, "failed applying CRD manifests")
 			return err
 		}
 
 		if err := r.applyRBAC(ctx, instance); err != nil {
-			log.Log.Error(err, "failed applying RBAC manifests")
+			Log.Error(err, "failed applying RBAC manifests")
 			return err
 		}
 	}
 	instance.Status.ContainerImage = &operatorImage
 
 	if err := r.applyOperator(ctx, instance); err != nil {
-		log.Log.Error(err, "failed applying Operator manifests")
+		Log.Error(err, "failed applying Operator manifests")
 		return err
 	}
 
@@ -673,6 +676,7 @@ func (r *OpenStackReconciler) renderAndApply(
 ) error {
 	var err error
 
+	Log := r.GetLogger(ctx)
 	bindir := util.GetEnvVar("BASE_BINDATA", "/bindata")
 
 	sourceFullDirectory := filepath.Join(bindir, sourceDirectory)
@@ -695,13 +699,13 @@ func (r *OpenStackReconciler) renderAndApply(
 		if setControllerReference {
 			// Set the controller reference.
 			if obj.GetNamespace() != "" {
-				log.Log.Info("Setting controller reference", "object", obj.GetName(), "controller", instance.Name)
+				Log.Info("Setting controller reference", "object", obj.GetName(), "controller", instance.Name)
 				err = controllerutil.SetControllerReference(instance, obj, r.Scheme)
 				if err != nil {
 					return errors.Wrap(err, "failed to set owner reference")
 				}
 			} else {
-				log.Log.Info("skipping controller reference (cluster scoped)", "object", obj.GetName(), "controller", instance.Name)
+				Log.Info("skipping controller reference (cluster scoped)", "object", obj.GetName(), "controller", instance.Name)
 			}
 		}
 
