@@ -70,7 +70,6 @@ type OpenStackVersionReconciler struct {
 	client.Client
 	Kclient kubernetes.Interface
 	Scheme  *runtime.Scheme
-	Log     logr.Logger
 }
 
 // GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields

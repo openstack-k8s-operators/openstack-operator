@@ -154,7 +154,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}()
 
 	// Ensure NodeSets
-	nodeSets, err := r.listNodeSets(ctx, &Log, instance)
+	nodeSets, err := r.listNodeSets(ctx, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
@@ -493,10 +493,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manag
 		Complete(r)
 }
 
-func (r *OpenStackDataPlaneDeploymentReconciler) listNodeSets(ctx context.Context, Log *logr.Logger, instance *dataplanev1.OpenStackDataPlaneDeployment) (*dataplanev1.OpenStackDataPlaneNodeSetList, error) {
+func (r *OpenStackDataPlaneDeploymentReconciler) listNodeSets(ctx context.Context, instance *dataplanev1.OpenStackDataPlaneDeployment) (*dataplanev1.OpenStackDataPlaneNodeSetList, error) {
 
 	var nodeSets = dataplanev1.OpenStackDataPlaneNodeSetList{}
 	var err error
+
+	Log := r.GetLogger(ctx)
 
 	for _, nodeSet := range instance.Spec.NodeSets {
 
