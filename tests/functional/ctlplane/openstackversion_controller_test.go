@@ -187,7 +187,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.TestTobikoImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.TestHorizontestImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.TestAnsibletestImage).ShouldNot(BeNil())
-
+				g.Expect(version.Status.ContainerImages.WatcherAPIImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.WatcherDecisionEngineImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.WatcherApplierImage).ShouldNot(BeNil())
 			}, timeout, interval).Should(Succeed())
 		})
 
