@@ -187,7 +187,15 @@ tidy: ## Run go mod tidy on every mod file in the repo
 
 .PHONY: golangci-lint
 golangci-lint:
-	test -s $(LOCALBIN)/golangci-lint || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.59.1
+	test -s $(LOCALBIN)/golangci-lint || { \
+		if [ -n "$$GITHUB_TOKEN" ]; then \
+			echo "Using GitHub token for golangci-lint download"; \
+			curl -sSfL -H "Authorization: token $$GITHUB_TOKEN" https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.59.1 && exit 0; \
+			echo "Authenticated download failed, falling back to unauthenticated download"; \
+			unset GITHUB_TOKEN; \
+		fi; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.59.1; \
+	}
 	$(LOCALBIN)/golangci-lint run --fix
 
 MAX_PROCS := 5
@@ -322,7 +330,15 @@ $(KUSTOMIZE): $(LOCALBIN)
 		echo "$(LOCALBIN)/kustomize version is not expected $(KUSTOMIZE_VERSION). Removing it before installing."; \
 		rm -rf $(LOCALBIN)/kustomize; \
 	fi
-	test -s $(LOCALBIN)/kustomize || { curl -Ss $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); }
+	test -s $(LOCALBIN)/kustomize || { \
+		if [ -n "$$GITHUB_TOKEN" ]; then \
+			echo "Using GitHub token for kustomize download"; \
+			curl -Ss -H "Authorization: token $$GITHUB_TOKEN" $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN) && exit 0; \
+			echo "Authenticated download failed, falling back to unauthenticated download"; \
+			unset GITHUB_TOKEN; \
+		fi; \
+		curl -Ss $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); \
+	}
 
 .PHONY: controller-gen
 controller-gen: gowork $(CONTROLLER_GEN) ## Download controller-gen locally if necessary. If wrong version is installed, it will be overwritten.
@@ -352,7 +368,14 @@ kuttl-test: ## Run kuttl tests
 .PHONY: kuttl
 kuttl: $(KUTTL) ## Download kubectl-kuttl locally if necessary.
 $(KUTTL): $(LOCALBIN)
-	test -s $(LOCALBIN)/kubectl-kuttl || curl -L -o $(LOCALBIN)/kubectl-kuttl https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_linux_x86_64
+	test -s $(LOCALBIN)/kubectl-kuttl || { \
+		if [ -n "$$GITHUB_TOKEN" ]; then \
+			echo "Using GitHub token for kuttl download"; \
+			curl -Ss -L -H "Authorization: token $$GITHUB_TOKEN" -o $(LOCALBIN)/kubectl-kuttl https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_linux_x86_64 && exit 0; \
+			echo "Authenticated download failed, falling back to unauthenticated download"; \
+		fi; \
+		curl -Ss -L -o $(LOCALBIN)/kubectl-kuttl https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_linux_x86_64; \
+	}
 	chmod +x $(LOCALBIN)/kubectl-kuttl
 
 .PHONY: operator-sdk
@@ -364,7 +387,12 @@ ifeq (, $(shell which operator-sdk 2>/dev/null))
 	set -e ;\
 	mkdir -p $(dir $(OPERATOR_SDK)) ;\
 	OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
-	curl -sSLo $(OPERATOR_SDK) https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${OS}_$${ARCH} ;\
+	if [ -n "$$GITHUB_TOKEN" ]; then \
+		echo "Using GitHub token for operator-sdk download"; \
+		curl -sSL -H "Authorization: token $$GITHUB_TOKEN" -o $(OPERATOR_SDK) https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${OS}_$${ARCH} && exit 0; \
+		echo "Authenticated download failed, falling back to unauthenticated download"; \
+	fi ;\
+	curl -sSL -o $(OPERATOR_SDK) https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${OS}_$${ARCH} ;\
 	chmod +x $(OPERATOR_SDK) ;\
 	}
 else
@@ -398,7 +426,12 @@ ifeq (,$(shell which opm 2>/dev/null))
 	set -e ;\
 	mkdir -p $(dir $(OPM)) ;\
 	OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
-	curl -sSLo $(OPM) https://github.com/operator-framework/operator-registry/releases/download/v1.29.0/$${OS}-$${ARCH}-opm ;\
+	if [ -n "$$GITHUB_TOKEN" ]; then \
+		echo "Using GitHub token for opm download"; \
+		curl -sSL -H "Authorization: token $$GITHUB_TOKEN" -o $(OPM) https://github.com/operator-framework/operator-registry/releases/download/v1.29.0/$${OS}-$${ARCH}-opm && exit 0; \
+		echo "Authenticated download failed, falling back to unauthenticated download"; \
+	fi ;\
+	curl -sSL -o $(OPM) https://github.com/operator-framework/operator-registry/releases/download/v1.29.0/$${OS}-$${ARCH}-opm ;\
 	chmod +x $(OPM) ;\
 	}
 else
@@ -408,9 +441,13 @@ endif
 
 .PHONY: yq
 yq: $(LOCALBIN) ## Download and install yq in local env
-	test -s $(LOCALBIN)/yq || ( cd $(LOCALBIN) &&\
-	wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64.tar.gz -O - |\
-	tar xz && mv yq_linux_amd64 $(LOCALBIN)/yq )
+	test -s $(LOCALBIN)/yq || ( cd $(LOCALBIN) && \
+		if [ -n "$$GITHUB_TOKEN" ]; then \
+			echo "Using GitHub token for yq download"; \
+			curl -Ss -L -H "Authorization: token $$GITHUB_TOKEN" https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64.tar.gz | tar xz && mv yq_linux_amd64 $(LOCALBIN)/yq && exit 0; \
+			echo "Authenticated download failed, falling back to unauthenticated download"; \
+		fi; \
+		curl -Ss -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64.tar.gz | tar xz && mv yq_linux_amd64 $(LOCALBIN)/yq )
 
 .PHONY: oc
 oc: $(LOCALBIN) ## Download and install oc in local env
