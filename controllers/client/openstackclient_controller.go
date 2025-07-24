@@ -378,6 +378,18 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		)
 	}
 
+	// if pod is stuck in terminating state for more than 3 minutes, force delete it
+	if osclient.DeletionTimestamp != nil {
+		terminatingDuration := time.Since(osclient.DeletionTimestamp.Time)
+		if terminatingDuration > time.Minute*3 {
+			// Force delete only truly stuck pods
+			err := r.Client.Delete(ctx, osclient, client.GracePeriodSeconds(0))
+			if err != nil {
+				return ctrl.Result{}, fmt.Errorf("Failed to force delete pod: %w", err)
+			}
+		}
+	}
+
 	podReady := false
 
 	for _, condition := range osclient.Status.Conditions {
