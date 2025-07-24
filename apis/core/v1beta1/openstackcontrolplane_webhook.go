@@ -149,11 +149,12 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) (admission.Wa
 		return nil, apierrors.NewInternalError(fmt.Errorf("unable to convert existing object"))
 	}
 
+	var allWarn []string
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
-	if err := r.ValidateUpdateServices(oldControlPlane.Spec, basePath); err != nil {
-		allErrs = append(allErrs, err...)
-	}
+
+	allWarn, errs := r.ValidateUpdateServices(oldControlPlane.Spec, basePath)
+	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
 		allErrs = append(allErrs, err)
@@ -165,7 +166,7 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) (admission.Wa
 			r.Name, allErrs)
 	}
 
-	return nil, nil
+	return allWarn, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
@@ -382,7 +383,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 			errors = append(errors, err...)
 
 			for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
-				errors = append(errors, rabbitmqSpec.ValidateCreate(basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)...)
+				warn, errs := rabbitmqSpec.ValidateCreate(basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)
+				warnings = append(warnings, warn...)
+				errors = append(errors, errs...)
 			}
 		}
 	}
@@ -401,8 +404,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 }
 
 // ValidateUpdateServices validating service definitions during the OpenstackControlPlane CR update
-func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlaneSpec, basePath *field.Path) field.ErrorList {
+func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlaneSpec, basePath *field.Path) (admission.Warnings, field.ErrorList) {
 	var errors field.ErrorList
+	var warnings []string
 
 	errors = append(errors, r.ValidateServiceDependencies(basePath)...)
 
@@ -552,9 +556,10 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		}
 		oldRabbitmqs := *old.Rabbitmq.Templates
 		for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
-
 			if oldRabbitmq, ok := oldRabbitmqs[rabbitmqName]; ok {
-				errors = append(errors, rabbitmqSpec.ValidateUpdate(oldRabbitmq, basePath.Child("rabbitmq").Child("templates").Key(rabbitmqName), r.Namespace)...)
+				warn, errs := rabbitmqSpec.ValidateUpdate(oldRabbitmq, basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)
+				warnings = append(warnings, warn...)
+				errors = append(errors, errs...)
 			}
 		}
 	}
@@ -569,7 +574,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		}
 	}
 
-	return errors
+	return warnings, errors
 }
 
 // ValidateServiceDependencies ensures that when a service is enabled then all the services it depends on are also
