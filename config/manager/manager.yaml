@@ -72,3 +72,12 @@ spec:
             customRequests: replace_me #NOTE: this is used via the Makefile to inject a custom template that kustomize won't allow
       serviceAccountName: openstack-operator-controller-manager
       terminationGracePeriodSeconds: 10
+      tolerations:
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 120
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 120

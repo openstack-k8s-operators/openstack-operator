@@ -46,3 +46,12 @@ spec:
             memory: {{ .RabbitmqOperator.Deployment.Manager.Resources.Requests.Memory }}
       serviceAccountName: rabbitmq-cluster-operator-controller-manager
       terminationGracePeriodSeconds: 10
+      tolerations:
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 120
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 120

@@ -95,6 +95,20 @@ func ClientPodSpec(
 				VolumeMounts: volumeMounts,
 			},
 		},
+		Tolerations: []corev1.Toleration{
+			{
+				Key:               "node.kubernetes.io/not-ready",
+				Operator:          corev1.TolerationOpExists,
+				Effect:            corev1.TaintEffectNoExecute,
+				TolerationSeconds: &[]int64{120}[0],
+			},
+			{
+				Key:               "node.kubernetes.io/unreachable",
+				Operator:          corev1.TolerationOpExists,
+				Effect:            corev1.TaintEffectNoExecute,
+				TolerationSeconds: &[]int64{120}[0],
+			},
+		},
 	}
 
 	if instance.Spec.NodeSelector != nil {
