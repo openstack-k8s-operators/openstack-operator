@@ -107,7 +107,6 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	allIPSets map[string]infranetworkv1.IPSet, dnsDetails *DNSDetails,
 ) error {
 	var allDNSRecords []infranetworkv1.DNSHost
-	var ctlplaneSearchDomain string
 	dnsDetails.Hostnames = map[string]map[infranetworkv1.NetNameStr]string{}
 	dnsDetails.AllIPs = map[string]map[infranetworkv1.NetNameStr]string{}
 
@@ -155,9 +154,8 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					dnsDetails.AllIPs[hostName][infranetworkv1.NetNameStr(netLower)] = res.Address
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
-					// Adding only ctlplane domain for ansibleee.
-					// TODO (rabi) This is not very efficient.
-					if netLower == dataplanev1.CtlPlaneNetwork && ctlplaneSearchDomain == "" {
+
+					if dnsDetails.CtlplaneSearchDomain == "" && netLower == dataplanev1.CtlPlaneNetwork {
 						dnsDetails.CtlplaneSearchDomain = res.DNSDomain
 					}
 				}
@@ -309,27 +307,19 @@ func cleanupStaleReservations(ctx context.Context, helper *helper.Helper,
 		return err
 	}
 
-	ipSetsToRemove := []infranetworkv1.IPSet{}
-	// Delete all IPSet for nodes that are not in nodeset
-	for _, ipSet := range ipSetList.Items {
-		found := false
-		for _, node := range instance.Spec.Nodes {
-			if ipSet.Name == node.HostName {
-				found = true
-				break
-			}
-		}
-		if !found {
-			ipSetsToRemove = append(ipSetsToRemove, ipSet)
-		}
+	currentNodes := make(map[string]bool)
+	for _, node := range instance.Spec.Nodes {
+		currentNodes[node.HostName] = true
 	}
-	for _, ipSet := range ipSetsToRemove {
-		if err := helper.GetClient().Delete(ctx, &ipSet); err != nil {
-			return err
+
+	for _, ipSet := range ipSetList.Items {
+		if _, ok := currentNodes[ipSet.Name]; !ok {
+			if err := helper.GetClient().Delete(ctx, &ipSet); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
-
 }
 
 // reserveIPs Reserves IPs by creating IPSets
@@ -348,7 +338,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	if len(netConfigList.Items) == 0 {
 		errMsg := "no NetConfig CR exists yet"
 		util.LogForObject(helper, errMsg, instance)
-		return nil, nil, fmt.Errorf(errMsg)
+		return nil, nil, fmt.Errorf("%s", errMsg)
 	}
 	netServiceNetMap := BuildNetServiceNetMap(netConfigList.Items[0])
 	allIPSets := make(map[string]infranetworkv1.IPSet)
@@ -356,33 +346,33 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	// CreateOrPatch IPSets
 	for nodeName, node := range instance.Spec.Nodes {
 		foundCtlPlane := false
-		nets := node.Networks
-		hostName := node.HostName
-		if len(nets) == 0 {
-			nets = instance.Spec.NodeTemplate.Networks
+		if len(node.Networks) == 0 {
+			node.Networks = instance.Spec.NodeTemplate.Networks
 		}
 
-		if len(nets) > 0 {
-			for _, net := range nets {
+		if len(node.Networks) > 0 {
+			for _, net := range node.Networks {
 				if strings.EqualFold(string(net.Name), dataplanev1.CtlPlaneNetwork) ||
 					netServiceNetMap[strings.ToLower(string(net.Name))] == dataplanev1.CtlPlaneNetwork {
 					foundCtlPlane = true
+					break
 				}
 			}
 			if !foundCtlPlane {
-				msg := fmt.Sprintf("ctlplane network should be defined for node %s", nodeName)
-				return nil, netServiceNetMap, fmt.Errorf(msg)
+				return nil, netServiceNetMap,
+					fmt.Errorf("ctlplane network should be defined for node %s", nodeName)
 			}
 			ipSet := &infranetworkv1.IPSet{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: instance.Namespace,
-					Name:      hostName,
+					Name:      node.HostName,
 				},
 			}
 			_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ipSet, func() error {
-				ownerLabels := labels.GetLabels(instance, labels.GetGroupLabel(NodeSetLabel), map[string]string{})
+				ownerLabels := labels.GetLabels(
+					instance, labels.GetGroupLabel(NodeSetLabel), map[string]string{})
 				ipSet.Labels = util.MergeStringMaps(ipSet.GetLabels(), ownerLabels)
-				ipSet.Spec.Networks = nets
+				ipSet.Spec.Networks = node.Networks
 				// Set controller reference to the DataPlaneNode object
 				err := controllerutil.SetControllerReference(
 					helper.GetBeforeObject(), ipSet, helper.GetScheme())
@@ -391,11 +381,11 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			if err != nil {
 				return nil, netServiceNetMap, err
 			}
-			allIPSets[hostName] = *ipSet
+			allIPSets[node.HostName] = *ipSet
 		} else {
 			msg := fmt.Sprintf("No Networks defined for node %s or template", nodeName)
 			util.LogForObject(helper, msg, instance)
-			return nil, netServiceNetMap, fmt.Errorf(msg)
+			return nil, netServiceNetMap, fmt.Errorf("%s", msg)
 		}
 	}
 	return allIPSets, netServiceNetMap, nil
