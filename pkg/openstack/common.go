@@ -72,7 +72,7 @@ const (
 	caCertSelector = "ca-cert"
 )
 
-// GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
 func GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenstackControlPlane")
 }
