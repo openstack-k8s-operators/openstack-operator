@@ -286,7 +286,7 @@ EOF_CAT
 for X in $(ls manifests/*clusterserviceversion.yaml); do
         OPERATOR_NAME=$(echo $X | sed -e "s|manifests\/\([^\.]*\)\..*|\1|" | sed -e "s|-|_|g" | tr '[:lower:]' '[:upper:]' )
         echo $OPERATOR_NAME
-        if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" ]]; then
+        if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" ]] || [[ $OPERATOR_NAME == "WATCHER_OPERATOR" ]]; then
             IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[0].image)
         else
             IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[1].image)
