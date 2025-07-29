@@ -82,39 +82,41 @@ type ContainerTemplate struct {
 	AodhListenerImage  *string `json:"aodhListenerImage,omitempty"`
 	AodhNotifierImage  *string `json:"aodhNotifierImage,omitempty"`
 	// this is shared by BaremetalOperator, OctaviaOperator, and TelemetryOperator
-	ApacheImage                       *string `json:"apacheImage,omitempty"`
-	BarbicanAPIImage                  *string `json:"barbicanAPIImage,omitempty"`
-	BarbicanKeystoneListenerImage     *string `json:"barbicanKeystoneListenerImage,omitempty"`
-	BarbicanWorkerImage               *string `json:"barbicanWorkerImage,omitempty"`
-	CeilometerCentralImage            *string `json:"ceilometerCentralImage,omitempty"`
-	CeilometerComputeImage            *string `json:"ceilometerComputeImage,omitempty"`
-	CeilometerIpmiImage               *string `json:"ceilometerIpmiImage,omitempty"`
-	CeilometerNotificationImage       *string `json:"ceilometerNotificationImage,omitempty"`
-	CeilometerSgcoreImage             *string `json:"ceilometerSgcoreImage,omitempty"`
-	CeilometerMysqldExporterImage     *string `json:"ceilometerMysqldExporterImage,omitempty"`
-	CinderAPIImage                    *string `json:"cinderAPIImage,omitempty"`
-	CinderBackupImage                 *string `json:"cinderBackupImage,omitempty"`
-	CinderSchedulerImage              *string `json:"cinderSchedulerImage,omitempty"`
-	DesignateAPIImage                 *string `json:"designateAPIImage,omitempty"`
-	DesignateBackendbind9Image        *string `json:"designateBackendbind9Image,omitempty"`
-	DesignateCentralImage             *string `json:"designateCentralImage,omitempty"`
-	DesignateMdnsImage                *string `json:"designateMdnsImage,omitempty"`
-	DesignateProducerImage            *string `json:"designateProducerImage,omitempty"`
-	DesignateUnboundImage             *string `json:"designateUnboundImage,omitempty"`
-	DesignateWorkerImage              *string `json:"designateWorkerImage,omitempty"`
-	EdpmFrrImage                      *string `json:"edpmFrrImage,omitempty"`
-	EdpmIscsidImage                   *string `json:"edpmIscsidImage,omitempty"`
-	EdpmLogrotateCrondImage           *string `json:"edpmLogrotateCrondImage,omitempty"`
-	EdpmMultipathdImage               *string `json:"edpmMultipathdImage,omitempty"`
-	EdpmNeutronDhcpAgentImage         *string `json:"edpmNeutronDhcpAgentImage,omitempty"`
-	EdpmNeutronMetadataAgentImage     *string `json:"edpmNeutronMetadataAgentImage,omitempty"`
-	EdpmNeutronOvnAgentImage          *string `json:"edpmNeutronOvnAgentImage,omitempty"`
-	EdpmNeutronSriovAgentImage        *string `json:"edpmNeutronSriovAgentImage,omitempty"`
-	EdpmOvnBgpAgentImage              *string `json:"edpmOvnBgpAgentImage,omitempty"`
-	EdpmNodeExporterImage             *string `json:"edpmNodeExporterImage,omitempty"`
-	EdpmKeplerImage                   *string `json:"edpmKeplerImage,omitempty"`
-	EdpmPodmanExporterImage           *string `json:"edpmPodmanExporterImage,omitempty"`
+	ApacheImage                   *string `json:"apacheImage,omitempty"`
+	BarbicanAPIImage              *string `json:"barbicanAPIImage,omitempty"`
+	BarbicanKeystoneListenerImage *string `json:"barbicanKeystoneListenerImage,omitempty"`
+	BarbicanWorkerImage           *string `json:"barbicanWorkerImage,omitempty"`
+	CeilometerCentralImage        *string `json:"ceilometerCentralImage,omitempty"`
+	CeilometerComputeImage        *string `json:"ceilometerComputeImage,omitempty"`
+	CeilometerIpmiImage           *string `json:"ceilometerIpmiImage,omitempty"`
+	CeilometerNotificationImage   *string `json:"ceilometerNotificationImage,omitempty"`
+	CeilometerSgcoreImage         *string `json:"ceilometerSgcoreImage,omitempty"`
+	CeilometerMysqldExporterImage *string `json:"ceilometerMysqldExporterImage,omitempty"`
+	CinderAPIImage                *string `json:"cinderAPIImage,omitempty"`
+	CinderBackupImage             *string `json:"cinderBackupImage,omitempty"`
+	CinderSchedulerImage          *string `json:"cinderSchedulerImage,omitempty"`
+	DesignateAPIImage             *string `json:"designateAPIImage,omitempty"`
+	DesignateBackendbind9Image    *string `json:"designateBackendbind9Image,omitempty"`
+	DesignateCentralImage         *string `json:"designateCentralImage,omitempty"`
+	DesignateMdnsImage            *string `json:"designateMdnsImage,omitempty"`
+	DesignateProducerImage        *string `json:"designateProducerImage,omitempty"`
+	DesignateUnboundImage         *string `json:"designateUnboundImage,omitempty"`
+	DesignateWorkerImage          *string `json:"designateWorkerImage,omitempty"`
+	EdpmFrrImage                  *string `json:"edpmFrrImage,omitempty"`
+	EdpmIscsidImage               *string `json:"edpmIscsidImage,omitempty"`
+	EdpmLogrotateCrondImage       *string `json:"edpmLogrotateCrondImage,omitempty"`
+	EdpmMultipathdImage           *string `json:"edpmMultipathdImage,omitempty"`
+	EdpmNeutronDhcpAgentImage     *string `json:"edpmNeutronDhcpAgentImage,omitempty"`
+	EdpmNeutronMetadataAgentImage *string `json:"edpmNeutronMetadataAgentImage,omitempty"`
+	EdpmNeutronOvnAgentImage      *string `json:"edpmNeutronOvnAgentImage,omitempty"`
+	EdpmNeutronSriovAgentImage    *string `json:"edpmNeutronSriovAgentImage,omitempty"`
+	EdpmOvnBgpAgentImage          *string `json:"edpmOvnBgpAgentImage,omitempty"`
+	EdpmNodeExporterImage         *string `json:"edpmNodeExporterImage,omitempty"`
+	EdpmKeplerImage               *string `json:"edpmKeplerImage,omitempty"`
+	EdpmPodmanExporterImage       *string `json:"edpmPodmanExporterImage,omitempty"`
+	// Deprecated: Use OpenstackNetworkExporterImage instead
 	EdpmOpenstackNetworkExporterImage *string `json:"edpmOpenstackNetworkExporterImage,omitempty"`
+	OpenstackNetworkExporterImage     *string `json:"openstackNetworkExporterImage,omitempty"`
 	GlanceAPIImage                    *string `json:"glanceAPIImage,omitempty"`
 	HeatAPIImage                      *string `json:"heatAPIImage,omitempty"`
 	HeatCfnapiImage                   *string `json:"heatCfnapiImage,omitempty"`
