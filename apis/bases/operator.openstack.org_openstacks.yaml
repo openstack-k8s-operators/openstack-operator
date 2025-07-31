@@ -95,6 +95,7 @@ spec:
                       - swift
                       - telemetry
                       - test
+                      - watcher
                       minLength: 1
                       type: string
                     replicas:
