@@ -108,6 +108,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			BarbicanAPIImage:                  getImg(instance.Spec.CustomContainerImages.BarbicanAPIImage, defaults.BarbicanAPIImage),
 			BarbicanKeystoneListenerImage:     getImg(instance.Spec.CustomContainerImages.BarbicanKeystoneListenerImage, defaults.BarbicanKeystoneListenerImage),
 			BarbicanWorkerImage:               getImg(instance.Spec.CustomContainerImages.BarbicanWorkerImage, defaults.BarbicanWorkerImage),
+			BootcOsContainerImage:             getImg(instance.Spec.CustomContainerImages.BootcOsContainerImage, defaults.BootcOsContainerImage),
 			CeilometerCentralImage:            getImg(instance.Spec.CustomContainerImages.CeilometerCentralImage, defaults.CeilometerCentralImage),
 			CeilometerComputeImage:            getImg(instance.Spec.CustomContainerImages.CeilometerComputeImage, defaults.CeilometerComputeImage),
 			CeilometerIpmiImage:               getImg(instance.Spec.CustomContainerImages.CeilometerIpmiImage, defaults.CeilometerIpmiImage),
