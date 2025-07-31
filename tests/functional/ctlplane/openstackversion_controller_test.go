@@ -137,7 +137,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmKeplerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmPodmanExporterImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmOpenstackNetworkExporterImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.OpenstackNetworkExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmOvnBgpAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.GlanceAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.HeatAPIImage).ShouldNot(BeNil())
