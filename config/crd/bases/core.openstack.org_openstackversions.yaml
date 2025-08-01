@@ -191,6 +191,8 @@ spec:
                     type: string
                   openstackClientImage:
                     type: string
+                  openstackLightspeedImage:
+                    type: string
                   openstackNetworkExporterImage:
                     type: string
                   osContainerImage:
@@ -415,6 +417,8 @@ spec:
                       type: string
                     openstackClientImage:
                       type: string
+                    openstackLightspeedImage:
+                      type: string
                     openstackNetworkExporterImage:
                       type: string
                     osContainerImage:
@@ -608,6 +612,8 @@ spec:
                   octaviaWorkerImage:
                     type: string
                   openstackClientImage:
+                    type: string
+                  openstackLightspeedImage:
                     type: string
                   openstackNetworkExporterImage:
                     type: string
