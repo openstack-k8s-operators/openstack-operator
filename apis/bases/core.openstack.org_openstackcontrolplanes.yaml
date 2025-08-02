@@ -1497,7 +1497,7 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                      notificationBusInstance:
+                      notificationsBusInstance:
                         type: string
                       passwordSelectors:
                         default:
@@ -7570,8 +7570,6 @@ spec:
                         type: array
                       federatedRealmConfig:
                         type: string
-                      federationMountPath:
-                        type: string
                       fernetMaxActiveKeys:
                         default: 5
                         format: int32
@@ -8661,7 +8659,7 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                      notificationBusInstance:
+                      notificationsBusInstance:
                         type: string
                       passwordSelectors:
                         default:
@@ -11097,6 +11095,12 @@ spec:
                           persistenceDatabaseAccount:
                             default: octavia-persistence
                             type: string
+                          redisHosts:
+                            default: []
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           resources:
                             properties:
                               claims:
@@ -11241,6 +11245,12 @@ spec:
                           persistenceDatabaseAccount:
                             default: octavia-persistence
                             type: string
+                          redisHosts:
+                            default: []
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           resources:
                             properties:
                               claims:
@@ -11489,6 +11499,12 @@ spec:
                           persistenceDatabaseAccount:
                             default: octavia-persistence
                             type: string
+                          redisHosts:
+                            default: []
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
                           resources:
                             properties:
                               claims:
@@ -11574,6 +11590,9 @@ spec:
                         type: boolean
                       rabbitMqClusterName:
                         default: rabbitmq
+                        type: string
+                      redisServiceName:
+                        default: octavia-redis
                         type: string
                       resources:
                         properties:

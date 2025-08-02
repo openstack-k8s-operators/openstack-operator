@@ -168,6 +168,13 @@ spec:
                   PersistenceDatabaseAccount - name of MariaDBAccount which will be used
                   to connect for the persistence database
                 type: string
+              redisHosts:
+                default: []
+                description: List of Redis Hosts
+                items:
+                  type: string
+                type: array
+                x-kubernetes-list-type: atomic
               resources:
                 description: |-
                   Resources - Compute Resources required by this service (Limits/Requests).
