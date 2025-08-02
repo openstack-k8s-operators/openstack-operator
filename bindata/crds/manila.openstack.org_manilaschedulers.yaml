@@ -1158,7 +1158,7 @@ spec:
                   NodeSelector to target subset of worker nodes running this service. Setting here overrides
                   any global NodeSelector settings within the Manila CR.
                 type: object
-              notificationURLSecret:
+              notificationsURLSecret:
                 description: Secret containing Notification transport URL
                 type: string
               passwordSelectors:
