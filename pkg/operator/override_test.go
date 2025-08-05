@@ -104,6 +104,22 @@ func TestApplyOperatorOverrides(t *testing.T) {
 		},
 	}
 
+	// Define custom tolerations for testing
+	customTolerations := []corev1.Toleration{
+		{
+			Key:      "example.com/special-node",
+			Operator: corev1.TolerationOpEqual,
+			Value:    "special",
+			Effect:   corev1.TaintEffectNoSchedule,
+		},
+		{
+			Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](300),
+		},
+	}
+
 	// A list of potential overrides that can be applied
 	allOverrides := []operatorv1beta1.OperatorSpec{
 		{
@@ -140,6 +156,12 @@ func TestApplyOperatorOverrides(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name: "nova",
+			ControllerManager: operatorv1beta1.ContainerSpec{
+				Tolerations: customTolerations,
+			},
+		},
 	}
 
 	// --- Define Test Cases ---
@@ -149,9 +171,10 @@ func TestApplyOperatorOverrides(t *testing.T) {
 		initialOp    *Operator
 		overrideList []operatorv1beta1.OperatorSpec
 		// We will assert on specific fields instead of the whole struct
-		expectedReplicas *int32
-		expectedLimits   *ResourceList
-		expectedRequests *ResourceList
+		expectedReplicas    *int32
+		expectedLimits      *ResourceList
+		expectedRequests    *ResourceList
+		expectedTolerations []corev1.Toleration
 	}{
 		{
 			name:         "Scenario 1: Override is found and applied (Keystone)",
@@ -218,13 +241,29 @@ func TestApplyOperatorOverrides(t *testing.T) {
 		},
 		{
 			name:         "Scenario 4: Operator not in override list, no changes applied",
-			operatorName: "nova",
+			operatorName: "neutron",
 			initialOp: &Operator{
-				Name:       "nova",
+				Name:       "neutron",
 				Deployment: Deployment{Replicas: ptr.To[int32](1)},
 			},
 			overrideList:     allOverrides,
 			expectedReplicas: ptr.To[int32](1), // Expect this to remain unchanged
+		},
+		{
+			name:         "Scenario 5: Tolerations override is applied (Nova)",
+			operatorName: "nova",
+			initialOp: &Operator{
+				Name: "nova",
+				Deployment: Deployment{
+					Replicas: ptr.To[int32](1),
+					Manager: Container{
+						Resources: defaultResources,
+					},
+				},
+			},
+			overrideList:        allOverrides,
+			expectedReplicas:    ptr.To[int32](1),
+			expectedTolerations: customTolerations,
 		},
 	}
 
@@ -265,11 +304,358 @@ func TestApplyOperatorOverrides(t *testing.T) {
 			}
 
 			// Assert Requests
-			if tc.expectedLimits != nil {
+			if tc.expectedRequests != nil {
 				if !reflect.DeepEqual(tc.initialOp.Deployment.Manager.Resources.Requests, tc.expectedRequests) {
-					t.Errorf("wrong resource limits:\n got: %+v\nwant: %+v", tc.initialOp.Deployment.Manager.Resources.Requests, tc.expectedRequests)
+					t.Errorf("wrong resource requests:\n got: %+v\nwant: %+v", tc.initialOp.Deployment.Manager.Resources.Requests, tc.expectedRequests)
+				}
+			}
+
+			// Assert Tolerations
+			if tc.expectedTolerations != nil {
+				if !reflect.DeepEqual(tc.initialOp.Deployment.Tolerations, tc.expectedTolerations) {
+					t.Errorf("wrong tolerations:\n got: %+v\nwant: %+v", tc.initialOp.Deployment.Tolerations, tc.expectedTolerations)
 				}
 			}
 		})
+	}
+}
+
+// --- Test specifically for tolerations functionality ---
+
+func TestTolerationsOverride(t *testing.T) {
+	testTolerations := []corev1.Toleration{
+		{
+			Key:      "node.example.com/gpu",
+			Operator: corev1.TolerationOpEqual,
+			Value:    "nvidia",
+			Effect:   corev1.TaintEffectNoSchedule,
+		},
+		{
+			Key:               corev1.TaintNodeMemoryPressure, // "node.kubernetes.io/memory-pressure",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](600),
+		},
+	}
+
+	// Default tolerations for testing merge behavior
+	defaultTolerations := []corev1.Toleration{
+		{
+			Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+		{
+			Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+	}
+
+	testCases := []struct {
+		name                string
+		operatorSpec        operatorv1beta1.OperatorSpec
+		initialTolerations  []corev1.Toleration
+		expectedTolerations []corev1.Toleration
+	}{
+		{
+			name: "Add tolerations to empty list",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "test-operator",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					Tolerations: testTolerations,
+				},
+			},
+			initialTolerations:  nil,
+			expectedTolerations: testTolerations,
+		},
+		{
+			name: "No custom tolerations, keep defaults unchanged",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name:              "test-operator",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					// No tolerations specified
+				},
+			},
+			initialTolerations:  defaultTolerations,
+			expectedTolerations: defaultTolerations,
+		},
+		{
+			name: "Merge custom tolerations with defaults (different keys)",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "test-operator",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					Tolerations: testTolerations, // Different keys than defaults
+				},
+			},
+			initialTolerations:  defaultTolerations,
+			expectedTolerations: append(defaultTolerations, testTolerations...),
+		},
+		{
+			name: "Override default tolerations (same key)",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "test-operator",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					Tolerations: []corev1.Toleration{
+						{
+							Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready", // Same key as default
+							Operator:          corev1.TolerationOpExists,
+							Effect:            corev1.TaintEffectNoExecute,
+							TolerationSeconds: ptr.To[int64](600), // Different value
+						},
+					},
+				},
+			},
+			initialTolerations: defaultTolerations,
+			expectedTolerations: []corev1.Toleration{
+				{
+					Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](600), // Overridden value
+				},
+				{
+					Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](120), // Unchanged default
+				},
+			},
+		},
+		{
+			name: "Mixed scenario: override one default, add new custom",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "test-operator",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					Tolerations: []corev1.Toleration{
+						{
+							Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready", // Override default
+							Operator:          corev1.TolerationOpExists,
+							Effect:            corev1.TaintEffectNoExecute,
+							TolerationSeconds: ptr.To[int64](300),
+						},
+						{
+							Key:      "node.example.com/gpu", // Add new
+							Operator: corev1.TolerationOpEqual,
+							Value:    "nvidia",
+							Effect:   corev1.TaintEffectNoSchedule,
+						},
+					},
+				},
+			},
+			initialTolerations: defaultTolerations,
+			expectedTolerations: []corev1.Toleration{
+				{
+					Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready", // Overridden
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](300),
+				},
+				{
+					Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable", // Unchanged default
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](120),
+				},
+				{
+					Key:      "node.example.com/gpu", // New addition
+					Operator: corev1.TolerationOpEqual,
+					Value:    "nvidia",
+					Effect:   corev1.TaintEffectNoSchedule,
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			op := &Operator{
+				Name: tc.operatorSpec.Name,
+				Deployment: Deployment{
+					Tolerations: tc.initialTolerations,
+				},
+			}
+
+			SetOverrides(tc.operatorSpec, op)
+
+			if !reflect.DeepEqual(op.Deployment.Tolerations, tc.expectedTolerations) {
+				t.Errorf("wrong tolerations after override:\n got: %+v\nwant: %+v", op.Deployment.Tolerations, tc.expectedTolerations)
+			}
+		})
+	}
+}
+
+// --- Test for mergeTolerations function ---
+
+func TestMergeTolerations(t *testing.T) {
+	defaultTolerations := []corev1.Toleration{
+		{
+			Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+		{
+			Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+	}
+
+	testCases := []struct {
+		name     string
+		defaults []corev1.Toleration
+		custom   []corev1.Toleration
+		expected []corev1.Toleration
+	}{
+		{
+			name:     "Empty custom tolerations should return defaults",
+			defaults: defaultTolerations,
+			custom:   []corev1.Toleration{},
+			expected: defaultTolerations,
+		},
+		{
+			name:     "Nil custom tolerations should return defaults",
+			defaults: defaultTolerations,
+			custom:   nil,
+			expected: defaultTolerations,
+		},
+		{
+			name:     "Add new toleration to defaults",
+			defaults: defaultTolerations,
+			custom: []corev1.Toleration{
+				{
+					Key:      "node.example.com/gpu",
+					Operator: corev1.TolerationOpEqual,
+					Value:    "nvidia",
+					Effect:   corev1.TaintEffectNoSchedule,
+				},
+			},
+			expected: []corev1.Toleration{
+				{
+					Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](120),
+				},
+				{
+					Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](120),
+				},
+				{
+					Key:      "node.example.com/gpu",
+					Operator: corev1.TolerationOpEqual,
+					Value:    "nvidia",
+					Effect:   corev1.TaintEffectNoSchedule,
+				},
+			},
+		},
+		{
+			name:     "Override existing toleration",
+			defaults: defaultTolerations,
+			custom: []corev1.Toleration{
+				{
+					Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](600),
+				},
+			},
+			expected: []corev1.Toleration{
+				{
+					Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](600), // Overridden
+				},
+				{
+					Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](120), // Unchanged
+				},
+			},
+		},
+		{
+			name:     "Mixed: override one, add one",
+			defaults: defaultTolerations,
+			custom: []corev1.Toleration{
+				{
+					Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](300),
+				},
+				{
+					Key:      "node.example.com/special",
+					Operator: corev1.TolerationOpEqual,
+					Value:    "true",
+					Effect:   corev1.TaintEffectNoSchedule,
+				},
+			},
+			expected: []corev1.Toleration{
+				{
+					Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](300), // Overridden
+				},
+				{
+					Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable",
+					Operator:          corev1.TolerationOpExists,
+					Effect:            corev1.TaintEffectNoExecute,
+					TolerationSeconds: ptr.To[int64](120), // Unchanged
+				},
+				{
+					Key:      "node.example.com/special",
+					Operator: corev1.TolerationOpEqual,
+					Value:    "true",
+					Effect:   corev1.TaintEffectNoSchedule, // Added
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := mergeTolerations(tc.defaults, tc.custom)
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("mergeTolerations() failed:\n got: %+v\nwant: %+v", result, tc.expected)
+			}
+		})
+	}
+}
+
+// --- Test for global defaults initialization ---
+
+func TestGlobalTolerationsDefaults(t *testing.T) {
+	// Test that the default tolerations are correctly defined
+	if len(operatorv1beta1.DefaultTolerations) != 2 {
+		t.Errorf("Expected 2 default tolerations, got %d", len(operatorv1beta1.DefaultTolerations))
+	}
+
+	// Verify the specific default tolerations
+	expectedDefaults := []corev1.Toleration{
+		{
+			Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+		{
+			Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable",
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+	}
+
+	if !reflect.DeepEqual(operatorv1beta1.DefaultTolerations, expectedDefaults) {
+		t.Errorf("Default tolerations don't match expected:\n got: %+v\nwant: %+v", operatorv1beta1.DefaultTolerations, expectedDefaults)
 	}
 }

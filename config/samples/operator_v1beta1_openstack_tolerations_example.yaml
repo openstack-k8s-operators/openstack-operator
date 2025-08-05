@@ -1,0 +1,76 @@
+apiVersion: operator.openstack.org/v1beta1
+kind: OpenStack
+metadata:
+  labels:
+    app.kubernetes.io/name: openstack
+    app.kubernetes.io/instance: openstack-sample
+    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: openstack-operator
+  name: openstack-sample
+spec:
+  # Example showing how to customize tolerations for different service operators
+  #
+  # MERGE BEHAVIOR:
+  # - Custom tolerations are MERGED with the default tolerations
+  # - If a custom toleration has the same KEY as a default, it OVERRIDES the default
+  # - If a custom toleration has a different KEY, it is ADDED to the defaults
+  #
+  # Default tolerations (applied automatically unless overridden):
+  #   - key: "node.kubernetes.io/not-ready"
+  #     operator: "Exists"
+  #     effect: "NoExecute"
+  #     tolerationSeconds: 120
+  #   - key: "node.kubernetes.io/unreachable"
+  #     operator: "Exists"
+  #     effect: "NoExecute"
+  #     tolerationSeconds: 120
+  operatorOverrides:
+  - name: "keystone"
+    # Custom tolerations for keystone operator pods
+    controllerManager:
+      tolerations:
+      - key: "example.com/special-nodes"
+        operator: "Equal"
+        value: "keystone"
+        effect: "NoSchedule"
+      - key: "node.kubernetes.io/memory-pressure"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+  - name: "nova"
+    # Example: Override default tolerations and add new ones
+    # Result will be:
+    #   1. node.kubernetes.io/not-ready (OVERRIDDEN - 600s instead of 120s)
+    #   2. node.kubernetes.io/unreachable (OVERRIDDEN - 400s instead of 120s)
+    #   3. node.example.com/compute (ADDED - new toleration)
+    controllerManager:
+        tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 600  # Override default 120s
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 400  # Override default 120s
+        - key: "node.example.com/compute"  # Add new toleration
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+  - name: "glance"
+    # Custom resource limits AND tolerations example
+    controllerManager:
+      resources:
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+        requests:
+          cpu: "1"
+          memory: "2Gi"
+      tolerations:
+      - key: "storage-node"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+  # Note: Operators not listed (like mariadb, neutron, etc.) will use the default tolerations

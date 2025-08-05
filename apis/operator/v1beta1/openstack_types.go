@@ -21,6 +21,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -69,6 +70,23 @@ var (
 	DefaultRbacProxyMemoryLimit resource.Quantity = resource.MustParse("128Mi")
 	// DefaultRbacProxyMemoryRequests - Default kube rbac proxy container memory requests
 	DefaultRbacProxyMemoryRequests resource.Quantity = resource.MustParse("64Mi")
+
+	// DefaultTolerations - Default tolerations for all operators
+	DefaultTolerations = []corev1.Toleration{
+		{
+			Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready"
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+		{
+			Key:               corev1.TaintNodeUnreachable, // "node.kubernetes.io/unreachable"
+			Operator:          corev1.TolerationOpExists,
+			Effect:            corev1.TaintEffectNoExecute,
+			TolerationSeconds: ptr.To[int64](120),
+		},
+	}
+
 	// OperatorList - list of all operators with optional different defaults then the above.
 	// NOTE: test-operator was deployed as a independant package so it may or may not be installed
 	// NOTE: depending on how watcher-operator is released for FR2 and then in FR3 it may need to be
@@ -210,6 +228,11 @@ type ContainerSpec struct {
 	// Resources - Compute Resources for the service operator controller manager
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Tolerations - Tolerations for the service operator controller manager
+	// https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
 // OpenStackStatus defines the observed state of OpenStack
