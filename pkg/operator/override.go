@@ -38,6 +38,7 @@ type Deployment struct {
 	Replicas      *int32
 	Manager       Container
 	KubeRbacProxy Container
+	Tolerations   []corev1.Toleration
 }
 
 // Container -
@@ -108,6 +109,38 @@ func SetOverrides(opOvr operatorv1beta1.OperatorSpec, op *Operator) {
 			op.Deployment.Manager.Resources.Requests.Memory = opOvr.ControllerManager.Resources.Requests.Memory().String()
 		}
 	}
+	if len(opOvr.ControllerManager.Tolerations) > 0 {
+		op.Deployment.Tolerations = mergeTolerations(op.Deployment.Tolerations, opOvr.ControllerManager.Tolerations)
+	}
+}
+
+// mergeTolerations merges custom tolerations with default tolerations.
+// If a custom toleration has the same key as a default one, it overrides the default.
+// Otherwise, the custom toleration is added to the list.
+func mergeTolerations(defaults, custom []corev1.Toleration) []corev1.Toleration {
+	if len(custom) == 0 {
+		return defaults
+	}
+
+	// Start with a copy of defaults
+	merged := make([]corev1.Toleration, len(defaults))
+	copy(merged, defaults)
+
+	// For each custom toleration, check if it should override a default one
+	for _, customTol := range custom {
+
+		f := func(c corev1.Toleration) bool {
+			return c.Key == customTol.Key
+		}
+		idx := slices.IndexFunc(merged, f)
+		if idx >= 0 {
+			merged[idx] = customTol
+		} else {
+			merged = append(merged, customTol)
+		}
+	}
+
+	return merged
 }
 
 func GetOperator(operators []Operator, name string) (int, Operator) {

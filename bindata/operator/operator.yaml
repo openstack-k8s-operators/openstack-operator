@@ -129,19 +129,26 @@ spec:
             memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
+      tolerations:
+{{- range .OpenStackOperator.Deployment.Tolerations }}
+      - key: "{{ .Key }}"
+{{- if .Operator }}
+        operator: "{{ .Operator }}"
+{{- end }}
+{{- if .Value }}
+        value: "{{ .Value }}"
+{{- end }}
+{{- if .Effect }}
+        effect: "{{ .Effect }}"
+{{- end }}
+{{- if .TolerationSeconds }}
+        tolerationSeconds: {{ .TolerationSeconds }}
+{{- end }}
+{{- end }}
       securityContext:
         runAsNonRoot: true
       serviceAccountName: openstack-operator-controller-manager
       terminationGracePeriodSeconds: 10
-      tolerations:
-      - effect: NoExecute
-        key: node.kubernetes.io/not-ready
-        operator: Exists
-        tolerationSeconds: 120
-      - effect: NoExecute
-        key: node.kubernetes.io/unreachable
-        operator: Exists
-        tolerationSeconds: 120
       volumes:
       - name: cert
         secret:
