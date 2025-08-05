@@ -566,6 +566,7 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 						},
 					},
 					KubeRbacProxy: kubeRbacProxyContainer,
+					Tolerations:   operatorv1beta1.DefaultTolerations,
 				},
 			}
 
