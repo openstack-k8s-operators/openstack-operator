@@ -109,8 +109,8 @@ func SetOverrides(opOvr operatorv1beta1.OperatorSpec, op *Operator) {
 			op.Deployment.Manager.Resources.Requests.Memory = opOvr.ControllerManager.Resources.Requests.Memory().String()
 		}
 	}
-	if len(opOvr.ControllerManager.Tolerations) > 0 {
-		op.Deployment.Tolerations = mergeTolerations(op.Deployment.Tolerations, opOvr.ControllerManager.Tolerations)
+	if len(opOvr.Tolerations) > 0 {
+		op.Deployment.Tolerations = mergeTolerations(op.Deployment.Tolerations, opOvr.Tolerations)
 	}
 }
 

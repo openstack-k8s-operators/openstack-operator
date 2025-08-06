@@ -70,22 +70,6 @@ spec:
                                 x-kubernetes-int-or-string: true
                               type: object
                           type: object
-                        tolerations:
-                          items:
-                            properties:
-                              effect:
-                                type: string
-                              key:
-                                type: string
-                              operator:
-                                type: string
-                              tolerationSeconds:
-                                format: int64
-                                type: integer
-                              value:
-                                type: string
-                            type: object
-                          type: array
                       type: object
                     name:
                       enum:
@@ -118,6 +102,22 @@ spec:
                       maximum: 1
                       minimum: 0
                       type: integer
+                    tolerations:
+                      items:
+                        properties:
+                          effect:
+                            type: string
+                          key:
+                            type: string
+                          operator:
+                            type: string
+                          tolerationSeconds:
+                            format: int64
+                            type: integer
+                          value:
+                            type: string
+                        type: object
+                      type: array
                   required:
                   - name
                   type: object

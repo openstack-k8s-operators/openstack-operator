@@ -28,36 +28,34 @@ spec:
   operatorOverrides:
   - name: "keystone"
     # Custom tolerations for keystone operator pods
-    controllerManager:
-      tolerations:
-      - key: "example.com/special-nodes"
-        operator: "Equal"
-        value: "keystone"
-        effect: "NoSchedule"
-      - key: "node.kubernetes.io/memory-pressure"
-        operator: "Exists"
-        effect: "NoExecute"
-        tolerationSeconds: 300
+    tolerations:
+    - key: "example.com/special-nodes"
+      operator: "Equal"
+      value: "keystone"
+      effect: "NoSchedule"
+    - key: "node.kubernetes.io/memory-pressure"
+      operator: "Exists"
+      effect: "NoExecute"
+      tolerationSeconds: 300
   - name: "nova"
     # Example: Override default tolerations and add new ones
     # Result will be:
     #   1. node.kubernetes.io/not-ready (OVERRIDDEN - 600s instead of 120s)
     #   2. node.kubernetes.io/unreachable (OVERRIDDEN - 400s instead of 120s)
     #   3. node.example.com/compute (ADDED - new toleration)
-    controllerManager:
-        tolerations:
-        - key: "node.kubernetes.io/not-ready"
-          operator: "Exists"
-          effect: "NoExecute"
-          tolerationSeconds: 600  # Override default 120s
-        - key: "node.kubernetes.io/unreachable"
-          operator: "Exists"
-          effect: "NoExecute"
-          tolerationSeconds: 400  # Override default 120s
-        - key: "node.example.com/compute"  # Add new toleration
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
+    tolerations:
+    - key: "node.kubernetes.io/not-ready"
+      operator: "Exists"
+      effect: "NoExecute"
+      tolerationSeconds: 600  # Override default 120s
+    - key: "node.kubernetes.io/unreachable"
+      operator: "Exists"
+      effect: "NoExecute"
+      tolerationSeconds: 400  # Override default 120s
+    - key: "node.example.com/compute"  # Add new toleration
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
   - name: "glance"
     # Custom resource limits AND tolerations example
     controllerManager:
@@ -68,9 +66,9 @@ spec:
         requests:
           cpu: "1"
           memory: "2Gi"
-      tolerations:
-      - key: "storage-node"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
+    tolerations:
+    - key: "storage-node"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
   # Note: Operators not listed (like mariadb, neutron, etc.) will use the default tolerations

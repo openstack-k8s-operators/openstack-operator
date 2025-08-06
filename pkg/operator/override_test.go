@@ -157,10 +157,8 @@ func TestApplyOperatorOverrides(t *testing.T) {
 			},
 		},
 		{
-			Name: "nova",
-			ControllerManager: operatorv1beta1.ContainerSpec{
-				Tolerations: customTolerations,
-			},
+			Name:        "nova",
+			Tolerations: customTolerations,
 		},
 	}
 
@@ -363,10 +361,8 @@ func TestTolerationsOverride(t *testing.T) {
 		{
 			name: "Add tolerations to empty list",
 			operatorSpec: operatorv1beta1.OperatorSpec{
-				Name: "test-operator",
-				ControllerManager: operatorv1beta1.ContainerSpec{
-					Tolerations: testTolerations,
-				},
+				Name:        "test-operator",
+				Tolerations: testTolerations,
 			},
 			initialTolerations:  nil,
 			expectedTolerations: testTolerations,
@@ -374,10 +370,8 @@ func TestTolerationsOverride(t *testing.T) {
 		{
 			name: "No custom tolerations, keep defaults unchanged",
 			operatorSpec: operatorv1beta1.OperatorSpec{
-				Name:              "test-operator",
-				ControllerManager: operatorv1beta1.ContainerSpec{
-					// No tolerations specified
-				},
+				Name: "test-operator",
+				// No tolerations specified
 			},
 			initialTolerations:  defaultTolerations,
 			expectedTolerations: defaultTolerations,
@@ -385,10 +379,8 @@ func TestTolerationsOverride(t *testing.T) {
 		{
 			name: "Merge custom tolerations with defaults (different keys)",
 			operatorSpec: operatorv1beta1.OperatorSpec{
-				Name: "test-operator",
-				ControllerManager: operatorv1beta1.ContainerSpec{
-					Tolerations: testTolerations, // Different keys than defaults
-				},
+				Name:        "test-operator",
+				Tolerations: testTolerations, // Different keys than defaults
 			},
 			initialTolerations:  defaultTolerations,
 			expectedTolerations: append(defaultTolerations, testTolerations...),
@@ -397,14 +389,12 @@ func TestTolerationsOverride(t *testing.T) {
 			name: "Override default tolerations (same key)",
 			operatorSpec: operatorv1beta1.OperatorSpec{
 				Name: "test-operator",
-				ControllerManager: operatorv1beta1.ContainerSpec{
-					Tolerations: []corev1.Toleration{
-						{
-							Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready", // Same key as default
-							Operator:          corev1.TolerationOpExists,
-							Effect:            corev1.TaintEffectNoExecute,
-							TolerationSeconds: ptr.To[int64](600), // Different value
-						},
+				Tolerations: []corev1.Toleration{
+					{
+						Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready", // Same key as default
+						Operator:          corev1.TolerationOpExists,
+						Effect:            corev1.TaintEffectNoExecute,
+						TolerationSeconds: ptr.To[int64](600), // Different value
 					},
 				},
 			},
@@ -428,20 +418,18 @@ func TestTolerationsOverride(t *testing.T) {
 			name: "Mixed scenario: override one default, add new custom",
 			operatorSpec: operatorv1beta1.OperatorSpec{
 				Name: "test-operator",
-				ControllerManager: operatorv1beta1.ContainerSpec{
-					Tolerations: []corev1.Toleration{
-						{
-							Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready", // Override default
-							Operator:          corev1.TolerationOpExists,
-							Effect:            corev1.TaintEffectNoExecute,
-							TolerationSeconds: ptr.To[int64](300),
-						},
-						{
-							Key:      "node.example.com/gpu", // Add new
-							Operator: corev1.TolerationOpEqual,
-							Value:    "nvidia",
-							Effect:   corev1.TaintEffectNoSchedule,
-						},
+				Tolerations: []corev1.Toleration{
+					{
+						Key:               corev1.TaintNodeNotReady, // "node.kubernetes.io/not-ready", // Override default
+						Operator:          corev1.TolerationOpExists,
+						Effect:            corev1.TaintEffectNoExecute,
+						TolerationSeconds: ptr.To[int64](300),
+					},
+					{
+						Key:      "node.example.com/gpu", // Add new
+						Operator: corev1.TolerationOpEqual,
+						Value:    "nvidia",
+						Effect:   corev1.TaintEffectNoSchedule,
 					},
 				},
 			},
