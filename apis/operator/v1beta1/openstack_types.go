@@ -220,6 +220,11 @@ type OperatorSpec struct {
 	// +kubebuilder:validation:Optional
 	// ControllerManager - tunings for the controller manager container
 	ControllerManager ContainerSpec `json:"controllerManager,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Tolerations - Tolerations for the service operator deployment pods
+	// https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
 // ContainerSpec - customization for the container spec
@@ -228,11 +233,6 @@ type ContainerSpec struct {
 	// Resources - Compute Resources for the service operator controller manager
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// Tolerations - Tolerations for the service operator controller manager
-	// https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
 // OpenStackStatus defines the observed state of OpenStack
