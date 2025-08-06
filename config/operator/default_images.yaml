@@ -181,6 +181,8 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-swift-proxy-server:current-podified
         - name: RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-tempest-all:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_LIGHTSPEED_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-lightspeed/rag-content:os-docs-2024.2
           # NOTE: TEST_ images below do not get released downstream. They should not be prefixed with RELATED
         - name: TEST_TOBIKO_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-tobiko:current-podified

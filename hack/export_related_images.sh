@@ -87,6 +87,7 @@ export RELATED_IMAGE_OPENSTACK_NETWORK_EXPORTER_IMAGE_URL_DEFAULT=quay.io/openst
 export RELATED_IMAGE_EDPM_KEPLER_IMAGE_URL_DEFAULT=quay.io/sustainable_computing_io/kepler:release-0.7.12
 export RELATED_IMAGE_EDPM_PODMAN_EXPORTER_IMAGE_URL_DEFAULT=quay.io/navidys/prometheus-podman-exporter:v1.10.1
 export RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tempest-all:current-podified
+export RELATED_IMAGE_OPENSTACK_LIGHTSPEED_IMAGE_URL_DEFAULT=quay.io/openstack-lightspeed/rag-content:os-docs-2024.2
 #NOTE: TEST_ images below do not get released downstream. They should not be prefixed with RELATED
 export TEST_TOBIKO_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
 export TEST_ANSIBLETEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified
