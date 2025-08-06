@@ -156,6 +156,7 @@ bindata: kustomize yq ## Call sync bindata script
 	sed -i bindata/operator/operator.yaml -e "/customLimits/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.Memory }}"
 	sed -i bindata/operator/operator.yaml -e "/customRequests/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.Memory }}"
 	sed -i bindata/operator/operator.yaml -e "s|kube-rbac-proxy:replace_me.*|'{{ .OpenStackOperator.Deployment.KubeRbacProxy.Image }}'|"
+	sed -i bindata/operator/operator.yaml -e "/customTolerations/c\\      tolerations:\n{{- range .OpenStackOperator.Deployment.Tolerations }}\n      - key: \"{{ .Key }}\"\n{{- if .Operator }}\n        operator: \"{{ .Operator }}\"\n{{- end }}\n{{- if .Value }}\n        value: \"{{ .Value }}\"\n{{- end }}\n{{- if .Effect }}\n        effect: \"{{ .Effect }}\"\n{{- end }}\n{{- if .TolerationSeconds }}\n        tolerationSeconds: {{ .TolerationSeconds }}\n{{- end }}\n{{- end }}"
 	cp config/operator/managers.yaml bindata/operator/
 	cp config/operator/rabbit.yaml bindata/operator/
 	$(KUSTOMIZE) build config/rbac > bindata/rbac/rbac.yaml
@@ -203,7 +204,7 @@ ginkgo-run: ## Run ginkgo.
 	source hack/export_related_images.sh && \
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) -v debug --bin-dir $(LOCALBIN) use $(ENVTEST_K8S_VERSION) -p path)" \
 	OPERATOR_TEMPLATES="$(PWD)/templates" \
-	$(GINKGO) --trace --cover --coverpkg=./pkg/operator,./pkg/openstack,./pkg/openstackclient,./pkg/util,./pkg/dataplane/...,./controllers/...,./apis/client/v1beta1,./apis/core/v1beta1,./apis/dataplane/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
+	$(GINKGO) --trace --cover --coverpkg=./pkg/...,./controllers/...,./apis/... --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
 
 .PHONY: test-all
 test-all: test golint golangci golangci-lint ## Run all tests.
@@ -302,7 +303,7 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
 GINKGO ?= $(LOCALBIN)/ginkgo
-GINKGO_TESTS ?= ./tests/... ./apis/client/... ./apis/core/... ./apis/dataplane/... ./pkg/dataplane/...
+GINKGO_TESTS ?= ./tests/... ./apis/client/... ./apis/core/... ./apis/dataplane/... ./pkg/...
 
 KUTTL ?= $(LOCALBIN)/kubectl-kuttl
 

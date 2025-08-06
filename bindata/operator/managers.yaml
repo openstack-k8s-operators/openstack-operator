@@ -86,14 +86,21 @@ spec:
       serviceAccountName: {{ .Name }}-operator-controller-manager
       terminationGracePeriodSeconds: 10
       tolerations:
-      - key: "node.kubernetes.io/not-ready"
-        operator: "Exists"
-        effect: "NoExecute"
-        tolerationSeconds: 120
-      - key: "node.kubernetes.io/unreachable"
-        operator: "Exists"
-        effect: "NoExecute"
-        tolerationSeconds: 120
+{{- range .Deployment.Tolerations }}
+      - key: "{{ .Key }}"
+{{- if .Operator }}
+        operator: "{{ .Operator }}"
+{{- end }}
+{{- if .Value }}
+        value: "{{ .Value }}"
+{{- end }}
+{{- if .Effect }}
+        effect: "{{ .Effect }}"
+{{- end }}
+{{- if .TolerationSeconds }}
+        tolerationSeconds: {{ .TolerationSeconds }}
+{{- end }}
+{{- end }}
 {{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
       volumes:
       - name: cert
