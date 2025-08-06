@@ -135,7 +135,7 @@ spec:
     enabled: true
     template:
       metricStorage:
-        enabled: false
+        enabled: true
         monitoringStack:
           alertingEnabled: true
           scrapeInterval: 30s
@@ -169,3 +169,5 @@ spec:
         replicas: 1
       swiftProxy:
         replicas: 1
+  watcher:
+    enabled: true

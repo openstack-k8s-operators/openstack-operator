@@ -26,6 +26,7 @@ import (
 	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -244,6 +245,12 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 		if !(r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
 			reqs = "RabbitMQ, Keystone"
 		}
+	case "Watcher":
+		if !(r.Spec.Galera.Enabled && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled && r.Spec.Telemetry.Enabled && *r.Spec.Telemetry.Template.Ceilometer.Enabled &&
+			*r.Spec.Telemetry.Template.MetricStorage.Enabled) {
+			reqs = "Galera, Memcached, RabbitMQ, Keystone, Telemetry, Telemetry.Ceilometer, Telemetry.MetricStorage"
+		}
 	}
 
 	// If "reqs" is not the empty string, we have missing requirements
@@ -343,6 +350,11 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	if r.Spec.Designate.Enabled {
 		errors = append(errors, r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
+	}
+
+	if r.Spec.Watcher.Enabled {
+		errors = append(errors, r.Spec.Watcher.Template.ValidateCreate(basePath.Child("watcher").Child("template"), r.Namespace)...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
 	}
 
 	// Validation for remaining services...
@@ -533,6 +545,14 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
+	if r.Spec.Watcher.Enabled {
+		if old.Watcher.Template == nil {
+			old.Watcher.Template = &watcherv1.WatcherSpecCore{}
+		}
+		errors = append(errors, r.Spec.Watcher.Template.ValidateUpdate(*old.Watcher.Template, basePath.Child("watcher").Child("template"), r.Namespace)...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
+	}
+
 	if r.Spec.Memcached.Enabled {
 		if r.Spec.Memcached.Templates != nil {
 			err := common_webhook.ValidateDNS1123Label(
@@ -677,6 +697,12 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 		if depErrorMsg := r.checkDepsEnabled("Telemetry.Autoscaling"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("autoscaling").Child("enabled"),
 				*r.Spec.Telemetry.Template.Autoscaling.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+	if r.Spec.Watcher.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Watcher"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("watcher").Child("enabled"), r.Spec.Watcher.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -1028,6 +1054,24 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			template.Default()
 			// By-value copy, need to update
 			(*r.Spec.Redis.Templates)[key] = template
+		}
+	}
+
+	// Watcher
+	if r.Spec.Watcher.Enabled || r.Spec.Watcher.Template != nil {
+		if r.Spec.Watcher.Template == nil {
+			r.Spec.Watcher.Template = &watcherv1.WatcherSpecCore{}
+		}
+		r.Spec.Watcher.Template.Default()
+
+		if r.Spec.Watcher.Enabled {
+			initializeOverrideSpec(&r.Spec.Watcher.APIOverride.Route, true)
+			r.Spec.Watcher.Template.SetDefaultRouteAnnotations(r.Spec.Watcher.APIOverride.Route.Annotations)
+		}
+
+		// Default DatabaseInstance
+		if r.Spec.Watcher.Template.DatabaseInstance == nil || *r.Spec.Watcher.Template.DatabaseInstance == "" {
+			r.Spec.Watcher.Template.DatabaseInstance = ptr.To("openstack")
 		}
 	}
 
