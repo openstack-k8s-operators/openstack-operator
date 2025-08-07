@@ -286,10 +286,12 @@ EOF_CAT
 for X in $(ls manifests/*clusterserviceversion.yaml); do
         OPERATOR_NAME=$(echo $X | sed -e "s|manifests\/\([^\.]*\)\..*|\1|" | sed -e "s|-|_|g" | tr '[:lower:]' '[:upper:]' )
         echo $OPERATOR_NAME
-        if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" ]] || [[ $OPERATOR_NAME == "WATCHER_OPERATOR" ]]; then
-            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[0].image)
+        if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" ]]; then
+            # Rabbitmq cluster operator has just a container in the deployment and name is operator, different that openstack ones
+            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r '.spec.install.spec.deployments[0].spec.template.spec.containers.[] | select(.name == "operator") | .image')
         else
-            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[1].image)
+            # The name of the actual operator container in the openstack operators is manager
+            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r '.spec.install.spec.deployments[0].spec.template.spec.containers.[] | select(.name == "manager") | .image')
         fi
         echo $IMAGE
 
