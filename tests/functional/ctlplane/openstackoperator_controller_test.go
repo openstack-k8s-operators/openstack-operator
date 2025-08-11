@@ -1946,8 +1946,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 
 		It("should have configured nova from the service template", func() {
-			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				OSCtlplane.Spec.Nova.Template.APIDatabaseInstance = "custom-db"
 				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
 			}, timeout, interval).Should(Succeed())
