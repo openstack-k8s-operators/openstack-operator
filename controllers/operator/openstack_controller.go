@@ -871,11 +871,19 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 						obj.SetNamespace(namespace.(string))
 					}
 
-					apiParts := strings.Split(refData["apiVersion"].(string), "/")
+					apiVersion := refData["apiVersion"].(string)
+					apiParts := strings.Split(apiVersion, "/")
 					objGvk := schema.GroupVersionResource{
-						Group:    apiParts[0],
-						Version:  apiParts[1],
 						Resource: refData["kind"].(string),
+					}
+					// Some of the references have an apiVersion that lacks a group prefix
+					if len(apiParts) > 1 {
+						objGvk.Group = apiParts[0]
+						objGvk.Version = apiParts[1]
+						Log.Info("postCleanupObsoleteResources: Found apiVersion with group prefix", "apiVersion", apiVersion)
+					} else {
+						objGvk.Version = apiParts[0]
+						Log.Info("postCleanupObsoleteResources: Found apiVersion without group prefix", "apiVersion", apiVersion)
 					}
 					obj.SetGroupVersionKind(objGvk.GroupVersion().WithKind(refData["kind"].(string)))
 
