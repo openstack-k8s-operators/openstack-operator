@@ -210,7 +210,7 @@ func TestApplyOperatorOverrides(t *testing.T) {
 			},
 			expectedRequests: &ResourceList{
 				CPU:    "1",
-				Memory: "128Mi", // the default must not be overridden if we just change the cpu
+				Memory: "256Mi", // the default must not be overridden if we just change the cpu
 			},
 		},
 		{
