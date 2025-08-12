@@ -60,9 +60,9 @@ var (
 	// DefaultManagerCPURequests - Default controller manager container CPU requests
 	DefaultManagerCPURequests resource.Quantity = resource.MustParse("10m")
 	// DefaultManagerMemoryLimit - Default controller manager container memory limit
-	DefaultManagerMemoryLimit resource.Quantity = resource.MustParse("256Mi")
+	DefaultManagerMemoryLimit resource.Quantity = resource.MustParse("512Mi")
 	// DefaultManagerMemoryRequests - Default controller manager container memory requests
-	DefaultManagerMemoryRequests resource.Quantity = resource.MustParse("128Mi")
+	DefaultManagerMemoryRequests resource.Quantity = resource.MustParse("256Mi")
 	// DefaultRbacProxyCPULimit - Default kube rbac proxy container CPU limit
 	DefaultRbacProxyCPULimit resource.Quantity = resource.MustParse("500m")
 	// DefaultRbacProxyCPURequests - Default kube rbac proxy container CPU requests
