@@ -7900,8 +7900,6 @@ spec:
                         type: array
                       federatedRealmConfig:
                         type: string
-                      federationMountPath:
-                        type: string
                       fernetMaxActiveKeys:
                         default: 5
                         format: int32

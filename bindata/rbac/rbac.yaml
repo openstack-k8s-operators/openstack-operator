@@ -562,6 +562,26 @@ rules:
   - update
   - watch
 - apiGroups:
+  - keystone.openstack.org
+  resources:
+  - keystoneapplicationcredentials
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - keystone.openstack.org
+  resources:
+  - keystoneapplicationcredentials/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - lightspeed.openstack.org
   resources:
   - openstacklightspeeds

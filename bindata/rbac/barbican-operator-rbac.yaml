@@ -65,6 +65,14 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - secrets
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - ""
+  resources:
     - serviceaccounts
   verbs:
     - create
@@ -253,6 +261,14 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneapis
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - keystone.openstack.org
+  resources:
+    - keystoneapplicationcredentials
   verbs:
     - get
     - list

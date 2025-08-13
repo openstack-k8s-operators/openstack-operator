@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Script to verify Application Credential IDs are correctly configured in OpenStack service pods
+# Script to verify Application Credential IDs and AC secrets are correctly configured in OpenStack service pods
 # Usage: osp_check_appcred_id.sh <NAMESPACE> <SERVICE|all>
 
 if [[ $# -lt 2 ]]; then
     echo "Usage: $0 <NAMESPACE> <SERVICE|all>" >&2
-    echo "  SERVICE: barbican (or 'all' for supported services)" >&2
+    echo "  SERVICE: barbican, swift (or 'all' for supported services)" >&2
     exit 1
 fi
 
 NAMESPACE="$1"
 REQUESTED_SERVICE="$2"
 DEBUG=${DEBUG:-0}
-
-# Wait for control plane to be fully ready before checking pods, we have to add this manual sleep,
-# because controlplane is switching to ready state before service pods catch up the AC change
-echo "Waiting 60 seconds for OpenStack control plane to be fully ready..."
-sleep 60
 
 declare -a FAILED_CHECKS=()
 
@@ -31,7 +26,7 @@ declare -A SERVICES=(
     # [nova]="/etc/nova/nova.conf|sts/nova-api:nova-api,sts/nova-cell0-conductor:nova-conductor,sts/nova-cell1-conductor:nova-conductor,sts/nova-metadata:nova-metadata,sts/nova-scheduler:nova-scheduler"
     # [neutron]="/etc/neutron/neutron.conf|deploy/neutron:neutron-server"
     # [placement]="/etc/placement/placement.conf|deploy/placement:placement-api"
-    # [swift]="/etc/swift/proxy-server.conf|deploy/swift-proxy:swift-proxy,sts/swift-storage:swift-storage"
+    [swift]="/etc/swift/proxy-server.conf.d/00-proxy-server.conf|deploy/swift-proxy:proxy-server"
     # [ceilometer]="/etc/ceilometer/ceilometer.conf|sts/ceilometer:ceilometer-central"
 )
 
@@ -60,21 +55,21 @@ get_resource_type() {
     esac
 }
 
-# Extract application_credential_id from config file in pod
-get_app_cred_id_from_pod() {
-    local resource_spec="$1" container="$2" config_path="$3"
+# Extract application credential field from config file in pod
+get_app_cred_field_from_pod() {
+    local resource_spec="$1" container="$2" config_path="$3" field_name="$4"
     local output
 
-    debug "Executing: oc exec -n $NAMESPACE $resource_spec -c $container -- sh -c \"grep '^[[:space:]]*application_credential_id[[:space:]]*=' '$config_path' | sed 's/^[^=]*=[[:space:]]*//' | sed 's/[[:space:]]*$//' | head -1\""
+    debug "Executing: oc exec -n $NAMESPACE $resource_spec -c $container -- sh -c \"grep '^[[:space:]]*${field_name}[[:space:]]*=' '$config_path' | sed 's/^[^=]*=[[:space:]]*//' | sed 's/[[:space:]]*$//' | head -1\""
 
     if output=$(oc exec -n "$NAMESPACE" "$resource_spec" -c "$container" -- \
-        sh -c "grep '^[[:space:]]*application_credential_id[[:space:]]*=' '$config_path' | sed 's/^[^=]*=[[:space:]]*//' | sed 's/[[:space:]]*$//' | head -1" 2>/dev/null); then
-        debug "Successfully extracted ID from $resource_spec/$container: $output"
+        sh -c "grep '^[[:space:]]*${field_name}[[:space:]]*=' '$config_path' | sed 's/^[^=]*=[[:space:]]*//' | sed 's/[[:space:]]*$//' | head -1" 2>/dev/null); then
+        debug "Successfully extracted $field_name from $resource_spec/$container: $output"
         echo "$output"
         return 0
     fi
 
-    error "Failed to extract application_credential_id from $resource_spec/$container"
+    error "Failed to extract $field_name from $resource_spec/$container"
     return 1
 }
 
@@ -87,9 +82,11 @@ check_service() {
 
     echo "Checking service: $service"
 
-    # Get expected Application Credential ID from Kubernetes resource
+    # Get expected Application Credential data from Kubernetes resources
     local cr_name="ac-$service"
-    local expected_id
+    local expected_id expected_secret
+    
+    # Get AC ID from the KeystoneApplicationCredential status
     if ! expected_id=$(oc get "$RESOURCE_TYPE" "$cr_name" -n "$NAMESPACE" -o jsonpath='{.status.acID}' 2>/dev/null); then
         error "Failed to get Application Credential ID from $RESOURCE_TYPE/$cr_name"
         add_failed_check "$service" "$cr_name" "N/A" "Failed to get Application Credential ID from Kubernetes resource"
@@ -102,19 +99,47 @@ check_service() {
         return 1
     fi
 
+    # Get AC Secret from the associated secret (base64 decoded)
+    local secret_name
+    if ! secret_name=$(oc get "$RESOURCE_TYPE" "$cr_name" -n "$NAMESPACE" -o jsonpath='{.status.secretName}' 2>/dev/null); then
+        error "Failed to get secret name from $RESOURCE_TYPE/$cr_name"
+        add_failed_check "$service" "$cr_name" "N/A" "Failed to get secret name from Kubernetes resource"
+        return 1
+    fi
+
+    if [[ -z "$secret_name" ]]; then
+        error "$RESOURCE_TYPE/$cr_name has empty .status.secretName"
+        add_failed_check "$service" "$cr_name" "N/A" "Empty .status.secretName in Kubernetes resource"
+        return 1
+    fi
+
+    # Get and decode the AC_SECRET from the Kubernetes secret
+    if ! expected_secret=$(oc get secret "$secret_name" -n "$NAMESPACE" -o jsonpath='{.data.AC_SECRET}' 2>/dev/null | base64 -d); then
+        error "Failed to get AC_SECRET from secret/$secret_name"
+        add_failed_check "$service" "$secret_name" "N/A" "Failed to get AC_SECRET from Kubernetes secret"
+        return 1
+    fi
+
+    if [[ -z "$expected_secret" ]]; then
+        error "secret/$secret_name has empty AC_SECRET"
+        add_failed_check "$service" "$secret_name" "N/A" "Empty AC_SECRET in Kubernetes secret"
+        return 1
+    fi
+
     echo "  Expected ID: $expected_id"
+    echo "  Expected Secret: ${expected_secret:0:20}..."
 
     local failed=0
 
     # Check each resource/container pair
     IFS=',' read -ra TARGET_LIST <<< "$targets"
     for target in "${TARGET_LIST[@]}"; do
-        local resource_spec="${target%%:*}"  # e.g., "deploy/barbican-api" or "sts/cinder-api"
-        local container="${target##*:}"      # e.g., "barbican-api"
+        local resource_spec="${target%%:*}"  # e.g., "deploy/swift-proxy"
+        local container="${target##*:}"      # e.g., "proxy-server"
 
         # Parse resource type and name
-        local resource_type_short="${resource_spec%%/*}"  # e.g., "deploy" or "sts"
-        local resource_name="${resource_spec##*/}"        # e.g., "barbican-api"
+        local resource_type_short="${resource_spec%%/*}"  # e.g., "deploy"
+        local resource_name="${resource_spec##*/}"        # e.g., "swift-proxy"
         local resource_type_full=$(get_resource_type "$resource_type_short")
 
         # Skip if resource doesn't exist
@@ -123,23 +148,42 @@ check_service() {
             continue
         fi
 
+        # Check Application Credential ID
         local actual_id
-        if ! actual_id=$(get_app_cred_id_from_pod "$resource_type_full/$resource_name" "$container" "$config_path"); then
+        if ! actual_id=$(get_app_cred_field_from_pod "$resource_type_full/$resource_name" "$container" "$config_path" "application_credential_id"); then
             add_failed_check "$service" "$resource_spec" "$container" "Failed to extract application_credential_id from pod"
             failed=1
-            continue
-        fi
-
-        if [[ -z "$actual_id" ]]; then
+        elif [[ -z "$actual_id" ]]; then
             error "  $resource_spec/$container: application_credential_id not found in $config_path"
             add_failed_check "$service" "$resource_spec" "$container" "application_credential_id not found in config file"
             failed=1
         elif [[ "$actual_id" != "$expected_id" ]]; then
+            echo "  $resource_spec/$container: Found ID: $actual_id"
             error "  $resource_spec/$container: ID mismatch (got: $actual_id, expected: $expected_id)"
             add_failed_check "$service" "$resource_spec" "$container" "ID mismatch (got: $actual_id, expected: $expected_id)"
             failed=1
         else
+            echo "  $resource_spec/$container: Found ID: $actual_id"
             echo "  $resource_spec/$container: ID matches"
+        fi
+
+        # Check Application Credential Secret
+        local actual_secret
+        if ! actual_secret=$(get_app_cred_field_from_pod "$resource_type_full/$resource_name" "$container" "$config_path" "application_credential_secret"); then
+            add_failed_check "$service" "$resource_spec" "$container" "Failed to extract application_credential_secret from pod"
+            failed=1
+        elif [[ -z "$actual_secret" ]]; then
+            error "  $resource_spec/$container: application_credential_secret not found in $config_path"
+            add_failed_check "$service" "$resource_spec" "$container" "application_credential_secret not found in config file"
+            failed=1
+        elif [[ "$actual_secret" != "$expected_secret" ]]; then
+            echo "  $resource_spec/$container: Found Secret: ${actual_secret:0:20}..."
+            error "  $resource_spec/$container: Secret mismatch (got: ${actual_secret:0:20}..., expected: ${expected_secret:0:20}...)"
+            add_failed_check "$service" "$resource_spec" "$container" "Secret mismatch"
+            failed=1
+        else
+            echo "  $resource_spec/$container: Found Secret: ${actual_secret:0:20}..."
+            echo "  $resource_spec/$container: Secret matches"
         fi
     done
 
@@ -153,7 +197,7 @@ print_failed_checks_summary() {
     fi
 
     echo
-    echo "FAILED APPLICATION CREDENTIAL ID CHECKS:"
+    echo "FAILED APPLICATION CREDENTIAL CHECKS:"
     for failure in "${FAILED_CHECKS[@]}"; do
         echo "  $failure"
     done
@@ -187,9 +231,9 @@ main() {
     print_failed_checks_summary
 
     if [[ $overall_failed -eq 0 ]]; then
-        echo "All Application Credential ID checks passed"
+        echo "All Application Credential checks passed"
     else
-        echo "Some Application Credential ID checks failed"
+        echo "Some Application Credential checks failed"
     fi
 
     exit $overall_failed

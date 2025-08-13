@@ -37,3 +37,18 @@ commands:
 
       UNR=$(oc get appcred ac-cinder -n "$NS" -o jsonpath='{.spec.unrestricted}' 2>/dev/null || echo "")
       [ "${UNR}" = "true" ]
+
+      # ---- ac-swift ----
+      wait_ready ac-swift
+
+      EXP=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.expirationDays}')
+      [ "${EXP:-}" -eq 200 ]
+
+      GRP=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.gracePeriodDays}')
+      [ "${GRP:-}" -eq 90 ]
+
+      ROL=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.roles[*]}')
+      case " $ROL " in *" service "*) ;; *) exit 1;; esac
+
+      UNR=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.unrestricted}' 2>/dev/null || echo "")
+      [ "${UNR:-false}" = "false" ]
