@@ -497,4 +497,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: octavia-operator
+    openstack.org/operator-name: octavia

@@ -591,4 +591,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: telemetry-operator
+    openstack.org/operator-name: telemetry

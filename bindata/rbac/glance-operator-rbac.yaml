@@ -420,4 +420,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: glance-operator
+    openstack.org/operator-name: glance

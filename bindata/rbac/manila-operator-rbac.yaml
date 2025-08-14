@@ -465,4 +465,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: manila-operator
+    openstack.org/operator-name: manila
