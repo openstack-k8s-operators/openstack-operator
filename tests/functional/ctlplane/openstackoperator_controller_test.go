@@ -2257,9 +2257,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(watcher).Should(Not(BeNil()))
 			}, timeout, interval).Should(Succeed())
 
-			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-			OSCtlplane.Spec.Watcher.Enabled = false
-			Expect(th.K8sClient.Update(th.Ctx, OSCtlplane)).Should(Succeed())
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.Watcher.Enabled = false
+				g.Expect(th.K8sClient.Update(th.Ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
 
 			Eventually(func(g Gomega) {
 				instance := &watcherv1.Watcher{}
