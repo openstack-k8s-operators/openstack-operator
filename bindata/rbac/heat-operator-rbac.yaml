@@ -430,4 +430,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: heat-operator
+    openstack.org/operator-name: heat

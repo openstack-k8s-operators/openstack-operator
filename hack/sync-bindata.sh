@@ -255,7 +255,7 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: ${OPERATOR_NAME}
+    openstack.org/operator-name: ${OPERATOR_NAME//-operator}
 EOF_CAT
 done
 

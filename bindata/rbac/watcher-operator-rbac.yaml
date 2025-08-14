@@ -454,4 +454,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: watcher-operator
+    openstack.org/operator-name: watcher

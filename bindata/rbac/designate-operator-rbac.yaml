@@ -582,4 +582,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: designate-operator
+    openstack.org/operator-name: designate
