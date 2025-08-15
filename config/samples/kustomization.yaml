@@ -10,4 +10,5 @@ resources:
 #- dataplane_v1beta1_openstackdataplaneservice_empty.yaml
 #- dataplane_v1beta1_openstackdataplanedeployment_empty.yaml
 - operator_v1beta1_openstack.yaml
+- lightspeed_v1beta1_openstacklightspeed.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

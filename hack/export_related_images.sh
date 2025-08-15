@@ -90,6 +90,7 @@ export RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-ce
 export RELATED_IMAGE_WATCHER_API_IMAGE_URL_DEFAULT=quay.io/podified-master-centos9/openstack-watcher-api:current-podified
 export RELATED_IMAGE_WATCHER_APPLIER_IMAGE_URL_DEFAULT=quay.io/podified-master-centos9/openstack-watcher-applier:current-podified
 export RELATED_IMAGE_WATCHER_DECISION_ENGINE_IMAGE_URL_DEFAULT=quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified
+export RELATED_IMAGE_OPENSTACK_LIGHTSPEED_IMAGE_URL_DEFAULT=quay.io/openstack-lightspeed/rag-content:os-docs-2024.2
 #NOTE: TEST_ images below do not get released downstream. They should not be prefixed with RELATED
 export TEST_TOBIKO_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
 export TEST_ANSIBLETEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified
