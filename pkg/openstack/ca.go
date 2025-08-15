@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -20,7 +21,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	"golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -718,7 +718,7 @@ func getCAFromSecret(
 func getOperatorCABundle(caFile string) ([]byte, error) {
 	contents, err := os.ReadFile(caFile)
 	if err != nil {
-		return nil, fmt.Errorf("File reading error %w", err)
+		return nil, fmt.Errorf("file reading error %w", err)
 	}
 
 	return contents, nil

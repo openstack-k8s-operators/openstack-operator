@@ -1,3 +1,4 @@
+// Package openstack provides OpenStack service reconciliation and management functionality
 package openstack
 
 import (

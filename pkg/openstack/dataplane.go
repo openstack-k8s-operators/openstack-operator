@@ -24,6 +24,7 @@ func GetDataplaneNodesets(ctx context.Context, instance *corev1beta1.OpenStackCo
 	return dataplaneNodesets, nil
 }
 
+// DataplaneNodesetsDeployedVersionIsSet checks if deployed version is set for all dataplane nodesets
 func DataplaneNodesetsDeployedVersionIsSet(dataplaneNodesets *dataplanev1.OpenStackDataPlaneNodeSetList) bool {
 	for _, nodeset := range dataplaneNodesets.Items {
 		// FIXME: DeployedVersion on the DataplaneNodeset should be a string pointer to match how Controlplane implements this
