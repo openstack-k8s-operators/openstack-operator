@@ -57,14 +57,19 @@ spec:
                 default: admin
                 description: AdminPassword is the password for the OpenStack admin
                   user.
+                maxLength: 253
+                minLength: 1
                 type: string
               adminUsername:
                 default: admin
                 description: AdminUsername is the username for the OpenStack admin
                   user.
+                maxLength: 253
+                minLength: 1
                 type: string
               authUrl:
                 description: AuthUrl is the authentication URL for OpenStack.
+                format: uri
                 type: string
               backoffLimit:
                 default: 0
@@ -79,6 +84,7 @@ spec:
                 type: string
               dashboardUrl:
                 description: DashboardUrl is the URL of the Horizon dashboard.
+                format: uri
                 type: string
               debug:
                 default: false
@@ -1194,6 +1200,7 @@ spec:
               imageUrl:
                 default: http://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img
                 description: ImageUrl is the URL to download the Cirros image.
+                format: uri
                 type: string
               kubeconfigSecretName:
                 description: |-
@@ -1220,6 +1227,7 @@ spec:
                 default: horizontest
                 description: Password is the password for the user running the Horizon
                   tests.
+                maxLength: 253
                 type: string
               privileged:
                 default: false
@@ -1245,6 +1253,7 @@ spec:
               repoUrl:
                 default: https://review.opendev.org/openstack/horizon
                 description: RepoUrl is the URL of the Horizon repository.
+                format: uri
                 type: string
               resources:
                 default:
@@ -1360,6 +1369,7 @@ spec:
                 default: horizontest
                 description: User is the username under which the Horizon tests will
                   run.
+                maxLength: 253
                 type: string
             required:
             - adminPassword
