@@ -403,19 +403,6 @@ subjects:
   name: heat-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: heat-operator-proxy-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: heat-operator-proxy-role
-subjects:
-- kind: ServiceAccount
-  name: heat-operator-controller-manager
-  namespace: '{{ .OperatorNamespace }}'
----
 apiVersion: v1
 kind: Service
 metadata:

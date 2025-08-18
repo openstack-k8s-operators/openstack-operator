@@ -427,19 +427,6 @@ subjects:
   name: watcher-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: watcher-operator-proxy-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: watcher-operator-proxy-role
-subjects:
-- kind: ServiceAccount
-  name: watcher-operator-controller-manager
-  namespace: '{{ .OperatorNamespace }}'
----
 apiVersion: v1
 kind: Service
 metadata:

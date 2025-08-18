@@ -228,19 +228,6 @@ subjects:
   name: ${OPERATOR_NAME}-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: ${OPERATOR_NAME}-proxy-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: ${OPERATOR_NAME}-proxy-role
-subjects:
-- kind: ServiceAccount
-  name: ${OPERATOR_NAME}-controller-manager
-  namespace: '{{ .OperatorNamespace }}'
----
 apiVersion: v1
 kind: Service
 metadata:
