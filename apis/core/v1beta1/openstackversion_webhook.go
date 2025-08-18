@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
 	"os"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -153,7 +154,138 @@ func (r *OpenStackVersion) ValidateUpdate(old runtime.Object) (admission.Warning
 		)
 	}
 
+	// Validate CustomContainerImages changes during version updates
+	oldVersion, ok := old.(*OpenStackVersion)
+	if !ok {
+		return nil, apierrors.NewInternalError(fmt.Errorf("failed to convert old object to OpenStackVersion"))
+	}
+
+	// Check if targetVersion is changing and this is a minor update
+	if oldVersion.Spec.TargetVersion != r.Spec.TargetVersion && oldVersion.Status.DeployedVersion != nil {
+		// When changing target version during a minor update, ensure CustomContainerImages are also updated
+		if len(r.Spec.CustomContainerImages.CinderVolumeImages) > 0 ||
+			len(r.Spec.CustomContainerImages.ManilaShareImages) > 0 ||
+			hasAnyCustomImage(r.Spec.CustomContainerImages.ContainerTemplate) {
+
+			// Get the tracked custom images for the previous version
+			if r.Status.TrackedCustomImages != nil {
+				if trackedImages, exists := r.Status.TrackedCustomImages[oldVersion.Spec.TargetVersion]; exists {
+					// Compare current CustomContainerImages with tracked ones
+					if customContainerImagesEqual(r.Spec.CustomContainerImages, trackedImages) {
+						return nil, apierrors.NewForbidden(
+							schema.GroupResource{
+								Group:    GroupVersion.WithKind("OpenStackVersion").Group,
+								Resource: GroupVersion.WithKind("OpenStackVersion").Kind,
+							}, r.GetName(), &field.Error{
+								Type:     field.ErrorTypeForbidden,
+								Field:    "spec.customContainerImages",
+								BadValue: r.Spec.TargetVersion,
+								Detail:   "CustomContainerImages must be updated when changing targetVersion during a minor update. The current CustomContainerImages are identical to those used in the previous version (" + oldVersion.Spec.TargetVersion + "), which prevents proper version tracking and validation.",
+							},
+						)
+					}
+				}
+			}
+		}
+	}
+
 	return nil, nil
+}
+
+// hasAnyCustomImage checks if any image field in ContainerTemplate is set
+func hasAnyCustomImage(template ContainerTemplate) bool {
+	return template.AgentImage != nil ||
+		template.AnsibleeeImage != nil ||
+		template.AodhAPIImage != nil ||
+		template.AodhEvaluatorImage != nil ||
+		template.AodhListenerImage != nil ||
+		template.AodhNotifierImage != nil ||
+		template.ApacheImage != nil ||
+		template.BarbicanAPIImage != nil ||
+		template.BarbicanKeystoneListenerImage != nil ||
+		template.BarbicanWorkerImage != nil ||
+		template.CeilometerCentralImage != nil ||
+		template.CeilometerComputeImage != nil ||
+		template.CeilometerIpmiImage != nil ||
+		template.CeilometerNotificationImage != nil ||
+		template.CeilometerSgcoreImage != nil ||
+		template.CeilometerMysqldExporterImage != nil ||
+		template.CinderAPIImage != nil ||
+		template.CinderBackupImage != nil ||
+		template.CinderSchedulerImage != nil ||
+		template.DesignateAPIImage != nil ||
+		template.DesignateBackendbind9Image != nil ||
+		template.DesignateCentralImage != nil ||
+		template.DesignateMdnsImage != nil ||
+		template.DesignateProducerImage != nil ||
+		template.DesignateUnboundImage != nil ||
+		template.DesignateWorkerImage != nil ||
+		template.EdpmFrrImage != nil ||
+		template.EdpmIscsidImage != nil ||
+		template.EdpmLogrotateCrondImage != nil ||
+		template.EdpmMultipathdImage != nil ||
+		template.EdpmNeutronDhcpAgentImage != nil ||
+		template.EdpmNeutronMetadataAgentImage != nil ||
+		template.EdpmNeutronOvnAgentImage != nil ||
+		template.EdpmNeutronSriovAgentImage != nil ||
+		template.EdpmOvnBgpAgentImage != nil ||
+		template.EdpmNodeExporterImage != nil ||
+		template.EdpmKeplerImage != nil ||
+		template.EdpmPodmanExporterImage != nil ||
+		template.EdpmOpenstackNetworkExporterImage != nil ||
+		template.OpenstackNetworkExporterImage != nil ||
+		template.GlanceAPIImage != nil ||
+		template.HeatAPIImage != nil ||
+		template.HeatCfnapiImage != nil ||
+		template.HeatEngineImage != nil ||
+		template.HorizonImage != nil ||
+		template.InfraDnsmasqImage != nil ||
+		template.InfraMemcachedImage != nil ||
+		template.InfraRedisImage != nil ||
+		template.IronicAPIImage != nil ||
+		template.IronicConductorImage != nil ||
+		template.IronicInspectorImage != nil ||
+		template.IronicNeutronAgentImage != nil ||
+		template.IronicPxeImage != nil ||
+		template.IronicPythonAgentImage != nil ||
+		template.KeystoneAPIImage != nil ||
+		template.KsmImage != nil ||
+		template.ManilaAPIImage != nil ||
+		template.ManilaSchedulerImage != nil ||
+		template.MariadbImage != nil ||
+		template.NetUtilsImage != nil ||
+		template.NeutronAPIImage != nil ||
+		template.NovaAPIImage != nil ||
+		template.NovaComputeImage != nil ||
+		template.NovaConductorImage != nil ||
+		template.NovaNovncImage != nil ||
+		template.NovaSchedulerImage != nil ||
+		template.OctaviaAPIImage != nil ||
+		template.OctaviaHealthmanagerImage != nil ||
+		template.OctaviaHousekeepingImage != nil ||
+		template.OctaviaWorkerImage != nil ||
+		template.OctaviaRsyslogImage != nil ||
+		template.OpenstackClientImage != nil ||
+		template.OsContainerImage != nil ||
+		template.OvnControllerImage != nil ||
+		template.OvnControllerOvsImage != nil ||
+		template.OvnNbDbclusterImage != nil ||
+		template.OvnNorthdImage != nil ||
+		template.OvnSbDbclusterImage != nil ||
+		template.PlacementAPIImage != nil ||
+		template.RabbitmqImage != nil ||
+		template.SwiftAccountImage != nil ||
+		template.SwiftContainerImage != nil ||
+		template.SwiftObjectImage != nil ||
+		template.SwiftProxyImage != nil ||
+		template.TelemetryNodeExporterImage != nil ||
+		template.TestTempestImage != nil ||
+		template.TestTobikoImage != nil ||
+		template.TestHorizontestImage != nil ||
+		template.TestAnsibletestImage != nil ||
+		template.WatcherAPIImage != nil ||
+		template.WatcherApplierImage != nil ||
+		template.WatcherDecisionEngineImage != nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
