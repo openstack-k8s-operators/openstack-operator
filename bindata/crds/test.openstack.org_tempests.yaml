@@ -1300,6 +1300,8 @@ spec:
                     default: 0
                     description: Concurrency value that is passed to tempest via --concurrency
                     format: int64
+                    maximum: 128
+                    minimum: 0
                     type: integer
                   excludeList:
                     description: A content of exclude.txt file that is passed to tempest
@@ -1325,16 +1327,19 @@ spec:
                           description: |-
                             ChangeRefspec specifies which change the remote repository should be
                             checked out to (ChangeRepository must be defined as well).
+                          maxLength: 253
                           type: string
                         changeRepository:
                           description: |-
                             URL that points to a repository that contains a change that should be
                             applied to the repository defined by Repository (ChangeRefspec must be
                             defined as well).
+                          format: uri
                           type: string
                         repository:
                           description: URL that points to a git repository containing
                             an external plugin.
+                          format: uri
                           type: string
                       required:
                       - repository
@@ -1357,6 +1362,7 @@ spec:
                         URL:
                           description: URL that points to a location where the image
                             is located
+                          format: uri
                           type: string
                         containerFormat:
                           default: '-'
@@ -1379,23 +1385,29 @@ spec:
                               description: How much RAM should be allocated when this
                                 flavor is used
                               format: int64
+                              minimum: 1
                               type: integer
                             disk:
                               description: How much disk space should be allocated
                                 when this flavor is used
                               format: int64
+                              minimum: 0
                               type: integer
                             name:
                               description: Name of the flavor that should be created
+                              maxLength: 253
+                              minLength: 1
+                              pattern: ^[a-z0-9._-]+$
                               type: string
                             osCloud:
                               default: '-'
                               description: Cloud that should be used for authentication
                               type: string
                             vcpus:
-                              description: How many vcpus should be be allocated when
+                              description: How many vcpus should be allocated when
                                 this flavor is used
                               format: int64
+                              minimum: 1
                               type: integer
                           required:
                           - RAM
@@ -1411,6 +1423,9 @@ spec:
                           type: integer
                         name:
                           description: Name of the image
+                          maxLength: 253
+                          minLength: 1
+                          pattern: ^[a-z0-9._-]+$
                           type: string
                         osCloud:
                           default: '-'
@@ -1505,6 +1520,7 @@ spec:
                       The content of this variable will be passed to discover-tempest-config via
                       --flavor-min-disk
                     format: int64
+                    minimum: 0
                     type: integer
                   flavorMinMem:
                     default: 0
@@ -1512,6 +1528,7 @@ spec:
                       The content of this variable will be passed to discover-tempest-config via
                       --flavor-min-mem
                     format: int64
+                    minimum: 0
                     type: integer
                   generateProfile:
                     default: ""
@@ -1584,7 +1601,7 @@ spec:
                   testAccounts:
                     default: ""
                     description: A content of accounts.yaml that is passed to tempest
-                      via --test-acounts
+                      via --test-accounts
                     type: string
                   timeout:
                     default: 0
@@ -1592,6 +1609,7 @@ spec:
                       The content of this variable will be passed to discover-tempest-config via
                       --timeout
                     format: int64
+                    minimum: 0
                     type: integer
                   verbose:
                     default: false
@@ -1642,7 +1660,7 @@ spec:
                 type: array
               workflow:
                 description: |-
-                  Workflow - can be used to specify a multiple executions of tempest with
+                  Workflow - can be used to specify multiple executions of tempest with
                   a different configuration in a single CR. Accepts a list of dictionaries
                   where each member of the list accepts the same values as the Tempest CR
                   does in the `spec`` section. Values specified using the workflow section have
@@ -1805,8 +1823,7 @@ spec:
                       description: |-
                         Name of a workflow step. The step name will be used for example to create
                         a logs directory.
-                      maxLength: 100
-                      pattern: ^[a-z0-9]
+                      pattern: ^[a-z0-9-]+$
                       type: string
                     storageClass:
                       description: StorageClass used to create any test-operator related
@@ -1822,6 +1839,8 @@ spec:
                           description: Concurrency value that is passed to tempest
                             via --concurrency
                           format: int64
+                          maximum: 128
+                          minimum: 0
                           type: integer
                         excludeList:
                           description: A content of exclude.txt file that is passed
@@ -1847,22 +1866,25 @@ spec:
                                 description: |-
                                   ChangeRefspec specifies which change the remote repository should be
                                   checked out to (ChangeRepository must be defined as well).
+                                maxLength: 253
                                 type: string
                               changeRepository:
                                 description: |-
                                   URL that points to a repository that contains a change that should be
                                   applied to the repository defined by Repository (ChangeRefspec must be
                                   defined as well).
+                                format: uri
                                 type: string
                               repository:
                                 description: URL that points to a git repository containing
                                   an external plugin.
+                                format: uri
                                 type: string
                             required:
                             - repository
                             type: object
                           type: array
-                        extraImagesType:
+                        extraImages:
                           description: |-
                             Extra images that should be downloaded inside the test pod and uploaded to
                             openstack.
@@ -1879,6 +1901,7 @@ spec:
                               URL:
                                 description: URL that points to a location where the
                                   image is located
+                                format: uri
                                 type: string
                               containerFormat:
                                 default: '-'
@@ -1901,24 +1924,30 @@ spec:
                                     description: How much RAM should be allocated
                                       when this flavor is used
                                     format: int64
+                                    minimum: 1
                                     type: integer
                                   disk:
                                     description: How much disk space should be allocated
                                       when this flavor is used
                                     format: int64
+                                    minimum: 0
                                     type: integer
                                   name:
                                     description: Name of the flavor that should be
                                       created
+                                    maxLength: 253
+                                    minLength: 1
+                                    pattern: ^[a-z0-9._-]+$
                                     type: string
                                   osCloud:
                                     default: '-'
                                     description: Cloud that should be used for authentication
                                     type: string
                                   vcpus:
-                                    description: How many vcpus should be be allocated
+                                    description: How many vcpus should be allocated
                                       when this flavor is used
                                     format: int64
+                                    minimum: 1
                                     type: integer
                                 required:
                                 - RAM
@@ -1934,6 +1963,9 @@ spec:
                                 type: integer
                               name:
                                 description: Name of the image
+                                maxLength: 253
+                                minLength: 1
+                                pattern: ^[a-z0-9._-]+$
                                 type: string
                               osCloud:
                                 default: '-'
@@ -2015,12 +2047,14 @@ spec:
                             The content of this variable will be passed to discover-tempest-config via
                             --flavor-min-disk
                           format: int64
+                          minimum: 0
                           type: integer
                         flavorMinMem:
                           description: |-
                             The content of this variable will be passed to discover-tempest-config via
                             --flavor-min-mem
                           format: int64
+                          minimum: 0
                           type: integer
                         generateProfile:
                           description: |-
@@ -2080,13 +2114,14 @@ spec:
                           type: boolean
                         testAccounts:
                           description: A content of accounts.yaml that is passed to
-                            tempest via --test-acounts
+                            tempest via --test-accounts
                           type: string
                         timeout:
                           description: |-
                             The content of this variable will be passed to discover-tempest-config via
                             --timeout
                           format: int64
+                          minimum: 0
                           type: integer
                         verbose:
                           description: Indicate whether discover-tempest-config should
