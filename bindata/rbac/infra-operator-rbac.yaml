@@ -603,4 +603,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: infra-operator
+    openstack.org/operator-name: infra

@@ -351,4 +351,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: placement-operator
+    openstack.org/operator-name: placement
