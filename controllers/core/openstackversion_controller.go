@@ -206,6 +206,12 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 	instance.Status.ContainerImages = openstack.GetContainerImages(val, *instance)
 
+	// Track CustomContainerImages for this version
+	if instance.Status.TrackedCustomImages == nil {
+		instance.Status.TrackedCustomImages = make(map[string]corev1beta1.CustomContainerImages)
+	}
+	instance.Status.TrackedCustomImages[instance.Spec.TargetVersion] = instance.Spec.CustomContainerImages
+
 	// initialize service defaults
 	serviceDefaults := openstack.InitializeOpenStackVersionServiceDefaults(ctx)
 	if instance.Status.AvailableServiceDefaults == nil {
