@@ -473,4 +473,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: cinder-operator
+    openstack.org/operator-name: cinder

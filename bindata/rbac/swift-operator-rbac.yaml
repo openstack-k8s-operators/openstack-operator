@@ -474,4 +474,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: swift-operator
+    openstack.org/operator-name: swift
