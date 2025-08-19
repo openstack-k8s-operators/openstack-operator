@@ -2,7 +2,6 @@
 
 aliases:
   ci-approvers:
-  - lewisdenny
   - viroel
   docs-approvers:
   - Jenny-Anne
