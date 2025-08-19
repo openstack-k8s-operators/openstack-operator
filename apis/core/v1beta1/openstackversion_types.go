@@ -198,6 +198,9 @@ type OpenStackVersionStatus struct {
 	// ServiceDefaults - struct that contains current defaults for OSP services
 	ServiceDefaults ServiceDefaults `json:"serviceDefaults,omitempty"`
 
+	// TrackedCustomImages tracks CustomContainerImages used for each version to detect changes
+	TrackedCustomImages map[string]CustomContainerImages `json:"trackedCustomImages,omitempty"`
+
 	//ObservedGeneration - the most recent generation observed for this object.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
@@ -287,4 +290,147 @@ func GetOpenStackVersions(namespace string, k8sClient client.Client) (*OpenStack
 	}
 
 	return versionList, nil
+}
+
+// customContainerImagesEqual compares two CustomContainerImages for equality
+func customContainerImagesEqual(a, b CustomContainerImages) bool {
+	// Compare all ContainerTemplate fields
+	if !containerTemplateEqual(a.ContainerTemplate, b.ContainerTemplate) {
+		return false
+	}
+
+	// Compare CinderVolumeImages maps
+	if !stringMapEqual(a.CinderVolumeImages, b.CinderVolumeImages) {
+		return false
+	}
+
+	// Compare ManilaShareImages maps
+	if !stringMapEqual(a.ManilaShareImages, b.ManilaShareImages) {
+		return false
+	}
+
+	return true
+}
+
+// containerTemplateEqual compares two ContainerTemplate structs for equality
+func containerTemplateEqual(a, b ContainerTemplate) bool {
+	return stringPtrEqual(a.AgentImage, b.AgentImage) &&
+		stringPtrEqual(a.AnsibleeeImage, b.AnsibleeeImage) &&
+		stringPtrEqual(a.AodhAPIImage, b.AodhAPIImage) &&
+		stringPtrEqual(a.AodhEvaluatorImage, b.AodhEvaluatorImage) &&
+		stringPtrEqual(a.AodhListenerImage, b.AodhListenerImage) &&
+		stringPtrEqual(a.AodhNotifierImage, b.AodhNotifierImage) &&
+		stringPtrEqual(a.ApacheImage, b.ApacheImage) &&
+		stringPtrEqual(a.BarbicanAPIImage, b.BarbicanAPIImage) &&
+		stringPtrEqual(a.BarbicanKeystoneListenerImage, b.BarbicanKeystoneListenerImage) &&
+		stringPtrEqual(a.BarbicanWorkerImage, b.BarbicanWorkerImage) &&
+		stringPtrEqual(a.CeilometerCentralImage, b.CeilometerCentralImage) &&
+		stringPtrEqual(a.CeilometerComputeImage, b.CeilometerComputeImage) &&
+		stringPtrEqual(a.CeilometerIpmiImage, b.CeilometerIpmiImage) &&
+		stringPtrEqual(a.CeilometerNotificationImage, b.CeilometerNotificationImage) &&
+		stringPtrEqual(a.CeilometerSgcoreImage, b.CeilometerSgcoreImage) &&
+		stringPtrEqual(a.CeilometerMysqldExporterImage, b.CeilometerMysqldExporterImage) &&
+		stringPtrEqual(a.CinderAPIImage, b.CinderAPIImage) &&
+		stringPtrEqual(a.CinderBackupImage, b.CinderBackupImage) &&
+		stringPtrEqual(a.CinderSchedulerImage, b.CinderSchedulerImage) &&
+		stringPtrEqual(a.DesignateAPIImage, b.DesignateAPIImage) &&
+		stringPtrEqual(a.DesignateBackendbind9Image, b.DesignateBackendbind9Image) &&
+		stringPtrEqual(a.DesignateCentralImage, b.DesignateCentralImage) &&
+		stringPtrEqual(a.DesignateMdnsImage, b.DesignateMdnsImage) &&
+		stringPtrEqual(a.DesignateProducerImage, b.DesignateProducerImage) &&
+		stringPtrEqual(a.DesignateUnboundImage, b.DesignateUnboundImage) &&
+		stringPtrEqual(a.DesignateWorkerImage, b.DesignateWorkerImage) &&
+		stringPtrEqual(a.EdpmFrrImage, b.EdpmFrrImage) &&
+		stringPtrEqual(a.EdpmIscsidImage, b.EdpmIscsidImage) &&
+		stringPtrEqual(a.EdpmLogrotateCrondImage, b.EdpmLogrotateCrondImage) &&
+		stringPtrEqual(a.EdpmMultipathdImage, b.EdpmMultipathdImage) &&
+		stringPtrEqual(a.EdpmNeutronDhcpAgentImage, b.EdpmNeutronDhcpAgentImage) &&
+		stringPtrEqual(a.EdpmNeutronMetadataAgentImage, b.EdpmNeutronMetadataAgentImage) &&
+		stringPtrEqual(a.EdpmNeutronOvnAgentImage, b.EdpmNeutronOvnAgentImage) &&
+		stringPtrEqual(a.EdpmNeutronSriovAgentImage, b.EdpmNeutronSriovAgentImage) &&
+		stringPtrEqual(a.EdpmOvnBgpAgentImage, b.EdpmOvnBgpAgentImage) &&
+		stringPtrEqual(a.EdpmNodeExporterImage, b.EdpmNodeExporterImage) &&
+		stringPtrEqual(a.EdpmKeplerImage, b.EdpmKeplerImage) &&
+		stringPtrEqual(a.EdpmPodmanExporterImage, b.EdpmPodmanExporterImage) &&
+		stringPtrEqual(a.EdpmOpenstackNetworkExporterImage, b.EdpmOpenstackNetworkExporterImage) &&
+		stringPtrEqual(a.OpenstackNetworkExporterImage, b.OpenstackNetworkExporterImage) &&
+		stringPtrEqual(a.GlanceAPIImage, b.GlanceAPIImage) &&
+		stringPtrEqual(a.HeatAPIImage, b.HeatAPIImage) &&
+		stringPtrEqual(a.HeatCfnapiImage, b.HeatCfnapiImage) &&
+		stringPtrEqual(a.HeatEngineImage, b.HeatEngineImage) &&
+		stringPtrEqual(a.HorizonImage, b.HorizonImage) &&
+		stringPtrEqual(a.InfraDnsmasqImage, b.InfraDnsmasqImage) &&
+		stringPtrEqual(a.InfraMemcachedImage, b.InfraMemcachedImage) &&
+		stringPtrEqual(a.InfraRedisImage, b.InfraRedisImage) &&
+		stringPtrEqual(a.IronicAPIImage, b.IronicAPIImage) &&
+		stringPtrEqual(a.IronicConductorImage, b.IronicConductorImage) &&
+		stringPtrEqual(a.IronicInspectorImage, b.IronicInspectorImage) &&
+		stringPtrEqual(a.IronicNeutronAgentImage, b.IronicNeutronAgentImage) &&
+		stringPtrEqual(a.IronicPxeImage, b.IronicPxeImage) &&
+		stringPtrEqual(a.IronicPythonAgentImage, b.IronicPythonAgentImage) &&
+		stringPtrEqual(a.KeystoneAPIImage, b.KeystoneAPIImage) &&
+		stringPtrEqual(a.KsmImage, b.KsmImage) &&
+		stringPtrEqual(a.ManilaAPIImage, b.ManilaAPIImage) &&
+		stringPtrEqual(a.ManilaSchedulerImage, b.ManilaSchedulerImage) &&
+		stringPtrEqual(a.MariadbImage, b.MariadbImage) &&
+		stringPtrEqual(a.NetUtilsImage, b.NetUtilsImage) &&
+		stringPtrEqual(a.NeutronAPIImage, b.NeutronAPIImage) &&
+		stringPtrEqual(a.NovaAPIImage, b.NovaAPIImage) &&
+		stringPtrEqual(a.NovaComputeImage, b.NovaComputeImage) &&
+		stringPtrEqual(a.NovaConductorImage, b.NovaConductorImage) &&
+		stringPtrEqual(a.NovaNovncImage, b.NovaNovncImage) &&
+		stringPtrEqual(a.NovaSchedulerImage, b.NovaSchedulerImage) &&
+		stringPtrEqual(a.OctaviaAPIImage, b.OctaviaAPIImage) &&
+		stringPtrEqual(a.OctaviaHealthmanagerImage, b.OctaviaHealthmanagerImage) &&
+		stringPtrEqual(a.OctaviaHousekeepingImage, b.OctaviaHousekeepingImage) &&
+		stringPtrEqual(a.OctaviaWorkerImage, b.OctaviaWorkerImage) &&
+		stringPtrEqual(a.OctaviaRsyslogImage, b.OctaviaRsyslogImage) &&
+		stringPtrEqual(a.OpenstackClientImage, b.OpenstackClientImage) &&
+		stringPtrEqual(a.OsContainerImage, b.OsContainerImage) &&
+		stringPtrEqual(a.OvnControllerImage, b.OvnControllerImage) &&
+		stringPtrEqual(a.OvnControllerOvsImage, b.OvnControllerOvsImage) &&
+		stringPtrEqual(a.OvnNbDbclusterImage, b.OvnNbDbclusterImage) &&
+		stringPtrEqual(a.OvnNorthdImage, b.OvnNorthdImage) &&
+		stringPtrEqual(a.OvnSbDbclusterImage, b.OvnSbDbclusterImage) &&
+		stringPtrEqual(a.PlacementAPIImage, b.PlacementAPIImage) &&
+		stringPtrEqual(a.RabbitmqImage, b.RabbitmqImage) &&
+		stringPtrEqual(a.SwiftAccountImage, b.SwiftAccountImage) &&
+		stringPtrEqual(a.SwiftContainerImage, b.SwiftContainerImage) &&
+		stringPtrEqual(a.SwiftObjectImage, b.SwiftObjectImage) &&
+		stringPtrEqual(a.SwiftProxyImage, b.SwiftProxyImage) &&
+		stringPtrEqual(a.TelemetryNodeExporterImage, b.TelemetryNodeExporterImage) &&
+		stringPtrEqual(a.TestTempestImage, b.TestTempestImage) &&
+		stringPtrEqual(a.TestTobikoImage, b.TestTobikoImage) &&
+		stringPtrEqual(a.TestHorizontestImage, b.TestHorizontestImage) &&
+		stringPtrEqual(a.TestAnsibletestImage, b.TestAnsibletestImage) &&
+		stringPtrEqual(a.WatcherAPIImage, b.WatcherAPIImage) &&
+		stringPtrEqual(a.WatcherApplierImage, b.WatcherApplierImage) &&
+		stringPtrEqual(a.WatcherDecisionEngineImage, b.WatcherDecisionEngineImage)
+}
+
+// stringPtrEqual compares two string pointers for equality
+func stringPtrEqual(a, b *string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
+}
+
+// stringMapEqual compares two string maps for equality
+func stringMapEqual(a, b map[string]*string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for key, valueA := range a {
+		valueB, exists := b[key]
+		if !exists || !stringPtrEqual(valueA, valueB) {
+			return false
+		}
+	}
+
+	return true
 }
