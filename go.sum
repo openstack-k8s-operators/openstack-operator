@@ -8,6 +8,7 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dprince/keystone-operator/api v0.0.0-20250819170957-57bfc86dc986 h1:Sa79JgbfhvypTANV6oVMLpZXw6nO4mpO6mvlOWU+6ZQ=
 github.com/emicklei/go-restful/v3 v3.12.0 h1:y2DdzBAURM29NFF94q6RaY4vjIH1rtwDapwQtU84iWk=
 github.com/emicklei/go-restful/v3 v3.12.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/evanphx/json-patch v5.7.0+incompatible h1:vgGkfT/9f8zE6tvSCe74nfpAVDQ2tG6yudJd8LBksgI=
@@ -114,8 +115,6 @@ github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250813063935-f
 github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250813063935-fdc20530dcf1/go.mod h1:Dv8qpmBIQy3Jv/EyQnOyc0w61X8vyfxpjcIQONP5CwY=
 github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250815193050-feadf3472002 h1:B00JghiduA2ItmtptItSRYhCxysT0aIkDaWQyGRpUno=
 github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250815193050-feadf3472002/go.mod h1:B6LsM/f4MHzgoEOH2lQrEPyG5F3gmbhz4IyaUOAgj2o=
-github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250811083324-e790d63f389f h1:Ivo4YKaH26B1lQlwKcolELCRGtEbmvbfJShBTVrCdQI=
-github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250811083324-e790d63f389f/go.mod h1:H5iZOohoVOmZvIZPR5ep6z+jmfrpz25axOM6IXlXzNU=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20250730071847-837b07f8d72f h1:7w9WseH9LSKnLX3UW1AfWPaozN7fimdVoUtOYHnsQKY=
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20250730071847-837b07f8d72f/go.mod h1:0bajRHochTUT6Ecfriw27l3vL0yezVrnUmt3bcIpu4w=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20250730071847-837b07f8d72f h1:1T8716FlCs3wokHLL6jo7iYuMZfEdtTghvdFIjkmJhE=
