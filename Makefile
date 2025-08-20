@@ -186,6 +186,15 @@ tidy: ## Run go mod tidy on every mod file in the repo
 	go mod tidy
 	cd ./apis && go mod tidy
 
+.PHONY: add-replace-directive
+add-replace-directive: ## Add replace directive for OpenStack operator dependency (usage: make add-replace-directive FORK=user/repo-name BRANCH=branch-name)
+	@if [ -z "$(FORK)" ] || [ -z "$(BRANCH)" ]; then \
+		echo "Usage: make add-replace-directive FORK=user/repo-name BRANCH=branch-name"; \
+		echo "Example: make add-replace-directive FORK=dprince/keystone-operator BRANCH=drop_kube_rbac_proxy"; \
+		exit 1; \
+	fi
+	./hack/add-replace-directive.sh $(FORK) $(BRANCH)
+
 .PHONY: golangci-lint
 golangci-lint:
 	test -s $(LOCALBIN)/golangci-lint || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.59.1
