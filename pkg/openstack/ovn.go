@@ -36,6 +36,15 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		instance.Spec.Ovn.Template = &corev1beta1.OvnResources{}
 	}
 
+	// Create TLS certificate for OVN metrics services when TLS is enabled
+	if instance.Spec.Ovn.Enabled && instance.Spec.TLS.PodLevel.Enabled {
+		if err := EnsureOVNMetricsCert(ctx, instance, helper); err != nil {
+			Log.Error(err, "Failed to ensure OVN metrics certificate")
+			setOVNReadyError(instance, err)
+			return ctrl.Result{}, err
+		}
+	}
+
 	OVNDBClustersReady, err := ReconcileOVNDbClusters(ctx, instance, version, helper)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNDBClusters")
@@ -489,4 +498,53 @@ func OVNNorthImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStack
 		}
 	}
 	return true
+}
+
+// EnsureOVNMetricsCert creates TLS certificate for OVN metrics services
+func EnsureOVNMetricsCert(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) error {
+	Log := GetLogger(ctx)
+
+	dnsSuffix := clusterdns.GetDNSClusterDomain()
+
+	certRequest := certmanager.CertificateRequest{
+		IssuerName: instance.GetOvnIssuer(),
+		CertName:   "ovn-metrics",
+		Hostnames: []string{
+			// Cert needs to be valid for the individual pods services so make this a wildcard cert
+			fmt.Sprintf("*.%s.svc", instance.Namespace),
+			fmt.Sprintf("*.%s.svc.%s", instance.Namespace, dnsSuffix),
+		},
+		Ips: nil,
+		Usages: []certmgrv1.KeyUsage{
+			certmgrv1.UsageKeyEncipherment,
+			certmgrv1.UsageDigitalSignature,
+			certmgrv1.UsageServerAuth,
+			certmgrv1.UsageClientAuth,
+		},
+		Labels: map[string]string{serviceCertSelector: ""},
+	}
+
+	// Apply certificate duration settings if configured
+	if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
+		certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
+	}
+	if instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore != nil {
+		certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore.Duration
+	}
+
+	// Create or update the certificate
+	certSecret, ctrlResult, err := certmanager.EnsureCert(
+		ctx,
+		helper,
+		certRequest,
+		nil)
+	if err != nil {
+		return err
+	} else if (ctrlResult != ctrl.Result{}) {
+		Log.Info("OVN metrics certificate creation in progress", "certificate", certRequest.CertName)
+		return fmt.Errorf("OVN metrics certificate creation in progress")
+	}
+
+	Log.Info("OVN metrics certificate ensured", "secret", certSecret.Name, "certificate", certRequest.CertName)
+	return nil
 }
