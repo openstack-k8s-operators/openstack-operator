@@ -46,7 +46,8 @@ import (
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
-	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/apis/nova/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/nova-operator/apis/placement/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -54,7 +55,6 @@ import (
 	lightspeedv1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
-	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
@@ -152,7 +152,7 @@ var _ = BeforeSuite(func() {
 		"github.com/openstack-k8s-operators/neutron-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	novav1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/nova-operator/api", gomod, "bases")
+		"github.com/openstack-k8s-operators/nova-operator/apis", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	octaviav1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/octavia-operator/api", gomod, "bases")
@@ -161,7 +161,7 @@ var _ = BeforeSuite(func() {
 		"github.com/openstack-k8s-operators/ovn-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	placementv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/placement-operator/api", gomod, "bases")
+		"github.com/openstack-k8s-operators/nova-operator/apis", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	swiftv1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/swift-operator/api", gomod, "bases")
