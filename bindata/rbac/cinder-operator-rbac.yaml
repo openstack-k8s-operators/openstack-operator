@@ -446,19 +446,6 @@ subjects:
   name: cinder-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: cinder-operator-proxy-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cinder-operator-proxy-role
-subjects:
-- kind: ServiceAccount
-  name: cinder-operator-controller-manager
-  namespace: '{{ .OperatorNamespace }}'
----
 apiVersion: v1
 kind: Service
 metadata:

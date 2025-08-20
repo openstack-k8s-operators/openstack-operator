@@ -45,6 +45,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -913,6 +914,33 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 				return err
 			}
 			Log.Info("Operator deleted successfully", "name", operator.GetName())
+		}
+	}
+
+	// Cleanup obsolete proxy ClusterRoleBindings for service operators
+	clusterRoleBindingList := &rbacv1.ClusterRoleBindingList{}
+	err = r.Client.List(ctx, clusterRoleBindingList)
+	if err != nil {
+		return err
+	}
+	for _, clusterRoleBinding := range clusterRoleBindingList.Items {
+		// Check if this is a proxy rolebinding for a service operator
+		if strings.HasSuffix(clusterRoleBinding.Name, "-operator-proxy-rolebinding") {
+			// Extract operator name by removing the suffix
+			operatorName := strings.TrimSuffix(clusterRoleBinding.Name, "-operator-proxy-rolebinding")
+			if isServiceOperatorResource(operatorName) {
+				Log.Info("Deleting obsolete proxy ClusterRoleBinding", "name", clusterRoleBinding.Name)
+				err = r.Client.Delete(ctx, &clusterRoleBinding)
+				if err != nil {
+					if apierrors.IsNotFound(err) {
+						Log.Info("ClusterRoleBinding not found on delete. Continuing...", "name", clusterRoleBinding.Name)
+						continue
+					}
+					return err
+				}
+				Log.Info("ClusterRoleBinding deleted successfully", "name", clusterRoleBinding.Name)
+				break
+			}
 		}
 	}
 
