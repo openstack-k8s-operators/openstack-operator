@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: openstackclients.client.openstack.org
 spec:
   group: client.openstack.org
@@ -56,6 +56,7 @@ spec:
                             key:
                               type: string
                             name:
+                              default: ""
                               type: string
                             optional:
                               type: boolean
@@ -94,6 +95,7 @@ spec:
                             key:
                               type: string
                             name:
+                              default: ""
                               type: string
                             optional:
                               type: boolean
