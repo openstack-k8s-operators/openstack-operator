@@ -850,6 +850,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			DeferCleanup(
 				th.DeleteInstance,
