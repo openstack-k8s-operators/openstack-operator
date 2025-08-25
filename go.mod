@@ -93,7 +93,6 @@ require (
 	github.com/prometheus/procfs v0.13.0 // indirect
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.71.0-rhobs1 // indirect
 	github.com/rhobs/observability-operator v0.3.1 // indirect
-	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
@@ -121,6 +120,10 @@ require (
 )
 
 replace github.com/openstack-k8s-operators/openstack-operator/apis => ./apis
+
+replace github.com/openstack-k8s-operators/nova-operator/api => github.com/ratailor/nova-operator/apis a422847a4bfbafb5d6ce9f2da25245078a922431
+
+replace github.com/openstack-k8s-operators/placement-operator/api => github.com/ratailor/nova-operator/apis a422847a4bfbafb5d6ce9f2da25245078a922431
 
 // mschuppert: map to latest commit from release-4.16 tag
 // must consistent within modules and service operators
