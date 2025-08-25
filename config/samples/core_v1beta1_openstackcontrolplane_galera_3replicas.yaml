@@ -88,6 +88,7 @@ spec:
           replicas: 0 # backend needs to be configured
   manila:
     template:
+      databaseInstance: openstack
       manilaAPI:
         replicas: 1
       manilaScheduler:

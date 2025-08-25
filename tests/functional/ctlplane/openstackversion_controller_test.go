@@ -75,7 +75,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		It("should fail to create more than one OpenStackVersion", func() {
 
 			instance := &corev1.OpenStackVersion{}
-			instance.ObjectMeta.Namespace = names.Namespace
+			instance.Namespace = names.Namespace
 			instance.Name = "foo"
 			err := k8sClient.Create(ctx, instance)
 

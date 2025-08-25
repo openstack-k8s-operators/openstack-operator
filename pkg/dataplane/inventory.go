@@ -223,7 +223,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		"openstackdataplanenodeset":   instance.Name,
 		"inventory":                   "true",
 	}
-	for key, val := range instance.ObjectMeta.Labels {
+	for key, val := range instance.Labels {
 		labels[key] = val
 	}
 	template := []utils.Template{

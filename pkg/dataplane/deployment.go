@@ -23,13 +23,13 @@ import (
 	"fmt"
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	slices "golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
@@ -207,7 +207,7 @@ func (d *Deployer) ConditionalDeploy(
 			readyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			readyWaitingMessage))
+			"%s", readyWaitingMessage))
 
 	}
 
@@ -234,7 +234,7 @@ func (d *Deployer) ConditionalDeploy(
 			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 			nsConditions.Set(condition.TrueCondition(
 				readyCondition,
-				readyMessage))
+				"%s", readyMessage))
 		} else if ansibleJob.Status.Failed > *ansibleJob.Spec.BackoffLimit {
 			errorMsg := fmt.Sprintf("execution.name %s execution.namespace %s failed pods: %d", ansibleJob.Name, ansibleJob.Namespace, ansibleJob.Status.Failed)
 			for _, condition := range ansibleJob.Status.Conditions {
@@ -246,7 +246,7 @@ func (d *Deployer) ConditionalDeploy(
 				errorMsg = fmt.Sprintf("backoff limit reached for execution.name %s execution.namespace %s execution.condition.message: %s", ansibleJob.Name, ansibleJob.Namespace, ansibleCondition.Message)
 			}
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
-			err = fmt.Errorf(errorMsg)
+			err = fmt.Errorf("%s", errorMsg)
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.Reason(ansibleCondition.Reason),
@@ -259,7 +259,7 @@ func (d *Deployer) ConditionalDeploy(
 				readyCondition,
 				condition.RequestedReason,
 				condition.SeverityInfo,
-				readyWaitingMessage))
+				"%s", readyWaitingMessage))
 		}
 	}
 	d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
