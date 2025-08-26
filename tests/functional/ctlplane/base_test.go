@@ -90,6 +90,7 @@ type Names struct {
 	OVNControllerCertName              types.NamespacedName
 	OVNDbServerNBName                  types.NamespacedName
 	OVNDbServerSBName                  types.NamespacedName
+	OVNMetricsCertName                 types.NamespacedName
 	NeutronOVNCertName                 types.NamespacedName
 	OpenStackTopology                  []types.NamespacedName
 	WatcherCertPublicRouteName         types.NamespacedName
@@ -261,6 +262,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		OVNControllerCertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cert-ovncontroller-ovndbs",
+		},
+		OVNMetricsCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-ovn-metrics",
 		},
 		NeutronOVNCertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
