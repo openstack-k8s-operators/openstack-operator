@@ -21,11 +21,10 @@ require (
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20250811082751-434506f532d6
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20250811132527-8b60a24b4cd5
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20250811081638-ad2aa6263eb2
-	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20250811132528-e890fbdf8726
+	github.com/openstack-k8s-operators/nova-operator/apis v0.6.1-0.20250811132528-e890fbdf8726
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20250811132816-395cc3f32494
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20250811072630-c2b6e30af3a1
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20250811132819-b267d3671d1f
-	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20250811072922-3ada315d8eef
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250811072921-e4cdf967663d
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250811132820-f9e60d64606b
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20250814062147-d38ac9ce26f7
@@ -109,6 +108,8 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace github.com/openstack-k8s-operators/nova-operator/apis => github.com/ratailor/nova-operator/apis v0.0.0-20250825101302-a422847a4bfb //allow-merging
 
 // mschuppert: map to latest commit from release-4.16 tag
 // must consistent within modules and service operators
