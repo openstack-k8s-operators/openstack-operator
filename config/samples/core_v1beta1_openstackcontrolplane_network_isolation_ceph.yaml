@@ -238,6 +238,7 @@ spec:
     apiOverride:
       route: {}
     template:
+      databaseInstance: openstack
       manilaAPI:
         customServiceConfig: |
           [DEFAULT]

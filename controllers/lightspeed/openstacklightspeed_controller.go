@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package lightspeed implements the OpenStackLightspeed controller for managing OpenStack Lightspeed resources
 package lightspeed
 
 import (
@@ -39,7 +40,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	lightspeedv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/lightspeed"
 )
 
@@ -74,8 +74,8 @@ func (r *OpenStackLightspeedReconciler) GetLogger(ctx context.Context) logr.Logg
 func (r *OpenStackLightspeedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	Log := r.GetLogger(ctx)
 
-	instance := &lightspeedv1beta1.OpenStackLightspeed{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	instance := &lightspeedv1.OpenStackLightspeed{}
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			Log.Info("OpenStackLightspeed CR not found")
@@ -145,7 +145,7 @@ func (r *OpenStackLightspeedReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if instance.Spec.RAGImage == "" {
-		instance.Spec.RAGImage = lightspeedv1beta1.OpenStackLightspeedDefaultValues.RAGImageURL
+		instance.Spec.RAGImage = lightspeedv1.OpenStackLightspeedDefaultValues.RAGImageURL
 	}
 
 	OLSOperatorInstalled, err := lightspeed.IsOLSOperatorInstalled(ctx, helper)
@@ -242,7 +242,7 @@ func (r *OpenStackLightspeedReconciler) Reconcile(ctx context.Context, req ctrl.
 func (r *OpenStackLightspeedReconciler) reconcileDelete(
 	ctx context.Context,
 	helper *common_helper.Helper,
-	instance *lightspeedv1beta1.OpenStackLightspeed,
+	instance *lightspeedv1.OpenStackLightspeed,
 ) (ctrl.Result, error) {
 	Log := r.GetLogger(ctx)
 
@@ -272,7 +272,7 @@ func (r *OpenStackLightspeedReconciler) reconcileDelete(
 		return ctrl.Result{}, err
 	}
 
-	err = r.Client.Delete(ctx, &olsConfig)
+	err = r.Delete(ctx, &olsConfig)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -293,7 +293,7 @@ func (r *OpenStackLightspeedReconciler) SetupWithManager(mgr ctrl.Manager) error
 		listOpts := []client.ListOption{
 			client.InNamespace(o.GetNamespace()),
 		}
-		if err := r.Client.List(ctx, versionList, listOpts...); err != nil {
+		if err := r.List(ctx, versionList, listOpts...); err != nil {
 			Log.Error(err, "Unable to retrieve OpenStackVersion")
 			return nil
 		}
@@ -313,7 +313,7 @@ func (r *OpenStackLightspeedReconciler) SetupWithManager(mgr ctrl.Manager) error
 	})
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&lightspeedv1beta1.OpenStackLightspeed{}).
+		For(&lightspeedv1.OpenStackLightspeed{}).
 		Watches(&corev1beta1.OpenStackVersion{}, versionFunc).
 		Complete(r)
 }

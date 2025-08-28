@@ -348,12 +348,12 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec.NovaSpecCore)
 
-		nova.Spec.NovaImages.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
-		nova.Spec.NovaImages.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
-		nova.Spec.NovaImages.ConductorContainerImageURL = *version.Status.ContainerImages.NovaConductorImage
-		nova.Spec.NovaImages.MetadataContainerImageURL = *version.Status.ContainerImages.NovaAPIImage //metadata uses novaAPI image
-		nova.Spec.NovaImages.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
-		nova.Spec.NovaImages.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
+		nova.Spec.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
+		nova.Spec.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
+		nova.Spec.ConductorContainerImageURL = *version.Status.ContainerImages.NovaConductorImage
+		nova.Spec.MetadataContainerImageURL = *version.Status.ContainerImages.NovaAPIImage //metadata uses novaAPI image
+		nova.Spec.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
+		nova.Spec.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
 
 		if nova.Spec.Secret == "" {
 			nova.Spec.Secret = instance.Spec.Secret

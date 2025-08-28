@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package dataplane contains the OpenStackDataPlaneDeployment controller implementation
 package dataplane
 
 import (
@@ -82,7 +83,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 	// Fetch the OpenStackDataPlaneDeployment instance
 	instance := &dataplanev1.OpenStackDataPlaneDeployment{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -343,7 +344,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			severity,
 			condition.DeploymentReadyErrorMessage,
 			deploymentErrMsg)
-		return ctrl.Result{}, fmt.Errorf(deploymentErrMsg)
+		return ctrl.Result{}, fmt.Errorf("%s", deploymentErrMsg)
 	}
 
 	if shouldRequeue {
@@ -365,7 +366,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	return ctrl.Result{}, nil
 }
 
-// GetService
+// GetService retrieves a service for the OpenStackDataPlaneDeployment
 func (r *OpenStackDataPlaneDeploymentReconciler) GetService(
 	ctx context.Context,
 	helper *helper.Helper,
@@ -456,7 +457,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manag
 		listOpts := []client.ListOption{
 			client.InNamespace(obj.GetNamespace()),
 		}
-		if err := r.Client.List(context.Background(), deployments, listOpts...); err != nil {
+		if err := r.List(context.Background(), deployments, listOpts...); err != nil {
 			Log.Error(err, "Unable to retrieve deployments %w")
 			return nil
 		}
@@ -504,7 +505,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) listNodeSets(ctx context.Contex
 
 		// Fetch the OpenStackDataPlaneNodeSet instance
 		nodeSetInstance := &dataplanev1.OpenStackDataPlaneNodeSet{}
-		err := r.Client.Get(
+		err := r.Get(
 			ctx,
 			types.NamespacedName{
 				Namespace: instance.GetNamespace(),
