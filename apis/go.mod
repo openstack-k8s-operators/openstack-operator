@@ -13,13 +13,13 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250811072343-cbba065c90db
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250811063918-3d15010e0c06
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250811063920-3555bbab149d
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250730105425-ac390cdfa7a4
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250825154944-f18bd7894ed6
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250811072344-b7d2113b85c0
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250811082218-9f6971dd853d
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250605082218-a58074898dd7
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20250605082218-a58074898dd7
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20250811071515-76cd9351439d
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20250805111929-e9cf53277ec8
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20250825154944-213306df7441
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20250811132527-ecc862b2a7b3
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20250811132816-64db9a82b4e7
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20250811132817-9363d9afc583
