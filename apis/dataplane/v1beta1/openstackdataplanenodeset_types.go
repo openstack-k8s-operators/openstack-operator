@@ -233,7 +233,7 @@ var ContainerImageDefaults = openstackv1.ContainerImages{
 		CeilometerComputeImage:        getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-compute:current-podified"),
 		CeilometerIpmiImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-ipmi:current-podified"),
 		EdpmNodeExporterImage:         getStrPtr("quay.io/prometheus/node-exporter:v1.5.0"),
-		EdpmKeplerImage:               getStrPtr("quay.io/sustainable_computing_io/kepler:release-0.7.12"),
+		EdpmKeplerImage:               getStrPtr("quay.io/sustainable_computing_io/kepler:v0.10.2"),
 		EdpmPodmanExporterImage:       getStrPtr("quay.io/navidys/prometheus-podman-exporter:v1.10.1"),
 		OpenstackNetworkExporterImage: getStrPtr("quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified"),
 		OsContainerImage:              getStrPtr("quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified"),
