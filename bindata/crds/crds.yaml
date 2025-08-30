@@ -15624,6 +15624,8 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      notificationsBusInstance:
+                        type: string
                       passwordSelectors:
                         default:
                           service: WatcherPassword
