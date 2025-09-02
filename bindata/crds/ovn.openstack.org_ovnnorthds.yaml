@@ -52,10 +52,20 @@ spec:
                 description: ContainerImage - Container Image URL (will be set to
                   environmental default if empty)
                 type: string
+              exporterImage:
+                default: quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified
+                description: ExporterImage - Container Image URL for the openstack-network-exporter
+                  metrics sidecar (will be set to environmental default if empty)
+                type: string
               logLevel:
                 default: info
                 description: LogLevel - Set log level info, dbg, emer etc
                 type: string
+              metricsEnabled:
+                default: true
+                description: MetricsEnabled enables the metrics sidecar container
+                  for collecting OVN metrics
+                type: boolean
               nThreads:
                 default: 1
                 description: NThreads sets number of threads used for building logical
