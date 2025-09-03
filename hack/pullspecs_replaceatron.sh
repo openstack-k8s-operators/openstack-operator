@@ -19,7 +19,7 @@ cp "$CSV_FILE" "${CSV_FILE}.backup"
 echo "Updating RELATED_IMAGE_ environment variables in $CSV_FILE..."
 
 # Extract all RELATED_IMAGE_ env var names from the CSV file
-RELATED_IMAGE_VARS=$(grep -o 'RELATED_IMAGE_[A-Z_]*' "$CSV_FILE" | sort -u)
+RELATED_IMAGE_VARS=$(grep -o -e 'RELATED_IMAGE_[A-Z0-9_]*' -e '[A-Z0-9_]*_IMAGE_URL_DEFAULT' -e 'KUBE_RBAC_PROXY' "$CSV_FILE" | sort -u)
 
 # Track if any errors occurred
 ERRORS=0
