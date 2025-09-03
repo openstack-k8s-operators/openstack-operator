@@ -8,7 +8,7 @@
 # 1. Latest version of kuttl is installed at /usr/local/bin/kubectl-kuttl
 # 2. An OCP 4.10+ CRC cluster with Podified Operators has been deployed
 # 3. CLI user has access to $KUBECONFIG
-# 4. The environment variable INSTALL_YAMLS is set to the the path of the
+# 4. The environment variable INSTALL_YAMLS is set to the path of the
 #    install_yamls repo
 
 apiVersion: kuttl.dev/v1beta1

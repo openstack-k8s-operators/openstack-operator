@@ -41,7 +41,7 @@ OpenStackDataPlaneNodeSet uses the following conditions:
 | True when the NodeSet has been deployed successfully. False when the deployment is not yet requested or failed, or there are other failed conditions.
 
 | DeploymentReady
-| True when the the NodeSet has been deployed successfully
+| True when the NodeSet has been deployed successfully
 
 | InputReady
 | True when the required inputs are available and ready
