@@ -11,7 +11,7 @@ install all required operator dependencies for installing/managing OpenStack.
 
 ## Description
 
-This project is built, modeled, and maintained with [operator-sdk] (https://github.com/operator-framework/operator-sdk).
+This project is built, modeled, and maintained with [operator-sdk](https://github.com/operator-framework/operator-sdk).
 
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
