@@ -27,7 +27,7 @@ ERRORS=0
 # Process each RELATED_IMAGE_ variable
 for var_name in $RELATED_IMAGE_VARS; do
     # Check if the environment variable exists in the current bash environment
-    if [[ -n "${!var_name:-}" ]]; then
+    if [[ -v ${var_name} ]]; then
         current_value="${!var_name}"
         echo "Updating $var_name with value: $current_value"
         
