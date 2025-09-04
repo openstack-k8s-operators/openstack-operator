@@ -11,6 +11,7 @@ metadata:
     features.operators.openshift.io/token-auth-aws: "false"
     features.operators.openshift.io/token-auth-azure: "false"
     features.operators.openshift.io/token-auth-gcp: "false"
+    operators.openshift.io/valid-subscription: '["OpenShift Container Platform", "OpenShift Platform Plus"]'
     operatorframework.io/suggested-namespace: openstack-operators
     operatorframework.io/initialization-resource: '{"apiVersion":"operator.openstack.org/v1beta1","kind":"OpenStack","metadata":{"name":"openstack","namespace":"openstack-operators"},"spec":{}}'
     operators.operatorframework.io/builder: operator-sdk-v1.31.0
