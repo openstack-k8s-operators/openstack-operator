@@ -220,6 +220,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	if !instance.Spec.Ovn.Enabled {
 		instance.Status.ContainerImages.OvnNorthdImage = nil
+		instance.Status.ContainerImages.OpenstackNetworkExporterImage = nil
 		if _, err := EnsureDeleted(ctx, helper, OVNNorthd); err != nil {
 			return false, err
 		}
@@ -295,6 +296,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Ovn.Template.OVNNorthd.DeepCopyInto(&OVNNorthd.Spec.OVNNorthdSpecCore)
 
 		OVNNorthd.Spec.ContainerImage = *version.Status.ContainerImages.OvnNorthdImage
+		OVNNorthd.Spec.ExporterImage = *getImg(version.Status.ContainerImages.OpenstackNetworkExporterImage, &missingImageDefault)
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), OVNNorthd, helper.GetScheme())
 		if err != nil {
@@ -319,6 +321,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	if OVNNorthd.Status.ObservedGeneration == OVNNorthd.Generation && OVNNorthd.IsReady() { //revive:disable:indent-error-flow
 		instance.Status.ContainerImages.OvnNorthdImage = version.Status.ContainerImages.OvnNorthdImage
+		instance.Status.ContainerImages.OpenstackNetworkExporterImage = version.Status.ContainerImages.OpenstackNetworkExporterImage
 		return true, nil
 	} else {
 		return false, nil

@@ -11976,6 +11976,9 @@ spec:
                           logLevel:
                             default: info
                             type: string
+                          metricsEnabled:
+                            default: true
+                            type: boolean
                           nThreads:
                             default: 1
                             format: int32
