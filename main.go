@@ -145,11 +145,13 @@ func main() {
 	var enableLeaderElection bool
 	var probeAddr string
 	var pprofAddr string
+	var webhookPort int
 	var enableHTTP2 bool
 	flag.BoolVar(&enableHTTP2, "enable-http2", enableHTTP2, "If HTTP/2 should be enabled for the metrics and webhook servers.")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.StringVar(&pprofAddr, "pprof-bind-address", "", "The address the pprof endpoint binds to. Set to empty to disable pprof")
+	flag.IntVar(&webhookPort, "webhook-bind-address", 9443, "The port the webhook server binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -184,7 +186,7 @@ func main() {
 		LeaderElectionID:       "40ba705e.openstack.org",
 		WebhookServer: webhook.NewServer(
 			webhook.Options{
-				Port:    9443,
+				Port:    webhookPort,
 				TLSOpts: []func(config *tls.Config){disableHTTP2},
 			}),
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
