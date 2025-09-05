@@ -49,7 +49,7 @@ func ReconcileRedis(
 	// disabled from the start scenario when it likely should *not*
 	// start appearing in conditions. It also means that the situation
 	// where sample template data in a config where redis is disabled
-	// will require require that the controller iterator over the
+	// will require that the controller iterator over the
 	// specs and make sure that existing deployed redis instances are
 	// deleted. Generally means if we want the redis controller to
 	// truly remain invisible it's best not to provide any example

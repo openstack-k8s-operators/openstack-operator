@@ -10,7 +10,7 @@ const (
 )
 
 // MergeMetadataForUpdate merges the read-only fields of metadata.
-// This is to be able to do a a meaningful comparison in apply,
+// This is to be able to do a meaningful comparison in apply,
 // since objects created on runtime do not have these fields populated.
 func MergeMetadataForUpdate(current, updated *uns.Unstructured) error {
 	updated.SetCreationTimestamp(current.GetCreationTimestamp())

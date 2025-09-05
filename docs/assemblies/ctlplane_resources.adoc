@@ -642,7 +642,7 @@ OpenStackClientSpec defines the desired state of OpenStackClient
 | Field | Description | Scheme | Required
 
 | containerImage
-| ContainerImage for the the OpenstackClient container (will be set to environmental default if empty)
+| ContainerImage for the OpenstackClient container (will be set to environmental default if empty)
 | string
 | true
 |===
@@ -2904,7 +2904,7 @@ BarbicanSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -3157,7 +3157,7 @@ BarbicanComponentTemplate - Variables used by every sub-component of Barbican (e
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -3972,7 +3972,7 @@ CinderSpec defines the desired state of Cinder
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -4312,7 +4312,7 @@ CinderServiceTemplate defines the input parameters that can be defined for a giv
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -4416,7 +4416,7 @@ DesignateServiceTemplate defines the input parameters that can be defined for a 
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -5448,7 +5448,7 @@ DesignateSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -5938,7 +5938,7 @@ GlanceAPITemplate defines the desired state of GlanceAPI
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -6375,7 +6375,7 @@ GlanceSpecCore defines the desired state of Glance
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -6596,7 +6596,7 @@ HeatServiceTemplate -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
 | string
 | false
 
@@ -7214,7 +7214,7 @@ HeatSpec defines the desired state of Heat
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 01-custom.conf file.
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/heat/heat.conf.d directory as 01-custom.conf file.
 | string
 | false
 
@@ -7477,7 +7477,7 @@ HorizonSpecCore -
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/openstack-dashboard/local_settings.d directory as 9999_custom_settings.py file.
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/openstack-dashboard/local_settings.d directory as 9999_custom_settings.py file.
 | string
 | true
 
@@ -7579,7 +7579,7 @@ IronicServiceTemplate defines the common input parameters for Ironic services
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -8269,7 +8269,7 @@ IronicInspectorTemplate defines the input parameters for Ironic Inspector servic
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -8655,7 +8655,7 @@ IronicSpec defines the desired state of Ironic
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -8970,7 +8970,7 @@ KeystoneAPISpec defines the desired state of KeystoneAPI
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -9393,7 +9393,7 @@ ManilaServiceTemplate defines the input parameters that can be defined for a giv
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -10156,7 +10156,7 @@ ManilaSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -10857,7 +10857,7 @@ NeutronAPISpecCore -
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -11083,7 +11083,7 @@ NovaServiceBase contains the fields that are needed for each nova service CRD
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -11340,7 +11340,7 @@ NovaAPITemplate defines the input parameters specified by the user to create a N
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -11867,7 +11867,7 @@ NovaComputeTemplate defines the input parameters specified by the user to create
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12077,7 +12077,7 @@ NovaConductorTemplate defines the input parameters specified by the user to crea
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12313,7 +12313,7 @@ NovaMetadataTemplate defines the input parameters specified by the user to creat
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12523,7 +12523,7 @@ NovaNoVNCProxyTemplate defines the input parameters specified by the user to cre
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12765,7 +12765,7 @@ NovaSchedulerTemplate defines the input parameters specified by the user to crea
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -13098,7 +13098,7 @@ OctaviaAmphoraControllerSpecCore -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -13374,7 +13374,7 @@ OctaviaAPISpecCore -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -13914,7 +13914,7 @@ OctaviaSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -15510,7 +15510,7 @@ PlacementAPISpecCore -
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -16421,7 +16421,7 @@ Aodh defines the aodh component spec
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -16786,7 +16786,7 @@ CeilometerSpecCore defines the desired state of Ceilometer. This version is used
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -17579,7 +17579,7 @@ WatcherCommon defines a spec based reusable for all the CRDs
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -17721,7 +17721,7 @@ WatcherSubCrsTemplate define de common part of the input parameters specified by
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 

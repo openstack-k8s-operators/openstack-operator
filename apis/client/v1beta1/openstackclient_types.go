@@ -33,7 +33,7 @@ type OpenStackClientSpec struct {
 	OpenStackClientSpecCore `json:",inline"`
 
 	// +kubebuilder:validation:Required
-	// ContainerImage for the the OpenstackClient container (will be set to environmental default if empty)
+	// ContainerImage for the OpenstackClient container (will be set to environmental default if empty)
 	ContainerImage string `json:"containerImage"`
 }
 
