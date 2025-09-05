@@ -1178,6 +1178,11 @@ func (in *OpenStackControlPlaneSpec) DeepCopyInto(out *OpenStackControlPlaneSpec
 	in.Cinder.DeepCopyInto(&out.Cinder)
 	in.Galera.DeepCopyInto(&out.Galera)
 	in.Rabbitmq.DeepCopyInto(&out.Rabbitmq)
+	if in.NotificationsBusInstance != nil {
+		in, out := &in.NotificationsBusInstance, &out.NotificationsBusInstance
+		*out = new(string)
+		**out = **in
+	}
 	in.Memcached.DeepCopyInto(&out.Memcached)
 	in.Ovn.DeepCopyInto(&out.Ovn)
 	in.Neutron.DeepCopyInto(&out.Neutron)
