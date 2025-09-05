@@ -58,7 +58,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 		openstackclient.Spec.ContainerImage = *version.Status.ContainerImages.OpenstackClientImage
 
 		if instance.Spec.TLS.Ingress.Enabled || instance.Spec.TLS.PodLevel.Enabled {
-			openstackclient.Spec.Ca.CaBundleSecretName = tls.CABundleSecret
+			openstackclient.Spec.CaBundleSecretName = tls.CABundleSecret
 		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), openstackclient, helper.GetScheme())

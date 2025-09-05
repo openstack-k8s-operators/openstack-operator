@@ -44,7 +44,7 @@ func RenderDir(manifestDir string, d *RenderData) ([]*unstructured.Unstructured,
 		}
 
 		// Skip non-manifest files
-		if !(strings.HasSuffix(path, ".yml") || strings.HasSuffix(path, ".yaml") || strings.HasSuffix(path, ".json")) {
+		if !strings.HasSuffix(path, ".yml") && !strings.HasSuffix(path, ".yaml") && !strings.HasSuffix(path, ".json") {
 			return nil
 		}
 
