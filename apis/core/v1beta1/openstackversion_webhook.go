@@ -17,7 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
 	"os"
+	"reflect"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -153,7 +155,85 @@ func (r *OpenStackVersion) ValidateUpdate(old runtime.Object) (admission.Warning
 		)
 	}
 
+	// Validate CustomContainerImages changes during version updates
+	oldVersion, ok := old.(*OpenStackVersion)
+	if !ok {
+		return nil, apierrors.NewInternalError(fmt.Errorf("failed to convert old object to OpenStackVersion"))
+	}
+
+	// Check if targetVersion is changing and this is a minor update
+	if oldVersion.Spec.TargetVersion != r.Spec.TargetVersion && oldVersion.Status.DeployedVersion != nil {
+		// Check if the skip annotation is present
+		skipValidation := false
+		if r.Annotations != nil {
+			if _, exists := r.Annotations["core.openstack.org/skip-custom-images-validation"]; exists {
+				skipValidation = true
+			}
+		}
+
+		// When changing target version during a minor update, ensure CustomContainerImages are also updated
+		// unless skip annotation is present
+		if !skipValidation && hasAnyCustomImage(r.Spec.CustomContainerImages) {
+
+			// Get the tracked custom images for the previous version
+			if r.Status.TrackedCustomImages != nil {
+				if trackedImages, exists := r.Status.TrackedCustomImages[oldVersion.Spec.TargetVersion]; exists {
+					// Compare current CustomContainerImages with tracked ones
+					if !customContainerImagesAllModified(r.Spec.CustomContainerImages, trackedImages) {
+						return nil, apierrors.NewForbidden(
+							schema.GroupResource{
+								Group:    GroupVersion.WithKind("OpenStackVersion").Group,
+								Resource: GroupVersion.WithKind("OpenStackVersion").Kind,
+							}, r.GetName(), &field.Error{
+								Type:     field.ErrorTypeForbidden,
+								Field:    "spec.customContainerImages",
+								BadValue: r.Spec.TargetVersion,
+								Detail:   "CustomContainerImages must be updated when changing targetVersion. The current CustomContainerImages are identical to those used in the previous version (" + oldVersion.Spec.TargetVersion + "), which prevents proper version tracking and validation.",
+							},
+						)
+					}
+				}
+			}
+		}
+	}
+
 	return nil, nil
+}
+
+// hasAnyCustomImage checks if any image field in CustomContainerImages is set
+func hasAnyCustomImage(images CustomContainerImages) bool {
+	// Check CinderVolumeImages map
+	for _, img := range images.CinderVolumeImages {
+		if img != nil {
+			return true
+		}
+	}
+
+	// Check ManilaShareImages map
+	for _, img := range images.ManilaShareImages {
+		if img != nil {
+			return true
+		}
+	}
+
+	// Check ContainerTemplate fields using reflection
+	v := reflect.ValueOf(images.ContainerTemplate)
+	t := reflect.TypeOf(images.ContainerTemplate)
+
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		fieldType := t.Field(i)
+
+		// Check if field is a pointer and not nil
+		if field.Kind() == reflect.Ptr && !field.IsNil() {
+			// Additional check to ensure it's a string pointer (image fields)
+			if fieldType.Type.Elem().Kind() == reflect.String {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type

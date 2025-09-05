@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	"context"
+	"reflect"
 	"regexp"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -198,6 +199,9 @@ type OpenStackVersionStatus struct {
 	// ServiceDefaults - struct that contains current defaults for OSP services
 	ServiceDefaults ServiceDefaults `json:"serviceDefaults,omitempty"`
 
+	// TrackedCustomImages tracks CustomContainerImages used for each version to detect changes
+	TrackedCustomImages map[string]CustomContainerImages `json:"trackedCustomImages,omitempty"`
+
 	//ObservedGeneration - the most recent generation observed for this object.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
@@ -287,4 +291,93 @@ func GetOpenStackVersions(namespace string, k8sClient client.Client) (*OpenStack
 	}
 
 	return versionList, nil
+}
+
+// isContainerTemplateEmpty checks if all fields in a ContainerTemplate are nil
+func isContainerTemplateEmpty(ct ContainerTemplate) bool {
+	v := reflect.ValueOf(ct)
+	numFields := v.NumField()
+	for i := 0; i < numFields; i++ {
+		field := v.Field(i)
+		// Check if field is a pointer and not nil
+		if field.Kind() == reflect.Ptr && !field.IsNil() {
+			return false
+		}
+	}
+	return true
+}
+
+// customContainerImagesModified compares two CustomContainerImages and returns true if they are different
+func customContainerImagesAllModified(a, b CustomContainerImages) bool {
+	if !containerTemplateEqual(a.ContainerTemplate, b.ContainerTemplate) {
+		return true
+	}
+
+	if !stringMapEqual(a.CinderVolumeImages, b.CinderVolumeImages) {
+		return true
+	}
+
+	if !stringMapEqual(a.ManilaShareImages, b.ManilaShareImages) {
+		return true
+	}
+
+	// If all fields are equal, return false (not modified)
+	return false
+}
+
+// containerTemplateEqual compares two ContainerTemplate structs for equality using reflection
+func containerTemplateEqual(a, b ContainerTemplate) bool {
+	va := reflect.ValueOf(a)
+	vb := reflect.ValueOf(b)
+
+	numFields := va.NumField()
+	for i := 0; i < numFields; i++ {
+		fieldA := va.Field(i)
+		fieldB := vb.Field(i)
+
+		// Both fields should be *string type
+		if fieldA.Kind() != reflect.Ptr || fieldB.Kind() != reflect.Ptr {
+			continue
+		}
+
+		// Compare using stringPtrEqual logic
+		if fieldA.IsNil() && fieldB.IsNil() {
+			continue
+		}
+		if fieldA.IsNil() || fieldB.IsNil() {
+			return false
+		}
+		if fieldA.Elem().String() != fieldB.Elem().String() {
+			return false
+		}
+	}
+
+	return true
+}
+
+// stringPtrEqual compares two string pointers for equality
+func stringPtrEqual(a, b *string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
+}
+
+// stringMapEqual compares two string maps for equality
+func stringMapEqual(a, b map[string]*string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for key, valueA := range a {
+		valueB, exists := b[key]
+		if !exists || !stringPtrEqual(valueA, valueB) {
+			return false
+		}
+	}
+
+	return true
 }
