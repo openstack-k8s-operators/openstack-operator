@@ -2835,6 +2835,39 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 var _ = Describe("OpenStackOperator Webhook", func() {
 
+	DescribeTable("notificationsBusInstance",
+		func(getNotificationField func() (string, string)) {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			value, errMsg := getNotificationField()
+			spec["notificationsBusInstance"] = value
+			raw := map[string]interface{}{
+				"apiVersion": "core.openstack.org/v1beta1",
+				"kind":       "OpenStackControlPlane",
+				"metadata": map[string]interface{}{
+					"name":      "foo",
+					"namespace": namespace,
+				},
+				"spec": spec,
+			}
+			unstructuredObj := &unstructured.Unstructured{Object: raw}
+			_, err := controllerutil.CreateOrPatch(
+				th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+			Expect(err).Should(HaveOccurred())
+			var statusError *k8s_errors.StatusError
+			Expect(errors.As(err, &statusError)).To(BeTrue())
+			Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
+			Expect(statusError.ErrStatus.Message).To(
+				ContainSubstring(errMsg),
+			)
+		},
+		Entry("notificationsBusInstance is wrong", func() (string, string) {
+			return "foo", "spec.notificationsBusInstance: Invalid value: \"foo\": notificationsBusInstance must match an existing RabbitMQ instance name"
+		}),
+		Entry("notificationsBusInstance is an empty string", func() (string, string) {
+			return "", "spec.notificationsBusInstance: Invalid value: \"\": notificationsBusInstance is not a valid string"
+		}),
+	)
+
 	It("Blocks creating multiple ctlplane CRs in the same namespace", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 		spec["tls"] = GetTLSPublicSpec()
