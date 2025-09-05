@@ -155,6 +155,12 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Neutron.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
+	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// try to inject the top-level one if defined
+	if instance.Spec.Neutron.Template.NotificationsBusInstance == nil {
+		instance.Spec.Neutron.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	}
+
 	Log.Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
 		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec.NeutronAPISpecCore)
