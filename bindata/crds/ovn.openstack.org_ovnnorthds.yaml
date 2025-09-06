@@ -53,7 +53,6 @@ spec:
                   environmental default if empty)
                 type: string
               exporterImage:
-                default: quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified
                 description: ExporterImage - Container Image URL for the openstack-network-exporter
                   metrics sidecar (will be set to environmental default if empty)
                 type: string

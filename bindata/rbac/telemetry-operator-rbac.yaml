@@ -327,6 +327,14 @@ rules:
     - patch
     - watch
 - apiGroups:
+    - ovn.openstack.org
+  resources:
+    - ovnnorthds
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
     - rabbitmq.com
   resources:
     - rabbitmqclusters

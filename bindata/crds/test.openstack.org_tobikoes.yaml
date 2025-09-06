@@ -1192,6 +1192,20 @@ spec:
                   instances of test-operator related CRs exist. To run test-pods in parallel
                   set this option to true.
                 type: boolean
+              patch:
+                description: Optional patch to apply to the Tobiko repository.
+                properties:
+                  refspec:
+                    description: |-
+                      Refspec specifies which change the remote repository should be
+                      checked out to.
+                    type: string
+                  repository:
+                    description: URL of the Tobiko repository that a patch will be
+                      applied to.
+                    format: uri
+                    type: string
+                type: object
               preventCreate:
                 default: false
                 description: Boolean specifying whether tobiko tests create new resources
@@ -1409,6 +1423,21 @@ spec:
                       description: Number of processes/workers used to run tobiko
                         tests - value 0 results in automatic decission
                       type: integer
+                    patch:
+                      description: Optional patch to apply to the Tobiko repository
+                        for this step.
+                      properties:
+                        refspec:
+                          description: |-
+                            Refspec specifies which change the remote repository should be
+                            checked out to.
+                          type: string
+                        repository:
+                          description: URL of the Tobiko repository that a patch will
+                            be applied to.
+                          format: uri
+                          type: string
+                      type: object
                     preventCreate:
                       description: Boolean specifying whether tobiko tests create
                         new resources or re-use those previously created
