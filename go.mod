@@ -1,9 +1,9 @@
 module github.com/openstack-k8s-operators/openstack-operator
 
-go 1.24
+go 1.24.4
 
 require (
-	github.com/cert-manager/cert-manager v1.14.7
+	github.com/cert-manager/cert-manager v1.16.5
 	github.com/go-logr/logr v1.4.3
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/google/uuid v1.6.0
@@ -18,7 +18,7 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250926105901-f1fc136e23db
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250926125710-1d20f8dff436
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250926111930-e9f843ac503f
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250929094900-c6051f6ada6d
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250930134137-51c0fe58c195
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250926115411-d8d2d3ce3c08
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250926130544-3cc98ad43636
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20250929092825-4c2402451077
@@ -40,7 +40,7 @@ require (
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20250925100955-6778a4daa9df
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20250925120222-c0b444994d55
 	github.com/pkg/errors v0.9.1
-	github.com/rabbitmq/cluster-operator/v2 v2.9.0
+	github.com/rabbitmq/cluster-operator/v2 v2.16.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -114,13 +114,13 @@ require (
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/protobuf v1.36.7 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	k8s.io/apiextensions-apiserver v0.31.13 // indirect
+	k8s.io/apiextensions-apiserver v0.33.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250902184714-7fc278399c7f // indirect
-	sigs.k8s.io/gateway-api v1.0.0 // indirect
+	sigs.k8s.io/gateway-api v1.2.1 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.6.0 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.7.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
@@ -130,8 +130,26 @@ replace github.com/openstack-k8s-operators/openstack-operator/apis => ./apis
 // must consistent within modules and service operators
 replace github.com/openshift/api => github.com/openshift/api v0.0.0-20250711200046-c86d80652a9e //allow-merging
 
-// custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag_n)
-replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250717122149-12f70b7f3d8d //allow-merging
+// custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.16.0_patches)
+replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec //allow-merging
 
-// pin to support rabbitmq 2.16.1 rebase
+// pin to support rabbitmq 2.16.0 rebase
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20250627150254-e9823e99808e //allow-merging
+
+replace k8s.io/apimachinery => k8s.io/apimachinery v0.31.13 //allow-merging
+
+replace k8s.io/api => k8s.io/api v0.31.13 //allow-merging
+
+replace k8s.io/apiserver => k8s.io/apiserver v0.31.13 //allow-merging
+
+replace k8s.io/client-go => k8s.io/client-go v0.31.13 //allow-merging
+
+replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.31.13 //allow-merging
+
+replace k8s.io/cli-runtime => k8s.io/cli-runtime v0.31.13 //allow-merging
+
+replace k8s.io/code-generator => k8s.io/code-generator v0.31.13 //allow-merging
+
+replace k8s.io/component-base => k8s.io/component-base v0.31.13 //allow-merging
+
+replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
