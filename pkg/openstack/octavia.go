@@ -223,6 +223,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	if octavia.Status.ObservedGeneration == octavia.Generation && octavia.IsReady() {
+		helper.GetLogger().Info("Octavia ready condition is true")
 		instance.Status.ContainerImages.OctaviaAPIImage = version.Status.ContainerImages.OctaviaAPIImage
 		instance.Status.ContainerImages.OctaviaWorkerImage = version.Status.ContainerImages.OctaviaWorkerImage
 		instance.Status.ContainerImages.OctaviaHealthmanagerImage = version.Status.ContainerImages.OctaviaHealthmanagerImage
@@ -231,11 +232,23 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Status.ContainerImages.OctaviaRsyslogImage = version.Status.ContainerImages.OctaviaRsyslogImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOctaviaReadyCondition, corev1beta1.OpenStackControlPlaneOctaviaReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneOctaviaReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneOctaviaReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Octavia resource into the instance
+		// under the condition of type OpenStackControlPlaneOctaviaReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(octavia.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(octavia.Status.Conditions, corev1beta1.OpenStackControlPlaneOctaviaReadyCondition, instance, octavia.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneOctaviaReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneOctaviaReadyRunningMessage))
+		}
 	}
 
 	return ctrl.Result{}, nil

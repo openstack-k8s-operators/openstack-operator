@@ -369,15 +369,19 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
-	OVNControllerReady, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
+	OVNControllerReady, OVNControllerConditions, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if !OVNControllerReady {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+		if len(OVNControllerConditions) > 0 {
+			openstack.MirrorSubResourceCondition(OVNControllerConditions, corev1beta1.OpenStackControlPlaneOVNReadyCondition, instance, "OVN")
+		} else {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneOVNReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+		}
 	} else {
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
 	}

@@ -157,17 +157,30 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 	}
 
 	if swift.Status.ObservedGeneration == swift.GetGeneration() && swift.IsReady() {
+		Log.Info("Swift ready condition is true")
 		instance.Status.ContainerImages.SwiftAccountImage = version.Status.ContainerImages.SwiftAccountImage
 		instance.Status.ContainerImages.SwiftContainerImage = version.Status.ContainerImages.SwiftContainerImage
 		instance.Status.ContainerImages.SwiftObjectImage = version.Status.ContainerImages.SwiftObjectImage
 		instance.Status.ContainerImages.SwiftProxyImage = version.Status.ContainerImages.SwiftProxyImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneSwiftReadyCondition, corev1beta1.OpenStackControlPlaneSwiftReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneSwiftReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneSwiftReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Swift resource into the instance
+		// under the condition of type OpenStackControlPlaneSwiftReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(swift.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(swift.Status.Conditions, corev1beta1.OpenStackControlPlaneSwiftReadyCondition, instance, swift.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneSwiftReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneSwiftReadyRunningMessage))
+		}
 	}
 
 	return ctrl.Result{}, nil

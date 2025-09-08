@@ -203,6 +203,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	if ironic.Status.ObservedGeneration == ironic.Generation && ironic.IsReady() {
+		Log.Info("Ironic ready condition is true")
 		instance.Status.ContainerImages.IronicAPIImage = version.Status.ContainerImages.IronicAPIImage
 		instance.Status.ContainerImages.IronicConductorImage = version.Status.ContainerImages.IronicConductorImage
 		instance.Status.ContainerImages.IronicInspectorImage = version.Status.ContainerImages.IronicInspectorImage
@@ -211,11 +212,23 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.ContainerImages.IronicPythonAgentImage = version.Status.ContainerImages.IronicPythonAgentImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneIronicReadyCondition, corev1beta1.OpenStackControlPlaneIronicReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneIronicReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneIronicReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Ironic resource into the instance
+		// under the condition of type OpenStackControlPlaneIronicReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(ironic.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(ironic.Status.Conditions, corev1beta1.OpenStackControlPlaneIronicReadyCondition, instance, ironic.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneIronicReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneIronicReadyRunningMessage))
+		}
 	}
 
 	return ctrl.Result{}, nil

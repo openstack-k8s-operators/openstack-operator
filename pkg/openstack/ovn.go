@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
@@ -45,19 +46,19 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 		}
 	}
 
-	OVNDBClustersReady, err := ReconcileOVNDbClusters(ctx, instance, version, helper)
+	OVNDBClustersReady, OVNDBClustersConditions, err := ReconcileOVNDbClusters(ctx, instance, version, helper)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNDBClusters")
 		setOVNReadyError(instance, err)
 	}
 
-	OVNNorthdReady, err := ReconcileOVNNorthd(ctx, instance, version, helper)
+	OVNNorthdReady, OVNNorthdConditions, err := ReconcileOVNNorthd(ctx, instance, version, helper)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNNorthd")
 		setOVNReadyError(instance, err)
 	}
 
-	OVNControllerReady, err := ReconcileOVNController(ctx, instance, version, helper)
+	OVNControllerReady, OVNControllerConditions, err := ReconcileOVNController(ctx, instance, version, helper)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNController")
 		setOVNReadyError(instance, err)
@@ -67,23 +68,61 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 
 	// Expect all services (dbclusters, northd, ovn-controller) ready
 	if OVNDBClustersReady && OVNNorthdReady && OVNControllerReady {
-		Log.Info("OVN is ready")
+		Log.Info("OVN ready condition is true")
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
 	} else if !instance.Spec.Ovn.Enabled {
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the OVN resources into the instance
+		// under the condition of type OpenStackControlPlaneOVNReadyCondition, but only if the sub-resources
+		// currently have any conditions (which won't be true for the initial creation of the sub-resources, since
+		// they have not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		// Note: OVN aggregates multiple resources, so we collect conditions from all sub-resources
+
+		highestPriorityConditions := condition.Conditions{}
+
+		// We first mirror to an OpenStackControlPlaneOVNReadyCondition as a placeholder for the highest
+		// priority condition, which will later be replicated into the OpenStackControlPlaneOVNReadyCondition
+		// via the call to MirrorSubResourceCondition if it is indeed the highest priority condition.  This
+		// same pattern is used for all OVN sub-resources.  We take this approach to ensure that we can
+		// specify exactly which type of OVN sub-resource the condition is associated with.
+		if len(OVNDBClustersConditions) > 0 {
+			highestPriorityOVNDBClustersCondition := OVNDBClustersConditions.Mirror(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
+			highestPriorityOVNDBClustersCondition.Message = fmt.Sprintf("%s: %s", reflect.TypeOf(ovnv1.OVNDBCluster{}).Name(), highestPriorityOVNDBClustersCondition.Message)
+			highestPriorityConditions = append(highestPriorityConditions, *highestPriorityOVNDBClustersCondition)
+		}
+		if len(OVNNorthdConditions) > 0 {
+			highestPriorityOVNNorthdCondition := OVNNorthdConditions.Mirror(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
+			highestPriorityOVNNorthdCondition.Message = fmt.Sprintf("%s: %s", reflect.TypeOf(ovnv1.OVNNorthd{}).Name(), highestPriorityOVNNorthdCondition.Message)
+			highestPriorityConditions = append(highestPriorityConditions, *highestPriorityOVNNorthdCondition)
+		}
+		if len(OVNControllerConditions) > 0 {
+			highestPriorityOVNControllerCondition := OVNControllerConditions.Mirror(corev1beta1.OpenStackControlPlaneOVNReadyCondition)
+			highestPriorityOVNControllerCondition.Message = fmt.Sprintf("%s: %s", reflect.TypeOf(ovnv1.OVNController{}).Name(), highestPriorityOVNControllerCondition.Message)
+			highestPriorityConditions = append(highestPriorityConditions, *highestPriorityOVNControllerCondition)
+		}
+
+		if len(highestPriorityConditions) > 0 {
+			MirrorSubResourceCondition(highestPriorityConditions, corev1beta1.OpenStackControlPlaneOVNReadyCondition, instance, "")
+		} else {
+			// Default to the associated "running" condition message for the sub-resources if they currently lack any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneOVNReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+		}
 	}
 	return ctrl.Result{}, nil
 }
 
-func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
+func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, condition.Conditions, error) {
 	Log := GetLogger(ctx)
 	dnsSuffix := clusterdns.GetDNSClusterDomain()
+	conditions := condition.Conditions{}
 
 	OVNDBClustersReady := len(instance.Spec.Ovn.Template.OVNDBCluster) != 0
 	for name, dbcluster := range instance.Spec.Ovn.Template.OVNDBCluster {
@@ -98,7 +137,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			instance.Status.ContainerImages.OvnNbDbclusterImage = nil
 			instance.Status.ContainerImages.OvnSbDbclusterImage = nil
 			if _, err := EnsureDeleted(ctx, helper, OVNDBCluster); err != nil {
-				return false, err
+				return false, conditions, err
 			}
 			continue
 		}
@@ -106,9 +145,14 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		// preserve any previously set TLS certs, set CA cert
 		if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: name, Namespace: instance.Namespace}, OVNDBCluster); err != nil {
 			if !k8s_errors.IsNotFound(err) {
-				return false, err
+				return false, conditions, err
 			}
 		}
+
+		// Add the conditions to the list of conditions to consider later for mirroring
+		// It doesn't matter if the conditions are already in the list, they will be
+		// deduplicated later during a MirrorSubResourceCondition call.
+		conditions = append(conditions, OVNDBCluster.Status.Conditions...)
 		if instance.Spec.TLS.PodLevel.Enabled {
 			dbcluster.TLS = OVNDBCluster.Spec.TLS
 		}
@@ -145,9 +189,9 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 				certRequest,
 				nil)
 			if err != nil {
-				return false, err
+				return false, conditions, err
 			} else if (ctrlResult != ctrl.Result{}) {
-				return false, nil
+				return false, conditions, nil
 			}
 
 			dbcluster.TLS.SecretName = &certSecret.Name
@@ -190,7 +234,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 
 		if err != nil {
 			Log.Error(err, "Failed to reconcile OVNDBCluster")
-			return false, err
+			return false, conditions, err
 		}
 		if op != controllerutil.OperationResultNone {
 			Log.Info(fmt.Sprintf("OVNDBCluster %s - %s", OVNDBCluster.Name, op))
@@ -204,12 +248,13 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		instance.Status.ContainerImages.OvnSbDbclusterImage = version.Status.ContainerImages.OvnSbDbclusterImage
 	}
 
-	return OVNDBClustersReady, nil
+	return OVNDBClustersReady, conditions, nil
 
 }
 
-func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
+func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, condition.Conditions, error) {
 	Log := GetLogger(ctx)
+	conditions := condition.Conditions{}
 
 	OVNNorthd := &ovnv1.OVNNorthd{
 		ObjectMeta: metav1.ObjectMeta{
@@ -220,11 +265,10 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	if !instance.Spec.Ovn.Enabled {
 		instance.Status.ContainerImages.OvnNorthdImage = nil
-		instance.Status.ContainerImages.OpenstackNetworkExporterImage = nil
 		if _, err := EnsureDeleted(ctx, helper, OVNNorthd); err != nil {
-			return false, err
+			return false, conditions, err
 		}
-		return false, nil
+		return false, conditions, nil
 	}
 
 	ovnNorthdSpec := &instance.Spec.Ovn.Template.OVNNorthd
@@ -232,9 +276,13 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 	// preserve any previously set TLS certs, set CA cert
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "ovnnorthd", Namespace: instance.Namespace}, OVNNorthd); err != nil {
 		if !k8s_errors.IsNotFound(err) {
-			return false, err
+			return false, conditions, err
 		}
 	}
+	// Add the conditions to the list of conditions to consider later for mirroring
+	// It doesn't matter if the conditions are already in the list, they will be
+	// deduplicated later during a MirrorSubResourceCondition call.
+	conditions = append(conditions, OVNNorthd.Status.Conditions...)
 	if instance.Spec.TLS.PodLevel.Enabled {
 		ovnNorthdSpec.TLS = OVNNorthd.Spec.TLS
 		dnsSuffix := clusterdns.GetDNSClusterDomain()
@@ -269,9 +317,9 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 			certRequest,
 			nil)
 		if err != nil {
-			return false, err
+			return false, conditions, err
 		} else if (ctrlResult != ctrl.Result{}) {
-			return false, nil
+			return false, conditions, nil
 		}
 
 		ovnNorthdSpec.TLS.SecretName = &certSecret.Name
@@ -296,7 +344,6 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Ovn.Template.OVNNorthd.DeepCopyInto(&OVNNorthd.Spec.OVNNorthdSpecCore)
 
 		OVNNorthd.Spec.ContainerImage = *version.Status.ContainerImages.OvnNorthdImage
-		OVNNorthd.Spec.ExporterImage = *getImg(version.Status.ContainerImages.OpenstackNetworkExporterImage, &missingImageDefault)
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), OVNNorthd, helper.GetScheme())
 		if err != nil {
@@ -313,7 +360,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
 			err.Error()))
 		Log.Error(err, "Failed to reconcile OVNNorthd")
-		return false, err
+		return false, conditions, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("OVNNorthd %s - %s", OVNNorthd.Name, op))
@@ -321,16 +368,16 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	if OVNNorthd.Status.ObservedGeneration == OVNNorthd.Generation && OVNNorthd.IsReady() { //revive:disable:indent-error-flow
 		instance.Status.ContainerImages.OvnNorthdImage = version.Status.ContainerImages.OvnNorthdImage
-		instance.Status.ContainerImages.OpenstackNetworkExporterImage = version.Status.ContainerImages.OpenstackNetworkExporterImage
-		return true, nil
+		return true, conditions, nil
 	} else {
-		return false, nil
+		return false, conditions, nil
 	}
 
 }
 
-func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
+func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, condition.Conditions, error) {
 	Log := GetLogger(ctx)
+	conditions := condition.Conditions{}
 
 	OVNController := &ovnv1.OVNController{
 		ObjectMeta: metav1.ObjectMeta{
@@ -343,21 +390,21 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		instance.Status.ContainerImages.OvnControllerImage = nil
 		instance.Status.ContainerImages.OvnControllerOvsImage = nil
 		if _, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
-			return false, err
+			return false, conditions, err
 		}
-		return false, nil
+		return false, conditions, nil
 	} else if len(instance.Spec.Ovn.Template.OVNController.NicMappings) == 0 {
 		// If nicMappings is not configured there's no need to start ovn-controller
 		Log.Info("OVN Controller has no nicMappings configured, forcing ready condition to true.")
 		if _, err := EnsureDeleted(ctx, helper, OVNController); err != nil {
-			return false, err
+			return false, conditions, err
 		}
 
 		// for minor updates, update the ovn controller images to the one from the version
 		instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
 		instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
 
-		return true, nil
+		return true, conditions, nil
 	}
 
 	ovnControllerSpec := &instance.Spec.Ovn.Template.OVNController
@@ -365,9 +412,13 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 	// preserve any previously set TLS certs, set CA cert
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "ovncontroller", Namespace: instance.Namespace}, OVNController); err != nil {
 		if !k8s_errors.IsNotFound(err) {
-			return false, err
+			return false, conditions, err
 		}
 	}
+	// Add the conditions to the list of conditions to consider later for mirroring
+	// It doesn't matter if the conditions are already in the list, they will be
+	// deduplicated later during a MirrorSubResourceCondition call.
+	conditions = append(conditions, OVNController.Status.Conditions...)
 	if instance.Spec.TLS.PodLevel.Enabled {
 		dnsSuffix := clusterdns.GetDNSClusterDomain()
 		ovnControllerSpec.TLS = OVNController.Spec.TLS
@@ -402,9 +453,9 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 			certRequest,
 			nil)
 		if err != nil {
-			return false, err
+			return false, conditions, err
 		} else if (ctrlResult != ctrl.Result{}) {
-			return false, nil
+			return false, conditions, nil
 		}
 
 		ovnControllerSpec.TLS.SecretName = &certSecret.Name
@@ -447,7 +498,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 			corev1beta1.OpenStackControlPlaneOVNReadyErrorMessage,
 			err.Error()))
 		Log.Error(err, "Failed to reconcile OVNController")
-		return false, err
+		return false, conditions, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("OVNController %s - %s", OVNController.Name, op))
@@ -458,9 +509,9 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
 		instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
 		instance.Status.ContainerImages.OpenstackNetworkExporterImage = version.Status.ContainerImages.OpenstackNetworkExporterImage
-		return true, nil
+		return true, conditions, nil
 	} else {
-		return false, nil
+		return false, conditions, nil
 	}
 }
 

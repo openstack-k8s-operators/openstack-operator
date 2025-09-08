@@ -11,8 +11,9 @@ metadata:
     features.operators.openshift.io/token-auth-aws: "false"
     features.operators.openshift.io/token-auth-azure: "false"
     features.operators.openshift.io/token-auth-gcp: "false"
-    operators.openshift.io/valid-subscription: '["OpenShift Container Platform", "OpenShift Platform Plus"]'
     operatorframework.io/suggested-namespace: openstack-operators
+    operators.openshift.io/valid-subscription: '["OpenShift Container Platform", "OpenShift
+      Platform Plus"]'
     operators.operatorframework.io/builder: operator-sdk-v1.31.0
     operators.operatorframework.io/internal-objects: '["openstackclients.client.openstack.org","openstackdataplaneservices.dataplane.openstack.org"]'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
