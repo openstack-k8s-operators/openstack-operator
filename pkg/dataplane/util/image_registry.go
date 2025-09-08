@@ -1,4 +1,4 @@
-package util
+package util //nolint:revive // util is an acceptable package name in this context
 
 import (
 	"context"

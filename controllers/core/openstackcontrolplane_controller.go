@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package core contains the OpenStackControlPlane controller implementation
 package core
 
 import (
@@ -32,7 +34,6 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1 "k8s.io/api/core/v1"
 
@@ -131,7 +132,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	Log := r.GetLogger(ctx)
 	// Fetch the OpenStackControlPlane instance
 	instance := &corev1beta1.OpenStackControlPlane{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -777,7 +778,7 @@ func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context,
 // Verify the referenced topology exists
 func (r *OpenStackControlPlaneReconciler) checkTopologyRef(
 	ctx context.Context,
-	h *helper.Helper,
+	h *common_helper.Helper,
 	topologyRef *topologyv1.TopoRef,
 	namespace string,
 ) error {
