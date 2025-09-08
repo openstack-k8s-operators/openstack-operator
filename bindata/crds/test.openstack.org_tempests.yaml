@@ -1221,6 +1221,19 @@ spec:
                   needed for certain test-operator functionalities to work properly (e.g.:
                   extraRPMs in Tempest CR, or certain set of tobiko tests).
                 type: boolean
+              rerunFailedTests:
+                default: false
+                description: |-
+                  Activate tempest re-run feature. When activated, tempest will perform
+                  another run of the tests that failed during the first execution.
+                type: boolean
+              rerunOverrideStatus:
+                default: false
+                description: |-
+                  Allow override of exit status with the tempest re-run feature.
+                  When activated, the original return value of the tempest run will be
+                  overridden with a result of the tempest run on the set of failed tests.
+                type: boolean
               resources:
                 default:
                   limits:
@@ -1617,6 +1630,13 @@ spec:
                       executed with --verbose
                     type: boolean
                 type: object
+              timingDataUrl:
+                description: |-
+                  An URL pointing to an archive that contains the saved stestr timing data.
+                  This data is used to optimize the tests order, which helps to reduce the
+                  total Tempest execution time.
+                format: uri
+                type: string
               tolerations:
                 description: |-
                   This value contains a toleration that is applied to pods spawned by the
@@ -1761,6 +1781,17 @@ spec:
                         This parameter is deemed insecure but it is needed for certain test-operator
                         functionalities to work properly (e.g.: extraRPMs in Tempest CR, or certain set
                         of tobiko tests).
+                      type: boolean
+                    rerunFailedTests:
+                      description: |-
+                        Activate tempest re-run feature. When activated, tempest will perform
+                        another run of the tests that failed during the first execution.
+                      type: boolean
+                    rerunOverrideStatus:
+                      description: |-
+                        Allow override of exit status with the tempest re-run feature.
+                        When activated, the original return value of the tempest run will be
+                        overridden with a result of the tempest run on the set of failed tests.
                       type: boolean
                     resources:
                       description: |-
@@ -2128,6 +2159,13 @@ spec:
                             be executed with --verbose
                           type: boolean
                       type: object
+                    timingDataUrl:
+                      description: |-
+                        An URL pointing to an archive that contains the saved stestr timing data.
+                        This data is used to optimize the tests order, which helps to reduce the
+                        total Tempest execution time.
+                      format: uri
+                      type: string
                     tolerations:
                       description: |-
                         This value contains a toleration that is applied to pods spawned by the
