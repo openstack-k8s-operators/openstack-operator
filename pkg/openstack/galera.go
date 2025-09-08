@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -98,6 +99,9 @@ func ReconcileGaleras(
 		instance.Spec.Galera.Templates = ptr.To(map[string]mariadbv1.GaleraSpecCore{})
 	}
 
+	// List of conditions to consider later for mirroring
+	conditions := condition.Conditions{}
+
 	for name, spec := range *instance.Spec.Galera.Templates {
 		hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 		hostnameHeadless := fmt.Sprintf("%s-galera.%s.svc", name, instance.Namespace)
@@ -151,7 +155,14 @@ func ReconcileGaleras(
 		spec.TLS.Ca.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 		spec.TLS.SecretName = ptr.To(certSecret.Name)
 
-		status, err := reconcileGalera(ctx, instance, version, helper, name, &spec)
+		status, galera, err := reconcileGalera(ctx, instance, version, helper, name, &spec)
+
+		// Add the conditions to the list of conditions to consider later for mirroring.
+		// It doesn't matter if the conditions are already in the list, they will be
+		// deduplicated later during the MirrorSubResourceCondition call.
+		if galera != nil && galera.Status.Conditions != nil {
+			conditions = append(conditions, galera.Status.Conditions...)
+		}
 
 		switch status {
 		case galeraFailed:
@@ -178,11 +189,22 @@ func ReconcileGaleras(
 
 	} else if len(inprogress) > 0 {
 		log.Info("Galera in progress")
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneMariaDBReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Galera resources into the instance
+		// under the condition of type OpenStackControlPlaneMariaDBReadyCondition, but only if the sub-resources
+		// currently have any conditions (which won't be true for the initial creation of the sub-resources, since
+		// they have not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(conditions) > 0 {
+			MirrorSubResourceCondition(conditions, corev1beta1.OpenStackControlPlaneMariaDBReadyCondition, instance, reflect.TypeOf(mariadbv1.Galera{}).Name())
+		} else {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneMariaDBReadyRunningMessage))
+		}
 	} else {
 		log.Info("Galera ready condition is true")
 		instance.Status.Conditions.MarkTrue(
@@ -213,7 +235,7 @@ func reconcileGalera(
 	helper *helper.Helper,
 	name string,
 	spec *mariadbv1.GaleraSpecCore,
-) (galeraStatus, error) {
+) (galeraStatus, *mariadbv1.Galera, error) {
 	galera := &mariadbv1.Galera{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -224,11 +246,11 @@ func reconcileGalera(
 
 	if !instance.Spec.Galera.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, galera); err != nil {
-			return galeraFailed, err
+			return galeraFailed, galera, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition)
 		instance.Status.ContainerImages.MariadbImage = nil
-		return galeraReady, nil
+		return galeraReady, galera, nil
 	}
 
 	if spec.NodeSelector == nil {
@@ -256,7 +278,7 @@ func reconcileGalera(
 	})
 
 	if err != nil {
-		return galeraFailed, err
+		return galeraFailed, galera, err
 	}
 	if op != controllerutil.OperationResultNone {
 		log.Info(fmt.Sprintf("Galera %s - %s", galera.Name, op))
@@ -264,10 +286,10 @@ func reconcileGalera(
 
 	if galera.Status.ObservedGeneration == galera.Generation && galera.IsReady() {
 		instance.Status.ContainerImages.MariadbImage = version.Status.ContainerImages.MariadbImage
-		return galeraReady, nil
+		return galeraReady, galera, nil
 	}
 
-	return galeraCreating, nil
+	return galeraCreating, galera, nil
 }
 
 // GaleraImageMatch - return true if the Galera images match on the ControlPlane and Version, or if Galera is not enabled

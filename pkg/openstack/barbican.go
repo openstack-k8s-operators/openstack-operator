@@ -156,18 +156,31 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		helper.GetLogger().Info(fmt.Sprintf("barbican %s - %s", barbican.Name, op))
 	}
 
-	if barbican.IsReady() {
+	if barbican.Status.ObservedGeneration == barbican.Generation && barbican.IsReady() {
+		helper.GetLogger().Info("Barbican ready condition is true")
+		instance.Status.ContainerImages.BarbicanAPIImage = version.Status.ContainerImages.BarbicanAPIImage
+		instance.Status.ContainerImages.BarbicanWorkerImage = version.Status.ContainerImages.BarbicanWorkerImage
+		instance.Status.ContainerImages.BarbicanKeystoneListenerImage = version.Status.ContainerImages.BarbicanKeystoneListenerImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneBarbicanReadyCondition, corev1beta1.OpenStackControlPlaneBarbicanReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneBarbicanReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneBarbicanReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Barbican resource into the instance
+		// under the condition of type OpenStackControlPlaneBarbicanReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(barbican.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(barbican.Status.Conditions, corev1beta1.OpenStackControlPlaneBarbicanReadyCondition, instance, barbican.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneBarbicanReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneBarbicanReadyRunningMessage))
+		}
 	}
-	instance.Status.ContainerImages.BarbicanAPIImage = version.Status.ContainerImages.BarbicanAPIImage
-	instance.Status.ContainerImages.BarbicanWorkerImage = version.Status.ContainerImages.BarbicanWorkerImage
-	instance.Status.ContainerImages.BarbicanKeystoneListenerImage = version.Status.ContainerImages.BarbicanKeystoneListenerImage
 
 	return ctrl.Result{}, nil
 }
