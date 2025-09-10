@@ -136,7 +136,7 @@ spec:
             replicas: 1
           hasAPIAccess: true
   heat:
-    enabled: false
+    enabled: true
     template:
       databaseInstance: openstack
       heatAPI:
