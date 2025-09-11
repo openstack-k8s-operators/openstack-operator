@@ -430,6 +430,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 
 		OVNController.Spec.OvnContainerImage = *version.Status.ContainerImages.OvnControllerImage
 		OVNController.Spec.OvsContainerImage = *version.Status.ContainerImages.OvnControllerOvsImage
+		OVNController.Spec.ExporterImage = *getImg(version.Status.ContainerImages.OpenstackNetworkExporterImage, &missingImageDefault)
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), OVNController, helper.GetScheme())
 		if err != nil {
@@ -456,6 +457,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		Log.Info("OVN Controller ready condition is true")
 		instance.Status.ContainerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
 		instance.Status.ContainerImages.OvnControllerOvsImage = version.Status.ContainerImages.OvnControllerOvsImage
+		instance.Status.ContainerImages.OpenstackNetworkExporterImage = version.Status.ContainerImages.OpenstackNetworkExporterImage
 		return true, nil
 	} else {
 		return false, nil
