@@ -11781,6 +11781,9 @@ spec:
                                 default: random
                                 type: string
                             type: object
+                          metricsEnabled:
+                            default: true
+                            type: boolean
                           networkAttachment:
                             type: string
                           nicMappings:
