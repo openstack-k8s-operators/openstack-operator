@@ -284,80 +284,79 @@ func stringPointersEqual(a, b *string) bool {
 // only enabled services are checked
 func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) (bool, []string) {
 	failedMatches := []string{}
-	if BarbicanImageMatch(ctx, controlPlane, version) {
+	if !BarbicanImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Barbican")
 	}
-	if CinderImageMatch(ctx, controlPlane, version) {
+	if !CinderImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Cinder")
 	}
-	if DesignateImageMatch(ctx, controlPlane, version) {
+	if !DesignateImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Designate")
 	}
-	if DnsmasqImageMatch(ctx, controlPlane, version) {
+	if !DnsmasqImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Dnsmasq")
 	}
-	if GaleraImageMatch(ctx, controlPlane, version) {
+	if !GaleraImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Galera")
 	}
-	if GlanceImageMatch(ctx, controlPlane, version) {
+	if !GlanceImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Glance")
 	}
-	if HeatImageMatch(ctx, controlPlane, version) {
+	if !HeatImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Heat")
 	}
-	if HorizonImageMatch(ctx, controlPlane, version) {
+	if !HorizonImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Horizon")
 	}
-	if IronicImageMatch(ctx, controlPlane, version) {
+	if !IronicImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Ironic")
 	}
-	if KeystoneImageMatch(ctx, controlPlane, version) {
+	if !KeystoneImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Keystone")
 	}
-	if ManilaImageMatch(ctx, controlPlane, version) {
+	if !ManilaImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Manila")
 	}
-	if MemcachedImageMatch(ctx, controlPlane, version) {
+	if !MemcachedImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Memcached")
 	}
-	if RedisImageMatch(ctx, controlPlane, version) {
+	if !RedisImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Redis")
 	}
-	if NeutronImageMatch(ctx, controlPlane, version) {
+	if !NeutronImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Neutron")
 	}
-	if NovaImageMatch(ctx, controlPlane, version) {
+	if !NovaImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Nova")
 	}
-	if OctaviaImageMatch(ctx, controlPlane, version) {
+	if !OctaviaImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Octavia")
 	}
-	if ClientImageMatch(ctx, controlPlane, version) {
+	if !ClientImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "OpenstackClient")
 	}
-	if OVNControllerImageMatch(ctx, controlPlane, version) {
+	if !OVNControllerImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "OVNController")
 	}
-	if OVNNorthImageMatch(ctx, controlPlane, version) {
+	if !OVNNorthImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "OVNNorth")
 	}
-	if OVNDbClusterImageMatch(ctx, controlPlane, version) {
+	if !OVNDbClusterImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "OVNDbCluster")
 	}
-	if PlacementImageMatch(ctx, controlPlane, version) {
+	if !PlacementImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Placement")
 	}
-	if RabbitmqImageMatch(ctx, controlPlane, version) {
+	if !RabbitmqImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Rabbitmq")
 	}
-	if SwiftImageMatch(ctx, controlPlane, version) {
+	if !SwiftImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Swift")
 	}
-	if TelemetryImageMatch(ctx, controlPlane, version) {
+	if !TelemetryImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Telemetry")
 	}
-
-	if WatcherImageMatch(ctx, controlPlane, version) {
+	if !WatcherImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Watcher")
 	}
 
