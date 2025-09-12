@@ -280,15 +280,17 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.InputReadyCondition,
-			condition.RequestedReason,
+			condition.ErrorReason,
 			condition.SeverityError,
 			err.Error())
 		return result, err
 	} else if (result != ctrl.Result{}) {
+		// Since the the private key secret should have been manually created by the user when provided in the spec,
+		// we treat this as a warning because it means that reconciliation will not be able to continue.
 		instance.Status.Conditions.MarkFalse(
 			condition.InputReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
+			condition.ErrorReason,
+			condition.SeverityWarning,
 			dataplanev1.InputReadyWaitingMessage,
 			"secret/"+ansibleSSHPrivateKeySecret)
 		return result, nil
@@ -424,8 +426,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			dataplanev1.NodeSetDeploymentReadyWaitingMessage)
 	}
 
@@ -437,8 +441,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	} else if isDeploymentRunning {
 		Log.Info("Deployment still running...", "instance", instance)
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
 	} else if isDeploymentFailed {
 		podsInterface := r.Kclient.CoreV1().Pods(instance.Namespace)
@@ -459,8 +465,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		if err != nil {
 			deployErrorMsg = err.Error()
 		}
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
 			deployErrorMsg)
 	}
 

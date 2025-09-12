@@ -354,18 +354,22 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			Log.Info("Minor update for Controlplane in progress")
 			return ctrl.Result{}, nil
 		}
+
 		// ctlplane is ready, lets make sure all images match newly deployed versions
 		ctlplaneImagesMatch, badMatches := openstack.ControlplaneContainerImageMatch(ctx, controlPlane, instance)
 		if !ctlplaneImagesMatch {
+			// Since we need the images to match and we cannot proceed without it,
+			// we treat this as a warning because it means that reconciliation will not be able to continue.
 			errMsgBadMatches := "Controlplane images do not match the target version for the following services: " + strings.Join(badMatches, ", ")
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackVersionMinorUpdateControlplane,
-				condition.RequestedReason,
-				condition.SeverityInfo,
+				condition.ErrorReason,
+				condition.SeverityWarning,
 				corev1beta1.OpenStackVersionMinorUpdateReadyErrorMessage,
 				errMsgBadMatches))
-
+			return ctrl.Result{}, nil
 		}
+
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateControlplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)

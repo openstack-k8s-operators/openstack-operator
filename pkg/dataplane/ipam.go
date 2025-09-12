@@ -195,14 +195,16 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			err.Error())
 		return dnsDetails, err
 	}
 	if dnsDetails.ClusterAddresses == nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		return dnsDetails, nil
 	}
@@ -213,7 +215,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage,
 			err.Error())
 		return dnsDetails, err
@@ -230,7 +233,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage,
 			err.Error())
 		return dnsDetails, err
@@ -239,7 +243,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		util.LogForObject(helper, "DNSData not ready yet waiting", instance)
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		return dnsDetails, nil
 	}
@@ -261,7 +266,8 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 		util.LogErrorForObject(helper, err, "Could not cleanup stale IP Reservations", instance)
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetIPReservationReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetIPReservationReadyErrorMessage,
 			err.Error())
 		return nil, nil, false, err
@@ -270,7 +276,8 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetIPReservationReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetIPReservationReadyErrorMessage,
 			err.Error())
 		return nil, netServiceNetMap, false, err
@@ -280,7 +287,8 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 		if s.Status.Conditions.IsFalse(condition.ReadyCondition) {
 			instance.Status.Conditions.MarkFalse(
 				dataplanev1.NodeSetIPReservationReadyCondition,
-				condition.RequestedReason, condition.SeverityInfo,
+				condition.RequestedReason,
+				condition.SeverityInfo,
 				dataplanev1.NodeSetIPReservationReadyWaitingMessage)
 			return nil, netServiceNetMap, false, nil
 		}
