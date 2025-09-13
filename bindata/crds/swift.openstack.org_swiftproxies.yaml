@@ -52,6 +52,12 @@ spec:
           spec:
             description: SwiftProxySpec defines the desired state of SwiftProxy
             properties:
+              apiTimeout:
+                default: 60
+                description: Default APITimeout for HAProxy and Apache, defaults to
+                  60 seconds
+                minimum: 1
+                type: integer
               ceilometerEnabled:
                 default: false
                 description: Enables ceilometer in the swift proxy and creates required
