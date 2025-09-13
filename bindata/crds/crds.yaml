@@ -13049,6 +13049,7 @@ spec:
                           enum:
                           - None
                           - Mirrored
+                          - Quorum
                           type: string
                         rabbitmq:
                           properties:
@@ -13465,6 +13466,10 @@ spec:
                         type: string
                       swiftProxy:
                         properties:
+                          apiTimeout:
+                            default: 60
+                            minimum: 1
+                            type: integer
                           ceilometerEnabled:
                             default: false
                             type: boolean
