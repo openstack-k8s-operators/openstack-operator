@@ -1469,6 +1469,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 					keystoneRoute := &routev1.Route{}
 
 					g.Expect(th.K8sClient.Get(th.Ctx, keystoneRouteName, keystoneRoute)).Should(Succeed())
+					g.Expect(keystoneRoute.Spec.TLS).Should(Not(BeNil()))
 					g.Expect(keystoneRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
 					g.Expect(keystoneRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
 					g.Expect(keystoneRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))
@@ -2087,6 +2088,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				watcherRoute := &routev1.Route{}
 
 				g.Expect(th.K8sClient.Get(th.Ctx, watcherRouteName, watcherRoute)).Should(Succeed())
+				g.Expect(watcherRoute.Spec.TLS).Should(Not(BeNil()))
 				g.Expect(watcherRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
 				g.Expect(watcherRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
 				g.Expect(watcherRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))
@@ -3787,6 +3789,7 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 					novncproxyRoute := &routev1.Route{}
 
 					g.Expect(th.K8sClient.Get(th.Ctx, novncproxyRouteName, novncproxyRoute)).Should(Succeed())
+					g.Expect(novncproxyRoute.Spec.TLS).Should(Not(BeNil()))
 					g.Expect(novncproxyRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
 					g.Expect(novncproxyRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
 					g.Expect(novncproxyRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))
