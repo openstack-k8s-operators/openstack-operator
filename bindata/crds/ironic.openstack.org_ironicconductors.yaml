@@ -84,7 +84,7 @@ spec:
               dhcpRanges:
                 description: DHCPRanges - List of DHCP ranges to use for provisioning
                 items:
-                  description: DHCPRange to define address range for DHCP requestes
+                  description: DHCPRange to define address range for DHCP requests
                   properties:
                     cidr:
                       description: Cidr - IP address prefix (CIDR) representing an
