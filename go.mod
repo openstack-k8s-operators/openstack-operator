@@ -128,3 +128,13 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202507112000
 
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag_n)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250717122149-12f70b7f3d8d //allow-merging
+
+replace github.com/openstack-k8s-operators/lib-common/modules/ansible => github.com/stuggi/lib-common/modules/ansible v0.0.0-20250916145703-2224c464ad15
+
+replace github.com/openstack-k8s-operators/lib-common/modules/certmanager => github.com/stuggi/lib-common/modules/certmanager v0.0.0-20250916145703-2224c464ad15
+
+replace github.com/openstack-k8s-operators/lib-common/modules/common => github.com/stuggi/lib-common/modules/common v0.0.0-20250916145703-2224c464ad15
+
+replace github.com/openstack-k8s-operators/lib-common/modules/storage => github.com/stuggi/lib-common/modules/storage v0.0.0-20250916145703-2224c464ad15
+
+replace github.com/openstack-k8s-operators/lib-common/modules/test => github.com/stuggi/lib-common/modules/test v0.0.0-20250916145703-2224c464ad15
