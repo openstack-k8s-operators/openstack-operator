@@ -261,10 +261,12 @@ func EnsureEndpointConfig(
 					_, err := validateSecret.ValidateCertSecret(ctx, helper, instance.GetNamespace())
 					if err != nil {
 						if k8s_errors.IsNotFound(err) {
+							// Since the CA cert secret should have been manually created by the user when provided in the spec,
+							// we treat this as a warning because it means that reconciliation will not be able to continue.
 							instance.Status.Conditions.Set(condition.FalseCondition(
 								corev1.OpenStackControlPlaneCustomTLSReadyCondition,
-								condition.RequestedReason,
-								condition.SeverityInfo,
+								condition.ErrorReason,
+								condition.SeverityWarning,
 								corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage,
 								ingressOverride.TLS.SecretName))
 							return endpoints, ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil

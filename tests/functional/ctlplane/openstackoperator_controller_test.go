@@ -1438,7 +1438,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
 					corev1.OpenStackControlPlaneCustomTLSReadyCondition,
 					k8s_corev1.ConditionFalse,
-					condition.RequestedReason,
+					condition.ErrorReason,
 					fmt.Sprintf(corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage, names.CustomServiceCertSecretName.Name),
 				)
 			})

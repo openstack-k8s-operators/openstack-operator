@@ -219,6 +219,8 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	_, configMapHash, err := configmap.GetConfigMapAndHashWithName(ctx, helper, *instance.Spec.OpenStackConfigMap, instance.Namespace)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
+			// Since the OpenStackConfigMap config map is usually automatically created by the Keystone operator,
+			// we treat this as an info (because the user is usually not responsible for manually creating it).
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				clientv1.OpenStackClientReadyCondition,
 				condition.RequestedReason,
@@ -239,6 +241,8 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	_, secretHash, err := secret.GetSecret(ctx, helper, *instance.Spec.OpenStackConfigSecret, instance.Namespace)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
+			// Since the OpenStackConfigSecret secret is usually automatically created by the Keystone operator,
+			// we treat this as an info (because the user is usually not responsible for manually creating it).
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				clientv1.OpenStackClientReadyCondition,
 				condition.RequestedReason,
@@ -267,10 +271,12 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		)
 		if err != nil {
 			if k8s_errors.IsNotFound(err) {
+				// Since the CA cert secret should have been manually created by the user when provided in the spec,
+				// we treat this as a warning because it means that reconciliation will not be able to continue.
 				instance.Status.Conditions.Set(condition.FalseCondition(
 					condition.TLSInputReadyCondition,
-					condition.RequestedReason,
-					condition.SeverityInfo,
+					condition.ErrorReason,
+					condition.SeverityWarning,
 					fmt.Sprintf(condition.TLSInputReadyWaitingMessage, instance.Spec.CaBundleSecretName)))
 				return ctrl.Result{}, nil
 			}
