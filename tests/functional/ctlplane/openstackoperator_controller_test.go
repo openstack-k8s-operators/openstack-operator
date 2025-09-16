@@ -1208,7 +1208,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				corev1.OpenStackControlPlaneCAReadyCondition,
 				k8s_corev1.ConditionFalse,
 				condition.ErrorReason,
-				"OpenStackControlPlane CAs issuer custom-issuer error occured Error getting issuer : Issuer.cert-manager.io \"custom-issuer\" not found",
+				"OpenStackControlPlane CAs issuer custom-issuer error occured error getting issuer : Issuer.cert-manager.io \"custom-issuer\" not found",
 			)
 		})
 
