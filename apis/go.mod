@@ -8,14 +8,14 @@ require (
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20250823115959-6ec5aeadb762
-	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250823121348-93eefd34cb8b
+	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20250915091500-cbfa0b6b5a3f
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20250904131012-30b7110b0524
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250901072146-2be6be08d902
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250903094154-45e4d9dd39a4
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250831203253-9d97a0b7a0c7
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250825154944-f18bd7894ed6
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250915130221-636b635428be
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250908082125-1e6f74ca0521
-	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250818150612-8a8731ecd811
+	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250915091459-b2e35a35d423
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250605082218-a58074898dd7
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20250605082218-a58074898dd7
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20250831210307-c7cc59b9eb47
