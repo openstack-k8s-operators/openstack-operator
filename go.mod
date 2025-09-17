@@ -85,7 +85,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20250730071847-837b07f8d72f // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20250823121217-7e1cd2e3dd03 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
@@ -129,12 +129,54 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202507112000
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag_n)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250717122149-12f70b7f3d8d //allow-merging
 
-replace github.com/openstack-k8s-operators/lib-common/modules/ansible => github.com/stuggi/lib-common/modules/ansible v0.0.0-20250916145703-2224c464ad15
+replace github.com/openstack-k8s-operators/lib-common/modules/ansible => github.com/stuggi/lib-common/modules/ansible v0.0.0-20250918095806-400ff56ee760
 
-replace github.com/openstack-k8s-operators/lib-common/modules/certmanager => github.com/stuggi/lib-common/modules/certmanager v0.0.0-20250916145703-2224c464ad15
+replace github.com/openstack-k8s-operators/lib-common/modules/certmanager => github.com/stuggi/lib-common/modules/certmanager v0.0.0-20250918095806-400ff56ee760
 
-replace github.com/openstack-k8s-operators/lib-common/modules/common => github.com/stuggi/lib-common/modules/common v0.0.0-20250916145703-2224c464ad15
+replace github.com/openstack-k8s-operators/lib-common/modules/common => github.com/stuggi/lib-common/modules/common v0.0.0-20250918095806-400ff56ee760
 
-replace github.com/openstack-k8s-operators/lib-common/modules/storage => github.com/stuggi/lib-common/modules/storage v0.0.0-20250916145703-2224c464ad15
+replace github.com/openstack-k8s-operators/lib-common/modules/storage => github.com/stuggi/lib-common/modules/storage v0.0.0-20250918095806-400ff56ee760
 
-replace github.com/openstack-k8s-operators/lib-common/modules/test => github.com/stuggi/lib-common/modules/test v0.0.0-20250916145703-2224c464ad15
+replace github.com/openstack-k8s-operators/lib-common/modules/test => github.com/stuggi/lib-common/modules/test v0.0.0-20250918095806-400ff56ee760
+
+replace github.com/openstack-k8s-operators/infra-operator/apis => github.com/stuggi/infra-operator/apis v0.0.0-20250918095554-2298cceef06a
+
+replace github.com/openstack-k8s-operators/barbican-operator/api => github.com/stuggi/barbican-operator/api v0.0.0-20250918100240-39f3a8c21609
+
+replace github.com/openstack-k8s-operators/cinder-operator/api => github.com/stuggi/cinder-operator/api v0.0.0-20250918100359-bc41f5fc93ed
+
+replace github.com/openstack-k8s-operators/designate-operator/api => github.com/stuggi/designate-operator/api v0.0.0-20250918100455-bf2fdf07f4c3
+
+replace github.com/openstack-k8s-operators/glance-operator/api => github.com/stuggi/glance-operator/api v0.0.0-20250918100643-5c97f1803da1
+
+replace github.com/openstack-k8s-operators/heat-operator/api => github.com/stuggi/heat-operator/api v0.0.0-20250918100758-3e4c16cdcf22
+
+replace github.com/openstack-k8s-operators/horizon-operator/api => github.com/stuggi/horizon-operator/api v0.0.0-20250918100949-bcdd72fcfb41
+
+replace github.com/openstack-k8s-operators/ironic-operator/api => github.com/stuggi/ironic-operator/api v0.0.0-20250918101046-eb265d897d7d
+
+replace github.com/openstack-k8s-operators/keystone-operator/api => github.com/stuggi/keystone-operator/api v0.0.0-20250917084552-a473df34e74b
+
+replace github.com/openstack-k8s-operators/manila-operator/api => github.com/stuggi/manila-operator/api v0.0.0-20250918102019-57671bb5392b
+
+replace github.com/openstack-k8s-operators/mariadb-operator/api => github.com/stuggi/mariadb-operator/api v0.0.0-20250918102129-090f75820941
+
+replace github.com/openstack-k8s-operators/neutron-operator/api => github.com/stuggi/neutron-operator/api v0.0.0-20250918102219-ce7db0516540
+
+replace github.com/openstack-k8s-operators/nova-operator/api => github.com/stuggi/nova-operator/api v0.0.0-20250917154738-a5a4162b3258
+
+replace github.com/openstack-k8s-operators/octavia-operator/api => github.com/stuggi/octavia-operator/api v0.0.0-20250918102343-bc444a304bec
+
+replace github.com/openstack-k8s-operators/openstack-baremetal-operator/api => github.com/stuggi/openstack-baremetal-operator/api v0.0.0-20250918102454-67279a28331d
+
+replace github.com/openstack-k8s-operators/ovn-operator/api => github.com/stuggi/ovn-operator/api v0.0.0-20250918102545-2d9afd51e6a9
+
+replace github.com/openstack-k8s-operators/placement-operator/api => github.com/stuggi/placement-operator/api v0.0.0-20250918102640-52a3d01e1e90
+
+replace github.com/openstack-k8s-operators/swift-operator/api => github.com/stuggi/swift-operator/api v0.0.0-20250918102739-4b9664bb86d4
+
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/stuggi/telemetry-operator/api v0.0.0-20250918102830-573cb8501bb8
+
+replace github.com/openstack-k8s-operators/test-operator/api => github.com/stuggi/test-operator/api v0.0.0-20250918102930-7c021be50525
+
+replace github.com/openstack-k8s-operators/watcher-operator/api => github.com/stuggi/watcher-operator/api v0.0.0-20250917155557-2c5c4ad90865

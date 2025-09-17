@@ -5,7 +5,7 @@ set -eo pipefail
 # If no DOCKERFILE is set the script just echo's a list of bundle dependencies to stout as a single common separated line. This
 # is suitable for use with OPM catalog/index creation
 DOCKERFILE=${DOCKERFILE:-""}
-IMAGENAMESPACE=${IMAGENAMESPACE:-"openstack-k8s-operators"}
+IMAGENAMESPACE=${IMAGENAMESPACE:-"mschuppe"}
 IMAGEREGISTRY=${IMAGEREGISTRY:-"quay.io"}
 IMAGEBASE=${IMAGEBASE:-}
 IMAGECUSTOMTAG=${IMAGECUSTOMTAG:-}
