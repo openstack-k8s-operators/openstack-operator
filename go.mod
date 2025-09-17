@@ -18,7 +18,7 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250901072146-2be6be08d902
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250903094154-45e4d9dd39a4
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250831203253-9d97a0b7a0c7
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250915130221-636b635428be
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250917183121-f2de869e4953
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250908082125-1e6f74ca0521
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250915091459-b2e35a35d423
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20250605082218-a58074898dd7
@@ -36,7 +36,7 @@ require (
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20250902045753-a1902b8c8c94
 	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20250823133647-0561698fe839
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250911121739-4bf9b6837dca
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250823134211-a2ff384028b8
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250917072533-191de3a70e25
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20250901125937-4aac6f709010
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/cluster-operator/v2 v2.11.0
