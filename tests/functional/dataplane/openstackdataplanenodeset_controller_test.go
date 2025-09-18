@@ -1491,4 +1491,309 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				ContainSubstring("edpm_podman_registries_conf"))
 		})
 	})
+
+	When("Testing deployment filtering logic", func() {
+		var secondDeploymentName types.NamespacedName
+		var thirdDeploymentName types.NamespacedName
+
+		BeforeEach(func() {
+			secondDeploymentName = types.NamespacedName{
+				Name:      "edpm-deployment-2",
+				Namespace: namespace,
+			}
+			thirdDeploymentName = types.NamespacedName{
+				Name:      "edpm-deployment-3",
+				Namespace: namespace,
+			}
+		})
+
+		When("Multiple deployments exist with ServicesOverride", func() {
+			BeforeEach(func() {
+				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+				nodeSetSpec["preProvisioned"] = true
+				nodeSetSpec["services"] = []string{"bootstrap"}
+
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+
+				// Create deployment without ServicesOverride
+				normalDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, normalDeploymentSpec))
+
+				// Create deployment with ServicesOverride
+				overrideDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				overrideDeploymentSpec["servicesOverride"] = []string{"bootstrap", "configure-network"}
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, overrideDeploymentSpec))
+
+				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+			})
+
+			It("Should show all deployments in status with ServicesOverride latest", func() {
+				// Complete the normal deployment
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Succeeded = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Both deployments should be in status (for visibility)
+				// But only latest deployment affects overall nodeset state
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
+				}, th.Timeout, th.Interval).Should(Succeed())
+			})
+		})
+
+		When("Latest deployment has ServicesOverride", func() {
+			BeforeEach(func() {
+				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+				nodeSetSpec["preProvisioned"] = true
+				nodeSetSpec["services"] = []string{"bootstrap"}
+
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+
+				// Create first deployment (normal)
+				firstDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, firstDeploymentSpec))
+
+				// Create second deployment with ServicesOverride (latest)
+				overrideDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				overrideDeploymentSpec["servicesOverride"] = []string{"bootstrap"}
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, overrideDeploymentSpec))
+
+				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+			})
+
+			It("Should show all deployments in status but only latest affects overall state", func() {
+				// Complete the first deployment
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Succeeded = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Both deployments should be included (for visibility)
+				// But only latest deployment affects overall nodeset state
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
+				}, th.Timeout, th.Interval).Should(Succeed())
+			})
+		})
+
+		When("Running deployments exist with completed deployment", func() {
+			BeforeEach(func() {
+				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+				nodeSetSpec["preProvisioned"] = true
+				nodeSetSpec["services"] = []string{"bootstrap"}
+
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+
+				// Create first deployment (will complete)
+				firstDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, firstDeploymentSpec))
+
+				// Create second deployment (will be running)
+				secondDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, secondDeploymentSpec))
+
+				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+			})
+
+			It("Should show all deployments in status with running deployments", func() {
+				// Complete the first deployment
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Succeeded = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Leave second deployment running (don't complete it)
+				// Both deployments should be in status (for visibility)
+				// Second deployment affects overall state (running and latest)
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					// Should have first deployment (for visibility)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
+					// Should have second deployment (running and latest)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
+				}, th.Timeout, th.Interval).Should(Succeed())
+			})
+		})
+
+		When("Multiple deployments exist with different error states", func() {
+			BeforeEach(func() {
+				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+				nodeSetSpec["preProvisioned"] = true
+				nodeSetSpec["services"] = []string{"bootstrap"}
+
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+
+				// Create first deployment (will be older)
+				firstDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, firstDeploymentSpec))
+
+				// Create second deployment (will be newer)
+				secondDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, secondDeploymentSpec))
+
+				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+			})
+
+			It("Should show all deployments in status but only latest error affects state", func() {
+				// Simulate first deployment (older) failure
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Failed = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Simulate second deployment (newer) failure
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "bootstrap-" + secondDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Failed = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Both error deployments should be in status (for visibility)
+				// But only latest error affects overall nodeset state
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					// Should have first deployment (for visibility)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
+					// Should have second deployment (latest - affects overall state)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// The overall deployment condition should be false due to the latest error
+				th.ExpectCondition(
+					dataplaneNodeSetName,
+					ConditionGetterFunc(DataplaneConditionGetter),
+					condition.DeploymentReadyCondition,
+					corev1.ConditionFalse,
+				)
+			})
+		})
+
+		When("Mixed deployment states exist", func() {
+			BeforeEach(func() {
+				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+				nodeSetSpec["preProvisioned"] = true
+				nodeSetSpec["services"] = []string{"bootstrap"}
+
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+
+				// Create first deployment (will have error - should be ignored)
+				firstDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, firstDeploymentSpec))
+
+				// Create second deployment with ServicesOverride (should be ignored)
+				overrideDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				overrideDeploymentSpec["servicesOverride"] = []string{"bootstrap"}
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, overrideDeploymentSpec))
+
+				// Create third deployment (will succeed - should be processed)
+				thirdDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(thirdDeploymentName, thirdDeploymentSpec))
+
+				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+			})
+
+			It("Should show all deployments in status but only latest affects overall state", func() {
+				// Fail the first deployment
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Failed = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Complete the third deployment
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "bootstrap-" + thirdDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Succeeded = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// All deployments should be in status (for visibility)
+				// But only latest deployment affects overall nodeset state
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					// Should have first deployment (for visibility)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
+					// Should have second deployment (for visibility)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
+					// Should have third deployment (latest - affects overall state)
+					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(thirdDeploymentName.Name))
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// The overall deployment condition should be true from the successful deployment
+				th.ExpectCondition(
+					dataplaneNodeSetName,
+					ConditionGetterFunc(DataplaneConditionGetter),
+					condition.DeploymentReadyCondition,
+					corev1.ConditionTrue,
+				)
+			})
+		})
+	})
 })
