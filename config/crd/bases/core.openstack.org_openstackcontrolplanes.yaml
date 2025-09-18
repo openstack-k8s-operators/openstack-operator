@@ -11858,6 +11858,9 @@ spec:
                             logLevel:
                               default: info
                               type: string
+                            metricsEnabled:
+                              default: true
+                              type: boolean
                             networkAttachment:
                               type: string
                             nodeSelector:
