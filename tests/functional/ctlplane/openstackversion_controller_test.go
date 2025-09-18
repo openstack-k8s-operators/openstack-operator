@@ -409,6 +409,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(osversion.Generation).Should(Equal(osversion.Status.ObservedGeneration))
 
 				g.Expect(osversion.Status.DeployedVersion).Should(Equal(&initialVersion))
+				// Should not have OpenStackVersionAtLatestKnown
+				g.Expect(osversion.Status.Conditions.Has(corev1.OpenStackVersionAtLatestKnown)).To(BeFalse())
 
 			}, timeout, interval).Should(Succeed())
 
@@ -670,15 +672,24 @@ var _ = Describe("OpenStackOperator controller", func() {
 				osversion := GetOpenStackVersion(names.OpenStackVersionName)
 				g.Expect(osversion).Should(Not(BeNil()))
 				g.Expect(osversion.OwnerReferences).Should(HaveLen(1))
+				// The `AtLatestKnown` condition is True and MinorUpdateAvailable is not set
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionAtLatestKnown,
+					k8s_corev1.ConditionTrue,
+				)
+				g.Expect(osversion.Status.Conditions.Has(corev1.OpenStackVersionMinorUpdateAvailable)).To(BeFalse())
+				g.Expect(osversion.Status.DeployedVersion).Should(Equal(&updatedVersion)) // we're done here
+
+				// Make sure the Ready condition is True, e.g. all conditions are True.
 				th.ExpectCondition(
 					names.OpenStackVersionName,
 					ConditionGetterFunc(OpenStackVersionConditionGetter),
 					condition.ReadyCondition,
 					k8s_corev1.ConditionTrue,
 				)
-				g.Expect(osversion.Status.DeployedVersion).Should(Equal(&updatedVersion)) // we're done here
-				// no condition which reflects an update is available
-				g.Expect(osversion.Status.Conditions.Has(corev1.OpenStackVersionMinorUpdateAvailable)).To(BeFalse())
+
 			}, timeout, interval).Should(Succeed())
 
 		})
