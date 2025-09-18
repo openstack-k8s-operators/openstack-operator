@@ -489,95 +489,115 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
 	}
 
-	// Sort deployments from oldest to newest by the LastTransitionTime of
-	// their DeploymentReadyCondition
-	slices.SortFunc(deployments.Items, func(a, b dataplanev1.OpenStackDataPlaneDeployment) int {
-		aReady := a.Status.Conditions.Get(condition.DeploymentReadyCondition)
-		bReady := b.Status.Conditions.Get(condition.DeploymentReadyCondition)
-		if aReady != nil && bReady != nil {
-			if aReady.LastTransitionTime.Before(&bReady.LastTransitionTime) {
-				return -1
-			}
-		}
-		return 1
-	})
-
-	for _, deployment := range deployments.Items {
+	// Collect deployments that target this nodeset (excluding deleted ones)
+	var relevantDeployments []*dataplanev1.OpenStackDataPlaneDeployment
+	for i := range deployments.Items {
+		deployment := &deployments.Items[i]
 		if !deployment.DeletionTimestamp.IsZero() {
 			continue
 		}
-		if slices.Contains(
-			deployment.Spec.NodeSets, instance.Name) {
+		if slices.Contains(deployment.Spec.NodeSets, instance.Name) {
+			relevantDeployments = append(relevantDeployments, deployment)
+		}
+	}
 
-			// Reset the vars for every deployment
-			isDeploymentReady = false
-			isDeploymentRunning = false
-			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
-			if instance.Status.DeploymentStatuses == nil {
-				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
+	// Sort relevant deployments from oldest to newest, then take the last one
+	var latestRelevantDeployment *dataplanev1.OpenStackDataPlaneDeployment
+	if len(relevantDeployments) > 0 {
+		slices.SortFunc(relevantDeployments, func(a, b *dataplanev1.OpenStackDataPlaneDeployment) int {
+			aReady := a.Status.Conditions.Get(condition.DeploymentReadyCondition)
+			bReady := b.Status.Conditions.Get(condition.DeploymentReadyCondition)
+			if aReady != nil && bReady != nil {
+				if aReady.LastTransitionTime.Before(&bReady.LastTransitionTime) {
+					return -1
+				}
 			}
-			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
-			deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
-			if condition.IsError(deploymentCondition) {
-				err = fmt.Errorf("%s", deploymentCondition.Message)
-				isDeploymentFailed = true
-				failedDeploymentName = deployment.Name
-				break
-			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
-				isDeploymentRunning = true
-			} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
-				// If the nodeset configHash does not match with what's in the deployment or
-				// deployedBmhHash is different from current bmhRefHash.
-				if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
-					(!instance.Spec.PreProvisioned &&
-						deployment.Status.BmhRefHashes[instance.Name] != instance.Status.BmhRefHash) {
+			return 1
+		})
+		latestRelevantDeployment = relevantDeployments[len(relevantDeployments)-1]
+	}
+
+	for _, deployment := range relevantDeployments {
+		// Always add to DeploymentStatuses (for visibility)
+		deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
+		if instance.Status.DeploymentStatuses == nil {
+			instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
+		}
+		instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
+
+		// Apply filtering for overall nodeset deployment state logic
+		isLatestDeployment := latestRelevantDeployment != nil && deployment.Name == latestRelevantDeployment.Name
+		deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+		isRunningDeployment := deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) && !condition.IsError(deploymentCondition)
+
+		// Skip processing for overall nodeset state if not running AND not latest
+		// (This handles both completed and failed deployments that aren't the latest)
+		if !isRunningDeployment && !isLatestDeployment {
+			continue
+		}
+
+		// Reset the vars for every deployment that affects overall state
+		isDeploymentReady = false
+		isDeploymentRunning = false
+		if condition.IsError(deploymentCondition) {
+			err = fmt.Errorf("%s", deploymentCondition.Message)
+			isDeploymentFailed = true
+			failedDeploymentName = deployment.Name
+			break
+		} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
+			isDeploymentRunning = true
+		} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
+			// If the nodeset configHash does not match with what's in the deployment or
+			// deployedBmhHash is different from current bmhRefHash.
+			if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
+				(!instance.Spec.PreProvisioned &&
+					deployment.Status.BmhRefHashes[instance.Name] != instance.Status.BmhRefHash) {
+				continue
+			}
+			isDeploymentReady = true
+			for k, v := range deployment.Status.ConfigMapHashes {
+				instance.Status.ConfigMapHashes[k] = v
+			}
+			for k, v := range deployment.Status.SecretHashes {
+				instance.Status.SecretHashes[k] = v
+			}
+			for k, v := range deployment.Status.ContainerImages {
+				instance.Status.ContainerImages[k] = v
+			}
+			instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
+
+			// Get list of services by name, either from ServicesOverride or
+			// the NodeSet.
+			var services []string
+			if len(deployment.Spec.ServicesOverride) != 0 {
+				services = deployment.Spec.ServicesOverride
+			} else {
+				services = instance.Spec.Services
+			}
+
+			// For each service, check if EDPMServiceType is "update" or "update-services", and
+			// if so, copy Deployment.Status.DeployedVersion to
+			// NodeSet.Status.DeployedVersion
+			for _, serviceName := range services {
+				service := &dataplanev1.OpenStackDataPlaneService{}
+				name := types.NamespacedName{
+					Namespace: instance.Namespace,
+					Name:      serviceName,
+				}
+				err := helper.GetClient().Get(ctx, name, service)
+				if err != nil {
+					helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
+					return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
+				}
+
+				if service.Spec.EDPMServiceType != "update" && service.Spec.EDPMServiceType != "update-services" {
 					continue
 				}
-				isDeploymentReady = true
-				for k, v := range deployment.Status.ConfigMapHashes {
-					instance.Status.ConfigMapHashes[k] = v
-				}
-				for k, v := range deployment.Status.SecretHashes {
-					instance.Status.SecretHashes[k] = v
-				}
-				for k, v := range deployment.Status.ContainerImages {
-					instance.Status.ContainerImages[k] = v
-				}
-				instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
 
-				// Get list of services by name, either from ServicesOverride or
-				// the NodeSet.
-				var services []string
-				if len(deployment.Spec.ServicesOverride) != 0 {
-					services = deployment.Spec.ServicesOverride
-				} else {
-					services = instance.Spec.Services
-				}
-
-				// For each service, check if EDPMServiceType is "update" or "update-services", and
-				// if so, copy Deployment.Status.DeployedVersion to
-				// NodeSet.Status.DeployedVersion
-				for _, serviceName := range services {
-					service := &dataplanev1.OpenStackDataPlaneService{}
-					name := types.NamespacedName{
-						Namespace: instance.Namespace,
-						Name:      serviceName,
-					}
-					err := helper.GetClient().Get(ctx, name, service)
-					if err != nil {
-						helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
-						return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
-					}
-
-					if service.Spec.EDPMServiceType != "update" && service.Spec.EDPMServiceType != "update-services" {
-						continue
-					}
-
-					// An "update" or "update-services" service Deployment has been completed, so
-					// set the NodeSet's DeployedVersion to the Deployment's
-					// DeployedVersion.
-					instance.Status.DeployedVersion = deployment.Status.DeployedVersion
-				}
+				// An "update" or "update-services" service Deployment has been completed, so
+				// set the NodeSet's DeployedVersion to the Deployment's
+				// DeployedVersion.
+				instance.Status.DeployedVersion = deployment.Status.DeployedVersion
 			}
 		}
 	}
