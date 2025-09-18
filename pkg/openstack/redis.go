@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -74,6 +75,9 @@ func ReconcileRedis(
 		instance.Spec.Redis.Templates = ptr.To(map[string]redisv1.RedisSpecCore{})
 	}
 
+	// List of conditions to consider later for mirroring
+	conditions := condition.Conditions{}
+
 	for _, redis := range redises.Items {
 		for _, ref := range redis.GetOwnerReferences() {
 			// Check owner UID to ensure the redis instance is owned by this OpenStackControlPlane instance
@@ -111,7 +115,16 @@ func ReconcileRedis(
 	var status redisStatus
 
 	for name, spec := range *instance.Spec.Redis.Templates {
-		status, ctrlResult, err = reconcileRedis(ctx, instance, version, helper, name, &spec)
+		var redis *redisv1.Redis
+
+		status, redis, ctrlResult, err = reconcileRedis(ctx, instance, version, helper, name, &spec)
+
+		// Add the conditions to the list of conditions to consider later for mirroring.
+		// It doesn't matter if the conditions are already in the list, they will be
+		// deduplicated later during the MirrorSubResourceCondition call.
+		if redis != nil && redis.Status.Conditions != nil {
+			conditions = append(conditions, redis.Status.Conditions...)
+		}
 
 		switch status {
 		case redisFailed:
@@ -137,11 +150,22 @@ func ReconcileRedis(
 		return ctrlResult, fmt.Errorf(errors)
 
 	} else if len(inprogress) > 0 {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneRedisReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneRedisReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Redis resources into the instance
+		// under the condition of type OpenStackControlPlaneRedisReadyCondition, but only if the sub-resources
+		// currently have any conditions (which won't be true for the initial creation of the sub-resources, since
+		// they have not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(conditions) > 0 {
+			MirrorSubResourceCondition(conditions, corev1beta1.OpenStackControlPlaneRedisReadyCondition, instance, reflect.TypeOf(redisv1.Redis{}).Name())
+		} else {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneRedisReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneRedisReadyRunningMessage))
+		}
 	} else if !instance.Spec.Redis.Enabled {
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneRedisReadyCondition)
 	} else {
@@ -162,7 +186,7 @@ func reconcileRedis(
 	helper *helper.Helper,
 	name string,
 	spec *redisv1.RedisSpecCore,
-) (redisStatus, ctrl.Result, error) {
+) (redisStatus, *redisv1.Redis, ctrl.Result, error) {
 	redis := &redisv1.Redis{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -172,9 +196,9 @@ func reconcileRedis(
 
 	if !instance.Spec.Redis.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, redis); err != nil {
-			return redisFailed, ctrl.Result{}, err
+			return redisFailed, redis, ctrl.Result{}, err
 		}
-		return redisReady, ctrl.Result{}, nil
+		return redisReady, redis, ctrl.Result{}, nil
 	}
 
 	helper.GetLogger().Info("Reconciling Redis", "Redis.Namespace", instance.Namespace, "Redis.Name", name)
@@ -213,9 +237,9 @@ func reconcileRedis(
 			certRequest,
 			nil)
 		if err != nil {
-			return redisFailed, ctrlResult, err
+			return redisFailed, redis, ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
-			return redisCreating, ctrlResult, nil
+			return redisCreating, redis, ctrlResult, nil
 		}
 
 		tlsCert = certSecret.Name
@@ -251,7 +275,7 @@ func reconcileRedis(
 	})
 
 	if err != nil {
-		return redisFailed, ctrl.Result{}, err
+		return redisFailed, redis, ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		helper.GetLogger().Info(fmt.Sprintf("Redis %s - %s", redis.Name, op))
@@ -259,10 +283,10 @@ func reconcileRedis(
 
 	if redis.IsReady() { //FIXME ObserverdGeneration
 		instance.Status.ContainerImages.InfraRedisImage = version.Status.ContainerImages.InfraRedisImage
-		return redisReady, ctrl.Result{}, nil
+		return redisReady, redis, ctrl.Result{}, nil
 	}
 
-	return redisCreating, ctrl.Result{}, nil
+	return redisCreating, redis, ctrl.Result{}, nil
 }
 
 // RedisImageMatch - return true if the redis images match on the ControlPlane and Version, or if Redis is not enabled

@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -39,6 +40,7 @@ func ReconcileMemcacheds(
 ) (ctrl.Result, error) {
 	var failures = []string{}
 	var inprogress = []string{}
+	var conditions = condition.Conditions{}
 
 	// We first remove memcacheds no longer owned
 	memcacheds := &memcachedv1.MemcachedList{}
@@ -96,7 +98,16 @@ func ReconcileMemcacheds(
 	var err error
 	var status memcachedStatus
 	for name, spec := range *instance.Spec.Memcached.Templates {
-		status, ctrlResult, err = reconcileMemcached(ctx, instance, version, helper, name, &spec)
+		var memcached *memcachedv1.Memcached
+
+		status, memcached, ctrlResult, err = reconcileMemcached(ctx, instance, version, helper, name, &spec)
+
+		// Add the conditions to the list of conditions to consider later for mirroring.
+		// It doesn't matter if the conditions are already in the list, they will be
+		// deduplicated later during the MirrorSubResourceCondition call.
+		if memcached != nil && memcached.Status.Conditions != nil {
+			conditions = append(conditions, memcached.Status.Conditions...)
+		}
 
 		switch status {
 		case memcachedFailed:
@@ -122,11 +133,22 @@ func ReconcileMemcacheds(
 		return ctrlResult, fmt.Errorf(errors)
 
 	} else if len(inprogress) > 0 {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneMemcachedReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneMemcachedReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Memcached resources into the instance
+		// under the condition of type OpenStackControlPlaneMemcachedReadyCondition, but only if the sub-resources
+		// currently have any conditions (which won't be true for the initial creation of the sub-resources, since
+		// they have not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(conditions) > 0 {
+			MirrorSubResourceCondition(conditions, corev1beta1.OpenStackControlPlaneMemcachedReadyCondition, instance, reflect.TypeOf(memcachedv1.Memcached{}).Name())
+		} else {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneMemcachedReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneMemcachedReadyRunningMessage))
+		}
 	} else {
 		Log.Info("Memcached ready condition is true")
 		instance.Status.Conditions.MarkTrue(
@@ -146,7 +168,7 @@ func reconcileMemcached(
 	helper *helper.Helper,
 	name string,
 	spec *memcachedv1.MemcachedSpecCore,
-) (memcachedStatus, ctrl.Result, error) {
+) (memcachedStatus, *memcachedv1.Memcached, ctrl.Result, error) {
 	memcached := &memcachedv1.Memcached{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -158,11 +180,11 @@ func reconcileMemcached(
 
 	if !instance.Spec.Memcached.Enabled {
 		if _, err := EnsureDeleted(ctx, helper, memcached); err != nil {
-			return memcachedFailed, ctrl.Result{}, err
+			return memcachedFailed, memcached, ctrl.Result{}, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneMemcachedReadyCondition)
 		instance.Status.ContainerImages.InfraMemcachedImage = nil
-		return memcachedReady, ctrl.Result{}, nil
+		return memcachedReady, memcached, ctrl.Result{}, nil
 	}
 
 	Log.Info("Reconciling Memcached", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
@@ -195,9 +217,9 @@ func reconcileMemcached(
 			certRequest,
 			nil)
 		if err != nil {
-			return memcachedFailed, ctrlResult, err
+			return memcachedFailed, memcached, ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
-			return memcachedCreating, ctrlResult, nil
+			return memcachedCreating, memcached, ctrlResult, nil
 		}
 
 		tlsCert = certSecret.Name
@@ -232,9 +254,9 @@ func reconcileMemcached(
 				certRequest,
 				nil)
 			if err != nil {
-				return memcachedFailed, ctrlResult, err
+				return memcachedFailed, memcached, ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {
-				return memcachedCreating, ctrlResult, nil
+				return memcachedCreating, memcached, ctrlResult, nil
 			}
 
 			mtlsCert = certSecret.Name
@@ -273,7 +295,7 @@ func reconcileMemcached(
 	})
 
 	if err != nil {
-		return memcachedFailed, ctrl.Result{}, err
+		return memcachedFailed, memcached, ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
 		Log.Info(fmt.Sprintf("Memcached %s - %s", memcached.Name, op))
@@ -281,10 +303,10 @@ func reconcileMemcached(
 
 	if memcached.Status.ObservedGeneration == memcached.Generation && memcached.IsReady() {
 		instance.Status.ContainerImages.InfraMemcachedImage = version.Status.ContainerImages.InfraMemcachedImage
-		return memcachedReady, ctrl.Result{}, nil
+		return memcachedReady, memcached, ctrl.Result{}, nil
 	}
 
-	return memcachedCreating, ctrl.Result{}, nil
+	return memcachedCreating, memcached, ctrl.Result{}, nil
 }
 
 // MemcachedImageMatch - return true if the memcached images match on the ControlPlane and Version, or if Memcached is not enabled

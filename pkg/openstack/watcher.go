@@ -151,16 +151,29 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 
 	if watcher.Status.ObservedGeneration == watcher.Generation && watcher.IsReady() {
+		helper.GetLogger().Info("Watcher ready condition is true")
 		instance.Status.ContainerImages.WatcherAPIImage = version.Status.ContainerImages.WatcherAPIImage
 		instance.Status.ContainerImages.WatcherApplierImage = version.Status.ContainerImages.WatcherApplierImage
 		instance.Status.ContainerImages.WatcherDecisionEngineImage = version.Status.ContainerImages.WatcherApplierImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneWatcherReadyCondition, corev1beta1.OpenStackControlPlaneWatcherReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneWatcherReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneWatcherReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Watcher resource into the instance
+		// under the condition of type OpenStackControlPlaneWatcherReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(watcher.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(watcher.Status.Conditions, corev1beta1.OpenStackControlPlaneWatcherReadyCondition, instance, watcher.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneWatcherReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneWatcherReadyRunningMessage))
+		}
 	}
 
 	return ctrl.Result{}, nil

@@ -915,3 +915,21 @@ func DeleteCertsAndRoutes(
 
 	return ctrl.Result{}, nil
 }
+
+// MirrorSubResourceCondition -
+//  1. Mirrors the condition of the highest priority from subResource to the instance,
+//     placing it in the condition of type targetCondition of the instance
+//  2. If passed, prepends the kind of the subResource to the message associated with the
+//     condition, which, while perhaps redundant for the targetCondition, will help provide
+//     clarity in the case that the targetCondition ends up being the highest priority
+//     condition in the OpenStackControlPlane (and thus appears in the
+//     OpenStackControlPlane's "Ready" condition at the end of the reconciliation loop)
+func MirrorSubResourceCondition(conditions condition.Conditions, targetCondition condition.Type, instance *corev1beta1.OpenStackControlPlane, subResource string) {
+	myCondition := conditions.Mirror(targetCondition)
+	if subResource != "" {
+		// Prepend the kind of the subResource to the message associated with the condition
+		// if one was passed
+		myCondition.Message = fmt.Sprintf("%s: %s", subResource, myCondition.Message)
+	}
+	instance.Status.Conditions.Set(myCondition)
+}
