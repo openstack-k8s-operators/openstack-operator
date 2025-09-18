@@ -10,6 +10,7 @@ rules:
   - configmaps
   - namespaces
   - serviceaccounts
+  - services
   verbs:
   - '*'
 - apiGroups:
@@ -41,17 +42,6 @@ rules:
   - cert-manager.io
   resources:
   - certificates
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cert-manager.io
-  resources:
   - issuers
   verbs:
   - create
@@ -61,12 +51,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - '*'
 - apiGroups:
   - discovery.k8s.io
   resources:

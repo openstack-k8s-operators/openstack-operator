@@ -225,7 +225,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 					Spec: &alertmanagerSvc,
 				},
 			}
-			ed.Route.Create = alertmanagerSvc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "true"
+			ed.Route.Create = alertmanagerSvc.Annotations[service.AnnotationIngressCreateKey] == "true"
 			ed.Route.TLS.Enabled = false
 			if instance.Spec.Telemetry.AlertmanagerOverride.Route != nil {
 				ed.Route.OverrideSpec = *instance.Spec.Telemetry.AlertmanagerOverride.Route
@@ -332,10 +332,10 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.NotificationImage = *version.Status.ContainerImages.CeilometerNotificationImage
 		telemetry.Spec.Ceilometer.SgCoreImage = *version.Status.ContainerImages.CeilometerSgcoreImage
 		telemetry.Spec.Ceilometer.ProxyImage = *version.Status.ContainerImages.CeilometerProxyImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
+		telemetry.Spec.Autoscaling.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
+		telemetry.Spec.Autoscaling.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
+		telemetry.Spec.Autoscaling.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
+		telemetry.Spec.Autoscaling.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
 
 		telemetry.Spec.Ceilometer.KSMImage = *getImg(version.Status.ContainerImages.KsmImage, &missingImageDefault)
 		telemetry.Spec.Ceilometer.MysqldExporterImage = *getImg(version.Status.ContainerImages.CeilometerMysqldExporterImage, &missingImageDefault)

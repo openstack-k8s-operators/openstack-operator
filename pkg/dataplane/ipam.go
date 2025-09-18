@@ -87,7 +87,7 @@ func checkDNSService(ctx context.Context, helper *helper.Helper,
 	return nil
 }
 
-// createNetServiceNetMap Creates a map of net and ServiceNet
+// BuildNetServiceNetMap creates a map of net and ServiceNet
 func BuildNetServiceNetMap(netconfig infranetworkv1.NetConfig) map[string]string {
 	serviceNetMap := make(map[string]string)
 	for _, net := range netconfig.Spec.Networks {
@@ -197,7 +197,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
-			err.Error())
+			"%s", err.Error())
 		return dnsDetails, err
 	}
 	if dnsDetails.ClusterAddresses == nil {

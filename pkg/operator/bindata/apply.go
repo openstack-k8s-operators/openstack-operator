@@ -1,3 +1,4 @@
+// Package bindata provides functionality for applying binary data and resources to Kubernetes
 package bindata
 
 import (

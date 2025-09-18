@@ -93,7 +93,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	Log.Info("Reconciling OpenStackVersion")
 	// Fetch the instance
 	instance := &corev1beta1.OpenStackVersion{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -228,7 +228,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	// lookup the current Controlplane object
 	controlPlane := &corev1beta1.OpenStackControlPlane{}
-	err = r.Client.Get(ctx, client.ObjectKey{
+	err = r.Get(ctx, client.ObjectKey{
 		Namespace: instance.Namespace,
 		Name:      instance.Name,
 	}, controlPlane)
@@ -418,7 +418,7 @@ func (r *OpenStackVersionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		listOpts := []client.ListOption{
 			client.InNamespace(o.GetNamespace()),
 		}
-		if err := r.Client.List(ctx, versionList, listOpts...); err != nil {
+		if err := r.List(ctx, versionList, listOpts...); err != nil {
 			Log.Error(err, "Unable to retrieve OpenStackVersion")
 			return nil
 		}
