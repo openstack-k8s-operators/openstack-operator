@@ -78,77 +78,108 @@ var _ = Describe("OpenStackOperator controller", func() {
 	})
 
 	var (
-		galeraService = Entry("the galera service", func() (
+		galeraTopologyService = Entry("the galera service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := mariadb.GetGalera(names.DBName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		keystoneService = Entry("the keystone service", func() (
+		keystoneTopologyService = Entry("the keystone service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := keystone.GetKeystoneAPI(names.KeystoneAPIName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		rabbitService = Entry("the rabbitmq service", func() (
+		rabbitTopologyService = Entry("the rabbitmq service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetRabbitMQCluster(names.RabbitMQName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		memcachedService = Entry("the memcached service", func() (
+		memcachedTopologyService = Entry("the memcached service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := infra.GetMemcached(names.MemcachedName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		glanceService = Entry("the glance service", func() (
+		glanceTopologyService = Entry("the glance service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetGlance(names.GlanceName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		cinderService = Entry("the cinder service", func() (
+		cinderTopologyService = Entry("the cinder service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetCinder(names.CinderName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		manilaService = Entry("the manila service", func() (
+		manilaTopologyService = Entry("the manila service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetManila(names.ManilaName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		neutronService = Entry("the neutron service", func() (
+		neutronTopologyService = Entry("the neutron service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetNeutron(names.NeutronName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		horizonService = Entry("the horizon service", func() (
+		horizonTopologyService = Entry("the horizon service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetHorizon(names.HorizonName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		heatService = Entry("the heat service", func() (
+		heatTopologyService = Entry("the heat service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetHeat(names.HeatName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		telemetryService = Entry("the telemetry service", func() (
+		telemetryTopologyService = Entry("the telemetry service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetTelemetry(names.TelemetryName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
-		watcherService = Entry("the watcher service", func() (
+		watcherTopologyService = Entry("the watcher service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetWatcher(names.WatcherName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
+		})
+
+		glanceNotifSvc = Entry("the Glance service", func() (
+			client.Object, *string) {
+			svc := GetGlance(names.GlanceName)
+			return svc, svc.Spec.NotificationBusInstance
+		})
+		cinderNotifSvc = Entry("the Cinder service", func() (
+			client.Object, *string) {
+			svc := GetCinder(names.CinderName)
+			return svc, svc.Spec.NotificationsBusInstance
+		})
+		manilaNotifSvc = Entry("the Manila service", func() (
+			client.Object, *string) {
+			svc := GetManila(names.ManilaName)
+			return svc, svc.Spec.NotificationsBusInstance
+		})
+		neutronNotifSvc = Entry("the Neutron service", func() (
+			client.Object, *string) {
+			svc := GetNeutron(names.NeutronName)
+			return svc, svc.Spec.NotificationsBusInstance
+		})
+		novaNotifSvc = Entry("the Nova service", func() (
+			client.Object, *string) {
+			svc := GetNova(names.NovaName)
+			return svc, svc.Spec.NotificationsBusInstance
+		})
+		watcherNotifSvc = Entry("the Watcher service", func() (
+			client.Object, *string) {
+			svc := GetWatcher(names.WatcherName)
+			return svc, svc.Spec.NotificationsBusInstance
 		})
 	)
 	//
@@ -845,6 +876,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
 			// create cert secrets for ovn instance
@@ -1166,6 +1198,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
 			// create cert secrets for ovn instance
@@ -1293,6 +1326,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
 			// create cert secrets for ovn instance
@@ -1821,6 +1855,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// NOTE(bogdando): DBs certs need to be created here as well, but those are already existing somehow
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
@@ -1985,6 +2020,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
 			// create cert secrets for ovn instance
@@ -2168,6 +2204,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
 			// create cert secrets for ovn instance
@@ -2643,6 +2680,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for rabbitmq instances
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
 			// create cert secrets for memcached instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
 			// create cert secrets for ovn instance
@@ -2709,18 +2747,18 @@ var _ = Describe("OpenStackOperator controller", func() {
 			},
 			// The entry list depends on the default enabled services in the
 			// default spec
-			galeraService,
-			keystoneService,
-			rabbitService,
-			memcachedService,
-			telemetryService,
-			glanceService,
-			cinderService,
-			manilaService,
-			neutronService,
-			horizonService,
-			heatService,
-			watcherService,
+			galeraTopologyService,
+			keystoneTopologyService,
+			rabbitTopologyService,
+			memcachedTopologyService,
+			telemetryTopologyService,
+			glanceTopologyService,
+			cinderTopologyService,
+			manilaTopologyService,
+			neutronTopologyService,
+			horizonTopologyService,
+			heatTopologyService,
+			watcherTopologyService,
 		)
 		DescribeTable("An OpenStackControlplane updates the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -2741,18 +2779,18 @@ var _ = Describe("OpenStackOperator controller", func() {
 					g.Expect(toporef).To(Equal(expectedTopology))
 				}, timeout, interval).Should(Succeed())
 			},
-			galeraService,
-			keystoneService,
-			rabbitService,
-			memcachedService,
-			telemetryService,
-			glanceService,
-			cinderService,
-			manilaService,
-			neutronService,
-			horizonService,
-			heatService,
-			watcherService,
+			galeraTopologyService,
+			keystoneTopologyService,
+			rabbitTopologyService,
+			memcachedTopologyService,
+			telemetryTopologyService,
+			glanceTopologyService,
+			cinderTopologyService,
+			manilaTopologyService,
+			neutronTopologyService,
+			horizonTopologyService,
+			heatTopologyService,
+			watcherTopologyService,
 		)
 		DescribeTable("An OpenStackControlplane Service (Glance) overrides the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -2790,17 +2828,17 @@ var _ = Describe("OpenStackOperator controller", func() {
 			},
 			// The entry list depends on the default enabled services in the
 			// default spec
-			galeraService,
-			keystoneService,
-			rabbitService,
-			memcachedService,
-			telemetryService,
-			cinderService,
-			manilaService,
-			neutronService,
-			horizonService,
-			heatService,
-			watcherService,
+			galeraTopologyService,
+			keystoneTopologyService,
+			rabbitTopologyService,
+			memcachedTopologyService,
+			telemetryTopologyService,
+			cinderTopologyService,
+			manilaTopologyService,
+			neutronTopologyService,
+			horizonTopologyService,
+			heatTopologyService,
+			watcherTopologyService,
 		)
 		DescribeTable("An OpenStackControlplane removes the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -2817,18 +2855,183 @@ var _ = Describe("OpenStackOperator controller", func() {
 			},
 			// The entry list depends on the default enabled services in the
 			// default spec
-			galeraService,
-			keystoneService,
-			rabbitService,
-			memcachedService,
-			telemetryService,
-			glanceService,
-			cinderService,
-			manilaService,
-			neutronService,
-			horizonService,
-			heatService,
-			watcherService,
+			galeraTopologyService,
+			keystoneTopologyService,
+			rabbitTopologyService,
+			memcachedTopologyService,
+			telemetryTopologyService,
+			glanceTopologyService,
+			cinderTopologyService,
+			manilaTopologyService,
+			neutronTopologyService,
+			horizonTopologyService,
+			heatTopologyService,
+			watcherTopologyService,
+		)
+	})
+
+	When("An OpenStackControlplane instance references a notificationsBusInstance", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+
+			// point notificationsBusInstance to the default rabbitmq instance
+			spec["notificationsBusInstance"] = names.RabbitMQName.Name
+
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"ceilometer": map[string]interface{}{
+						"enabled": true,
+					},
+					"metricStorage": map[string]interface{}{
+						"enabled": true,
+					},
+				},
+			}
+			spec["watcher"] = map[string]interface{}{
+				"enabled": true,
+			}
+
+			// enable nova and its dependencies
+			spec["nova"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"apiTimeout": 60,
+					"cellTemplates": map[string]interface{}{
+						"cell0": map[string]interface{}{},
+					},
+				},
+			}
+			spec["placement"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"apiTimeout": 60,
+				},
+			}
+
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+			th.CreateSecret(types.NamespacedName{
+				Name:      "openstack-config-secret",
+				Namespace: namespace,
+			}, map[string][]byte{"secure.yaml": []byte("foo")})
+
+			th.CreateConfigMap(types.NamespacedName{
+				Name:      "openstack-config",
+				Namespace: namespace,
+			}, map[string]interface{}{
+				"clouds.yaml": string("foo"),
+				"OS_CLOUD":    "default",
+			})
+		})
+		DescribeTable("it is propagated to",
+			func(serviceNameFunc func() (client.Object, *string)) {
+
+				svc, notif := serviceNameFunc()
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				// service exists and notificationsBusInstance has been propagated
+				Eventually(func(g Gomega) {
+					g.Expect(OSCtlplane).Should(Not(BeNil()))
+					g.Expect(svc).Should(Not(BeNil()))
+					g.Expect(notif).To(Equal(OSCtlplane.Spec.NotificationsBusInstance))
+				}, timeout, interval).Should(Succeed())
+			},
+			// The entry list depends on the services that currently implement
+			// the notificationsBusInstance interface
+			glanceNotifSvc,
+			cinderNotifSvc,
+			manilaNotifSvc,
+			neutronNotifSvc,
+			novaNotifSvc,
+			watcherNotifSvc,
+		)
+		DescribeTable("A service (Nova) overrides the notification value",
+			func(serviceNameFunc func() (client.Object, *string)) {
+				rabbitMqOverride := "rabbitmq-notifications"
+
+				Eventually(func(g Gomega) {
+					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+					ctlplane.Spec.Nova.Template.NotificationsBusInstance = &rabbitMqOverride
+					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				// Nova points to the override
+				Eventually(func(g Gomega) {
+					nova := GetNova(names.NovaName)
+					g.Expect(OSCtlplane).Should(Not(BeNil()))
+					g.Expect(nova).Should(Not(BeNil()))
+					g.Expect(nova.Spec.NotificationsBusInstance).To(Equal(OSCtlplane.Spec.Nova.Template.NotificationsBusInstance))
+					g.Expect(*nova.Spec.NotificationsBusInstance).To(Equal(rabbitMqOverride))
+				}, timeout, interval).Should(Succeed())
+
+				// The rest of the services still point to the top-level rabbit
+				svc, notif := serviceNameFunc()
+				Eventually(func(g Gomega) {
+					g.Expect(OSCtlplane).Should(Not(BeNil()))
+					g.Expect(svc).Should(Not(BeNil()))
+					g.Expect(notif).To(Equal(OSCtlplane.Spec.NotificationsBusInstance))
+				}, timeout, interval).Should(Succeed())
+			},
+			// The entry list depends on the services that currently implement
+			// the notificationsBusInstance interface
+			glanceNotifSvc,
+			cinderNotifSvc,
+			manilaNotifSvc,
+			neutronNotifSvc,
+			watcherNotifSvc,
+		)
+		DescribeTable("An OpenStackControlplane removes the notificationsBusInstance reference",
+			func(serviceNameFunc func() (client.Object, *string)) {
+				Eventually(func(g Gomega) {
+					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+					ctlplane.Spec.NotificationsBusInstance = nil
+					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
+
+					svc, notif := serviceNameFunc()
+					g.Expect(svc).Should(Not(BeNil()))
+					g.Expect(notif).To(BeNil())
+				}, timeout, interval).Should(Succeed())
+			},
+			// The entry list depends on the services that currently implement
+			// the notificationsBusInstance interface
+			glanceNotifSvc,
+			cinderNotifSvc,
+			manilaNotifSvc,
+			neutronNotifSvc,
+			novaNotifSvc,
+			watcherNotifSvc,
 		)
 	})
 })
@@ -3595,6 +3798,7 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 			// create cert secrets for rabbitmq instances
 			th.CreateCertSecret(names.RabbitMQCertName)
 			th.CreateCertSecret(names.RabbitMQCell1CertName)
+			th.CreateCertSecret(names.RabbitMQNotificationsCertName)
 
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
@@ -3737,7 +3941,7 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 			Eventually(func(g Gomega) {
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				rabbitTemplates := *(OSCtlplane.Spec.Rabbitmq.Templates)
-				g.Expect(rabbitTemplates).Should(HaveLen(2))
+				g.Expect(rabbitTemplates).Should(HaveLen(3))
 				delete(rabbitTemplates, names.RabbitMQCell1Name.Name)
 				OSCtlplane.Spec.Rabbitmq.Templates = &rabbitTemplates
 				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
@@ -3747,7 +3951,7 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 			Eventually(func(g Gomega) {
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				rabbitTemplates := *(OSCtlplane.Spec.Rabbitmq.Templates)
-				g.Expect(rabbitTemplates).Should(HaveLen(1))
+				g.Expect(rabbitTemplates).Should(HaveLen(2))
 			}, timeout, interval).Should(Succeed())
 
 			// cell1.rabbitmq should not exists in db
