@@ -8688,6 +8688,7 @@ spec:
                             type: string
                         type: object
                     required:
+                    - databaseInstance
                     - manilaAPI
                     - manilaScheduler
                     - memcachedInstance
