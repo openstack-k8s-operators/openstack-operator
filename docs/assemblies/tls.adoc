@@ -130,7 +130,7 @@ in `lib-common`, which is set to the label "osp-rootca-issuer-internal" for the 
 ==== keyUsages
 
 This attribute is a list of key uages to be included as key usage extensions in the certificate.  The
-strings that correspond to valid usages are provided by the https://github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1/types.go[certmanage api].
+strings that correspond to valid usages are provided by the https://github.com/cert-manager/cert-manager/blob/master/pkg/apis/certmanager/v1/types.go[certmanage api].
 If this attribute is not provided, the default set of key usages as defined in https://github.com/openstack-k8s-operators/lib-common/blob/main/modules/certmanager/certificate.go[lib-common].
 will be used.  These are "key encipherment", "digital signature" and "server auth".  In the above examples, we
 see that libvirt defines this attribute because the "client auth" key usage is also needed.
