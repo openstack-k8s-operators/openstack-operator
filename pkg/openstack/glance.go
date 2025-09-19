@@ -74,6 +74,12 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Glance.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
+	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// try to inject the top-level one if defined
+	if instance.Spec.Glance.Template.NotificationBusInstance == nil {
+		instance.Spec.Glance.Template.NotificationBusInstance = instance.Spec.NotificationsBusInstance
+	}
+
 	// When component services got created check if there is the need to create a route
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: glanceName, Namespace: instance.Namespace}, glance); err != nil {
 		if !k8s_errors.IsNotFound(err) {

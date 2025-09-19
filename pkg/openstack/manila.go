@@ -118,6 +118,12 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
+	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// try to inject the top-level one if defined
+	if instance.Spec.Manila.Template.NotificationsBusInstance == nil {
+		instance.Spec.Manila.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	}
+
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), manila, func() error {
 		instance.Spec.Manila.Template.ManilaSpecBase.DeepCopyInto(&manila.Spec.ManilaSpecBase)
