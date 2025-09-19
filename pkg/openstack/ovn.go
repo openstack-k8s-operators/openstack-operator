@@ -136,6 +136,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 		if !instance.Spec.Ovn.Enabled {
 			instance.Status.ContainerImages.OvnNbDbclusterImage = nil
 			instance.Status.ContainerImages.OvnSbDbclusterImage = nil
+			instance.Status.ContainerImages.OpenstackNetworkExporterImage = nil
 			if _, err := EnsureDeleted(ctx, helper, OVNDBCluster); err != nil {
 				return false, conditions, err
 			}
@@ -221,6 +222,8 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 				OVNDBCluster.Spec.ContainerImage = *version.Status.ContainerImages.OvnSbDbclusterImage
 			}
 
+			OVNDBCluster.Spec.ExporterImage = *getImg(version.Status.ContainerImages.OpenstackNetworkExporterImage, &missingImageDefault)
+
 			if OVNDBCluster.Spec.StorageClass == "" {
 				OVNDBCluster.Spec.StorageClass = instance.Spec.StorageClass
 			}
@@ -246,6 +249,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 	if OVNDBClustersReady {
 		instance.Status.ContainerImages.OvnNbDbclusterImage = version.Status.ContainerImages.OvnNbDbclusterImage
 		instance.Status.ContainerImages.OvnSbDbclusterImage = version.Status.ContainerImages.OvnSbDbclusterImage
+		instance.Status.ContainerImages.OpenstackNetworkExporterImage = version.Status.ContainerImages.OpenstackNetworkExporterImage
 	}
 
 	return OVNDBClustersReady, conditions, nil
