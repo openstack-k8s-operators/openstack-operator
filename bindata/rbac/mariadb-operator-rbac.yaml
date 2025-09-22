@@ -53,6 +53,18 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - cronjobs
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - ""
+  resources:
     - pods
   verbs:
     - create
@@ -92,6 +104,18 @@ rules:
   verbs:
     - get
     - list
+    - watch
+- apiGroups:
+    - batch
+  resources:
+    - cronjobs
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
     - watch
 - apiGroups:
     - batch
@@ -183,6 +207,32 @@ rules:
     - patch
     - update
     - watch
+- apiGroups:
+    - mariadb.openstack.org
+  resources:
+    - galerabackups
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - mariadb.openstack.org
+  resources:
+    - galerabackups/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - mariadb.openstack.org
+  resources:
+    - galerabackups/status
+  verbs:
+    - get
+    - patch
+    - update
 - apiGroups:
     - mariadb.openstack.org
   resources:
