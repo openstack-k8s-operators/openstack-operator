@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package operator provides functionality for managing operator overrides and configurations
 package operator
 
 import (
@@ -70,6 +71,7 @@ func memQuantity(mega int64) *resource.Quantity {
 	return q
 }
 
+// HasOverrides checks if the given operator name has overrides in the provided list
 func HasOverrides(operatorOverrides []operatorv1beta1.OperatorSpec, operatorName string) *operatorv1beta1.OperatorSpec {
 	// validate of operatorName is in the list of operatorOverrides
 	f := func(c operatorv1beta1.OperatorSpec) bool {
@@ -83,6 +85,7 @@ func HasOverrides(operatorOverrides []operatorv1beta1.OperatorSpec, operatorName
 	return nil
 }
 
+// SetOverrides applies the provided operator overrides to the operator configuration
 func SetOverrides(opOvr operatorv1beta1.OperatorSpec, op *Operator) {
 	if opOvr.Replicas != nil {
 		op.Deployment.Replicas = opOvr.Replicas
@@ -143,6 +146,7 @@ func mergeTolerations(defaults, custom []corev1.Toleration) []corev1.Toleration 
 	return merged
 }
 
+// GetOperator finds and returns the operator with the given name from the list
 func GetOperator(operators []Operator, name string) (int, Operator) {
 	f := func(c Operator) bool {
 		return c.Name == name

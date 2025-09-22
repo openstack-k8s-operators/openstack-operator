@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package util //nolint:revive // util is an acceptable package name in this context
 
 import (
 	"context"
@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-// GetDataSourceCmSecrets gets the ConfigMaps and Secrets from a DataSource
+// GetDataSourceCmSecret gets the ConfigMaps and Secrets from a DataSource
 func GetDataSourceCmSecret(ctx context.Context, helper *helper.Helper, namespace string, dataSource dataplanev1.DataSource) (*v1.ConfigMap, *v1.Secret, error) {
 
 	var configMap *v1.ConfigMap

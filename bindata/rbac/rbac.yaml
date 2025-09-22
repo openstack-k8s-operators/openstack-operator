@@ -50,61 +50,10 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - imagestreamimages
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - imagestreammappings
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - imagestreams
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - imagestreams/layers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - imagestreamtags
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - imagetags
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
+  - configmaps
   - pods
+  - secrets
+  - services
   verbs:
   - create
   - delete
@@ -116,12 +65,21 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods/log
+  - imagestreamimages
+  - imagestreammappings
+  - imagestreams
+  - imagestreams/layers
+  - imagestreamtags
+  - imagetags
   verbs:
   - get
+  - list
+  - watch
 - apiGroups:
   - ""
   resources:
+  - namespaces
+  - pods/log
   - projects
   verbs:
   - get
@@ -189,17 +147,6 @@ rules:
   - cert-manager.io
   resources:
   - certificates
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cert-manager.io
-  resources:
   - issuers
   verbs:
   - create
@@ -251,84 +198,15 @@ rules:
   - config.openshift.io
   resources:
   - imagedigestmirrorsets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - config.openshift.io
-  resources:
   - networks
   verbs:
   - get
   - list
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - core.openstack.org
   resources:
   - openstackcontrolplanes
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - core.openstack.org
-  resources:
-  - openstackcontrolplanes/finalizers
-  verbs:
-  - patch
-  - update
-- apiGroups:
-  - core.openstack.org
-  resources:
-  - openstackcontrolplanes/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - core.openstack.org
-  resources:
   - openstackversions
   verbs:
   - create
@@ -341,6 +219,7 @@ rules:
 - apiGroups:
   - core.openstack.org
   resources:
+  - openstackcontrolplanes/finalizers
   - openstackversions/finalizers
   verbs:
   - patch
@@ -348,6 +227,7 @@ rules:
 - apiGroups:
   - core.openstack.org
   resources:
+  - openstackcontrolplanes/status
   - openstackversions/status
   verbs:
   - get
@@ -367,6 +247,8 @@ rules:
   - dataplane.openstack.org
   resources:
   - openstackdataplanedeployments/finalizers
+  - openstackdataplanenodesets/finalizers
+  - openstackdataplaneservices/finalizers
   verbs:
   - patch
   - update
@@ -374,6 +256,7 @@ rules:
   - dataplane.openstack.org
   resources:
   - openstackdataplanedeployments/status
+  - openstackdataplanenodesets/status
   verbs:
   - get
   - patch
@@ -393,21 +276,6 @@ rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
-  - openstackdataplanenodesets/finalizers
-  verbs:
-  - patch
-  - update
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
-  - openstackdataplanenodesets/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
   - openstackdataplaneservices
   verbs:
   - create
@@ -416,13 +284,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
-  - openstackdataplaneservices/finalizers
-  verbs:
-  - patch
-  - update
 - apiGroups:
   - designate.openstack.org
   resources:
@@ -487,22 +348,10 @@ rules:
   - image.openshift.io
   resources:
   - imagestreamimages
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - image.openshift.io
-  resources:
   - imagestreammappings
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - image.openshift.io
-  resources:
   - imagestreams
+  - imagestreamtags
+  - imagetags
   verbs:
   - get
   - list
@@ -513,22 +362,6 @@ rules:
   - imagestreams/layers
   verbs:
   - get
-- apiGroups:
-  - image.openshift.io
-  resources:
-  - imagestreamtags
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - image.openshift.io
-  resources:
-  - imagetags
-  verbs:
-  - get
-  - list
-  - watch
 - apiGroups:
   - ironic.openstack.org
   resources:
@@ -635,48 +468,7 @@ rules:
   - network.openstack.org
   resources:
   - dnsdata
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - network.openstack.org
-  resources:
-  - dnsdata/finalizers
-  verbs:
-  - patch
-  - update
-- apiGroups:
-  - network.openstack.org
-  resources:
-  - dnsdata/status
-  verbs:
-  - get
-- apiGroups:
-  - network.openstack.org
-  resources:
   - dnsmasqs
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - network.openstack.org
-  resources:
-  - dnsmasqs/status
-  verbs:
-  - get
-- apiGroups:
-  - network.openstack.org
-  resources:
   - ipsets
   verbs:
   - create
@@ -689,6 +481,7 @@ rules:
 - apiGroups:
   - network.openstack.org
   resources:
+  - dnsdata/finalizers
   - ipsets/finalizers
   verbs:
   - patch
@@ -696,6 +489,8 @@ rules:
 - apiGroups:
   - network.openstack.org
   resources:
+  - dnsdata/status
+  - dnsmasqs/status
   - ipsets/status
   verbs:
   - get
@@ -788,29 +583,7 @@ rules:
   - ovn.openstack.org
   resources:
   - ovncontrollers
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ovn.openstack.org
-  resources:
   - ovndbclusters
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ovn.openstack.org
-  resources:
   - ovnnorthds
   verbs:
   - create
@@ -866,16 +639,6 @@ rules:
   - rbac.authorization.k8s.io
   resources:
   - rolebindings
-  verbs:
-  - create
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
   - roles
   verbs:
   - create

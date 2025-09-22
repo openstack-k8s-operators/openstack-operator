@@ -573,6 +573,7 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		},
 	}
 	manilaTemplate := map[string]interface{}{
+		"databaseInstance":    "openstack",
 		"rabbitMqClusterName": "rabbitmq",
 		"memcachedInstance":   "memcached",
 		"databaseAccount":     "account",

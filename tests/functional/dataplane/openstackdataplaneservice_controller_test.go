@@ -34,7 +34,7 @@ var _ = Describe("OpenstackDataplaneService Test", func() {
 
 	When("A defined service resource is created", func() {
 		BeforeEach(func() {
-			os.Unsetenv("OPERATOR_SERVICES")
+			_ = os.Unsetenv("OPERATOR_SERVICES")
 			CreateDataplaneService(dataplaneServiceName, false)
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 		})
@@ -50,7 +50,7 @@ var _ = Describe("OpenstackDataplaneService Test", func() {
 
 	When("A defined service resource for all nodes is created", func() {
 		BeforeEach(func() {
-			os.Unsetenv("OPERATOR_SERVICES")
+			_ = os.Unsetenv("OPERATOR_SERVICES")
 			CreateDataplaneService(dataplaneServiceName, true)
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 		})

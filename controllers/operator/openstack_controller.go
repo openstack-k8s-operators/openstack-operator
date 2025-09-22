@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package operator contains the OpenStack operator controller implementation
 package operator
 
 import (
@@ -133,12 +134,12 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Fetch the OpenStack instance
 	instanceList := &operatorv1beta1.OpenStackList{}
-	err := r.Client.List(ctx, instanceList, &client.ListOptions{})
+	err := r.List(ctx, instanceList, &client.ListOptions{})
 	if err != nil {
 		return ctrl.Result{}, errors.Wrap(err, "failed listing all OpenStack instances")
 	}
 	instance := &operatorv1beta1.OpenStack{}
-	err = r.Client.Get(ctx, req.NamespacedName, instance)
+	err = r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile req.
@@ -229,7 +230,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 		if instanceList.Items[0].Name != req.Name {
 			Log.Info("Ignoring OpenStack.operator.openstack.org because one already exists and does not match existing name")
-			err = r.Client.Delete(ctx, instance, &client.DeleteOptions{})
+			err = r.Delete(ctx, instance, &client.DeleteOptions{})
 			if err != nil {
 				instance.Status.Conditions.Set(condition.FalseCondition(
 					operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -363,7 +364,7 @@ func (r *OpenStackReconciler) reconcileDelete(ctx context.Context, instance *ope
 func (r *OpenStackReconciler) countDeployments(ctx context.Context, instance *operatorv1beta1.OpenStack) (int, []string, error) {
 	deployments := &appsv1.DeploymentList{}
 	pending := []string{}
-	err := r.Client.List(ctx, deployments, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, deployments, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return 0, pending, err
 	}
@@ -409,7 +410,7 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 	Log := r.GetLogger(ctx)
 
 	endpointSliceList := &discoveryv1.EndpointSliceList{}
-	err := r.Client.List(ctx, endpointSliceList, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, endpointSliceList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			Log.Info("Webhook endpoint not found. Requeuing...")
@@ -755,14 +756,14 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 
 	csvList := &uns.UnstructuredList{}
 	csvList.SetGroupVersionKind(csvGVR.GroupVersion().WithKind("ClusterServiceVersion"))
-	err := r.Client.List(ctx, csvList, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, csvList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
 	for _, csv := range csvList.Items {
 		Log.Info("Found CSV", "name", csv.GetName())
 		if isServiceOperatorResource(csv.GetName()) {
-			err = r.Client.Delete(ctx, &csv)
+			err = r.Delete(ctx, &csv)
 			if err != nil {
 				if apierrors.IsNotFound(err) {
 					Log.Info("CSV not found on delete. Continuing...", "name", csv.GetName())
@@ -776,14 +777,14 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 
 	subscriptionList := &uns.UnstructuredList{}
 	subscriptionList.SetGroupVersionKind(subscriptionGVR.GroupVersion().WithKind("Subscription"))
-	err = r.Client.List(ctx, subscriptionList, &client.ListOptions{Namespace: instance.Namespace})
+	err = r.List(ctx, subscriptionList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
 	for _, subscription := range subscriptionList.Items {
 		Log.Info("Found Subscription", "name", subscription.GetName())
 		if isServiceOperatorResource(subscription.GetName()) {
-			err = r.Client.Delete(ctx, &subscription)
+			err = r.Delete(ctx, &subscription)
 			if err != nil {
 				if apierrors.IsNotFound(err) {
 					Log.Info("Subscription not found on delete. Continuing...", "name", subscription.GetName())
@@ -800,7 +801,7 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 	installPlanList := &uns.UnstructuredList{}
 	installPlanList.SetGroupVersionKind(installPlanGVR.GroupVersion().WithKind("InstallPlan"))
 
-	err = r.Client.List(ctx, installPlanList, &client.ListOptions{Namespace: instance.Namespace})
+	err = r.List(ctx, installPlanList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
@@ -814,7 +815,7 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 		if found {
 			// just checking for the first one should be sufficient
 			if isServiceOperatorResource(csvNames[0].(string)) {
-				err = r.Client.Delete(ctx, &installPlan)
+				err = r.Delete(ctx, &installPlan)
 				if err != nil {
 					if apierrors.IsNotFound(err) {
 						Log.Info("Installplane not found on delete. Continuing...", "name", installPlan.GetName())
@@ -848,7 +849,7 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 	// 4) installPlan from old service operators removed
 	operatorList := &uns.UnstructuredList{}
 	operatorList.SetGroupVersionKind(operatorGVR.GroupVersion().WithKind("Operator"))
-	err := r.Client.List(ctx, operatorList, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, operatorList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
@@ -894,7 +895,7 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 					// references from CRD's should be removed before this function is called
 					// but this is a safeguard as we do not want to delete them
 					if refData["kind"].(string) != "CustomResourceDefinition" {
-						err = r.Client.Delete(ctx, &obj)
+						err = r.Delete(ctx, &obj)
 						if err != nil {
 							if apierrors.IsNotFound(err) {
 								Log.Info("Object not found on delete. Continuing...", "name", obj.GetName())
@@ -908,7 +909,7 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 				return fmt.Errorf("Requeuing/Found references for operator name: %s, refs: %v", operator.GetName(), refs)
 			}
 			// no refs found so we should be able to successfully delete the operator
-			err = r.Client.Delete(ctx, &operator)
+			err = r.Delete(ctx, &operator)
 			if err != nil {
 				return err
 			}
