@@ -67,6 +67,10 @@ spec:
                   to use on db creation (in milliseconds)
                 format: int32
                 type: integer
+              exporterImage:
+                description: ExporterImage - Container Image URL for the openstack-network-exporter
+                  metrics sidecar (will be set to environmental default if empty)
+                type: string
               inactivityProbe:
                 default: 60000
                 description: Probe interval for the OVSDB session (in milliseconds)
@@ -76,6 +80,11 @@ spec:
                 default: info
                 description: LogLevel - Set log level info, dbg, emer etc
                 type: string
+              metricsEnabled:
+                default: true
+                description: MetricsEnabled enables the metrics sidecar container
+                  for collecting OVN DB metrics
+                type: boolean
               networkAttachment:
                 description: |-
                   NetworkAttachment is a NetworkAttachment resource name to expose the service to the given network.

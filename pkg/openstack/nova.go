@@ -348,12 +348,12 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec.NovaSpecCore)
 
-		nova.Spec.NovaImages.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
-		nova.Spec.NovaImages.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
-		nova.Spec.NovaImages.ConductorContainerImageURL = *version.Status.ContainerImages.NovaConductorImage
-		nova.Spec.NovaImages.MetadataContainerImageURL = *version.Status.ContainerImages.NovaAPIImage //metadata uses novaAPI image
-		nova.Spec.NovaImages.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
-		nova.Spec.NovaImages.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
+		nova.Spec.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
+		nova.Spec.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage
+		nova.Spec.ConductorContainerImageURL = *version.Status.ContainerImages.NovaConductorImage
+		nova.Spec.MetadataContainerImageURL = *version.Status.ContainerImages.NovaAPIImage //metadata uses novaAPI image
+		nova.Spec.SchedulerContainerImageURL = *version.Status.ContainerImages.NovaSchedulerImage
+		nova.Spec.NoVNCContainerImageURL = *version.Status.ContainerImages.NovaNovncImage
 
 		if nova.Spec.Secret == "" {
 			nova.Spec.Secret = instance.Spec.Secret
@@ -380,6 +380,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	}
 
 	if nova.Status.ObservedGeneration == nova.Generation && nova.IsReady() {
+		Log.Info("Nova ready condition is true")
 		instance.Status.ContainerImages.NovaAPIImage = version.Status.ContainerImages.NovaAPIImage
 		instance.Status.ContainerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
 		instance.Status.ContainerImages.NovaConductorImage = version.Status.ContainerImages.NovaConductorImage
@@ -387,11 +388,23 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Status.ContainerImages.NovaSchedulerImage = version.Status.ContainerImages.NovaSchedulerImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneNovaReadyCondition, corev1beta1.OpenStackControlPlaneNovaReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneNovaReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneNovaReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Nova resource into the instance
+		// under the condition of type OpenStackControlPlaneNovaReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(nova.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(nova.Status.Conditions, corev1beta1.OpenStackControlPlaneNovaReadyCondition, instance, nova.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneNovaReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneNovaReadyRunningMessage))
+		}
 	}
 
 	return ctrl.Result{}, nil

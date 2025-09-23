@@ -581,4 +581,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: nova-operator
+    openstack.org/operator-name: nova

@@ -52,6 +52,10 @@ spec:
           spec:
             description: OVNControllerSpec defines the desired state of OVNController
             properties:
+              exporterImage:
+                description: ExporterImage - Container Image URL for the openstack-network-exporter
+                  metrics daemonset (will be set to environmental default if empty)
+                type: string
               external-ids:
                 default: {}
                 description: OVSExternalIDs is a set of configuration options for
@@ -64,6 +68,9 @@ spec:
                     type: array
                   enable-chassis-as-gateway:
                     default: true
+                    description: |-
+                      DEPRECATED: To be removed in the next API version
+                      Any value set to this field is ignored
                     type: boolean
                   ovn-bridge:
                     default: br-int
@@ -78,6 +85,11 @@ spec:
                     default: random
                     type: string
                 type: object
+              metricsEnabled:
+                default: true
+                description: MetricsEnabled enables the metrics daemonset for collecting
+                  OVN metrics
+                type: boolean
               networkAttachment:
                 description: |-
                   NetworkAttachment is a NetworkAttachment resource name to expose the service to the given network.
@@ -260,6 +272,10 @@ spec:
                       current project
                     type: string
                 type: object
+              metricsNumberReady:
+                description: MetricsNumberReady of metrics instances
+                format: int32
+                type: integer
               networkAttachments:
                 additionalProperties:
                   items:

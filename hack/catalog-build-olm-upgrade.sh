@@ -10,9 +10,11 @@ echo $URL | sed -e "s|:.*|@$DIGEST|"
 
 }
 
-MAIN_VERSION=${MAIN_VERSION:-"0.4.0"}
-FEATURE_RELEASE_VERSION=${FEATURE_RELEASE_VERSION:-"0.3.0"}
-FEATURE_RELEASE_BRANCH=${FEATURE_RELEASE_BRANCH:-"18.0-fr3"}
+# These variables are mandatory. The script will exit if they are not set.
+MAIN_VERSION=${MAIN_VERSION:?"Error: MAIN_VERSION must be set."}
+FEATURE_RELEASE_VERSION=${FEATURE_RELEASE_VERSION:?"Error: FEATURE_RELEASE_VERSION must be set."}
+FEATURE_RELEASE_BRANCH=${FEATURE_RELEASE_BRANCH:?"Error: FEATURE_RELEASE_BRANCH must be set."}
+
 BUNDLE=${BUNDLE:-"quay.io/openstack-k8s-operators/openstack-operator-bundle:latest"}
 
 [ -d "catalog" ] && rm -Rf catalog

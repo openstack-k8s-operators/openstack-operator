@@ -158,6 +158,17 @@ spec:
           duration: 87600h0m0s
         cert:
           duration: 43800h0m0s
+  watcher:
+    enabled: true
+    template:
+      databaseInstance: openstack
+      databaseAccount: watcher
+      apiServiceTemplate:
+        replicas: 1
+      applierServiceTemplate:
+        replicas: 1
+      decisionengineServiceTemplate:
+        replicas: 1
 status:
   conditions:
   - message: Setup complete
@@ -212,6 +223,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneExposeSwiftReady
+  - message: OpenStackControlPlane watcher service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeWatcherReady
   - message: OpenStackControlPlane Glance completed
     reason: Ready
     status: "True"
@@ -268,3 +283,7 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneTestCMReadyCondition
+  - message: OpenStackControlPlane Watcher completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneWatcherReady

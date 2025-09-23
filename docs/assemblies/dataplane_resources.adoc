@@ -168,6 +168,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | map[string]string
 | false
 
+| bmhRefHashes
+| BmhRefHashes
+| map[string]string
+| false
+
 | containerImages
 | ContainerImages
 | map[string]string
@@ -253,7 +258,7 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 
 | baremetalSetTemplate
 | BaremetalSetTemplate Template for BaremetalSet for the NodeSet
-| baremetalv1.OpenStackBaremetalSetSpec
+| baremetalv1.OpenStackBaremetalSetTemplateSpec
 | false
 
 | nodeTemplate
@@ -381,6 +386,16 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | DeployedVersion
 | string
 | false
+
+| bmhRefHash
+| bmhRefHash - Current hash of the BMHs
+| string
+| false
+
+| deployedBmhHash
+| DeployedBmhHash - Hash of BMHs deployed
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -460,6 +475,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | string
 | false
 
+| role
+| Role is a path to the role that ansible will run on this execution
+| string
+| false
+
 | caCerts
 | CACerts - Secret containing the CA certificate chain
 | string
@@ -471,7 +491,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | false
 
 | certsFrom
-| CertsFrom - Service name used to obtain TLSCert and CACerts data. If both CertsFrom and either TLSCert or CACerts is set, then those fields take precedence.
+| CertsFrom - Service name used to obtain TLSCert and CACerts data. If both CertsFrom and either TLSCert or CACerts is set, then those fields take precedence. DEPRECATED: Will be removed in a future release. Use EDPMServiceType instead.
 | string
 | false
 
@@ -543,7 +563,7 @@ OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a da
 | false
 
 | edpmRoleServiceName
-| EDPMRoleServiceName is the value of the +++<role>+++_service_name variable from the edpm-ansible role where this certificate is used. For example if the certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be ovn, which matches the edpm_ovn_service_name variable from the role. If not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then OpenStackDataPlaneService.Name is used.+++</role>+++
+| EDPMRoleServiceName is the value of the +++<role>+++_service_name variable from the edpm-ansible role where this certificate is used. For example if the certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be ovn, which matches the edpm_ovn_service_name variable from the role. If not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then OpenStackDataPlaneService.Name is used. DEPRECATED: Will be removed in a future release. Use EDPMServiceType instead.+++</role>+++
 | string
 | false
 |===
@@ -622,7 +642,7 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 | ansibleUser
 | AnsibleUser SSH user for Ansible connection
 | string
-| true
+| false
 
 | ansibleHost
 | AnsibleHost SSH host for Ansible connection
@@ -745,6 +765,11 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 
 | managementNetwork
 | ManagementNetwork - Name of network to use for management (SSH/Ansible)
+| string
+| false
+
+| ctlplaneInterface
+| CtlplaneInterface - Interface on the provisioned nodes to use for ctlplane network
 | string
 | false
 |===

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -20,7 +21,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	"golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -406,8 +406,6 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		}
 	}
 
-	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
-
 	// create/update combined CA secret
 	if instance.Spec.TLS.CaBundleSecretName != "" {
 		caSecret, _, err := secret.GetSecret(ctx, helper, instance.Spec.TLS.CaBundleSecretName, instance.Namespace)
@@ -421,6 +419,15 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 				instance.Spec.TLS.CaBundleSecretName,
 				err.Error()))
 			if k8s_errors.IsNotFound(err) {
+				// Since the CA cert secret should have been manually created by the user when provided in the spec,
+				// we treat this as a warning because it means that reconciliation will not be able to continue.
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					corev1.OpenStackControlPlaneCAReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					condition.TLSInputReadyWaitingMessage,
+					instance.Spec.TLS.CaBundleSecretName))
+
 				timeout := time.Second * 10
 				Log.Info(fmt.Sprintf("Certificate %s not found, reconcile in %s", instance.Spec.TLS.CaBundleSecretName, timeout.String()))
 
@@ -437,6 +444,8 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			}
 		}
 	}
+
+	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
 
 	// get CA bundle from operator image. Downstream and upstream build use a different
 	// base image, so the ca bundle cert file can be in different locations
@@ -718,7 +727,7 @@ func getCAFromSecret(
 func getOperatorCABundle(caFile string) ([]byte, error) {
 	contents, err := os.ReadFile(caFile)
 	if err != nil {
-		return nil, fmt.Errorf("File reading error %w", err)
+		return nil, fmt.Errorf("file reading error %w", err)
 	}
 
 	return contents, nil

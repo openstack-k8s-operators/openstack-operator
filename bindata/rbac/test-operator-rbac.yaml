@@ -288,4 +288,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: test-operator
+    openstack.org/operator-name: test

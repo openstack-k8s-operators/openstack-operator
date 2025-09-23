@@ -223,7 +223,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		"openstackdataplanenodeset":   instance.Name,
 		"inventory":                   "true",
 	}
-	for key, val := range instance.ObjectMeta.Labels {
+	for key, val := range instance.Labels {
 		labels[key] = val
 	}
 	template := []utils.Template{
@@ -349,7 +349,9 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 		group.Vars["edpm_telemetry_podman_exporter_image"] = containerImages.EdpmPodmanExporterImage
 	}
 	if template.Ansible.AnsibleVars["edpm_telemetry_openstack_network_exporter_image"] == nil {
-		group.Vars["edpm_telemetry_openstack_network_exporter_image"] = containerImages.EdpmOpenstackNetworkExporterImage
+		if containerImages.OpenstackNetworkExporterImage != nil {
+			group.Vars["edpm_telemetry_openstack_network_exporter_image"] = containerImages.OpenstackNetworkExporterImage
+		}
 	}
 
 	err := unmarshalAnsibleVars(template.Ansible.AnsibleVars, group.Vars)

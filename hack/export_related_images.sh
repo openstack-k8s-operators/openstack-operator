@@ -85,10 +85,14 @@ export RELATED_IMAGE_EDPM_NEUTRON_OVN_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-a
 export RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified
 export RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
 export RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT=quay.io/prometheus/node-exporter:v1.5.0
-export RELATED_IMAGE_EDPM_OPENSTACK_NETWORK_EXPORTER_IMAGE_URL_DEFAULT=quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified
+export RELATED_IMAGE_OPENSTACK_NETWORK_EXPORTER_IMAGE_URL_DEFAULT=quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified
 export RELATED_IMAGE_EDPM_KEPLER_IMAGE_URL_DEFAULT=quay.io/sustainable_computing_io/kepler:release-0.7.12
 export RELATED_IMAGE_EDPM_PODMAN_EXPORTER_IMAGE_URL_DEFAULT=quay.io/navidys/prometheus-podman-exporter:v1.10.1
 export RELATED_IMAGE_TEST_TEMPEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tempest-all:current-podified
+export RELATED_IMAGE_WATCHER_API_IMAGE_URL_DEFAULT=quay.io/podified-master-centos9/openstack-watcher-api:current-podified
+export RELATED_IMAGE_WATCHER_APPLIER_IMAGE_URL_DEFAULT=quay.io/podified-master-centos9/openstack-watcher-applier:current-podified
+export RELATED_IMAGE_WATCHER_DECISION_ENGINE_IMAGE_URL_DEFAULT=quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified
+export RELATED_IMAGE_OPENSTACK_LIGHTSPEED_IMAGE_URL_DEFAULT=quay.io/openstack-lightspeed/rag-content:os-docs-2024.2
 #NOTE: TEST_ images below do not get released downstream. They should not be prefixed with RELATED
 export TEST_TOBIKO_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-tobiko:current-podified
 export TEST_ANSIBLETEST_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ansible-tests:current-podified

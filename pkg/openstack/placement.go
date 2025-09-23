@@ -144,14 +144,27 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 	}
 
 	if placementAPI.Status.ObservedGeneration == placementAPI.Generation && placementAPI.IsReady() {
+		Log.Info("PlacementAPI ready condition is true")
 		instance.Status.ContainerImages.PlacementAPIImage = version.Status.ContainerImages.PlacementAPIImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, corev1beta1.OpenStackControlPlanePlacementAPIReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlanePlacementAPIReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the PlacementAPI resource into the instance
+		// under the condition of type OpenStackControlPlanePlacementAPIReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(placementAPI.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(placementAPI.Status.Conditions, corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition, instance, placementAPI.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlanePlacementAPIReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlanePlacementAPIReadyRunningMessage))
+		}
 	}
 
 	return ctrl.Result{}, nil

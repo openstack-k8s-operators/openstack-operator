@@ -280,7 +280,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 					Spec: &alertmanagerSvc,
 				},
 			}
-			ed.Route.Create = alertmanagerSvc.ObjectMeta.Annotations[service.AnnotationIngressCreateKey] == "true"
+			ed.Route.Create = alertmanagerSvc.Annotations[service.AnnotationIngressCreateKey] == "true"
 			ed.Route.TLS.Enabled = false
 			if instance.Spec.Telemetry.AlertmanagerOverride.Route != nil {
 				ed.Route.OverrideSpec = *instance.Spec.Telemetry.AlertmanagerOverride.Route
@@ -387,10 +387,10 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.NotificationImage = *version.Status.ContainerImages.CeilometerNotificationImage
 		telemetry.Spec.Ceilometer.SgCoreImage = *version.Status.ContainerImages.CeilometerSgcoreImage
 		telemetry.Spec.Ceilometer.ProxyImage = *version.Status.ContainerImages.CeilometerProxyImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
-		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
+		telemetry.Spec.Autoscaling.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
+		telemetry.Spec.Autoscaling.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
+		telemetry.Spec.Autoscaling.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
+		telemetry.Spec.Autoscaling.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
 
 		telemetry.Spec.Ceilometer.KSMImage = *getImg(version.Status.ContainerImages.KsmImage, &missingImageDefault)
 		telemetry.Spec.Ceilometer.MysqldExporterImage = *getImg(version.Status.ContainerImages.CeilometerMysqldExporterImage, &missingImageDefault)
@@ -431,6 +431,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	}
 
 	if telemetry.Status.ObservedGeneration == telemetry.Generation && telemetry.IsReady() {
+		helper.GetLogger().Info("Telemetry ready condition is true")
 		instance.Status.ContainerImages.CeilometerCentralImage = version.Status.ContainerImages.CeilometerCentralImage
 		instance.Status.ContainerImages.CeilometerComputeImage = version.Status.ContainerImages.CeilometerComputeImage
 		instance.Status.ContainerImages.CeilometerIpmiImage = version.Status.ContainerImages.CeilometerIpmiImage
@@ -447,11 +448,23 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.CloudKittyProcImage = version.Status.ContainerImages.CloudKittyProcImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneTelemetryReadyCondition, corev1beta1.OpenStackControlPlaneTelemetryReadyMessage)
 	} else {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneTelemetryReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneTelemetryReadyRunningMessage))
+		// We want to mirror the condition of the highest priority from the Telemetry resource into the instance
+		// under the condition of type OpenStackControlPlaneTelemetryReadyCondition, but only if the sub-resource
+		// currently has any conditions (which won't be true for the initial creation of the sub-resource, since
+		// it has not gone through a reconcile loop yet to have any conditions).  If this condition ends up being
+		// the highest priority condition in the OpenStackControlPlane, it will appear in the OpenStackControlPlane's
+		// "Ready" condition at the end of the reconciliation loop, clearly surfacing the condition to the user in
+		// the "oc get oscontrolplane -n <namespace>" output.
+		if len(telemetry.Status.Conditions) > 0 {
+			MirrorSubResourceCondition(telemetry.Status.Conditions, corev1beta1.OpenStackControlPlaneTelemetryReadyCondition, instance, telemetry.Kind)
+		} else {
+			// Default to the associated "running" condition message for the sub-resource if it currently lacks any conditions for mirroring
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneTelemetryReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneTelemetryReadyRunningMessage))
+		}
 	}
 
 	return ctrl.Result{}, nil

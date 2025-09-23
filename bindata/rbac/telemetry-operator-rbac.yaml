@@ -327,6 +327,14 @@ rules:
     - patch
     - watch
 - apiGroups:
+    - ovn.openstack.org
+  resources:
+    - ovnnorthds
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
     - rabbitmq.com
   resources:
     - rabbitmqclusters
@@ -591,4 +599,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: telemetry-operator
+    openstack.org/operator-name: telemetry

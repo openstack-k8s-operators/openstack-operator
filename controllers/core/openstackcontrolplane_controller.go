@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package core contains the OpenStackControlPlane controller implementation
 package core
 
 import (
@@ -32,7 +34,6 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1 "k8s.io/api/core/v1"
 
@@ -53,6 +54,7 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
+	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 
 	"github.com/go-logr/logr"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -77,7 +79,7 @@ type OpenStackControlPlaneReconciler struct {
 	Kclient kubernetes.Interface
 }
 
-// GetLog returns a logger object with a prefix of "conroller.name" and aditional controller context fields
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
 func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackControlPlane")
 }
@@ -119,6 +121,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=config.openshift.io,resources=networks,verbs=get;list;watch;
 // +kubebuilder:rbac:groups=topology.openstack.org,resources=topologies,verbs=get;list;watch;update
+// +kubebuilder:rbac:groups=watcher.openstack.org,resources=watchers,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -129,7 +132,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	Log := r.GetLogger(ctx)
 	// Fetch the OpenStackControlPlane instance
 	instance := &corev1beta1.OpenStackControlPlane{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -367,15 +370,19 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
-	OVNControllerReady, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
+	OVNControllerReady, OVNControllerConditions, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if !OVNControllerReady {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+		if len(OVNControllerConditions) > 0 {
+			openstack.MirrorSubResourceCondition(OVNControllerConditions, corev1beta1.OpenStackControlPlaneOVNReadyCondition, instance, "OVN")
+		} else {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneOVNReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneOVNReadyRunningMessage))
+		}
 	} else {
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
 	}
@@ -573,6 +580,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcileWatcher(ctx, instance, version, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	ctrlResult, errs := openstack.DeleteCertsAndRoutes(ctx, instance, helper)
 	if errs != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -610,7 +624,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileDelete(ctx context.Context, i
 const (
 	passwordSecretField               = ".spec.secret"
 	tlsCABundleSecretNameField        = ".spec.tls.caBundleSecretName"
-	tlsIngressCACustomIssuer          = ".spec.tls.ingerss.ca.customIssuer"
+	tlsIngressCACustomIssuer          = ".spec.tls.ingress.ca.customIssuer"
 	tlsPodLevelInternalCACustomIssuer = ".spec.tls.podLevel.internal.ca.customIssuer"
 	tlsPodLevelOvnCACustomIssuer      = ".spec.tls.podLevel.ovn.ca.customIssuer"
 )
@@ -716,6 +730,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 		Owns(&certmgrv1.Issuer{}).
 		Owns(&certmgrv1.Certificate{}).
 		Owns(&barbicanv1.Barbican{}).
+		Owns(&watcherv1.Watcher{}).
 		Owns(&corev1beta1.OpenStackVersion{}).
 		Watches(
 			&corev1.Secret{},
@@ -733,7 +748,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context, src client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
 
-	l := log.FromContext(ctx).WithName("Controllers").WithName("OpenStackControlPlane")
+	Log := r.GetLogger(ctx)
 
 	for _, field := range allWatchFields {
 		crList := &corev1beta1.OpenStackControlPlaneList{}
@@ -743,12 +758,12 @@ func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context,
 		}
 		err := r.List(ctx, crList, listOps)
 		if err != nil {
-			l.Error(err, fmt.Sprintf("listing %s for field: %s - %s", crList.GroupVersionKind().Kind, field, src.GetNamespace()))
+			Log.Error(err, fmt.Sprintf("listing %s for field: %s - %s", crList.GroupVersionKind().Kind, field, src.GetNamespace()))
 			return requests
 		}
 
 		for _, item := range crList.Items {
-			l.Info(fmt.Sprintf("input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
+			Log.Info(fmt.Sprintf("input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
 
 			requests = append(requests,
 				reconcile.Request{
@@ -767,7 +782,7 @@ func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context,
 // Verify the referenced topology exists
 func (r *OpenStackControlPlaneReconciler) checkTopologyRef(
 	ctx context.Context,
-	h *helper.Helper,
+	h *common_helper.Helper,
 	topologyRef *topologyv1.TopoRef,
 	namespace string,
 ) error {

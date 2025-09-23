@@ -429,4 +429,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: barbican-operator
+    openstack.org/operator-name: barbican

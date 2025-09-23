@@ -9,3 +9,12 @@ metadata:
     app.kubernetes.io/created-by: openstack-operator
   name: openstack
   namespace: openstack-operators
+spec:
+  operatorOverrides:
+  - name: infra
+    controllerManager:
+      resources:
+        limits:
+          cpu: 600m
+          memory: 2Gi
+    replicas: 1

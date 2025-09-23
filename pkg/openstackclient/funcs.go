@@ -10,6 +10,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package openstackclient provides functionality for managing OpenStack client resources
 package openstackclient
 
 import (
@@ -93,6 +94,20 @@ func ClientPodSpec(
 				},
 				Env:          env.MergeEnvs([]corev1.EnvVar{}, envVars),
 				VolumeMounts: volumeMounts,
+			},
+		},
+		Tolerations: []corev1.Toleration{
+			{
+				Key:               "node.kubernetes.io/not-ready",
+				Operator:          corev1.TolerationOpExists,
+				Effect:            corev1.TaintEffectNoExecute,
+				TolerationSeconds: &[]int64{120}[0],
+			},
+			{
+				Key:               "node.kubernetes.io/unreachable",
+				Operator:          corev1.TolerationOpExists,
+				Effect:            corev1.TaintEffectNoExecute,
+				TolerationSeconds: &[]int64{120}[0],
 			},
 		},
 	}

@@ -360,4 +360,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: neutron-operator
+    openstack.org/operator-name: neutron

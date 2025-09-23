@@ -30,6 +30,7 @@ import (
 
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
@@ -40,6 +41,7 @@ import (
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
+
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -50,6 +52,7 @@ import (
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 )
 
 var _ = Describe("OpenStackOperator controller", func() {
@@ -138,6 +141,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 		telemetryService = Entry("the telemetry service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetTelemetry(names.TelemetryName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		watcherService = Entry("the watcher service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetWatcher(names.WatcherName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
@@ -841,6 +850,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			DeferCleanup(
 				th.DeleteInstance,
@@ -1198,7 +1208,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				corev1.OpenStackControlPlaneCAReadyCondition,
 				k8s_corev1.ConditionFalse,
 				condition.ErrorReason,
-				"OpenStackControlPlane CAs issuer custom-issuer error occured Error getting issuer : Issuer.cert-manager.io \"custom-issuer\" not found",
+				"OpenStackControlPlane CAs issuer custom-issuer error occured error getting issuer : Issuer.cert-manager.io \"custom-issuer\" not found",
 			)
 		})
 
@@ -1428,7 +1438,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
 					corev1.OpenStackControlPlaneCustomTLSReadyCondition,
 					k8s_corev1.ConditionFalse,
-					condition.RequestedReason,
+					condition.ErrorReason,
 					fmt.Sprintf(corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage, names.CustomServiceCertSecretName.Name),
 				)
 			})
@@ -1459,6 +1469,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 					keystoneRoute := &routev1.Route{}
 
 					g.Expect(th.K8sClient.Get(th.Ctx, keystoneRouteName, keystoneRoute)).Should(Succeed())
+					g.Expect(keystoneRoute.Spec.TLS).Should(Not(BeNil()))
 					g.Expect(keystoneRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
 					g.Expect(keystoneRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
 					g.Expect(keystoneRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))
@@ -1805,6 +1816,464 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("A OpenStackControlplane instance is created", func() {
+		BeforeEach(func() {
+			// NOTE(bogdando): DBs certs need to be created here as well, but those are already existing somehow
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			DeferCleanup(k8sClient.Delete, ctx,
+				th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")}))
+			DeferCleanup(k8sClient.Delete, ctx,
+				th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
+
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			// enable dependencies
+			spec["nova"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"apiTimeout": 60,
+					"cellTemplates": map[string]interface{}{
+						"cell0": map[string]interface{}{},
+					},
+				},
+			}
+			spec["galera"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["memcached"] = map[string]interface{}{
+				"enabled": true,
+				"templates": map[string]interface{}{
+					"memcached": map[string]interface{}{
+						"replicas": 1,
+					},
+				},
+			}
+			spec["rabbitmq"] = map[string]interface{}{
+				"enabled": true,
+				"templates": map[string]interface{}{
+					"rabbitmq": map[string]interface{}{
+						"replicas": 1,
+					},
+				},
+			}
+			spec["keystone"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["glance"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["neutron"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["placement"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"apiTimeout": 60,
+				},
+			}
+			// turn off unrelated to this test case services
+			spec["horizon"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["cinder"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["swift"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["redis"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["ironic"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["designate"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["barbican"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["manila"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["heat"] = map[string]interface{}{
+				"enabled": false,
+			}
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": false,
+			}
+
+			Eventually(func(g Gomega) {
+				g.Expect(CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec)).Should(Not(BeNil()))
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+				SimulateControlplaneReady()
+			}, timeout, interval).Should(Succeed())
+
+			DeferCleanup(
+				th.DeleteInstance,
+				GetOpenStackControlPlane(names.OpenStackControlplaneName),
+			)
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Status.ObservedGeneration = OSCtlplane.Generation
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneMemcachedReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneRabbitMQReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneNeutronReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneGlanceReadyCondition, "Ready")
+				OSCtlplane.Status.Conditions.MarkTrue(corev1.OpenStackControlPlanePlacementAPIReadyCondition, "Ready")
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+				th.Logger.Info("Simulated nova dependencies ready", "on", names.OpenStackControlplaneName)
+			}, timeout, interval).Should(Succeed())
+
+			// nova to become ready
+			Eventually(func(g Gomega) {
+				conditions := OpenStackControlPlaneConditionGetter(names.OpenStackControlplaneName)
+				g.Expect(conditions.Has(corev1.OpenStackControlPlaneNovaReadyCondition)).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have configured nova", func() {
+			nova := &novav1.Nova{}
+			Eventually(func(g Gomega) {
+				g.Expect(k8sClient.Get(ctx, names.NovaName, nova)).Should(Succeed())
+				g.Expect(nova).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have configured nova from the service template", func() {
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.Nova.Template.APIDatabaseInstance = "custom-db"
+				g.Expect(k8sClient.Update(ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			nova := &novav1.Nova{}
+			Eventually(func(g Gomega) {
+				g.Expect(k8sClient.Get(ctx, names.NovaName, nova)).Should(Succeed())
+				g.Expect(nova).ShouldNot(BeNil())
+				g.Expect(nova.Spec.APIDatabaseInstance).Should(Equal("custom-db"))
+
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A watcher OpenStackControlplane instance is created with telemetry and default values", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["watcher"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"ceilometer": map[string]interface{}{
+						"enabled": true,
+					},
+					"metricStorage": map[string]interface{}{
+						"enabled": true,
+					},
+				},
+			}
+
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicRouteName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicSvcName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertInternalName))
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+
+		})
+
+		It("should have watcher enabled and default values", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Watcher.Enabled).Should(BeTrue())
+
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+
+			Expect(OSCtlplane.Spec.Watcher.APIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Watcher.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Watcher.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.watcher.openstack.org/timeout", "60s"))
+
+			watcher := GetWatcher(names.WatcherName)
+			// watcher services exist
+			Eventually(func(g Gomega) {
+				watcher := GetWatcher(names.WatcherName)
+				g.Expect(watcher).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// default databaseInstance is openstack
+			Expect(watcher.Spec.DatabaseInstance).Should(Equal(ptr.To("openstack")))
+			Expect(watcher.Spec.DatabaseAccount).Should(Equal(ptr.To("watcher")))
+			// default Watche container images are set
+			Expect(watcher.Spec.APIContainerImageURL).Should(Not(BeNil()))
+			Expect(watcher.Spec.ApplierContainerImageURL).Should(Not(BeNil()))
+			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Not(BeNil()))
+			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Equal("quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified"))
+
+			Expect(watcher.Spec.APIServiceTemplate.TLS.Ca.CaBundleSecretName).Should(Equal("combined-ca-bundle"))
+
+		})
+
+		It("should create watcher route and populate TLS secrets", func() {
+			watcherPublicSvcName := types.NamespacedName{Name: "watcher-public", Namespace: namespace}
+			watcherInternalSvcName := types.NamespacedName{Name: "watcher-internal", Namespace: namespace}
+
+			th.CreateService(
+				watcherPublicSvcName,
+				map[string]string{
+					"osctlplane-service": "watcher",
+					"osctlplane":         "",
+				},
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{
+							Name:     "watcher-public",
+							Port:     int32(9322),
+							Protocol: k8s_corev1.ProtocolTCP,
+						},
+					},
+				})
+			watcherSvc := th.GetService(watcherPublicSvcName)
+			if watcherSvc.Annotations == nil {
+				watcherSvc.Annotations = map[string]string{}
+			}
+			watcherSvc.Annotations[service.AnnotationIngressCreateKey] = "true"
+			watcherSvc.Annotations[service.AnnotationEndpointKey] = "public"
+			Expect(th.K8sClient.Status().Update(th.Ctx, watcherSvc)).To(Succeed())
+			th.CreateService(
+				watcherInternalSvcName,
+				map[string]string{
+					"osctlplane-service": "watcher",
+					"osctlplane":         "",
+				},
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{
+							Name:     "watcher-internal",
+							Port:     int32(9322),
+							Protocol: k8s_corev1.ProtocolTCP,
+						},
+					},
+				})
+			watcherIntSvc := th.GetService(watcherInternalSvcName)
+			if watcherIntSvc.Annotations == nil {
+				watcherIntSvc.Annotations = map[string]string{}
+			}
+			watcherIntSvc.Annotations[service.AnnotationIngressCreateKey] = "false"
+			watcherIntSvc.Annotations[service.AnnotationEndpointKey] = "internal"
+			Expect(th.K8sClient.Status().Update(th.Ctx, watcherIntSvc)).To(Succeed())
+
+			Eventually(func(g Gomega) {
+				watcherRouteName := types.NamespacedName{Name: "watcher-public", Namespace: namespace}
+				watcherRoute := &routev1.Route{}
+
+				g.Expect(th.K8sClient.Get(th.Ctx, watcherRouteName, watcherRoute)).Should(Succeed())
+				g.Expect(watcherRoute.Spec.TLS).Should(Not(BeNil()))
+				g.Expect(watcherRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
+				g.Expect(watcherRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
+				g.Expect(watcherRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))
+			}, timeout, interval).Should(Succeed())
+
+			watcher := GetWatcher(names.WatcherName)
+			Expect(watcher.Spec.APIServiceTemplate.TLS.API.Internal.SecretName).Should(Equal(ptr.To("cert-watcher-internal-svc")))
+			Expect(watcher.Spec.APIServiceTemplate.TLS.API.Public.SecretName).Should(Equal(ptr.To("cert-watcher-public-svc")))
+			Expect(watcher.Spec.APIServiceTemplate.Override.Service["public"].EndpointURL).Should(Not(BeNil()))
+
+		})
+		It("should have ControlPlaneWatcherReadyCondition false when watcher is not ready", func() {
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneWatcherReadyCondition,
+					k8s_corev1.ConditionFalse,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have ControlPlaneWatcherReadyCondition true when watcher is ready", func() {
+			// simulate watcher ready state
+			Eventually(func(g Gomega) {
+				watcher := &watcherv1.Watcher{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.WatcherName, watcher)).Should(Succeed())
+				watcher.Status.ObservedGeneration = watcher.Generation
+				watcher.Status.Conditions.MarkTrue(condition.ReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, watcher)).To(Succeed())
+				th.Logger.Info("Simulated Watcher ready", "on", names.WatcherName)
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneWatcherReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A watcher OpenStackControlplane instance is created with custom parameters", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["watcher"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"decisionengineServiceTemplate": map[string]interface{}{
+						"customServiceConfig": "#testcustom",
+					},
+					"apiServiceTemplate": map[string]interface{}{
+						"replicas": int32(2),
+					},
+					"databaseInstance": "custom-db",
+					"databaseAccount":  "custom-account",
+					"apiTimeout":       120,
+				},
+			}
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"ceilometer": map[string]interface{}{
+						"enabled": true,
+					},
+					"metricStorage": map[string]interface{}{
+						"enabled": true,
+					},
+				},
+			}
+
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicRouteName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicSvcName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertInternalName))
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have watcher enabled and default values", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Watcher.Enabled).Should(BeTrue())
+
+			watcher := GetWatcher(names.WatcherName)
+			// watcher services exist
+			Eventually(func(g Gomega) {
+				watcher := GetWatcher(names.WatcherName)
+				g.Expect(watcher).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// default values
+			Expect(watcher.Spec.ServiceUser).Should(Equal(ptr.To("watcher")))
+			Expect(watcher.Spec.MemcachedInstance).Should(Equal(ptr.To("memcached")))
+			Expect(OSCtlplane.Spec.Watcher.Template.DecisionEngineServiceTemplate.Replicas).Should(Equal(ptr.To(int32(1))))
+
+			Expect(OSCtlplane.Spec.Watcher.APIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Watcher.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "120s"))
+			Expect(OSCtlplane.Spec.Watcher.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.watcher.openstack.org/timeout", "120s"))
+			// default Watche container images are set
+			Expect(watcher.Spec.APIContainerImageURL).Should(Not(BeNil()))
+			Expect(watcher.Spec.ApplierContainerImageURL).Should(Not(BeNil()))
+			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Equal("quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified"))
+
+		})
+
+		It("should have watcher parameters from controlplane template", func() {
+			watcher := GetWatcher(names.WatcherName)
+			Expect(watcher.Spec.DecisionEngineServiceTemplate.CustomServiceConfig).Should(Equal("#testcustom"))
+			Expect(watcher.Spec.APIServiceTemplate.Replicas).Should(Equal(ptr.To(int32(2))))
+			Expect(watcher.Spec.DatabaseInstance).Should(Equal(ptr.To("custom-db")))
+			Expect(watcher.Spec.DatabaseAccount).Should(Equal(ptr.To("custom-account")))
+		})
+
+		It("should have ControlPlaneWatcherReadyCondition false when watcher is not ready", func() {
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneWatcherReadyCondition,
+					k8s_corev1.ConditionFalse,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have ControlPlaneWatcherReadyCondition true when watcher is ready", func() {
+			// simulate watcher ready state
+			Eventually(func(g Gomega) {
+				watcher := &watcherv1.Watcher{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.WatcherName, watcher)).Should(Succeed())
+				watcher.Status.ObservedGeneration = watcher.Generation
+				watcher.Status.Conditions.MarkTrue(condition.ReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, watcher)).To(Succeed())
+				th.Logger.Info("Simulated Watcher ready", "on", names.WatcherName)
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneWatcherReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should delete the watcher instance when watcher is disabled", func() {
+			// watcher services exist
+			Eventually(func(g Gomega) {
+				watcher := GetWatcher(names.WatcherName)
+				g.Expect(watcher).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				OSCtlplane.Spec.Watcher.Enabled = false
+				g.Expect(th.K8sClient.Update(th.Ctx, OSCtlplane)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				instance := &watcherv1.Watcher{}
+				err := th.K8sClient.Get(th.Ctx, names.WatcherName, instance)
+				g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
 	When("OpenStackControlplane instance is deleted", func() {
 		BeforeEach(func() {
 			DeferCleanup(
@@ -1901,7 +2370,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			openStackControlPlane := &corev1.OpenStackControlPlane{}
-			openStackControlPlane.ObjectMeta.Namespace = names.Namespace
+			openStackControlPlane.Namespace = names.Namespace
 			openStackControlPlane.Name = names.OpenStackVersionName2.Name
 			err = k8sClient.Delete(ctx, openStackControlPlane)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -2150,6 +2619,20 @@ var _ = Describe("OpenStackOperator controller", func() {
 			spec["topologyRef"] = map[string]string{
 				"name": names.OpenStackTopology[0].Name,
 			}
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"ceilometer": map[string]interface{}{
+						"enabled": true,
+					},
+					"metricStorage": map[string]interface{}{
+						"enabled": true,
+					},
+				},
+			}
+			spec["watcher"] = map[string]interface{}{
+				"enabled": true,
+			}
 			// Build the topology Spec
 			topologySpec := GetSampleTopologySpec()
 			// Create Test Topologies
@@ -2237,6 +2720,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronService,
 			horizonService,
 			heatService,
+			watcherService,
 		)
 		DescribeTable("An OpenStackControlplane updates the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -2268,6 +2752,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronService,
 			horizonService,
 			heatService,
+			watcherService,
 		)
 		DescribeTable("An OpenStackControlplane Service (Glance) overrides the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -2315,6 +2800,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronService,
 			horizonService,
 			heatService,
+			watcherService,
 		)
 		DescribeTable("An OpenStackControlplane removes the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -2342,6 +2828,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronService,
 			horizonService,
 			heatService,
+			watcherService,
 		)
 	})
 })
@@ -2966,6 +3453,33 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 				"Invalid value: \"namespace\": Customizing namespace field is not supported"),
 		)
 	})
+	It("Blocks creating ctlplane CRs with watcher enabled without telemetry services", func() {
+		spec := GetDefaultOpenStackControlPlaneSpec()
+		spec["watcher"] = map[string]interface{}{
+			"enabled": true,
+		}
+		raw := map[string]interface{}{
+			"apiVersion": "core.openstack.org/v1beta1",
+			"kind":       "OpenStackControlPlane",
+			"metadata": map[string]interface{}{
+				"name":      "foo",
+				"namespace": namespace,
+			},
+			"spec": spec,
+		}
+
+		unstructuredObj := &unstructured.Unstructured{Object: raw}
+		_, err := controllerutil.CreateOrPatch(
+			th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+		Expect(err).Should(HaveOccurred())
+		var statusError *k8s_errors.StatusError
+		Expect(errors.As(err, &statusError)).To(BeTrue())
+		Expect(err.Error()).To(
+			ContainSubstring(
+				"invalid: spec.watcher.enabled: Invalid value: true: Watcher requires these services to be enabled: Galera, Memcached, RabbitMQ, Keystone, Telemetry, Telemetry.Ceilometer, Telemetry.MetricStorage"),
+		)
+	})
+
 })
 
 var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
@@ -3275,6 +3789,7 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 					novncproxyRoute := &routev1.Route{}
 
 					g.Expect(th.K8sClient.Get(th.Ctx, novncproxyRouteName, novncproxyRoute)).Should(Succeed())
+					g.Expect(novncproxyRoute.Spec.TLS).Should(Not(BeNil()))
 					g.Expect(novncproxyRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
 					g.Expect(novncproxyRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
 					g.Expect(novncproxyRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))

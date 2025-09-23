@@ -11,6 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package client contains the OpenStackClient controller implementation
 package client
 
 import (
@@ -62,7 +63,7 @@ type OpenStackClientReconciler struct {
 	Kclient kubernetes.Interface
 }
 
-// GetLog returns a logger object with a prefix of "conroller.name" and aditional controller context fields
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
 func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackClient")
 }
@@ -87,7 +88,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	Log := r.GetLogger(ctx)
 
 	instance := &clientv1.OpenStackClient{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
+	err := r.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			Log.Info("OpenStackClient CR not found")
@@ -219,6 +220,8 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	_, configMapHash, err := configmap.GetConfigMapAndHashWithName(ctx, helper, *instance.Spec.OpenStackConfigMap, instance.Namespace)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
+			// Since the OpenStackConfigMap config map is usually automatically created by the Keystone operator,
+			// we treat this as an info (because the user is usually not responsible for manually creating it).
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				clientv1.OpenStackClientReadyCondition,
 				condition.RequestedReason,
@@ -239,6 +242,8 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	_, secretHash, err := secret.GetSecret(ctx, helper, *instance.Spec.OpenStackConfigSecret, instance.Namespace)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
+			// Since the OpenStackConfigSecret secret is usually automatically created by the Keystone operator,
+			// we treat this as an info (because the user is usually not responsible for manually creating it).
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				clientv1.OpenStackClientReadyCondition,
 				condition.RequestedReason,
@@ -267,11 +272,14 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		)
 		if err != nil {
 			if k8s_errors.IsNotFound(err) {
+				// Since the CA cert secret should have been manually created by the user when provided in the spec,
+				// we treat this as a warning because it means that reconciliation will not be able to continue.
 				instance.Status.Conditions.Set(condition.FalseCondition(
 					condition.TLSInputReadyCondition,
-					condition.RequestedReason,
-					condition.SeverityInfo,
-					fmt.Sprintf(condition.TLSInputReadyWaitingMessage, instance.Spec.CaBundleSecretName)))
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					condition.TLSInputReadyWaitingMessage,
+					instance.Spec.CaBundleSecretName))
 				return ctrl.Result{}, nil
 			}
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -320,7 +328,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	podSpecHashName := "podSpec"
 
 	op, err := controllerutil.CreateOrPatch(ctx, r.Client, osclient, func() error {
-		isPodUpdate := !osclient.ObjectMeta.CreationTimestamp.IsZero()
+		isPodUpdate := !osclient.CreationTimestamp.IsZero()
 		currentPodSpecHash := instance.Status.Hash[podSpecHashName]
 		if !isPodUpdate || currentPodSpecHash != podSpecHash {
 			osclient.Spec = spec
@@ -348,14 +356,14 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			// openstackclient pod
 			if err := r.Delete(ctx, osclient); err != nil && !k8s_errors.IsNotFound(err) {
 				// Error deleting the object
-				return ctrl.Result{}, fmt.Errorf("Error deleting OpenStackClient pod %s: %w", osclient.Name, err)
+				return ctrl.Result{}, fmt.Errorf("error deleting OpenStackClient pod %s: %w", osclient.Name, err)
 			}
 			Log.Info(fmt.Sprintf("OpenStackClient pod deleted due to change %s", err.Error()))
 
 			return ctrl.Result{Requeue: true}, nil
 		}
 
-		return ctrl.Result{}, fmt.Errorf("Failed to create or update pod %s: %w", osclient.Name, err)
+		return ctrl.Result{}, fmt.Errorf("failed to create or update pod %s: %w", osclient.Name, err)
 	}
 
 	if err != nil {
@@ -376,6 +384,18 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			fmt.Sprintf("Pod %s successfully reconciled - operation: %s", osclient.Name, string(op)),
 			instance,
 		)
+	}
+
+	// if pod is stuck in terminating state for more than 3 minutes, force delete it
+	if osclient.DeletionTimestamp != nil {
+		terminatingDuration := time.Since(osclient.DeletionTimestamp.Time)
+		if terminatingDuration > time.Minute*3 {
+			// Force delete only truly stuck pods
+			err := r.Delete(ctx, osclient, client.GracePeriodSeconds(0))
+			if err != nil {
+				return ctrl.Result{}, fmt.Errorf("failed to force delete pod: %w", err)
+			}
+		}
 	}
 
 	podReady := false
@@ -468,7 +488,7 @@ func (r *OpenStackClientReconciler) SetupWithManager(
 		listOpts := []client.ListOption{
 			client.InNamespace(o.GetNamespace()),
 		}
-		if err := r.Client.List(ctx, openstackclients, listOpts...); err != nil {
+		if err := r.List(ctx, openstackclients, listOpts...); err != nil {
 			Log.Error(err, "Unable to retrieve OpenstackClient CRs %v")
 			return nil
 		}
@@ -515,7 +535,7 @@ func (r *OpenStackClientReconciler) SetupWithManager(
 func (r *OpenStackClientReconciler) findObjectsForSrc(ctx context.Context, src client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
 
-	l := log.FromContext(context.Background()).WithName("Controllers").WithName("OpenStackClient")
+	Log := r.GetLogger(context.Background())
 
 	for _, field := range allWatchFields {
 		crList := &clientv1.OpenStackClientList{}
@@ -525,12 +545,12 @@ func (r *OpenStackClientReconciler) findObjectsForSrc(ctx context.Context, src c
 		}
 		err := r.List(ctx, crList, listOps)
 		if err != nil {
-			l.Error(err, fmt.Sprintf("listing %s for field: %s - %s", crList.GroupVersionKind().Kind, field, src.GetNamespace()))
+			Log.Error(err, fmt.Sprintf("listing %s for field: %s - %s", crList.GroupVersionKind().Kind, field, src.GetNamespace()))
 			return requests
 		}
 
 		for _, item := range crList.Items {
-			l.Info(fmt.Sprintf("input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
+			Log.Info(fmt.Sprintf("input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
 
 			requests = append(requests,
 				reconcile.Request{

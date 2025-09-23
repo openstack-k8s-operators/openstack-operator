@@ -1162,6 +1162,12 @@ spec:
                   - extraVol
                   type: object
                 type: array
+              federatedRealmConfig:
+                description: |-
+                  Secret containing the configuration for federated realms
+                  This is only needed when multiple realms are federated.
+                  Config files mount path is set to /var/lib/httpd/metadata/
+                type: string
               fernetMaxActiveKeys:
                 default: 5
                 description: FernetMaxActiveKeys - Maximum number of fernet token
@@ -1627,6 +1633,9 @@ spec:
                 description: ReadyCount of keystone API instances
                 format: int32
                 type: integer
+              region:
+                description: Region - optional region name for the keystone service
+                type: string
               transportURLSecret:
                 description: TransportURLSecret - Secret containing RabbitMQ transportURL
                 type: string

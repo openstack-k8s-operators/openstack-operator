@@ -380,6 +380,18 @@ rules:
     - update
     - watch
 - apiGroups:
+    - redis.openstack.org
+  resources:
+    - redises
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
     - route.openshift.io
   resources:
     - routes
@@ -485,4 +497,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: octavia-operator
+    openstack.org/operator-name: octavia

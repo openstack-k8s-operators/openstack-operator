@@ -208,6 +208,7 @@ spec:
     apiOverride:
       route: {}
     template:
+      databaseInstance: openstack
       manilaAPI:
         replicas: 1
         networkAttachments:

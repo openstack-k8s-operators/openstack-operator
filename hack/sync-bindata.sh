@@ -142,13 +142,21 @@ EOF_CAT
 }
 
 for BUNDLE in $(hack/pin-bundle-images.sh | tr "," " "); do
-    n=0
-    until [ "$n" -ge 5 ]; do
-        skopeo copy "docker://$BUNDLE" dir:${EXTRACT_DIR}/tmp && break
-        echo "Command failed. retrying ... $n/5"
-        n=$((n+1))
-        sleep 15
-    done
+    (
+        set +e
+        n=0
+        RC=1
+        while :; do
+            skopeo copy "docker://$BUNDLE" dir:${EXTRACT_DIR}/tmp
+            RC=$?
+            if [ $RC -eq 0 -o "$n" -ge 5 ]; then
+                exit $RC
+            fi
+            n=$((n+1))
+            echo "Command failed. retrying ... $n/5"
+            sleep 15
+        done
+    )
     extract_bundle "${EXTRACT_DIR}/tmp" "${OUT_DATA}/"
 done
 
@@ -247,7 +255,7 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: ${OPERATOR_NAME}
+    openstack.org/operator-name: ${OPERATOR_NAME//-operator}
 EOF_CAT
 done
 
@@ -279,9 +287,11 @@ for X in $(ls manifests/*clusterserviceversion.yaml); do
         OPERATOR_NAME=$(echo $X | sed -e "s|manifests\/\([^\.]*\)\..*|\1|" | sed -e "s|-|_|g" | tr '[:lower:]' '[:upper:]' )
         echo $OPERATOR_NAME
         if [[ $OPERATOR_NAME == "RABBITMQ_CLUSTER_OPERATOR" ]]; then
-            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[0].image)
+            # Rabbitmq cluster operator has just a container in the deployment and name is operator, different that openstack ones
+            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r '.spec.install.spec.deployments[0].spec.template.spec.containers.[] | select(.name == "operator") | .image')
         else
-            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r .spec.install.spec.deployments[0].spec.template.spec.containers[1].image)
+            # The name of the actual operator container in the openstack operators is manager
+            IMAGE=$(cat $X | $LOCAL_BINARIES/yq -r '.spec.install.spec.deployments[0].spec.template.spec.containers.[] | select(.name == "manager") | .image')
         fi
         echo $IMAGE
 

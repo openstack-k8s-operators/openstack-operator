@@ -56,7 +56,7 @@ OPERATOR_SDK_VERSION ?= v1.31.0
 DEFAULT_IMG ?= quay.io/openstack-k8s-operators/openstack-operator:latest
 IMG ?= $(DEFAULT_IMG)
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.29
+ENVTEST_K8S_VERSION = 1.31
 
 CRDDESC_OVERRIDE ?= :maxDescLen=0
 
@@ -137,7 +137,7 @@ help: ## Display this help.
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	mkdir -p config/operator/rbac && \
 	$(CONTROLLER_GEN) crd$(CRDDESC_OVERRIDE) output:crd:artifacts:config=config/crd/bases webhook paths="./..." && \
-	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./apis/client/...,./apis/core/...,./apis/dataplane/...,./controllers/client/...,./controllers/core/...,./controllers/dataplane/...,./pkg/...}" output:dir=config/rbac && \
+	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./apis/lightspeed/...,./apis/client/...,./apis/core/...,./apis/dataplane/...,./controllers/lightspeed/...,./controllers/client/...,./controllers/core/...,./controllers/dataplane/...,./pkg/...}" output:dir=config/rbac && \
 	$(CONTROLLER_GEN) rbac:roleName=operator-role paths="./controllers/operator/..." paths="./apis/operator/..." output:dir=config/operator/rbac && \
 	rm -f apis/bases/* && cp -a config/crd/bases apis/
 
@@ -151,8 +151,12 @@ bindata: kustomize yq ## Call sync bindata script
 	mkdir -p bindata/crds bindata/rbac bindata/operator
 	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
 	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
-	sed -i bindata/operator/operator.yaml -e "/envCustomImage/c\\{{ range \$$envName, \$$envValue := .OpenStackServiceRelatedImages }}\n        - name: {{ \$$envName }}\n          value: {{ \$$envValue }}\n{{ end }}"
-	sed -i bindata/operator/operator.yaml -e "s|kube-rbac-proxy:replace_me.*|'{{ .KubeRbacProxyImage }}'|"
+	sed -i bindata/operator/operator.yaml -e "s|replicas:.*|replicas: {{ .OpenStackOperator.Deployment.Replicas }}|"
+	sed -i bindata/operator/operator.yaml -e "/envCustom/c\\{{- range .OpenStackOperator.Deployment.Manager.Env }}\n        - name: '{{ .Name }}'\n          value: '{{ .Value }}'\n{{- end }}"
+	sed -i bindata/operator/operator.yaml -e "/customLimits/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.Memory }}"
+	sed -i bindata/operator/operator.yaml -e "/customRequests/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.Memory }}"
+	sed -i bindata/operator/operator.yaml -e "s|kube-rbac-proxy:replace_me.*|'{{ .OpenStackOperator.Deployment.KubeRbacProxy.Image }}'|"
+	sed -i bindata/operator/operator.yaml -e "/customTolerations/c\\      tolerations:\n{{- range .OpenStackOperator.Deployment.Tolerations }}\n      - key: \"{{ .Key }}\"\n{{- if .Operator }}\n        operator: \"{{ .Operator }}\"\n{{- end }}\n{{- if .Value }}\n        value: \"{{ .Value }}\"\n{{- end }}\n{{- if .Effect }}\n        effect: \"{{ .Effect }}\"\n{{- end }}\n{{- if .TolerationSeconds }}\n        tolerationSeconds: {{ .TolerationSeconds }}\n{{- end }}\n{{- end }}"
 	cp config/operator/managers.yaml bindata/operator/
 	cp config/operator/rabbit.yaml bindata/operator/
 	$(KUSTOMIZE) build config/rbac > bindata/rbac/rbac.yaml
@@ -182,9 +186,10 @@ tidy: ## Run go mod tidy on every mod file in the repo
 	go mod tidy
 	cd ./apis && go mod tidy
 
+GOLANGCI_LINT_VERSION ?= v2.4.0
 .PHONY: golangci-lint
 golangci-lint:
-	test -s $(LOCALBIN)/golangci-lint || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.59.1
+	test -s $(LOCALBIN)/golangci-lint || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s $(GOLANGCI_LINT_VERSION)
 	$(LOCALBIN)/golangci-lint run --fix
 
 MAX_PROCS := 5
@@ -200,7 +205,7 @@ ginkgo-run: ## Run ginkgo.
 	source hack/export_related_images.sh && \
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) -v debug --bin-dir $(LOCALBIN) use $(ENVTEST_K8S_VERSION) -p path)" \
 	OPERATOR_TEMPLATES="$(PWD)/templates" \
-	$(GINKGO) --trace --cover --coverpkg=./pkg/openstack,./pkg/openstackclient,./pkg/util,./pkg/dataplane/...,./controllers/...,./apis/client/v1beta1,./apis/core/v1beta1,./apis/dataplane/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
+	$(GINKGO) --trace --cover --coverpkg=./pkg/...,./controllers/...,./apis/... --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
 
 .PHONY: test-all
 test-all: test golint golangci golangci-lint ## Run all tests.
@@ -299,16 +304,16 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
 GINKGO ?= $(LOCALBIN)/ginkgo
-GINKGO_TESTS ?= ./tests/... ./apis/client/... ./apis/core/... ./apis/dataplane/... ./pkg/dataplane/...
+GINKGO_TESTS ?= ./tests/... ./apis/client/... ./apis/core/... ./apis/dataplane/... ./pkg/...
 
 KUTTL ?= $(LOCALBIN)/kubectl-kuttl
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.5.0 #(dprince: bumped to aquire new features like --load-restrictor)
-CONTROLLER_TOOLS_VERSION ?= v0.14.0
+CONTROLLER_TOOLS_VERSION ?= v0.18.0
 CRD_MARKDOWN_VERSION ?= v0.0.3
 KUTTL_VERSION ?= 0.17.0
-GOTOOLCHAIN_VERSION ?= go1.21.0
+GOTOOLCHAIN_VERSION ?= go1.24.0
 OC_VERSION ?= 4.16.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
@@ -335,7 +340,7 @@ $(CRD_MARKDOWN): $(LOCALBIN)
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(LOCALBIN)
-	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@c7e1dc9b
+	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
 .PHONY: ginkgo
 ginkgo: $(GINKGO) ## Download ginkgo locally if necessary.
@@ -505,6 +510,7 @@ SKIP_CERT ?=false
 run-with-webhook: export METRICS_PORT?=8080
 run-with-webhook: export HEALTH_PORT?=8081
 run-with-webhook: export PPROF_PORT?=8082
+run-with-webhook: export WEBHOOK_PORT?=9443
 run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/run_with_local_webhook.sh
 

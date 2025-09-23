@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package operator contains the OpenStack operator controller implementation
 package operator
 
 import (
@@ -21,12 +22,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -37,19 +40,17 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	operatorv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1"
+	"github.com/openstack-k8s-operators/openstack-operator/pkg/operator"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/operator/bindata"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-)
-
-const (
-	OperatorCount = 22
 )
 
 // OpenStackReconciler reconciles a OpenStack object
@@ -59,7 +60,7 @@ type OpenStackReconciler struct {
 	Kclient kubernetes.Interface
 }
 
-// GetLog returns a logger object with a prefix of "controller.name" and aditional controller context fields
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
 func (r *OpenStackReconciler) GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackOperator")
 }
@@ -67,7 +68,6 @@ func (r *OpenStackReconciler) GetLogger(ctx context.Context) logr.Logger {
 var (
 	envRelatedOperatorImages         (map[string]*string) // operatorName -> image
 	envRelatedOpenStackServiceImages (map[string]*string) // full_related_image_name -> image
-	rabbitmqImage                    string
 	operatorImage                    string
 	kubeRbacProxyImage               string
 	openstackReleaseVersion          string
@@ -88,12 +88,7 @@ func SetupEnv() {
 			operatorName = strings.TrimSuffix(operatorName, "_OPERATOR_MANAGER_IMAGE_URL")
 			operatorName = strings.ToLower(operatorName)
 			operatorName = strings.ReplaceAll(operatorName, "_", "-")
-			// rabbitmq-cluster is a special case with an alternate deployment template
-			if operatorName == "rabbitmq-cluster" {
-				rabbitmqImage = envArr[1]
-			} else {
-				envRelatedOperatorImages[operatorName] = &envArr[1]
-			}
+			envRelatedOperatorImages[operatorName] = &envArr[1]
 			log.Log.Info("Found operator related image", "operator", operatorName, "image", envArr[1])
 		} else if strings.HasPrefix(envArr[0], "RELATED_IMAGE_") {
 			envRelatedOpenStackServiceImages[envArr[0]] = &envArr[1]
@@ -101,6 +96,7 @@ func SetupEnv() {
 			kubeRbacProxyImage = envArr[1]
 		} else if envArr[0] == "OPERATOR_IMAGE_URL" {
 			operatorImage = envArr[1]
+			envRelatedOperatorImages[operatorv1beta1.OpenStackOperatorName] = &operatorImage
 		} else if envArr[0] == "OPENSTACK_RELEASE_VERSION" {
 			openstackReleaseVersion = envArr[1]
 		} else if envArr[0] == "LEASE_DURATION" {
@@ -110,7 +106,6 @@ func SetupEnv() {
 		} else if envArr[0] == "RETRY_PERIOD" {
 			retryPeriod = envArr[1]
 		}
-
 	}
 }
 
@@ -139,12 +134,12 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Fetch the OpenStack instance
 	instanceList := &operatorv1beta1.OpenStackList{}
-	err := r.Client.List(ctx, instanceList, &client.ListOptions{})
+	err := r.List(ctx, instanceList, &client.ListOptions{})
 	if err != nil {
 		return ctrl.Result{}, errors.Wrap(err, "failed listing all OpenStack instances")
 	}
 	instance := &operatorv1beta1.OpenStack{}
-	err = r.Client.Get(ctx, req.NamespacedName, instance)
+	err = r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile req.
@@ -213,6 +208,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	)
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.ObservedGeneration = instance.Generation
+	instance.Status.TotalOperatorCount = ptr.To(len(operatorv1beta1.OperatorList))
 
 	instance.Status.Conditions.Set(condition.FalseCondition(
 		operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -234,7 +230,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 		if instanceList.Items[0].Name != req.Name {
 			Log.Info("Ignoring OpenStack.operator.openstack.org because one already exists and does not match existing name")
-			err = r.Client.Delete(ctx, instance, &client.DeleteOptions{})
+			err = r.Delete(ctx, instance, &client.DeleteOptions{})
 			if err != nil {
 				instance.Status.Conditions.Set(condition.FalseCondition(
 					operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -285,8 +281,8 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			err))
 		return ctrl.Result{}, err
 	}
-	if deploymentsRunning < OperatorCount {
-		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", OperatorCount, "pending", deploymentsPending)
+	if deploymentsRunning < *instance.Status.EnabledOperatorCount {
+		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", *instance.Status.EnabledOperatorCount, "pending", deploymentsPending)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			operatorv1beta1.OpenStackOperatorDeploymentsReadyCondition,
 			condition.RequestedReason,
@@ -368,7 +364,7 @@ func (r *OpenStackReconciler) reconcileDelete(ctx context.Context, instance *ope
 func (r *OpenStackReconciler) countDeployments(ctx context.Context, instance *operatorv1beta1.OpenStack) (int, []string, error) {
 	deployments := &appsv1.DeploymentList{}
 	pending := []string{}
-	err := r.Client.List(ctx, deployments, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, deployments, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return 0, pending, err
 	}
@@ -411,30 +407,49 @@ func isWebhookEndpoint(name string) bool {
 // checkServiceEndpoints -
 func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instance *operatorv1beta1.OpenStack) (ctrl.Result, error) {
 
+	Log := r.GetLogger(ctx)
+
 	endpointSliceList := &discoveryv1.EndpointSliceList{}
-	err := r.Client.List(ctx, endpointSliceList, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, endpointSliceList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			log.Log.Info("Webhook endpoint not found. Requeuing...")
+			Log.Info("Webhook endpoint not found. Requeuing...")
 			return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 		}
 		return ctrl.Result{}, err
 	}
 
 	for _, endpointSlice := range endpointSliceList.Items {
-		if isWebhookEndpoint(endpointSlice.GetName()) {
+		endpointSliceName := endpointSlice.GetName()
+
+		if isWebhookEndpoint(endpointSliceName) {
+			// is deployment disabled ?
+			disabled := false
+			for _, op := range instance.Spec.OperatorOverrides {
+				if strings.HasPrefix(endpointSliceName, op.Name+"-operator") &&
+					op.Replicas != nil && *op.Replicas == 0 {
+
+					disabled = true
+					Log.Info(fmt.Sprintf("Webhook %s disabled, skipping endpoint slice check", endpointSliceName), "name", endpointSlice.GetName())
+					break
+				}
+			}
+			if disabled {
+				continue
+			}
+
 			if len(endpointSlice.Endpoints) == 0 {
-				log.Log.Info("Webhook endpoint not configured. Requeuing...", "name", endpointSlice.GetName())
+				Log.Info("Webhook endpoint not configured. Requeuing...", "name", endpointSlice.GetName())
 				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 			}
 			for _, endpoint := range endpointSlice.Endpoints {
 				if len(endpoint.Addresses) == 0 {
-					log.Log.Info("Webhook endpoint addresses aren't healthy. Requeuing...", "name", endpointSlice.GetName())
+					Log.Info("Webhook endpoint addresses aren't healthy. Requeuing...", "name", endpointSlice.GetName())
 					return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 				}
 				bFalse := false
 				if endpoint.Conditions.Ready == &bFalse || endpoint.Conditions.Serving == &bFalse {
-					log.Log.Info("Webhook endpoint addresses aren't serving. Requeuing...", "name", endpointSlice.GetName())
+					Log.Info("Webhook endpoint addresses aren't serving. Requeuing...", "name", endpointSlice.GetName())
 					return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
 				}
 			}
@@ -445,22 +460,23 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 }
 
 func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
 	// only apply CRDs and RBAC once per each containerImage change
 	if !containerImageMatch(instance) {
 		if err := r.applyCRDs(ctx, instance); err != nil {
-			log.Log.Error(err, "failed applying CRD manifests")
+			Log.Error(err, "failed applying CRD manifests")
 			return err
 		}
 
 		if err := r.applyRBAC(ctx, instance); err != nil {
-			log.Log.Error(err, "failed applying RBAC manifests")
+			Log.Error(err, "failed applying RBAC manifests")
 			return err
 		}
 	}
 	instance.Status.ContainerImage = &operatorImage
 
 	if err := r.applyOperator(ctx, instance); err != nil {
-		log.Log.Error(err, "failed applying Operator manifests")
+		Log.Error(err, "failed applying Operator manifests")
 		return err
 	}
 
@@ -479,17 +495,177 @@ func (r *OpenStackReconciler) applyRBAC(ctx context.Context, instance *operatorv
 }
 
 func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	kubeRbacProxyContainer := operator.Container{
+		Image: kubeRbacProxyImage,
+		Resources: operator.Resource{
+			Limits: &operator.ResourceList{
+				CPU:    operatorv1beta1.DefaultRbacProxyCPULimit.String(),
+				Memory: operatorv1beta1.DefaultRbacProxyMemoryLimit.String(),
+			},
+			Requests: &operator.ResourceList{
+				CPU:    operatorv1beta1.DefaultRbacProxyCPURequests.String(),
+				Memory: operatorv1beta1.DefaultRbacProxyMemoryRequests.String(),
+			},
+		},
+	}
+	defaultEnv := []corev1.EnvVar{
+		{
+			Name:  "LEASE_DURATION",
+			Value: leaseDuration,
+		},
+		{
+			Name:  "RENEW_DEADLINE",
+			Value: renewDeadline,
+		},
+		{
+			Name:  "RETRY_PERIOD",
+			Value: retryPeriod,
+		}}
+
+	relatedImagesEnv := []corev1.EnvVar{}
+	// maps are not sorted in go, make sure to add the images in a sorted way,
+	// otherwise the env vars content will change regularly
+	keys := make([]string, 0, len(envRelatedOpenStackServiceImages))
+	for k := range envRelatedOpenStackServiceImages {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+	for _, name := range keys {
+		if img, ok := envRelatedOpenStackServiceImages[name]; ok && img != nil {
+			relatedImagesEnv = append(relatedImagesEnv,
+				corev1.EnvVar{
+					Name:  name,
+					Value: *img,
+				})
+		}
+	}
+
+	// all othere serviceOperators
+	operators := []operator.Operator{} // operator details
+	disabledOperators := 0
+	enabledOperators := 0
+	for _, op := range operatorv1beta1.OperatorList {
+		if img, ok := envRelatedOperatorImages[op.Name]; ok && img != nil {
+			// set global defaults
+			serviceOp := operator.Operator{
+				Name:      op.Name,
+				Namespace: instance.Namespace,
+				Deployment: operator.Deployment{
+					Replicas: ptr.To(operatorv1beta1.ReplicasEnabled),
+					Manager: operator.Container{
+						Image: *img,
+						Env:   defaultEnv,
+						Resources: operator.Resource{
+							Limits: &operator.ResourceList{
+								CPU:    operatorv1beta1.DefaultManagerCPULimit.String(),
+								Memory: operatorv1beta1.DefaultManagerMemoryLimit.String(),
+							},
+							Requests: &operator.ResourceList{
+								CPU:    operatorv1beta1.DefaultManagerCPURequests.String(),
+								Memory: operatorv1beta1.DefaultManagerMemoryRequests.String(),
+							},
+						},
+					},
+					KubeRbacProxy: kubeRbacProxyContainer,
+					Tolerations:   operatorv1beta1.DefaultTolerations,
+				},
+			}
+
+			switch op.Name {
+			case operatorv1beta1.OpenStackOperatorName:
+				// set the release version on the openstack-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "OPENSTACK_RELEASE_VERSION",
+						Value: openstackReleaseVersion,
+					})
+				// set related images on the openstack-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					relatedImagesEnv...)
+			case operatorv1beta1.OpenStackBaremetalOperatorName:
+				// enable webhooks on the openstack-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "ENABLE_WEBHOOKS",
+						Value: "true",
+					})
+				// set related images on the openstack-baremetal-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					relatedImagesEnv...)
+			case operatorv1beta1.InfraOperatorName:
+				// enable webhooks on the infra-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "ENABLE_WEBHOOKS",
+						Value: "true",
+					})
+			default:
+				// disable webhooks per default
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "ENABLE_WEBHOOKS",
+						Value: "false",
+					})
+			}
+
+			// set operator defaults if defined
+			operator.SetOverrides(op, &serviceOp)
+
+			// set user overrides
+			opOvr := operator.HasOverrides(instance.Spec.OperatorOverrides, op.Name)
+			if opOvr != nil {
+				operator.SetOverrides(*opOvr, &serviceOp)
+			}
+
+			operators = append(operators, serviceOp)
+
+			if *serviceOp.Deployment.Replicas == 0 {
+				disabledOperators++
+			} else {
+				enabledOperators++
+			}
+		}
+	}
+	instance.Status.DisabledOperatorCount = &disabledOperators
+	instance.Status.EnabledOperatorCount = &enabledOperators
+
+	// serviceOperators a copy of operators details, without openstack-operator and rabbitmq-cluster-operator
+	// which get removed bellow when creating openstackOperator and rabbitmqOperator, since they use dedicated
+	// templates
+	serviceOperators := operators
+
+	// openstack-operator-controller-manager
+	openstackOperator := operator.Operator{}
+	idx, op := operator.GetOperator(serviceOperators, operatorv1beta1.OpenStackOperatorName)
+	if idx >= 0 {
+		openstackOperator = op
+		// remove openstackOperator from serviceOperators
+		serviceOperators = append(serviceOperators[:idx], serviceOperators[idx+1:]...)
+	}
+
+	// rabbitmq-cluster-operator
+	rabbitmqOperator := operator.Operator{}
+	idx, op = operator.GetOperator(serviceOperators, operatorv1beta1.RabbitMQOperatorName)
+	if idx >= 0 {
+		rabbitmqOperator = op
+		// remove rabbitmq-cluster-operator from serviceOperators
+		serviceOperators = append(serviceOperators[:idx], serviceOperators[idx+1:]...)
+	}
+
 	data := bindata.MakeRenderData()
+
+	// global stuff
 	data.Data["OperatorNamespace"] = instance.Namespace
-	data.Data["OperatorImages"] = envRelatedOperatorImages
-	data.Data["RabbitmqImage"] = rabbitmqImage
-	data.Data["OperatorImage"] = operatorImage
-	data.Data["KubeRbacProxyImage"] = kubeRbacProxyImage
-	data.Data["OpenstackReleaseVersion"] = openstackReleaseVersion
-	data.Data["LeaseDuration"] = leaseDuration
-	data.Data["RenewDeadline"] = renewDeadline
-	data.Data["RetryPeriod"] = retryPeriod
-	data.Data["OpenStackServiceRelatedImages"] = envRelatedOpenStackServiceImages
+
+	// rabbitmaq-cluster-operator-manager image rabbit.yaml
+	data.Data["RabbitmqOperator"] = rabbitmqOperator
+
+	// openstack-operator-controller-manager image operator.yaml
+	data.Data["OpenStackOperator"] = openstackOperator
+
+	// service operators
+	data.Data["ServiceOperators"] = serviceOperators // -> service operator images managers.yaml
+
 	return r.renderAndApply(ctx, instance, data, "operator", true)
 }
 
@@ -502,6 +678,7 @@ func (r *OpenStackReconciler) renderAndApply(
 ) error {
 	var err error
 
+	Log := r.GetLogger(ctx)
 	bindir := util.GetEnvVar("BASE_BINDATA", "/bindata")
 
 	sourceFullDirectory := filepath.Join(bindir, sourceDirectory)
@@ -524,13 +701,13 @@ func (r *OpenStackReconciler) renderAndApply(
 		if setControllerReference {
 			// Set the controller reference.
 			if obj.GetNamespace() != "" {
-				log.Log.Info("Setting controller reference", "object", obj.GetName(), "controller", instance.Name)
+				Log.Info("Setting controller reference", "object", obj.GetName(), "controller", instance.Name)
 				err = controllerutil.SetControllerReference(instance, obj, r.Scheme)
 				if err != nil {
 					return errors.Wrap(err, "failed to set owner reference")
 				}
 			} else {
-				log.Log.Info("skipping controller reference (cluster scoped)", "object", obj.GetName(), "controller", instance.Name)
+				Log.Info("skipping controller reference (cluster scoped)", "object", obj.GetName(), "controller", instance.Name)
 			}
 		}
 
@@ -544,15 +721,11 @@ func (r *OpenStackReconciler) renderAndApply(
 }
 
 func isServiceOperatorResource(name string) bool {
-	//NOTE: test-operator was deployed as a independant package so it may or may not be installed
-	//NOTE: depending on how watcher-operator is released for FR2 and then in FR3 it may need to be
-	// added into this list in the future
-	serviceOperatorNames := []string{"barbican", "cinder", "designate", "glance", "heat", "horizon", "infra",
-		"ironic", "keystone", "manila", "mariadb", "neutron", "nova", "octavia", "openstack-baremetal", "ovn",
-		"placement", "rabbitmq-cluster", "swift", "telemetry", "test"}
-
-	for _, item := range serviceOperatorNames {
-		if strings.Index(name, item) == 0 {
+	for _, item := range operatorv1beta1.OperatorList {
+		if item.Name == operatorv1beta1.OpenStackOperatorName {
+			continue
+		}
+		if strings.Index(name, item.Name) == 0 {
 			return true
 		}
 	}
@@ -583,14 +756,14 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 
 	csvList := &uns.UnstructuredList{}
 	csvList.SetGroupVersionKind(csvGVR.GroupVersion().WithKind("ClusterServiceVersion"))
-	err := r.Client.List(ctx, csvList, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, csvList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
 	for _, csv := range csvList.Items {
 		Log.Info("Found CSV", "name", csv.GetName())
 		if isServiceOperatorResource(csv.GetName()) {
-			err = r.Client.Delete(ctx, &csv)
+			err = r.Delete(ctx, &csv)
 			if err != nil {
 				if apierrors.IsNotFound(err) {
 					Log.Info("CSV not found on delete. Continuing...", "name", csv.GetName())
@@ -604,14 +777,14 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 
 	subscriptionList := &uns.UnstructuredList{}
 	subscriptionList.SetGroupVersionKind(subscriptionGVR.GroupVersion().WithKind("Subscription"))
-	err = r.Client.List(ctx, subscriptionList, &client.ListOptions{Namespace: instance.Namespace})
+	err = r.List(ctx, subscriptionList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
 	for _, subscription := range subscriptionList.Items {
 		Log.Info("Found Subscription", "name", subscription.GetName())
 		if isServiceOperatorResource(subscription.GetName()) {
-			err = r.Client.Delete(ctx, &subscription)
+			err = r.Delete(ctx, &subscription)
 			if err != nil {
 				if apierrors.IsNotFound(err) {
 					Log.Info("Subscription not found on delete. Continuing...", "name", subscription.GetName())
@@ -628,7 +801,7 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 	installPlanList := &uns.UnstructuredList{}
 	installPlanList.SetGroupVersionKind(installPlanGVR.GroupVersion().WithKind("InstallPlan"))
 
-	err = r.Client.List(ctx, installPlanList, &client.ListOptions{Namespace: instance.Namespace})
+	err = r.List(ctx, installPlanList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
@@ -642,7 +815,7 @@ func (r *OpenStackReconciler) cleanupObsoleteResources(ctx context.Context, inst
 		if found {
 			// just checking for the first one should be sufficient
 			if isServiceOperatorResource(csvNames[0].(string)) {
-				err = r.Client.Delete(ctx, &installPlan)
+				err = r.Delete(ctx, &installPlan)
 				if err != nil {
 					if apierrors.IsNotFound(err) {
 						Log.Info("Installplane not found on delete. Continuing...", "name", installPlan.GetName())
@@ -676,7 +849,7 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 	// 4) installPlan from old service operators removed
 	operatorList := &uns.UnstructuredList{}
 	operatorList.SetGroupVersionKind(operatorGVR.GroupVersion().WithKind("Operator"))
-	err := r.Client.List(ctx, operatorList, &client.ListOptions{Namespace: instance.Namespace})
+	err := r.List(ctx, operatorList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		return err
 	}
@@ -697,19 +870,32 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 					Log.Info("Deleting operator reference", "Reference", ref)
 					obj := uns.Unstructured{}
 					obj.SetName(refData["name"].(string))
-					obj.SetNamespace(refData["namespace"].(string))
-					apiParts := strings.Split(refData["apiVersion"].(string), "/")
+
+					// Some of the references are not namespaced, so we need to check if the namespace is present
+					if namespace, ok := refData["namespace"]; ok {
+						obj.SetNamespace(namespace.(string))
+					}
+
+					apiVersion := refData["apiVersion"].(string)
+					apiParts := strings.Split(apiVersion, "/")
 					objGvk := schema.GroupVersionResource{
-						Group:    apiParts[0],
-						Version:  apiParts[1],
 						Resource: refData["kind"].(string),
+					}
+					// Some of the references have an apiVersion that lacks a group prefix
+					if len(apiParts) > 1 {
+						objGvk.Group = apiParts[0]
+						objGvk.Version = apiParts[1]
+						Log.Info("postCleanupObsoleteResources: Found apiVersion with group prefix", "apiVersion", apiVersion)
+					} else {
+						objGvk.Version = apiParts[0]
+						Log.Info("postCleanupObsoleteResources: Found apiVersion without group prefix", "apiVersion", apiVersion)
 					}
 					obj.SetGroupVersionKind(objGvk.GroupVersion().WithKind(refData["kind"].(string)))
 
 					// references from CRD's should be removed before this function is called
 					// but this is a safeguard as we do not want to delete them
 					if refData["kind"].(string) != "CustomResourceDefinition" {
-						err = r.Client.Delete(ctx, &obj)
+						err = r.Delete(ctx, &obj)
 						if err != nil {
 							if apierrors.IsNotFound(err) {
 								Log.Info("Object not found on delete. Continuing...", "name", obj.GetName())
@@ -723,7 +909,7 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 				return fmt.Errorf("Requeuing/Found references for operator name: %s, refs: %v", operator.GetName(), refs)
 			}
 			// no refs found so we should be able to successfully delete the operator
-			err = r.Client.Delete(ctx, &operator)
+			err = r.Delete(ctx, &operator)
 			if err != nil {
 				return err
 			}

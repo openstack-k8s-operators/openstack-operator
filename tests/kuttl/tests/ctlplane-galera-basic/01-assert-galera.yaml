@@ -171,6 +171,8 @@ spec:
           duration: 87600h0m0s
         cert:
           duration: 43800h0m0s
+  watcher:
+    enabled: false
 status:
   conditions:
   - message: Setup complete

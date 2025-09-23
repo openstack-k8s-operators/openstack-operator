@@ -412,4 +412,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: keystone-operator
+    openstack.org/operator-name: keystone

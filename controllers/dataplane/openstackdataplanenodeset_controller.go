@@ -19,11 +19,11 @@ package dataplane
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"golang.org/x/exp/slices"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -145,7 +145,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// Fetch the OpenStackDataPlaneNodeSet instance
 	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -280,15 +280,17 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.InputReadyCondition,
-			condition.RequestedReason,
+			condition.ErrorReason,
 			condition.SeverityError,
-			err.Error())
+			"%s", err.Error())
 		return result, err
 	} else if (result != ctrl.Result{}) {
+		// Since the the private key secret should have been manually created by the user when provided in the spec,
+		// we treat this as a warning because it means that reconciliation will not be able to continue.
 		instance.Status.Conditions.MarkFalse(
 			condition.InputReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
+			condition.ErrorReason,
+			condition.SeverityWarning,
 			dataplanev1.InputReadyWaitingMessage,
 			"secret/"+ansibleSSHPrivateKeySecret)
 		return result, nil
@@ -424,8 +426,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			dataplanev1.NodeSetDeploymentReadyWaitingMessage)
 	}
 
@@ -437,8 +441,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	} else if isDeploymentRunning {
 		Log.Info("Deployment still running...", "instance", instance)
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
 	} else if isDeploymentFailed {
 		podsInterface := r.Kclient.CoreV1().Pods(instance.Namespace)
@@ -459,9 +465,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		if err != nil {
 			deployErrorMsg = err.Error()
 		}
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
-			deployErrorMsg)
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			"%s", deployErrorMsg)
 	}
 
 	return ctrl.Result{}, err
@@ -511,7 +519,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
 			deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
 			if condition.IsError(deploymentCondition) {
-				err = fmt.Errorf(deploymentCondition.Message)
+				err = fmt.Errorf("%s", deploymentCondition.Message)
 				isDeploymentFailed = true
 				failedDeploymentName = deployment.Name
 				break
@@ -670,20 +678,14 @@ func (r *OpenStackDataPlaneNodeSetReconciler) machineConfigWatcherFn(
 	kind := strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)
 	const registryMachineConfigName string = "99-master-generated-registries"
 
-	mcNamespacedName := types.NamespacedName{
-		Name:      registryMachineConfigName,
-		Namespace: "",
-	}
-
-	if err := r.Get(ctx, mcNamespacedName, obj); err != nil {
-		Log.Error(err, fmt.Sprintf("Unable to retrieve MachingConfig %s", registryMachineConfigName))
+	if obj.GetName() != registryMachineConfigName {
 		return nil
 	}
 
 	listOpts := []client.ListOption{
 		client.InNamespace(obj.GetNamespace()),
 	}
-	if err := r.Client.List(ctx, nodeSets, listOpts...); err != nil {
+	if err := r.List(ctx, nodeSets, listOpts...); err != nil {
 		Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList")
 		return nil
 	}
@@ -745,7 +747,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) genericWatcherFn(
 	listOpts := []client.ListOption{
 		client.InNamespace(obj.GetNamespace()),
 	}
-	if err := r.Client.List(ctx, nodeSets, listOpts...); err != nil {
+	if err := r.List(ctx, nodeSets, listOpts...); err != nil {
 		Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList")
 		return nil
 	}

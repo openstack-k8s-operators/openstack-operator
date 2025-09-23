@@ -87,7 +87,7 @@ func checkDNSService(ctx context.Context, helper *helper.Helper,
 	return nil
 }
 
-// createNetServiceNetMap Creates a map of net and ServiceNet
+// BuildNetServiceNetMap creates a map of net and ServiceNet
 func BuildNetServiceNetMap(netconfig infranetworkv1.NetConfig) map[string]string {
 	serviceNetMap := make(map[string]string)
 	for _, net := range netconfig.Spec.Networks {
@@ -107,7 +107,6 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	allIPSets map[string]infranetworkv1.IPSet, dnsDetails *DNSDetails,
 ) error {
 	var allDNSRecords []infranetworkv1.DNSHost
-	var ctlplaneSearchDomain string
 	dnsDetails.Hostnames = map[string]map[infranetworkv1.NetNameStr]string{}
 	dnsDetails.AllIPs = map[string]map[infranetworkv1.NetNameStr]string{}
 
@@ -155,9 +154,8 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					dnsDetails.AllIPs[hostName][infranetworkv1.NetNameStr(netLower)] = res.Address
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
-					// Adding only ctlplane domain for ansibleee.
-					// TODO (rabi) This is not very efficient.
-					if netLower == dataplanev1.CtlPlaneNetwork && ctlplaneSearchDomain == "" {
+
+					if dnsDetails.CtlplaneSearchDomain == "" && netLower == dataplanev1.CtlPlaneNetwork {
 						dnsDetails.CtlplaneSearchDomain = res.DNSDomain
 					}
 				}
@@ -197,14 +195,16 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
-			err.Error())
+			condition.ErrorReason,
+			condition.SeverityError,
+			"%s", err.Error())
 		return dnsDetails, err
 	}
 	if dnsDetails.ClusterAddresses == nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		return dnsDetails, nil
 	}
@@ -215,7 +215,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage,
 			err.Error())
 		return dnsDetails, err
@@ -232,7 +233,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage,
 			err.Error())
 		return dnsDetails, err
@@ -241,7 +243,8 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		util.LogForObject(helper, "DNSData not ready yet waiting", instance)
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
+			condition.RequestedReason,
+			condition.SeverityInfo,
 			dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		return dnsDetails, nil
 	}
@@ -263,7 +266,8 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 		util.LogErrorForObject(helper, err, "Could not cleanup stale IP Reservations", instance)
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetIPReservationReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetIPReservationReadyErrorMessage,
 			err.Error())
 		return nil, nil, false, err
@@ -272,7 +276,8 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetIPReservationReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
+			condition.ErrorReason,
+			condition.SeverityError,
 			dataplanev1.NodeSetIPReservationReadyErrorMessage,
 			err.Error())
 		return nil, netServiceNetMap, false, err
@@ -282,7 +287,8 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 		if s.Status.Conditions.IsFalse(condition.ReadyCondition) {
 			instance.Status.Conditions.MarkFalse(
 				dataplanev1.NodeSetIPReservationReadyCondition,
-				condition.RequestedReason, condition.SeverityInfo,
+				condition.RequestedReason,
+				condition.SeverityInfo,
 				dataplanev1.NodeSetIPReservationReadyWaitingMessage)
 			return nil, netServiceNetMap, false, nil
 		}
@@ -309,27 +315,19 @@ func cleanupStaleReservations(ctx context.Context, helper *helper.Helper,
 		return err
 	}
 
-	ipSetsToRemove := []infranetworkv1.IPSet{}
-	// Delete all IPSet for nodes that are not in nodeset
-	for _, ipSet := range ipSetList.Items {
-		found := false
-		for _, node := range instance.Spec.Nodes {
-			if ipSet.Name == node.HostName {
-				found = true
-				break
-			}
-		}
-		if !found {
-			ipSetsToRemove = append(ipSetsToRemove, ipSet)
-		}
+	currentNodes := make(map[string]bool)
+	for _, node := range instance.Spec.Nodes {
+		currentNodes[node.HostName] = true
 	}
-	for _, ipSet := range ipSetsToRemove {
-		if err := helper.GetClient().Delete(ctx, &ipSet); err != nil {
-			return err
+
+	for _, ipSet := range ipSetList.Items {
+		if _, ok := currentNodes[ipSet.Name]; !ok {
+			if err := helper.GetClient().Delete(ctx, &ipSet); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
-
 }
 
 // reserveIPs Reserves IPs by creating IPSets
@@ -348,7 +346,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	if len(netConfigList.Items) == 0 {
 		errMsg := "no NetConfig CR exists yet"
 		util.LogForObject(helper, errMsg, instance)
-		return nil, nil, fmt.Errorf(errMsg)
+		return nil, nil, fmt.Errorf("%s", errMsg)
 	}
 	netServiceNetMap := BuildNetServiceNetMap(netConfigList.Items[0])
 	allIPSets := make(map[string]infranetworkv1.IPSet)
@@ -356,33 +354,33 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	// CreateOrPatch IPSets
 	for nodeName, node := range instance.Spec.Nodes {
 		foundCtlPlane := false
-		nets := node.Networks
-		hostName := node.HostName
-		if len(nets) == 0 {
-			nets = instance.Spec.NodeTemplate.Networks
+		if len(node.Networks) == 0 {
+			node.Networks = instance.Spec.NodeTemplate.Networks
 		}
 
-		if len(nets) > 0 {
-			for _, net := range nets {
+		if len(node.Networks) > 0 {
+			for _, net := range node.Networks {
 				if strings.EqualFold(string(net.Name), dataplanev1.CtlPlaneNetwork) ||
 					netServiceNetMap[strings.ToLower(string(net.Name))] == dataplanev1.CtlPlaneNetwork {
 					foundCtlPlane = true
+					break
 				}
 			}
 			if !foundCtlPlane {
-				msg := fmt.Sprintf("ctlplane network should be defined for node %s", nodeName)
-				return nil, netServiceNetMap, fmt.Errorf(msg)
+				return nil, netServiceNetMap,
+					fmt.Errorf("ctlplane network should be defined for node %s", nodeName)
 			}
 			ipSet := &infranetworkv1.IPSet{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: instance.Namespace,
-					Name:      hostName,
+					Name:      node.HostName,
 				},
 			}
 			_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ipSet, func() error {
-				ownerLabels := labels.GetLabels(instance, labels.GetGroupLabel(NodeSetLabel), map[string]string{})
+				ownerLabels := labels.GetLabels(
+					instance, labels.GetGroupLabel(NodeSetLabel), map[string]string{})
 				ipSet.Labels = util.MergeStringMaps(ipSet.GetLabels(), ownerLabels)
-				ipSet.Spec.Networks = nets
+				ipSet.Spec.Networks = node.Networks
 				// Set controller reference to the DataPlaneNode object
 				err := controllerutil.SetControllerReference(
 					helper.GetBeforeObject(), ipSet, helper.GetScheme())
@@ -391,11 +389,11 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			if err != nil {
 				return nil, netServiceNetMap, err
 			}
-			allIPSets[hostName] = *ipSet
+			allIPSets[node.HostName] = *ipSet
 		} else {
 			msg := fmt.Sprintf("No Networks defined for node %s or template", nodeName)
 			util.LogForObject(helper, msg, instance)
-			return nil, netServiceNetMap, fmt.Errorf(msg)
+			return nil, netServiceNetMap, fmt.Errorf("%s", msg)
 		}
 	}
 	return allIPSets, netServiceNetMap, nil

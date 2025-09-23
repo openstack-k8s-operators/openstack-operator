@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package main provides the entry point for the OpenStack operator
 package main
 
 import (
@@ -55,6 +56,7 @@ import (
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
+	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 
 	// Note(lpiwowar): Please, do not remove! This import is necessary in order
 	// to make the test-operator part of the openstack-operator-index.
@@ -84,9 +86,11 @@ import (
 	machineconfig "github.com/openshift/api/machineconfiguration/v1"
 	ocp_image "github.com/openshift/api/operator/v1alpha1"
 
+	lightspeedv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
+	lightspeedcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/lightspeed"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	// +kubebuilder:scaffold:imports
 )
@@ -132,6 +136,8 @@ func init() {
 	utilruntime.Must(k8s_networkv1.AddToScheme(scheme))
 	utilruntime.Must(operatorv1beta1.AddToScheme(scheme))
 	utilruntime.Must(topologyv1.AddToScheme(scheme))
+	utilruntime.Must(watcherv1.AddToScheme(scheme))
+	utilruntime.Must(lightspeedv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -140,11 +146,13 @@ func main() {
 	var enableLeaderElection bool
 	var probeAddr string
 	var pprofAddr string
+	var webhookPort int
 	var enableHTTP2 bool
 	flag.BoolVar(&enableHTTP2, "enable-http2", enableHTTP2, "If HTTP/2 should be enabled for the metrics and webhook servers.")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.StringVar(&pprofAddr, "pprof-bind-address", "", "The address the pprof endpoint binds to. Set to empty to disable pprof")
+	flag.IntVar(&webhookPort, "webhook-bind-address", 9443, "The port the webhook server binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -179,7 +187,7 @@ func main() {
 		LeaderElectionID:       "40ba705e.openstack.org",
 		WebhookServer: webhook.NewServer(
 			webhook.Options{
-				Port:    9443,
+				Port:    webhookPort,
 				TLSOpts: []func(config *tls.Config){disableHTTP2},
 			}),
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
@@ -272,6 +280,9 @@ func main() {
 	// Defaults for OpenStackClient
 	clientv1.SetupDefaults()
 
+	// Defaults for OpenStackLightspeed
+	lightspeedv1beta1.SetupDefaults()
+
 	// Defaults for Dataplane
 	dataplanev1.SetupDefaults()
 
@@ -307,6 +318,14 @@ func main() {
 			os.Exit(1)
 		}
 		checker = mgr.GetWebhookServer().StartedChecker()
+	}
+
+	if err = (&lightspeedcontrollers.OpenStackLightspeedReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackLightspeed")
+		os.Exit(1)
 	}
 
 	// +kubebuilder:scaffold:builder

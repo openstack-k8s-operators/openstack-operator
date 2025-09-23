@@ -75,7 +75,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		It("should fail to create more than one OpenStackVersion", func() {
 
 			instance := &corev1.OpenStackVersion{}
-			instance.ObjectMeta.Namespace = names.Namespace
+			instance.Namespace = names.Namespace
 			instance.Name = "foo"
 			err := k8sClient.Create(ctx, instance)
 
@@ -137,7 +137,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmKeplerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmPodmanExporterImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmOpenstackNetworkExporterImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.OpenstackNetworkExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmOvnBgpAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.GlanceAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.HeatAPIImage).ShouldNot(BeNil())
@@ -187,7 +187,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.TestTobikoImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.TestHorizontestImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.TestAnsibletestImage).ShouldNot(BeNil())
-
+				g.Expect(version.Status.ContainerImages.WatcherAPIImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.WatcherDecisionEngineImage).ShouldNot(BeNil())
+				g.Expect(version.Status.ContainerImages.WatcherApplierImage).ShouldNot(BeNil())
 			}, timeout, interval).Should(Succeed())
 		})
 
@@ -624,7 +626,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// this would occur automatically via the watch on the DataPlaneNodeSet's by openstackcontrolplane
 			// so once the administrator executes the DataplaneDeployment and that finishes the controlplane will update the images immediately
 			SimulateControlplaneReady()
-			// now we check that the rest of the container images got updated
+			// now we check that the container images for the aforementioned services got updated
 			Eventually(func(g Gomega) {
 				th.ExpectCondition(
 					names.OpenStackVersionName,

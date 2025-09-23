@@ -90,13 +90,11 @@ rules:
   resources:
     - deployments
   verbs:
-    - create
     - delete
     - get
     - list
     - patch
     - update
-    - watch
 - apiGroups:
     - apps
   resources:
@@ -392,4 +390,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    openstack.org/operator-name: ovn-operator
+    openstack.org/operator-name: ovn

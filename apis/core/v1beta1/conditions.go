@@ -155,6 +155,12 @@ const (
 
 	// OpenStackControlPlaneOpenStackVersionInitializationReadyCondition Status=True condition which indicates if OpenStackVersion is initialized
 	OpenStackControlPlaneOpenStackVersionInitializationReadyCondition condition.Type = "OpenStackControlPlaneOpenStackVersionInitializationReadyCondition"
+
+	// OpenStackControlPlaneWatcherReadyCondition Status=True condition which indicates if Watcher is configured and operational
+	OpenStackControlPlaneWatcherReadyCondition condition.Type = "OpenStackControlPlaneWatcherReady"
+
+	// OpenStackControlPlaneExposeWatcherReadyCondition Status=True condition which indicates if Watcher is exposed via a route
+	OpenStackControlPlaneExposeWatcherReadyCondition condition.Type = "OpenStackControlPlaneExposeWatcherReady"
 )
 
 // Common Messages used by API objects.
@@ -486,6 +492,18 @@ const (
 
 	// OpenStackControlPlaneOpenStackVersionInitializationReadyErrorMessage
 	OpenStackControlPlaneOpenStackVersionInitializationReadyErrorMessage = "OpenStackControlPlane OpenStackVersion initialization error occured %s"
+
+	// OpenStackControlPlaneWatcherReadyInitMessage
+	OpenStackControlPlaneWatcherReadyInitMessage = "OpenStackControlPlane Watcher not started"
+
+	// OpenStackControlPlaneWatcherReadyMessage
+	OpenStackControlPlaneWatcherReadyMessage = "OpenStackControlPlane Watcher completed"
+
+	// OpenStackControlPlaneWatcherReadyRunningMessage
+	OpenStackControlPlaneWatcherReadyRunningMessage = "OpenStackControlPlane Watcher in progress"
+
+	// OpenStackControlPlaneWatcherReadyErrorMessage
+	OpenStackControlPlaneWatcherReadyErrorMessage = "OpenStackControlPlane Watcher error occured %s"
 )
 
 // Version Conditions used by to drive minor updates

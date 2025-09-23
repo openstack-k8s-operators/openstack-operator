@@ -19,6 +19,7 @@ package v1beta1
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
@@ -26,8 +27,8 @@ import (
 	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -149,11 +150,12 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) (admission.Wa
 		return nil, apierrors.NewInternalError(fmt.Errorf("unable to convert existing object"))
 	}
 
+	var allWarn []string
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
-	if err := r.ValidateUpdateServices(oldControlPlane.Spec, basePath); err != nil {
-		allErrs = append(allErrs, err...)
-	}
+
+	allWarn, errs := r.ValidateUpdateServices(oldControlPlane.Spec, basePath)
+	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
 		allErrs = append(allErrs, err)
@@ -165,7 +167,7 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) (admission.Wa
 			r.Name, allErrs)
 	}
 
-	return nil, nil
+	return allWarn, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
@@ -246,6 +248,12 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 	case "Telemetry.CloudKitty":
 		if !(r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
 			reqs = "RabbitMQ, Keystone"
+		}
+	case "Watcher":
+		if !(r.Spec.Galera.Enabled && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
+			r.Spec.Keystone.Enabled && r.Spec.Telemetry.Enabled && *r.Spec.Telemetry.Template.Ceilometer.Enabled &&
+			*r.Spec.Telemetry.Template.MetricStorage.Enabled) {
+			reqs = "Galera, Memcached, RabbitMQ, Keystone, Telemetry, Telemetry.Ceilometer, Telemetry.MetricStorage"
 		}
 	}
 
@@ -348,6 +356,11 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
+	if r.Spec.Watcher.Enabled {
+		errors = append(errors, r.Spec.Watcher.Template.ValidateCreate(basePath.Child("watcher").Child("template"), r.Namespace)...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
+	}
+
 	// Validation for remaining services...
 	if r.Spec.Galera.Enabled {
 		for key, s := range *r.Spec.Galera.Templates {
@@ -386,7 +399,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 			errors = append(errors, err...)
 
 			for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
-				errors = append(errors, rabbitmqSpec.ValidateCreate(basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)...)
+				warn, errs := rabbitmqSpec.ValidateCreate(basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)
+				warnings = append(warnings, warn...)
+				errors = append(errors, errs...)
 			}
 		}
 	}
@@ -405,8 +420,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 }
 
 // ValidateUpdateServices validating service definitions during the OpenstackControlPlane CR update
-func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlaneSpec, basePath *field.Path) field.ErrorList {
+func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlaneSpec, basePath *field.Path) (admission.Warnings, field.ErrorList) {
 	var errors field.ErrorList
+	var warnings []string
 
 	errors = append(errors, r.ValidateServiceDependencies(basePath)...)
 
@@ -533,6 +549,14 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
+	if r.Spec.Watcher.Enabled {
+		if old.Watcher.Template == nil {
+			old.Watcher.Template = &watcherv1.WatcherSpecCore{}
+		}
+		errors = append(errors, r.Spec.Watcher.Template.ValidateUpdate(*old.Watcher.Template, basePath.Child("watcher").Child("template"), r.Namespace)...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
+	}
+
 	if r.Spec.Memcached.Enabled {
 		if r.Spec.Memcached.Templates != nil {
 			err := common_webhook.ValidateDNS1123Label(
@@ -556,9 +580,10 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		}
 		oldRabbitmqs := *old.Rabbitmq.Templates
 		for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
-
 			if oldRabbitmq, ok := oldRabbitmqs[rabbitmqName]; ok {
-				errors = append(errors, rabbitmqSpec.ValidateUpdate(oldRabbitmq, basePath.Child("rabbitmq").Child("templates").Key(rabbitmqName), r.Namespace)...)
+				warn, errs := rabbitmqSpec.ValidateUpdate(oldRabbitmq, basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)
+				warnings = append(warnings, warn...)
+				errors = append(errors, errs...)
 			}
 		}
 	}
@@ -573,7 +598,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		}
 	}
 
-	return errors
+	return warnings, errors
 }
 
 // ValidateServiceDependencies ensures that when a service is enabled then all the services it depends on are also
@@ -676,6 +701,12 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 		if depErrorMsg := r.checkDepsEnabled("Telemetry.Autoscaling"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("telemetry").Child("template").Child("autoscaling").Child("enabled"),
 				*r.Spec.Telemetry.Template.Autoscaling.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+	if r.Spec.Watcher.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Watcher"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("watcher").Child("enabled"), r.Spec.Watcher.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -1027,6 +1058,24 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			template.Default()
 			// By-value copy, need to update
 			(*r.Spec.Redis.Templates)[key] = template
+		}
+	}
+
+	// Watcher
+	if r.Spec.Watcher.Enabled || r.Spec.Watcher.Template != nil {
+		if r.Spec.Watcher.Template == nil {
+			r.Spec.Watcher.Template = &watcherv1.WatcherSpecCore{}
+		}
+		r.Spec.Watcher.Template.Default()
+
+		if r.Spec.Watcher.Enabled {
+			initializeOverrideSpec(&r.Spec.Watcher.APIOverride.Route, true)
+			r.Spec.Watcher.Template.SetDefaultRouteAnnotations(r.Spec.Watcher.APIOverride.Route.Annotations)
+		}
+
+		// Default DatabaseInstance
+		if r.Spec.Watcher.Template.DatabaseInstance == nil || *r.Spec.Watcher.Template.DatabaseInstance == "" {
+			r.Spec.Watcher.Template.DatabaseInstance = ptr.To("openstack")
 		}
 	}
 
