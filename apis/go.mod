@@ -13,7 +13,7 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20250913143437-ca03bf1e106a
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250916093004-20a0505e2327
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250911092040-f829125f6046
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250919143843-b81500a16049
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250922155301-057562fb7182
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250915220807-7ac28d765257
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250916093250-82a76386143d
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20250922082314-c83d83092a04
@@ -68,6 +68,7 @@ require (
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gophercloud/gophercloud v1.14.1 // indirect
+	github.com/grafana/loki/operator/api/loki v0.0.0-20250910094332-a082b8a061ba // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -117,3 +118,6 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202507112000
 
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag_n)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250717122149-12f70b7f3d8d //allow-merging
+
+// Test CloudKitty
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250923092300-186405486b28
