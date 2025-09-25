@@ -52,6 +52,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.AodhEvaluatorImage = nil
 		instance.Status.ContainerImages.AodhNotifierImage = nil
 		instance.Status.ContainerImages.AodhListenerImage = nil
+		instance.Status.ContainerImages.CloudKittyAPIImage = nil
+		instance.Status.ContainerImages.CloudKittyProcImage = nil
 		return ctrl.Result{}, nil
 	}
 
@@ -86,6 +88,14 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Telemetry.Template.Autoscaling.Aodh.Override.Service[endpointType],
 				telemetry.Name)
+
+		if instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service == nil {
+			instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service = make(map[service.Endpoint]service.RoutedOverrideSpec)
+		}
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service[endpointType] =
+			AddServiceOpenStackOperatorLabel(
+				instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service[endpointType],
+				telemetry.Name)
 	}
 
 	// preserve any previously set TLS certs, set CA cert
@@ -95,12 +105,20 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Ceilometer.TLS = telemetry.Spec.Ceilometer.TLS
 		instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS = telemetry.Spec.Ceilometer.MysqldExporterTLS
 		instance.Spec.Telemetry.Template.Ceilometer.KSMTLS = telemetry.Spec.Ceilometer.KSMTLS
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS = telemetry.Spec.CloudKitty.CloudKittyAPI.TLS
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.TLS = telemetry.Spec.CloudKitty.CloudKittyProc.TLS
+		// TODO
+		// instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.PrometheusTLS = telemetry.Spec.CloudKitty.CloudKittyProc.PrometheusTLS
 	}
 	instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.Ceilometer.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.Ceilometer.KSMTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	// TODO
+	// instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.PrometheusTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	aodhSvcs, err := service.GetServicesListWithLabel(
 		ctx,
@@ -140,6 +158,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
 	ksmSvcs, err := service.GetServicesListWithLabel(
 		ctx,
 		helper,
@@ -158,6 +177,42 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	cloudKittySvcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		map[string]string{common.AppSelector: "cloudkitty"},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// make sure to get to EndpointConfig when all service got created
+	if len(cloudKittySvcs.Items) == len(instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service) {
+		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+			ctx,
+			instance,
+			helper,
+			telemetry,
+			cloudKittySvcs,
+			instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service,
+			instance.Spec.Telemetry.CloudKittyAPIOverride,
+			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS,
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		// set service overrides
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service = endpointDetails.GetEndpointServiceOverrides()
+		// update TLS settings with cert secret
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	// make sure to get to EndpointConfig when all service got created
@@ -389,6 +444,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.AodhEvaluatorImage = version.Status.ContainerImages.AodhEvaluatorImage
 		instance.Status.ContainerImages.AodhNotifierImage = version.Status.ContainerImages.AodhNotifierImage
 		instance.Status.ContainerImages.AodhListenerImage = version.Status.ContainerImages.AodhListenerImage
+		instance.Status.ContainerImages.CloudKittyAPIImage = version.Status.ContainerImages.CloudKittyAPIImage
+		instance.Status.ContainerImages.CloudKittyProcImage = version.Status.ContainerImages.CloudKittyProcImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneTelemetryReadyCondition, corev1beta1.OpenStackControlPlaneTelemetryReadyMessage)
 	} else {
 		// We want to mirror the condition of the highest priority from the Telemetry resource into the instance
