@@ -36,8 +36,9 @@ import (
 // OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNodeSet
 type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
 	// BaremetalSetTemplate Template for BaremetalSet for the NodeSet
-	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetTemplateSpec `json:"baremetalSetTemplate,omitempty"`
+	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetTemplateSpec `json:"baremetalSetTemplate"`
 
 	// +kubebuilder:validation:Required
 	// NodeTemplate - node attributes specific to nodes defined by this resource. These

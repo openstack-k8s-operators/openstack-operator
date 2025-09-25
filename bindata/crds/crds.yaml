@@ -16537,6 +16537,7 @@ spec:
           spec:
             properties:
               baremetalSetTemplate:
+                default: {}
                 properties:
                   agentImageUrl:
                     type: string
