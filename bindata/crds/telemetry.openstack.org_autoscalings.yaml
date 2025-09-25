@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   creationTimestamp: null
   name: autoscalings.telemetry.openstack.org
 spec:
@@ -95,7 +95,6 @@ spec:
                     description: |-
                       ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json.
                       But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
-                      TODO: -> implement
                     type: object
                   evaluatorImage:
                     type: string
@@ -143,7 +142,7 @@ spec:
                                     Annotations is an unstructured key value map stored with a resource that may be
                                     set by external tools to store and retrieve arbitrary metadata. They are not
                                     queryable and should be preserved when modifying objects.
-                                    More info: http://kubernetes.io/docs/user-guide/annotations
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
                                   type: object
                                 labels:
                                   additionalProperties:
@@ -152,7 +151,7 @@ spec:
                                     Map of string keys and values that can be used to organize and categorize
                                     (scope and select) objects. May match selectors of replication controllers
                                     and services.
-                                    More info: http://kubernetes.io/docs/user-guide/labels
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
                                   type: object
                               type: object
                             spec:
@@ -395,10 +394,13 @@ spec:
                       valid secret key.
                     type: string
                   name:
+                    default: ""
                     description: |-
                       Name of the referent.
+                      This field is effectively required, but due to backwards compatibility is
+                      allowed to be empty. Instances of this type with an empty value here are
+                      almost certainly wrong.
                       More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?
                     type: string
                   optional:
                     description: Specify whether the Secret or its key must be defined
