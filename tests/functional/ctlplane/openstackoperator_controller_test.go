@@ -181,8 +181,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			tlsSpec := GetTLSPublicSpec()
-			tlsSpec["ingress"] = map[string]interface{}{
-				"ca": map[string]interface{}{
+			tlsSpec["ingress"] = map[string]any{
+				"ca": map[string]any{
 					"duration": "100h",
 				},
 			}
@@ -211,8 +211,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			tlsSpec := GetTLSPublicSpec()
-			tlsSpec["ingress"] = map[string]interface{}{
-				"cert": map[string]interface{}{
+			tlsSpec["ingress"] = map[string]any{
+				"cert": map[string]any{
 					"duration": "10h",
 				},
 			}
@@ -241,11 +241,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			tlsSpec := GetTLSPublicSpec()
-			tlsSpec["ingress"] = map[string]interface{}{
-				"ca": map[string]interface{}{
+			tlsSpec["ingress"] = map[string]any{
+				"ca": map[string]any{
 					"duration": "100h",
 				},
-				"cert": map[string]interface{}{
+				"cert": map[string]any{
 					"duration": "10h",
 				},
 			}
@@ -274,11 +274,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			tlsSpec := GetTLSPublicSpec()
-			tlsSpec["ingress"] = map[string]interface{}{
-				"ca": map[string]interface{}{
+			tlsSpec["ingress"] = map[string]any{
+				"ca": map[string]any{
 					"renewBefore": "100h",
 				},
-				"cert": map[string]interface{}{
+				"cert": map[string]any{
 					"renewBefore": "10h",
 				},
 			}
@@ -309,8 +309,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			tlsSpec := GetTLSPublicSpec()
-			tlsSpec["ingress"] = map[string]interface{}{
-				"ca": map[string]interface{}{
+			tlsSpec["ingress"] = map[string]any{
+				"ca": map[string]any{
 					"customIssuer": "myissuer",
 				},
 			}
@@ -380,10 +380,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("TLS - A TLSe OpenStackControlplane instance is created with customized internal ca duration", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["tls"] = map[string]interface{}{
-				"podLevel": map[string]interface{}{
-					"internal": map[string]interface{}{
-						"ca": map[string]interface{}{
+			spec["tls"] = map[string]any{
+				"podLevel": map[string]any{
+					"internal": map[string]any{
+						"ca": map[string]any{
 							"duration": "100h",
 						},
 					},
@@ -435,10 +435,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("TLS - A TLSe OpenStackControlplane instance is created with customized internal cert duration", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["tls"] = map[string]interface{}{
-				"podLevel": map[string]interface{}{
-					"internal": map[string]interface{}{
-						"cert": map[string]interface{}{
+			spec["tls"] = map[string]any{
+				"podLevel": map[string]any{
+					"internal": map[string]any{
+						"cert": map[string]any{
 							"duration": "10h",
 						},
 					},
@@ -490,10 +490,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("TLS - A TLSe OpenStackControlplane instance is created with an internal custom issuer", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["tls"] = map[string]interface{}{
-				"podLevel": map[string]interface{}{
-					"internal": map[string]interface{}{
-						"ca": map[string]interface{}{
+			spec["tls"] = map[string]any{
+				"podLevel": map[string]any{
+					"internal": map[string]any{
+						"ca": map[string]any{
 							"customIssuer": "myissuer",
 						},
 					},
@@ -523,13 +523,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("TLS - A TLSe OpenStackControlplane instance is created with an libvirt custom issuer", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["tls"] = map[string]interface{}{
-				"podLevel": map[string]interface{}{
-					"libvirt": map[string]interface{}{
-						"ca": map[string]interface{}{
+			spec["tls"] = map[string]any{
+				"podLevel": map[string]any{
+					"libvirt": map[string]any{
+						"ca": map[string]any{
 							"customIssuer": "myissuer",
 						},
-						"cert": map[string]interface{}{
+						"cert": map[string]any{
 							"duration": "43800h", // can we come up with a single default duration for certs?
 						},
 					},
@@ -559,10 +559,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("TLS - A TLSe OpenStackControlplane instance is created with an ovn custom issuer", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["tls"] = map[string]interface{}{
-				"podLevel": map[string]interface{}{
-					"ovn": map[string]interface{}{
-						"ca": map[string]interface{}{
+			spec["tls"] = map[string]any{
+				"podLevel": map[string]any{
+					"ovn": map[string]any{
+						"ca": map[string]any{
 							"customIssuer": "myissuer",
 						},
 					},
@@ -799,7 +799,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
-			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]any{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 
 			// client pod exists
 			Eventually(func(g Gomega) {
@@ -1055,7 +1055,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
-			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]any{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 
 			// client pod exists
 			Eventually(func(g Gomega) {
@@ -1303,17 +1303,17 @@ var _ = Describe("OpenStackOperator controller", func() {
 			DeferCleanup(k8sClient.Delete, ctx,
 				th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")}))
 			DeferCleanup(k8sClient.Delete, ctx,
-				th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
+				th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]any{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			spec["tls"] = GetTLSPublicSpec()
-			spec["keystone"] = map[string]interface{}{
+			spec["keystone"] = map[string]any{
 				"enabled": true,
-				"apiOverride": map[string]interface{}{
-					"tls": map[string]interface{}{
+				"apiOverride": map[string]any{
+					"tls": map[string]any{
 						"secretName": names.CustomServiceCertSecretName.Name,
 					},
 				},
-				"template": map[string]interface{}{
+				"template": map[string]any{
 					"databaseInstance": names.KeystoneAPIName.Name,
 					"secret":           "osp-secret",
 				},
@@ -1571,20 +1571,20 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			spec["tls"] = GetTLSPublicSpec()
-			spec["cinder"] = map[string]interface{}{
+			spec["cinder"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
-					"cinderAPI": map[string]interface{}{
+				"template": map[string]any{
+					"cinderAPI": map[string]any{
 						"replicas": 1,
 					},
-					"cinderBackup": map[string]interface{}{
+					"cinderBackup": map[string]any{
 						"replicas": 1,
 					},
-					"cinderScheduler": map[string]interface{}{
+					"cinderScheduler": map[string]any{
 						"replicas": 1,
 					},
-					"cinderVolumes": map[string]interface{}{
-						"volume1": map[string]interface{}{
+					"cinderVolumes": map[string]any{
+						"volume1": map[string]any{
 							"replicas": 1,
 						},
 					},
@@ -1678,19 +1678,19 @@ var _ = Describe("OpenStackOperator controller", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			spec["tls"] = GetTLSPublicSpec()
-			spec["ovn"] = map[string]interface{}{
+			spec["ovn"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
-					"ovnDBCluster": map[string]interface{}{
-						"ovndbcluster-nb": map[string]interface{}{
+				"template": map[string]any{
+					"ovnDBCluster": map[string]any{
+						"ovndbcluster-nb": map[string]any{
 							"dbType": "NB",
 						},
-						"ovndbcluster-sb": map[string]interface{}{
+						"ovndbcluster-sb": map[string]any{
 							"dbType": "SB",
 						},
 					},
-					"ovnController": map[string]interface{}{
-						"nicMappings": map[string]interface{}{
+					"ovnController": map[string]any{
+						"nicMappings": map[string]any{
 							"datacentre": "ospbr",
 						},
 					},
@@ -1829,82 +1829,82 @@ var _ = Describe("OpenStackOperator controller", func() {
 			DeferCleanup(k8sClient.Delete, ctx,
 				th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")}))
 			DeferCleanup(k8sClient.Delete, ctx,
-				th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
+				th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]any{"clouds.yaml": string("foo"), "OS_CLOUD": "default"}))
 
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			// enable dependencies
-			spec["nova"] = map[string]interface{}{
+			spec["nova"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
+				"template": map[string]any{
 					"apiTimeout": 60,
-					"cellTemplates": map[string]interface{}{
-						"cell0": map[string]interface{}{},
+					"cellTemplates": map[string]any{
+						"cell0": map[string]any{},
 					},
 				},
 			}
-			spec["galera"] = map[string]interface{}{
+			spec["galera"] = map[string]any{
 				"enabled": true,
 			}
-			spec["memcached"] = map[string]interface{}{
+			spec["memcached"] = map[string]any{
 				"enabled": true,
-				"templates": map[string]interface{}{
-					"memcached": map[string]interface{}{
+				"templates": map[string]any{
+					"memcached": map[string]any{
 						"replicas": 1,
 					},
 				},
 			}
-			spec["rabbitmq"] = map[string]interface{}{
+			spec["rabbitmq"] = map[string]any{
 				"enabled": true,
-				"templates": map[string]interface{}{
-					"rabbitmq": map[string]interface{}{
+				"templates": map[string]any{
+					"rabbitmq": map[string]any{
 						"replicas": 1,
 					},
 				},
 			}
-			spec["keystone"] = map[string]interface{}{
+			spec["keystone"] = map[string]any{
 				"enabled": true,
 			}
-			spec["glance"] = map[string]interface{}{
+			spec["glance"] = map[string]any{
 				"enabled": true,
 			}
-			spec["neutron"] = map[string]interface{}{
+			spec["neutron"] = map[string]any{
 				"enabled": true,
 			}
-			spec["placement"] = map[string]interface{}{
+			spec["placement"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
+				"template": map[string]any{
 					"apiTimeout": 60,
 				},
 			}
 			// turn off unrelated to this test case services
-			spec["horizon"] = map[string]interface{}{
+			spec["horizon"] = map[string]any{
 				"enabled": false,
 			}
-			spec["cinder"] = map[string]interface{}{
+			spec["cinder"] = map[string]any{
 				"enabled": false,
 			}
-			spec["swift"] = map[string]interface{}{
+			spec["swift"] = map[string]any{
 				"enabled": false,
 			}
-			spec["redis"] = map[string]interface{}{
+			spec["redis"] = map[string]any{
 				"enabled": false,
 			}
-			spec["ironic"] = map[string]interface{}{
+			spec["ironic"] = map[string]any{
 				"enabled": false,
 			}
-			spec["designate"] = map[string]interface{}{
+			spec["designate"] = map[string]any{
 				"enabled": false,
 			}
-			spec["barbican"] = map[string]interface{}{
+			spec["barbican"] = map[string]any{
 				"enabled": false,
 			}
-			spec["manila"] = map[string]interface{}{
+			spec["manila"] = map[string]any{
 				"enabled": false,
 			}
-			spec["heat"] = map[string]interface{}{
+			spec["heat"] = map[string]any{
 				"enabled": false,
 			}
-			spec["telemetry"] = map[string]interface{}{
+			spec["telemetry"] = map[string]any{
 				"enabled": false,
 			}
 
@@ -1967,16 +1967,16 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("A watcher OpenStackControlplane instance is created with telemetry and default values", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["watcher"] = map[string]interface{}{
+			spec["watcher"] = map[string]any{
 				"enabled": true,
 			}
-			spec["telemetry"] = map[string]interface{}{
+			spec["telemetry"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
-					"ceilometer": map[string]interface{}{
+				"template": map[string]any{
+					"ceilometer": map[string]any{
 						"enabled": true,
 					},
-					"metricStorage": map[string]interface{}{
+					"metricStorage": map[string]any{
 						"enabled": true,
 					},
 				},
@@ -2139,13 +2139,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("A watcher OpenStackControlplane instance is created with custom parameters", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["watcher"] = map[string]interface{}{
+			spec["watcher"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
-					"decisionengineServiceTemplate": map[string]interface{}{
+				"template": map[string]any{
+					"decisionengineServiceTemplate": map[string]any{
 						"customServiceConfig": "#testcustom",
 					},
-					"apiServiceTemplate": map[string]interface{}{
+					"apiServiceTemplate": map[string]any{
 						"replicas": int32(2),
 					},
 					"databaseInstance": "custom-db",
@@ -2153,13 +2153,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 					"apiTimeout":       120,
 				},
 			}
-			spec["telemetry"] = map[string]interface{}{
+			spec["telemetry"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
-					"ceilometer": map[string]interface{}{
+				"template": map[string]any{
+					"ceilometer": map[string]any{
 						"enabled": true,
 					},
-					"metricStorage": map[string]interface{}{
+					"metricStorage": map[string]any{
 						"enabled": true,
 					},
 				},
@@ -2322,10 +2322,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 
 		It("rejects the OpenStackControlPlane if its name is not that same as the OpenStackVersion's name", func() {
-			raw := map[string]interface{}{
+			raw := map[string]any{
 				"apiVersion": "core.openstack.org/v1beta1",
 				"kind":       "OpenStackControlPlane",
-				"metadata": map[string]interface{}{
+				"metadata": map[string]any{
 					"name":      names.OpenStackControlplaneName.Name,
 					"namespace": names.Namespace,
 				},
@@ -2354,10 +2354,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 
 		It("accepts the OpenStackControlPlane if its name is the same as the OpenStackVersion's name", func() {
-			raw := map[string]interface{}{
+			raw := map[string]any{
 				"apiVersion": "core.openstack.org/v1beta1",
 				"kind":       "OpenStackControlPlane",
-				"metadata": map[string]interface{}{
+				"metadata": map[string]any{
 					"name":      names.OpenStackVersionName2.Name,
 					"namespace": names.Namespace,
 				},
@@ -2417,7 +2417,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
-			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]any{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 		})
 
 		It("sets nodeSelector in resource specs", func() {
@@ -2585,7 +2585,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 	When("An OpenStackControlplane instance references a wrong topology", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
-			spec["topologyRef"] = map[string]interface{}{
+			spec["topologyRef"] = map[string]any{
 				"name": "foo",
 			}
 			DeferCleanup(
@@ -2619,18 +2619,18 @@ var _ = Describe("OpenStackOperator controller", func() {
 			spec["topologyRef"] = map[string]string{
 				"name": names.OpenStackTopology[0].Name,
 			}
-			spec["telemetry"] = map[string]interface{}{
+			spec["telemetry"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
-					"ceilometer": map[string]interface{}{
+				"template": map[string]any{
+					"ceilometer": map[string]any{
 						"enabled": true,
 					},
-					"metricStorage": map[string]interface{}{
+					"metricStorage": map[string]any{
 						"enabled": true,
 					},
 				},
 			}
-			spec["watcher"] = map[string]interface{}{
+			spec["watcher"] = map[string]any{
 				"enabled": true,
 			}
 			// Build the topology Spec
@@ -2679,7 +2679,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			th.CreateConfigMap(types.NamespacedName{
 				Name:      "openstack-config",
 				Namespace: namespace,
-			}, map[string]interface{}{
+			}, map[string]any{
 				"clouds.yaml": string("foo"),
 				"OS_CLOUD":    "default",
 			})
@@ -2847,10 +2847,10 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		Expect(OSCtlplane.Labels).Should(Not(BeNil()))
 		Expect(OSCtlplane.Labels).Should(HaveKeyWithValue("core.openstack.org/openstackcontrolplane", ""))
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": OSCtlplane.GetNamespace(),
 			},
@@ -2886,13 +2886,13 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Does not override default label via defaulting webhook when provided", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 		spec["tls"] = GetTLSPublicSpec()
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "openstack",
 				"namespace": namespace,
-				"labels": map[string]interface{}{
+				"labels": map[string]any{
 					"core.openstack.org/openstackcontrolplane": "foo",
 				},
 			},
@@ -2912,17 +2912,17 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("calls placement validation webhook", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 		spec["tls"] = GetTLSPublicSpec()
-		spec["placement"] = map[string]interface{}{
-			"template": map[string]interface{}{
-				"defaultConfigOverwrite": map[string]interface{}{
+		spec["placement"] = map[string]any{
+			"template": map[string]any{
+				"defaultConfigOverwrite": map[string]any{
 					"api-paste.ini": "not supported",
 				},
 			},
 		}
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "openstack",
 				"namespace": namespace,
 			},
@@ -2948,21 +2948,21 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with to long memcached keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		memcachedTemplate := map[string]interface{}{
-			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{
+		memcachedTemplate := map[string]any{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]any{
 				"replicas": 1,
 			},
 		}
 
-		spec["memcached"] = map[string]interface{}{
+		spec["memcached"] = map[string]any{
 			"enabled":   true,
 			"templates": memcachedTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -2985,21 +2985,21 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with wrong memcached keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		memcachedTemplate := map[string]interface{}{
-			"foo_bar": map[string]interface{}{
+		memcachedTemplate := map[string]any{
+			"foo_bar": map[string]any{
 				"replicas": 1,
 			},
 		}
 
-		spec["memcached"] = map[string]interface{}{
+		spec["memcached"] = map[string]any{
 			"enabled":   true,
 			"templates": memcachedTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3022,21 +3022,21 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with to long rabbitmq keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		rabbitmqTemplate := map[string]interface{}{
-			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{
+		rabbitmqTemplate := map[string]any{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]any{
 				"replicas": 1,
 			},
 		}
 
-		spec["rabbitmq"] = map[string]interface{}{
+		spec["rabbitmq"] = map[string]any{
 			"enabled":   true,
 			"templates": rabbitmqTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3059,21 +3059,21 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with wrong rabbitmq keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		rabbitmqTemplate := map[string]interface{}{
-			"foo_bar": map[string]interface{}{
+		rabbitmqTemplate := map[string]any{
+			"foo_bar": map[string]any{
 				"replicas": 1,
 			},
 		}
 
-		spec["rabbitmq"] = map[string]interface{}{
+		spec["rabbitmq"] = map[string]any{
 			"enabled":   true,
 			"templates": rabbitmqTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3096,21 +3096,21 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with to long galera keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		galeraTemplate := map[string]interface{}{
-			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{
+		galeraTemplate := map[string]any{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]any{
 				"storageRequest": "500M",
 			},
 		}
 
-		spec["galera"] = map[string]interface{}{
+		spec["galera"] = map[string]any{
 			"enabled":   true,
 			"templates": galeraTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3133,21 +3133,21 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with wrong galera keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		galeraTemplate := map[string]interface{}{
-			"foo_bar": map[string]interface{}{
+		galeraTemplate := map[string]any{
+			"foo_bar": map[string]any{
 				"storageRequest": "500M",
 			},
 		}
 
-		spec["galera"] = map[string]interface{}{
+		spec["galera"] = map[string]any{
 			"enabled":   true,
 			"templates": galeraTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3170,29 +3170,29 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with to long glanceapi keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		apiList := map[string]interface{}{
-			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{
+		apiList := map[string]any{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]any{
 				"replicas": 1,
 			},
 		}
 
-		glanceTemplate := map[string]interface{}{
+		glanceTemplate := map[string]any{
 			"databaseInstance": "openstack",
 			"secret":           "secret",
 			"databaseAccount":  "account",
 			"glanceAPIs":       apiList,
 		}
 
-		spec["glance"] = map[string]interface{}{
+		spec["glance"] = map[string]any{
 			"enabled":        true,
 			"uniquePodNames": false,
 			"template":       glanceTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3215,29 +3215,29 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with to long glanceapi keys/names (uniquePodNames)", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		apiList := map[string]interface{}{
-			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{
+		apiList := map[string]any{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]any{
 				"replicas": 1,
 			},
 		}
 
-		glanceTemplate := map[string]interface{}{
+		glanceTemplate := map[string]any{
 			"databaseInstance": "openstack",
 			"secret":           "secret",
 			"databaseAccount":  "account",
 			"glanceAPIs":       apiList,
 		}
 
-		spec["glance"] = map[string]interface{}{
+		spec["glance"] = map[string]any{
 			"enabled":        true,
 			"uniquePodNames": true,
 			"template":       glanceTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3260,28 +3260,28 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with wrong glanceapi keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		apiList := map[string]interface{}{
-			"foo_bar": map[string]interface{}{
+		apiList := map[string]any{
+			"foo_bar": map[string]any{
 				"replicas": 1,
 			},
 		}
 
-		glanceTemplate := map[string]interface{}{
+		glanceTemplate := map[string]any{
 			"databaseInstance": "openstack",
 			"secret":           "secret",
 			"databaseAccount":  "account",
 			"glanceAPIs":       apiList,
 		}
 
-		spec["glance"] = map[string]interface{}{
+		spec["glance"] = map[string]any{
 			"enabled":  true,
 			"template": glanceTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3304,26 +3304,26 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with to long cinderVolume keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		volumeList := map[string]interface{}{
-			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{},
+		volumeList := map[string]any{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]any{},
 		}
-		cinderTemplate := map[string]interface{}{
+		cinderTemplate := map[string]any{
 			"databaseInstance": "openstack",
 			"secret":           "secret",
 			"databaseAccount":  "account",
 			"cinderVolumes":    volumeList,
 		}
 
-		spec["cinder"] = map[string]interface{}{
+		spec["cinder"] = map[string]any{
 			"enabled":        true,
 			"uniquePodNames": false,
 			"template":       cinderTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3346,26 +3346,26 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with to long cinderVolume keys/names (uniquePodNames)", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		volumeList := map[string]interface{}{
-			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]interface{}{},
+		volumeList := map[string]any{
+			"foo-1234567890-1234567890-1234567890-1234567890-1234567890": map[string]any{},
 		}
-		cinderTemplate := map[string]interface{}{
+		cinderTemplate := map[string]any{
 			"databaseInstance": "openstack",
 			"secret":           "secret",
 			"databaseAccount":  "account",
 			"cinderVolumes":    volumeList,
 		}
 
-		spec["cinder"] = map[string]interface{}{
+		spec["cinder"] = map[string]any{
 			"enabled":        true,
 			"uniquePodNames": true,
 			"template":       cinderTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3388,26 +3388,26 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	It("Blocks creating ctlplane CRs with wrong cinderVolume keys/names", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 
-		volumeList := map[string]interface{}{
-			"foo_bar": map[string]interface{}{},
+		volumeList := map[string]any{
+			"foo_bar": map[string]any{},
 		}
-		cinderTemplate := map[string]interface{}{
+		cinderTemplate := map[string]any{
 			"databaseInstance": "openstack",
 			"secret":           "secret",
 			"databaseAccount":  "account",
 			"cinderVolumes":    volumeList,
 		}
 
-		spec["cinder"] = map[string]interface{}{
+		spec["cinder"] = map[string]any{
 			"enabled":        true,
 			"uniquePodNames": true,
 			"template":       cinderTemplate,
 		}
 
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3428,14 +3428,14 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	})
 	It("Blocks creating ctlplane CRs with wrong topology namespace", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
-		spec["topologyRef"] = map[string]interface{}{
+		spec["topologyRef"] = map[string]any{
 			"name":      "foo",
 			"namespace": "bar",
 		}
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},
@@ -3455,13 +3455,13 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 	})
 	It("Blocks creating ctlplane CRs with watcher enabled without telemetry services", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
-		spec["watcher"] = map[string]interface{}{
+		spec["watcher"] = map[string]any{
 			"enabled": true,
 		}
-		raw := map[string]interface{}{
+		raw := map[string]any{
 			"apiVersion": "core.openstack.org/v1beta1",
 			"kind":       "OpenStackControlPlane",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "foo",
 				"namespace": namespace,
 			},

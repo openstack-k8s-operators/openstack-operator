@@ -120,15 +120,15 @@ func PatchOLSConfig(
 	indexID string,
 ) error {
 	// 1. Patch the Providers section
-	providersPatch := []interface{}{
-		map[string]interface{}{
-			"credentialsSecretRef": map[string]interface{}{
+	providersPatch := []any{
+		map[string]any{
+			"credentialsSecretRef": map[string]any{
 				"name": instance.Spec.LLMCredentials,
 			},
-			"models": []interface{}{
-				map[string]interface{}{
+			"models": []any{
+				map[string]any{
 					"name":       instance.Spec.ModelName,
-					"parameters": map[string]interface{}{},
+					"parameters": map[string]any{},
 				},
 			},
 			"name": OpenStackLightspeedDefaultProvider,
@@ -141,8 +141,8 @@ func PatchOLSConfig(
 	}
 
 	// 2. Patch the RAG section
-	openstackRAG := []interface{}{
-		map[string]interface{}{
+	openstackRAG := []any{
+		map[string]any{
 			"image":     instance.Spec.RAGImage,
 			"indexID":   indexID,
 			"indexPath": OpenStackLightspeedVectorDBPath,
@@ -174,7 +174,7 @@ func PatchOLSConfig(
 
 	// 3. Add info which OpenStackLightspeed instance owns the OLSConfig
 	labels := olsConfig.GetLabels()
-	updatedLabels := map[string]interface{}{
+	updatedLabels := map[string]any{
 		OpenStackLightspeedOwnerIDLabel: string(instance.GetUID()),
 	}
 	for k, v := range labels {
@@ -299,7 +299,7 @@ func extractEnvFromPodLogs(ctx context.Context, pod *corev1.Pod, envVarName stri
 	}
 
 	logs := buf.String()
-	for _, envLine := range strings.Split(logs, "\n") {
+	for envLine := range strings.SplitSeq(logs, "\n") {
 		parts := strings.Split(envLine, "=")
 		if len(parts) != 2 {
 			continue

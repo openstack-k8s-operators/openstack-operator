@@ -36,11 +36,11 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = false
-			nodeSetSpec["nodes"] = map[string]interface{}{
-				"compute-0": map[string]interface{}{
+			nodeSetSpec["nodes"] = map[string]any{
+				"compute-0": map[string]any{
 					"hostName": "compute-0"},
 			}
-			nodeSetSpec["baremetalSetTemplate"] = map[string]interface{}{
+			nodeSetSpec["baremetalSetTemplate"] = map[string]any{
 				"bmhLabelSelector": map[string]string{
 					"app": "test-openstack",
 				},
@@ -64,13 +64,13 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = false
-			nodeSetSpec["baremetalSetTemplate"] = map[string]interface{}{
+			nodeSetSpec["baremetalSetTemplate"] = map[string]any{
 				"cloudUserName": "test-user",
 				"bmhLabelSelector": map[string]string{
 					"app": "test-openstack",
 				},
-				"baremetalHosts": map[string]interface{}{
-					"compute-0": map[string]interface{}{
+				"baremetalHosts": map[string]any{
+					"compute-0": map[string]any{
 						"ctlPlaneIP": "192.168.1.12/24",
 					},
 				},
@@ -94,17 +94,17 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = false
-			nodeSetSpec["nodes"] = map[string]interface{}{
-				"compute-0": map[string]interface{}{
+			nodeSetSpec["nodes"] = map[string]any{
+				"compute-0": map[string]any{
 					"hostName": "compute-0"},
 			}
-			nodeSetSpec["baremetalSetTemplate"] = map[string]interface{}{
+			nodeSetSpec["baremetalSetTemplate"] = map[string]any{
 				"domainName": "example.com",
 				"bmhLabelSelector": map[string]string{
 					"app": "test-openstack",
 				},
-				"baremetalHosts": map[string]interface{}{
-					"compute-0": map[string]interface{}{
+				"baremetalHosts": map[string]any{
+					"compute-0": map[string]any{
 						"ctlPlaneIP": "192.168.1.12/24",
 					},
 				},
@@ -124,8 +124,8 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = true
-			nodeSetSpec["nodes"] = map[string]interface{}{
-				"compute-0": map[string]interface{}{
+			nodeSetSpec["nodes"] = map[string]any{
+				"compute-0": map[string]any{
 					"hostName": "compute-0"},
 			}
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
@@ -135,8 +135,8 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 			Eventually(func(_ Gomega) string {
 				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 				newNodeSetSpec["preProvisioned"] = true
-				newNodeSetSpec["nodes"] = map[string]interface{}{
-					"compute-0": map[string]interface{}{
+				newNodeSetSpec["nodes"] = map[string]any{
+					"compute-0": map[string]any{
 						"hostName": "compute-0"},
 				}
 				newInstance := DefaultDataplaneNodeSetTemplate(types.NamespacedName{Name: "test-duplicate-node", Namespace: namespace}, newNodeSetSpec)
@@ -151,19 +151,19 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 			Eventually(func(_ Gomega) string {
 				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 				newNodeSetSpec["preProvisioned"] = true
-				newNodeSetSpec["nodes"] = map[string]interface{}{
-					"compute-3": map[string]interface{}{
+				newNodeSetSpec["nodes"] = map[string]any{
+					"compute-3": map[string]any{
 						"hostName": "compute-3",
-						"ansible": map[string]interface{}{
+						"ansible": map[string]any{
 							"ansibleHost": "compute-3",
 						},
 					},
-					"compute-2": map[string]interface{}{
+					"compute-2": map[string]any{
 						"hostName": "compute-2"},
-					"compute-8": map[string]interface{}{
+					"compute-8": map[string]any{
 						"hostName": "compute-8"},
-					"compute-0": map[string]interface{}{
-						"ansible": map[string]interface{}{
+					"compute-0": map[string]any{
+						"ansible": map[string]any{
 							"ansibleHost": "compute-0",
 						},
 					},
@@ -180,8 +180,8 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = true
-			nodeSetSpec["nodes"] = map[string]interface{}{
-				"compute-0": map[string]interface{}{
+			nodeSetSpec["nodes"] = map[string]any{
+				"compute-0": map[string]any{
 					"hostName": "compute-0"},
 			}
 

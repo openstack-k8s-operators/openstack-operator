@@ -322,7 +322,7 @@ func (d *Deployer) addCertMounts(
 				projectedVolumeSource := corev1.ProjectedVolumeSource{
 					Sources: []corev1.VolumeProjection{},
 				}
-				for i := 0; i < numberOfSecrets; i++ {
+				for i := range numberOfSecrets {
 					secretName := GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, i)
 					certSecret := &corev1.Secret{}
 					err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)

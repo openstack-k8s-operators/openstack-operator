@@ -269,16 +269,16 @@ func (a *EEJob) FormatAEEExtraVars(
 	if service.Spec.DeployOnAllNodeSets {
 		a.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte("\"all\""))
 	} else {
-		a.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", nodeSet.GetName())))
+		a.ExtraVars["edpm_override_hosts"] = json.RawMessage(fmt.Appendf(nil, "\"%s\"", nodeSet.GetName()))
 	}
 	if service.Spec.EDPMServiceType != "" {
-		a.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
+		a.ExtraVars["edpm_service_type"] = json.RawMessage(fmt.Appendf(nil, "\"%s\"", service.Spec.EDPMServiceType))
 	} else {
-		a.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
+		a.ExtraVars["edpm_service_type"] = json.RawMessage(fmt.Appendf(nil, "\"%s\"", service.Name))
 	}
 
 	if len(deployment.Spec.ServicesOverride) > 0 {
-		a.ExtraVars["edpm_services_override"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", deployment.Spec.ServicesOverride)))
+		a.ExtraVars["edpm_services_override"] = json.RawMessage(fmt.Appendf(nil, "\"%s\"", deployment.Spec.ServicesOverride))
 	}
 }
 
