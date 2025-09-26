@@ -395,12 +395,26 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		Log.Info("Setting DeployedVersion")
 		instance.Status.DeployedVersion = &instance.Spec.TargetVersion
 	}
-	if instance.Status.DeployedVersion != nil &&
-		*instance.Status.AvailableVersion != *instance.Status.DeployedVersion {
-		instance.Status.Conditions.Set(condition.TrueCondition(
-			corev1beta1.OpenStackVersionMinorUpdateAvailable,
-			corev1beta1.OpenStackVersionMinorUpdateAvailableMessage))
+
+	if instance.Status.DeployedVersion != nil {
+
+		if *instance.Status.AvailableVersion != *instance.Status.DeployedVersion {
+			instance.Status.Conditions.Remove(corev1beta1.OpenStackVersionAtLatestKnown)
+
+			instance.Status.Conditions.Set(condition.TrueCondition(
+				corev1beta1.OpenStackVersionMinorUpdateAvailable,
+				corev1beta1.OpenStackVersionMinorUpdateAvailableMessage))
+
+		} else {
+			instance.Status.Conditions.Remove(corev1beta1.OpenStackVersionMinorUpdateAvailable)
+
+			instance.Status.Conditions.Set(condition.TrueCondition(
+				corev1beta1.OpenStackVersionAtLatestKnown,
+				corev1beta1.OpenStackVersionMinorUpdateAtLatestKnownMessage))
+		}
+
 	} else {
+		instance.Status.Conditions.Remove(corev1beta1.OpenStackVersionAtLatestKnown)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackVersionMinorUpdateAvailable)
 	}
 
