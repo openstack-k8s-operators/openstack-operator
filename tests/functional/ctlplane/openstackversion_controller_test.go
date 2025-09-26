@@ -221,52 +221,52 @@ var _ = Describe("OpenStackOperator controller", func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 
 			// a single galera database
-			galeraTemplate := map[string]interface{}{
-				names.DBName.Name: map[string]interface{}{
+			galeraTemplate := map[string]any{
+				names.DBName.Name: map[string]any{
 					"storageRequest": "500M",
 				},
 			}
-			spec["galera"] = map[string]interface{}{
+			spec["galera"] = map[string]any{
 				"enabled":   true,
 				"templates": galeraTemplate,
 			}
 
-			spec["horizon"] = map[string]interface{}{
+			spec["horizon"] = map[string]any{
 				"enabled": false,
 			}
 
-			spec["glance"] = map[string]interface{}{
+			spec["glance"] = map[string]any{
 				"enabled": false,
 			}
-			spec["cinder"] = map[string]interface{}{
+			spec["cinder"] = map[string]any{
 				"enabled": false,
 			}
-			spec["neutron"] = map[string]interface{}{
+			spec["neutron"] = map[string]any{
 				"enabled": false,
 			}
-			spec["manila"] = map[string]interface{}{
+			spec["manila"] = map[string]any{
 				"enabled": false,
 			}
-			spec["heat"] = map[string]interface{}{
+			spec["heat"] = map[string]any{
 				"enabled": false,
 			}
-			spec["telemetry"] = map[string]interface{}{
+			spec["telemetry"] = map[string]any{
 				"enabled": false,
 			}
 			spec["tls"] = GetTLSPublicSpec()
-			spec["ovn"] = map[string]interface{}{
+			spec["ovn"] = map[string]any{
 				"enabled": true,
-				"template": map[string]interface{}{
-					"ovnDBCluster": map[string]interface{}{
-						"ovndbcluster-nb": map[string]interface{}{
+				"template": map[string]any{
+					"ovnDBCluster": map[string]any{
+						"ovndbcluster-nb": map[string]any{
 							"dbType": "NB",
 						},
-						"ovndbcluster-sb": map[string]interface{}{
+						"ovndbcluster-sb": map[string]any{
 							"dbType": "SB",
 						},
 					},
-					"ovnController": map[string]interface{}{
-						"nicMappings": map[string]interface{}{
+					"ovnController": map[string]any{
+						"nicMappings": map[string]any{
 							"datacentre": "ospbr",
 						},
 					},
@@ -380,7 +380,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
 
 			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
-			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]any{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
 
 			// verify that the controlplane deploys the old OVN controller image
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)

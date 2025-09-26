@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net"
 	"strconv"
 	"strings"
@@ -37,8 +38,8 @@ import (
 )
 
 // getAnsibleVarsFrom gets ansible vars from ConfigMap/Secret
-func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]interface{}, error) {
-	result := make(map[string]interface{})
+func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]any, error) {
+	result := make(map[string]any)
 
 	for _, dataSource := range ansible.AnsibleVarsFrom {
 		configMap, secret, err := util.GetDataSourceCmSecret(ctx, helper, namespace, dataSource)
@@ -123,9 +124,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		utils.LogErrorForObject(helper, err, "could not get ansible group vars from configMap/secret", instance)
 		return "", err
 	}
-	for k, v := range groupVars {
-		nodeSetGroup.Vars[k] = v
-	}
+	maps.Copy(nodeSetGroup.Vars, groupVars)
 	err = resolveGroupAnsibleVars(&instance.Spec.NodeTemplate,
 		&nodeSetGroup, containerImages, netServiceNetMap)
 	if err != nil {
@@ -184,9 +183,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 			utils.LogErrorForObject(helper, err, "could not get ansible host vars from configMap/secret", instance)
 			return "", err
 		}
-		for k, v := range hostVars {
-			host.Vars[k] = v
-		}
+		maps.Copy(host.Vars, hostVars)
 		// Use ansible_host if provided else use hostname. Fall back to
 		// nodeName if all else fails.
 		if node.Ansible.AnsibleHost != "" {
@@ -223,9 +220,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		"openstackdataplanenodeset":   instance.Name,
 		"inventory":                   "true",
 	}
-	for key, val := range instance.Labels {
-		labels[key] = val
-	}
+	maps.Copy(labels, instance.Labels)
 	template := []utils.Template{
 		// Secret
 		{
@@ -399,10 +394,10 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection,
 
 // unmarshal raw strings into an ansible vars dictionary
 func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
-	parsedVars map[string]interface{},
+	parsedVars map[string]any,
 ) error {
 	for key, val := range ansibleVars {
-		var v interface{}
+		var v any
 		err := yaml.Unmarshal(val, &v)
 		if err != nil {
 			return err

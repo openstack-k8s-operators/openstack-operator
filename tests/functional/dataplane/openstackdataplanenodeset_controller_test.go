@@ -42,13 +42,13 @@ type AnsibleInventory struct {
 		} `yaml:"vars"`
 		Hosts struct {
 			Node struct {
-				AnsibleHost       string        `yaml:"ansible_host"`
-				AnsiblePort       string        `yaml:"ansible_port"`
-				AnsibleUser       string        `yaml:"ansible_user"`
-				CtlPlaneIP        string        `yaml:"ctlplane_ip"`
-				DNSSearchDomains  []interface{} `yaml:"dns_search_domains"`
-				ManagementNetwork string        `yaml:"management_network"`
-				Networks          []interface{} `yaml:"networks"`
+				AnsibleHost       string `yaml:"ansible_host"`
+				AnsiblePort       string `yaml:"ansible_port"`
+				AnsibleUser       string `yaml:"ansible_user"`
+				CtlPlaneIP        string `yaml:"ctlplane_ip"`
+				DNSSearchDomains  []any  `yaml:"dns_search_domains"`
+				ManagementNetwork string `yaml:"management_network"`
+				Networks          []any  `yaml:"networks"`
 			} `yaml:"edpm-compute-node-1"`
 		} `yaml:"hosts"`
 	} `yaml:"edpm-compute-nodeset"`
@@ -480,7 +480,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("A Dataplane resorce is created without PreProvisioned nodes and ordered deployment", func() {
 			BeforeEach(func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
+				spec["metadata"] = map[string]any{"ansiblesshprivatekeysecret": ""}
 				spec["preProvisioned"] = false
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
@@ -529,7 +529,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("A Dataplane resorce is created without PreProvisioned nodes but is marked as PreProvisioned, with ordered deployment", func() {
 			BeforeEach(func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
+				spec["metadata"] = map[string]any{"ansiblesshprivatekeysecret": ""}
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
@@ -712,9 +712,9 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("The individual node has a AnsibleUser override", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-				nodeOverrideSpec := map[string]interface{}{
+				nodeOverrideSpec := map[string]any{
 					"hostName": dataplaneNodeName.Name,
-					"networks": []map[string]interface{}{
+					"networks": []map[string]any{
 						{
 							"name":       "networkinternal",
 							"subnetName": "subnet1",
@@ -724,20 +724,20 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 							"subnetName": "subnet1",
 						},
 					},
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "test-user",
 					},
 				}
 
-				nodeTemplateOverrideSpec := map[string]interface{}{
+				nodeTemplateOverrideSpec := map[string]any{
 					"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "cloud-user",
 					},
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"] = map[string]interface{}{dataplaneNodeName.Name: nodeOverrideSpec}
+				nodeSetSpec["nodes"] = map[string]any{dataplaneNodeName.Name: nodeOverrideSpec}
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
@@ -897,7 +897,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("A Dataplane resorce is created without PreProvisioned nodes and ordered deployment", func() {
 			BeforeEach(func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
+				spec["metadata"] = map[string]any{"ansiblesshprivatekeysecret": ""}
 				spec["preProvisioned"] = false
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
@@ -946,7 +946,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("A Dataplane resorce is created without PreProvisioned nodes but is marked as PreProvisioned, with ordered deployment", func() {
 			BeforeEach(func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
+				spec["metadata"] = map[string]any{"ansiblesshprivatekeysecret": ""}
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
@@ -1130,9 +1130,9 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
-				nodeOverrideSpec := map[string]interface{}{
+				nodeOverrideSpec := map[string]any{
 					"hostName": dataplaneNodeName.Name,
-					"networks": []map[string]interface{}{
+					"networks": []map[string]any{
 						{
 							"name":       "networkinternal",
 							"subnetName": "subnet1",
@@ -1142,20 +1142,20 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 							"subnetName": "subnet1",
 						},
 					},
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "test-user",
 					},
 				}
 
-				nodeTemplateOverrideSpec := map[string]interface{}{
+				nodeTemplateOverrideSpec := map[string]any{
 					"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "cloud-user",
 					},
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"] = map[string]interface{}{dataplaneNodeName.Name: nodeOverrideSpec}
+				nodeSetSpec["nodes"] = map[string]any{dataplaneNodeName.Name: nodeOverrideSpec}
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
@@ -1267,7 +1267,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		BeforeEach(func() {
 
 			dataplanev1.SetupDefaults()
-			updateServiceSpec := map[string]interface{}{
+			updateServiceSpec := map[string]any{
 				"playbook": "osp.edpm.update",
 			}
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, updateServiceSpec)
@@ -1315,7 +1315,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		BeforeEach(func() {
 
 			dataplanev1.SetupDefaults()
-			updateServiceSpec := map[string]interface{}{
+			updateServiceSpec := map[string]any{
 				"playbook": "osp.edpm.update_services",
 			}
 			CreateDataPlaneServiceFromSpec(newDataplaneUpdateServiceName, updateServiceSpec)
@@ -1407,7 +1407,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
 			nodeSetSpec["preProvisioned"] = true
 			nodeSetSpec["services"] = []string{"bootstrap"}
-			nodeSetSpec["nodeTemplate"] = map[string]interface{}{
+			nodeSetSpec["nodeTemplate"] = map[string]any{
 				"extraMounts": []storage.VolMounts{
 					{
 						Mounts: []corev1.VolumeMount{
@@ -1427,7 +1427,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					},
 				},
 				"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-				"ansible": map[string]interface{}{
+				"ansible": map[string]any{
 					"ansibleUser": "cloud-user",
 				},
 			}

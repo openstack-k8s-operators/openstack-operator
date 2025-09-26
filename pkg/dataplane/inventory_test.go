@@ -12,7 +12,7 @@ func TestProcessConfigMapData_NumbersAsInts(t *testing.T) {
 		name         string
 		data         map[string]string
 		prefix       string
-		expected     map[string]interface{}
+		expected     map[string]any
 		expectedType any
 	}{
 		{
@@ -21,7 +21,7 @@ func TestProcessConfigMapData_NumbersAsInts(t *testing.T) {
 				"foo": "bar",
 			},
 			prefix: "",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"foo": "bar",
 			},
 			expectedType: "",
@@ -32,7 +32,7 @@ func TestProcessConfigMapData_NumbersAsInts(t *testing.T) {
 				"intVal": "123",
 			},
 			prefix: "",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"intVal": json.Number("123"),
 			},
 			expectedType: json.Number("1"),
@@ -43,7 +43,7 @@ func TestProcessConfigMapData_NumbersAsInts(t *testing.T) {
 				"floatVal": "123.45",
 			},
 			prefix: "",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"floatVal": json.Number("123.45"),
 			},
 			expectedType: json.Number("1"),
@@ -54,7 +54,7 @@ func TestProcessConfigMapData_NumbersAsInts(t *testing.T) {
 				"somekey": "42",
 			},
 			prefix: "myprefix-",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"myprefix-somekey": json.Number("42"),
 			},
 			expectedType: json.Number("1"),
@@ -91,7 +91,7 @@ func TestProcessSecretData_NumbersAsInts(t *testing.T) {
 		name         string
 		data         map[string][]byte
 		prefix       string
-		expected     map[string]interface{}
+		expected     map[string]any
 		expectedType any
 	}{
 		{
@@ -100,7 +100,7 @@ func TestProcessSecretData_NumbersAsInts(t *testing.T) {
 				"foo": []byte("bar"),
 			},
 			prefix: "",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"foo": "bar",
 			},
 			expectedType: "",
@@ -111,7 +111,7 @@ func TestProcessSecretData_NumbersAsInts(t *testing.T) {
 				"intVal": []byte("123"),
 			},
 			prefix: "",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"intVal": json.Number("123"),
 			},
 			expectedType: json.Number("1"),
@@ -122,7 +122,7 @@ func TestProcessSecretData_NumbersAsInts(t *testing.T) {
 				"floatVal": []byte("123.45"),
 			},
 			prefix: "",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"floatVal": json.Number("123.45"),
 			},
 			expectedType: json.Number("1"),
@@ -133,7 +133,7 @@ func TestProcessSecretData_NumbersAsInts(t *testing.T) {
 				"somekey": []byte("42"),
 			},
 			prefix: "myprefix-",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"myprefix-somekey": json.Number("42"),
 			},
 			expectedType: json.Number("1"),

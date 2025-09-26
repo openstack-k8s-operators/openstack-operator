@@ -30,11 +30,11 @@ var DefaultEdpmServiceAnsibleVarList = []string{
 var CustomEdpmServiceDomainTag = "test-image:latest"
 var DefaultBackoffLimit = int32(6)
 
-func CreateICSP(name types.NamespacedName, spec map[string]interface{}) client.Object {
-	raw := map[string]interface{}{
+func CreateICSP(name types.NamespacedName, spec map[string]any) client.Object {
+	raw := map[string]any{
 		"apiVersion": "operator.openshift.io/v1alpha1",
 		"kind":       "ImageContentSourcePolicy",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -44,18 +44,18 @@ func CreateICSP(name types.NamespacedName, spec map[string]interface{}) client.O
 }
 
 func CreateMachineConfig() client.Object {
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"apiVersion": "machineconfiguration.openshift.io/v1",
 		"kind":       "MachineConfig",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name": "99-master-generated-registries",
 		},
-		"spec": map[string]interface{}{
-			"config": map[string]interface{}{
-				"storage": map[string]interface{}{
-					"files": []interface{}{
-						map[string]interface{}{
-							"contents": map[string]interface{}{
+		"spec": map[string]any{
+			"config": map[string]any{
+				"storage": map[string]any{
+					"files": []any{
+						map[string]any{
+							"contents": map[string]any{
 								"source":      "data:text/plain;charset=utf-8;base64,dW5xdWFsaWZpZWQtc2VhcmNoLXJlZ2lzdHJpZXMgPSBbInJlZ2lzdHJ5LmFjY2Vzcy5yZWRoYXQuY29tIiwgImRvY2tlci5pbyJdCnNob3J0LW5hbWUtbW9kZSA9ICIiCgpbW3JlZ2lzdHJ5XV0KICBwcmVmaXggPSAiIgogIGxvY2F0aW9uID0gInJlZ2lzdHJ5LmNpLm9wZW5zaGlmdC5vcmcvb3JpZ2luLzQuMTMtMjAyMy0wMi0yNi0xNjMwMzAiCgogIFtbcmVnaXN0cnkubWlycm9yXV0KICAgIGxvY2F0aW9uID0gInJlZ2lzdHJ5Lm9rZC5ibmUtc2hpZnQubmV0Ojg0NDMvb2tkIgogICAgcHVsbC1mcm9tLW1pcnJvciA9ICJkaWdlc3Qtb25seSIKCltbcmVnaXN0cnldXQogIHByZWZpeCA9ICIiCiAgbG9jYXRpb24gPSAicmVnaXN0cnkuY2kub3BlbnNoaWZ0Lm9yZy9vcmlnaW4vNC4xMy0yMDIzLTAzLTA3LTA5NDQwNiIKCiAgW1tyZWdpc3RyeS5taXJyb3JdXQogICAgbG9jYXRpb24gPSAicmVnaXN0cnkub2tkLmJuZS1zaGlmdC5uZXQ6ODQ0My9va2QiCiAgICBwdWxsLWZyb20tbWlycm9yID0gImRpZ2VzdC1vbmx5IgoKW1tyZWdpc3RyeV1dCiAgcHJlZml4ID0gIiIKICBsb2NhdGlvbiA9ICJyZWdpc3RyeS5jaS5vcGVuc2hpZnQub3JnL29yaWdpbi9yZWxlYXNlIgoKICBbW3JlZ2lzdHJ5Lm1pcnJvcl1dCiAgICBsb2NhdGlvbiA9ICJyZWdpc3RyeS5va2QuYm5lLXNoaWZ0Lm5ldDo4NDQzL29rZCIKICAgIHB1bGwtZnJvbS1taXJyb3IgPSAiZGlnZXN0LW9ubHkiCg==",
 								"compression": "",
 							},
@@ -73,20 +73,20 @@ func CreateMachineConfig() client.Object {
 }
 
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
-func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]any) *unstructured.Unstructured {
 	instance := DefaultDataplaneNodeSetTemplate(name, spec)
 	return th.CreateUnstructured(instance)
 }
 
 // Create OpenStackDataPlaneDeployment in k8s and test that no errors occur
-func CreateDataplaneDeployment(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+func CreateDataplaneDeployment(name types.NamespacedName, spec map[string]any) *unstructured.Unstructured {
 	instance := DefaultDataplaneDeploymentTemplate(name, spec)
 	return th.CreateUnstructured(instance)
 }
 
 // Create an OpenStackDataPlaneService with a given NamespacedName, assert on success
 func CreateDataplaneService(name types.NamespacedName, globalService bool) *unstructured.Unstructured {
-	var raw map[string]interface{}
+	var raw map[string]any
 	if globalService {
 		raw = DefaultDataplaneGlobalService(name)
 	} else {
@@ -96,23 +96,23 @@ func CreateDataplaneService(name types.NamespacedName, globalService bool) *unst
 }
 
 func CreateDataplaneServicesWithSameServiceType(name types.NamespacedName) {
-	CreateDataPlaneServiceFromSpec(name, map[string]interface{}{
+	CreateDataPlaneServiceFromSpec(name, map[string]any{
 		"edpmServiceType": "nova"})
 	CreateDataPlaneServiceFromSpec(types.NamespacedName{
-		Name: "duplicate-service", Namespace: name.Namespace}, map[string]interface{}{
+		Name: "duplicate-service", Namespace: name.Namespace}, map[string]any{
 		"edpmServiceType": "nova"})
 }
 
 // Create an OpenStackDataPlaneService with a given NamespacedName, and a given unstructured spec
-func CreateDataPlaneServiceFromSpec(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+func CreateDataPlaneServiceFromSpec(name types.NamespacedName, spec map[string]any) *unstructured.Unstructured {
 	if spec["playbook"] == nil && spec["playbookContents"] == nil && spec["role"] == nil {
 		spec["playbook"] = "test"
 	}
-	raw := map[string]interface{}{
+	raw := map[string]any{
 
 		"apiVersion": "dataplane.openstack.org/v1beta1",
 		"kind":       "OpenStackDataPlaneService",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -122,22 +122,22 @@ func CreateDataPlaneServiceFromSpec(name types.NamespacedName, spec map[string]i
 }
 
 // Build CustomServiceImageSpec struct with empty `Nodes` list
-func CustomServiceImageSpec() map[string]interface{} {
+func CustomServiceImageSpec() map[string]any {
 
-	var ansibleServiceVars = make(map[string]interface{})
+	var ansibleServiceVars = make(map[string]any)
 	for _, svcName := range DefaultEdpmServiceAnsibleVarList {
 		imageAddress := fmt.Sprintf(`"%s.%s"`, svcName, CustomEdpmServiceDomainTag)
 		ansibleServiceVars[svcName] = imageAddress
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"preProvisioned": true,
-		"nodeTemplate": map[string]interface{}{
+		"nodeTemplate": map[string]any{
 			"networks": []infrav1.IPSetNetwork{
 				{Name: "ctlplane", SubnetName: "subnet1"},
 			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-			"ansible": map[string]interface{}{
+			"ansible": map[string]any{
 				"ansibleVars": ansibleServiceVars,
 			},
 		},
@@ -145,12 +145,12 @@ func CustomServiceImageSpec() map[string]interface{} {
 	}
 }
 
-func CreateNetConfig(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+func CreateNetConfig(name types.NamespacedName, spec map[string]any) *unstructured.Unstructured {
 	raw := DefaultNetConfig(name, spec)
 	return th.CreateUnstructured(raw)
 }
 
-func CreateDNSMasq(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+func CreateDNSMasq(name types.NamespacedName, spec map[string]any) *unstructured.Unstructured {
 	raw := DefaultDNSMasq(name, spec)
 	return th.CreateUnstructured(raw)
 }
@@ -183,28 +183,28 @@ func CreateOpenStackVersion(name types.NamespacedName) *unstructured.Unstructure
 }
 
 // Struct initialization
-func DefaultOpenStackVersion(name types.NamespacedName) map[string]interface{} {
-	return map[string]interface{}{
+func DefaultOpenStackVersion(name types.NamespacedName) map[string]any {
+	return map[string]any{
 		"apiVersion": "core.openstack.org/v1beta1",
 		"kind":       "OpenStackVersion",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
-		"spec": map[string]interface{}{
+		"spec": map[string]any{
 			"targetVersion": "0.0.1",
 		},
-		"status": map[string]interface{}{
+		"status": map[string]any{
 			"availableVersion": "0.0.1",
 		},
 	}
 }
 
-func DefaultICSPSpec() map[string]interface{} {
-	return map[string]interface{}{
-		"repositoryDigestMirrors": []interface{}{
-			map[string]interface{}{
-				"mirrors": []interface{}{
+func DefaultICSPSpec() map[string]any {
+	return map[string]any{
+		"repositoryDigestMirrors": []any{
+			map[string]any{
+				"mirrors": []any{
 					"registry.okd.bne-shift.net:8443/okd", // Change to a string
 				},
 				"source": "registry.ci.openshift.org/origin/release", // Move "source" here
@@ -214,22 +214,22 @@ func DefaultICSPSpec() map[string]interface{} {
 }
 
 // Build OpenStackDataPlaneNodeSetSpec struct and fill it with preset values
-func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
+func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]any {
 
-	return map[string]interface{}{
+	return map[string]any{
 		"services": []string{
 			"foo-service",
 			"foo-update-service",
 			"global-service",
 		},
-		"nodeTemplate": map[string]interface{}{
+		"nodeTemplate": map[string]any{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-			"ansible": map[string]interface{}{
+			"ansible": map[string]any{
 				"ansibleUser": "cloud-user",
 			},
 		},
-		"nodes": map[string]interface{}{
-			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
+		"nodes": map[string]any{
+			fmt.Sprintf("%s-node-1", nodeSetName): map[string]any{
 				"hostName": "edpm-compute-node-1",
 				"networks": []infrav1.IPSetNetwork{
 					{Name: "networkinternal", SubnetName: "subnet1"},
@@ -237,9 +237,9 @@ func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 				},
 			},
 		},
-		"baremetalSetTemplate": map[string]interface{}{
-			"baremetalHosts": map[string]interface{}{
-				"ctlPlaneIP": map[string]interface{}{},
+		"baremetalSetTemplate": map[string]any{
+			"baremetalHosts": map[string]any{
+				"ctlPlaneIP": map[string]any{},
 			},
 			"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
 			"ctlplaneInterface":   "172.20.12.1",
@@ -249,20 +249,20 @@ func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 	}
 }
 
-func DuplicateServiceNodeSetSpec(nodeSetName string) map[string]interface{} {
-	return map[string]interface{}{
+func DuplicateServiceNodeSetSpec(nodeSetName string) map[string]any {
+	return map[string]any{
 		"services": []string{
 			"foo-service",
 			"duplicate-service",
 		},
-		"nodeTemplate": map[string]interface{}{
+		"nodeTemplate": map[string]any{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-			"ansible": map[string]interface{}{
+			"ansible": map[string]any{
 				"ansibleUser": "cloud-user",
 			},
 		},
-		"nodes": map[string]interface{}{
-			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
+		"nodes": map[string]any{
+			fmt.Sprintf("%s-node-1", nodeSetName): map[string]any{
 				"hostName": "edpm-compute-node-1",
 				"networks": []infrav1.IPSetNetwork{
 					{Name: "networkinternal", SubnetName: "subnet1"},
@@ -277,17 +277,17 @@ func DuplicateServiceNodeSetSpec(nodeSetName string) map[string]interface{} {
 }
 
 // Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
-func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
-	spec := map[string]interface{}{
+func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]any {
+	spec := map[string]any{
 		"preProvisioned": true,
-		"nodeTemplate": map[string]interface{}{
+		"nodeTemplate": map[string]any{
 			"networks": []infrav1.IPSetNetwork{
 				{Name: "networkinternal", SubnetName: "subnet1"},
 				{Name: "ctlplane", SubnetName: "subnet1"},
 			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
-		"nodes": map[string]interface{}{},
+		"nodes": map[string]any{},
 	}
 	if tlsEnabled {
 		spec["tlsEnabled"] = true
@@ -297,9 +297,9 @@ func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 }
 
 // Build OpenStackDataPlnaeDeploymentSpec and fill it with preset values
-func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
+func DefaultDataPlaneDeploymentSpec() map[string]any {
 
-	return map[string]interface{}{
+	return map[string]any{
 		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
@@ -307,8 +307,8 @@ func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 	}
 }
 
-func MinorUpdateDataPlaneDeploymentSpec() map[string]interface{} {
-	return map[string]interface{}{
+func MinorUpdateDataPlaneDeploymentSpec() map[string]any {
+	return map[string]any{
 		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
@@ -316,8 +316,8 @@ func MinorUpdateDataPlaneDeploymentSpec() map[string]interface{} {
 	}
 }
 
-func MinorUpdateServicesDataPlaneDeploymentSpec() map[string]interface{} {
-	return map[string]interface{}{
+func MinorUpdateServicesDataPlaneDeploymentSpec() map[string]any {
+	return map[string]any{
 		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
@@ -326,8 +326,8 @@ func MinorUpdateServicesDataPlaneDeploymentSpec() map[string]interface{} {
 }
 
 // Build OpenStackDataPlnaeDeploymentSpec with duplicate services
-func DuplicateServiceDeploymentSpec() map[string]interface{} {
-	return map[string]interface{}{
+func DuplicateServiceDeploymentSpec() map[string]any {
+	return map[string]any{
 		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
@@ -339,8 +339,8 @@ func DuplicateServiceDeploymentSpec() map[string]interface{} {
 }
 
 // Build OpenStackDataPlnaeDeploymentSpec with global service
-func GlobalServiceDeploymentSpec() map[string]interface{} {
-	return map[string]interface{}{
+func GlobalServiceDeploymentSpec() map[string]any {
+	return map[string]any{
 		"nodeSets": []string{
 			"alpha-nodeset",
 			"beta-nodeset",
@@ -354,8 +354,8 @@ func GlobalServiceDeploymentSpec() map[string]interface{} {
 }
 
 // Build OpenStackDataPlnaeDeploymentSpec with single global service
-func SingleGlobalServiceDeploymentSpec() map[string]interface{} {
-	return map[string]interface{}{
+func SingleGlobalServiceDeploymentSpec() map[string]any {
+	return map[string]any{
 		"nodeSets": []string{
 			"alpha-nodeset",
 			"beta-nodeset",
@@ -366,15 +366,15 @@ func SingleGlobalServiceDeploymentSpec() map[string]interface{} {
 	}
 }
 
-func DefaultNetConfigSpec() map[string]interface{} {
-	return map[string]interface{}{
-		"networks": []map[string]interface{}{{
+func DefaultNetConfigSpec() map[string]any {
+	return map[string]any{
+		"networks": []map[string]any{{
 			"dnsDomain":  "test-domain.test",
 			"mtu":        1500,
 			"name":       "CtlPlane",
 			"serviceNet": "ctlplane",
-			"subnets": []map[string]interface{}{{
-				"allocationRanges": []map[string]interface{}{{
+			"subnets": []map[string]any{{
+				"allocationRanges": []map[string]any{{
 					"end":   "172.20.12.120",
 					"start": "172.20.12.0",
 				},
@@ -389,8 +389,8 @@ func DefaultNetConfigSpec() map[string]interface{} {
 			"mtu":        1500,
 			"name":       "networkinternal",
 			"serviceNet": "internalapi",
-			"subnets": []map[string]interface{}{{
-				"allocationRanges": []map[string]interface{}{{
+			"subnets": []map[string]any{{
+				"allocationRanges": []map[string]any{{
 					"end":   "172.20.13.120",
 					"start": "172.20.13.0",
 				},
@@ -405,8 +405,8 @@ func DefaultNetConfigSpec() map[string]interface{} {
 	}
 }
 
-func DefaultDNSMasqSpec() map[string]interface{} {
-	return map[string]interface{}{
+func DefaultDNSMasqSpec() map[string]any {
+	return map[string]any{
 		"replicas": 1,
 	}
 }
@@ -473,12 +473,12 @@ func SimulateIPSetComplete(name types.NamespacedName) {
 }
 
 // Build OpenStackDataPlaneNodeSet struct and fill it with preset values
-func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
-	return map[string]interface{}{
+func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]any) map[string]any {
+	return map[string]any{
 
 		"apiVersion": "dataplane.openstack.org/v1beta1",
 		"kind":       "OpenStackDataPlaneNodeSet",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -487,13 +487,13 @@ func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]
 }
 
 // Build OpenStackDataPlaneDeployment struct and fill it with preset values
-func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
-	return map[string]interface{}{
+func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec map[string]any) map[string]any {
+	return map[string]any{
 
 		"apiVersion": "dataplane.openstack.org/v1beta1",
 		"kind":       "OpenStackDataPlaneDeployment",
 
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -501,11 +501,11 @@ func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec map[stri
 	}
 }
 
-func DefaultNetConfig(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
-	return map[string]interface{}{
+func DefaultNetConfig(name types.NamespacedName, spec map[string]any) map[string]any {
+	return map[string]any{
 		"apiVersion": "network.openstack.org/v1beta1",
 		"kind":       "NetConfig",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -513,11 +513,11 @@ func DefaultNetConfig(name types.NamespacedName, spec map[string]interface{}) ma
 	}
 }
 
-func DefaultDNSMasq(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
-	return map[string]interface{}{
+func DefaultDNSMasq(name types.NamespacedName, spec map[string]any) map[string]any {
+	return map[string]any{
 		"apiVersion": "network.openstack.org/v1beta1",
 		"kind":       "DNSMasq",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -527,46 +527,46 @@ func DefaultDNSMasq(name types.NamespacedName, spec map[string]interface{}) map[
 
 // Create an empty OpenStackDataPlaneService struct
 // containing only given NamespacedName as metadata
-func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
+func DefaultDataplaneService(name types.NamespacedName) map[string]any {
 
-	return map[string]interface{}{
+	return map[string]any{
 
 		"apiVersion": "dataplane.openstack.org/v1beta1",
 		"kind":       "OpenStackDataPlaneService",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
-		"spec": map[string]interface{}{
+		"spec": map[string]any{
 			"playbook": "test",
 		}}
 }
 
 // Create an empty OpenStackDataPlaneService struct
 // containing only given NamespacedName as metadata
-func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]interface{} {
+func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]any {
 
-	return map[string]interface{}{
+	return map[string]any{
 
 		"apiVersion": "dataplane.openstack.org/v1beta1",
 		"kind":       "OpenStackDataPlaneService",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
-		"spec": map[string]interface{}{
+		"spec": map[string]any{
 			"deployOnAllNodeSets": true,
 			"playbook":            "test",
 		},
 	}
 }
 
-func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {
+func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]any) client.Object {
 
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"apiVersion": "core.openstack.org/v1beta1",
 		"kind":       "OpenStackControlPlane",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -575,79 +575,79 @@ func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]inte
 	return th.CreateUnstructured(raw)
 }
 
-func GetDefaultOpenStackControlPlaneSpec(tlsIngress bool, tlsPodlevel bool) map[string]interface{} {
-	memcachedTemplate := map[string]interface{}{
-		"memcached": map[string]interface{}{
+func GetDefaultOpenStackControlPlaneSpec(tlsIngress bool, tlsPodlevel bool) map[string]any {
+	memcachedTemplate := map[string]any{
+		"memcached": map[string]any{
 			"replicas": 1,
 		},
 	}
-	rabbitTemplate := map[string]interface{}{
-		"rabbitmq": map[string]interface{}{
+	rabbitTemplate := map[string]any{
+		"rabbitmq": map[string]any{
 			"replicas": 1,
 		},
-		"rabbitmq-cell1": map[string]interface{}{
+		"rabbitmq-cell1": map[string]any{
 			"replicas": 1,
 		},
 	}
-	galeraTemplate := map[string]interface{}{
-		"openstack": map[string]interface{}{
+	galeraTemplate := map[string]any{
+		"openstack": map[string]any{
 			"storageRequest": "500M",
 		},
-		"openstack-cell1": map[string]interface{}{
+		"openstack-cell1": map[string]any{
 			"storageRequest": "500M",
 		},
 	}
-	keystoneTemplate := map[string]interface{}{
+	keystoneTemplate := map[string]any{
 		"databaseInstance": "keystone",
 		"secret":           "osp-secret",
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"secret":       "osp-secret",
 		"storageClass": "local-storage",
-		"galera": map[string]interface{}{
+		"galera": map[string]any{
 			"enabled":   true,
 			"templates": galeraTemplate,
 		},
-		"rabbitmq": map[string]interface{}{
+		"rabbitmq": map[string]any{
 			"enabled":   true,
 			"templates": rabbitTemplate,
 		},
-		"memcached": map[string]interface{}{
+		"memcached": map[string]any{
 			"enabled":   true,
 			"templates": memcachedTemplate,
 		},
-		"keystone": map[string]interface{}{
+		"keystone": map[string]any{
 			"enabled":  true,
 			"template": keystoneTemplate,
 		},
-		"tls": map[string]interface{}{
-			"ingress": map[string]interface{}{
+		"tls": map[string]any{
+			"ingress": map[string]any{
 				"enabled": tlsIngress,
 
-				"ca": map[string]interface{}{
+				"ca": map[string]any{
 					"customIssuer": "custom-issuer",
 					"duration":     "100h",
 				},
-				"cert": map[string]interface{}{
+				"cert": map[string]any{
 					"duration": "10h",
 				},
 			},
-			"podLevel": map[string]interface{}{
+			"podLevel": map[string]any{
 				"enabled": tlsPodlevel,
-				"internal": map[string]interface{}{
-					"ca": map[string]interface{}{
+				"internal": map[string]any{
+					"ca": map[string]any{
 						"duration": "100h",
 					},
-					"cert": map[string]interface{}{
+					"cert": map[string]any{
 						"duration": "10h",
 					},
 				},
-				"ovn": map[string]interface{}{
-					"ca": map[string]interface{}{
+				"ovn": map[string]any{
+					"ca": map[string]any{
 						"duration": "100h",
 					},
-					"cert": map[string]interface{}{
+					"cert": map[string]any{
 						"duration": "10h",
 					},
 				},

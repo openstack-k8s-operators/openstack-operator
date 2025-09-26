@@ -19,6 +19,7 @@ package dataplane
 import (
 	"context"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"time"
@@ -555,15 +556,9 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				continue
 			}
 			isDeploymentReady = true
-			for k, v := range deployment.Status.ConfigMapHashes {
-				instance.Status.ConfigMapHashes[k] = v
-			}
-			for k, v := range deployment.Status.SecretHashes {
-				instance.Status.SecretHashes[k] = v
-			}
-			for k, v := range deployment.Status.ContainerImages {
-				instance.Status.ContainerImages[k] = v
-			}
+			maps.Copy(instance.Status.ConfigMapHashes, deployment.Status.ConfigMapHashes)
+			maps.Copy(instance.Status.SecretHashes, deployment.Status.SecretHashes)
+			maps.Copy(instance.Status.ContainerImages, deployment.Status.ContainerImages)
 			instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
 
 			// Get list of services by name, either from ServicesOverride or

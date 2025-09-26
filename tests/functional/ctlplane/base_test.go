@@ -296,16 +296,16 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 	}
 }
 
-func GetDefaultOpenStackClientSpec() map[string]interface{} {
-	return map[string]interface{}{}
+func GetDefaultOpenStackClientSpec() map[string]any {
+	return map[string]any{}
 }
 
-func CreateOpenStackClient(name types.NamespacedName, spec map[string]interface{}) client.Object {
+func CreateOpenStackClient(name types.NamespacedName, spec map[string]any) client.Object {
 
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"apiVersion": "client.openstack.org/v1beta1",
 		"kind":       "OpenStackClient",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -327,12 +327,12 @@ func OpenStackClientConditionGetter(name types.NamespacedName) condition.Conditi
 	return instance.Status.Conditions
 }
 
-func CreateOpenStackVersion(name types.NamespacedName, spec map[string]interface{}) client.Object {
+func CreateOpenStackVersion(name types.NamespacedName, spec map[string]any) client.Object {
 
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"apiVersion": "core.openstack.org/v1beta1",
 		"kind":       "OpenStackVersion",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -341,8 +341,8 @@ func CreateOpenStackVersion(name types.NamespacedName, spec map[string]interface
 	return th.CreateUnstructured(raw)
 }
 
-func GetDefaultOpenStackVersionSpec() map[string]interface{} {
-	return map[string]interface{}{}
+func GetDefaultOpenStackVersionSpec() map[string]any {
+	return map[string]any{}
 }
 
 func GetOpenStackVersion(name types.NamespacedName) *corev1.OpenStackVersion {
@@ -366,12 +366,12 @@ func OpenStackVersionRemoveFinalizer(ctx context.Context, name types.NamespacedN
 	}, timeout, interval).Should(Succeed())
 }
 
-func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {
+func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]any) client.Object {
 
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"apiVersion": "core.openstack.org/v1beta1",
 		"kind":       "OpenStackControlPlane",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -381,16 +381,16 @@ func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]inte
 }
 
 // Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
-func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
-	spec := map[string]interface{}{
+func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]any {
+	spec := map[string]any{
 		"preProvisioned": true,
-		"nodeTemplate": map[string]interface{}{
+		"nodeTemplate": map[string]any{
 			"networks": []infrav1.IPSetNetwork{
 				{Name: "ctlplane", SubnetName: "subnet1"},
 			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
-		"nodes":            map[string]interface{}{},
+		"nodes":            map[string]any{},
 		"servicesOverride": []string{},
 	}
 	if tlsEnabled {
@@ -409,12 +409,12 @@ func GetDataplaneNodeset(name types.NamespacedName) *dataplanev1.OpenStackDataPl
 }
 
 // Build OpenStackDataPlaneNodeSet struct and fill it with preset values
-func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
-	return map[string]interface{}{
+func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]any) map[string]any {
+	return map[string]any{
 
 		"apiVersion": "dataplane.openstack.org/v1beta1",
 		"kind":       "OpenStackDataPlaneNodeSet",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		},
@@ -424,47 +424,47 @@ func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]
 
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
 // func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
-func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) client.Object {
+func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]any) client.Object {
 	instance := DefaultDataplaneNodeSetTemplate(name, spec)
 	return th.CreateUnstructured(instance)
 }
 
-func GetTLSPublicSpec() map[string]interface{} {
-	return map[string]interface{}{
-		"podLevel": map[string]interface{}{
+func GetTLSPublicSpec() map[string]any {
+	return map[string]any{
+		"podLevel": map[string]any{
 			"enabled": false,
 		},
 	}
 }
 
-func GetTLSeCustomIssuerSpec() map[string]interface{} {
-	return map[string]interface{}{
-		"ingress": map[string]interface{}{
+func GetTLSeCustomIssuerSpec() map[string]any {
+	return map[string]any{
+		"ingress": map[string]any{
 			"enabled": true,
 
-			"ca": map[string]interface{}{
+			"ca": map[string]any{
 				"customIssuer": names.CustomIssuerName.Name,
 				"duration":     "100h",
 			},
-			"cert": map[string]interface{}{
+			"cert": map[string]any{
 				"duration": "10h",
 			},
 		},
-		"podLevel": map[string]interface{}{
+		"podLevel": map[string]any{
 			"enabled": true,
-			"internal": map[string]interface{}{
-				"ca": map[string]interface{}{
+			"internal": map[string]any{
+				"ca": map[string]any{
 					"duration": "100h",
 				},
-				"cert": map[string]interface{}{
+				"cert": map[string]any{
 					"duration": "10h",
 				},
 			},
-			"ovn": map[string]interface{}{
-				"ca": map[string]interface{}{
+			"ovn": map[string]any{
+				"ca": map[string]any{
 					"duration": "100h",
 				},
-				"cert": map[string]interface{}{
+				"cert": map[string]any{
 					"duration": "10h",
 				},
 			},
@@ -472,8 +472,8 @@ func GetTLSeCustomIssuerSpec() map[string]interface{} {
 	}
 }
 
-func GetDefaultGaleraSpec() map[string]interface{} {
-	return map[string]interface{}{
+func GetDefaultGaleraSpec() map[string]any {
+	return map[string]any{
 		"replicas":       1,
 		"logToDisk":      false,
 		"secret":         "osp-secret",
@@ -483,13 +483,13 @@ func GetDefaultGaleraSpec() map[string]interface{} {
 	}
 }
 
-func CreateGaleraConfig(namespace string, spec map[string]interface{}) client.Object {
+func CreateGaleraConfig(namespace string, spec map[string]any) client.Object {
 	name := uuid.New().String()
 
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"apiVersion": "mariadb.openstack.org/v1beta1",
 		"kind":       "Galera",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name,
 			"namespace": namespace,
 		},
@@ -499,20 +499,20 @@ func CreateGaleraConfig(namespace string, spec map[string]interface{}) client.Ob
 	return th.CreateUnstructured(raw)
 }
 
-func GetDefaultRabbitMQSpec() map[string]interface{} {
-	return map[string]interface{}{
+func GetDefaultRabbitMQSpec() map[string]any {
+	return map[string]any{
 		"replicas":       1,
 		"containerImage": "",
 	}
 }
 
-func CreateRabbitMQConfig(namespace string, spec map[string]interface{}) client.Object {
+func CreateRabbitMQConfig(namespace string, spec map[string]any) client.Object {
 	name := uuid.New().String()
 
-	raw := map[string]interface{}{
+	raw := map[string]any{
 		"apiVersion": "rabbitmq.openstack.org/v1beta1",
 		"kind":       "RabbitMq",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      name,
 			"namespace": namespace,
 		},
@@ -522,144 +522,144 @@ func CreateRabbitMQConfig(namespace string, spec map[string]interface{}) client.
 	return th.CreateUnstructured(raw)
 }
 
-func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
-	memcachedTemplate := map[string]interface{}{
-		"memcached": map[string]interface{}{
+func GetDefaultOpenStackControlPlaneSpec() map[string]any {
+	memcachedTemplate := map[string]any{
+		"memcached": map[string]any{
 			"replicas": 1,
 		},
 	}
-	rabbitTemplate := map[string]interface{}{
-		names.RabbitMQName.Name: map[string]interface{}{
+	rabbitTemplate := map[string]any{
+		names.RabbitMQName.Name: map[string]any{
 			"replicas": 1,
 		},
-		names.RabbitMQCell1Name.Name: map[string]interface{}{
+		names.RabbitMQCell1Name.Name: map[string]any{
 			"replicas": 1,
 		},
 	}
-	galeraTemplate := map[string]interface{}{
-		names.DBName.Name: map[string]interface{}{
+	galeraTemplate := map[string]any{
+		names.DBName.Name: map[string]any{
 			"storageRequest": "500M",
 		},
-		names.DBCell1Name.Name: map[string]interface{}{
+		names.DBCell1Name.Name: map[string]any{
 			"storageRequest": "500M",
 		},
 	}
-	keystoneTemplate := map[string]interface{}{
+	keystoneTemplate := map[string]any{
 		"databaseInstance": names.KeystoneAPIName.Name,
 		"secret":           "osp-secret",
 	}
-	ironicTemplate := map[string]interface{}{
-		"ironicConductors": []interface{}{},
+	ironicTemplate := map[string]any{
+		"ironicConductors": []any{},
 	}
-	heatTemplate := map[string]interface{}{
+	heatTemplate := map[string]any{
 		"databaseInstance": "openstack",
 		"secret":           "osp-secret",
-		"passwordSelectors": map[string]interface{}{
+		"passwordSelectors": map[string]any{
 			"authEncryptionKey": "HeatAuthEncryptionKey",
 		},
 	}
-	telemetryTemplate := map[string]interface{}{
-		"ceilometer": map[string]interface{}{
+	telemetryTemplate := map[string]any{
+		"ceilometer": map[string]any{
 			"enabled": false,
 		},
-		"metricStorage": map[string]interface{}{
+		"metricStorage": map[string]any{
 			"enabled": false,
 		},
-		"logging": map[string]interface{}{
+		"logging": map[string]any{
 			"enabled": false,
 		},
-		"autoscaling": map[string]interface{}{
+		"autoscaling": map[string]any{
 			"enabled": false,
 		},
 	}
-	manilaTemplate := map[string]interface{}{
+	manilaTemplate := map[string]any{
 		"databaseInstance":    "openstack",
 		"rabbitMqClusterName": "rabbitmq",
 		"memcachedInstance":   "memcached",
 		"databaseAccount":     "account",
-		"manilaAPI": map[string]interface{}{
+		"manilaAPI": map[string]any{
 			"replicas": 1,
 		},
-		"manilaScheduler": map[string]interface{}{
+		"manilaScheduler": map[string]any{
 			"replicas": 1,
 		},
-		"manilaShares": map[string]interface{}{
-			"share1": map[string]interface{}{
+		"manilaShares": map[string]any{
+			"share1": map[string]any{
 				"replicas": 1,
 			},
 		},
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"secret":       "osp-secret",
 		"storageClass": "local-storage",
-		"galera": map[string]interface{}{
+		"galera": map[string]any{
 			"enabled":   true,
 			"templates": galeraTemplate,
 		},
-		"rabbitmq": map[string]interface{}{
+		"rabbitmq": map[string]any{
 			"enabled":   true,
 			"templates": rabbitTemplate,
 		},
-		"memcached": map[string]interface{}{
+		"memcached": map[string]any{
 			"enabled":   true,
 			"templates": memcachedTemplate,
 		},
-		"keystone": map[string]interface{}{
+		"keystone": map[string]any{
 			"enabled":  true,
 			"template": keystoneTemplate,
 		},
-		"placement": map[string]interface{}{
+		"placement": map[string]any{
 			"enabled": false,
 		},
-		"glance": map[string]interface{}{
+		"glance": map[string]any{
 			"enabled": true,
 		},
-		"horizon": map[string]interface{}{
+		"horizon": map[string]any{
 			"enabled": true,
 		},
-		"cinder": map[string]interface{}{
+		"cinder": map[string]any{
 			"enabled": true,
 		},
-		"ovn": map[string]interface{}{
+		"ovn": map[string]any{
 			"enabled": false,
 		},
-		"neutron": map[string]interface{}{
+		"neutron": map[string]any{
 			"enabled": true,
 		},
-		"swift": map[string]interface{}{
+		"swift": map[string]any{
 			"enabled": false,
 		},
-		"nova": map[string]interface{}{
+		"nova": map[string]any{
 			"enabled": false,
 		},
-		"redis": map[string]interface{}{
+		"redis": map[string]any{
 			"enabled": false,
 		},
-		"ironic": map[string]interface{}{
+		"ironic": map[string]any{
 			"enabled":  false,
 			"template": ironicTemplate,
 		},
-		"designate": map[string]interface{}{
+		"designate": map[string]any{
 			"enabled": false,
 		},
-		"barbican": map[string]interface{}{
+		"barbican": map[string]any{
 			"enabled": false,
 		},
-		"openstackclient": map[string]interface{}{},
-		"manila": map[string]interface{}{
+		"openstackclient": map[string]any{},
+		"manila": map[string]any{
 			"enabled":  true,
 			"template": manilaTemplate,
 		},
-		"heat": map[string]interface{}{
+		"heat": map[string]any{
 			"enabled":  true,
 			"template": heatTemplate,
 		},
-		"telemetry": map[string]interface{}{
+		"telemetry": map[string]any{
 			"enabled":  true,
 			"template": telemetryTemplate,
 		},
-		"watcher": map[string]interface{}{
+		"watcher": map[string]any{
 			"enabled": false,
 		},
 	}
@@ -708,7 +708,7 @@ func CreateClusterConfigCM() client.Object {
 				Name:      "cluster-config-v1",
 				Namespace: "kube-system",
 			},
-			map[string]interface{}{
+			map[string]any{
 				"install-config": "",
 			})
 	}, timeout, interval).Should(Succeed())
@@ -821,10 +821,10 @@ func SimulateControlplaneReady() {
 }
 
 // GetSampleTopologySpec - A sample (and opinionated) Topology Spec
-func GetSampleTopologySpec() map[string]interface{} {
+func GetSampleTopologySpec() map[string]any {
 	// Build the topology Spec
-	topologySpec := map[string]interface{}{
-		"topologySpreadConstraints": []map[string]interface{}{
+	topologySpec := map[string]any{
+		"topologySpreadConstraints": []map[string]any{
 			{
 				"maxSkew":           1,
 				"topologyKey":       k8s_corev1.LabelHostname,
@@ -836,11 +836,11 @@ func GetSampleTopologySpec() map[string]interface{} {
 }
 
 // CreateTopology - Creates a Topology CR based on the spec passed as input
-func CreateTopology(topology types.NamespacedName, spec map[string]interface{}) client.Object {
-	raw := map[string]interface{}{
+func CreateTopology(topology types.NamespacedName, spec map[string]any) client.Object {
+	raw := map[string]any{
 		"apiVersion": "topology.openstack.org/v1beta1",
 		"kind":       "Topology",
-		"metadata": map[string]interface{}{
+		"metadata": map[string]any{
 			"name":      topology.Name,
 			"namespace": topology.Namespace,
 		},

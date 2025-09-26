@@ -3,6 +3,7 @@ package bindata
 import (
 	"github.com/pkg/errors"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"maps"
 )
 
 const (
@@ -61,11 +62,11 @@ func MergeWebhookConfigurationForUpdate(current, updated *uns.Unstructured) erro
 
 	if gvk.Group == "admissionregistration.k8s.io" && (gvk.Kind == "MutatingWebhookConfiguration" || gvk.Kind == "ValidatingWebhookConfiguration") {
 
-		for i, webhook := range updated.Object["webhooks"].([]interface{}) {
+		for i, webhook := range updated.Object["webhooks"].([]any) {
 
-			currentClientConfig := current.Object["webhooks"].([]interface{})[i].(map[string]interface{})["clientConfig"].(map[string]interface{})
+			currentClientConfig := current.Object["webhooks"].([]any)[i].(map[string]any)["clientConfig"].(map[string]any)
 			if currentClientConfig != nil {
-				webhook.(map[string]interface{})["clientConfig"] = currentClientConfig
+				webhook.(map[string]any)["clientConfig"] = currentClientConfig
 			}
 
 		}
@@ -172,9 +173,7 @@ func mergeAnnotations(current, updated *uns.Unstructured) {
 		curAnnotations = map[string]string{}
 	}
 
-	for k, v := range updatedAnnotations {
-		curAnnotations[k] = v
-	}
+	maps.Copy(curAnnotations, updatedAnnotations)
 
 	updated.SetAnnotations(curAnnotations)
 }
@@ -189,9 +188,7 @@ func mergeLabels(current, updated *uns.Unstructured) {
 		curLabels = map[string]string{}
 	}
 
-	for k, v := range updatedLabels {
-		curLabels[k] = v
-	}
+	maps.Copy(curLabels, updatedLabels)
 
 	// add a label for openstack.openstack.org/crd to identify CRDs we install
 	gvk := updated.GroupVersionKind()

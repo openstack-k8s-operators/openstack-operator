@@ -3,6 +3,7 @@ package util //nolint:revive // util is an acceptable package name in this conte
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"sort"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -183,7 +184,7 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 		parsedExtraVars := ""
 		// unmarshal nested data structures
 		for _, variable := range keys {
-			var tmp interface{}
+			var tmp any
 			err := yaml.Unmarshal(a.ExtraVars[variable], &tmp)
 			if err != nil {
 				return nil, err
@@ -203,9 +204,7 @@ func labelsForOpenStackAnsibleEE(labels map[string]string) map[string]string {
 	ls := map[string]string{
 		"app": "openstackansibleee",
 	}
-	for key, val := range labels {
-		ls[key] = val
-	}
+	maps.Copy(ls, labels)
 	return ls
 }
 
