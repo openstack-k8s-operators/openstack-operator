@@ -54,6 +54,8 @@ rules:
     - ""
   resources:
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -89,42 +91,7 @@ rules:
     - batch
   resources:
     - cronjobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - batch
-  resources:
     - jobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - secrets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - services
   verbs:
     - create
     - delete
@@ -145,17 +112,6 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneendpoints
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - keystone.openstack.org
-  resources:
     - keystoneservices
   verbs:
     - create
@@ -169,6 +125,7 @@ rules:
     - mariadb.openstack.org
   resources:
     - mariadbaccounts
+    - mariadbdatabases
   verbs:
     - create
     - delete
@@ -183,18 +140,6 @@ rules:
     - mariadbaccounts/finalizers
   verbs:
     - update
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
-    - mariadbdatabases
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
 - apiGroups:
     - memcached.openstack.org
   resources:
@@ -228,16 +173,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create
@@ -287,83 +222,8 @@ rules:
     - watcher.openstack.org
   resources:
     - watcherapis
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - watcher.openstack.org
-  resources:
-    - watcherapis/finalizers
-  verbs:
-    - update
-- apiGroups:
-    - watcher.openstack.org
-  resources:
-    - watcherapis/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - watcher.openstack.org
-  resources:
     - watcherappliers
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - watcher.openstack.org
-  resources:
-    - watcherappliers/finalizers
-  verbs:
-    - update
-- apiGroups:
-    - watcher.openstack.org
-  resources:
-    - watcherappliers/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - watcher.openstack.org
-  resources:
     - watcherdecisionengines
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - watcher.openstack.org
-  resources:
-    - watcherdecisionengines/finalizers
-  verbs:
-    - update
-- apiGroups:
-    - watcher.openstack.org
-  resources:
-    - watcherdecisionengines/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - watcher.openstack.org
-  resources:
     - watchers
   verbs:
     - create
@@ -376,12 +236,18 @@ rules:
 - apiGroups:
     - watcher.openstack.org
   resources:
+    - watcherapis/finalizers
+    - watcherappliers/finalizers
+    - watcherdecisionengines/finalizers
     - watchers/finalizers
   verbs:
     - update
 - apiGroups:
     - watcher.openstack.org
   resources:
+    - watcherapis/status
+    - watcherappliers/status
+    - watcherdecisionengines/status
     - watchers/status
   verbs:
     - get

@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   creationTimestamp: null
   name: ceilometers.telemetry.openstack.org
 spec:
@@ -133,7 +133,6 @@ spec:
                 description: |-
                   ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json.
                   But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
-                  TODO: -> implement
                 type: object
               ipmiImage:
                 type: string

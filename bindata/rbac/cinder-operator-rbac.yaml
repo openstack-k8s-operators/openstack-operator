@@ -54,6 +54,8 @@ rules:
     - ""
   resources:
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -89,17 +91,6 @@ rules:
     - batch
   resources:
     - cronjobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - batch
-  resources:
     - jobs
   verbs:
     - create
@@ -113,113 +104,9 @@ rules:
     - cinder.openstack.org
   resources:
     - cinderapis
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinderapis/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinderapis/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
     - cinderbackups
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinderbackups/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinderbackups/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
     - cinders
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinders/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinders/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
     - cinderschedulers
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinderschedulers/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
-    - cinderschedulers/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - cinder.openstack.org
-  resources:
     - cindervolumes
   verbs:
     - create
@@ -232,6 +119,10 @@ rules:
 - apiGroups:
     - cinder.openstack.org
   resources:
+    - cinderapis/finalizers
+    - cinderbackups/finalizers
+    - cinders/finalizers
+    - cinderschedulers/finalizers
     - cindervolumes/finalizers
   verbs:
     - patch
@@ -239,42 +130,15 @@ rules:
 - apiGroups:
     - cinder.openstack.org
   resources:
+    - cinderapis/status
+    - cinderbackups/status
+    - cinders/status
+    - cinderschedulers/status
     - cindervolumes/status
   verbs:
     - get
     - patch
     - update
-- apiGroups:
-    - ""
-  resources:
-    - pods
-  verbs:
-    - get
-    - list
-- apiGroups:
-    - ""
-  resources:
-    - secrets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - services
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
 - apiGroups:
     - k8s.cni.cncf.io
   resources:
@@ -295,17 +159,6 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneendpoints
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - keystone.openstack.org
-  resources:
     - keystoneservices
   verbs:
     - create
@@ -319,6 +172,7 @@ rules:
     - mariadb.openstack.org
   resources:
     - mariadbaccounts
+    - mariadbdatabases
   verbs:
     - create
     - delete
@@ -334,18 +188,6 @@ rules:
   verbs:
     - patch
     - update
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
-    - mariadbdatabases
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
 - apiGroups:
     - memcached.openstack.org
   resources:
@@ -370,16 +212,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create

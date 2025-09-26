@@ -53,7 +53,10 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - configmaps
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -89,54 +92,7 @@ rules:
     - batch
   resources:
     - cronjobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - batch
-  resources:
     - jobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - configmaps
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - secrets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - services
   verbs:
     - create
     - delete
@@ -157,59 +113,7 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneapis
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - keystone.openstack.org
-  resources:
-    - keystoneapis/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - keystone.openstack.org
-  resources:
-    - keystoneapis/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - keystone.openstack.org
-  resources:
     - keystoneendpoints
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - keystone.openstack.org
-  resources:
-    - keystoneendpoints/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - keystone.openstack.org
-  resources:
-    - keystoneendpoints/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - keystone.openstack.org
-  resources:
     - keystoneservices
   verbs:
     - create
@@ -222,6 +126,8 @@ rules:
 - apiGroups:
     - keystone.openstack.org
   resources:
+    - keystoneapis/finalizers
+    - keystoneendpoints/finalizers
     - keystoneservices/finalizers
   verbs:
     - patch
@@ -229,6 +135,8 @@ rules:
 - apiGroups:
     - keystone.openstack.org
   resources:
+    - keystoneapis/status
+    - keystoneendpoints/status
     - keystoneservices/status
   verbs:
     - get
@@ -238,6 +146,7 @@ rules:
     - mariadb.openstack.org
   resources:
     - mariadbaccounts
+    - mariadbdatabases
   verbs:
     - create
     - delete
@@ -253,18 +162,6 @@ rules:
   verbs:
     - patch
     - update
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
-    - mariadbdatabases
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
 - apiGroups:
     - memcached.openstack.org
   resources:
@@ -298,16 +195,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create

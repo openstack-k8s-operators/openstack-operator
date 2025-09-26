@@ -53,7 +53,11 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - configmaps
+    - persistentvolumeclaims
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -77,17 +81,6 @@ rules:
     - apps
   resources:
     - deployments
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - apps
-  resources:
     - statefulsets
   verbs:
     - create
@@ -110,171 +103,12 @@ rules:
     - update
     - watch
 - apiGroups:
-    - ""
-  resources:
-    - configmaps
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - persistentvolumeclaims
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - pods
-  verbs:
-    - get
-    - list
-- apiGroups:
-    - ""
-  resources:
-    - secrets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - services
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
     - ironic.openstack.org
   resources:
     - ironicapis
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicapis/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicapis/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
     - ironicconductors
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicconductors/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicconductors/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
     - ironicinspectors
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicinspectors/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicinspectors/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
     - ironicneutronagents
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicneutronagents/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
-    - ironicneutronagents/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - ironic.openstack.org
-  resources:
     - ironics
   verbs:
     - create
@@ -287,6 +121,10 @@ rules:
 - apiGroups:
     - ironic.openstack.org
   resources:
+    - ironicapis/finalizers
+    - ironicconductors/finalizers
+    - ironicinspectors/finalizers
+    - ironicneutronagents/finalizers
     - ironics/finalizers
   verbs:
     - patch
@@ -294,6 +132,10 @@ rules:
 - apiGroups:
     - ironic.openstack.org
   resources:
+    - ironicapis/status
+    - ironicconductors/status
+    - ironicinspectors/status
+    - ironicneutronagents/status
     - ironics/status
   verbs:
     - get
@@ -319,17 +161,6 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneendpoints
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - keystone.openstack.org
-  resources:
     - keystoneservices
   verbs:
     - create
@@ -343,6 +174,7 @@ rules:
     - mariadb.openstack.org
   resources:
     - mariadbaccounts
+    - mariadbdatabases
   verbs:
     - create
     - delete
@@ -358,18 +190,6 @@ rules:
   verbs:
     - patch
     - update
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
-    - mariadbdatabases
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
 - apiGroups:
     - operator.openshift.io
   resources:
@@ -393,16 +213,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create

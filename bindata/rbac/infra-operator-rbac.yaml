@@ -53,74 +53,10 @@ rules:
 - apiGroups:
     - ""
   resources:
-    - pods
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - serviceaccounts
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - apps
-  resources:
-    - deployments
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - apps
-  resources:
-    - statefulsets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - config.openshift.io
-  resources:
-    - networks
-  verbs:
-    - get
-    - list
-    - watch
-- apiGroups:
-    - ""
-  resources:
     - configmaps
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -138,7 +74,19 @@ rules:
 - apiGroups:
     - ""
   resources:
-    - secrets
+    - serviceaccounts
+  verbs:
+    - create
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - apps
+  resources:
+    - deployments
+    - statefulsets
   verbs:
     - create
     - delete
@@ -148,16 +96,12 @@ rules:
     - update
     - watch
 - apiGroups:
-    - ""
+    - config.openshift.io
   resources:
-    - services
+    - networks
   verbs:
-    - create
-    - delete
     - get
     - list
-    - patch
-    - update
     - watch
 - apiGroups:
     - frrk8s.metallb.io
@@ -238,6 +182,12 @@ rules:
     - network.openstack.org
   resources:
     - bgpconfigurations
+    - dnsdata
+    - dnsdatas
+    - dnsmasqs
+    - ipsets
+    - reservations
+    - services
   verbs:
     - create
     - delete
@@ -256,101 +206,23 @@ rules:
     - network.openstack.org
   resources:
     - bgpconfigurations/status
+    - dnsdata/status
+    - dnsmasqs/status
+    - ipsets/status
+    - services/status
   verbs:
     - get
     - patch
     - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - dnsdata
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
 - apiGroups:
     - network.openstack.org
   resources:
     - dnsdata/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - dnsdata/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - dnsdatas
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - dnsmasqs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - network.openstack.org
-  resources:
     - dnsmasqs/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - dnsmasqs/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - ipsets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - network.openstack.org
-  resources:
     - ipsets/finalizers
+    - reservations/finalizers
+    - services/finalizers
   verbs:
-    - patch
-    - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - ipsets/status
-  verbs:
-    - get
     - patch
     - update
 - apiGroups:
@@ -361,52 +233,6 @@ rules:
     - get
     - list
     - watch
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - reservations
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - reservations/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - services
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - services/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - network.openstack.org
-  resources:
-    - services/status
-  verbs:
-    - get
-    - patch
-    - update
 - apiGroups:
     - policy
   resources:
@@ -435,31 +261,6 @@ rules:
     - rabbitmq.openstack.org
   resources:
     - rabbitmqs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rabbitmq.openstack.org
-  resources:
-    - rabbitmqs/finalizers
-  verbs:
-    - update
-- apiGroups:
-    - rabbitmq.openstack.org
-  resources:
-    - rabbitmqs/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - rabbitmq.openstack.org
-  resources:
     - transporturls
   verbs:
     - create
@@ -472,12 +273,14 @@ rules:
 - apiGroups:
     - rabbitmq.openstack.org
   resources:
+    - rabbitmqs/finalizers
     - transporturls/finalizers
   verbs:
     - update
 - apiGroups:
     - rabbitmq.openstack.org
   resources:
+    - rabbitmqs/status
     - transporturls/status
   verbs:
     - get
@@ -487,16 +290,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create
