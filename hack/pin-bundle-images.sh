@@ -88,5 +88,6 @@ done
 # append the rabbitmq URL only if we aren't in Dockerfile mode
 if [ -z "$DOCKERFILE" ]; then
     # pin rabbit to sha256 for our v2.9.0_patches fork
-    echo -n ",quay.io/openstack-k8s-operators/rabbitmq-cluster-operator-bundle@sha256:bad31e1b028840ac3c199efc3a8ecb3c87bdb68e6a11c8e32a7dbcd5a4d4114d"
+    # FIXME: waiting on https://github.com/openstack-k8s-operators/rabbitmq-patch-builder/pull/19 to land
+    echo -n ",quay.io/dprince/rabbitmq-cluster-operator-bundle@sha256:1e0dec16c711fdcebc32aacef6756c703098f3f45747c93f0b1e59498055dbc5"
 fi
