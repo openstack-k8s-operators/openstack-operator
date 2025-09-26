@@ -37,6 +37,7 @@ import (
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
@@ -69,6 +70,8 @@ type Names struct {
 	RabbitMQCertName                   types.NamespacedName
 	RabbitMQCell1Name                  types.NamespacedName
 	RabbitMQCell1CertName              types.NamespacedName
+	RabbitMQNotificationsName          types.NamespacedName
+	RabbitMQNotificationsCertName      types.NamespacedName
 	NoVNCProxyCell1CertPublicRouteName types.NamespacedName
 	NoVNCProxyCell1CertPublicSvcName   types.NamespacedName
 	NoVNCProxyCell1CertVencryptName    types.NamespacedName
@@ -222,6 +225,14 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		RabbitMQCell1CertName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cert-rabbitmq-cell1-svc",
+		},
+		RabbitMQNotificationsName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "rabbitmq-notifications",
+		},
+		RabbitMQNotificationsCertName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cert-rabbitmq-notifications-svc",
 		},
 		NoVNCProxyCell1CertPublicRouteName: types.NamespacedName{
 			Name:      "cert-nova-novncproxy-cell1-public-route",
@@ -533,6 +544,9 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 			"replicas": 1,
 		},
 		names.RabbitMQCell1Name.Name: map[string]interface{}{
+			"replicas": 1,
+		},
+		names.RabbitMQNotificationsName.Name: map[string]interface{}{
 			"replicas": 1,
 		},
 	}
@@ -870,6 +884,15 @@ func GetCinder(name types.NamespacedName) *cinderv1.Cinder {
 // GetNeutron
 func GetNeutron(name types.NamespacedName) *neutronv1.NeutronAPI {
 	instance := &neutronv1.NeutronAPI{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetNova
+func GetNova(name types.NamespacedName) *novav1.Nova {
+	instance := &novav1.Nova{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
