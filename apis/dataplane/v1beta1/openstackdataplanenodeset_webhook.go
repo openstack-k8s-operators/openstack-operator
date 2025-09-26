@@ -68,7 +68,11 @@ func (r *OpenStackDataPlaneNodeSet) Default() {
 
 // Default - set defaults for this OpenStackDataPlaneNodeSet Spec
 func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
-	domain := spec.BaremetalSetTemplate.DomainName
+	var domain string
+	if spec.BaremetalSetTemplate != nil {
+		domain = spec.BaremetalSetTemplate.DomainName
+	}
+
 	for nodeName, node := range spec.Nodes {
 		if node.HostName == "" {
 			node.HostName = nodeName
@@ -82,7 +86,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 		spec.Nodes[nodeName] = *node.DeepCopy()
 	}
 
-	if !spec.PreProvisioned {
+	if !spec.PreProvisioned && spec.BaremetalSetTemplate != nil {
 		spec.NodeTemplate.Ansible.AnsibleUser = spec.BaremetalSetTemplate.CloudUserName
 		if spec.BaremetalSetTemplate.DeploymentSSHSecret == "" {
 			spec.BaremetalSetTemplate.DeploymentSSHSecret = spec.NodeTemplate.AnsibleSSHPrivateKeySecret
@@ -212,12 +216,14 @@ func (r *OpenStackDataPlaneNodeSetSpec) ValidateUpdate(oldSpec *OpenStackDataPla
 	// to the openstack-baremetal-operator webhook to avoid duplicating logic.
 	if !reflect.DeepEqual(r.BaremetalSetTemplate, oldSpec.BaremetalSetTemplate) {
 		// Call openstack-baremetal-operator webhook Validate() to parse changes
-		err := r.BaremetalSetTemplate.ValidateTemplate(
-			len(oldSpec.Nodes), oldSpec.BaremetalSetTemplate)
-		if err != nil {
-			errors = append(errors, field.Forbidden(
-				field.NewPath("spec.baremetalSetTemplate"),
-				fmt.Sprintf("%s", err)))
+		if r.BaremetalSetTemplate != nil && oldSpec.BaremetalSetTemplate != nil {
+			err := r.BaremetalSetTemplate.ValidateTemplate(
+				len(oldSpec.Nodes), *oldSpec.BaremetalSetTemplate)
+			if err != nil {
+				errors = append(errors, field.Forbidden(
+					field.NewPath("spec.baremetalSetTemplate"),
+					fmt.Sprintf("%s", err)))
+			}
 		}
 	}
 

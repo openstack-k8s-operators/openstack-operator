@@ -42,7 +42,7 @@ spec:
         - name: RELATED_IMAGE_OCTAVIA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/octavia-operator@sha256:4d08afd31dc5ded10c54a5541f514ac351e9b40a183285b3db27d0757a6354c8
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:e3f947e9034a951620a76eaf41ceec95eefcef0eacb251b10993d6820d5e1af6
+          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:e7cfed051c1cf801e651fd4035070e38698039f284ac0b2a0332769fdbb4a9c8
         - name: RELATED_IMAGE_OVN_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/ovn-operator@sha256:1051afc168038fb814f75e7a5f07c588b295a83ebd143dcd8b46d799e31ad302
         - name: RELATED_IMAGE_PLACEMENT_OPERATOR_MANAGER_IMAGE_URL
