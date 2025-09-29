@@ -362,17 +362,16 @@ spec:
       cloudkitty:
         apiTimeout: 0
         cloudKittyAPI:
-          containerImage: quay.io/jwysogla/cloudkitty-api:latest
           override:
-          service:
-            internal:
-              metadata:
-                annotations:
-                  metallb.universe.tf/address-pool: internalapi
-                  metallb.universe.tf/allow-shared-ip: internalapi
-                  metallb.universe.tf/loadBalancerIPs: 172.17.0.80
-              spec:
-                type: LoadBalancer
+            service:
+              internal:
+                metadata:
+                  annotations:
+                    metallb.universe.tf/address-pool: internalapi
+                    metallb.universe.tf/allow-shared-ip: internalapi
+                    metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+                spec:
+                  type: LoadBalancer
           replicas: 1
           resources: {}
           tls:
@@ -381,7 +380,6 @@ spec:
               public: {}
             caBundleSecretName: combined-ca-bundle
         cloudKittyProc:
-          containerImage: quay.io/jwysogla/cloudkitty-processor:latest
           replicas: 1
           resources: {}
           tls:

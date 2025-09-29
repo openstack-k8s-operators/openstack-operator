@@ -68,7 +68,6 @@ require (
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gophercloud/gophercloud v1.14.1 // indirect
-	github.com/grafana/loki/operator/api/loki v0.0.0-20250910094332-a082b8a061ba // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -120,4 +119,4 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202507112000
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250717122149-12f70b7f3d8d //allow-merging
 
 // Test CloudKitty
-replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250923092300-186405486b28
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872

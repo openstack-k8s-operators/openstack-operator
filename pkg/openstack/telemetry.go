@@ -377,6 +377,9 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Ceilometer.CeilometerSpecCore.DeepCopyInto(&telemetry.Spec.Ceilometer.CeilometerSpecCore)
 		instance.Spec.Telemetry.Template.Logging.DeepCopyInto(&telemetry.Spec.Logging)
 		instance.Spec.Telemetry.Template.MetricStorage.DeepCopyInto(&telemetry.Spec.MetricStorage)
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittySpecBase.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittySpecBase)
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyAPI.CloudKittyAPITemplateCore)
+		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyProc.CloudKittyProcTemplateCore)
 
 		telemetry.Spec.Ceilometer.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Ceilometer.Enabled)
 		telemetry.Spec.Autoscaling.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Autoscaling.Enabled)
@@ -391,6 +394,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Autoscaling.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
 		telemetry.Spec.Autoscaling.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
 		telemetry.Spec.Autoscaling.Aodh.ListenerImage = *version.Status.ContainerImages.AodhListenerImage
+		telemetry.Spec.CloudKitty.CloudKittyAPI.ContainerImage = *version.Status.ContainerImages.CloudKittyAPIImage
+		telemetry.Spec.CloudKitty.CloudKittyProc.ContainerImage = *version.Status.ContainerImages.CloudKittyProcImage
 
 		telemetry.Spec.Ceilometer.KSMImage = *getImg(version.Status.ContainerImages.KsmImage, &missingImageDefault)
 		telemetry.Spec.Ceilometer.MysqldExporterImage = *getImg(version.Status.ContainerImages.CeilometerMysqldExporterImage, &missingImageDefault)
@@ -484,7 +489,9 @@ func TelemetryImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStac
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhAPIImage, version.Status.ContainerImages.AodhAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhEvaluatorImage, version.Status.ContainerImages.AodhEvaluatorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhNotifierImage, version.Status.ContainerImages.AodhNotifierImage) ||
-			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhListenerImage, version.Status.ContainerImages.AodhListenerImage) {
+			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhListenerImage, version.Status.ContainerImages.AodhListenerImage) || 
+			!stringPointersEqual(controlPlane.Status.ContainerImages.CloudKittyAPIImage, version.Status.ContainerImages.CloudKittyAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.CloudKittyProcImage, version.Status.ContainerImages.CloudKittyProcImage) {
 			Log.Info("Telemetry images do not match")
 			return false
 		}

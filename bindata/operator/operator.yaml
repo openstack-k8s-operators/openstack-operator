@@ -54,7 +54,7 @@ metadata:
   name: openstack-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 spec:
-  replicas: {{ .OpenStackOperator.Deployment.Replicas }}
+  replicas: 1
   selector:
     matchLabels:
       openstack.org/operator-name: openstack
@@ -74,10 +74,7 @@ spec:
         command:
         - /manager
         env:
-{{- range .OpenStackOperator.Deployment.Manager.Env }}
-        - name: '{{ .Name }}'
-          value: '{{ .Value }}'
-{{- end }}
+        - envCustom: replace_me
         image: '{{ .OpenStackOperator.Deployment.Manager.Image }}'
         livenessProbe:
           httpGet:
@@ -98,11 +95,9 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.CPU }}
-            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.Memory }}
+            customLimits: replace_me
           requests:
-            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.CPU }}
-            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.Memory }}
+            customRequests: replace_me
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:
@@ -114,7 +109,7 @@ spec:
         - --upstream=http://127.0.0.1:8080/
         - --logtostderr=true
         - --v=0
-        image: '{{ .OpenStackOperator.Deployment.KubeRbacProxy.Image }}'
+        image: kube-rbac-proxy:replace_me
         name: kube-rbac-proxy
         ports:
         - containerPort: 8443
@@ -129,22 +124,7 @@ spec:
             memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
-      tolerations:
-{{- range .OpenStackOperator.Deployment.Tolerations }}
-      - key: "{{ .Key }}"
-{{- if .Operator }}
-        operator: "{{ .Operator }}"
-{{- end }}
-{{- if .Value }}
-        value: "{{ .Value }}"
-{{- end }}
-{{- if .Effect }}
-        effect: "{{ .Effect }}"
-{{- end }}
-{{- if .TolerationSeconds }}
-        tolerationSeconds: {{ .TolerationSeconds }}
-{{- end }}
-{{- end }}
+      customTolerations: replace_me
       securityContext:
         runAsNonRoot: true
       serviceAccountName: openstack-operator-controller-manager
