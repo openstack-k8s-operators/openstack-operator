@@ -64,6 +64,8 @@ github.com/gophercloud/gophercloud v1.14.1 h1:DTCNaTVGl8/cFu58O1JwWgis9gtISAFONq
 github.com/gophercloud/gophercloud v1.14.1/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
 github.com/imdario/mergo v0.3.16 h1:wwQJbIsHYGMUyLSPrEq1CT16AhnhNJQ51+4fdHUnCl4=
 github.com/imdario/mergo v0.3.16/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
+github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872 h1:LDZKByr7fpYLZydCGiY3hYUJerC+axk0VvLYKSWEqIg=
+github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872/go.mod h1:v4Stbc6YFVR3r7ofSuErpTJ9Ki2Ka9Fs8S+dgiNqx60=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
@@ -144,8 +146,6 @@ github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.2025071
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250717122149-12f70b7f3d8d/go.mod h1:6Mq2N/KtNFW20L+PQC5qkeK8R8UGadmGBXL8HDY6lcg=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250922191944-7d54e7c80282 h1:wrBO9Xe8CqXlZJNG8yuBOtVqebiJR+02sKPTMtNMi9w=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20250922191944-7d54e7c80282/go.mod h1:x47kL081iHPPLBL7AcNuX2ossjJP+xXO6RMgG21ATKM=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250926151751-fb90e2d5d545 h1:cscDXcjLvEwUsV4U6fPdMSB/M4k7CeuejOacINmwPnE=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20250926151751-fb90e2d5d545/go.mod h1:nNPrAB/FKxbK8X0nyjSlbH9jNY3V5nWQ6+H5z/OkWuI=
 github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20250925120222-c0b444994d55 h1:Eq8IMNekzmAbe8mlGtsmCejXOSqb6AW9ieUM9KBMV+A=
 github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20250925120222-c0b444994d55/go.mod h1:cIeTQmrUXSxzHuv/W9hxMk02z5BT+4RJl9MdXX20BsA=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

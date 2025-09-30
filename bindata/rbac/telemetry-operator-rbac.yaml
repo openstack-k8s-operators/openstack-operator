@@ -108,6 +108,53 @@ rules:
     - update
     - watch
 - apiGroups:
+    - cert-manager.io
+  resources:
+    - certificates
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - cert-manager.io
+  resources:
+    - issuers
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - cloudkitty.openstack.org
+  resources:
+    - cloudkittyprocs
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - cloudkitty.openstack.org
+  resources:
+    - cloudkittyprocs/finalizers
+  verbs:
+    - patch
+    - update
+- apiGroups:
+    - cloudkitty.openstack.org
+  resources:
+    - cloudkittyprocs/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
     - heat.openstack.org
   resources:
     - heats
@@ -136,6 +183,21 @@ rules:
   resources:
     - keystoneendpoints
     - keystoneservices
+<<<<<<< HEAD
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - loki.grafana.com
+  resources:
+    - lokistacks
+=======
+>>>>>>> main
   verbs:
     - create
     - delete
@@ -282,10 +344,25 @@ rules:
   verbs:
     - use
 - apiGroups:
+    - security.openshift.io
+  resourceNames:
+    - anyuid
+    - privileged
+  resources:
+    - securitycontextconstraints
+  verbs:
+    - use
+- apiGroups:
     - telemetry.openstack.org
   resources:
     - autoscalings
     - ceilometers
+<<<<<<< HEAD
+    - cloudkitties
+    - cloudkittyapis
+    - cloudkittyprocs
+=======
+>>>>>>> main
     - loggings
     - metricstorages
     - telemetries
@@ -302,6 +379,10 @@ rules:
   resources:
     - autoscalings/finalizers
     - ceilometers/finalizers
+<<<<<<< HEAD
+    - cloudkitties/finalizers
+=======
+>>>>>>> main
     - loggings/finalizers
     - metricstorages/finalizers
   verbs:
@@ -313,6 +394,12 @@ rules:
   resources:
     - autoscalings/status
     - ceilometers/status
+<<<<<<< HEAD
+    - cloudkitties/status
+    - cloudkittyapis/status
+    - cloudkittyprocs/status
+=======
+>>>>>>> main
     - loggings/status
     - metricstorages/status
     - telemetries/status
@@ -323,6 +410,11 @@ rules:
 - apiGroups:
     - telemetry.openstack.org
   resources:
+<<<<<<< HEAD
+    - cloudkittyapis/finalizers
+    - cloudkittyprocs/finalizers
+=======
+>>>>>>> main
     - telemetries/finalizers
   verbs:
     - patch

@@ -130,6 +130,8 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			CinderAPIImage:                getImg(instance.Spec.CustomContainerImages.CinderAPIImage, defaults.CinderAPIImage),
 			CinderBackupImage:             getImg(instance.Spec.CustomContainerImages.CinderBackupImage, defaults.CinderBackupImage),
 			CinderSchedulerImage:          getImg(instance.Spec.CustomContainerImages.CinderSchedulerImage, defaults.CinderSchedulerImage),
+			CloudKittyAPIImage:            getImg(instance.Spec.CustomContainerImages.CloudKittyAPIImage, defaults.CloudKittyAPIImage),
+			CloudKittyProcImage:           getImg(instance.Spec.CustomContainerImages.CloudKittyProcImage, defaults.CloudKittyProcImage),
 			DesignateAPIImage:             getImg(instance.Spec.CustomContainerImages.DesignateAPIImage, defaults.DesignateAPIImage),
 			DesignateBackendbind9Image:    getImg(instance.Spec.CustomContainerImages.DesignateBackendbind9Image, defaults.DesignateBackendbind9Image),
 			DesignateCentralImage:         getImg(instance.Spec.CustomContainerImages.DesignateCentralImage, defaults.DesignateCentralImage),

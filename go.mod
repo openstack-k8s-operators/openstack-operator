@@ -135,3 +135,6 @@ replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-oper
 
 // pin to support rabbitmq 2.16.1 rebase
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20250627150254-e9823e99808e //allow-merging
+
+// Test CloudKitty
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872 //allow-merging
