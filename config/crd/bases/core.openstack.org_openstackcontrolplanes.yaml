@@ -13244,7 +13244,7 @@ spec:
                         rabbitmq:
                           properties:
                             additionalConfig:
-                              maxLength: 2000
+                              maxLength: 100000
                               type: string
                             additionalPlugins:
                               items:
@@ -13356,6 +13356,10 @@ spec:
                               - PreferDualStack
                               - RequireDualStack
                               type: string
+                            labels:
+                              additionalProperties:
+                                type: string
+                              type: object
                             type:
                               default: ClusterIP
                               enum:
