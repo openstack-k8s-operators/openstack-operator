@@ -54,29 +54,7 @@ rules:
     - ""
   resources:
     - configmaps
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
     - persistentvolumeclaims
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
     - pods
   verbs:
     - create
@@ -117,86 +95,8 @@ rules:
     - test.openstack.org
   resources:
     - ansibletests
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - test.openstack.org
-  resources:
-    - ansibletests/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - test.openstack.org
-  resources:
-    - ansibletests/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - test.openstack.org
-  resources:
     - horizontests
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - test.openstack.org
-  resources:
-    - horizontests/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - test.openstack.org
-  resources:
-    - horizontests/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - test.openstack.org
-  resources:
     - tempests
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - test.openstack.org
-  resources:
-    - tempests/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - test.openstack.org
-  resources:
-    - tempests/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - test.openstack.org
-  resources:
     - tobikoes
   verbs:
     - create
@@ -209,6 +109,9 @@ rules:
 - apiGroups:
     - test.openstack.org
   resources:
+    - ansibletests/finalizers
+    - horizontests/finalizers
+    - tempests/finalizers
     - tobikoes/finalizers
   verbs:
     - patch
@@ -216,6 +119,9 @@ rules:
 - apiGroups:
     - test.openstack.org
   resources:
+    - ansibletests/status
+    - horizontests/status
+    - tempests/status
     - tobikoes/status
   verbs:
     - get

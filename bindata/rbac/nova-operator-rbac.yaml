@@ -54,6 +54,8 @@ rules:
     - ""
   resources:
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -89,49 +91,7 @@ rules:
     - batch
   resources:
     - cronjobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - batch
-  resources:
     - jobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - pods
-  verbs:
-    - get
-    - list
-- apiGroups:
-    - ""
-  resources:
-    - secrets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - services
   verbs:
     - create
     - delete
@@ -160,17 +120,6 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneendpoints
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - keystone.openstack.org
-  resources:
     - keystoneservices
   verbs:
     - create
@@ -184,24 +133,6 @@ rules:
     - mariadb.openstack.org
   resources:
     - mariadbaccounts
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
-    - mariadbaccounts/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
     - mariadbdatabases
   verbs:
     - create
@@ -214,6 +145,7 @@ rules:
 - apiGroups:
     - mariadb.openstack.org
   resources:
+    - mariadbaccounts/finalizers
     - mariadbdatabases/finalizers
   verbs:
     - patch
@@ -239,194 +171,12 @@ rules:
     - nova.openstack.org
   resources:
     - nova
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - nova/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - nova/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
     - novaapis
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novaapis/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novaapis/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
     - novacells
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novacells/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novacells/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
     - novacomputes
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novacomputes/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novacomputes/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
     - novaconductors
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novaconductors/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novaconductors/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
     - novametadata
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novametadata/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novametadata/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
     - novanovncproxies
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novanovncproxies/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
-    - novanovncproxies/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - nova.openstack.org
-  resources:
     - novaschedulers
   verbs:
     - create
@@ -439,6 +189,13 @@ rules:
 - apiGroups:
     - nova.openstack.org
   resources:
+    - nova/finalizers
+    - novaapis/finalizers
+    - novacells/finalizers
+    - novacomputes/finalizers
+    - novaconductors/finalizers
+    - novametadata/finalizers
+    - novanovncproxies/finalizers
     - novaschedulers/finalizers
   verbs:
     - patch
@@ -446,6 +203,13 @@ rules:
 - apiGroups:
     - nova.openstack.org
   resources:
+    - nova/status
+    - novaapis/status
+    - novacells/status
+    - novacomputes/status
+    - novaconductors/status
+    - novametadata/status
+    - novanovncproxies/status
     - novaschedulers/status
   verbs:
     - get
@@ -467,16 +231,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create

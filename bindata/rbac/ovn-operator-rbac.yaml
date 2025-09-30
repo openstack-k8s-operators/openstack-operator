@@ -53,7 +53,10 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - configmaps
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -77,6 +80,7 @@ rules:
     - apps
   resources:
     - daemonsets
+    - statefulsets
   verbs:
     - create
     - delete
@@ -96,64 +100,9 @@ rules:
     - patch
     - update
 - apiGroups:
-    - apps
-  resources:
-    - statefulsets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
     - batch
   resources:
     - jobs
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - configmaps
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - pods
-  verbs:
-    - get
-    - list
-- apiGroups:
-    - ""
-  resources:
-    - secrets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - services
   verbs:
     - create
     - delete
@@ -196,6 +145,8 @@ rules:
     - ovn.openstack.org
   resources:
     - ovncontrollers
+    - ovndbclusters
+    - ovnnorthds
   verbs:
     - create
     - delete
@@ -208,6 +159,8 @@ rules:
     - ovn.openstack.org
   resources:
     - ovncontrollers/finalizers
+    - ovndbclusters/finalizers
+    - ovnnorthds/finalizers
   verbs:
     - patch
     - update
@@ -215,27 +168,9 @@ rules:
     - ovn.openstack.org
   resources:
     - ovncontrollers/status
+    - ovnnorthds/status
   verbs:
     - get
-    - patch
-    - update
-- apiGroups:
-    - ovn.openstack.org
-  resources:
-    - ovndbclusters
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ovn.openstack.org
-  resources:
-    - ovndbclusters/finalizers
-  verbs:
     - patch
     - update
 - apiGroups:
@@ -249,46 +184,9 @@ rules:
     - update
     - watch
 - apiGroups:
-    - ovn.openstack.org
-  resources:
-    - ovnnorthds
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ovn.openstack.org
-  resources:
-    - ovnnorthds/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - ovn.openstack.org
-  resources:
-    - ovnnorthds/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create

@@ -183,6 +183,7 @@ rules:
   resources:
     - keystoneendpoints
     - keystoneservices
+<<<<<<< HEAD
   verbs:
     - create
     - delete
@@ -195,6 +196,8 @@ rules:
     - loki.grafana.com
   resources:
     - lokistacks
+=======
+>>>>>>> main
   verbs:
     - create
     - delete
@@ -354,9 +357,12 @@ rules:
   resources:
     - autoscalings
     - ceilometers
+<<<<<<< HEAD
     - cloudkitties
     - cloudkittyapis
     - cloudkittyprocs
+=======
+>>>>>>> main
     - loggings
     - metricstorages
     - telemetries
@@ -373,7 +379,10 @@ rules:
   resources:
     - autoscalings/finalizers
     - ceilometers/finalizers
+<<<<<<< HEAD
     - cloudkitties/finalizers
+=======
+>>>>>>> main
     - loggings/finalizers
     - metricstorages/finalizers
   verbs:
@@ -385,9 +394,12 @@ rules:
   resources:
     - autoscalings/status
     - ceilometers/status
+<<<<<<< HEAD
     - cloudkitties/status
     - cloudkittyapis/status
     - cloudkittyprocs/status
+=======
+>>>>>>> main
     - loggings/status
     - metricstorages/status
     - telemetries/status
@@ -398,8 +410,11 @@ rules:
 - apiGroups:
     - telemetry.openstack.org
   resources:
+<<<<<<< HEAD
     - cloudkittyapis/finalizers
     - cloudkittyprocs/finalizers
+=======
+>>>>>>> main
     - telemetries/finalizers
   verbs:
     - patch

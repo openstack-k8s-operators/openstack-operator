@@ -53,7 +53,10 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - configmaps
     - pods
+    - secrets
+    - services
   verbs:
     - create
     - delete
@@ -77,17 +80,6 @@ rules:
     - apps
   resources:
     - deployments
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - apps
-  resources:
     - statefulsets
   verbs:
     - create
@@ -110,240 +102,15 @@ rules:
     - update
     - watch
 - apiGroups:
-    - ""
-  resources:
-    - configmaps
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - pods
-  verbs:
-    - get
-    - list
-- apiGroups:
-    - ""
-  resources:
-    - secrets
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - ""
-  resources:
-    - services
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
     - designate.openstack.org
   resources:
     - designateapis
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designateapis/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designateapis/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
     - designatebackendbind9s
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designatebackendbind9s/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designatebackendbind9s/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
     - designatecentrals
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designatecentrals/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designatecentrals/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
     - designatemdnses
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designatemdnses/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designatemdnses/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
     - designateproducers
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designateproducers/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designateproducers/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
     - designates
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designates/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designates/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
     - designateunbounds
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designateunbounds/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
-    - designateunbounds/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - designate.openstack.org
-  resources:
     - designateworkers
   verbs:
     - create
@@ -356,6 +123,13 @@ rules:
 - apiGroups:
     - designate.openstack.org
   resources:
+    - designateapis/finalizers
+    - designatebackendbind9s/finalizers
+    - designatecentrals/finalizers
+    - designatemdnses/finalizers
+    - designateproducers/finalizers
+    - designates/finalizers
+    - designateunbounds/finalizers
     - designateworkers/finalizers
   verbs:
     - patch
@@ -363,6 +137,13 @@ rules:
 - apiGroups:
     - designate.openstack.org
   resources:
+    - designateapis/status
+    - designatebackendbind9s/status
+    - designatecentrals/status
+    - designatemdnses/status
+    - designateproducers/status
+    - designates/status
+    - designateunbounds/status
     - designateworkers/status
   verbs:
     - get
@@ -388,17 +169,6 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneendpoints
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - keystone.openstack.org
-  resources:
     - keystoneservices
   verbs:
     - create
@@ -412,6 +182,7 @@ rules:
     - mariadb.openstack.org
   resources:
     - mariadbaccounts
+    - mariadbdatabases
   verbs:
     - create
     - delete
@@ -428,18 +199,6 @@ rules:
     - patch
     - update
 - apiGroups:
-    - mariadb.openstack.org
-  resources:
-    - mariadbdatabases
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
     - rabbitmq.openstack.org
   resources:
     - transporturls
@@ -455,16 +214,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create

@@ -37,6 +37,21 @@ for service in "${!services_secrets[@]}"; do
     for port in $ports; do
         echo "Connecting to $service on port $port..."
 
+        # Use different secret for metrics port 1981
+        current_secret="$secret"
+        if [[ "$port" == "1981" && ("$service" == "ovsdbserver-nb-0" || "$service" == "ovsdbserver-sb-0") ]]; then
+            current_secret="cert-ovn-metrics"
+            # Fetch the certificate from the metrics secret
+            current_secret_cert=$(oc get secret "$current_secret" -n "$NAMESPACE" -o jsonpath="{.data['tls\.crt']}" | base64 --decode 2>&1)
+        else
+            current_secret_cert="$secret_cert"
+        fi
+
+        if [[ -z "$current_secret_cert" ]]; then
+            echo "Error retrieving or decoding certificate from secret $current_secret for service $service port $port."
+            continue
+        fi
+
         # Captures the certificate section from the openssl output
         pod_cert=$(oc rsh -n "$NAMESPACE" openstackclient openssl s_client -connect "$cluster_ip:$port" -servername "$cluster_ip" </dev/null 2>/dev/null | sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p')
 
@@ -45,7 +60,7 @@ for service in "${!services_secrets[@]}"; do
             continue
         fi
 
-        if [[ "$pod_cert" == "$secret_cert" ]]; then
+        if [[ "$pod_cert" == "$current_secret_cert" ]]; then
             echo "Certificates for $service on port $port match the secret."
         else
             echo "Certificates for $service on port $port DO NOT match the secret."
