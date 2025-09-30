@@ -14841,26 +14841,14 @@ spec:
                             type: integer
                           cloudKittyAPI:
                             properties:
-                              containerImage:
-                                type: string
                               customServiceConfig:
                                 type: string
                               customServiceConfigSecrets:
-                                allOf:
-                                - items:
-                                    type: string
-                                - items:
-                                    type: string
                                 items:
                                   type: string
                                 type: array
                                 x-kubernetes-list-type: atomic
                               networkAttachments:
-                                allOf:
-                                - items:
-                                    type: string
-                                - items:
-                                    type: string
                                 items:
                                   type: string
                                 type: array
@@ -14900,11 +14888,6 @@ spec:
                                             loadBalancerClass:
                                               type: string
                                             loadBalancerSourceRanges:
-                                              allOf:
-                                              - items:
-                                                  type: string
-                                              - items:
-                                                  type: string
                                               items:
                                                 type: string
                                               type: array
@@ -14927,9 +14910,6 @@ spec:
                                     type: object
                                 type: object
                               replicas:
-                                allOf:
-                                - minimum: 0
-                                - minimum: 0
                                 default: 1
                                 format: int32
                                 minimum: 0
@@ -14937,29 +14917,6 @@ spec:
                               resources:
                                 properties:
                                   claims:
-                                    allOf:
-                                    - items:
-                                        properties:
-                                          name:
-                                            type: string
-                                          request:
-                                            type: string
-                                        required:
-                                        - name
-                                        type: object
-                                      x-kubernetes-list-map-keys:
-                                      - name
-                                    - items:
-                                        properties:
-                                          name:
-                                            type: string
-                                          request:
-                                            type: string
-                                        required:
-                                        - name
-                                        type: object
-                                      x-kubernetes-list-map-keys:
-                                      - name
                                     items:
                                       properties:
                                         name:
@@ -14975,13 +14932,6 @@ spec:
                                     x-kubernetes-list-type: map
                                   limits:
                                     additionalProperties:
-                                      allOf:
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
                                       anyOf:
                                       - type: integer
                                       - type: string
@@ -14990,13 +14940,6 @@ spec:
                                     type: object
                                   requests:
                                     additionalProperties:
-                                      allOf:
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
                                       anyOf:
                                       - type: integer
                                       - type: string
@@ -15032,26 +14975,14 @@ spec:
                             type: object
                           cloudKittyProc:
                             properties:
-                              containerImage:
-                                type: string
                               customServiceConfig:
                                 type: string
                               customServiceConfigSecrets:
-                                allOf:
-                                - items:
-                                    type: string
-                                - items:
-                                    type: string
                                 items:
                                   type: string
                                 type: array
                                 x-kubernetes-list-type: atomic
                               networkAttachments:
-                                allOf:
-                                - items:
-                                    type: string
-                                - items:
-                                    type: string
                                 items:
                                   type: string
                                 type: array
@@ -15061,9 +14992,6 @@ spec:
                                   type: string
                                 type: object
                               replicas:
-                                allOf:
-                                - minimum: 0
-                                - minimum: 0
                                 default: 1
                                 format: int32
                                 minimum: 0
@@ -15071,29 +14999,6 @@ spec:
                               resources:
                                 properties:
                                   claims:
-                                    allOf:
-                                    - items:
-                                        properties:
-                                          name:
-                                            type: string
-                                          request:
-                                            type: string
-                                        required:
-                                        - name
-                                        type: object
-                                      x-kubernetes-list-map-keys:
-                                      - name
-                                    - items:
-                                        properties:
-                                          name:
-                                            type: string
-                                          request:
-                                            type: string
-                                        required:
-                                        - name
-                                        type: object
-                                      x-kubernetes-list-map-keys:
-                                      - name
                                     items:
                                       properties:
                                         name:
@@ -15109,13 +15014,6 @@ spec:
                                     x-kubernetes-list-type: map
                                   limits:
                                     additionalProperties:
-                                      allOf:
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
                                       anyOf:
                                       - type: integer
                                       - type: string
@@ -15124,13 +15022,6 @@ spec:
                                     type: object
                                   requests:
                                     additionalProperties:
-                                      allOf:
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
-                                      - anyOf:
-                                        - type: integer
-                                        - type: string
                                       anyOf:
                                       - type: integer
                                       - type: string
@@ -15162,9 +15053,7 @@ spec:
                             default: openstack
                             type: string
                           enabled:
-                            allOf:
-                            - default: false
-                            - default: false
+                            default: false
                             type: boolean
                           memcachedInstance:
                             default: memcached
@@ -15193,12 +15082,9 @@ spec:
                           prometheusHost:
                             type: string
                           prometheusPort:
-                            allOf:
-                            - maximum: 65535
-                              minimum: 1
-                            - maximum: 65535
-                              minimum: 1
                             format: int32
+                            maximum: 65535
+                            minimum: 1
                             type: integer
                           prometheusTLSCaCertSecret:
                             nullable: true
@@ -15224,26 +15110,17 @@ spec:
                                 type: s3
                             properties:
                               schemas:
-                                allOf:
-                                - items:
-                                    properties:
-                                      effectiveDate:
-                                        type: string
-                                      version:
-                                        type: string
-                                    type: object
-                                  minItems: 1
-                                - items:
-                                    properties:
-                                      effectiveDate:
-                                        type: string
-                                      version:
-                                        type: string
-                                    type: object
-                                  minItems: 1
                                 default:
                                 - effectiveDate: "2020-10-11"
                                   version: v11
+                                items:
+                                  properties:
+                                    effectiveDate:
+                                      type: string
+                                    version:
+                                      type: string
+                                  type: object
+                                minItems: 1
                                 type: array
                               secret:
                                 properties:

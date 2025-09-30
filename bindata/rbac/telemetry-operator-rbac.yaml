@@ -53,6 +53,21 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - configmaps
+    - pods
+    - secrets
+    - services
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - ""
+  resources:
     - serviceaccounts
   verbs:
     - create
@@ -93,9 +108,9 @@ rules:
     - update
     - watch
 - apiGroups:
-    - ""
+    - cert-manager.io
   resources:
-    - configmaps
+    - certificates
   verbs:
     - create
     - delete
@@ -105,9 +120,17 @@ rules:
     - update
     - watch
 - apiGroups:
-    - ""
+    - cert-manager.io
   resources:
-    - pods
+    - issuers
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - cloudkitty.openstack.org
+  resources:
+    - cloudkittyprocs
   verbs:
     - create
     - delete
@@ -117,29 +140,20 @@ rules:
     - update
     - watch
 - apiGroups:
-    - ""
+    - cloudkitty.openstack.org
   resources:
-    - secrets
+    - cloudkittyprocs/finalizers
   verbs:
-    - create
-    - delete
-    - get
-    - list
     - patch
     - update
-    - watch
 - apiGroups:
-    - ""
+    - cloudkitty.openstack.org
   resources:
-    - services
+    - cloudkittyprocs/status
   verbs:
-    - create
-    - delete
     - get
-    - list
     - patch
     - update
-    - watch
 - apiGroups:
     - heat.openstack.org
   resources:
@@ -168,6 +182,7 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneendpoints
+    - keystoneservices
   verbs:
     - create
     - delete
@@ -177,9 +192,9 @@ rules:
     - update
     - watch
 - apiGroups:
-    - keystone.openstack.org
+    - loki.grafana.com
   resources:
-    - keystoneservices
+    - lokistacks
   verbs:
     - create
     - delete
@@ -200,24 +215,6 @@ rules:
     - mariadb.openstack.org
   resources:
     - mariadbaccounts
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
-    - mariadbaccounts/finalizers
-  verbs:
-    - patch
-    - update
-- apiGroups:
-    - mariadb.openstack.org
-  resources:
     - mariadbdatabases
   verbs:
     - create
@@ -230,6 +227,7 @@ rules:
 - apiGroups:
     - mariadb.openstack.org
   resources:
+    - mariadbaccounts/finalizers
     - mariadbdatabases/finalizers
   verbs:
     - patch
@@ -246,28 +244,6 @@ rules:
     - monitoring.rhobs
   resources:
     - alertmanagers
-  verbs:
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - monitoring.rhobs
-  resources:
-    - monitoringstacks
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - monitoring.rhobs
-  resources:
     - prometheuses
   verbs:
     - delete
@@ -279,18 +255,8 @@ rules:
 - apiGroups:
     - monitoring.rhobs
   resources:
+    - monitoringstacks
     - prometheusrules
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - monitoring.rhobs
-  resources:
     - scrapeconfigs
   verbs:
     - create
@@ -358,16 +324,6 @@ rules:
     - rbac.authorization.k8s.io
   resources:
     - rolebindings
-  verbs:
-    - create
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - rbac.authorization.k8s.io
-  resources:
     - roles
   verbs:
     - create
@@ -385,120 +341,24 @@ rules:
   verbs:
     - use
 - apiGroups:
+    - security.openshift.io
+  resourceNames:
+    - anyuid
+    - privileged
+  resources:
+    - securitycontextconstraints
+  verbs:
+    - use
+- apiGroups:
     - telemetry.openstack.org
   resources:
     - autoscalings
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - autoscalings/finalizers
-  verbs:
-    - delete
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - autoscalings/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
     - ceilometers
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - ceilometers/finalizers
-  verbs:
-    - delete
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - ceilometers/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
+    - cloudkitties
+    - cloudkittyapis
+    - cloudkittyprocs
     - loggings
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - loggings/finalizers
-  verbs:
-    - delete
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - loggings/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
     - metricstorages
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - metricstorages/finalizers
-  verbs:
-    - delete
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
-    - metricstorages/status
-  verbs:
-    - get
-    - patch
-    - update
-- apiGroups:
-    - telemetry.openstack.org
-  resources:
     - telemetries
   verbs:
     - create
@@ -511,16 +371,37 @@ rules:
 - apiGroups:
     - telemetry.openstack.org
   resources:
-    - telemetries/finalizers
+    - autoscalings/finalizers
+    - ceilometers/finalizers
+    - cloudkitties/finalizers
+    - loggings/finalizers
+    - metricstorages/finalizers
   verbs:
+    - delete
     - patch
     - update
 - apiGroups:
     - telemetry.openstack.org
   resources:
+    - autoscalings/status
+    - ceilometers/status
+    - cloudkitties/status
+    - cloudkittyapis/status
+    - cloudkittyprocs/status
+    - loggings/status
+    - metricstorages/status
     - telemetries/status
   verbs:
     - get
+    - patch
+    - update
+- apiGroups:
+    - telemetry.openstack.org
+  resources:
+    - cloudkittyapis/finalizers
+    - cloudkittyprocs/finalizers
+    - telemetries/finalizers
+  verbs:
     - patch
     - update
 - apiGroups:
