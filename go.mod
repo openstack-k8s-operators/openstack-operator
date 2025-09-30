@@ -133,10 +133,8 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-202507112000
 // custom RabbitmqClusterSpecCore for OpenStackControlplane (v2.9.0_patches_tag_n)
 replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250717122149-12f70b7f3d8d //allow-merging
 
-<<<<<<< HEAD
-// Test CloudKitty
-replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872
-=======
 // pin to support rabbitmq 2.16.1 rebase
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20250627150254-e9823e99808e //allow-merging
->>>>>>> main
+
+// Test CloudKitty
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872 //allow-merging

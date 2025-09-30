@@ -126,4 +126,4 @@ replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-oper
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20250627150254-e9823e99808e //allow-merging
 
 // Test CloudKitty
-replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20250930133019-ac359d938872 //allow-merging

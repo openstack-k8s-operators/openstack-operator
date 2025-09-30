@@ -41,8 +41,9 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 				fieldName += strings.ToUpper(matches[i])[0:1]
 				fieldName += strings.ToLower(matches[i])[1:]
 			}
-			// format API so we adhere to go linting standards
+			// format API and CloudKitty so we adhere to go linting standards
 			fieldName = strings.ReplaceAll(fieldName, "Api", "API")
+			fieldName = strings.ReplaceAll(fieldName, "Cloudkitty", "CloudKitty")
 		}
 		//Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
