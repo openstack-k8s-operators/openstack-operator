@@ -63,6 +63,11 @@ spec:
                 default: ""
                 description: AnsibleExtraVars - string to pass parameters to ansible
                 type: string
+              ansibleGitBranch:
+                description: AnsibleGitBranch - git branch to check out in the cloned
+                  repo
+                format: string
+                type: string
               ansibleGitRepo:
                 description: AnsibleGitRepo - git repo to clone into container
                 format: uri
@@ -1413,6 +1418,11 @@ spec:
                     ansibleExtraVars:
                       description: AnsibleExtraVars - interface to pass parameters
                         to ansible using -e
+                      type: string
+                    ansibleGitBranch:
+                      description: AnsibleGitBranch - git branch to check out in the
+                        cloned repo
+                      format: string
                       type: string
                     ansibleGitRepo:
                       description: AnsibleGitRepo - git repo to clone into container
