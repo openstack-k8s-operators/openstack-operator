@@ -937,7 +937,7 @@ func patchIssuer(
 		return err
 	}
 	// Unmarshal patch data into a local map for logging
-	patchDiff := map[string]interface{}{}
+	patchDiff := map[string]any{}
 	if err := json.Unmarshal(diff, &patchDiff); err != nil {
 		return err
 	}

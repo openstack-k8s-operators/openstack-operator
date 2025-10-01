@@ -138,7 +138,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// marked for deployment on all nodesets
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			// with EDPMServiceType set
-			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]any{
 				"edpmServiceType":               "foo-update-service",
 				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
@@ -182,7 +182,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -285,7 +285,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Three services on both nodesets
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
-			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]any{
 				"edpmServiceType":               "foo-update-service",
 				"openStackAnsibleEERunnerImage": "foo-image:latest"})
 
@@ -298,30 +298,30 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Create both nodesets
 
 			betaNodeName := fmt.Sprintf("%s-node-1", betaNodeSetName.Name)
-			betaNodeSetSpec := map[string]interface{}{
+			betaNodeSetSpec := map[string]any{
 				"preProvisioned": false,
 				"services": []string{
 					"foo-service",
 				},
-				"nodeTemplate": map[string]interface{}{
+				"nodeTemplate": map[string]any{
 					"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "cloud-user",
 					},
 				},
-				"nodes": map[string]interface{}{
-					betaNodeName: map[string]interface{}{
+				"nodes": map[string]any{
+					betaNodeName: map[string]any{
 						"hostname": betaNodeName,
-						"networks": []map[string]interface{}{{
+						"networks": []map[string]any{{
 							"name":       "CtlPlane",
 							"subnetName": "subnet1",
 						},
 						},
 					},
 				},
-				"baremetalSetTemplate": map[string]interface{}{
-					"baremetalHosts": map[string]interface{}{
-						"ctlPlaneIP": map[string]interface{}{},
+				"baremetalSetTemplate": map[string]any{
+					"baremetalHosts": map[string]any{
+						"ctlPlaneIP": map[string]any{},
 					},
 					"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
 					"ctlplaneInterface":   "172.20.12.1",
@@ -335,7 +335,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			SimulateIPSetComplete(types.NamespacedName{Name: betaNodeName, Namespace: namespace})
 			SimulateDNSDataComplete(betaNodeSetName)
 
-			deploymentSpec := map[string]interface{}{
+			deploymentSpec := map[string]any{
 				"nodeSets": []string{
 					"alpha-nodeset",
 					"beta-nodeset",
@@ -393,7 +393,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -545,7 +545,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			SimulateIPSetComplete(dataplaneNodeName)
 			SimulateDNSDataComplete(alphaNodeSetName)
 
-			deploymentSpec := map[string]interface{}{
+			deploymentSpec := map[string]any{
 				"nodeSets": []string{
 					"alpha-nodeset",
 					"beta-nodeset",
@@ -603,7 +603,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -694,7 +694,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -759,7 +759,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Three services on both nodesets
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
-			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]any{
 				"EDPMServiceType": "foo-update-service"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
@@ -772,32 +772,32 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Create both nodesets
 
 			betaNodeName := fmt.Sprintf("%s-node-1", betaNodeSetName.Name)
-			betaNodeSetSpec := map[string]interface{}{
+			betaNodeSetSpec := map[string]any{
 				"preProvisioned": false,
 				"services": []string{
 					"foo-service",
 					"global-service",
 					"foo-update-service",
 				},
-				"nodeTemplate": map[string]interface{}{
+				"nodeTemplate": map[string]any{
 					"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "cloud-user",
 					},
 				},
-				"nodes": map[string]interface{}{
-					betaNodeName: map[string]interface{}{
+				"nodes": map[string]any{
+					betaNodeName: map[string]any{
 						"hostname": betaNodeName,
-						"networks": []map[string]interface{}{{
+						"networks": []map[string]any{{
 							"name":       "CtlPlane",
 							"subnetName": "subnet1",
 						},
 						},
 					},
 				},
-				"baremetalSetTemplate": map[string]interface{}{
-					"baremetalHosts": map[string]interface{}{
-						"ctlPlaneIP": map[string]interface{}{},
+				"baremetalSetTemplate": map[string]any{
+					"baremetalHosts": map[string]any{
+						"ctlPlaneIP": map[string]any{},
 					},
 					"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
 					"ctlplaneInterface":   "172.20.12.1",
@@ -811,7 +811,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			SimulateIPSetComplete(types.NamespacedName{Name: betaNodeName, Namespace: namespace})
 			SimulateDNSDataComplete(betaNodeSetName)
 
-			deploymentSpec := map[string]interface{}{
+			deploymentSpec := map[string]any{
 				"nodeSets": []string{
 					"alpha-nodeset",
 					"beta-nodeset",
@@ -869,7 +869,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -1027,7 +1027,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -1092,7 +1092,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Three services on both nodesets
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
-			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]any{
 				"EDPMServiceType": "foo-update-service"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
@@ -1105,30 +1105,30 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Create both nodesets
 
 			betaNodeName := fmt.Sprintf("%s-node-1", betaNodeSetName.Name)
-			betaNodeSetSpec := map[string]interface{}{
+			betaNodeSetSpec := map[string]any{
 				"preProvisioned": false,
 				"services": []string{
 					"foo-service",
 				},
-				"nodeTemplate": map[string]interface{}{
+				"nodeTemplate": map[string]any{
 					"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "cloud-user",
 					},
 				},
-				"nodes": map[string]interface{}{
-					betaNodeName: map[string]interface{}{
+				"nodes": map[string]any{
+					betaNodeName: map[string]any{
 						"hostname": betaNodeName,
-						"networks": []map[string]interface{}{{
+						"networks": []map[string]any{{
 							"name":       "CtlPlane",
 							"subnetName": "subnet1",
 						},
 						},
 					},
 				},
-				"baremetalSetTemplate": map[string]interface{}{
-					"baremetalHosts": map[string]interface{}{
-						"ctlPlaneIP": map[string]interface{}{},
+				"baremetalSetTemplate": map[string]any{
+					"baremetalHosts": map[string]any{
+						"ctlPlaneIP": map[string]any{},
 					},
 					"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
 					"ctlplaneInterface":   "172.20.12.1",
@@ -1194,7 +1194,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -1300,7 +1300,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Three services on both nodesets
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
-			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]any{
 				"EDPMServiceType": "foo-update-service"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
@@ -1313,30 +1313,30 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// Create both nodesets
 
 			betaNodeName := fmt.Sprintf("%s-node-1", betaNodeSetName.Name)
-			betaNodeSetSpec := map[string]interface{}{
+			betaNodeSetSpec := map[string]any{
 				"preProvisioned": false,
 				"services": []string{
 					"foo-service",
 				},
-				"nodeTemplate": map[string]interface{}{
+				"nodeTemplate": map[string]any{
 					"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
-					"ansible": map[string]interface{}{
+					"ansible": map[string]any{
 						"ansibleUser": "cloud-user",
 					},
 				},
-				"nodes": map[string]interface{}{
-					betaNodeName: map[string]interface{}{
+				"nodes": map[string]any{
+					betaNodeName: map[string]any{
 						"hostname": betaNodeName,
-						"networks": []map[string]interface{}{{
+						"networks": []map[string]any{{
 							"name":       "CtlPlane",
 							"subnetName": "subnet1",
 						},
 						},
 					},
 				},
-				"baremetalSetTemplate": map[string]interface{}{
-					"baremetalHosts": map[string]interface{}{
-						"ctlPlaneIP": map[string]interface{}{},
+				"baremetalSetTemplate": map[string]any{
+					"baremetalHosts": map[string]any{
+						"ctlPlaneIP": map[string]any{},
 					},
 					"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
 					"ctlplaneInterface":   "172.20.12.1",
@@ -1402,7 +1402,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -1550,7 +1550,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -1652,7 +1652,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
@@ -1753,7 +1753,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 				Name:      "ovncontroller-config",
 			}
-			mapData := map[string]interface{}{
+			mapData := map[string]any{
 				"ovsdb-config": "test-ovn-config",
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)

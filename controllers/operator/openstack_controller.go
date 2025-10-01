@@ -866,7 +866,7 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 				// The horizon-operator.openstack-operators has references to old roles/bindings
 				// the code below will delete those references before continuing
 				for _, ref := range refs {
-					refData := ref.(map[string]interface{})
+					refData := ref.(map[string]any)
 					Log.Info("Deleting operator reference", "Reference", ref)
 					obj := uns.Unstructured{}
 					obj.SetName(refData["name"].(string))
