@@ -61,16 +61,18 @@ func DeployBaremetalSet(
 		ownerLabels := labels.GetLabels(instance, labels.GetGroupLabel(NodeSetLabel), map[string]string{})
 		baremetalSet.Labels = utils.MergeStringMaps(baremetalSet.GetLabels(), ownerLabels)
 		baremetalSet.Spec.BaremetalHosts = make(map[string]baremetalv1.InstanceSpec)
-		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec.OpenStackBaremetalSetTemplateSpec)
-		// Set Images
-		if containerImages.OsContainerImage != nil && instance.Spec.BaremetalSetTemplate.OSContainerImageURL == "" {
-			baremetalSet.Spec.OSContainerImageURL = *containerImages.OsContainerImage
-		}
-		if containerImages.AgentImage != nil && instance.Spec.BaremetalSetTemplate.AgentImageURL == "" {
-			baremetalSet.Spec.AgentImageURL = *containerImages.AgentImage
-		}
-		if containerImages.ApacheImage != nil && instance.Spec.BaremetalSetTemplate.ApacheImageURL == "" {
-			baremetalSet.Spec.ApacheImageURL = *containerImages.ApacheImage
+		if instance.Spec.BaremetalSetTemplate != nil {
+			instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec.OpenStackBaremetalSetTemplateSpec)
+			// Set Images
+			if containerImages.OsContainerImage != nil && instance.Spec.BaremetalSetTemplate.OSContainerImageURL == "" {
+				baremetalSet.Spec.OSContainerImageURL = *containerImages.OsContainerImage
+			}
+			if containerImages.AgentImage != nil && instance.Spec.BaremetalSetTemplate.AgentImageURL == "" {
+				baremetalSet.Spec.AgentImageURL = *containerImages.AgentImage
+			}
+			if containerImages.ApacheImage != nil && instance.Spec.BaremetalSetTemplate.ApacheImageURL == "" {
+				baremetalSet.Spec.ApacheImageURL = *containerImages.ApacheImage
+			}
 		}
 
 		for _, node := range instance.Spec.Nodes {

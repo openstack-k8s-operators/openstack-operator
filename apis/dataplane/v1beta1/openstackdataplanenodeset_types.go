@@ -37,7 +37,7 @@ import (
 type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Optional
 	// BaremetalSetTemplate Template for BaremetalSet for the NodeSet
-	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetTemplateSpec `json:"baremetalSetTemplate,omitempty"`
+	BaremetalSetTemplate *baremetalv1.OpenStackBaremetalSetTemplateSpec `json:"baremetalSetTemplate,omitempty"`
 
 	// +kubebuilder:validation:Required
 	// NodeTemplate - node attributes specific to nodes defined by this resource. These
