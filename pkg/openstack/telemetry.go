@@ -383,6 +383,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 		telemetry.Spec.Ceilometer.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Ceilometer.Enabled)
 		telemetry.Spec.Autoscaling.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Autoscaling.Enabled)
+		telemetry.Spec.CloudKitty.Enabled = ptr.To(*instance.Spec.Telemetry.Template.CloudKitty.Enabled)
 
 		telemetry.Spec.Ceilometer.CentralImage = *version.Status.ContainerImages.CeilometerCentralImage
 		telemetry.Spec.Ceilometer.ComputeImage = *version.Status.ContainerImages.CeilometerComputeImage
