@@ -95,6 +95,57 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	// Check if AC should be enabled and manage it accordingly
+	glanceReady := glance.Status.ObservedGeneration == glance.Generation && glance.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	glanceSecret := instance.Spec.Glance.Template.Secret
+	if glanceSecret == "" {
+		glanceSecret = instance.Spec.Secret
+	}
+
+	// Check if any GlanceAPI has AC configured
+	hasACConfigured := false
+	for _, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
+		if glanceAPI.Auth.ApplicationCredentialSecret != "" {
+			hasACConfigured = true
+			break
+		}
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Glance.ApplicationCredential) || hasACConfigured {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			glance.Name,
+			glanceReady,
+			glanceSecret,
+			instance.Spec.Glance.Template.PasswordSelectors.Service,
+			instance.Spec.Glance.Template.ServiceUser,
+			instance.Spec.Glance.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret for all GlanceAPIs based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
+			glanceAPI.Auth.ApplicationCredentialSecret = acSecretName
+			instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
+		}
+	}
+
 	// add selector to service overrides
 	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
 		eps := []service.Endpoint{service.EndpointPublic, service.EndpointInternal}

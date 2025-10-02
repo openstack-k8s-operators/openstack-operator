@@ -52,6 +52,14 @@ spec:
                 default: 60
                 description: APITimeout for HAProxy, Apache, and rpc_response_timeout
                 type: integer
+              auth:
+                description: Auth - authentication settings for keystone integration
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - secret name for application
+                      credential
+                    type: string
+                type: object
               cloudKittyAPI:
                 description: CloudKittyAPI - Spec definition for the API service of
                   this CloudKitty deployment
@@ -528,6 +536,12 @@ spec:
                   Right now required by the maridb-operator to get the credentials from the instance to create the DB
                   Might not be required in future
                 type: string
+              lokiRetentionDays:
+                default: 95
+                description: |-
+                  LokiRetentionDays defines the number of days logs are kept in Loki storage.
+                  Set to 0 to disable retention limits.
+                type: integer
               lokiStackSize:
                 default: 1x.demo
                 description: Size of the LokiStack. Supported are "1x.demo" (default),

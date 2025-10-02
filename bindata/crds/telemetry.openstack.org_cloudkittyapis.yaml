@@ -48,6 +48,14 @@ spec:
           spec:
             description: CloudKittyAPISpec defines the desired state of CloudKittyAPI
             properties:
+              auth:
+                description: Auth - authentication settings for keystone integration
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - secret name for application
+                      credential
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - CloudKitty Container Image URL (will
                   be set to environmental default if empty)

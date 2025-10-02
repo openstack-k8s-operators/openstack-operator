@@ -58,6 +58,14 @@ spec:
                   60 seconds
                 minimum: 1
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               ceilometerEnabled:
                 default: false
                 description: Enables ceilometer in the swift proxy and creates required

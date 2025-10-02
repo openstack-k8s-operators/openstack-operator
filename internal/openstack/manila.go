@@ -63,6 +63,45 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	manilaReady := manila.Status.ObservedGeneration == manila.Generation && manila.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	manilaSecret := instance.Spec.Manila.Template.Secret
+	if manilaSecret == "" {
+		manilaSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Manila.ApplicationCredential) ||
+		instance.Spec.Manila.Template.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			manila.Name,
+			manilaReady,
+			manilaSecret,
+			instance.Spec.Manila.Template.PasswordSelectors.Service,
+			instance.Spec.Manila.Template.ServiceUser,
+			instance.Spec.Manila.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Manila.Template.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Manila.Template.ManilaAPI.TLS = manila.Spec.ManilaAPI.TLS

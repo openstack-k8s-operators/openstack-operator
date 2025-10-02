@@ -155,6 +155,45 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
 	}
 
+	// Application Credential Management (Day-2 operation)
+	novaReady := nova.Status.ObservedGeneration == nova.Generation && nova.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	novaSecret := instance.Spec.Nova.Template.Secret
+	if novaSecret == "" {
+		novaSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Nova.ApplicationCredential) ||
+		instance.Spec.Nova.Template.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			nova.Name,
+			novaReady,
+			novaSecret,
+			instance.Spec.Nova.Template.PasswordSelectors.Service,
+			instance.Spec.Nova.Template.ServiceUser,
+			instance.Spec.Nova.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Nova.Template.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	// Nova API
 	svcs, err := service.GetServicesListWithLabel(
 		ctx,

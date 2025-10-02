@@ -365,6 +365,7 @@ rules:
   - keystone.openstack.org
   resources:
   - keystoneapis
+  - keystoneapplicationcredentials
   verbs:
   - create
   - delete
@@ -373,6 +374,14 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - keystone.openstack.org
+  resources:
+  - keystoneapplicationcredentials/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - machineconfiguration.openshift.io
   resources:

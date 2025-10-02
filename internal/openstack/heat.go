@@ -93,6 +93,41 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	instance.Spec.Heat.Template.HeatAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Heat.Template.HeatCfnAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
+	// Application Credential Management (Day-2 operation)
+	heatReady := heat.Status.ObservedGeneration == heat.Generation && heat.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	heatSecret := instance.Spec.Heat.Template.Secret
+	if heatSecret == "" {
+		heatSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Heat.ApplicationCredential) ||
+		instance.Spec.Heat.Template.Auth.ApplicationCredentialSecret != "" {
+
+		heatACSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx, helper, instance, heat.Name, heatReady,
+			heatSecret,
+			instance.Spec.Heat.Template.PasswordSelectors.Service,
+			instance.Spec.Heat.Template.ServiceUser,
+			instance.Spec.Heat.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Heat.Template.Auth.ApplicationCredentialSecret = heatACSecretName
+	}
+
 	// Heat API
 	svcs, err := service.GetServicesListWithLabel(
 		ctx,

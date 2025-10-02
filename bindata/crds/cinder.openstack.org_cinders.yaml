@@ -53,6 +53,14 @@ spec:
                 description: APITimeout for HAProxy, Apache, and rpc_response_timeout
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               cinderAPI:
                 description: CinderAPI - Spec definition for the API service of this
                   Cinder deployment

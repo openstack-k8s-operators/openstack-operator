@@ -53,6 +53,14 @@ spec:
                 description: APITimeout for Route and Apache
                 minimum: 60
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               customServiceConfig:
                 description: |-
                   CustomServiceConfig - customize the service config using this parameter to change service defaults,

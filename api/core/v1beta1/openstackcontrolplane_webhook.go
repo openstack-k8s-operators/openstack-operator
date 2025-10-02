@@ -937,6 +937,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Glance.APIOverride = map[string]Override{}
 		}
 		for name, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+
 			var override Override
 			var ok bool
 
@@ -1244,7 +1245,7 @@ func (r *OpenStackControlPlane) ValidateNotificationsBusInstance(basePath *field
 	// NotificationsBusInstance is set and must be equal to an existing
 	// deployed rabbitmq instance, otherwise we should fail because it
 	// does not represent a valid string
-	for k := range(*r.Spec.Rabbitmq.Templates) {
+	for k := range *r.Spec.Rabbitmq.Templates {
 		if *r.Spec.NotificationsBusInstance == k {
 			return nil
 		}
