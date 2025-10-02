@@ -107,6 +107,45 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 	}
 	instance.Spec.Neutron.Template.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
+	// Application Credential Management (Day-2 operation)
+	neutronReady := neutronAPI.Status.ObservedGeneration == neutronAPI.Generation && neutronAPI.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	neutronSecret := instance.Spec.Neutron.Template.Secret
+	if neutronSecret == "" {
+		neutronSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Neutron.ApplicationCredential) ||
+		instance.Spec.Neutron.Template.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			neutronAPI.Name,
+			neutronReady,
+			neutronSecret,
+			instance.Spec.Neutron.Template.PasswordSelectors.Service,
+			instance.Spec.Neutron.Template.ServiceUser,
+			instance.Spec.Neutron.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Neutron.Template.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	svcs, err := service.GetServicesListWithLabel(
 		ctx,
 		helper,

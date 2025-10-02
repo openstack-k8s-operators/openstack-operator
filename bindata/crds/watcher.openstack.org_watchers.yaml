@@ -460,6 +460,15 @@ spec:
                         type: string
                     type: object
                 type: object
+              auth:
+                description: Auth - Parameters related to authentication (shared by
+                  all Watcher components)
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               customServiceConfig:
                 description: |-
                   CustomServiceConfig - customize the service config using this parameter to change service defaults,

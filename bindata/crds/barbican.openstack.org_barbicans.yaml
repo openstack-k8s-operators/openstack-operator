@@ -53,6 +53,15 @@ spec:
                 description: Barbican API timeout
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication for all Barbican
+                  services
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               barbicanAPI:
                 description: BarbicanAPI - Spec definition for the  API services of
                   this Barbican deployment

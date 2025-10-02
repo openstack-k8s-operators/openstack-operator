@@ -56,6 +56,14 @@ spec:
                 description: APITimeout for HAProxy and Apache defaults to OctaviaSpecCore
                   APITimeout (seconds)
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: Octavia Container Image URL
                 type: string

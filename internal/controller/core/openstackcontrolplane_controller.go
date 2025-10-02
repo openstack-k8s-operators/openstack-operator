@@ -92,6 +92,8 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=horizon.openstack.org,resources=horizons,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapplicationcredentials,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapplicationcredentials/status,verbs=get;patch;update
 // +kubebuilder:rbac:groups=placement.openstack.org,resources=placementapis,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=glance.openstack.org,resources=glances,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=heat.openstack.org,resources=heats,verbs=get;list;watch;create;update;patch;delete
@@ -705,6 +707,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 		Owns(&mariadbv1.Galera{}).
 		Owns(&memcachedv1.Memcached{}).
 		Owns(&keystonev1.KeystoneAPI{}).
+		Owns(&keystonev1.KeystoneApplicationCredential{}).
 		Owns(&placementv1.PlacementAPI{}).
 		Owns(&glancev1.Glance{}).
 		Owns(&cinderv1.Cinder{}).

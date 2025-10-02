@@ -98,6 +98,136 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 				telemetry.Name)
 	}
 
+	// Application Credential Management (Day-2 operation)
+	// Telemetry has 3 separate services with 3 different users: aodh, ceilometer, cloudkitty
+	telemetryReady := telemetry.Status.ObservedGeneration == telemetry.Generation && telemetry.IsReady()
+
+	// AC for Aodh (if service enabled)
+	if instance.Spec.Telemetry.Template.Autoscaling.Enabled != nil && *instance.Spec.Telemetry.Template.Autoscaling.Enabled {
+		// Only call if AC enabled or currently configured
+		if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Telemetry.ApplicationCredentialAodh) ||
+			instance.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret != "" {
+
+			// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+			aodhSecret := instance.Spec.Telemetry.Template.Autoscaling.Aodh.Secret
+			if aodhSecret == "" {
+				aodhSecret = instance.Spec.Secret
+			}
+
+			aodhACSecretName, aodhACResult, err := EnsureApplicationCredentialForService(
+				ctx,
+				helper,
+				instance,
+				"aodh",
+				telemetryReady,
+				aodhSecret,
+				instance.Spec.Telemetry.Template.Autoscaling.Aodh.PasswordSelectors.AodhService,
+				instance.Spec.Telemetry.Template.Autoscaling.Aodh.ServiceUser,
+				instance.Spec.Telemetry.ApplicationCredentialAodh,
+			)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			// If AC is not ready, return immediately without updating the service CR
+			if (aodhACResult != ctrl.Result{}) {
+				return aodhACResult, nil
+			}
+
+			// Set ApplicationCredentialSecret for Aodh based on what the helper returned:
+			// - If AC disabled: returns ""
+			// - If AC enabled and ready: returns the AC secret name
+			instance.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret = aodhACSecretName
+		}
+	} else {
+		// Aodh service disabled, clear the field
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret = ""
+	}
+
+	// AC for Ceilometer (if service enabled)
+	if instance.Spec.Telemetry.Template.Ceilometer.Enabled != nil && *instance.Spec.Telemetry.Template.Ceilometer.Enabled {
+		// Only call if AC enabled or currently configured
+		if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Telemetry.ApplicationCredentialCeilometer) ||
+			instance.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret != "" {
+
+			// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+			ceilometerSecret := instance.Spec.Telemetry.Template.Ceilometer.Secret
+			if ceilometerSecret == "" {
+				ceilometerSecret = instance.Spec.Secret
+			}
+
+			ceilometerACSecretName, ceilometerACResult, err := EnsureApplicationCredentialForService(
+				ctx,
+				helper,
+				instance,
+				"ceilometer",
+				telemetryReady,
+				ceilometerSecret,
+				instance.Spec.Telemetry.Template.Ceilometer.PasswordSelectors.CeilometerService,
+				instance.Spec.Telemetry.Template.Ceilometer.ServiceUser,
+				instance.Spec.Telemetry.ApplicationCredentialCeilometer,
+			)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			// If AC is not ready, return immediately without updating the service CR
+			if (ceilometerACResult != ctrl.Result{}) {
+				return ceilometerACResult, nil
+			}
+
+			// Set ApplicationCredentialSecret for Ceilometer based on what the helper returned:
+			// - If AC disabled: returns ""
+			// - If AC enabled and ready: returns the AC secret name
+			instance.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret = ceilometerACSecretName
+		}
+	} else {
+		// Ceilometer service disabled, clear the field
+		instance.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret = ""
+	}
+
+	// AC for CloudKitty (if service enabled)
+	if instance.Spec.Telemetry.Template.CloudKitty.Enabled != nil && *instance.Spec.Telemetry.Template.CloudKitty.Enabled {
+		// Only call if AC enabled or currently configured
+		if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Telemetry.ApplicationCredentialCloudKitty) ||
+			instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret != "" {
+
+			// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+			cloudkittySecret := instance.Spec.Telemetry.Template.CloudKitty.Secret
+			if cloudkittySecret == "" {
+				cloudkittySecret = instance.Spec.Secret
+			}
+
+			cloudkittyACSecretName, cloudkittyACResult, err := EnsureApplicationCredentialForService(
+				ctx,
+				helper,
+				instance,
+				"cloudkitty",
+				telemetryReady,
+				cloudkittySecret,
+				instance.Spec.Telemetry.Template.CloudKitty.PasswordSelectors.CloudKittyService,
+				instance.Spec.Telemetry.Template.CloudKitty.ServiceUser,
+				instance.Spec.Telemetry.ApplicationCredentialCloudKitty,
+			)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			// If AC is not ready, return immediately without updating the service CR
+			if (cloudkittyACResult != ctrl.Result{}) {
+				return cloudkittyACResult, nil
+			}
+
+			// Set ApplicationCredentialSecret for CloudKitty based on what the helper returned:
+			// - If AC disabled: returns ""
+			// - If AC enabled and ready: returns the AC secret name
+			instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret = cloudkittyACSecretName
+		}
+	} else {
+		// CloudKitty service disabled, clear the field
+		instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret = ""
+	}
+
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
