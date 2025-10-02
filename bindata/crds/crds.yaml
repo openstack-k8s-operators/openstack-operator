@@ -10021,6 +10021,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationsBusInstance:
+                type: string
               nova:
                 properties:
                   apiOverride:
