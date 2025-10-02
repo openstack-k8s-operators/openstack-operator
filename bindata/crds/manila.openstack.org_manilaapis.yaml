@@ -52,6 +52,14 @@ spec:
           spec:
             description: ManilaAPISpec defines the desired state of ManilaAPI
             properties:
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Manila API Container Image URL
                 type: string

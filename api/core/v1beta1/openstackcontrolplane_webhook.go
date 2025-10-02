@@ -810,6 +810,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Cinder.Template = &cinderv1.CinderSpecCore{}
 		}
 		r.Spec.Cinder.Template.Default()
+		// Default Auth fields for Application Credentials
+		if r.Spec.Cinder.Template.CinderAPI.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Cinder.Template.CinderAPI.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("cinder")
+		}
 		initializeOverrideSpec(&r.Spec.Cinder.APIOverride.Route, true)
 		r.Spec.Cinder.Template.SetDefaultRouteAnnotations(r.Spec.Cinder.APIOverride.Route.Annotations)
 	}
@@ -844,6 +848,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Glance.APIOverride = map[string]Override{}
 		}
 		for name, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
+
 			var override Override
 			var ok bool
 
@@ -856,6 +861,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 				glanceAPI.SetDefaultRouteAnnotations(override.Route.Annotations)
 				r.Spec.Glance.APIOverride[name] = override
 			}
+			// Default Auth fields for Application Credentials
+			if glanceAPI.Auth.ApplicationCredentialSecret == "" {
+				glanceAPI.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("glance")
+			}
+			// Update the glanceAPI with Auth defaults
+			r.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 		}
 		// clean up the APIOverrides for each glanceAPI that has been
 		// deleted from the ctlplane
@@ -886,6 +897,14 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
 		}
 		r.Spec.Ironic.Template.Default()
+		// Default Auth fields for Application Credentials (shared ironic user)
+		if r.Spec.Ironic.Template.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Ironic.Template.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("ironic")
+		}
+		// Default Auth for IronicInspector (uses separate ironic-inspector user)
+		if r.Spec.Ironic.Template.IronicInspector.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Ironic.Template.IronicInspector.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("ironic-inspector")
+		}
 
 		initializeOverrideSpec(&r.Spec.Ironic.APIOverride.Route, true)
 		initializeOverrideSpec(&r.Spec.Ironic.InspectorOverride.Route, true)
@@ -909,6 +928,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Manila.Template = &manilav1.ManilaSpecCore{}
 		}
 		r.Spec.Manila.Template.Default()
+		// Default Auth fields for Application Credentials (only for ManilaAPI which has Auth in TemplateCore)
+		if r.Spec.Manila.Template.ManilaAPI.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Manila.Template.ManilaAPI.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("manila")
+		}
+		// Note: ManilaScheduler and ManilaShares don't have Auth in TemplateCore,
+		// their child operator webhooks will default Auth when child CRs are created
 		initializeOverrideSpec(&r.Spec.Manila.APIOverride.Route, true)
 		r.Spec.Manila.Template.SetDefaultRouteAnnotations(r.Spec.Manila.APIOverride.Route.Annotations)
 	}
@@ -932,6 +957,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
 		}
 		r.Spec.Neutron.Template.Default()
+		// Default Auth fields for Application Credentials
+		if r.Spec.Neutron.Template.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Neutron.Template.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("neutron")
+		}
 		initializeOverrideSpec(&r.Spec.Neutron.APIOverride.Route, true)
 		r.Spec.Neutron.Template.SetDefaultRouteAnnotations(r.Spec.Neutron.APIOverride.Route.Annotations)
 	}
@@ -942,6 +971,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Nova.Template = &novav1.NovaSpecCore{}
 		}
 		r.Spec.Nova.Template.Default()
+		// Default Auth fields for Application Credentials (parent level)
+		if r.Spec.Nova.Template.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Nova.Template.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("nova")
+		}
 		initializeOverrideSpec(&r.Spec.Nova.APIOverride.Route, true)
 		r.Spec.Nova.Template.SetDefaultRouteAnnotations(r.Spec.Nova.APIOverride.Route.Annotations)
 	}
@@ -968,6 +1001,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Placement.Template = &placementv1.PlacementAPISpecCore{}
 		}
 		r.Spec.Placement.Template.Default()
+		// Default Auth fields for Application Credentials
+		if r.Spec.Placement.Template.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Placement.Template.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("placement")
+		}
 		initializeOverrideSpec(&r.Spec.Placement.APIOverride.Route, true)
 		r.Spec.Placement.Template.SetDefaultRouteAnnotations(r.Spec.Placement.APIOverride.Route.Annotations)
 	}
@@ -987,6 +1024,19 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
 		}
 		r.Spec.Telemetry.Template.Default()
+		// Default Auth fields for Application Credentials
+		// Autoscaling (Aodh) - Auth is in Aodh field
+		if r.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("aodh")
+		}
+		// Ceilometer - Auth is inlined in CeilometerSpecCore
+		if r.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("ceilometer")
+		}
+		// CloudKitty - Auth is inlined from CloudKittyTemplate
+		if r.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("cloudkitty")
+		}
 		initializeOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, true)
 		r.Spec.Telemetry.Template.Autoscaling.SetDefaultRouteAnnotations(r.Spec.Telemetry.AodhAPIOverride.Route.Annotations)
 	}
@@ -1014,6 +1064,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		}
 
 		r.Spec.Swift.Template.Default()
+		// Default Auth fields for Application Credentials (centralized at parent level)
+		if r.Spec.Swift.Template.SwiftProxy.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Swift.Template.SwiftProxy.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("swift")
+		}
 	}
 
 	// Horizon
@@ -1032,6 +1086,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		}
 
 		r.Spec.Octavia.Template.Default()
+		// Default Auth fields for Application Credentials (shared by all Octavia components)
+		if r.Spec.Octavia.Template.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Octavia.Template.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("octavia")
+		}
 		initializeOverrideSpec(&r.Spec.Octavia.APIOverride.Route, true)
 		r.Spec.Octavia.Template.SetDefaultRouteAnnotations(r.Spec.Octavia.APIOverride.Route.Annotations)
 	}
@@ -1042,6 +1100,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
 		}
 		r.Spec.Barbican.Template.Default()
+		// Default Auth fields for Application Credentials (centralized at parent level)
+		if r.Spec.Barbican.Template.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Barbican.Template.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("barbican")
+		}
 		initializeOverrideSpec(&r.Spec.Barbican.APIOverride.Route, true)
 		r.Spec.Barbican.Template.SetDefaultRouteAnnotations(r.Spec.Barbican.APIOverride.Route.Annotations)
 	}
@@ -1052,6 +1114,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Designate.Template = &designatev1.DesignateSpecCore{}
 		}
 		r.Spec.Designate.Template.Default()
+		// Default Auth fields for Application Credentials (only for DesignateAPI which has Auth in TemplateCore)
+		if r.Spec.Designate.Template.DesignateAPI.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Designate.Template.DesignateAPI.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("designate")
+		}
+		// Note: DesignateCentral, DesignateProducer, DesignateWorker don't have Auth in TemplateCore,
+		// their child operator webhooks will default Auth when child CRs are created
 	}
 
 	// Redis
@@ -1073,6 +1141,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Watcher.Template = &watcherv1.WatcherSpecCore{}
 		}
 		r.Spec.Watcher.Template.Default()
+		// Default Auth fields for Application Credentials (shared by all Watcher components)
+		if r.Spec.Watcher.Template.Auth.ApplicationCredentialSecret == "" {
+			r.Spec.Watcher.Template.Auth.ApplicationCredentialSecret = keystonev1.GetACSecretName("watcher")
+		}
 
 		if r.Spec.Watcher.Enabled {
 			initializeOverrideSpec(&r.Spec.Watcher.APIOverride.Route, true)
@@ -1083,6 +1155,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Watcher.Template.DatabaseInstance == nil || *r.Spec.Watcher.Template.DatabaseInstance == "" {
 			r.Spec.Watcher.Template.DatabaseInstance = ptr.To("openstack")
 		}
+	}
+
+	// Initialize ApplicationCredential (watcher specific) field to avoid null value
+	// This ensures consistent behavior with other services.
+	if r.Spec.Watcher.ApplicationCredential == nil {
+		r.Spec.Watcher.ApplicationCredential = &ServiceAppCredSection{Enabled: false}
 	}
 
 }
@@ -1151,7 +1229,7 @@ func (r *OpenStackControlPlane) ValidateNotificationsBusInstance(basePath *field
 	// NotificationsBusInstance is set and must be equal to an existing
 	// deployed rabbitmq instance, otherwise we should fail because it
 	// does not represent a valid string
-	for k := range(*r.Spec.Rabbitmq.Templates) {
+	for k := range *r.Spec.Rabbitmq.Templates {
 		if *r.Spec.NotificationsBusInstance == k {
 			return nil
 		}

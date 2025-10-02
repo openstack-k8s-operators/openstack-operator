@@ -1223,6 +1223,14 @@ spec:
                 description: ManilaAPI - Spec definition for the API service of this
                   Manila deployment
                 properties:
+                  auth:
+                    description: Auth - Parameters related to authentication
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - Secret containing
+                          Application Credential ID and Secret
+                        type: string
+                    type: object
                   containerImage:
                     description: ContainerImage - Manila API Container Image URL
                     type: string
