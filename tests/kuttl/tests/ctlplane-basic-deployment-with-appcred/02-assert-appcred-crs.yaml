@@ -1,0 +1,84 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |-
+      set -euo pipefail
+      NS="${NAMESPACE}"
+
+      wait_ready() { oc wait appcred/$1 -n "$NS" --for=condition=Ready --timeout=120s; }
+
+      # ---- ac-barbican ----
+      wait_ready ac-barbican
+
+      EXP=$(oc get appcred ac-barbican -n "$NS" -o jsonpath='{.spec.expirationDays}')
+      [ "${EXP:-}" -eq 200 ]
+
+      GRP=$(oc get appcred ac-barbican -n "$NS" -o jsonpath='{.spec.gracePeriodDays}')
+      [ "${GRP:-}" -eq 90 ]
+
+      ROL=$(oc get appcred ac-barbican -n "$NS" -o jsonpath='{.spec.roles[*]}')
+      case " $ROL " in *" service "*) ;; *) exit 1;; esac
+
+      UNR=$(oc get appcred ac-barbican -n "$NS" -o jsonpath='{.spec.unrestricted}' 2>/dev/null || echo "")
+      [ "${UNR:-false}" = "false" ]
+
+      # ---- ac-cinder ----
+      wait_ready ac-cinder
+
+      EXP=$(oc get appcred ac-cinder -n "$NS" -o jsonpath='{.spec.expirationDays}')
+      [ "${EXP:-}" -eq 10 ]
+
+      GRP=$(oc get appcred ac-cinder -n "$NS" -o jsonpath='{.spec.gracePeriodDays}')
+      [ "${GRP:-}" -eq 5 ]
+
+      ROL=$(oc get appcred ac-cinder -n "$NS" -o jsonpath='{.spec.roles[*]}')
+      case " $ROL " in *" admin "*) ;; *) exit 1;; esac
+      case " $ROL " in *" service "*) ;; *) exit 1;; esac
+
+      UNR=$(oc get appcred ac-cinder -n "$NS" -o jsonpath='{.spec.unrestricted}' 2>/dev/null || echo "")
+      [ "${UNR}" = "true" ]
+
+      # ---- ac-swift ----
+      wait_ready ac-swift
+
+      EXP=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.expirationDays}')
+      [ "${EXP:-}" -eq 200 ]
+
+      GRP=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.gracePeriodDays}')
+      [ "${GRP:-}" -eq 90 ]
+
+      ROL=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.roles[*]}')
+      case " $ROL " in *" service "*) ;; *) exit 1;; esac
+
+      UNR=$(oc get appcred ac-swift -n "$NS" -o jsonpath='{.spec.unrestricted}' 2>/dev/null || echo "")
+      [ "${UNR:-false}" = "false" ]
+
+      # ---- ac-glance ----
+      wait_ready ac-glance
+
+      EXP=$(oc get appcred ac-glance -n "$NS" -o jsonpath='{.spec.expirationDays}')
+      [ "${EXP:-}" -eq 200 ]
+
+      GRP=$(oc get appcred ac-glance -n "$NS" -o jsonpath='{.spec.gracePeriodDays}')
+      [ "${GRP:-}" -eq 90 ]
+
+      ROL=$(oc get appcred ac-glance -n "$NS" -o jsonpath='{.spec.roles[*]}')
+      case " $ROL " in *" service "*) ;; *) exit 1;; esac
+
+      UNR=$(oc get appcred ac-glance -n "$NS" -o jsonpath='{.spec.unrestricted}' 2>/dev/null || echo "")
+      [ "${UNR:-false}" = "false" ]
+
+      # ---- ac-manila ----
+      wait_ready ac-manila
+
+      EXP=$(oc get appcred ac-manila -n "$NS" -o jsonpath='{.spec.expirationDays}')
+      [ "${EXP:-}" -eq 200 ]
+
+      GRP=$(oc get appcred ac-manila -n "$NS" -o jsonpath='{.spec.gracePeriodDays}')
+      [ "${GRP:-}" -eq 90 ]
+
+      ROL=$(oc get appcred ac-manila -n "$NS" -o jsonpath='{.spec.roles[*]}')
+      case " $ROL " in *" service "*) ;; *) exit 1;; esac
+
+      UNR=$(oc get appcred ac-manila -n "$NS" -o jsonpath='{.spec.unrestricted}' 2>/dev/null || echo "")
+      [ "${UNR:-false}" = "false" ]

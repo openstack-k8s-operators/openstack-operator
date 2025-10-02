@@ -1081,6 +1081,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		}
 	}
 
+	// Initialize ApplicationCredential (watcher specific) field to avoid null value
+	// This ensures consistent behavior with other services.
+	if r.Spec.Watcher.ApplicationCredential == nil {
+		r.Spec.Watcher.ApplicationCredential = &ServiceAppCredSection{Enabled: false}
+	}
+
 }
 
 // DefaultLabel - adding default label to the OpenStackControlPlane
@@ -1147,7 +1153,7 @@ func (r *OpenStackControlPlane) ValidateNotificationsBusInstance(basePath *field
 	// NotificationsBusInstance is set and must be equal to an existing
 	// deployed rabbitmq instance, otherwise we should fail because it
 	// does not represent a valid string
-	for k := range(*r.Spec.Rabbitmq.Templates) {
+	for k := range *r.Spec.Rabbitmq.Templates {
 		if *r.Spec.NotificationsBusInstance == k {
 			return nil
 		}

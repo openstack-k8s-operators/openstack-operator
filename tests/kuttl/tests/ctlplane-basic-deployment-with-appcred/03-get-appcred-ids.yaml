@@ -1,0 +1,28 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+    - script: |
+        echo "Waiting 60 seconds for OpenStack control plane to be fully ready..."
+        echo "Control plane switches to ready state before service pods catch up with AC changes"
+        sleep 60
+
+        echo "Gather and save appcred IDs"
+        # TODO: Uncomment services here when they support application credentials in their operators
+        # Currently implemented: barbican, cinder, glance, swift, manila
+        # Future support: nova, neutron, placement, ceilometer, ironic, heat, octavia, designate, watcher, aodh
+        bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE barbican
+        bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE cinder
+        bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE glance
+        bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE swift
+        bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE manila
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE nova
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE neutron
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE placement
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE ceilometer
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE ironic
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE heat
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE octavia
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE designate
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE watcher
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE aodh
+        # bash -s < ../../common/osp_check_appcred_id.sh $NAMESPACE all
