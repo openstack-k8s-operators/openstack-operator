@@ -52,6 +52,14 @@ spec:
                 description: APITimeout for HAProxy and Apache defaults to Barbican
                   APITimeout (seconds)
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Barbican Container Image URL (will be
                   set to environmental default if empty)

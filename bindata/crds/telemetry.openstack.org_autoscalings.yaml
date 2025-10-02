@@ -1,3 +1,4 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -70,6 +71,14 @@ spec:
                     default: 60
                     description: APITimeout for Route and Apache
                     type: integer
+                  auth:
+                    description: Auth - authentication settings for keystone integration
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - secret name for
+                          application credential
+                        type: string
+                    type: object
                   customServiceConfig:
                     default: '# add your customization here'
                     description: |-

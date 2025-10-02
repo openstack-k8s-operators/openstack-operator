@@ -1229,6 +1229,14 @@ spec:
                         APITimeout
                       minimum: 1
                       type: integer
+                    auth:
+                      description: Auth - Parameters related to authentication
+                      properties:
+                        applicationCredentialSecret:
+                          description: ApplicationCredentialSecret - Secret containing
+                            Application Credential ID and Secret
+                          type: string
+                      type: object
                     containerImage:
                       description: Glance Container Image URL (will be set to environmental
                         default if empty)
