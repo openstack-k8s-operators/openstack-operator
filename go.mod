@@ -153,3 +153,12 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.13 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.13 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+// appcred related changes
+replace github.com/openstack-k8s-operators/keystone-operator/api => github.com/Deydra71/keystone-operator/api v0.0.0-20251002062345-bf9333e0a92e
+
+replace github.com/openstack-k8s-operators/barbican-operator/api => github.com/Deydra71/barbican-operator/api v0.0.0-20251002103851-03426c53d7b4
+
+replace github.com/openstack-k8s-operators/swift-operator/api => github.com/Deydra71/swift-operator/api v0.0.0-20251002104902-c74f3b4829ac
+
+replace github.com/openstack-k8s-operators/glance-operator/api => github.com/Deydra71/glance-operator/api v0.0.0-20251002104053-c523b5160ca7

@@ -148,6 +148,7 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneapis
+    - keystoneapplicationcredentials
   verbs:
     - get
     - list
