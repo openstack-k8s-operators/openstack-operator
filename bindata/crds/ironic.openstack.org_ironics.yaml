@@ -79,6 +79,15 @@ spec:
                   ConfigOverwrite - interface to overwrite default config files like e.g. policy.json.
                   But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
                 type: object
+              graphicalConsoles:
+                default: Disabled
+                description: 'Whether to enable graphical consoles. NOTE: Setting
+                  this to Enabled is not supported.'
+                enum:
+                - Enabled
+                - Disabled
+                - ""
+                type: string
               images:
                 default: {}
                 description: Images - Container images for all ironic services
@@ -91,6 +100,10 @@ spec:
                     description: Conductor - Ironic Conductor Container Image (will
                       be set to environmental default if empty)
                     type: string
+                  graphicalConsole:
+                    description: GraphicalConsole - Ironic Graphical Console Container
+                      Image (will be set to environmental default if empty)
+                    type: string
                   inspector:
                     description: Inspector - Ironic Inspector Container Image (will
                       be set to environmental default if empty)
@@ -102,6 +115,10 @@ spec:
                   neutronAgent:
                     description: NeutronAgent - ML2 baremtal - Ironic Neutron Agent
                       Image (will be set to environmental default if empty)
+                    type: string
+                  novncproxy:
+                    description: NoVNCProxy - Ironic NoVNCProxy Container Image (will
+                      be set to environmental default if empty)
                     type: string
                   pxe:
                     description: Pxe- Ironic DHCP/TFTP/HTTP Container Image URL (will
