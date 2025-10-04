@@ -6586,6 +6586,13 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      graphicalConsoles:
+                        default: Disabled
+                        enum:
+                        - Enabled
+                        - Disabled
+                        - ""
+                        type: string
                       ironicAPI:
                         properties:
                           customServiceConfig:
