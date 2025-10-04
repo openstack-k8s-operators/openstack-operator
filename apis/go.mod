@@ -3,7 +3,7 @@ module github.com/openstack-k8s-operators/openstack-operator/apis
 go 1.24.4
 
 require (
-	github.com/cert-manager/cert-manager v1.16.5
+	github.com/cert-manager/cert-manager v1.17.4
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/onsi/ginkgo/v2 v2.25.3
 	github.com/onsi/gomega v1.38.2
@@ -35,9 +35,9 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/tools v0.36.0 // indirect
-	k8s.io/api v0.31.13
-	k8s.io/apimachinery v0.31.13
-	k8s.io/client-go v0.31.13
+	k8s.io/api v0.32.0
+	k8s.io/apimachinery v0.32.0
+	k8s.io/client-go v0.32.0
 	k8s.io/utils v0.0.0-20250820121507-0af2bda4dd1d
 	sigs.k8s.io/controller-runtime v0.19.7
 )
