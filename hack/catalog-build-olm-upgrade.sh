@@ -22,7 +22,7 @@ BUNDLE=${BUNDLE:-"quay.io/openstack-k8s-operators/openstack-operator-bundle:late
 mkdir catalog
 
 opm generate dockerfile ./catalog -i registry.redhat.io/openshift4/ose-operator-registry-rhel9:v4.18
-opm init openstack-operator --default-channel=stable-v1.0 --output yaml > catalog/index.yaml
+opm init openstack-operator --default-channel=alpha --output yaml > catalog/index.yaml
 
 #opm render ${BUNDLE} --output yaml >> catalog/index.yaml
 opm render $(toDigestURL $BUNDLE) --output yaml >> catalog/index.yaml
@@ -33,7 +33,7 @@ opm render $(toDigestURL quay.io/openstack-k8s-operators/openstack-operator-bund
 ---
 schema: olm.channel
 package: openstack-operator
-name: stable-v1.0
+name: alpha
 entries:
   - name: openstack-operator.v${FEATURE_RELEASE_VERSION}
   - name: openstack-operator.v${MAIN_VERSION}
