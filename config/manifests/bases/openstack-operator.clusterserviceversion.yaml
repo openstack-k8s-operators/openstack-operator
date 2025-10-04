@@ -633,6 +633,16 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
       version: v1beta1
+    - description: OpenStackLightspeed is the Schema for the openstacklightspeeds
+        API
+      displayName: OpenStack Lightspeed
+      kind: OpenStackLightspeed
+      name: openstacklightspeeds.lightspeed.openstack.org
+      specDescriptors:
+      - description: Type of the provider serving the LLM
+        displayName: Provider Type
+        path: llmEndpointType
+      version: v1beta1
     - description: OpenStack is the Schema for the openstacks API
       displayName: OpenStack
       kind: OpenStack
