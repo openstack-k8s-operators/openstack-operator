@@ -136,6 +136,13 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	// add the NodeSet name variable
 	nodeSetGroup.Vars["edpm_nodeset_name"] = instance.Name
 
+	// add ID of the RHOSO cluster to the ansible variables
+	nodeSetGroup.Vars["edpm_rhoso_cluster_id"], err = util.GetRhosoClusterID(ctx, instance.Namespace)
+	if err != nil {
+		utils.LogErrorForObject(helper, err, "could not get OpenShift Cluster ID", instance)
+		return "", err
+	}
+
 	isDisconnected, err := util.IsDisconnectedOCP(ctx, helper)
 	if err != nil {
 		return "", err
