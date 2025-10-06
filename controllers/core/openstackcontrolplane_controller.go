@@ -763,7 +763,7 @@ func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context,
 		}
 
 		for _, item := range crList.Items {
-			Log.Info(fmt.Sprintf("input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
+			Log.Info(fmt.Sprintf("[ControlPlane] input source %s changed, reconcile: %s - %s", src.GetName(), item.GetName(), item.GetNamespace()))
 
 			requests = append(requests,
 				reconcile.Request{
