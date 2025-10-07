@@ -2,17 +2,32 @@
   "extends": [
     "github>openstack-k8s-operators/renovate-config:default.json5"
   ],
-  "baseBranches": ["main"],
+  "baseBranchPatterns": [
+    "main"
+  ],
   "useBaseBranchConfig": "merge",
   "packageRules": [
     {
-      "matchPackageNames": ["github.com/openstack-k8s-operators/openstack-operator/apis"],
+      "matchPackageNames": [
+        "github.com/openstack-k8s-operators/openstack-operator/apis"
+      ],
       "enabled": false
     }
   ],
   "postUpgradeTasks": {
-    "commands": ["make gowork", "make tidy", "make manifests generate", "make bindata"],
-    "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml", "hack/*.sh"],
+    "commands": [
+      "make gowork",
+      "make tidy",
+      "make manifests generate",
+      "make bindata"
+    ],
+    "fileFilters": [
+      "**/go.mod",
+      "**/go.sum",
+      "**/*.go",
+      "**/*.yaml",
+      "hack/*.sh"
+    ],
     "executionMode": "update"
   }
 }
