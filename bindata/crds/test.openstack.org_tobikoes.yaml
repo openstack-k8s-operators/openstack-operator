@@ -1289,7 +1289,7 @@ spec:
                   capabilities on top of capabilities that are usually needed by the test
                   pods (NET_ADMIN, NET_RAW). This parameter is deemed insecure but it is
                   needed for certain test-operator functionalities to work properly (e.g.:
-                  extraRPMs in Tempest CR, or certain set of tobiko tests).
+                  extraRPMs in Tempest CR, or a certain set of tobiko tests).
                 type: boolean
               publicKey:
                 default: ""
@@ -1423,7 +1423,7 @@ spec:
                 description: Tobiko version
                 type: string
               workflow:
-                description: A parameter  that contains a workflow definition.
+                description: A parameter that contains a workflow definition.
                 items:
                   properties:
                     SELinuxLevel:
@@ -1496,7 +1496,7 @@ spec:
                       type: object
                     numProcesses:
                       description: Number of processes/workers used to run tobiko
-                        tests - value 0 results in automatic decission
+                        tests - value 0 results in automatic decision
                       type: integer
                     patch:
                       description: Optional patch to apply to the Tobiko repository
@@ -1526,7 +1526,7 @@ spec:
                         pods with allowedPrivilegedEscalation: true and the default capabilities on
                         top of capabilities that are usually needed by the test pods (NET_ADMIN, NET_RAW).
                         This parameter is deemed insecure but it is needed for certain test-operator
-                        functionalities to work properly (e.g.: extraRPMs in Tempest CR, or certain set
+                        functionalities to work properly (e.g.: extraRPMs in Tempest CR, or a certain set
                         of tobiko tests).
                       type: boolean
                     publicKey:

@@ -1303,7 +1303,7 @@ spec:
                   capabilities on top of capabilities that are usually needed by the test
                   pods (NET_ADMIN, NET_RAW). This parameter is deemed insecure but it is
                   needed for certain test-operator functionalities to work properly (e.g.:
-                  extraRPMs in Tempest CR, or certain set of tobiko tests).
+                  extraRPMs in Tempest CR, or a certain set of tobiko tests).
                 type: boolean
               projectName:
                 default: horizontest
