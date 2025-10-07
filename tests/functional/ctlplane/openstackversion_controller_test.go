@@ -19,6 +19,7 @@ package functional_test
 import (
 	"errors"
 	"os"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
@@ -683,6 +684,551 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 		})
 
+	})
+
+	When("CustomContainerImages are set", func() {
+		var (
+			initialVersion = "0.0.1"
+			updatedVersion = "0.0.2"
+		)
+
+		When("KeystoneAPI custom images", func() {
+			var customKeystoneImage = "custom.registry/keystone:custom-tag"
+
+			BeforeEach(func() {
+				// Create OpenStackVersion with custom container images
+				spec := GetDefaultOpenStackVersionSpec()
+				spec["customContainerImages"] = map[string]interface{}{
+					"keystoneAPIImage": customKeystoneImage,
+				}
+
+				DeferCleanup(
+					th.DeleteInstance,
+					CreateOpenStackVersion(names.OpenStackVersionName, spec),
+				)
+
+				// Wait for initial version to be created and initialized
+				Eventually(func(g Gomega) {
+					th.ExpectCondition(
+						names.OpenStackVersionName,
+						ConditionGetterFunc(OpenStackVersionConditionGetter),
+						corev1.OpenStackVersionInitialized,
+						k8s_corev1.ConditionTrue,
+					)
+
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(version).Should(Not(BeNil()))
+					g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring(initialVersion))
+					g.Expect(version.Spec.TargetVersion).Should(ContainSubstring(initialVersion))
+				}, timeout, interval).Should(Succeed())
+
+				// Inject a newer version for testing minor updates
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					// Create container defaults for the updated version
+					if version.Status.ContainerImageVersionDefaults == nil {
+						version.Status.ContainerImageVersionDefaults = make(map[string]*corev1.ContainerDefaults)
+					}
+					version.Status.ContainerImageVersionDefaults[updatedVersion] = &corev1.ContainerDefaults{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Simulate deployment by setting DeployedVersion
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Status.DeployedVersion = &initialVersion
+
+					// Track the custom images for the initial version
+					if version.Status.TrackedCustomImages == nil {
+						version.Status.TrackedCustomImages = make(map[string]corev1.CustomContainerImages)
+					}
+					version.Status.TrackedCustomImages[initialVersion] = corev1.CustomContainerImages{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Remove finalizer as needed for cleanup
+				DeferCleanup(
+					OpenStackVersionRemoveFinalizer,
+					ctx,
+					names.OpenStackVersionName,
+				)
+			})
+
+			It("should prevent targetVersion modification when CustomContainerImages are unchanged", func() {
+				// Attempt to update targetVersion without changing CustomContainerImages
+				// This should be rejected by the webhook validation
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+
+					// Try to update to the new version without changing custom images
+					version.Spec.TargetVersion = updatedVersion
+					// Keep the same custom container images (this should trigger validation error)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+
+					err := k8sClient.Update(ctx, version)
+					g.Expect(err).Should(HaveOccurred())
+					g.Expect(err.Error()).Should(ContainSubstring("CustomContainerImages must be updated when changing targetVersion"))
+					g.Expect(err.Error()).Should(ContainSubstring("prevents proper version tracking and validation"))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should allow targetVersion modification when CustomContainerImages are updated", func() {
+				// Update CustomContainerImages along with targetVersion
+				newCustomKeystoneImage := "custom.registry/keystone:new-custom-tag"
+
+				// Use Eventually to handle potential conflicts from controller updates
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Spec.TargetVersion = updatedVersion
+					// Update the custom container images (this should be allowed)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &newCustomKeystoneImage,
+						},
+					}
+
+					g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Verify the update was successful
+				Eventually(func(g Gomega) {
+					updatedVersionObj := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(updatedVersionObj.Spec.TargetVersion).Should(Equal(updatedVersion))
+					g.Expect(*updatedVersionObj.Spec.CustomContainerImages.KeystoneAPIImage).Should(Equal(newCustomKeystoneImage))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should allow targetVersion modification when no CustomContainerImages are set", func() {
+				// First, remove custom container images
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{}
+					g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Now update targetVersion (this should be allowed since no custom images)
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Spec.TargetVersion = updatedVersion
+					g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Verify the update was successful
+				Eventually(func(g Gomega) {
+					versionObj := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(versionObj.Spec.TargetVersion).Should(Equal(updatedVersion))
+				}, timeout, interval).Should(Succeed())
+			})
+		})
+
+		When("CinderVolume custom images", func() {
+			var customCinderVolumeImage = "custom.registry/cinder-volume:custom-tag"
+
+			BeforeEach(func() {
+				// Create OpenStackVersion with custom CinderVolumeImages
+				spec := GetDefaultOpenStackVersionSpec()
+				spec["customContainerImages"] = map[string]interface{}{
+					"cinderVolumeImages": map[string]string{
+						"backend1": customCinderVolumeImage,
+					},
+				}
+
+				DeferCleanup(
+					th.DeleteInstance,
+					CreateOpenStackVersion(names.OpenStackVersionName, spec),
+				)
+
+				// Wait for initial version to be created and initialized
+				Eventually(func(g Gomega) {
+					th.ExpectCondition(
+						names.OpenStackVersionName,
+						ConditionGetterFunc(OpenStackVersionConditionGetter),
+						corev1.OpenStackVersionInitialized,
+						k8s_corev1.ConditionTrue,
+					)
+
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(version).Should(Not(BeNil()))
+					g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring(initialVersion))
+					g.Expect(version.Spec.TargetVersion).Should(ContainSubstring(initialVersion))
+				}, timeout, interval).Should(Succeed())
+
+				// Inject a newer version for testing minor updates
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					// Create container defaults for the updated version
+					if version.Status.ContainerImageVersionDefaults == nil {
+						version.Status.ContainerImageVersionDefaults = make(map[string]*corev1.ContainerDefaults)
+					}
+					version.Status.ContainerImageVersionDefaults[updatedVersion] = &corev1.ContainerDefaults{}
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Simulate deployment by setting DeployedVersion
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Status.DeployedVersion = &initialVersion
+
+					// Track the custom images for the initial version
+					if version.Status.TrackedCustomImages == nil {
+						version.Status.TrackedCustomImages = make(map[string]corev1.CustomContainerImages)
+					}
+					version.Status.TrackedCustomImages[initialVersion] = corev1.CustomContainerImages{
+						CinderVolumeImages: map[string]*string{
+							"backend1": &customCinderVolumeImage,
+						},
+					}
+
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Remove finalizer as needed for cleanup
+				DeferCleanup(
+					OpenStackVersionRemoveFinalizer,
+					ctx,
+					names.OpenStackVersionName,
+				)
+			})
+
+			It("should prevent targetVersion modification when CinderVolumeImages are unchanged", func() {
+				// Attempt to update targetVersion without changing CinderVolumeImages
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Spec.TargetVersion = updatedVersion
+					// Keep the same CinderVolumeImages (this should trigger validation error)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						CinderVolumeImages: map[string]*string{
+							"backend1": &customCinderVolumeImage,
+						},
+					}
+
+					err := k8sClient.Update(ctx, version)
+					if err != nil && strings.Contains(err.Error(), "the object has been modified") {
+						// Retry on conflict errors
+						return
+					}
+					g.Expect(err).Should(HaveOccurred())
+					g.Expect(err.Error()).Should(ContainSubstring("CustomContainerImages must be updated when changing targetVersion"))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should allow targetVersion modification when CinderVolumeImages are updated", func() {
+				newCustomCinderVolumeImage := "custom.registry/cinder-volume:new-custom-tag"
+
+				// Update CinderVolumeImages along with targetVersion
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Spec.TargetVersion = updatedVersion
+					// Update the CinderVolumeImages (this should be allowed)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						CinderVolumeImages: map[string]*string{
+							"backend1": &newCustomCinderVolumeImage,
+						},
+					}
+					g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Verify the update was successful
+				Eventually(func(g Gomega) {
+					updatedVersionObj := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(updatedVersionObj.Spec.TargetVersion).Should(Equal(updatedVersion))
+					g.Expect(*updatedVersionObj.Spec.CustomContainerImages.CinderVolumeImages["backend1"]).Should(Equal(newCustomCinderVolumeImage))
+				}, timeout, interval).Should(Succeed())
+			})
+		})
+
+		When("ManilaShare custom images", func() {
+			var customManilaShareImage = "custom.registry/manila-share:custom-tag"
+
+			BeforeEach(func() {
+				// Create OpenStackVersion with custom ManilaShareImages
+				spec := GetDefaultOpenStackVersionSpec()
+				spec["customContainerImages"] = map[string]interface{}{
+					"manilaShareImages": map[string]string{
+						"share-backend1": customManilaShareImage,
+					},
+				}
+
+				DeferCleanup(
+					th.DeleteInstance,
+					CreateOpenStackVersion(names.OpenStackVersionName, spec),
+				)
+
+				// Wait for initial version to be created and initialized
+				Eventually(func(g Gomega) {
+					th.ExpectCondition(
+						names.OpenStackVersionName,
+						ConditionGetterFunc(OpenStackVersionConditionGetter),
+						corev1.OpenStackVersionInitialized,
+						k8s_corev1.ConditionTrue,
+					)
+
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(version).Should(Not(BeNil()))
+					g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring(initialVersion))
+					g.Expect(version.Spec.TargetVersion).Should(ContainSubstring(initialVersion))
+				}, timeout, interval).Should(Succeed())
+
+				// Inject a newer version for testing minor updates
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					// Create container defaults for the updated version
+					if version.Status.ContainerImageVersionDefaults == nil {
+						version.Status.ContainerImageVersionDefaults = make(map[string]*corev1.ContainerDefaults)
+					}
+					version.Status.ContainerImageVersionDefaults[updatedVersion] = &corev1.ContainerDefaults{}
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Simulate deployment by setting DeployedVersion
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Status.DeployedVersion = &initialVersion
+
+					// Track the custom images for the initial version
+					if version.Status.TrackedCustomImages == nil {
+						version.Status.TrackedCustomImages = make(map[string]corev1.CustomContainerImages)
+					}
+					version.Status.TrackedCustomImages[initialVersion] = corev1.CustomContainerImages{
+						ManilaShareImages: map[string]*string{
+							"share-backend1": &customManilaShareImage,
+						},
+					}
+
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Remove finalizer as needed for cleanup
+				DeferCleanup(
+					OpenStackVersionRemoveFinalizer,
+					ctx,
+					names.OpenStackVersionName,
+				)
+			})
+
+			It("should prevent targetVersion modification when ManilaShareImages are unchanged", func() {
+				// Attempt to update targetVersion without changing ManilaShareImages
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Spec.TargetVersion = updatedVersion
+					// Keep the same ManilaShareImages (this should trigger validation error)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						ManilaShareImages: map[string]*string{
+							"share-backend1": &customManilaShareImage,
+						},
+					}
+
+					err := k8sClient.Update(ctx, version)
+					if err != nil && strings.Contains(err.Error(), "the object has been modified") {
+						// Retry on conflict errors
+						return
+					}
+					g.Expect(err).Should(HaveOccurred())
+					g.Expect(err.Error()).Should(ContainSubstring("CustomContainerImages must be updated when changing targetVersion"))
+					g.Expect(err.Error()).Should(ContainSubstring("prevents proper version tracking and validation"))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should allow targetVersion modification when ManilaShareImages are updated", func() {
+				newCustomManilaShareImage := "custom.registry/manila-share:new-custom-tag"
+
+				// Update ManilaShareImages along with targetVersion
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Spec.TargetVersion = updatedVersion
+					// Update the ManilaShareImages (this should be allowed)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						ManilaShareImages: map[string]*string{
+							"share-backend1": &newCustomManilaShareImage,
+						},
+					}
+					g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Verify the update was successful
+				Eventually(func(g Gomega) {
+					updatedVersionObj := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(updatedVersionObj.Spec.TargetVersion).Should(Equal(updatedVersion))
+					g.Expect(*updatedVersionObj.Spec.CustomContainerImages.ManilaShareImages["share-backend1"]).Should(Equal(newCustomManilaShareImage))
+				}, timeout, interval).Should(Succeed())
+			})
+		})
+
+		When("skip-custom-images-validation annotation", func() {
+			var customKeystoneImage = "custom.registry/keystone:custom-tag"
+
+			BeforeEach(func() {
+				// Create OpenStackVersion with custom container images
+				spec := GetDefaultOpenStackVersionSpec()
+				spec["customContainerImages"] = map[string]interface{}{
+					"keystoneAPIImage": customKeystoneImage,
+				}
+
+				DeferCleanup(
+					th.DeleteInstance,
+					CreateOpenStackVersion(names.OpenStackVersionName, spec),
+				)
+
+				// Wait for initial version to be created and initialized
+				Eventually(func(g Gomega) {
+					th.ExpectCondition(
+						names.OpenStackVersionName,
+						ConditionGetterFunc(OpenStackVersionConditionGetter),
+						corev1.OpenStackVersionInitialized,
+						k8s_corev1.ConditionTrue,
+					)
+
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(version).Should(Not(BeNil()))
+					g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring(initialVersion))
+					g.Expect(version.Spec.TargetVersion).Should(ContainSubstring(initialVersion))
+				}, timeout, interval).Should(Succeed())
+
+				// Inject a newer version for testing minor updates
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					// Create container defaults for the updated version
+					if version.Status.ContainerImageVersionDefaults == nil {
+						version.Status.ContainerImageVersionDefaults = make(map[string]*corev1.ContainerDefaults)
+					}
+					version.Status.ContainerImageVersionDefaults[updatedVersion] = &corev1.ContainerDefaults{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Simulate deployment by setting DeployedVersion
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+					version.Status.DeployedVersion = &initialVersion
+
+					// Track the custom images for the initial version
+					if version.Status.TrackedCustomImages == nil {
+						version.Status.TrackedCustomImages = make(map[string]corev1.CustomContainerImages)
+					}
+					version.Status.TrackedCustomImages[initialVersion] = corev1.CustomContainerImages{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Remove finalizer as needed for cleanup
+				DeferCleanup(
+					OpenStackVersionRemoveFinalizer,
+					ctx,
+					names.OpenStackVersionName,
+				)
+			})
+
+			It("should allow targetVersion modification with skip annotation when CustomContainerImages are unchanged", func() {
+				// Update targetVersion with skip annotation, keeping same custom images
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+
+					// Add the skip annotation
+					if version.Annotations == nil {
+						version.Annotations = make(map[string]string)
+					}
+					version.Annotations["core.openstack.org/skip-custom-images-validation"] = "true"
+
+					version.Spec.TargetVersion = updatedVersion
+					// Keep the same custom container images (should be allowed with annotation)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+
+					g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Verify the update was successful
+				Eventually(func(g Gomega) {
+					updatedVersionObj := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(updatedVersionObj.Spec.TargetVersion).Should(Equal(updatedVersion))
+					g.Expect(*updatedVersionObj.Spec.CustomContainerImages.KeystoneAPIImage).Should(Equal(customKeystoneImage))
+					g.Expect(updatedVersionObj.Annotations["core.openstack.org/skip-custom-images-validation"]).Should(Equal("true"))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should allow targetVersion modification with skip annotation set to empty value", func() {
+				// Update targetVersion with skip annotation set to empty string
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+
+					// Add the skip annotation with empty value
+					if version.Annotations == nil {
+						version.Annotations = make(map[string]string)
+					}
+					version.Annotations["core.openstack.org/skip-custom-images-validation"] = ""
+
+					version.Spec.TargetVersion = updatedVersion
+					// Keep the same custom container images (should be allowed with annotation)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+
+					g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				// Verify the update was successful
+				Eventually(func(g Gomega) {
+					updatedVersionObj := GetOpenStackVersion(names.OpenStackVersionName)
+					g.Expect(updatedVersionObj.Spec.TargetVersion).Should(Equal(updatedVersion))
+					g.Expect(*updatedVersionObj.Spec.CustomContainerImages.KeystoneAPIImage).Should(Equal(customKeystoneImage))
+					g.Expect(updatedVersionObj.Annotations["core.openstack.org/skip-custom-images-validation"]).Should(Equal(""))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			It("should prevent targetVersion modification without skip annotation when CustomContainerImages are unchanged", func() {
+				// Attempt to update targetVersion without skip annotation and unchanged custom images
+				Eventually(func(g Gomega) {
+					version := GetOpenStackVersion(names.OpenStackVersionName)
+
+					// Ensure no skip annotation
+					if version.Annotations != nil {
+						delete(version.Annotations, "core.openstack.org/skip-custom-images-validation")
+					}
+
+					version.Spec.TargetVersion = updatedVersion
+					// Keep the same custom container images (should be rejected without annotation)
+					version.Spec.CustomContainerImages = corev1.CustomContainerImages{
+						ContainerTemplate: corev1.ContainerTemplate{
+							KeystoneAPIImage: &customKeystoneImage,
+						},
+					}
+
+					err := k8sClient.Update(ctx, version)
+					if err != nil && strings.Contains(err.Error(), "the object has been modified") {
+						// Retry on conflict errors
+						return
+					}
+					g.Expect(err).Should(HaveOccurred())
+					g.Expect(err.Error()).Should(ContainSubstring("CustomContainerImages must be updated when changing targetVersion"))
+					g.Expect(err.Error()).Should(ContainSubstring("prevents proper version tracking and validation"))
+				}, timeout, interval).Should(Succeed())
+			})
+		})
 	})
 
 })
