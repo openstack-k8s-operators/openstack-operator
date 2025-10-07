@@ -12,6 +12,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.38.2
 	github.com/openshift/api v3.9.0+incompatible
+	github.com/openshift/client-go v0.0.0-20240528061634-b054aa794d87
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20251004061941-fc4a6b62f14f
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20251002160033-d2a363bddc32
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251002063410-b6cf1b1e0e23

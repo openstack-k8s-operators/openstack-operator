@@ -285,6 +285,24 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 	})
 
+	When("A Dataplane nodeset is created", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(false)))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+		It("should have the RHOSO cluster ID set in the Ansible inventory", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			Expect(secret.Data["inventory"]).Should(
+				ContainSubstring("edpm_rhoso_cluster_id"))
+		})
+	})
+
 	When("TLS is enabled", func() {
 		tlsEnabled := true
 		When("A Dataplane resource is created with PreProvisioned nodes, no deployment", func() {
