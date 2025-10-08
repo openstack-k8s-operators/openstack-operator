@@ -1284,7 +1284,7 @@ spec:
                   capabilities on top of capabilities that are usually needed by the test
                   pods (NET_ADMIN, NET_RAW). This parameter is deemed insecure but it is
                   needed for certain test-operator functionalities to work properly (e.g.:
-                  extraRPMs in Tempest CR, or certain set of tobiko tests).
+                  extraRPMs in Tempest CR, or a certain set of tobiko tests).
                 type: boolean
               rerunFailedTests:
                 default: false
@@ -1375,7 +1375,7 @@ spec:
               tempestRun:
                 description: |-
                   TempestRunSpec - is used to configure execution of tempest. Please refer to
-                  Please refer to https://docs.openstack.org/tempest/latest/ for the further
+                  Please refer to https://docs.openstack.org/tempest/latest/ for further
                   explanation of the CLI parameters.
                 properties:
                   concurrency:
@@ -1554,7 +1554,7 @@ spec:
               tempestconfRun:
                 description: |-
                   TempestconfRunSpec - is used to configure execution of discover-tempest-config
-                  Please refer to https://docs.opendev.org/openinfra/python-tempestconf for the
+                  Please refer to https://docs.opendev.org/openinfra/python-tempestconf for
                   further explanation of the CLI parameters.
                 properties:
                   append:
@@ -1752,7 +1752,7 @@ spec:
                   Workflow - can be used to specify multiple executions of tempest with
                   a different configuration in a single CR. Accepts a list of dictionaries
                   where each member of the list accepts the same values as the Tempest CR
-                  does in the `spec`` section. Values specified using the workflow section have
+                  does in the `spec` section. Values specified using the workflow section have
                   a higher precedence than the values specified higher in the Tempest CR
                   hierarchy.
                 items:
@@ -1854,7 +1854,7 @@ spec:
                         pods with allowedPrivilegedEscalation: true and the default capabilities on
                         top of capabilities that are usually needed by the test pods (NET_ADMIN, NET_RAW).
                         This parameter is deemed insecure but it is needed for certain test-operator
-                        functionalities to work properly (e.g.: extraRPMs in Tempest CR, or certain set
+                        functionalities to work properly (e.g.: extraRPMs in Tempest CR, or a certain set
                         of tobiko tests).
                       type: boolean
                     rerunFailedTests:
@@ -1941,8 +1941,8 @@ spec:
                       type: string
                     tempestRun:
                       description: |-
-                        TempestRunSpec - is used to configure execution of tempest. Please refer to
-                        Please refer to https://docs.openstack.org/tempest/latest/ for the further
+                        WorkflowTempestRunSpec - is used to configure execution of tempest.
+                        Please refer to https://docs.openstack.org/tempest/latest/ for further
                         explanation of the CLI parameters.
                       properties:
                         concurrency:
@@ -2088,7 +2088,7 @@ spec:
                           type: array
                         extraRPMs:
                           description: |-
-                            A list URLs that point to RPMs that should be downloaded and installed
+                            A list of URLs that point to RPMs that should be downloaded and installed
                             inside the tempest test pod.
                           items:
                             type: string
@@ -2116,8 +2116,8 @@ spec:
                       type: object
                     tempestconfRun:
                       description: |-
-                        TempestconfRunSpec - is used to configure execution of discover-tempest-config
-                        Please refer to https://docs.opendev.org/openinfra/python-tempestconf for the
+                        WorkflowTempestconfRunSpec - is used to configure execution of discover-tempest-config
+                        Please refer to https://docs.opendev.org/openinfra/python-tempestconf for
                         further explanation of the CLI parameters.
                       properties:
                         append:
