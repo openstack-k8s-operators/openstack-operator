@@ -512,6 +512,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.IronicGraphicalConsoleImage != nil {
+		in, out := &in.IronicGraphicalConsoleImage, &out.IronicGraphicalConsoleImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.IronicInspectorImage != nil {
 		in, out := &in.IronicInspectorImage, &out.IronicInspectorImage
 		*out = new(string)
@@ -519,6 +524,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 	}
 	if in.IronicNeutronAgentImage != nil {
 		in, out := &in.IronicNeutronAgentImage, &out.IronicNeutronAgentImage
+		*out = new(string)
+		**out = **in
+	}
+	if in.IronicNovncImage != nil {
+		in, out := &in.IronicNovncImage, &out.IronicNovncImage
 		*out = new(string)
 		**out = **in
 	}
