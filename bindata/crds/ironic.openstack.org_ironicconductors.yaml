@@ -55,6 +55,9 @@ spec:
               conductorGroup:
                 description: ConductorGroup - Ironic Conductor conductor group.
                 type: string
+              consoleImage:
+                description: ConsoleImage - Ironic Graphical Console Container Image
+                type: string
               containerImage:
                 description: ContainerImage - Ironic Conductor Container Image
                 type: string
@@ -115,6 +118,15 @@ spec:
                   - start
                   type: object
                 type: array
+              graphicalConsoles:
+                default: Disabled
+                description: 'Whether to enable graphical consoles. NOTE: Setting
+                  this to Enabled is not supported.'
+                enum:
+                - Enabled
+                - Disabled
+                - ""
+                type: string
               ironicPythonAgentImage:
                 description: IronicPythonAgentImage - Image containing the ironic-python-agent
                   kernel and ramdisk
@@ -142,6 +154,9 @@ spec:
                   NodeSelector to target subset of worker nodes running this service. Setting here overrides
                   any global NodeSelector settings within the Ironic CR
                 type: object
+              novncproxyImage:
+                description: NoVNCProxyImage - Ironic NoVNCProxy Container Image
+                type: string
               passwordSelectors:
                 default:
                   service: IronicPassword

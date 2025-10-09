@@ -51,7 +51,6 @@ import (
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
-	lightspeedv1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
@@ -61,7 +60,6 @@ import (
 
 	client_ctrl "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	core_ctrl "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
-	lightspeed_ctrl "github.com/openstack-k8s-operators/openstack-operator/controllers/lightspeed"
 
 	ocp_configv1 "github.com/openshift/api/config/v1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
@@ -229,8 +227,6 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
 
-	err = lightspeedv1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
 	err = openstackclientv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = corev1.AddToScheme(scheme.Scheme)
@@ -345,15 +341,7 @@ var _ = BeforeSuite(func() {
 	core_ctrl.SetupVersionDefaults()
 	openstack.SetupServiceOperatorDefaults()
 	openstackclientv1.SetupDefaults()
-	lightspeedv1.SetupDefaults()
 	corev1.SetupVersionDefaults()
-
-	err = (&lightspeed_ctrl.OpenStackLightspeedReconciler{
-		Client:  k8sManager.GetClient(),
-		Scheme:  k8sManager.GetScheme(),
-		Kclient: kclient,
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
 
 	err = (&client_ctrl.OpenStackClientReconciler{
 		Client:  k8sManager.GetClient(),

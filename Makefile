@@ -137,7 +137,7 @@ help: ## Display this help.
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	mkdir -p config/operator/rbac && \
 	$(CONTROLLER_GEN) crd$(CRDDESC_OVERRIDE) output:crd:artifacts:config=config/crd/bases webhook paths="./..." && \
-	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./apis/lightspeed/...,./apis/client/...,./apis/core/...,./apis/dataplane/...,./controllers/lightspeed/...,./controllers/client/...,./controllers/core/...,./controllers/dataplane/...,./pkg/...}" output:dir=config/rbac && \
+	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./apis/client/...,./apis/core/...,./apis/dataplane/...,./controllers/client/...,./controllers/core/...,./controllers/dataplane/...,./pkg/...}" output:dir=config/rbac && \
 	$(CONTROLLER_GEN) rbac:roleName=operator-role paths="./controllers/operator/..." paths="./apis/operator/..." output:dir=config/operator/rbac && \
 	rm -f apis/bases/* && cp -a config/crd/bases apis/
 

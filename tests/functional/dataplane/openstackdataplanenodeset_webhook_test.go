@@ -51,8 +51,10 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		It("Should block changes to the BmhLabelSelector object in baremetalSetTemplate spec", func() {
 			Eventually(func(_ Gomega) string {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				instance.Spec.BaremetalSetTemplate.BmhLabelSelector = map[string]string{
-					"app": "openstack1",
+				if instance.Spec.BaremetalSetTemplate != nil {
+					instance.Spec.BaremetalSetTemplate.BmhLabelSelector = map[string]string{
+						"app": "openstack1",
+					}
 				}
 				err := th.K8sClient.Update(th.Ctx, instance)
 				return fmt.Sprintf("%s", err)
@@ -80,9 +82,11 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		It("Should allow changes to the CloudUserName", func() {
 			Eventually(func(_ Gomega) error {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				instance.Spec.BaremetalSetTemplate.CloudUserName = "new-user"
-				instance.Spec.BaremetalSetTemplate.BmhLabelSelector = map[string]string{
-					"app": "test-openstack",
+				if instance.Spec.BaremetalSetTemplate != nil {
+					instance.Spec.BaremetalSetTemplate.CloudUserName = "new-user"
+					instance.Spec.BaremetalSetTemplate.BmhLabelSelector = map[string]string{
+						"app": "test-openstack",
+					}
 				}
 
 				return th.K8sClient.Update(th.Ctx, instance)

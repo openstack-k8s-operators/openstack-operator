@@ -86,13 +86,4 @@ resources:
   kind: OpenStack
   path: github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1
   version: v1beta1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: openstack.org
-  group: lightspeed
-  kind: OpenStackLightspeed
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1
-  version: v1beta1
 version: "3"

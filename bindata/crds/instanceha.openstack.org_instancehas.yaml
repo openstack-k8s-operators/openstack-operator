@@ -53,8 +53,8 @@ spec:
                   bundle file
                 type: string
               containerImage:
-                description: ContainerImage for the the InstanceHa container (will
-                  be set to environmental default if empty)
+                description: ContainerImage for the InstanceHa container (will be
+                  set to environmental default if empty)
                 type: string
               fencingSecret:
                 default: fencing-secret

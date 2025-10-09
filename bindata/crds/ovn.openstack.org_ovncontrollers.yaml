@@ -52,6 +52,27 @@ spec:
           spec:
             description: OVNControllerSpec defines the desired state of OVNController
             properties:
+              bondConfiguration:
+                additionalProperties:
+                  description: Bond defines the configuration of each bond interface
+                    in the deployment
+                  properties:
+                    links:
+                      default: []
+                      items:
+                        type: string
+                      type: array
+                      x-kubernetes-list-type: set
+                    mode:
+                      default: active-backup
+                      type: string
+                    mtu:
+                      default: 1500
+                      format: int32
+                      type: integer
+                  type: object
+                description: Map of bond names to their configuration
+                type: object
               exporterImage:
                 description: ExporterImage - Container Image URL for the openstack-network-exporter
                   metrics daemonset (will be set to environmental default if empty)

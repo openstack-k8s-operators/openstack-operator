@@ -132,6 +132,10 @@ func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 		allErrs = append(allErrs, err)
 	}
 
+	if err := r.ValidateNotificationsBusInstance(basePath); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if len(allErrs) != 0 {
 		return allWarn, apierrors.NewInvalid(
 			schema.GroupKind{Group: "core.openstack.org", Kind: "OpenStackControlPlane"},
@@ -158,6 +162,10 @@ func (r *OpenStackControlPlane) ValidateUpdate(old runtime.Object) (admission.Wa
 	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
+	if err := r.ValidateNotificationsBusInstance(basePath); err != nil {
 		allErrs = append(allErrs, err)
 	}
 
@@ -361,6 +369,13 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
 	}
 
+	if r.Spec.Telemetry.Enabled {
+		errors = append(errors, r.Spec.Telemetry.Template.ValidateCreate(basePath.Child("telemetry").Child("template"), r.Namespace)...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
+	}
+
 	// Validation for remaining services...
 	if r.Spec.Galera.Enabled {
 		for key, s := range *r.Spec.Galera.Templates {
@@ -555,6 +570,15 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		}
 		errors = append(errors, r.Spec.Watcher.Template.ValidateUpdate(*old.Watcher.Template, basePath.Child("watcher").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
+	}
+	if r.Spec.Telemetry.Enabled {
+		if old.Telemetry.Template == nil {
+			old.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
+		}
+		errors = append(errors, r.Spec.Telemetry.Template.ValidateUpdate(*old.Telemetry.Template, basePath.Child("telemetry").Child("template"), r.Namespace)...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
 	}
 
 	if r.Spec.Memcached.Enabled {
@@ -1141,4 +1165,29 @@ func (r *OpenStackControlPlane) ValidateTopology(basePath *field.Path) *field.Er
 		}
 	}
 	return nil
+}
+
+// ValidateNotificationsBusInstance - returns an error if the notificationsBusInstance
+// parameter is not valid.
+// - nil or empty string must be raised as an error
+// - when notificationsBusInstance does not point to an existing RabbitMQ instance
+func (r *OpenStackControlPlane) ValidateNotificationsBusInstance(basePath *field.Path) *field.Error {
+	notificationsField := basePath.Child("notificationsBusInstance")
+	// no notificationsBusInstance field set, nothing to validate here
+	if r.Spec.NotificationsBusInstance == nil {
+		return nil
+	}
+	// When NotificationsBusInstance is set, fail if it is an empty string
+	if *r.Spec.NotificationsBusInstance == "" {
+		return field.Invalid(notificationsField, *r.Spec.NotificationsBusInstance, "notificationsBusInstance is not a valid string")
+	}
+	// NotificationsBusInstance is set and must be equal to an existing
+	// deployed rabbitmq instance, otherwise we should fail because it
+	// does not represent a valid string
+	for k := range(*r.Spec.Rabbitmq.Templates) {
+		if *r.Spec.NotificationsBusInstance == k {
+			return nil
+		}
+	}
+	return field.Invalid(notificationsField, *r.Spec.NotificationsBusInstance, "notificationsBusInstance must match an existing RabbitMQ instance name")
 }

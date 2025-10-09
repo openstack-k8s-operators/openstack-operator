@@ -6586,6 +6586,13 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      graphicalConsoles:
+                        default: Disabled
+                        enum:
+                        - Enabled
+                        - Disabled
+                        - ""
+                        type: string
                       ironicAPI:
                         properties:
                           customServiceConfig:
@@ -9855,6 +9862,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              notificationsBusInstance:
+                type: string
               nova:
                 properties:
                   apiOverride:
@@ -12056,6 +12065,24 @@ spec:
                     properties:
                       ovnController:
                         properties:
+                          bondConfiguration:
+                            additionalProperties:
+                              properties:
+                                links:
+                                  default: []
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: set
+                                mode:
+                                  default: active-backup
+                                  type: string
+                                mtu:
+                                  default: 1500
+                                  format: int32
+                                  type: integer
+                              type: object
+                            type: object
                           external-ids:
                             default: {}
                             properties:
@@ -13244,7 +13271,7 @@ spec:
                         rabbitmq:
                           properties:
                             additionalConfig:
-                              maxLength: 2000
+                              maxLength: 100000
                               type: string
                             additionalPlugins:
                               items:
@@ -13356,6 +13383,10 @@ spec:
                               - PreferDualStack
                               - RequireDualStack
                               type: string
+                            labels:
+                              additionalProperties:
+                                type: string
+                              type: object
                             type:
                               default: ClusterIP
                               enum:

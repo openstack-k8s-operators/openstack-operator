@@ -86,11 +86,9 @@ import (
 	machineconfig "github.com/openshift/api/machineconfiguration/v1"
 	ocp_image "github.com/openshift/api/operator/v1alpha1"
 
-	lightspeedv1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/lightspeed/v1beta1"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
-	lightspeedcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/lightspeed"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	// +kubebuilder:scaffold:imports
 )
@@ -137,7 +135,6 @@ func init() {
 	utilruntime.Must(operatorv1beta1.AddToScheme(scheme))
 	utilruntime.Must(topologyv1.AddToScheme(scheme))
 	utilruntime.Must(watcherv1.AddToScheme(scheme))
-	utilruntime.Must(lightspeedv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -280,9 +277,6 @@ func main() {
 	// Defaults for OpenStackClient
 	clientv1.SetupDefaults()
 
-	// Defaults for OpenStackLightspeed
-	lightspeedv1beta1.SetupDefaults()
-
 	// Defaults for Dataplane
 	dataplanev1.SetupDefaults()
 
@@ -318,14 +312,6 @@ func main() {
 			os.Exit(1)
 		}
 		checker = mgr.GetWebhookServer().StartedChecker()
-	}
-
-	if err = (&lightspeedcontrollers.OpenStackLightspeedReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpenStackLightspeed")
-		os.Exit(1)
 	}
 
 	// +kubebuilder:scaffold:builder
