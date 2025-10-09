@@ -44,7 +44,7 @@ spec:
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:a17fc270857869fd1efe5020b2a1cb8c2abbd838f08de88f3a6a59e8754ec351
         - name: RELATED_IMAGE_OVN_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/ovn-operator@sha256:551b59e107c9812f7ad7aa06577376b0dcb58ff9498a41d5d5273e60e20ba7e4
+          value: quay.io/openstack-k8s-operators/ovn-operator@sha256:315e558023b41ac1aa215082096995a03810c5b42910a33b00427ffcac9c6a14
         - name: RELATED_IMAGE_PLACEMENT_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/placement-operator@sha256:d33c1f507e1f5b9a4bf226ad98917e92101ac66b36e19d35cbe04ae7014f6bff
         - name: RELATED_IMAGE_RABBITMQ_CLUSTER_OPERATOR_MANAGER_IMAGE_URL

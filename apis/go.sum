@@ -150,8 +150,8 @@ github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251007102453-
 github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251007102453-ebfa5abc85f9/go.mod h1:9hVb6W4F+QOsScCF69O+y0DREQOYZNRHB3pAWNgdr9M=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251007160653-73411ba26222 h1:6njT8VlvIBKuii7AEQumhqnI8u0dgoYkX8Rf7jcPySw=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251007160653-73411ba26222/go.mod h1:StWvPTGwPxvaC5T+6qCEFVGlU1/en80J1pYijplyKZE=
-github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251007102452-2237fe83b2ac h1:GqcTTj5fvD4ltxsciXCcUg92mwyJR0NbEJ0/P9ykwqE=
-github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251007102452-2237fe83b2ac/go.mod h1:9A4u8gHLl+PeEfcqweyyIdUGRap3j95oTlkRhw6FDa0=
+github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251009064229-83a344ba9732 h1:n8VE9b+geiFr6z3j6Ys6stT2ntSWDGeB8Pp2odf82fA=
+github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251009064229-83a344ba9732/go.mod h1:9A4u8gHLl+PeEfcqweyyIdUGRap3j95oTlkRhw6FDa0=
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20251006102217-a0180c9d1d51 h1:+uy6b+pzHzib8OtjXex+mYsWMZc41P327Lima/TtAOM=
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20251006102217-a0180c9d1d51/go.mod h1:tT7pLlledNe6qxzJPmgG4Vt3y8C8hjlUli0rPBeAiz0=
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec h1:saovr368HPAKHN0aRPh8h8n9s9dn3d8Frmfua0UYRlc=

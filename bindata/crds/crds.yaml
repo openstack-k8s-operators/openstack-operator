@@ -12231,6 +12231,24 @@ spec:
                     properties:
                       ovnController:
                         properties:
+                          bondConfiguration:
+                            additionalProperties:
+                              properties:
+                                links:
+                                  default: []
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: set
+                                mode:
+                                  default: active-backup
+                                  type: string
+                                mtu:
+                                  default: 1500
+                                  format: int32
+                                  type: integer
+                              type: object
+                            type: object
                           external-ids:
                             default: {}
                             properties:
