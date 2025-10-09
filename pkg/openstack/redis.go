@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -114,7 +115,15 @@ func ReconcileRedis(
 	var err error
 	var status redisStatus
 
-	for name, spec := range *instance.Spec.Redis.Templates {
+	// Sort template names to ensure consistent ordering
+	templateNames := make([]string, 0, len(*instance.Spec.Redis.Templates))
+	for name := range *instance.Spec.Redis.Templates {
+		templateNames = append(templateNames, name)
+	}
+	sort.Strings(templateNames)
+
+	for _, name := range templateNames {
+		spec := (*instance.Spec.Redis.Templates)[name]
 		var redis *redisv1.Redis
 
 		status, redis, ctrlResult, err = reconcileRedis(ctx, instance, version, helper, name, &spec)

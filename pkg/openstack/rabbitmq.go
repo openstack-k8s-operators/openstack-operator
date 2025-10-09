@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -104,7 +105,15 @@ func ReconcileRabbitMQs(
 		instance.Spec.Rabbitmq.Templates = ptr.To(map[string]rabbitmqv1.RabbitMqSpecCore{})
 	}
 
-	for name, spec := range *instance.Spec.Rabbitmq.Templates {
+	// Sort template names to ensure consistent ordering
+	templateNames := make([]string, 0, len(*instance.Spec.Rabbitmq.Templates))
+	for name := range *instance.Spec.Rabbitmq.Templates {
+		templateNames = append(templateNames, name)
+	}
+	sort.Strings(templateNames)
+
+	for _, name := range templateNames {
+		spec := (*instance.Spec.Rabbitmq.Templates)[name]
 		status, ctrlResult, err = reconcileRabbitMQ(ctx, instance, version, helper, name, spec)
 
 		switch status {

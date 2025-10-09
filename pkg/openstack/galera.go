@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -102,7 +103,15 @@ func ReconcileGaleras(
 	// List of conditions to consider later for mirroring
 	conditions := condition.Conditions{}
 
-	for name, spec := range *instance.Spec.Galera.Templates {
+	// Sort template names to ensure consistent ordering
+	templateNames := make([]string, 0, len(*instance.Spec.Galera.Templates))
+	for name := range *instance.Spec.Galera.Templates {
+		templateNames = append(templateNames, name)
+	}
+	sort.Strings(templateNames)
+
+	for _, name := range templateNames {
+		spec := (*instance.Spec.Galera.Templates)[name]
 		hostname := fmt.Sprintf("%s.%s.svc", name, instance.Namespace)
 		hostnameHeadless := fmt.Sprintf("%s-galera.%s.svc", name, instance.Namespace)
 
