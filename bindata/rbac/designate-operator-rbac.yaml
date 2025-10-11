@@ -199,6 +199,14 @@ rules:
     - patch
     - update
 - apiGroups:
+    - operator.openshift.io
+  resources:
+    - networks
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
     - rabbitmq.openstack.org
   resources:
     - transporturls
