@@ -154,3 +154,6 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.13 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.13 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+// Test CloudKitty
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/jlarriba/telemetry-operator/api v0.1.1-0.20251002075820-bed9eb4c0105 //allow-merging
