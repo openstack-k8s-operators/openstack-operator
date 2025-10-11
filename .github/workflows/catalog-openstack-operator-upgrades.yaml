@@ -79,9 +79,9 @@ jobs:
       run: ./openstack-operator/hack/catalog-build-olm-upgrade.sh
       env:
         #FIXME: these should be pulled from a YAML config in the main operator directory?
-        MAIN_VERSION: 0.4.0
-        FEATURE_RELEASE_VERSION: 0.3.0
-        FEATURE_RELEASE_BRANCH: 18.0-fr3
+        MAIN_VERSION: 0.5.0
+        FEATURE_RELEASE_VERSION: 0.4.0
+        FEATURE_RELEASE_BRANCH: 18.0-fr4
         BUNDLE:  ${{ env.imageregistry }}/${{ env.imagenamespace }}/openstack-operator-bundle:${{ github.sha }}
 
     - name: Buildah Action
