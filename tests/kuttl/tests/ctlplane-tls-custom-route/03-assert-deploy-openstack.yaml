@@ -34,12 +34,6 @@ spec:
       route:
         spec:
           tls:
-            certificate: |
-              CERT123
-            key: |
-              KEY123
-            caCertificate: |
-              CACERT123
             termination: reencrypt
     template:
       databaseInstance: openstack
