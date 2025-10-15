@@ -2,4 +2,5 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:
   - script: |
+      # Apply OpenStackControlPlane with kustomize (ConfigMap was created in step 02)
       oc kustomize ../../../../config/samples/tls/custom_route_cert | oc apply -n $NAMESPACE -f -
