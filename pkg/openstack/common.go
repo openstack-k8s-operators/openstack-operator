@@ -516,6 +516,26 @@ func (ed *EndpointDetail) ensureRoute(
 			return ctrlResult, nil
 		}
 
+		// Check the route admission status and update condition accordingly
+		err = checkRouteAdmissionStatus(ctx, helper, ed.Name, ed.Namespace)
+		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				condType,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				corev1.OpenStackControlPlaneExposeServiceReadyRouteAdmissionErrorMessage,
+				owner.GetName(),
+				ed.Name,
+				err.Error()))
+			return ctrl.Result{}, err
+		}
+
+		// Route is successfully created and admitted
+		instance.Status.Conditions.MarkTrue(
+			condType,
+			corev1.OpenStackControlPlaneExposeServiceReadyMessage,
+			owner.GetName())
+
 		return ctrl.Result{}, nil
 	}
 	instance.Status.Conditions.Remove(condType)
@@ -705,6 +725,45 @@ func (ed *EndpointDetail) CreateRoute(
 	ed.EndpointURL = ed.Proto.String() + "://" + *ed.Hostname
 
 	return ctrl.Result{}, nil
+}
+
+// checkRouteAdmissionStatus checks the admission status of a route and returns an error if not admitted
+func checkRouteAdmissionStatus(
+	ctx context.Context,
+	helper *helper.Helper,
+	routeName string,
+	namespace string,
+) error {
+	serviceRoute := &routev1.Route{}
+	err := helper.GetClient().Get(ctx, types.NamespacedName{Name: routeName, Namespace: namespace}, serviceRoute)
+	if err != nil {
+		return err
+	}
+
+	// Check if the route has ingress status
+	if len(serviceRoute.Status.Ingress) == 0 {
+		// Route exists but has no ingress status yet - this is normal during initial creation
+		// Return nil to allow reconciliation to continue
+		return nil
+	}
+
+	// Check the admission status of the first ingress
+	for _, condition := range serviceRoute.Status.Ingress[0].Conditions {
+		// RouteAdmitted (value: "Admitted") is currently the only officially defined condition type in the OpenShift Route API
+		// https://github.com/openshift/api/blob/c9bef43e850983ce73f69a58b9da0bd02883c26a/route/v1/types.go#L384
+		// RouteAdmitted means the route is able to service requests for the provided Host
+		if condition.Type == routev1.RouteAdmitted {
+			if condition.Status != k8s_corev1.ConditionTrue {
+				// Route admission failed - return error with the message
+				return fmt.Errorf("%s", condition.Message)
+			}
+			// Route is admitted successfully
+			return nil
+		}
+	}
+
+	// No admission condition found yet - route is still being processed
+	return nil
 }
 
 // GetEndptCertSecret -
