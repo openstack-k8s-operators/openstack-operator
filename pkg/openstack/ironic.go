@@ -36,8 +36,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition)
 		instance.Status.ContainerImages.IronicAPIImage = nil
 		instance.Status.ContainerImages.IronicConductorImage = nil
+		instance.Status.ContainerImages.IronicGraphicalConsoleImage = nil
 		instance.Status.ContainerImages.IronicInspectorImage = nil
 		instance.Status.ContainerImages.IronicNeutronAgentImage = nil
+		instance.Status.ContainerImages.IronicNovncImage = nil
 		instance.Status.ContainerImages.IronicPxeImage = nil
 		instance.Status.ContainerImages.IronicPythonAgentImage = nil
 		return ctrl.Result{}, nil
@@ -173,8 +175,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 		ironic.Spec.Images.API = *version.Status.ContainerImages.IronicAPIImage
 		ironic.Spec.Images.Conductor = *version.Status.ContainerImages.IronicConductorImage
+		ironic.Spec.Images.GraphicalConsole = *version.Status.ContainerImages.IronicGraphicalConsoleImage
 		ironic.Spec.Images.Inspector = *version.Status.ContainerImages.IronicInspectorImage
 		ironic.Spec.Images.NeutronAgent = *version.Status.ContainerImages.IronicNeutronAgentImage
+		ironic.Spec.Images.NoVNCProxy = *version.Status.ContainerImages.IronicNovncImage
 		ironic.Spec.Images.Pxe = *version.Status.ContainerImages.IronicPxeImage
 		ironic.Spec.Images.IronicPythonAgent = *version.Status.ContainerImages.IronicPythonAgentImage
 
@@ -206,8 +210,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		Log.Info("Ironic ready condition is true")
 		instance.Status.ContainerImages.IronicAPIImage = version.Status.ContainerImages.IronicAPIImage
 		instance.Status.ContainerImages.IronicConductorImage = version.Status.ContainerImages.IronicConductorImage
+		instance.Status.ContainerImages.IronicGraphicalConsoleImage = version.Status.ContainerImages.IronicGraphicalConsoleImage
 		instance.Status.ContainerImages.IronicInspectorImage = version.Status.ContainerImages.IronicInspectorImage
 		instance.Status.ContainerImages.IronicNeutronAgentImage = version.Status.ContainerImages.IronicNeutronAgentImage
+		instance.Status.ContainerImages.IronicNovncImage = version.Status.ContainerImages.IronicNovncImage
 		instance.Status.ContainerImages.IronicPxeImage = version.Status.ContainerImages.IronicPxeImage
 		instance.Status.ContainerImages.IronicPythonAgentImage = version.Status.ContainerImages.IronicPythonAgentImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneIronicReadyCondition, corev1beta1.OpenStackControlPlaneIronicReadyMessage)
@@ -241,8 +247,10 @@ func IronicImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackCo
 	if controlPlane.Spec.Ironic.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.IronicAPIImage, version.Status.ContainerImages.IronicAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicConductorImage, version.Status.ContainerImages.IronicConductorImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicGraphicalConsoleImage, version.Status.ContainerImages.IronicGraphicalConsoleImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicInspectorImage, version.Status.ContainerImages.IronicInspectorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicNeutronAgentImage, version.Status.ContainerImages.IronicNeutronAgentImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicNovncImage, version.Status.ContainerImages.IronicNovncImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPxeImage, version.Status.ContainerImages.IronicPxeImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPythonAgentImage, version.Status.ContainerImages.IronicPythonAgentImage) {
 			Log.Info("Ironic images do not match")
