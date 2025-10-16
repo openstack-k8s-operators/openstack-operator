@@ -370,7 +370,7 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
-	OVNControllerReady, OVNControllerConditions, err := openstack.ReconcileOVNController(ctx, instance, version, helper)
+	OVNControllerReady, OVNControllerConditions, err := openstack.ReconcileOVNController(ctx, instance, version, helper, "")
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if !OVNControllerReady {

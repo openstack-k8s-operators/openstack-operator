@@ -12282,6 +12282,13 @@ spec:
                           metricsEnabled:
                             default: true
                             type: boolean
+                          metricsTLS:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                           networkAttachment:
                             type: string
                           nicMappings:
@@ -12361,6 +12368,13 @@ spec:
                             metricsEnabled:
                               default: true
                               type: boolean
+                            metricsTLS:
+                              properties:
+                                caBundleSecretName:
+                                  type: string
+                                secretName:
+                                  type: string
+                              type: object
                             networkAttachment:
                               type: string
                             nodeSelector:
@@ -12489,6 +12503,13 @@ spec:
                           metricsEnabled:
                             default: true
                             type: boolean
+                          metricsTLS:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                           nThreads:
                             default: 1
                             format: int32
