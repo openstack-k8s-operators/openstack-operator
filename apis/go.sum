@@ -78,6 +78,8 @@ github.com/joshdk/go-junit v1.0.0 h1:S86cUKIdwBHWwA6xCmFlf3RTLfVXYQfvanM5Uh+K6GE
 github.com/joshdk/go-junit v1.0.0/go.mod h1:TiiV0PqkaNfFXjEiyjWM3XXrhVyCa1K4Zfga6W52ung=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
+github.com/karelyatin/ovn-operator/api v0.0.0-20251016110332-fa590079ed53 h1:Ph5lDvRqiA5xHf35myJp51txhyADB8OY9jPqgA3oFlk=
+github.com/karelyatin/ovn-operator/api v0.0.0-20251016110332-fa590079ed53/go.mod h1:RTW7SRp+Fn8JmIjdOgLl3GB3tTAhnI0q2XgauR1eEUM=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
@@ -150,8 +152,6 @@ github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251007102453-
 github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251007102453-ebfa5abc85f9/go.mod h1:9hVb6W4F+QOsScCF69O+y0DREQOYZNRHB3pAWNgdr9M=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251007160653-73411ba26222 h1:6njT8VlvIBKuii7AEQumhqnI8u0dgoYkX8Rf7jcPySw=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251007160653-73411ba26222/go.mod h1:StWvPTGwPxvaC5T+6qCEFVGlU1/en80J1pYijplyKZE=
-github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251009064229-83a344ba9732 h1:n8VE9b+geiFr6z3j6Ys6stT2ntSWDGeB8Pp2odf82fA=
-github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251009064229-83a344ba9732/go.mod h1:9A4u8gHLl+PeEfcqweyyIdUGRap3j95oTlkRhw6FDa0=
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20251006102217-a0180c9d1d51 h1:+uy6b+pzHzib8OtjXex+mYsWMZc41P327Lima/TtAOM=
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20251006102217-a0180c9d1d51/go.mod h1:tT7pLlledNe6qxzJPmgG4Vt3y8C8hjlUli0rPBeAiz0=
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec h1:saovr368HPAKHN0aRPh8h8n9s9dn3d8Frmfua0UYRlc=
