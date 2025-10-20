@@ -65,6 +65,17 @@ spec:
                 description: MetricsEnabled enables the metrics sidecar container
                   for collecting OVN metrics
                 type: boolean
+              metricsTLS:
+                description: MetricsTLS - Parameters related to TLS for metrics sidecar
+                properties:
+                  caBundleSecretName:
+                    description: CaBundleSecretName - holding the CA certs in a pre-created
+                      bundle file
+                    type: string
+                  secretName:
+                    description: SecretName - holding the cert, key for the service
+                    type: string
+                type: object
               nThreads:
                 default: 1
                 description: NThreads sets number of threads used for building logical
@@ -221,6 +232,11 @@ spec:
                   - type
                   type: object
                 type: array
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
               lastAppliedTopology:
                 description: LastAppliedTopology - the last applied Topology
                 properties:
