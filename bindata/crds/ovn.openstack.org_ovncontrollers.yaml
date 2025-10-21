@@ -117,6 +117,17 @@ spec:
                 description: MetricsEnabled enables the metrics daemonset for collecting
                   OVN metrics
                 type: boolean
+              metricsTLS:
+                description: MetricsTLS - Parameters related to TLS for metrics daemonset
+                properties:
+                  caBundleSecretName:
+                    description: CaBundleSecretName - holding the CA certs in a pre-created
+                      bundle file
+                    type: string
+                  secretName:
+                    description: SecretName - holding the cert, key for the service
+                    type: string
+                type: object
               networkAttachment:
                 description: |-
                   NetworkAttachment is a NetworkAttachment resource name to expose the service to the given network.
