@@ -170,6 +170,17 @@ $ oc create secret generic redhat-registry \
 * Replace `<registry_username>` with the applicable user name.
 * Replace `<registry_password>` with the applicable password.
 
+. Optional: Configure environment variables for all playbooks, such as proxy settings:
++
+The `edpm_playbook_environment` variable sets environment variables that are applied to all tasks within all playbooks. This is useful for configuring proxy settings or other environment variables needed across the data plane deployment.
++
+----
+$ oc create secret generic edpm-playbook-environment \
+--from-literal edpm_playbook_environment='{"HTTP_PROXY": "http://proxy.example.com:8080", "HTTPS_PROXY": "http://proxy.example.com:8080", "NO_PROXY": "localhost,127.0.0.1", "http_proxy": "http://proxy.example.com:8080", "https_proxy": "http://proxy.example.com:8080", "no_proxy": "localhost,127.0.0.1"}'
+----
++
+* Replace the proxy values with your actual proxy server addresses.
+
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
@@ -188,11 +199,14 @@ spec:
           name: subscription-manager
       - secretRef:
           name: redhat-registry
+      - secretRef:
+          name: edpm-playbook-environment
 ----
 
 +
 For a complete list of the Red Hat Customer Portal registration commands, see https://access.redhat.com/solutions/253273. For information about how to log into `registry.redhat.io`, see https://access.redhat.com/RegistryAuthentication#creating-registry-service-accounts-6.
 endif::[]
+
 . If your nodes are bare metal, you must configure the bare metal template, see xref:con_provisioning-bare-metal-data-plane-nodes_{context}[Provisioning bare metal data plane nodes].
 
 . Optional: The sample `OpenStackDataPlaneNodeSet` CR you copied includes default node configurations under the `nodes` section. You can add additional nodes, and edit the configured values as required. For example, to add node-specific Ansible variables that customize the node, add the following configuration to your `openstack-edpm.yaml` file:
