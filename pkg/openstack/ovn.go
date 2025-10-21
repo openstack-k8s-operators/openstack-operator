@@ -38,27 +38,30 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	}
 
 	// Create TLS certificate for OVN metrics services when TLS is enabled
+	var ovnMetricsCertName string
 	if instance.Spec.Ovn.Enabled && instance.Spec.TLS.PodLevel.Enabled {
-		if err := EnsureOVNMetricsCert(ctx, instance, helper); err != nil {
+		var err error
+		ovnMetricsCertName, err = EnsureOVNMetricsCert(ctx, instance, helper)
+		if err != nil {
 			Log.Error(err, "Failed to ensure OVN metrics certificate")
 			setOVNReadyError(instance, err)
 			return ctrl.Result{}, err
 		}
 	}
 
-	OVNDBClustersReady, OVNDBClustersConditions, err := ReconcileOVNDbClusters(ctx, instance, version, helper)
+	OVNDBClustersReady, OVNDBClustersConditions, err := ReconcileOVNDbClusters(ctx, instance, version, helper, ovnMetricsCertName)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNDBClusters")
 		setOVNReadyError(instance, err)
 	}
 
-	OVNNorthdReady, OVNNorthdConditions, err := ReconcileOVNNorthd(ctx, instance, version, helper)
+	OVNNorthdReady, OVNNorthdConditions, err := ReconcileOVNNorthd(ctx, instance, version, helper, ovnMetricsCertName)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNNorthd")
 		setOVNReadyError(instance, err)
 	}
 
-	OVNControllerReady, OVNControllerConditions, err := ReconcileOVNController(ctx, instance, version, helper)
+	OVNControllerReady, OVNControllerConditions, err := ReconcileOVNController(ctx, instance, version, helper, ovnMetricsCertName)
 	if err != nil {
 		Log.Error(err, "Failed to reconcile OVNController")
 		setOVNReadyError(instance, err)
@@ -120,7 +123,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 }
 
 // ReconcileOVNDbClusters reconciles the OVN database clusters for the OpenStack control plane
-func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, condition.Conditions, error) {
+func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper, ovnMetricsCertName string) (bool, condition.Conditions, error) {
 	Log := GetLogger(ctx)
 	dnsSuffix := clusterdns.GetDNSClusterDomain()
 	conditions := condition.Conditions{}
@@ -199,6 +202,12 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			dbcluster.TLS.SecretName = &certSecret.Name
 		}
 
+		// Set MetricsTLS configuration if TLS is enabled and metrics cert is available
+		if instance.Spec.TLS.PodLevel.Enabled && ovnMetricsCertName != "" {
+			dbcluster.MetricsTLS.SecretName = &ovnMetricsCertName
+			dbcluster.MetricsTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+		}
+
 		if dbcluster.NodeSelector == nil {
 			dbcluster.NodeSelector = &instance.Spec.NodeSelector
 		}
@@ -259,7 +268,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 }
 
 // ReconcileOVNNorthd reconciles the OVN Northd service for the OpenStack control plane
-func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, condition.Conditions, error) {
+func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper, ovnMetricsCertName string) (bool, condition.Conditions, error) {
 	Log := GetLogger(ctx)
 	conditions := condition.Conditions{}
 
@@ -334,6 +343,12 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 	}
 	ovnNorthdSpec.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
+	// Set MetricsTLS configuration if TLS is enabled and metrics cert is available
+	if instance.Spec.TLS.PodLevel.Enabled && ovnMetricsCertName != "" {
+		ovnNorthdSpec.MetricsTLS.SecretName = &ovnMetricsCertName
+		ovnNorthdSpec.MetricsTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	}
+
 	if ovnNorthdSpec.NodeSelector == nil {
 		ovnNorthdSpec.NodeSelector = &instance.Spec.NodeSelector
 	}
@@ -386,7 +401,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 }
 
 // ReconcileOVNController reconciles the OVN Controller service for the OpenStack control plane
-func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, condition.Conditions, error) {
+func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper, ovnMetricsCertName string) (bool, condition.Conditions, error) {
 	Log := GetLogger(ctx)
 	conditions := condition.Conditions{}
 
@@ -472,6 +487,12 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		ovnControllerSpec.TLS.SecretName = &certSecret.Name
 	}
 	ovnControllerSpec.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+
+	// Set MetricsTLS configuration if TLS is enabled and metrics cert is available
+	if instance.Spec.TLS.PodLevel.Enabled && ovnMetricsCertName != "" {
+		ovnControllerSpec.MetricsTLS.SecretName = &ovnMetricsCertName
+		ovnControllerSpec.MetricsTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	}
 
 	if ovnControllerSpec.NodeSelector == nil {
 		ovnControllerSpec.NodeSelector = &instance.Spec.NodeSelector
@@ -568,7 +589,7 @@ func OVNNorthImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStack
 }
 
 // EnsureOVNMetricsCert creates TLS certificate for OVN metrics services
-func EnsureOVNMetricsCert(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) error {
+func EnsureOVNMetricsCert(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (string, error) {
 	Log := GetLogger(ctx)
 
 	dnsSuffix := clusterdns.GetDNSClusterDomain()
@@ -606,12 +627,12 @@ func EnsureOVNMetricsCert(ctx context.Context, instance *corev1beta1.OpenStackCo
 		certRequest,
 		nil)
 	if err != nil {
-		return err
+		return "", err
 	} else if (ctrlResult != ctrl.Result{}) {
 		Log.Info("OVN metrics certificate creation in progress", "certificate", certRequest.CertName)
-		return fmt.Errorf("OVN metrics certificate creation in progress")
+		return "", fmt.Errorf("OVN metrics certificate creation in progress")
 	}
 
 	Log.Info("OVN metrics certificate ensured", "secret", certSecret.Name, "certificate", certRequest.CertName)
-	return nil
+	return certSecret.Name, nil
 }
