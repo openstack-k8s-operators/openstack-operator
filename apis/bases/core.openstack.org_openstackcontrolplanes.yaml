@@ -2785,6 +2785,9 @@ spec:
                               - synth-domain
                               - no-negcache
                               - local
+                              - local-ttl
+                              - dhcp-ttl
+                              - max-ttl
                               type: string
                             values:
                               items:
