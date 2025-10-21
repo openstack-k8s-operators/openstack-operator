@@ -1068,22 +1068,6 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Designate.Template.Default()
 	}
 
-	// RabbitMQ
-	if r.Spec.Rabbitmq.Enabled || r.Spec.Rabbitmq.Templates != nil {
-		if r.Spec.Rabbitmq.Templates == nil {
-			r.Spec.Rabbitmq.Templates = ptr.To(map[string]rabbitmqv1.RabbitMqSpecCore{})
-		}
-
-		for key, template := range *r.Spec.Rabbitmq.Templates {
-			// Enforce queueType=Quorum for all new resources, preserve existing resources unchanged
-			if r.ObjectMeta.CreationTimestamp.IsZero() {
-				template.QueueType = "Quorum"
-			}
-			// By-value copy, need to update
-			(*r.Spec.Rabbitmq.Templates)[key] = template
-		}
-	}
-
 	// Redis
 	if r.Spec.Redis.Enabled || r.Spec.Redis.Templates != nil {
 		if r.Spec.Redis.Templates == nil {
