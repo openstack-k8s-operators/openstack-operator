@@ -9,24 +9,24 @@ require (
 	github.com/onsi/gomega v1.38.2
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20251014175433-c4ab8419a351
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20251014173752-ea967e56a392
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251014214210-a42b174daf83
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20251014170627-1d5452aa314d
-	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20251016070425-48b1f8142860
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251022085840-31cb063eeb8a
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20251022111742-64b4039d28a7
+	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20251022081400-3013db58c91d
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20251014173211-ce3de752f864
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20251020143452-7086a5eea166
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20251017145306-e6d6e0c9f32e
-	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20251014160540-0b7d580557b2
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20251007102731-b786c86bffe7
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20251007102731-b786c86bffe7
+	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20251021163720-bb51cea0d967
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20251021145236-2b84ec9fd9bb
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20251021145236-2b84ec9fd9bb
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20251018205015-c45ca5cf503c
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20251015110425-ad0381ce8cd4
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20251016170447-17d48235c379
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20251013072934-e80b840aec1c
-	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251015074813-c8f83332b774
+	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251022084705-f7d8ed01fa05
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251016050458-7c5c8fc69a7a
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251020102141-f19d0ee25e0f
 	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20251016091846-46ae39c6d532
-	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20251016091846-b1f736d575ca
+	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20251022081645-83643617513b
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20251015160727-f7231411e300
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20251015112911-89fa1b154a88
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.71.0-rhobs1 // indirect
@@ -68,7 +68,7 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gophercloud/gophercloud v1.14.1 // indirect
+	github.com/gophercloud/gophercloud/v2 v2.8.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -80,7 +80,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20250929092825-4c2402451077 // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20251021145236-2b84ec9fd9bb // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
