@@ -381,9 +381,26 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyAPI.CloudKittyAPITemplateCore)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyProc.CloudKittyProcTemplateCore)
 
-		telemetry.Spec.Ceilometer.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Ceilometer.Enabled)
-		telemetry.Spec.Autoscaling.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Autoscaling.Enabled)
-		telemetry.Spec.CloudKitty.Enabled = ptr.To(*instance.Spec.Telemetry.Template.CloudKitty.Enabled)
+		// TODO: investigate if the following could be simplified to
+		// telemetry.Spec.<service>.Enabled = instance.Spec.Telemetry.Template.<service>.Enabled
+		// With current implementation we essentially create a copy of the bools and point to that, so the
+		// resulting pointers in telemetry and instance objects are different (different addresses)
+		// but once dereferenced, they point to the same true / false value. Do we need to do that?
+		if instance.Spec.Telemetry.Template.Ceilometer.Enabled == nil {
+			telemetry.Spec.Ceilometer.Enabled = ptr.To(false)
+		} else {
+			telemetry.Spec.Ceilometer.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Ceilometer.Enabled)
+		}
+		if instance.Spec.Telemetry.Template.Autoscaling.Enabled == nil {
+			telemetry.Spec.Autoscaling.Enabled = ptr.To(false)
+		} else {
+			telemetry.Spec.Autoscaling.Enabled = ptr.To(*instance.Spec.Telemetry.Template.Autoscaling.Enabled)
+		}
+		if instance.Spec.Telemetry.Template.CloudKitty.Enabled == nil {
+			telemetry.Spec.CloudKitty.Enabled = ptr.To(false)
+		} else {
+			telemetry.Spec.CloudKitty.Enabled = ptr.To(*instance.Spec.Telemetry.Template.CloudKitty.Enabled)
+		}
 
 		telemetry.Spec.Ceilometer.CentralImage = *version.Status.ContainerImages.CeilometerCentralImage
 		telemetry.Spec.Ceilometer.ComputeImage = *version.Status.ContainerImages.CeilometerComputeImage
