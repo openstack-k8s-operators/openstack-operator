@@ -3145,54 +3145,6 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		Expect(OSCtlplane.Labels).Should(HaveKeyWithValue("core.openstack.org/openstackcontrolplane", "foo"))
 	})
 
-	It("Enforces queueType=Quorum for new resources", func() {
-		spec := GetDefaultOpenStackControlPlaneSpec()
-		spec["tls"] = GetTLSPublicSpec()
-
-		DeferCleanup(
-			th.DeleteInstance,
-			CreateOpenStackControlPlane(types.NamespacedName{Name: "test-new-quorum", Namespace: namespace}, spec),
-		)
-
-		OSCtlplane := GetOpenStackControlPlane(types.NamespacedName{Name: "test-new-quorum", Namespace: namespace})
-		Expect(OSCtlplane.Spec.Rabbitmq.Templates).Should(Not(BeNil()))
-
-		// Verify that all templates get queueType=Quorum for new resources
-		for templateName, template := range *OSCtlplane.Spec.Rabbitmq.Templates {
-			Expect(template.QueueType).Should(Equal("Quorum"), "RabbitMQ template %s should have queueType=Quorum", templateName)
-		}
-	})
-
-	It("Preserves existing queueType values on updates", func() {
-		spec := GetDefaultOpenStackControlPlaneSpec()
-		spec["tls"] = GetTLSPublicSpec()
-
-		// Create a resource first (will get Quorum by default)
-		ctlplane := CreateOpenStackControlPlane(types.NamespacedName{Name: "test-preserve-existing", Namespace: namespace}, spec)
-		DeferCleanup(th.DeleteInstance, ctlplane)
-
-		// Manually set it to Mirrored to simulate existing deployment
-		Eventually(func(g Gomega) {
-			existingCtlplane := GetOpenStackControlPlane(types.NamespacedName{Name: "test-preserve-existing", Namespace: namespace})
-			(*existingCtlplane.Spec.Rabbitmq.Templates)["rabbitmq"] = rabbitmqv1.RabbitMqSpecCore{
-				QueueType: "Mirrored", // Simulate existing value
-			}
-			g.Expect(k8sClient.Update(ctx, existingCtlplane)).Should(Succeed())
-		}).Should(Succeed())
-
-		// Verify it's preserved on subsequent updates
-		Eventually(func(g Gomega) {
-			updatedCtlplane := GetOpenStackControlPlane(types.NamespacedName{Name: "test-preserve-existing", Namespace: namespace})
-			updatedCtlplane.Spec.Secret = "updated-secret" // Trigger webhook
-			g.Expect(k8sClient.Update(ctx, updatedCtlplane)).Should(Succeed())
-
-			// Should still be Mirrored after update
-			finalCtlplane := GetOpenStackControlPlane(types.NamespacedName{Name: "test-preserve-existing", Namespace: namespace})
-			rabbitTemplate := (*finalCtlplane.Spec.Rabbitmq.Templates)["rabbitmq"]
-			g.Expect(rabbitTemplate.QueueType).Should(Equal("Mirrored"), "Existing queueType should be preserved")
-		}).Should(Succeed())
-	})
-
 	It("calls placement validation webhook", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 		spec["tls"] = GetTLSPublicSpec()

@@ -1,7 +1,7 @@
 # A quick way to test a fake minor update. Run this script, and then once the
 # openstackversion reconciles (the CSV will redeploy the controller-manager)
 # you can set targetVersion == 0.0.2 for a quick test
-VERSION=0.4
+VERSION=0.5
 CURRENT=${VERSION}.0
 UPDATE=${VERSION}.1
 oc get csv openstack-operator.v${CURRENT} -o yaml -n openstack-operators  > csv.yaml

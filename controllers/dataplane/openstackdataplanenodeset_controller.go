@@ -403,20 +403,20 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, err
 	}
 
-	if !isDeploymentRunning && !isDeploymentFailed {
+	if !isDeploymentRunning {
 		// Generate NodeSet Inventory
-		_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
+		_, errInventory := deployment.GenerateNodeSetInventory(ctx, helper, instance,
 			allIPSets, dnsDetails.ServerAddresses, containerImages, netServiceNetMap)
-		if err != nil {
+		if errInventory != nil {
 			errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
-			util.LogErrorForObject(helper, err, errorMsg, instance)
+			util.LogErrorForObject(helper, errInventory, errorMsg, instance)
 			instance.Status.Conditions.MarkFalse(
 				dataplanev1.SetupReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityError,
 				dataplanev1.DataPlaneNodeSetErrorMessage,
 				errorMsg)
-			return ctrl.Result{}, err
+			return ctrl.Result{}, errInventory
 		}
 	}
 	// all setup tasks complete, mark SetupReadyCondition True

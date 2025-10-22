@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -97,7 +98,16 @@ func ReconcileMemcacheds(
 	var ctrlResult ctrl.Result
 	var err error
 	var status memcachedStatus
-	for name, spec := range *instance.Spec.Memcached.Templates {
+
+	// Sort template names to ensure consistent ordering
+	templateNames := make([]string, 0, len(*instance.Spec.Memcached.Templates))
+	for name := range *instance.Spec.Memcached.Templates {
+		templateNames = append(templateNames, name)
+	}
+	sort.Strings(templateNames)
+
+	for _, name := range templateNames {
+		spec := (*instance.Spec.Memcached.Templates)[name]
 		var memcached *memcachedv1.Memcached
 
 		status, memcached, ctrlResult, err = reconcileMemcached(ctx, instance, version, helper, name, &spec)
