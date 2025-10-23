@@ -109,6 +109,20 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		return ctrl.Result{}, nil
 	}
 
+	// If the deployment has failed with backoff limit exceeded, do not reconcile
+	// even if nodesets or other watched resources change. The deployment is in a
+	// terminal failure state and should not be retried.
+	if instance.Status.Conditions != nil {
+		deploymentCondition := instance.Status.Conditions.Get(condition.DeploymentReadyCondition)
+		if deploymentCondition != nil &&
+			deploymentCondition.Severity == condition.SeverityError &&
+			deploymentCondition.Reason == condition.JobReasonBackoffLimitExceeded {
+			Log.Info("Deployment has failed with backoff limit exceeded, skipping reconciliation",
+				"deployment", instance.Name)
+			return ctrl.Result{}, nil
+		}
+	}
+
 	// initialize status if Conditions is nil, but do not reset if it already
 	// exists
 	isNewInstance := instance.Status.Conditions == nil
@@ -344,6 +358,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			severity,
 			condition.DeploymentReadyErrorMessage,
 			deploymentErrMsg)
+		if backoffLimitReached {
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, fmt.Errorf("%s", deploymentErrMsg)
 	}
 
