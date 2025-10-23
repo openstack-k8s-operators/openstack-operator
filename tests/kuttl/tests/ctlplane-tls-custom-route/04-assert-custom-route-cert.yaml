@@ -9,3 +9,7 @@ commands:
   - script: |
       echo "Checking placement custom route certificate..."
       bash ../../common/osp_check_route_cert.sh "placement"
+
+  - script: |
+      echo "Verifying placement route override certificates in OpenStackControlPlane..."
+      bash ../../common/verify_route_override_certs.sh "placement"
