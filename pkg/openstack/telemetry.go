@@ -415,6 +415,9 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		if telemetry.Spec.Autoscaling.HeatInstance == "" {
 			telemetry.Spec.Autoscaling.HeatInstance = heatName
 		}
+		if telemetry.Spec.CloudKitty.StorageClass == "" {
+			telemetry.Spec.CloudKitty.StorageClass = instance.Spec.StorageClass
+		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), telemetry, helper.GetScheme())
 		if err != nil {
