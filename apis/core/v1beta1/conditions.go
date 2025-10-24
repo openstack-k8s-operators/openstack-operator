@@ -448,6 +448,9 @@ const (
 	// OpenStackControlPlaneExposeServiceReadyMessage
 	OpenStackControlPlaneExposeServiceReadyMessage = "OpenStackControlPlane %s service exposed"
 
+	// OpenStackControlPlaneExposeServiceReadyRouteAdmissionErrorMessage
+	OpenStackControlPlaneExposeServiceReadyRouteAdmissionErrorMessage = "OpenStackControlPlane %s route %s admission failed: %s"
+
 	// OpenStackControlPlaneCAReadyInitMessage
 	OpenStackControlPlaneCAReadyInitMessage = "OpenStackControlPlane CAs not started"
 
