@@ -476,7 +476,9 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 }
 
 func checkDeployment(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneNodeSet) (isDeploymentReady bool, isDeploymentRunning bool, isDeploymentFailed bool, failedDeploymentName string, err error) {
+	instance *dataplanev1.OpenStackDataPlaneNodeSet) (
+	isNodeSetDeploymentReady bool, isNodeSetDeploymentRunning bool,
+	isNodeSetDeploymentFailed bool, failedDeploymentName string, err error) {
 
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
@@ -486,7 +488,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 	err = helper.GetClient().List(ctx, deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
+		return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
 	}
 
 	// Collect deployments that target this nodeset (excluding deleted ones)
@@ -528,25 +530,33 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		// Apply filtering for overall nodeset deployment state logic
 		isLatestDeployment := latestRelevantDeployment != nil && deployment.Name == latestRelevantDeployment.Name
 		deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
-		isRunningDeployment := deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) && !condition.IsError(deploymentCondition)
 
-		// Skip processing for overall nodeset state if not running AND not latest
-		// (This handles both completed and failed deployments that aren't the latest)
-		if !isRunningDeployment && !isLatestDeployment {
+		// Skip failed/error deployments that aren't the latest
+		// All running and completed deployments are processed
+		isCurrentDeploymentFailed := condition.IsError(deploymentCondition)
+		if isCurrentDeploymentFailed && !isLatestDeployment {
 			continue
 		}
 
+		isCurrentDeploymentRunning := deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) && !isCurrentDeploymentFailed
+		isCurrentDeploymentReady := deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition)
+
 		// Reset the vars for every deployment that affects overall state
-		isDeploymentReady = false
-		isDeploymentRunning = false
-		if condition.IsError(deploymentCondition) {
+		isNodeSetDeploymentReady = false
+		isNodeSetDeploymentRunning = false
+		isNodeSetDeploymentFailed = false
+
+		if isCurrentDeploymentFailed {
 			err = fmt.Errorf("%s", deploymentCondition.Message)
-			isDeploymentFailed = true
 			failedDeploymentName = deployment.Name
+			isNodeSetDeploymentFailed = true
 			break
-		} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
-			isDeploymentRunning = true
-		} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
+		}
+		if isCurrentDeploymentRunning {
+			isNodeSetDeploymentRunning = true
+		}
+
+		if isCurrentDeploymentReady {
 			// If the nodeset configHash does not match with what's in the deployment or
 			// deployedBmhHash is different from current bmhRefHash.
 			if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
@@ -554,7 +564,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 					deployment.Status.BmhRefHashes[instance.Name] != instance.Status.BmhRefHash) {
 				continue
 			}
-			isDeploymentReady = true
+			isNodeSetDeploymentReady = true
 			for k, v := range deployment.Status.ConfigMapHashes {
 				instance.Status.ConfigMapHashes[k] = v
 			}
@@ -587,7 +597,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				err := helper.GetClient().Get(ctx, name, service)
 				if err != nil {
 					helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
-					return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
+					return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
 				}
 
 				if service.Spec.EDPMServiceType != "update" && service.Spec.EDPMServiceType != "update-services" {
@@ -602,7 +612,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		}
 	}
 
-	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeploymentName, err
+	return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
