@@ -1494,15 +1494,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 	When("Testing deployment filtering logic", func() {
 		var secondDeploymentName types.NamespacedName
-		var thirdDeploymentName types.NamespacedName
 
 		BeforeEach(func() {
 			secondDeploymentName = types.NamespacedName{
 				Name:      "edpm-deployment-2",
-				Namespace: namespace,
-			}
-			thirdDeploymentName = types.NamespacedName{
-				Name:      "edpm-deployment-3",
 				Namespace: namespace,
 			}
 		})
@@ -1546,7 +1541,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}, th.Timeout, th.Interval).Should(Succeed())
 
 				// Both deployments should be in status (for visibility)
-				// But only latest deployment affects overall nodeset state
+				// All completed deployments are processed, with latest deployment determining final state
 				Eventually(func(g Gomega) {
 					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
@@ -1581,7 +1576,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 
-			It("Should show all deployments in status but only latest affects overall state", func() {
+			It("Should show all deployments in status and process all completed deployments", func() {
 				// Complete the first deployment
 				Eventually(func(g Gomega) {
 					ansibleeeName := types.NamespacedName{
@@ -1594,7 +1589,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}, th.Timeout, th.Interval).Should(Succeed())
 
 				// Both deployments should be included (for visibility)
-				// But only latest deployment affects overall nodeset state
+				// All completed deployments are processed, with latest determining final state
 				Eventually(func(g Gomega) {
 					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
@@ -1642,10 +1637,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 				// Leave second deployment running (don't complete it)
 				// Both deployments should be in status (for visibility)
-				// Second deployment affects overall state (running and latest)
+				// First deployment is processed (completed), second affects final state (running and latest)
 				Eventually(func(g Gomega) {
 					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-					// Should have first deployment (for visibility)
+					// Should have first deployment (completed, processed)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
 					// Should have second deployment (running and latest)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
@@ -1702,10 +1697,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}, th.Timeout, th.Interval).Should(Succeed())
 
 				// Both error deployments should be in status (for visibility)
-				// But only latest error affects overall nodeset state
+				// First failed deployment is skipped (not latest), second error affects final state (latest)
 				Eventually(func(g Gomega) {
 					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-					// Should have first deployment (for visibility)
+					// Should have first deployment (for visibility only)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
 					// Should have second deployment (latest - affects overall state)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
@@ -1721,7 +1716,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 		})
 
-		When("Mixed deployment states exist", func() {
+		When("Failed deployment followed by completed deployment", func() {
 			BeforeEach(func() {
 				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
 				nodeSetSpec["preProvisioned"] = true
@@ -1731,18 +1726,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 
-				// Create first deployment (will have error - should be ignored)
+				// Create first deployment (will fail)
 				firstDeploymentSpec := DefaultDataPlaneDeploymentSpec()
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, firstDeploymentSpec))
 
-				// Create second deployment with ServicesOverride (should be ignored)
-				overrideDeploymentSpec := DefaultDataPlaneDeploymentSpec()
-				overrideDeploymentSpec["servicesOverride"] = []string{"bootstrap"}
-				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, overrideDeploymentSpec))
-
-				// Create third deployment (will succeed - should be processed)
-				thirdDeploymentSpec := DefaultDataPlaneDeploymentSpec()
-				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(thirdDeploymentName, thirdDeploymentSpec))
+				// Create second deployment (will complete successfully)
+				secondDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, secondDeploymentSpec))
 
 				CreateSSHSecret(dataplaneSSHSecretName)
 				CreateCABundleSecret(caBundleSecretName)
@@ -1751,7 +1741,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 
-			It("Should show all deployments in status but only latest affects overall state", func() {
+			It("Should show all deployments in status and process completed deployment", func() {
 				// Fail the first deployment
 				Eventually(func(g Gomega) {
 					ansibleeeName := types.NamespacedName{
@@ -1763,10 +1753,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 				}, th.Timeout, th.Interval).Should(Succeed())
 
-				// Complete the third deployment
+				// Complete the second deployment
 				Eventually(func(g Gomega) {
 					ansibleeeName := types.NamespacedName{
-						Name:      "bootstrap-" + thirdDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Name:      "bootstrap-" + secondDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
 						Namespace: namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
@@ -1774,16 +1764,20 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 				}, th.Timeout, th.Interval).Should(Succeed())
 
-				// All deployments should be in status (for visibility)
-				// But only latest deployment affects overall nodeset state
+				// Wait for deployment controller to populate hashes
+				Eventually(func(g Gomega) {
+					deployment := GetDataplaneDeployment(secondDeploymentName)
+					g.Expect(deployment.Status.NodeSetHashes).Should(HaveKey(dataplaneNodeSetName.Name))
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Both deployments should be in status (for visibility)
+				// First failed deployment is skipped (not latest), second completed deployment is processed and determines final state
 				Eventually(func(g Gomega) {
 					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
-					// Should have first deployment (for visibility)
+					// Should have first deployment (for visibility only)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
-					// Should have second deployment (for visibility)
+					// Should have second deployment (completed and latest - affects overall state)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(secondDeploymentName.Name))
-					// Should have third deployment (latest - affects overall state)
-					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(thirdDeploymentName.Name))
 				}, th.Timeout, th.Interval).Should(Succeed())
 
 				// The overall deployment condition should be true from the successful deployment
