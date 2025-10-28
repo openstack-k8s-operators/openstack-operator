@@ -1,5 +1,6 @@
 resources:
 - ../../base/openstackcontrolplane
+- placement-cert-data.yaml
 
 patches:
 - target:
@@ -9,6 +10,37 @@ patches:
     - op: replace
       path: /metadata/name
       value: openstack
-- target:
-    kind: OpenStackControlPlane
-  path: patch.yaml
+
+- path: patch.yaml
+
+# Use replacements to inject cert data from ConfigMap
+replacements:
+- source:
+    kind: ConfigMap
+    name: placement-cert-data
+    fieldPath: data.[tls.crt]
+  targets:
+  - select:
+      kind: OpenStackControlPlane
+    fieldPaths:
+    - spec.placement.apiOverride.route.spec.tls.certificate
+
+- source:
+    kind: ConfigMap
+    name: placement-cert-data
+    fieldPath: data.[tls.key]
+  targets:
+  - select:
+      kind: OpenStackControlPlane
+    fieldPaths:
+    - spec.placement.apiOverride.route.spec.tls.key
+
+- source:
+    kind: ConfigMap
+    name: placement-cert-data
+    fieldPath: data.[ca.crt]
+  targets:
+  - select:
+      kind: OpenStackControlPlane
+    fieldPaths:
+    - spec.placement.apiOverride.route.spec.tls.caCertificate

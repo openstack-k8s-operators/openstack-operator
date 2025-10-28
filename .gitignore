@@ -11,6 +11,8 @@ testbin/*
 bundle/*
 bundle.Dockerfile
 config/operator/deployment/kustomization.yaml
+# Generated certificate ConfigMaps for kustomize
+config/samples/tls/custom_route_cert/placement-cert-data.yaml
 
 # Test binary, build with `go test -c`
 *.test
