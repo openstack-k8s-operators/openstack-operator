@@ -125,7 +125,7 @@ docs-kustomize-examples: oc yq ## Generate updated docs from examples using kust
 # More info on the usage of ANSI control characters for terminal formatting:
 # https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
 # More info on the awk command:
-# http://linuxcommand.org/lc3_adv_awk.php
+# https://linuxcommand.org/lc3_adv_awk.php
 
 .PHONY: help
 help: ## Display this help.
