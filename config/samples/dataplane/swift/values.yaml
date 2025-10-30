@@ -7,12 +7,12 @@ metadata:
     config.kubernetes.io/local-config: "true"
 data:
   nodeset:
-    networkattachments:
+    networkAttachments:
     - ctlplane
     - storage
-    nodetemplate:
+    nodeTemplate:
       ansible:
-        vars:
+        ansibleVars:
           # Swift disks defined here apply to all nodes. Node-specific disks
           # might be defined in the nodes: section below
           #
@@ -22,11 +22,11 @@ data:
           # zone are optional and might be used to enforce distribution of
           # replicas
           edpm_swift_disks:
-            - device: /dev/vdb
-              path: /srv/node/vdb
-              weight: 4000
-              region: 0
-              zone: 0
+          - device: /dev/vdb
+            path: /srv/node/vdb
+            weight: 4000
+            region: 0
+            zone: 0
     nodes:
       edpm-swift-0:
         ansible:
@@ -36,9 +36,9 @@ data:
             # node with a different disk. This node will use only vdc. It would
             # use vdb from parent section if not defined
             edpm_swift_disks:
-              - device: /dev/vdc
-                path: /srv/node/vdc
-                weight: 1000
+            - device: /dev/vdc
+              path: /srv/node/vdc
+              weight: 1000
         hostName: edpm-swift-0
         networks:
         - defaultRoute: true
