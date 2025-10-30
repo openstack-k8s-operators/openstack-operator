@@ -1793,4 +1793,120 @@ var _ = Describe("Dataplane Deployment Test", func() {
 
 	})
 
+	When("A dataplaneDeployment fails with backoff limit exceeded", func() {
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaNeutronMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			CreateDataplaneService(dataplaneServiceName, false)
+			CreateDataplaneService(dataplaneGlobalServiceName, true)
+
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+		})
+
+		It("should not reconcile after failure", func() {
+			// Directly set the deployment status to backoff limit exceeded
+			// This simulates a deployment that has failed after retries
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+
+				// Initialize conditions if not present
+				if deployment.Status.Conditions == nil {
+					deployment.Status.Conditions = condition.Conditions{}
+				}
+
+				// Initialize NodeSetConditions if not present
+				if deployment.Status.NodeSetConditions == nil {
+					deployment.Status.NodeSetConditions = make(map[string]condition.Conditions)
+				}
+
+				// Set the deployment condition to backoff limit exceeded
+				deployment.Status.Conditions.MarkFalse(
+					condition.DeploymentReadyCondition,
+					condition.JobReasonBackoffLimitExceeded,
+					condition.SeverityError,
+					condition.DeploymentReadyErrorMessage,
+					"Simulated backoff limit exceeded for testing")
+
+				deployment.Status.Deployed = false
+				deployment.Status.ObservedGeneration = deployment.Generation
+
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, deployment)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// Verify the deployment has the correct failure condition
+			deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+			deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+			Expect(deploymentCondition).ToNot(BeNil())
+			Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityError)))
+			Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
+
+			// Verify the status is not deployed
+			deployment = GetDataplaneDeployment(dataplaneDeploymentName)
+			Expect(deployment.Status.Deployed).To(BeFalse())
+
+			// Store the current ObservedGeneration and condition timestamp
+			originalGeneration := deployment.Status.ObservedGeneration
+			deploymentCondition = deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+			originalTransitionTime := deploymentCondition.LastTransitionTime
+
+			// Trigger reconciliation by updating the deployment annotation
+			// This should normally trigger reconciliation, but should be blocked by our early return check
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				if deployment.Annotations == nil {
+					deployment.Annotations = make(map[string]string)
+				}
+				deployment.Annotations["test-annotation"] = "trigger-reconcile"
+				g.Expect(th.K8sClient.Update(th.Ctx, deployment)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// Wait a bit to ensure reconciliation would have been triggered if it was going to
+			th.Logger.Info("Waiting to ensure no reconciliation occurs...")
+
+			// Verify the deployment status hasn't changed after annotation update
+			// The ObservedGeneration and condition LastTransitionTime should remain the same
+			Consistently(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				g.Expect(deployment.Status.ObservedGeneration).To(Equal(originalGeneration))
+				deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityError)))
+				g.Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
+				g.Expect(deploymentCondition.LastTransitionTime).To(Equal(originalTransitionTime))
+				g.Expect(deployment.Status.Deployed).To(BeFalse())
+			}, "5s", "1s").Should(Succeed())
+
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionFalse,
+			)
+		})
+	})
+
 })
