@@ -38,6 +38,9 @@ CI_TOOLS_REPO
 go.work
 go.work.sum
 
+# static manifest of modules present in the repo
+!/hack/go.work
+
 # docs
 .bundle/
 docs_build/

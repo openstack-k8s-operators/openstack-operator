@@ -495,6 +495,14 @@ gowork: ## Generate go.work file to support our multi module repository
 	go work use ./apis
 	go work sync
 
+.PHONY: gowork-manifest
+gowork-manifest: ## Generate hack/go.work file as a static manifest of modules present in the repo
+	pushd ./hack; \
+	rm -f go.work; \
+	GOWORK=off GOTOOLCHAIN=$(GOTOOLCHAIN_VERSION) go work init; \
+	go work use ../; \
+	go work use ../apis
+
 .PHONY: operator-lint
 operator-lint: gowork ## Runs operator-lint
 	GOBIN=$(LOCALBIN) go install github.com/gibizer/operator-lint@v0.3.0
