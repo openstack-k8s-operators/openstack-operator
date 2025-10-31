@@ -14,8 +14,8 @@ metadata:
     operators.openshift.io/valid-subscription: '["OpenShift Container Platform", "OpenShift Platform Plus"]'
     operatorframework.io/suggested-namespace: openstack-operators
     operatorframework.io/initialization-resource: '{"apiVersion":"operator.openstack.org/v1beta1","kind":"OpenStack","metadata":{"name":"openstack","namespace":"openstack-operators"},"spec":{}}'
-    operators.operatorframework.io/builder: operator-sdk-v1.31.0
-    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+    operators.operatorframework.io/builder: operator-sdk-v1.41.1
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
   name: openstack-operator.v0.0.0
   namespace: placeholder
 spec:
@@ -55,3 +55,4 @@ spec:
     name: Red Hat Inc.
     url: https://redhat.com/
   version: 0.1.0
+  minKubeVersion: 0.0.1

@@ -4,7 +4,7 @@
 # More info: https://book.kubebuilder.io/reference/project-config.html
 domain: openstack.org
 layout:
-- go.kubebuilder.io/v3
+- go.kubebuilder.io/v4
 multigroup: true
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
@@ -19,9 +19,10 @@ resources:
   domain: openstack.org
   group: core
   kind: OpenStackControlPlane
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1
   version: v1beta1
   webhooks:
+    defaulting: true
     validation: true
     webhookVersion: v1
 - api:
@@ -31,8 +32,12 @@ resources:
   domain: openstack.org
   group: client
   kind: OpenStackClient
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -40,7 +45,7 @@ resources:
   domain: openstack.org
   group: core
   kind: OpenStackVersion
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1
   version: v1beta1
   webhooks:
     defaulting: true
@@ -53,7 +58,7 @@ resources:
   domain: openstack.org
   group: dataplane
   kind: OpenStackDataPlaneNodeSet
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1
   version: v1beta1
   webhooks:
     defaulting: true
@@ -66,8 +71,12 @@ resources:
   domain: openstack.org
   group: dataplane
   kind: OpenStackDataPlaneService
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -75,8 +84,12 @@ resources:
   domain: openstack.org
   group: dataplane
   kind: OpenStackDataPlaneDeployment
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -84,6 +97,6 @@ resources:
   domain: openstack.org
   group: operator
   kind: OpenStack
-  path: github.com/openstack-k8s-operators/openstack-operator/apis/operator/v1beta1
+  path: github.com/openstack-k8s-operators/openstack-operator/api/operator/v1beta1
   version: v1beta1
 version: "3"
