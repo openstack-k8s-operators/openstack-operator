@@ -3,26 +3,26 @@ set -ex pipefail
 
 CTLPLANE_FILES=()
 CTLPLANE_PATHS=(
-    "apis/client/v1beta1/openstackclient_types.go"
-    "apis/core/v1beta1/openstackcontrolplane_types.go"
-    "apis/core/v1beta1/openstackversion_types.go"
+    "api/client/v1beta1/openstackclient_types.go"
+    "api/core/v1beta1/openstackcontrolplane_types.go"
+    "api/core/v1beta1/openstackversion_types.go"
 )
 DATAPLANE_FILES=()
 DATAPLANE_PATHS=(
-    "apis/dataplane/v1beta1/openstackdataplanedeployment_types.go"
-    "apis/dataplane/v1beta1/openstackdataplanenodeset_types.go"
-    "apis/dataplane/v1beta1/openstackdataplaneservice_types.go"
-    "apis/dataplane/v1beta1/common.go"
+    "api/dataplane/v1beta1/openstackdataplanedeployment_types.go"
+    "api/dataplane/v1beta1/openstackdataplanenodeset_types.go"
+    "api/dataplane/v1beta1/openstackdataplaneservice_types.go"
+    "api/dataplane/v1beta1/common.go"
 )
 
 # Getting APIs from Services
-SERVICE_PATH=($(MODCACHE=$(go env GOMODCACHE) awk '/openstack-k8s-operators/ && ! /lib-common/ && ! /openstack-operator/ && ! /infra/ && ! /replace/ {print ENVIRON["MODCACHE"] "/" $1 "@" $2 "/v1beta1/*_types.go"}' apis/go.mod))
+SERVICE_PATH=($(MODCACHE=$(go env GOMODCACHE) awk '/openstack-k8s-operators/ && ! /lib-common/ && ! /openstack-operator/ && ! /infra/ && ! /replace/ {print ENVIRON["MODCACHE"] "/" $1 "@" $2 "/v1beta1/*_types.go"}' api/go.mod))
 for SERVICE in ${SERVICE_PATH[@]};do
     CTLPLANE_PATHS+=($(ls ${SERVICE}))
 done
 
 # Getting APIs from Infra
-INFRA_PATH=($(MODCACHE=$(go env GOMODCACHE) awk '/openstack-k8s-operators/ && /infra/ {print ENVIRON["MODCACHE"] "/" $1 "@" $2 "/"}' apis/go.mod))
+INFRA_PATH=($(MODCACHE=$(go env GOMODCACHE) awk '/openstack-k8s-operators/ && /infra/ {print ENVIRON["MODCACHE"] "/" $1 "@" $2 "/"}' api/go.mod))
 PATTERNS=("memcached/v1beta1/*_types.go"  "network/v1beta1/*_types.go"  "rabbitmq/v1beta1/*_types.go")
 for INFRA in ${PATTERNS[@]};do
     ls ${INFRA_PATH}${INFRA}

@@ -2,39 +2,36 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: openstack-operator
     control-plane: controller-manager
-    openstack.org/operator-name: openstack
   name: '{{ .OperatorNamespace }}'
----
-apiVersion: v1
-data:
-  controller_manager_config.yaml: |
-    apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
-    kind: ControllerManagerConfig
-    health:
-      healthProbeBindAddress: :8081
-    metrics:
-      bindAddress: 127.0.0.1:8080
-    webhook:
-      port: 9443
-    leaderElection:
-      leaderElect: true
-      resourceName: 40ba705e.openstack.org
-kind: ConfigMap
-metadata:
-  name: openstack-operator-manager-config
-  namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app.kubernetes.io/component: webhook
-    app.kubernetes.io/created-by: openstack-operator
-    app.kubernetes.io/instance: webhook-service
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: service
-    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/name: openstack-operator
+    control-plane: controller-manager
+  name: openstack-operator-controller-manager-metrics-service
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app.kubernetes.io/name: openstack-operator
+    control-plane: controller-manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: openstack-operator
   name: openstack-operator-webhook-service
   namespace: '{{ .OperatorNamespace }}'
 spec:
@@ -43,12 +40,15 @@ spec:
     protocol: TCP
     targetPort: 9443
   selector:
-    openstack.org/operator-name: openstack
+    app.kubernetes.io/name: openstack-operator
+    control-plane: controller-manager
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: openstack-operator
     control-plane: controller-manager
     openstack.org/operator-name: openstack
   name: openstack-operator-controller-manager
@@ -57,20 +57,25 @@ spec:
   replicas: {{ .OpenStackOperator.Deployment.Replicas }}
   selector:
     matchLabels:
+      app.kubernetes.io/name: openstack-operator
+      control-plane: controller-manager
       openstack.org/operator-name: openstack
   template:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
       labels:
+        app.kubernetes.io/name: openstack-operator
         control-plane: controller-manager
         openstack.org/operator-name: openstack
     spec:
       containers:
       - args:
-        - --health-probe-bind-address=:8081
-        - --metrics-bind-address=127.0.0.1:8080
+        - --metrics-bind-address=:8443
         - --leader-elect
+        - --health-probe-bind-address=:8081
+        - --metrics-cert-path=/tmp/k8s-metrics-server/metrics-certs
+        - --webhook-cert-path=/tmp/k8s-webhook-server/serving-certs
         command:
         - /manager
         env:
@@ -105,66 +110,61 @@ spec:
             memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.Memory }}
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
         volumeMounts:
-        - mountPath: /tmp/k8s-webhook-server/serving-certs
-          name: cert
+        - mountPath: /tmp/k8s-metrics-server/metrics-certs
+          name: metrics-certs
           readOnly: true
-      - args:
-        - --secure-listen-address=0.0.0.0:8443
-        - --upstream=http://127.0.0.1:8080/
-        - --logtostderr=true
-        - --v=0
-        image: '{{ .OpenStackOperator.Deployment.KubeRbacProxy.Image }}'
-        name: kube-rbac-proxy
-        ports:
-        - containerPort: 8443
-          name: https
-          protocol: TCP
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 5m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-      tolerations:
-{{- range .OpenStackOperator.Deployment.Tolerations }}
-      - key: "{{ .Key }}"
-{{- if .Operator }}
-        operator: "{{ .Operator }}"
-{{- end }}
-{{- if .Value }}
-        value: "{{ .Value }}"
-{{- end }}
-{{- if .Effect }}
-        effect: "{{ .Effect }}"
-{{- end }}
-{{- if .TolerationSeconds }}
-        tolerationSeconds: {{ .TolerationSeconds }}
-{{- end }}
-{{- end }}
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: webhook-certs
+          readOnly: true
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: openstack-operator-controller-manager
       terminationGracePeriodSeconds: 10
       volumes:
-      - name: cert
+      - name: metrics-certs
         secret:
-          defaultMode: 420
+          items:
+          - key: ca.crt
+            path: ca.crt
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key
+          optional: false
+          secretName: metrics-server-cert
+      - name: webhook-certs
+        secret:
           secretName: webhook-server-cert
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   labels:
-    app.kubernetes.io/component: certificate
-    app.kubernetes.io/created-by: openstack-operator
-    app.kubernetes.io/instance: serving-cert
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: certificate
-    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/name: openstack-operator
+  name: openstack-operator-metrics-certs
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - openstack-operator-controller-manager-metrics-service.{{ .OperatorNamespace }}.svc
+  - openstack-operator-controller-manager-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: openstack-operator-selfsigned-issuer
+  secretName: metrics-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: openstack-operator
   name: openstack-operator-serving-cert
   namespace: '{{ .OperatorNamespace }}'
 spec:
@@ -180,12 +180,8 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   labels:
-    app.kubernetes.io/component: certificate
-    app.kubernetes.io/created-by: openstack-operator
-    app.kubernetes.io/instance: selfsigned-issuer
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: issuer
-    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/name: openstack-operator
   name: openstack-operator-selfsigned-issuer
   namespace: '{{ .OperatorNamespace }}'
 spec:
@@ -196,13 +192,6 @@ kind: MutatingWebhookConfiguration
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
-  labels:
-    app.kubernetes.io/component: webhook
-    app.kubernetes.io/created-by: openstack-operator
-    app.kubernetes.io/instance: mutating-webhook-configuration
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: mutatingingwebhookconfiguration
-    app.kubernetes.io/part-of: openstack-operator
   name: openstack-operator-mutating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
@@ -213,7 +202,7 @@ webhooks:
       namespace: '{{ .OperatorNamespace }}'
       path: /mutate-client-openstack-org-v1beta1-openstackclient
   failurePolicy: Fail
-  name: mopenstackclient.kb.io
+  name: mopenstackclient-v1beta1.kb.io
   rules:
   - apiGroups:
     - client.openstack.org
@@ -233,7 +222,7 @@ webhooks:
       namespace: '{{ .OperatorNamespace }}'
       path: /mutate-core-openstack-org-v1beta1-openstackcontrolplane
   failurePolicy: Fail
-  name: mopenstackcontrolplane.kb.io
+  name: mopenstackcontrolplane-v1beta1.kb.io
   rules:
   - apiGroups:
     - core.openstack.org
@@ -253,7 +242,7 @@ webhooks:
       namespace: '{{ .OperatorNamespace }}'
       path: /mutate-core-openstack-org-v1beta1-openstackversion
   failurePolicy: Fail
-  name: mopenstackversion.kb.io
+  name: mopenstackversion-v1beta1.kb.io
   rules:
   - apiGroups:
     - core.openstack.org
@@ -264,6 +253,86 @@ webhooks:
     - UPDATE
     resources:
     - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  name: mopenstackdataplanedeployment-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  name: mopenstackdataplanenodeset-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  name: mopenstackdataplaneservice-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: mopenstackclient.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
   sideEffects: None
 - admissionReviewVersions:
   - v1
@@ -291,26 +360,6 @@ webhooks:
     service:
       name: openstack-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
-      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
-  failurePolicy: Fail
-  name: mopenstackdataplanenodeset.kb.io
-  rules:
-  - apiGroups:
-    - dataplane.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackdataplanenodesets
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: openstack-operator-webhook-service
-      namespace: '{{ .OperatorNamespace }}'
       path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
   failurePolicy: Fail
   name: mopenstackdataplaneservice.kb.io
@@ -331,15 +380,128 @@ kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
-  labels:
-    app.kubernetes.io/component: webhook
-    app.kubernetes.io/created-by: openstack-operator
-    app.kubernetes.io/instance: validating-webhook-configuration
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: validatingwebhookconfiguration
-    app.kubernetes.io/part-of: openstack-operator
   name: openstack-operator-validating-webhook-configuration
 webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: vopenstackclient-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-core-openstack-org-v1beta1-openstackcontrolplane
+  failurePolicy: Fail
+  name: vopenstackcontrolplane-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackcontrolplanes
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-core-openstack-org-v1beta1-openstackversion
+  failurePolicy: Fail
+  name: vopenstackversion-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  name: vopenstackdataplanedeployment-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  name: vopenstackdataplanenodeset-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  name: vopenstackdataplaneservice-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+  sideEffects: None
 - admissionReviewVersions:
   - v1
   clientConfig:
@@ -366,46 +528,6 @@ webhooks:
     service:
       name: openstack-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
-      path: /validate-core-openstack-org-v1beta1-openstackcontrolplane
-  failurePolicy: Fail
-  name: vopenstackcontrolplane.kb.io
-  rules:
-  - apiGroups:
-    - core.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackcontrolplanes
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: openstack-operator-webhook-service
-      namespace: '{{ .OperatorNamespace }}'
-      path: /validate-core-openstack-org-v1beta1-openstackversion
-  failurePolicy: Fail
-  name: vopenstackversion.kb.io
-  rules:
-  - apiGroups:
-    - core.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackversions
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: openstack-operator-webhook-service
-      namespace: '{{ .OperatorNamespace }}'
       path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
   failurePolicy: Fail
   name: vopenstackdataplanedeployment.kb.io
@@ -419,26 +541,6 @@ webhooks:
     - UPDATE
     resources:
     - openstackdataplanedeployments
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: openstack-operator-webhook-service
-      namespace: '{{ .OperatorNamespace }}'
-      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
-  failurePolicy: Fail
-  name: vopenstackdataplanenodeset.kb.io
-  rules:
-  - apiGroups:
-    - dataplane.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackdataplanenodesets
   sideEffects: None
 - admissionReviewVersions:
   - v1

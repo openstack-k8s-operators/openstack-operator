@@ -1,17 +1,14 @@
 resources:
 - ../crd/bases/operator.openstack.org_openstacks.yaml
+- ../samples/operator_v1beta1_openstack.yaml
 
 bases:
-#- ../crd/
 - manifests
 - rbac
 - deployment
-- ../certmanager/
-- ../samples/
 
-patchesStrategicMerge:
-#- delete_crd.yaml
+patches:
 
 # Injects our custom images (ENV variable settings)
-- manager_operator_images.yaml
-- default_images.yaml
+- path: manager_operator_images.yaml
+- path: default_images.yaml
