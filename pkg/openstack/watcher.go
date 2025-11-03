@@ -160,7 +160,7 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		helper.GetLogger().Info("Watcher ready condition is true")
 		instance.Status.ContainerImages.WatcherAPIImage = version.Status.ContainerImages.WatcherAPIImage
 		instance.Status.ContainerImages.WatcherApplierImage = version.Status.ContainerImages.WatcherApplierImage
-		instance.Status.ContainerImages.WatcherDecisionEngineImage = version.Status.ContainerImages.WatcherApplierImage
+		instance.Status.ContainerImages.WatcherDecisionEngineImage = version.Status.ContainerImages.WatcherDecisionEngineImage
 		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneWatcherReadyCondition, corev1beta1.OpenStackControlPlaneWatcherReadyMessage)
 	} else {
 		// We want to mirror the condition of the highest priority from the Watcher resource into the instance
