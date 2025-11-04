@@ -2169,6 +2169,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 					k8s_corev1.ConditionTrue,
 				)
 			}, timeout, interval).Should(Succeed())
+
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Status.ContainerImages.WatcherAPIImage).Should(Equal(ptr.To("quay.io/podified-master-centos9/openstack-watcher-api:current-podified")))
+			Expect(OSCtlplane.Status.ContainerImages.WatcherApplierImage).Should(Equal(ptr.To("quay.io/podified-master-centos9/openstack-watcher-applier:current-podified")))
+			Expect(OSCtlplane.Status.ContainerImages.WatcherDecisionEngineImage).Should(Equal(ptr.To("quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified")))
 		})
 	})
 
