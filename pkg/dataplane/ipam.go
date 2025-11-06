@@ -81,6 +81,7 @@ func checkDNSService(ctx context.Context, helper *helper.Helper,
 		util.LogForObject(helper, "DNS control plane service exists, but not ready yet ", instance)
 		return nil
 	}
+
 	dnsDetails.ClusterAddresses = dnsmasqList.Items[0].Status.DNSClusterAddresses
 	dnsDetails.ServerAddresses = dnsmasqList.Items[0].Status.DNSAddresses
 	dnsDetails.DNSDataLabelSelectorValue = dnsmasqList.Items[0].Spec.DNSDataLabelSelectorValue
