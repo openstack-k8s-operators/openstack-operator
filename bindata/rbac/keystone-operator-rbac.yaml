@@ -68,6 +68,24 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - events
+  verbs:
+    - create
+    - patch
+- apiGroups:
+    - ""
+  resources:
+    - secrets/finalizers
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+- apiGroups:
+    - ""
+  resources:
     - serviceaccounts
   verbs:
     - create
@@ -113,6 +131,7 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneapis
+    - keystoneapplicationcredentials
     - keystoneendpoints
     - keystoneservices
   verbs:
@@ -127,6 +146,7 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneapis/finalizers
+    - keystoneapplicationcredentials/finalizers
     - keystoneendpoints/finalizers
     - keystoneservices/finalizers
   verbs:
@@ -136,6 +156,7 @@ rules:
     - keystone.openstack.org
   resources:
     - keystoneapis/status
+    - keystoneapplicationcredentials/status
     - keystoneendpoints/status
     - keystoneservices/status
   verbs:
