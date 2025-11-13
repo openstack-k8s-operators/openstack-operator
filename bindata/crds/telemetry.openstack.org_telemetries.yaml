@@ -604,7 +604,7 @@ spec:
                       is deployed
                     type: string
                   enabled:
-                    default: true
+                    default: false
                     description: Enabled - Whether OpenStack logging service should
                       be deployed and managed
                     type: boolean
