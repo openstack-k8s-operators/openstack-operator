@@ -96,6 +96,8 @@ type ContainerTemplate struct {
 	CinderAPIImage                *string `json:"cinderAPIImage,omitempty"`
 	CinderBackupImage             *string `json:"cinderBackupImage,omitempty"`
 	CinderSchedulerImage          *string `json:"cinderSchedulerImage,omitempty"`
+	CloudKittyAPIImage            *string `json:"cloudkittyAPIImage,omitempty"`
+	CloudKittyProcImage           *string `json:"cloudkittyProcImage,omitempty"`
 	DesignateAPIImage             *string `json:"designateAPIImage,omitempty"`
 	DesignateBackendbind9Image    *string `json:"designateBackendbind9Image,omitempty"`
 	DesignateCentralImage         *string `json:"designateCentralImage,omitempty"`
