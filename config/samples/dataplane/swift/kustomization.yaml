@@ -14,7 +14,7 @@ replacements:
 - source:
     kind: DataPlaneConfig
     name: edpm-swift-values
-    fieldPath: data.nodeset.nodetemplate.ansible.vars.edpm_swift_disks
+    fieldPath: data.nodeset.nodeTemplate.ansible.ansibleVars.edpm_swift_disks
   targets:
   - select:
       kind: OpenStackDataPlaneNodeSet
@@ -36,7 +36,7 @@ replacements:
 - source:
     kind: DataPlaneConfig
     name: edpm-swift-values
-    fieldPath: data.nodeset.networkattachments
+    fieldPath: data.nodeset.networkAttachments
   targets:
   - select:
       kind: OpenStackDataPlaneNodeSet
