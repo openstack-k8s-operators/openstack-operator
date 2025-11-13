@@ -14779,7 +14779,7 @@ spec:
                             default: openshift-logging
                             type: string
                           enabled:
-                            default: true
+                            default: false
                             type: boolean
                           port:
                             default: 10514
