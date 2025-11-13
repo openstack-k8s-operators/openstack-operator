@@ -52,6 +52,27 @@ https://access.redhat.com/documentation/en-us/red_hat_satellite/6.13/html-single
 If not using Satellite version 6.13, then refer to the specific version of the
 documentation for the version of Satellite that is in use.
 
+=== Using `edpm_bootstrap_command` for configuring system proxy settings
+
+`edpm_bootstrap_command` can be used to configure system proxy settings by
+creating a file under `/etc/profile.d` that defines the proxy environment
+variables.
+
+----
+edpm_bootstrap_command: |
+    cat >/etc/profile.d/proxy.sh <<EOF
+    export http_proxy="http://USERNAME:PASSWORD@proxy-server.example.com:3128/"
+    export https_proxy="http://USERNAME:PASSWORD@proxy-server.example.com:3128/"
+    export no_proxy="localhost,127.0.0.1,::1" # Add any hosts to bypass the proxy
+    EOF
+----
+
+Note that these variable values won't always apply to tasks executed by
+ansible. To ensure ansible tasks always use a proxy, create the
+`edpm_playbook_environment` secret and reference it on the
+`OpenStackDataPlaneNodeSet` as shown in
+xref:proc_creating-a-set-of-data-plane-nodes.adoc.
+
 === Customizing container image locations
 
 The container images used by the various roles from edpm-ansible can pull from

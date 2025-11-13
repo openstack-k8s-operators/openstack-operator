@@ -1717,35 +1717,45 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 
 		When("Failed deployment followed by completed deployment", func() {
+			var testNodeSetName types.NamespacedName
+
 			BeforeEach(func() {
+				// Use unique nodeset name for this test
+				testNodeSetName = types.NamespacedName{
+					Name:      "edpm-compute-nodeset-failsuccess",
+					Namespace: namespace,
+				}
+
 				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
 				nodeSetSpec["preProvisioned"] = true
 				nodeSetSpec["services"] = []string{"bootstrap"}
 
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
-				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(testNodeSetName, nodeSetSpec))
 
 				// Create first deployment (will fail)
 				firstDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				firstDeploymentSpec["nodeSets"] = []string{testNodeSetName.Name}
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, firstDeploymentSpec))
 
 				// Create second deployment (will complete successfully)
 				secondDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				secondDeploymentSpec["nodeSets"] = []string{testNodeSetName.Name}
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, secondDeploymentSpec))
 
 				CreateSSHSecret(dataplaneSSHSecretName)
 				CreateCABundleSecret(caBundleSecretName)
 				SimulateDNSMasqComplete(dnsMasqName)
 				SimulateIPSetComplete(dataplaneNodeName)
-				SimulateDNSDataComplete(dataplaneNodeSetName)
+				SimulateDNSDataComplete(testNodeSetName)
 			})
 
 			It("Should show all deployments in status and process completed deployment", func() {
 				// Fail the first deployment
 				Eventually(func(g Gomega) {
 					ansibleeeName := types.NamespacedName{
-						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + testNodeSetName.Name,
 						Namespace: namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
@@ -1756,7 +1766,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				// Complete the second deployment
 				Eventually(func(g Gomega) {
 					ansibleeeName := types.NamespacedName{
-						Name:      "bootstrap-" + secondDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Name:      "bootstrap-" + secondDeploymentName.Name + "-" + testNodeSetName.Name,
 						Namespace: namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
@@ -1767,13 +1777,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				// Wait for deployment controller to populate hashes
 				Eventually(func(g Gomega) {
 					deployment := GetDataplaneDeployment(secondDeploymentName)
-					g.Expect(deployment.Status.NodeSetHashes).Should(HaveKey(dataplaneNodeSetName.Name))
+					g.Expect(deployment.Status.NodeSetHashes).Should(HaveKey(testNodeSetName.Name))
 				}, th.Timeout, th.Interval).Should(Succeed())
 
 				// Both deployments should be in status (for visibility)
 				// First failed deployment is skipped (not latest), second completed deployment is processed and determines final state
 				Eventually(func(g Gomega) {
-					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					instance := GetDataplaneNodeSet(testNodeSetName)
 					// Should have first deployment (for visibility only)
 					g.Expect(instance.Status.DeploymentStatuses).Should(HaveKey(dataplaneDeploymentName.Name))
 					// Should have second deployment (completed and latest - affects overall state)
@@ -1781,12 +1791,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}, th.Timeout, th.Interval).Should(Succeed())
 
 				// The overall deployment condition should be true from the successful deployment
-				th.ExpectCondition(
-					dataplaneNodeSetName,
-					ConditionGetterFunc(DataplaneConditionGetter),
-					condition.DeploymentReadyCondition,
-					corev1.ConditionTrue,
-				)
+				Eventually(func(_ Gomega) {
+					th.ExpectCondition(
+						testNodeSetName,
+						ConditionGetterFunc(DataplaneConditionGetter),
+						condition.DeploymentReadyCondition,
+						corev1.ConditionTrue,
+					)
+				}, th.Timeout, th.Interval).Should(Succeed())
 			})
 		})
 	})
