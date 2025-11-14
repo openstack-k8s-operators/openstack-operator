@@ -16619,6 +16619,23 @@ spec:
                   cloudUserName:
                     default: cloud-admin
                     type: string
+                  ctlplaneBond:
+                    properties:
+                      bondInterfaces:
+                        items:
+                          type: string
+                        minItems: 2
+                        type: array
+                      bondMode:
+                        default: active-backup
+                        type: string
+                      bondOptions:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    required:
+                    - bondInterfaces
+                    type: object
                   ctlplaneInterface:
                     type: string
                   deploymentSSHSecret:

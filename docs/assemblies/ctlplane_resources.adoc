@@ -301,6 +301,11 @@
 * <<manilaspecbase,ManilaSpecBase>>
 * <<manilaspeccore,ManilaSpecCore>>
 * <<manilastatus,ManilaStatus>>
+* <<galerabackup,GaleraBackup>>
+* <<galerabackuplist,GaleraBackupList>>
+* <<galerabackupspec,GaleraBackupSpec>>
+* <<galerabackupstatus,GaleraBackupStatus>>
+* <<galerabackuptransferstoragespec,GaleraBackupTransferStorageSpec>>
 * <<galera,Galera>>
 * <<galeraattributes,GaleraAttributes>>
 * <<galeralist,GaleraList>>
@@ -400,6 +405,7 @@
 * <<octaviaspeccore,OctaviaSpecCore>>
 * <<octaviastatus,OctaviaStatus>>
 * <<passwordselector,PasswordSelector>>
+* <<bondconfig,BondConfig>>
 * <<cpucountreq,CPUCountReq>>
 * <<cpumhzreq,CPUMhzReq>>
 * <<cpureqs,CPUReqs>>
@@ -422,6 +428,7 @@
 * <<openstackprovisionserverlist,OpenStackProvisionServerList>>
 * <<openstackprovisionserverspec,OpenStackProvisionServerSpec>>
 * <<openstackprovisionserverstatus,OpenStackProvisionServerStatus>>
+* <<bond,Bond>>
 * <<ovncontroller,OVNController>>
 * <<ovncontrollerlist,OVNControllerList>>
 * <<ovncontrollerspec,OVNControllerSpec>>
@@ -1319,6 +1326,11 @@ OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
 | rabbitmq
 | Rabbitmq - Parameters related to the Rabbitmq service
 | <<rabbitmqsection,RabbitmqSection>>
+| false
+
+| notificationsBusInstance
+| NotificationsBusInstance - the name of RabbitMQ Cluster CR to select a Messaging Bus Service instance used by all services that produce or consume notifications. Avoid colocating it with RabbitMQ services used for PRC. That instance will be pushed down for services, unless overriden in templates.
+| *string
 | false
 
 | memcached
@@ -2479,6 +2491,11 @@ OpenStackVersionStatus defines the observed state of OpenStackVersion
 | serviceDefaults
 | ServiceDefaults - struct that contains current defaults for OSP services
 | <<servicedefaults,ServiceDefaults>>
+| false
+
+| trackedCustomImages
+| TrackedCustomImages tracks CustomContainerImages used for each version to detect changes
+| map[string]<<customcontainerimages,CustomContainerImages>>
 | false
 
 | observedGeneration
@@ -7953,6 +7970,21 @@ IronicConductorSpec defines the desired state of IronicConductor
 | TLS - Parameters related to the TLS
 | tls.Ca
 | false
+
+| graphicalConsoles
+| Whether to enable graphical consoles. NOTE: Setting this to Enabled is not supported.
+| string
+| true
+
+| novncproxyImage
+| NoVNCProxyImage - Ironic NoVNCProxy Container Image
+| string
+| false
+
+| consoleImage
+| ConsoleImage - Ironic Graphical Console Container Image
+| string
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -8464,7 +8496,7 @@ IronicNeutronAgentTemplate defines the input parameters for ML2 baremetal - iron
 [#dhcprange]
 ==== DHCPRange
 
-DHCPRange to define address range for DHCP requestes
+DHCPRange to define address range for DHCP requests
 
 |===
 | Field | Description | Scheme | Required
@@ -8570,6 +8602,16 @@ IronicImages to specify container images required by all ironic services
 | IronicPythonAgent - Image containing the ironic-python-agent kernel and ramdisk
 | string
 | true
+
+| novncproxy
+| NoVNCProxy - Ironic NoVNCProxy Container Image (will be set to environmental default if empty)
+| string
+| false
+
+| graphicalConsole
+| GraphicalConsole - Ironic Graphical Console Container Image (will be set to environmental default if empty)
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -8712,6 +8754,11 @@ IronicSpec defines the desired state of Ironic
 | apiTimeout
 | APITimeout for HAProxy, Apache
 | int
+| true
+
+| graphicalConsoles
+| Whether to enable graphical consoles. NOTE: Setting this to Enabled is not supported.
+| string
 | true
 |===
 
@@ -10133,7 +10180,7 @@ ManilaSpecBase -
 | databaseInstance
 | MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
 | string
-| false
+| true
 
 | rabbitMqClusterName
 | RabbitMQ instance name Needed to request a transportURL that is created and used in Manila
@@ -10271,6 +10318,139 @@ ManilaStatus defines the observed state of Manila
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
 | false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#galerabackup]
+==== GaleraBackup
+
+GaleraBackup is the Schema for the galerabackups API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<galerabackupspec,GaleraBackupSpec>>
+| false
+
+| status
+|
+| <<galerabackupstatus,GaleraBackupStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#galerabackuplist]
+==== GaleraBackupList
+
+GaleraBackupList contains a list of GaleraBackup
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<galerabackup,GaleraBackup>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#galerabackupspec]
+==== GaleraBackupSpec
+
+GaleraBackupSpec defines the desired state of GaleraBackup
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseInstance
+| Galera cluster to backup
+| string
+| false
+
+| storageClass
+| Storage volume for backup data
+| string
+| false
+
+| storageRequest
+| Storage Request for backup data
+| string
+| false
+
+| transferStorage
+| Configuration of storage used for intermediate data transfer
+| *<<galerabackuptransferstoragespec,GaleraBackupTransferStorageSpec>>
+| false
+
+| schedule
+| The schedule in Cron format
+| string
+| true
+
+| retention
+| Time duration after which old backups must be reclaimed on disk
+| *metav1.Duration
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#galerabackupstatus]
+==== GaleraBackupStatus
+
+GaleraBackupStatus defines the observed state of GaleraBackup
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track input changes
+| map[string]string
+| false
+
+| conditions
+| Deployment Conditions
+| condition.Conditions
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#galerabackuptransferstoragespec]
+==== GaleraBackupTransferStorageSpec
+
+|===
+| Field | Description | Scheme | Required
+
+| storageClass
+| Storage volume for backup data
+| string
+| false
+
+| storageRequest
+| Storage Request for backup data
+| string
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10895,6 +11075,11 @@ NeutronAPISpecCore -
 | TopologyRef to apply the Topology defined by the associated CR referenced by name
 | *topologyv1.TopoRef
 | false
+
+| notificationsBusInstance
+| NotificationsBusInstance is the name of the RabbitMqCluster CR to select the Message Bus Service instance used by the neutron to publish external notifications. If undefined, the value will be inherited from OpenStackControlPlane. An empty value "" leaves the notification drivers unconfigured and emitting no notifications at all. Avoid colocating it with RabbitMqClusterName used for RPC.
+| *string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10945,6 +11130,11 @@ NeutronAPIStatus defines the observed state of NeutronAPI
 | lastAppliedTopology
 | LastAppliedTopology - the last applied Topology
 | *topologyv1.TopoRef
+| false
+
+| notificationsTransportURLSecret
+| NotificationsTransportURLSecret - Secret containing external notifications transportURL
+| *string
 | false
 |===
 
@@ -14114,6 +14304,32 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 
 <<custom-resources,Back to Custom Resources>>
 
+[#bondconfig]
+==== BondConfig
+
+BondConfig defines the bonding configuration for network interfaces
+
+|===
+| Field | Description | Scheme | Required
+
+| bondInterfaces
+| BondInterfaces - List of physical interfaces to bond
+| []string
+| true
+
+| bondMode
+| BondMode - Bonding mode (e.g., active-backup, 802.3ad)
+| string
+| false
+
+| bondOptions
+| BondOptions - Additional bonding options as key-value pairs
+| map[string]string
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#cpucountreq]
 ==== CPUCountReq
 
@@ -14534,7 +14750,7 @@ OpenStackBaremetalSetStatus defines the observed state of OpenStackBaremetalSet
 | osImage
 | OSImage - OS qcow2 image Name
 | string
-| false
+| true
 
 | osContainerImageUrl
 | OSContainerImageURL - Container image URL for init with the OS qcow2 image (osImage)
@@ -14554,7 +14770,7 @@ OpenStackBaremetalSetStatus defines the observed state of OpenStackBaremetalSet
 | automatedCleaningMode
 | When set to disabled, automated cleaning will be avoided during provisioning and deprovisioning.
 | AutomatedCleaningMode
-| false
+| true
 
 | provisionServerName
 | ProvisionServerName - Optional. Existing OpenStackProvisionServer to use, else one would be created.
@@ -14581,10 +14797,15 @@ OpenStackBaremetalSetStatus defines the observed state of OpenStackBaremetalSet
 | string
 | true
 
+| ctlplaneBond
+| CtlplaneBond - Bonding configuration for ctlplane network
+| *<<bondconfig,BondConfig>>
+| false
+
 | bmhNamespace
 | BmhNamespace Namespace to look for BaremetalHosts(default: openshift-machine-api)
 | string
-| false
+| true
 
 | bmhLabelSelector
 | BmhLabelSelector allows for a sub-selection of BaremetalHosts based on arbitrary labels
@@ -14809,6 +15030,32 @@ OpenStackProvisionServerStatus defines the observed state of OpenStackProvisionS
 
 <<custom-resources,Back to Custom Resources>>
 
+[#bond]
+==== Bond
+
+Bond defines the configuration of each bond interface in the deployment
+
+|===
+| Field | Description | Scheme | Required
+
+| mode
+|
+| string
+| false
+
+| mtu
+|
+| int32
+| false
+
+| links
+|
+| []string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#ovncontroller]
 ==== OVNController
 
@@ -14873,6 +15120,11 @@ OVNControllerSpec defines the desired state of OVNController
 | Image used for the ovn-controller container (will be set to environmental default if empty)
 | string
 | true
+
+| exporterImage
+| ExporterImage - Container Image URL for the openstack-network-exporter metrics daemonset (will be set to environmental default if empty)
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -14893,6 +15145,11 @@ OVNControllerSpecCore -
 | nicMappings
 |
 | map[string]string
+| false
+
+| bondConfiguration
+| Map of bond names to their configuration
+| map[string]<<bond,Bond>>
 | false
 
 | resources
@@ -14919,6 +15176,16 @@ OVNControllerSpecCore -
 | TopologyRef to apply the Topology defined by the associated CR referenced by name
 | *topologyv1.TopoRef
 | false
+
+| metricsEnabled
+| MetricsEnabled enables the metrics daemonset for collecting OVN metrics
+| *bool
+| false
+
+| metricsTLS
+| MetricsTLS - Parameters related to TLS for metrics daemonset
+| tls.SimpleService
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -14938,6 +15205,11 @@ OVNControllerStatus defines the observed state of OVNController
 
 | ovsNumberReady
 | ovsNumberReady of ovs instances
+| int32
+| false
+
+| metricsNumberReady
+| MetricsNumberReady of metrics instances
 | int32
 | false
 
@@ -14993,6 +15265,11 @@ OVSExternalIDs is a set of configuration options for OVS external-ids table
 | false
 
 | ovn-encap-type
+|
+| string
+| false
+
+| ovn-encap-tos
 |
 | string
 | false
@@ -15085,6 +15362,11 @@ OVNDBClusterSpec defines the desired state of OVNDBCluster
 | ContainerImage - Container Image URL (will be set to environmental default if empty)
 | string
 | true
+
+| exporterImage
+| ExporterImage - Container Image URL for the openstack-network-exporter metrics sidecar (will be set to environmental default if empty)
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15165,6 +15447,16 @@ OVNDBClusterSpecCore -
 | topologyRef
 | TopologyRef to apply the Topology defined by the associated CR referenced by name
 | *topologyv1.TopoRef
+| false
+
+| metricsEnabled
+| MetricsEnabled enables the metrics sidecar container for collecting OVN DB metrics
+| *bool
+| false
+
+| metricsTLS
+| MetricsTLS - Parameters related to TLS for metrics sidecar
+| tls.SimpleService
 | false
 |===
 
@@ -15280,6 +15572,11 @@ OVNNorthdSpec defines the desired state of OVNNorthd
 | ContainerImage - Container Image URL (will be set to environmental default if empty)
 | string
 | true
+
+| exporterImage
+| ExporterImage - Container Image URL for the openstack-network-exporter metrics sidecar (will be set to environmental default if empty)
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15326,6 +15623,16 @@ OVNNorthdSpecCore -
 | TopologyRef to apply the Topology defined by the associated CR referenced by name
 | *topologyv1.TopoRef
 | false
+
+| metricsEnabled
+| MetricsEnabled enables the metrics sidecar container for collecting OVN metrics
+| *bool
+| false
+
+| metricsTLS
+| MetricsTLS - Parameters related to TLS for metrics sidecar
+| tls.SimpleService
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -15346,6 +15653,11 @@ OVNNorthdStatus defines the observed state of OVNNorthd
 | conditions
 | Conditions
 | condition.Conditions
+| false
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
 | false
 
 | observedGeneration
@@ -15764,6 +16076,11 @@ SwiftProxySpecCore -
 | topologyRef
 | TopologyRef to apply the Topology defined by the associated CR referenced by name
 | *topologyv1.TopoRef
+| false
+
+| apiTimeout
+| Default APITimeout for HAProxy and Apache, defaults to 60 seconds
+| int
 | false
 
 | ringConfigMaps
@@ -17672,6 +17989,11 @@ WatcherSpecCore defines the fields used from the OpenStackControlPlane CR (does 
 | APITimeout for Route and Apache
 | *int
 | true
+
+| notificationsBusInstance
+| NotificationsBusInstance is the name of the RabbitMqCluster CR to select the Message Bus Service instance used by the Watcher service to publish and consume notifications from other services. If undefined, the value will be inherited from OpenStackControlPlane. An empty value "" leaves the notification drivers unconfigured and emitting no notifications at all. Avoid colocating it with RabbitMqClusterName or other message bus instances used for RPC.
+| *string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -19417,7 +19739,7 @@ RabbitMqSpecCore - this version is used by the OpenStackControlplane CR (no cont
 | false
 
 | queueType
-| QueueType to eventually apply the ha-all policy to the cluster
+| QueueType to eventually apply the ha-all policy or configure default queue type for the cluster
 | string
 | true
 |===
@@ -19533,6 +19855,11 @@ TransportURLStatus defines the observed state of TransportURL
 
 | secretName
 | SecretName - name of the secret containing the rabbitmq transport URL
+| string
+| false
+
+| queueType
+| QueueType - the queue type from the associated RabbitMq instance
 | string
 | false
 
