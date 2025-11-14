@@ -6,6 +6,9 @@
       - data-plane-adoption-pipeline
     github-check:
       jobs:
+        - openstack-k8s-operators-content-provider:
+            vars:
+              cifmw_install_yamls_sdk_version: v1.41.1
         - openstack-operator-tempest-multinode
         - openstack-operator-docs-preview
         - openstack-operator-kuttl:

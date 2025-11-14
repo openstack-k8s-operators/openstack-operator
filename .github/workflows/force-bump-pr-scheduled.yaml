@@ -10,6 +10,6 @@ jobs:
     uses: openstack-k8s-operators/openstack-k8s-operators-ci/.github/workflows/force-bump-branches.yaml@main
     with:
       operator_name: openstack
-      custom_image: quay.io/openstack-k8s-operators/openstack-k8s-operators-ci-build-tools:golang-1.24-sdk-1.31
+      custom_image: quay.io/openstack-k8s-operators/openstack-k8s-operators-ci-build-tools:golang-1.24-sdk-1.41.1
     secrets:
       FORCE_BUMP_PULL_REQUEST_PAT: ${{ secrets.FORCE_BUMP_PULL_REQUEST_PAT }}

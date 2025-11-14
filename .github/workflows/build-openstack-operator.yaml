@@ -16,7 +16,7 @@ jobs:
     with:
       operator_name: openstack
       go_version: 1.24.x
-      operator_sdk_version: 1.31.0
+      operator_sdk_version: 1.41.1
       bundle_dockerfile: ./bundle.Dockerfile
       operator_version: 0.5.0
     secrets:

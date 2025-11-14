@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: openstack-operator-controller-operator
-    openstack.org/operator-name: openstack
+    app.kubernetes.io/name: openstack-operator-controller-operator
+    control-plane: controller-manager
   name: system
 ---
 apiVersion: apps/v1
@@ -12,20 +12,24 @@ metadata:
   name: openstack-operator-controller-operator
   namespace: system
   labels:
-    control-plane: openstack-operator-controller-operator
-    openstack.org/operator-name: openstack-controller
+    app.kubernetes.io/name: openstack-operator-controller-operator
+    control-plane: controller-manager
+    openstack.org/operator-name: openstack-init
 spec:
   selector:
     matchLabels:
-      openstack.org/operator-name: openstack-controller
+      app.kubernetes.io/name: openstack-operator-controller-operator
+      control-plane: controller-manager
+      openstack.org/operator-name: openstack-init
   replicas: 1
   template:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: operator
       labels:
-        control-plane: openstack-operator-controller-operator
-        openstack.org/operator-name: openstack-controller
+        app.kubernetes.io/name: openstack-operator-controller-operator
+        control-plane: controller-manager
+        openstack.org/operator-name: openstack-init
     spec:
       securityContext:
         runAsNonRoot: true
@@ -37,30 +41,11 @@ spec:
         # seccompProfile:
         #   type: RuntimeDefault
       containers:
-      - args:
-        - --secure-listen-address=0.0.0.0:8443
-        - --upstream=http://127.0.0.1:8080/
-        - --logtostderr=true
-        - --v=0
-        image: quay.io/openstack-k8s-operators/kube-rbac-proxy:v0.16.0
-        name: kube-rbac-proxy
-        ports:
-        - containerPort: 8443
-          name: https
-          protocol: TCP
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 5m
-            memory: 64Mi
       - command:
         - /operator
         args:
-        - --health-probe-bind-address=:8081
-        - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
+        - --health-probe-bind-address=:8081
         env:
         # we use kustomize to replace the first 2 envs here so do not reorder these
         - name: OPENSTACK_RELEASE_VERSION

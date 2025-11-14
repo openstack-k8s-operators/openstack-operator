@@ -1,4 +1,4 @@
 build_root_image:
   name: tools
   namespace: openstack-k8s-operators
-  tag: ci-build-root-golang-1.24-sdk-1.31
+  tag: ci-build-root-golang-1.24-sdk-1.41.1

@@ -50,7 +50,7 @@ endif
 
 # Set the Operator SDK version to use. By default, what is installed on the system is used.
 # This is useful for CI or a project to utilize a specific version of the operator-sdk toolkit.
-OPERATOR_SDK_VERSION ?= v1.31.0
+OPERATOR_SDK_VERSION ?= v1.41.1
 
 # Image URL to use all building/pushing image targets
 DEFAULT_IMG ?= quay.io/openstack-k8s-operators/openstack-operator:latest
@@ -139,9 +139,9 @@ help: ## Display this help.
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	mkdir -p config/operator/rbac && \
 	$(CONTROLLER_GEN) crd$(CRDDESC_OVERRIDE) output:crd:artifacts:config=config/crd/bases webhook paths="./..." && \
-	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./apis/client/...,./apis/core/...,./apis/dataplane/...,./controllers/client/...,./controllers/core/...,./controllers/dataplane/...,./pkg/...}" output:dir=config/rbac && \
-	$(CONTROLLER_GEN) rbac:roleName=operator-role paths="./controllers/operator/..." paths="./apis/operator/..." output:dir=config/operator/rbac && \
-	rm -f apis/bases/* && cp -a config/crd/bases apis/
+	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./api/client/...,./api/core/...,./api/dataplane/...,./internal/controller/client/...,./internal/controller/core/...,./internal/controller/dataplane/...,./internal/...}" output:dir=config/rbac && \
+	$(CONTROLLER_GEN) rbac:roleName=operator-role paths="./internal/controller/operator/..." paths="./api/operator/..." output:dir=config/operator/rbac && \
+	rm -f api/bases/* && cp -a config/crd/bases api/
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -171,7 +171,7 @@ fmt: ## Run go fmt against code.
 .PHONY: vet
 vet: gowork ## Run go vet against code.
 	go vet ./...
-	go vet ./apis/...
+	go vet ./api/...
 
 BRANCH ?= main
 .PHONY: force-bump
@@ -179,14 +179,14 @@ force-bump: ## Force bump after tagging
 	for dep in $$(cat go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator|^replace' | awk '{print $$1}'); do \
 		go get $$dep@$(BRANCH) ; \
 	done
-	for dep in $$(cat apis/go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator|^replace' | awk '{print $$1}'); do \
-		cd ./apis && go get $$dep@$(BRANCH) && cd .. ; \
+	for dep in $$(cat api/go.mod | grep openstack-k8s-operators | grep -vE -- 'indirect|openstack-operator|^replace' | awk '{print $$1}'); do \
+		cd ./api && go get $$dep@$(BRANCH) && cd .. ; \
 	done
 
 .PHONY: tidy
 tidy: ## Run go mod tidy on every mod file in the repo
 	go mod tidy
-	cd ./apis && go mod tidy
+	cd ./api && go mod tidy
 
 GOLANGCI_LINT_VERSION ?= v2.4.0
 .PHONY: golangci-lint
@@ -207,7 +207,7 @@ ginkgo-run: ## Run ginkgo.
 	source hack/export_related_images.sh && \
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) -v debug --bin-dir $(LOCALBIN) use $(ENVTEST_K8S_VERSION) -p path)" \
 	OPERATOR_TEMPLATES="$(PWD)/templates" \
-	$(GINKGO) --trace --cover --coverpkg=./pkg/...,./controllers/...,./apis/... --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
+	$(GINKGO) --trace --cover --coverpkg=./internal/...,./api/... --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) $(GINKGO_TESTS)
 
 .PHONY: test-all
 test-all: test golint golangci golangci-lint ## Run all tests.
@@ -220,7 +220,7 @@ cover: test ## Run tests and display functional test coverage
 
 .PHONY: build
 build: generate fmt vet ## Build manager binary.
-	go build -o bin/manager main.go
+	go build -o bin/manager cmd/main.go
 	go build -o bin/operator cmd/operator/main.go
 
 .PHONY: run
@@ -231,7 +231,7 @@ run: export ENABLE_WEBHOOKS?=false
 run: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/clean_local_webhook.sh
 	source hack/export_related_images.sh && \
-		go run ./main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)" -pprof-bind-address ":$(PPROF_PORT)"
+		go run ./cmd/main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)" -pprof-bind-address ":$(PPROF_PORT)"
 
 .PHONY: run-operator
 run-operator: export METRICS_PORT?=8080
@@ -270,6 +270,12 @@ docker-buildx:  ## Build and push docker image for the manager for cross-platfor
 	- docker buildx rm project-v3-builder
 	rm Dockerfile.cross
 
+.PHONY: build-installer
+build-installer: manifests generate kustomize ## Generate a consolidated YAML with CRDs and deployment.
+	mkdir -p dist
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/default > dist/install.yaml
+
 ##@ Deployment
 
 ifndef ignore-not-found
@@ -306,12 +312,12 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
 GINKGO ?= $(LOCALBIN)/ginkgo
-GINKGO_TESTS ?= ./tests/... ./apis/client/... ./apis/core/... ./apis/dataplane/... ./pkg/...
+GINKGO_TESTS ?= ./test/... ./api/client/... ./api/core/... ./api/dataplane/... ./internal/...
 
 KUTTL ?= $(LOCALBIN)/kubectl-kuttl
 
 ## Tool Versions
-KUSTOMIZE_VERSION ?= v5.5.0 #(dprince: bumped to aquire new features like --load-restrictor)
+KUSTOMIZE_VERSION ?= v5.6.0 #(dprince: bumped to aquire new features like --load-restrictor)
 CONTROLLER_TOOLS_VERSION ?= v0.18.0
 CRD_MARKDOWN_VERSION ?= v0.0.3
 KUTTL_VERSION ?= 0.17.0
@@ -351,7 +357,7 @@ $(GINKGO): $(LOCALBIN)
 
 .PHONY: kuttl-test
 kuttl-test: ## Run kuttl tests
-	$(LOCALBIN)/kubectl-kuttl test --config kuttl-test.yaml tests/kuttl/tests $(KUTTL_ARGS)
+	$(LOCALBIN)/kubectl-kuttl test --config kuttl-test.yaml test/kuttl/tests $(KUTTL_ARGS)
 
 .PHONY: kuttl
 kuttl: $(KUTTL) ## Download kubectl-kuttl locally if necessary.
@@ -380,8 +386,8 @@ endif
 bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
 	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/operator/deployment/ && $(KUSTOMIZE) edit set image controller=$(IMG) && \
-	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/1/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
-	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/1/env/1\", \"value\": {\"name\": \"OPERATOR_IMAGE_URL\", \"value\": \"$(IMG)\"}}]"
+	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
+	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/1\", \"value\": {\"name\": \"OPERATOR_IMAGE_URL\", \"value\": \"$(IMG)\"}}]"
 	$(KUSTOMIZE) build config/operator --load-restrictor='LoadRestrictionsNone' | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	$(OPERATOR_SDK) bundle validate ./bundle
 
@@ -468,12 +474,12 @@ get-ci-tools:
 # Run go fmt against code
 gofmt: get-ci-tools
 	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh
-	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh ./apis
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gofmt.sh ./api
 
 # Run go vet against code
 govet: get-ci-tools
 	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/govet.sh
-	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/govet.sh  ./apis
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/govet.sh  ./api
 
 # Run go test against code
 gotest: test
@@ -481,24 +487,24 @@ gotest: test
 # Run golangci-lint test against code
 golangci: get-ci-tools
 	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/golangci.sh
-	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/golangci.sh  ./apis
+	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/golangci.sh  ./api
 
 # Run go lint against code
 golint: get-ci-tools
 	GOWORK=off PATH=$(GOBIN):$(PATH); $(CI_TOOLS_REPO_DIR)/test-runner/golint.sh
-	GOWORK=off PATH=$(GOBIN):$(PATH); $(CI_TOOLS_REPO_DIR)/test-runner/golint.sh ./apis
+	GOWORK=off PATH=$(GOBIN):$(PATH); $(CI_TOOLS_REPO_DIR)/test-runner/golint.sh ./api
 
 .PHONY: gowork
 gowork: ## Generate go.work file to support our multi module repository
 	test -f go.work || GOTOOLCHAIN=$(GOTOOLCHAIN_VERSION) go work init
 	go work use .
-	go work use ./apis
+	go work use ./api
 	go work sync
 
 .PHONY: operator-lint
 operator-lint: gowork ## Runs operator-lint
 	GOBIN=$(LOCALBIN) go install github.com/gibizer/operator-lint@v0.3.0
-	go vet -vettool=$(LOCALBIN)/operator-lint ./... ./apis/...
+	go vet -vettool=$(LOCALBIN)/operator-lint ./... ./api/...
 
 # Used for webhook testing
 # The configure_local_webhook.sh script below will remove any OLM webhooks
