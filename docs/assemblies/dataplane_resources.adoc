@@ -258,7 +258,7 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 
 | baremetalSetTemplate
 | BaremetalSetTemplate Template for BaremetalSet for the NodeSet
-| baremetalv1.OpenStackBaremetalSetTemplateSpec
+| *baremetalv1.OpenStackBaremetalSetTemplateSpec
 | false
 
 | nodeTemplate

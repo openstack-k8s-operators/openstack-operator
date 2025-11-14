@@ -114,6 +114,55 @@ select BMHs for the node.
        bmhLabelSelector:
          nodeName: edpm-compute-01
 
+== Configuring Network Interface Bonding for Control Plane
+
+Network interface bonding (also known as NIC teaming) can be configured for the control plane
+network to provide redundancy and increased throughput. The bonding configuration is specified
+in the `baremetalSetTemplate` section using the `ctlplaneBond` field.
+
+The bonding configuration includes:
+
+* `bondInterfaces` - List of physical interfaces to bond (minimum 2 interfaces required)
+* `bondMode` - Bonding mode to use (default: "active-backup")
+* `bondOptions` - Additional bonding options as key-value pairs
+
+Supported bonding modes include:
+
+* `active-backup` - Only one interface is active at a time for fault tolerance
+* `802.3ad` - IEEE 802.3ad Dynamic link aggregation (LACP)
+* `balance-rr` - Round-robin policy for load balancing
+* `balance-xor` - XOR policy for load balancing
+* Other modes supported by cloud-init
+
+Example configuration with bonding:
+
+ apiVersion: dataplane.openstack.org/v1beta1
+ kind: OpenStackDataPlaneNodeSet
+ metadata:
+   name: openstack-edpm
+ spec:
+   baremetalSetTemplate:
+     bmhLabelSelector:
+       app: openstack
+       workload: compute
+     ctlplaneInterface: bond0
+     ctlplaneBond:
+       bondInterfaces:
+         - eno1
+         - eno2
+       bondMode: "802.3ad"
+       bondOptions:
+         bond-miimon: "100"
+         bond-xmit-hash-policy: "layer3+4"
+     cloudUserName: cloud-admin
+   nodes:
+     edpm-compute-0:
+       hostName: edpm-compute-0
+
+When bonding is configured, the `ctlplaneInterface` should be set to the bond interface name
+(e.g., `bond0`), and the physical interfaces specified in `bondInterfaces` will be configured
+as members of the bond during node provisioning.
+
 === Relevant Status Condition
 
 `NodeSetBaremetalProvisionReady` condition in status condtions reflects the status of
