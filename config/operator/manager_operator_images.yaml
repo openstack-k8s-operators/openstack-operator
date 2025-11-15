@@ -42,7 +42,7 @@ spec:
         - name: RELATED_IMAGE_OCTAVIA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/octavia-operator@sha256:442c269d79163f8da75505019c02e9f0815837aaadcaddacb8e6c12df297ca13
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:3f3e58058021dc15b28688a7744273d3b6467d29b085aad52895817f4721b24e
+          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:bf44c6b2be4686d0341585a31f2c6b3ad735d5d7721b444aab60efc7b91c282e
         - name: RELATED_IMAGE_OVN_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/ovn-operator@sha256:5d49d4594c66eda7b151746cc6e1d3c67c0129b4503eeb043a64ae8ec2da6a1b
         - name: RELATED_IMAGE_PLACEMENT_OPERATOR_MANAGER_IMAGE_URL
@@ -52,8 +52,8 @@ spec:
         - name: RELATED_IMAGE_SWIFT_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/swift-operator@sha256:c0b5f124a37c1538042c0e63f0978429572e2a851d7f3a6eb80de09b86d755a0
         - name: RELATED_IMAGE_TELEMETRY_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/telemetry-operator@sha256:3049185db4f984cc3ae56964642023cccde91f5444578cac0c9a53b19717d68f
+          value: quay.io/openstack-k8s-operators/telemetry-operator@sha256:84ab6e24b54db0f898e7804fbd4f251232bf4c853e166d480c87290a838634c0
         - name: RELATED_IMAGE_TEST_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/test-operator@sha256:82207e753574d4be246f86c4b074500d66cf20214aa80f0a8525cf3287a35e6d
+          value: quay.io/openstack-k8s-operators/test-operator@sha256:210517b918e30df1c95fc7d961c8e57e9a9d1cc2b9fe7eb4dad2034dd53a90aa
         - name: RELATED_IMAGE_WATCHER_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/watcher-operator@sha256:4838402d41d42c56613d43dc5041aae475a2b18e6172491d6c4d4a78a580697f
+          value: quay.io/openstack-k8s-operators/watcher-operator@sha256:dae91bdde4e1e2ad2d4a8ab4109a5b408bdaa7cbc71216809c8a7fb9dffa3bbb

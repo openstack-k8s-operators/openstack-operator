@@ -148,8 +148,8 @@ github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20251103074111-0ec
 github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20251103074111-0ec969e832ad/go.mod h1:4Bp2ias9AUXvPBOSOlEkuuegDkAcJEYB9K1UtmX4q8c=
 github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251112213455-aa03725e0f2b h1:j4S0Ir3U5SeBK1m5bdkHa27X8inJkWogDQ20bgOlHiE=
 github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251112213455-aa03725e0f2b/go.mod h1:itmNEGzWRK3aQEIfmGENWEtDRVOporqOqqzX+JOwGJg=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251112191014-b4c8cca9b6fc h1:YLyj7+T5JDW9CSxc0GFWGxNHurLkwqLxZoUi/hv9hVg=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251112191014-b4c8cca9b6fc/go.mod h1:xCA4HMEiU8jvL+Y2/5V+z7sNpszjnCPNWy+JaCOmsBc=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251114102648-689050741635 h1:I7Vfgm9vR+hvtxpx4lHCIbl6QTSgaKGv3WHTUD1SFjM=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251114102648-689050741635/go.mod h1:xCA4HMEiU8jvL+Y2/5V+z7sNpszjnCPNWy+JaCOmsBc=
 github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251111072459-1ceb14e1eab0 h1:r+s+puu/50Ca0Hw7BFQE25GNu/pI/bDClX8vZx0SVTQ=
 github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251111072459-1ceb14e1eab0/go.mod h1:7QF+qByM+6rC2iy7VfeaZmLPCau1jKPcXQAEahMoz1Y=
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20251112201103-7583889cdb89 h1:5Rzc3Y3oizFVY6p+cRBZ/dPiKQ/y5xkwIaCX/s5tsP0=
@@ -158,10 +158,10 @@ github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.2025092
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec/go.mod h1:Nh2NEePLjovUQof2krTAg4JaAoLacqtPTZQXK6izNfg=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20251112213455-cc9071dc6aa0 h1:lTWnuB7HUP5Wee4QC0lS+PKD4Ep3wsxlk8LAKGU6j1s=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20251112213455-cc9071dc6aa0/go.mod h1:ei5t/R+qRHpQkj+2Rtidx7V9t3GStquMRuB8xooLvPU=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20251105154519-2bcf8bd1e585 h1:KbSzdbRm3M64sf2JUJFoO3jOMt5+U4DmUt6cgNUSP9Y=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20251105154519-2bcf8bd1e585/go.mod h1:1DjlpLaA81y5pzBXP2mE6PcdMyobYu2AiArhbLlbBn8=
-github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20251112134615-47fb2954fea8 h1:dSFlDD6W8ezsg8pBSbcbdRkrcYeOu/ZrzQtVEhfCtmE=
-github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20251112134615-47fb2954fea8/go.mod h1:nln30Bm/OC/TuBVnYmia35eaV8MEQm/IZa9gC4PMbOc=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20251113151519-683f5ca02d77 h1:zDMHcn2Kz/ghXbvToKJhw3ffe4QxvIzcVgn4ZNxddSI=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20251113151519-683f5ca02d77/go.mod h1:1DjlpLaA81y5pzBXP2mE6PcdMyobYu2AiArhbLlbBn8=
+github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20251113115241-dadb7366805a h1:VULY7K711iHazFSmJsyQYeBt97Gqv7VqOJ59DKM5LF0=
+github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20251113115241-dadb7366805a/go.mod h1:nln30Bm/OC/TuBVnYmia35eaV8MEQm/IZa9gC4PMbOc=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

@@ -31,14 +31,14 @@ require (
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20251103113532-c4a3d7916c65
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20251103074111-0ec969e832ad
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20251112213455-aa03725e0f2b
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251112191014-b4c8cca9b6fc
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20251114102648-689050741635
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20251111072459-1ceb14e1eab0
 	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20251112201103-7583889cdb89
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20251112213455-cc9071dc6aa0
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20251105154519-2bcf8bd1e585
-	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20251112200537-6d9a94fa5f5f
-	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20251112134615-47fb2954fea8
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20251113151519-683f5ca02d77
+	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20251113132051-4442301ea6a0
+	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20251113115241-dadb7366805a
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/cluster-operator/v2 v2.16.0
 	github.com/stretchr/testify v1.11.1
