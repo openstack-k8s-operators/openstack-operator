@@ -146,6 +146,28 @@ spec:
                 default: cloud-admin
                 description: CloudUser to be configured for remote access
                 type: string
+              ctlplaneBond:
+                description: CtlplaneBond - Bonding configuration for ctlplane network
+                properties:
+                  bondInterfaces:
+                    description: BondInterfaces - List of physical interfaces to bond
+                    items:
+                      type: string
+                    minItems: 2
+                    type: array
+                  bondMode:
+                    default: active-backup
+                    description: BondMode - Bonding mode (e.g., active-backup, 802.3ad)
+                    type: string
+                  bondOptions:
+                    additionalProperties:
+                      type: string
+                    description: BondOptions - Additional bonding options as key-value
+                      pairs
+                    type: object
+                required:
+                - bondInterfaces
+                type: object
               ctlplaneGateway:
                 description: 'CtlplaneGateway - IP of gateway for ctrlplane network
                   (TODO: acquire this is another manner?)'
