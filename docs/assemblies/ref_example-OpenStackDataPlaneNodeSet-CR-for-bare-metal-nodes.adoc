@@ -100,7 +100,7 @@ spec:
   tlsEnabled: true
 ----
 
-<1> Configure the bare metal template for bare metal nodes that must be provisioned when creating the resource.
+<1> Configure the bare metal template for bare metal nodes that must be provisioned when creating the resource. Optionally includes `ctlplaneBond` for network interface bonding configuration.
 <2> Optional: A list of environment variables to pass to the pod.
 <3> The networks the `ansibleee-runner` connects to, specified as a list of `netattach` resource names.
 <4> The common configuration to apply to all nodes in this set of nodes.
