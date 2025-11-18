@@ -163,6 +163,213 @@ When bonding is configured, the `ctlplaneInterface` should be set to the bond in
 (e.g., `bond0`), and the physical interfaces specified in `bondInterfaces` will be configured
 as members of the bond during node provisioning.
 
+== Using custom OS Images with Provision Server
+
+This assumes you have already built a qcow2 image with all the required packages for EDPM
+deployment. For instructions on building custom images, refer to the
+https://github.com/openstack-k8s-operators/edpm-image-builder[edpm-image-builder].
+
+By default, OpenStackBaremetalSet automatically creates an `OpenStackProvisionServer` per
+nodeset to serve the bundled OS image for node provisioning. You can also use a custom provision
+server with a different OS image.
+
+To use a custom OS image, you must first package your qcow2 image as a container image.
+The packaging process is the same for all approaches described below.
+
+=== Packaging Your Custom qcow2 Image
+
+==== Container Image Requirements
+
+The container image used for `osContainerImageUrl` must:
+
+. Contain the qcow2 disk image file and its checksum file
+. Have an entrypoint script (like `copy_out.sh`) that copies the qcow2 file to the directory
+specified by the `DEST_DIR` environment variable
+. Exit successfully after copying the file (it runs as an init container)
+
+==== Building a Container Image from an Existing qcow2
+
+If you have an existing qcow2 image, you can package it using the `copy_out.sh` script from
+the https://github.com/openstack-k8s-operators/edpm-image-builder[edpm-image-builder]
+repository.
+
+===== Step 1: Generate Checksum File
+
+*Required:* Create a checksum file for your qcow2 image. The provision server requires a
+checksum file to function properly - the checksum discovery agent will fail if no checksum
+file is found. The provision server supports MD5, SHA256, or SHA512 checksums. The checksum
+file must contain the hash type in its filename (e.g., `md5`, `sha256`, or `sha512`):
+
+[,sh]
+----
+# For SHA256 (recommended)
+sha256sum my-custom-image.qcow2 > my-custom-image.qcow2.sha256sum
+
+# Or for MD5
+md5sum my-custom-image.qcow2 > my-custom-image.qcow2.md5sum
+
+# Or for SHA512
+sha512sum my-custom-image.qcow2 > my-custom-image.qcow2.sha512sum
+----
+
+===== Step 2: Clone the Repository
+
+Clone the edpm-image-builder repository to get the `copy_out.sh` script:
+
+[,sh]
+----
+git clone https://github.com/openstack-k8s-operators/edpm-image-builder.git
+cd edpm-image-builder
+----
+
+===== Step 3: Create Containerfile
+
+Create a `Containerfile` (or `Dockerfile`) in the same directory. Copy both your qcow2 image
+and its checksum file (checksum is required):
+
+[,dockerfile]
+----
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
+
+# Copy your qcow2 image and checksum file into the container
+# The copy_out.sh script expects files in the root directory (/) by default
+COPY my-custom-image.qcow2 /
+COPY my-custom-image.qcow2.sha256sum /
+
+# Copy the copy_out.sh script from the repository
+COPY copy_out.sh /copy_out.sh
+RUN chmod +x /copy_out.sh
+
+ENTRYPOINT ["/copy_out.sh"]
+----
+
+*Note:*
+
+* Replace `my-custom-image.qcow2` with your actual qcow2 filename
+* Replace `my-custom-image.qcow2.sha256sum` with your checksum filename (must contain `md5`,
+`sha256`, or `sha512` in the filename to be detected by the provision server)
+* The files are copied to `/` (root directory) because `copy_out.sh` expects to find them
+there by default (the default `SRC_DIR` is `/`). You can set `ENV SRC_DIR=<path>` in your
+Containerfile if you want to use a different source directory.
+* The `copy_out.sh` script handles both compressed (`.qcow2.gz`) and uncompressed (`.qcow2`)
+images
+
+===== Step 4: Build and Push
+
+Build and push the container image:
+
+[,sh]
+----
+buildah bud -f Containerfile -t <your-registry>/my-custom-os-image:latest
+buildah push <your-registry>/my-custom-os-image:latest
+----
+
+Or using podman/docker:
+
+[,sh]
+----
+podman build -f Containerfile -t <your-registry>/my-custom-os-image:latest
+podman push <your-registry>/my-custom-os-image:latest
+----
+
+=== Using the Custom OS Image
+
+After packaging your custom qcow2 image as a container image, you can use it with one of the
+following approaches:
+
+==== Using OpenStackVersion CR (Recommended)
+
+To use a custom OS image across multiple nodesets while maintaining centralized version
+management, you can patch the `OpenStackVersion` CR with the custom image in
+`customContainerImages`. This allows all nodesets to use the same custom image without
+specifying the container image URL individually in each nodeset.
+
+*Tip:* If you name your qcow2 image `edpm-hardened-uefi.qcow2` (the default osImage name)
+, you can avoid having to specify the `osImage` field in every nodeset.
+
+Otherwise, you will need to specify the `osImage` field with your custom image name in each
+nodeset.
+
+Patch the `OpenStackVersion` CR:
+
+[,console]
+----
+oc patch openstackversion openstack --type='merge' -p='
+spec:
+  customContainerImages:
+    osContainerImage: <your-registry>/my-custom-os-image:latest
+'
+----
+
+==== Using osContainerImageUrl in baremetalSetTemplate
+
+It is also possible to specify `osContainerImageUrl` directly in the `baremetalSetTemplate`
+of your `OpenStackDataPlaneNodeSet`, this approach requires updating each nodeset individually.
+
+[,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm
+spec:
+  baremetalSetTemplate:
+    bmhLabelSelector:
+      app: openstack
+      workload: compute
+    ctlplaneInterface: enp1s0
+    cloudUserName: cloud-admin
+    osImage: my-custom-image.qcow2
+    osContainerImageUrl: <your-registry>/my-custom-os-image:latest
+  nodes:
+    edpm-compute-0:
+      hostName: edpm-compute-0
+----
+
+==== Creating a Custom OpenStackProvisionServer
+
+You can also create a dedicated `OpenStackProvisionServer` resource. Note that this requires
+specifying the provision server in each nodeset. This approach allows you to use the same
+provision server for multiple nodesets and avoid exhausting available host ports, since each
+auto-created provision server uses a host port.
+
+After building and pushing your container image (as described in the packaging section above),
+create the `OpenStackProvisionServer` resource:
+
+[,yaml]
+----
+apiVersion: baremetal.openstack.org/v1beta1
+kind: OpenStackProvisionServer
+metadata:
+  name: openstackprovisionserver
+spec:
+  interface: enp1s0
+  port: 6190
+  osImage: my-custom-image.qcow2  # qcow2 file inside the container
+  osContainerImageUrl: <your-registry>/my-custom-os-image:latest
+  apacheImageUrl: registry.redhat.io/ubi9/httpd-24:latest
+  agentImageUrl: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
+----
+
+Then reference this provision server in your `OpenStackDataPlaneNodeSet`:
+
+[,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: example-nodeset
+spec:
+  baremetalSetTemplate:
+    provisionServerName: openstackprovisionserver
+    osImage: my-custom-image.qcow2
+    deploymentSSHSecret: custom-ssh-secret
+    ctlplaneInterface: enp1s0
+  nodes:
+    edpm-compute-0:
+      hostName: edpm-compute-0
+----
+
 === Relevant Status Condition
 
 `NodeSetBaremetalProvisionReady` condition in status condtions reflects the status of
