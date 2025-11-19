@@ -55,15 +55,14 @@ documentation for the version of Satellite that is in use.
 === Using `edpm_bootstrap_command` for configuring system proxy settings
 
 `edpm_bootstrap_command` can be used to configure system proxy settings by
-creating a file under `/etc/profile.d` that defines the proxy environment
-variables.
+adding the proxy environment variables to `/etc/environment`.
 
 ----
 edpm_bootstrap_command: |
-    cat >/etc/profile.d/proxy.sh <<EOF
-    export http_proxy="http://USERNAME:PASSWORD@proxy-server.example.com:3128/"
-    export https_proxy="http://USERNAME:PASSWORD@proxy-server.example.com:3128/"
-    export no_proxy="localhost,127.0.0.1,::1" # Add any hosts to bypass the proxy
+    cat >>/etc/environment <<EOF
+    http_proxy="http://USERNAME:PASSWORD@proxy-server.example.com:3128/"
+    https_proxy="http://USERNAME:PASSWORD@proxy-server.example.com:3128/"
+    no_proxy="localhost,127.0.0.1,::1" # Add any hosts to bypass the proxy
     EOF
 ----
 
