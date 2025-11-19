@@ -1,4 +1,6 @@
-ARG GOLANG_BUILDER=registry.access.redhat.com/ubi9/go-toolset:1.24
+# TODO(amoralej) go-toolset image pinned until a fix is provided for
+# https://issues.redhat.com/browse/RHEL-128838
+ARG GOLANG_BUILDER=registry.access.redhat.com/ubi9/go-toolset:1.24.6-1762230058
 ARG OPERATOR_BASE_IMAGE=registry.access.redhat.com/ubi9/ubi-minimal:9.6
 # Build the manager binary
 FROM $GOLANG_BUILDER AS builder
