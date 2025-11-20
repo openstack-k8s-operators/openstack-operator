@@ -1,0 +1,815 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.18.0
+  creationTimestamp: null
+  name: cloudkitties.telemetry.openstack.org
+spec:
+  group: telemetry.openstack.org
+  names:
+    kind: CloudKitty
+    listKind: CloudKittyList
+    plural: cloudkitties
+    singular: cloudkitty
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CloudKitty is the Schema for the cloudkitties API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CloudKittySpec defines the desired state of CloudKitty
+            properties:
+              apiTimeout:
+                default: 60
+                description: APITimeout for HAProxy, Apache, and rpc_response_timeout
+                type: integer
+              cloudKittyAPI:
+                description: CloudKittyAPI - Spec definition for the API service of
+                  this CloudKitty deployment
+                properties:
+                  containerImage:
+                    description: ContainerImage - CloudKitty Container Image URL (will
+                      be set to environmental default if empty)
+                    type: string
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/<service>/<service>.conf.d directory as a custom config file.
+                    type: string
+                  customServiceConfigSecrets:
+                    description: |-
+                      CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets
+                      that contain sensitive service config data. The content of each Secret gets added to the
+                      /etc/<service>/<service>.conf.d directory as a custom config file.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  networkAttachments:
+                    description: NetworkAttachments is a list of NetworkAttachment
+                      resource names to expose the services to the given network
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      NodeSelector to target subset of worker nodes running this service. Setting here overrides
+                      any global NodeSelector settings within the CloudKitty CR.
+                    type: object
+                  override:
+                    description: Override, provides the ability to override the generated
+                      manifest of several child resources.
+                    properties:
+                      service:
+                        additionalProperties:
+                          description: |-
+                            RoutedOverrideSpec - a routed service override configuration for the Service created to serve traffic
+                            to the cluster. Allows for the manifest of the created Service to be overwritten with custom configuration.
+                          properties:
+                            endpointURL:
+                              type: string
+                            metadata:
+                              description: |-
+                                EmbeddedLabelsAnnotations is an embedded subset of the fields included in k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta.
+                                Only labels and annotations are included.
+                              properties:
+                                annotations:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Annotations is an unstructured key value map stored with a resource that may be
+                                    set by external tools to store and retrieve arbitrary metadata. They are not
+                                    queryable and should be preserved when modifying objects.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+                                  type: object
+                                labels:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Map of string keys and values that can be used to organize and categorize
+                                    (scope and select) objects. May match selectors of replication controllers
+                                    and services.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+                                  type: object
+                              type: object
+                            spec:
+                              description: |-
+                                OverrideServiceSpec is a subset of the fields included in https://pkg.go.dev/k8s.io/api@v0.26.6/core/v1#ServiceSpec
+                                Limited to Type, SessionAffinity, LoadBalancerSourceRanges, ExternalName, ExternalTrafficPolicy, SessionAffinityConfig,
+                                IPFamilyPolicy, LoadBalancerClass and InternalTrafficPolicy
+                              properties:
+                                externalName:
+                                  description: |-
+                                    externalName is the external reference that discovery mechanisms will
+                                    return as an alias for this service (e.g. a DNS CNAME record). No
+                                    proxying will be involved.  Must be a lowercase RFC-1123 hostname
+                                    (https://tools.ietf.org/html/rfc1123) and requires `type` to be "ExternalName".
+                                  type: string
+                                externalTrafficPolicy:
+                                  description: |-
+                                    externalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on one of the Service's "externally-facing" addresses (NodePorts,
+                                    ExternalIPs, and LoadBalancer IPs). If set to "Local", the proxy will configure
+                                    the service in a way that assumes that external load balancers will take care
+                                    of balancing the service traffic between nodes, and so each node will deliver
+                                    traffic only to the node-local endpoints of the service, without masquerading
+                                    the client source IP. (Traffic mistakenly sent to a node with no endpoints will
+                                    be dropped.) The default value, "Cluster", uses the standard behavior of
+                                    routing to all endpoints evenly (possibly modified by topology and other
+                                    features). Note that traffic sent to an External IP or LoadBalancer IP from
+                                    within the cluster will always get "Cluster" semantics, but clients sending to
+                                    a NodePort from within the cluster may need to take traffic policy into account
+                                    when picking a node.
+                                  type: string
+                                internalTrafficPolicy:
+                                  description: |-
+                                    InternalTrafficPolicy describes how nodes distribute service traffic they
+                                    receive on the ClusterIP. If set to "Local", the proxy will assume that pods
+                                    only want to talk to endpoints of the service on the same node as the pod,
+                                    dropping the traffic if there are no local endpoints. The default value,
+                                    "Cluster", uses the standard behavior of routing to all endpoints evenly
+                                    (possibly modified by topology and other features).
+                                  type: string
+                                ipFamilyPolicy:
+                                  description: |-
+                                    IPFamilyPolicy represents the dual-stack-ness requested or required by
+                                    this Service. If there is no value provided, then this field will be set
+                                    to SingleStack. Services can be "SingleStack" (a single IP family),
+                                    "PreferDualStack" (two IP families on dual-stack configured clusters or
+                                    a single IP family on single-stack clusters), or "RequireDualStack"
+                                    (two IP families on dual-stack configured clusters, otherwise fail). The
+                                    ipFamilies and clusterIPs fields depend on the value of this field. This
+                                    field will be wiped when updating a service to type ExternalName.
+                                  type: string
+                                loadBalancerClass:
+                                  description: |-
+                                    loadBalancerClass is the class of the load balancer implementation this Service belongs to.
+                                    If specified, the value of this field must be a label-style identifier, with an optional prefix,
+                                    e.g. "internal-vip" or "example.com/internal-vip". Unprefixed names are reserved for end-users.
+                                    This field can only be set when the Service type is 'LoadBalancer'. If not set, the default load
+                                    balancer implementation is used, today this is typically done through the cloud provider integration,
+                                    but should apply for any default implementation. If set, it is assumed that a load balancer
+                                    implementation is watching for Services with a matching class. Any default load balancer
+                                    implementation (e.g. cloud providers) should ignore Services that set this field.
+                                    This field can only be set when creating or updating a Service to type 'LoadBalancer'.
+                                    Once set, it can not be changed. This field will be wiped when a service is updated to a non 'LoadBalancer' type.
+                                  type: string
+                                loadBalancerSourceRanges:
+                                  description: |-
+                                    If specified and supported by the platform, this will restrict traffic through the cloud-provider
+                                    load-balancer will be restricted to the specified client IPs. This field will be ignored if the
+                                    cloud-provider does not support the feature."
+                                    More info: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                                sessionAffinity:
+                                  description: |-
+                                    Supports "ClientIP" and "None". Used to maintain session affinity.
+                                    Enable client IP based session affinity.
+                                    Must be ClientIP or None.
+                                    Defaults to None.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+                                  type: string
+                                sessionAffinityConfig:
+                                  description: sessionAffinityConfig contains the
+                                    configurations of session affinity.
+                                  properties:
+                                    clientIP:
+                                      description: clientIP contains the configurations
+                                        of Client IP based session affinity.
+                                      properties:
+                                        timeoutSeconds:
+                                          description: |-
+                                            timeoutSeconds specifies the seconds of ClientIP type session sticky time.
+                                            The value must be >0 && <=86400(for 1 day) if ServiceAffinity == "ClientIP".
+                                            Default value is 10800(for 3 hours).
+                                          format: int32
+                                          type: integer
+                                      type: object
+                                  type: object
+                                type:
+                                  description: |-
+                                    type determines how the Service is exposed. Defaults to ClusterIP. Valid
+                                    options are ExternalName, ClusterIP, NodePort, and LoadBalancer.
+                                    "ClusterIP" allocates a cluster-internal IP address for load-balancing
+                                    to endpoints. Endpoints are determined by the selector or if that is not
+                                    specified, by manual construction of an Endpoints object or
+                                    EndpointSlice objects. If clusterIP is "None", no virtual IP is
+                                    allocated and the endpoints are published as a set of endpoints rather
+                                    than a virtual IP.
+                                    "NodePort" builds on ClusterIP and allocates a port on every node which
+                                    routes to the same endpoints as the clusterIP.
+                                    "LoadBalancer" builds on NodePort and creates an external load-balancer
+                                    (if supported in the current cloud) which routes to the same endpoints
+                                    as the clusterIP.
+                                    "ExternalName" aliases this service to the specified externalName.
+                                    Several other fields do not apply to ExternalName services.
+                                    More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+                                  type: string
+                              type: object
+                          type: object
+                        description: |-
+                          Override configuration for the Service created to serve traffic to the cluster.
+                          The key must be the endpoint type (public, internal)
+                        type: object
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas - CloudKitty API Replicas
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  tls:
+                    description: TLS - Parameters related to the TLS
+                    properties:
+                      api:
+                        description: API tls type which encapsulates for API services
+                        properties:
+                          internal:
+                            description: Internal GenericService - holds the secret
+                              for the internal endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                          public:
+                            description: Public GenericService - holds the secret
+                              for the public endpoint
+                            properties:
+                              secretName:
+                                description: SecretName - holding the cert, key for
+                                  the service
+                                type: string
+                            type: object
+                        type: object
+                      caBundleSecretName:
+                        description: CaBundleSecretName - holding the CA certs in
+                          a pre-created bundle file
+                        type: string
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
+                type: object
+              cloudKittyProc:
+                description: CloudKittyProc - Spec definition for the Scheduler service
+                  of this CloudKitty deployment
+                properties:
+                  containerImage:
+                    description: ContainerImage - CloudKitty Container Image URL (will
+                      be set to environmental default if empty)
+                    type: string
+                  customServiceConfig:
+                    description: |-
+                      CustomServiceConfig - customize the service config using this parameter to change service defaults,
+                      or overwrite rendered information using raw OpenStack config format. The content gets added to
+                      to /etc/<service>/<service>.conf.d directory as a custom config file.
+                    type: string
+                  customServiceConfigSecrets:
+                    description: |-
+                      CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets
+                      that contain sensitive service config data. The content of each Secret gets added to the
+                      /etc/<service>/<service>.conf.d directory as a custom config file.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  networkAttachments:
+                    description: NetworkAttachments is a list of NetworkAttachment
+                      resource names to expose the services to the given network
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      NodeSelector to target subset of worker nodes running this service. Setting here overrides
+                      any global NodeSelector settings within the CloudKitty CR.
+                    type: object
+                  replicas:
+                    default: 1
+                    description: Replicas - CloudKitty API Replicas
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: |-
+                      Resources - Compute Resources required by this service (Limits/Requests).
+                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+                          This is an alpha field and requires enabling the
+                          DynamicResourceAllocation feature gate.
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  tls:
+                    description: TLS - Parameters related to the TLS
+                    properties:
+                      caBundleSecretName:
+                        description: CaBundleSecretName - holding the CA certs in
+                          a pre-created bundle file
+                        type: string
+                      secretName:
+                        description: SecretName - holding the cert, key for the service
+                        type: string
+                    type: object
+                  topologyRef:
+                    description: |-
+                      TopologyRef to apply the Topology defined by the associated CR referenced
+                      by name
+                    properties:
+                      name:
+                        description: Name - The Topology CR name that the Service
+                          references
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace - The Namespace to fetch the Topology CR referenced
+                          NOTE: Namespace currently points by default to the same namespace where
+                          the Service is deployed. Customizing the namespace is not supported and
+                          webhooks prevent editing this field to a value different from the
+                          current project
+                        type: string
+                    type: object
+                type: object
+              customServiceConfig:
+                description: |-
+                  CustomServiceConfig - customize the service config for all CloudKitty services using this parameter to change service defaults,
+                  or overwrite rendered information using raw OpenStack config format. The content gets added to
+                  to /etc/<service>/<service>.conf.d directory as a custom config file.
+                type: string
+              databaseAccount:
+                default: cloudkitty
+                description: DatabaseAccount - optional MariaDBAccount used for cloudkitty
+                  DB, defaults to cloudkitty
+                type: string
+              databaseInstance:
+                default: openstack
+                description: |-
+                  MariaDB instance name
+                  Right now required by the maridb-operator to get the credentials from the instance to create the DB
+                  Might not be required in future
+                type: string
+              lokiStackSize:
+                default: 1x.demo
+                description: Size of the LokiStack. Supported are "1x.demo" (default),
+                  "1x.pico", "1x.extra-small", "1x.small", "1x.medium"
+                enum:
+                - ""
+                - 1x.demo
+                - 1x.pico
+                - 1x.extra-small
+                - 1x.small
+                - 1x.medium
+                type: string
+              memcachedInstance:
+                default: memcached
+                description: Memcached instance name.
+                type: string
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: |-
+                  NodeSelector to target subset of worker nodes running this service. Setting
+                  NodeSelector here acts as a default value and can be overridden by service
+                  specific NodeSelector Settings.
+                type: object
+              passwordSelector:
+                default:
+                  cloudKittyService: CloudKittyPassword
+                description: PasswordsSelectors - Selectors to identify the ServiceUser
+                  password from the Secret
+                properties:
+                  aodhService:
+                    default: AodhPassword
+                    description: AodhService - Selector to get the aodh service password
+                      from the Secret
+                    type: string
+                  ceilometerService:
+                    default: CeilometerPassword
+                    description: CeilometerService - Selector to get the ceilometer
+                      service password from the Secret
+                    type: string
+                  cloudKittyService:
+                    default: CloudKittyPassword
+                    description: CloudKittyService - Selector to get the CloudKitty
+                      service password from the Secret
+                    type: string
+                type: object
+              period:
+                default: 300
+                description: Period for collecting metrics in seconds
+                format: int32
+                type: integer
+              preserveJobs:
+                default: false
+                description: PreserveJobs - do not delete jobs after they finished
+                  e.g. to check logs
+                type: boolean
+              prometheusHost:
+                description: Host of user deployed prometheus
+                type: string
+              prometheusPort:
+                description: Port of user deployed prometheus
+                format: int32
+                maximum: 65535
+                minimum: 1
+                type: integer
+              prometheusTLSCaCertSecret:
+                description: If defined, specifies which CA certificate to use for
+                  user deployed prometheus
+                nullable: true
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be a
+                      valid secret key.
+                    type: string
+                  name:
+                    default: ""
+                    description: |-
+                      Name of the referent.
+                      This field is effectively required, but due to backwards compatibility is
+                      allowed to be empty. Instances of this type with an empty value here are
+                      almost certainly wrong.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  optional:
+                    description: Specify whether the Secret or its key must be defined
+                    type: boolean
+                required:
+                - key
+                type: object
+                x-kubernetes-map-type: atomic
+              rabbitMqClusterName:
+                default: rabbitmq
+                description: |-
+                  RabbitMQ instance name
+                  Needed to request a transportURL that is created and used in CloudKitty
+                type: string
+              s3StorageConfig:
+                default:
+                  secret:
+                    name: cloudkitty-loki-s3
+                    type: s3
+                description: S3 related configuration passed to Loki
+                properties:
+                  schemas:
+                    default:
+                    - effectiveDate: "2020-10-11"
+                      version: v11
+                    description: Schemas for reading and writing logs.
+                    items:
+                      properties:
+                        effectiveDate:
+                          description: |-
+                            EffectiveDate contains a date in YYYY-MM-DD format which is interpreted in the UTC time zone.
+
+                            The configuration always needs at least one schema that is currently valid. This means that when creating a new
+                            CloudKitty it is recommended to add a schema with the latest available version and an effective date of "yesterday".
+                            New schema versions added to the configuration always needs to be placed "in the future", so that Loki can start
+                            using it once the day rolls over.
+                          type: string
+                        version:
+                          description: Version for writing and reading logs.
+                          type: string
+                      type: object
+                    minItems: 1
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  secret:
+                    description: |-
+                      Secret for object storage authentication.
+                      Name of a secret in the same namespace as the CloudKitty custom resource.
+                    properties:
+                      credentialMode:
+                        description: |-
+                          CredentialMode can be used to set the desired credential mode for authenticating with the object storage.
+                          If this is not set, then the operator tries to infer the credential mode from the provided secret and its
+                          own configuration.
+                        type: string
+                      name:
+                        description: Name of a secret in the namespace configured
+                          for object storage secrets.
+                        type: string
+                      type:
+                        description: Type of object storage that should be used
+                        type: string
+                    type: object
+                  tls:
+                    description: TLS configuration for reaching the object storage
+                      endpoint.
+                    properties:
+                      caKey:
+                        description: |-
+                          Key is the data key of a ConfigMap containing a CA certificate.
+                          It needs to be in the same namespace as the CloudKitty custom resource.
+                          If empty, it defaults to "service-ca.crt".
+                        type: string
+                      caName:
+                        description: |-
+                          CA is the name of a ConfigMap containing a CA certificate.
+                          It needs to be in the same namespace as the CloudKitty custom resource.
+                        type: string
+                    type: object
+                type: object
+              secret:
+                default: osp-secret
+                description: Secret containing OpenStack password information
+                type: string
+              serviceUser:
+                default: cloudkitty
+                description: ServiceUser - optional username used for this service
+                  to register in cloudkitty
+                type: string
+              storageClass:
+                description: Storage class used for Loki
+                type: string
+              topologyRef:
+                description: |-
+                  TopologyRef to apply the Topology defined by the associated CR referenced
+                  by name
+                properties:
+                  name:
+                    description: Name - The Topology CR name that the Service references
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace - The Namespace to fetch the Topology CR referenced
+                      NOTE: Namespace currently points by default to the same namespace where
+                      the Service is deployed. Customizing the namespace is not supported and
+                      webhooks prevent editing this field to a value different from the
+                      current project
+                    type: string
+                type: object
+            type: object
+          status:
+            description: CloudKittyStatus defines the observed state of CloudKitty
+            properties:
+              apiEndpoints:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: API endpoints
+                type: object
+              cloudKittyAPIReadyCount:
+                default: 0
+                description: ReadyCount of CloudKitty API instance
+                format: int32
+                minimum: 0
+                type: integer
+              cloudKittyProcReadyCounts:
+                default: 0
+                description: ReadyCount of CloudKitty Processor instances
+                format: int32
+                minimum: 0
+                type: integer
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              databaseHostname:
+                description: CloudKitty Database Hostname
+                type: string
+              hash:
+                additionalProperties:
+                  type: string
+                description: Map of hashes to track e.g. job status
+                type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this service.
+                  If the observed generation is different than the spec generation, then the
+                  controller has not started processing the latest changes, and the status
+                  and its conditions are likely stale.
+                format: int64
+                type: integer
+              prometheusHostname:
+                description: PrometheusHost - Hostname for prometheus used for autoscaling
+                type: string
+              prometheusPort:
+                description: PrometheusPort - Port for prometheus used for autoscaling
+                format: int32
+                type: integer
+              prometheusTLS:
+                description: PrometheusTLS - Determines if TLS should be used for
+                  accessing prometheus
+                type: boolean
+              serviceIDs:
+                additionalProperties:
+                  type: string
+                description: ServiceIDs
+                type: object
+              transportURLSecret:
+                description: TransportURLSecret - Secret containing RabbitMQ transportURL
+                type: string
+            required:
+            - cloudKittyAPIReadyCount
+            - cloudKittyProcReadyCounts
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

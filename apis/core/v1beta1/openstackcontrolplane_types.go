@@ -704,6 +704,11 @@ type TelemetrySection struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// CloudKittyAPIOverride, provides the ability to override the generated manifest of several child resources.
+	CloudKittyAPIOverride Override `json:"cloudKittyApiOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// PrometheusOverride, provides the ability to override the generated manifest of several child resources.
 	PrometheusOverride Override `json:"prometheusOverride,omitempty"`
 
