@@ -293,6 +293,11 @@ spec:
                         description: CeilometerService - Selector to get the ceilometer
                           service password from the Secret
                         type: string
+                      cloudKittyService:
+                        default: CloudKittyPassword
+                        description: CloudKittyService - Selector to get the CloudKitty
+                          service password from the Secret
+                        type: string
                     type: object
                   preserveJobs:
                     default: false
