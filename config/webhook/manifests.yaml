@@ -12,7 +12,7 @@ webhooks:
       namespace: system
       path: /mutate-client-openstack-org-v1beta1-openstackclient
   failurePolicy: Fail
-  name: mopenstackclient.kb.io
+  name: mopenstackclient-v1beta1.kb.io
   rules:
   - apiGroups:
     - client.openstack.org
@@ -32,7 +32,7 @@ webhooks:
       namespace: system
       path: /mutate-core-openstack-org-v1beta1-openstackcontrolplane
   failurePolicy: Fail
-  name: mopenstackcontrolplane.kb.io
+  name: mopenstackcontrolplane-v1beta1.kb.io
   rules:
   - apiGroups:
     - core.openstack.org
@@ -52,7 +52,7 @@ webhooks:
       namespace: system
       path: /mutate-core-openstack-org-v1beta1-openstackversion
   failurePolicy: Fail
-  name: mopenstackversion.kb.io
+  name: mopenstackversion-v1beta1.kb.io
   rules:
   - apiGroups:
     - core.openstack.org
@@ -63,6 +63,86 @@ webhooks:
     - UPDATE
     resources:
     - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  name: mopenstackdataplanedeployment-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  name: mopenstackdataplanenodeset-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  name: mopenstackdataplaneservice-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: mopenstackclient.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
   sideEffects: None
 - admissionReviewVersions:
   - v1
@@ -83,26 +163,6 @@ webhooks:
     - UPDATE
     resources:
     - openstackdataplanedeployments
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
-  failurePolicy: Fail
-  name: mopenstackdataplanenodeset.kb.io
-  rules:
-  - apiGroups:
-    - dataplane.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackdataplanenodesets
   sideEffects: None
 - admissionReviewVersions:
   - v1
@@ -138,7 +198,7 @@ webhooks:
       namespace: system
       path: /validate-client-openstack-org-v1beta1-openstackclient
   failurePolicy: Fail
-  name: vopenstackclient.kb.io
+  name: vopenstackclient-v1beta1.kb.io
   rules:
   - apiGroups:
     - client.openstack.org
@@ -158,7 +218,7 @@ webhooks:
       namespace: system
       path: /validate-core-openstack-org-v1beta1-openstackcontrolplane
   failurePolicy: Fail
-  name: vopenstackcontrolplane.kb.io
+  name: vopenstackcontrolplane-v1beta1.kb.io
   rules:
   - apiGroups:
     - core.openstack.org
@@ -178,7 +238,7 @@ webhooks:
       namespace: system
       path: /validate-core-openstack-org-v1beta1-openstackversion
   failurePolicy: Fail
-  name: vopenstackversion.kb.io
+  name: vopenstackversion-v1beta1.kb.io
   rules:
   - apiGroups:
     - core.openstack.org
@@ -189,6 +249,86 @@ webhooks:
     - UPDATE
     resources:
     - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment
+  failurePolicy: Fail
+  name: vopenstackdataplanedeployment-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanedeployments
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+  failurePolicy: Fail
+  name: vopenstackdataplanenodeset-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplanenodesets
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplaneservice
+  failurePolicy: Fail
+  name: vopenstackdataplaneservice-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - dataplane.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackdataplaneservices
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-client-openstack-org-v1beta1-openstackclient
+  failurePolicy: Fail
+  name: vopenstackclient.kb.io
+  rules:
+  - apiGroups:
+    - client.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackclients
   sideEffects: None
 - admissionReviewVersions:
   - v1
@@ -209,26 +349,6 @@ webhooks:
     - UPDATE
     resources:
     - openstackdataplanedeployments
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
-  failurePolicy: Fail
-  name: vopenstackdataplanenodeset.kb.io
-  rules:
-  - apiGroups:
-    - dataplane.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackdataplanenodesets
   sideEffects: None
 - admissionReviewVersions:
   - v1

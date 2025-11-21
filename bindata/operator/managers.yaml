@@ -5,13 +5,16 @@ metadata:
   labels:
     control-plane: controller-manager
     openstack.org/operator-name: {{ .Name }}
+    app.kubernetes.io/name: {{ .Name }}
   name: {{ .Name }}-operator-controller-manager
   namespace: {{ .Namespace }}
 spec:
   replicas: {{ .Deployment.Replicas }}
   selector:
     matchLabels:
+      control-plane: controller-manager
       openstack.org/operator-name: {{ .Name }}
+      app.kubernetes.io/name: {{ .Name }}-operator
   template:
     metadata:
       annotations:
@@ -19,12 +22,21 @@ spec:
       labels:
         control-plane: controller-manager
         openstack.org/operator-name: {{ .Name }}
+        app.kubernetes.io/name: {{ .Name }}-operator
     spec:
       containers:
       - args:
-        - --health-probe-bind-address=:8081
-        - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
+        - --health-probe-bind-address=:8081
+{{- if isEnvVarTrue .Deployment.Manager.Env "METRICS_CERTS" }}
+        - --metrics-bind-address=:8443
+        - --metrics-cert-path=/tmp/k8s-metrics-server/metrics-certs
+{{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
+        - --webhook-cert-path=/tmp/k8s-webhook-server/serving-certs
+{{- end }}
+{{- else }}
+        - --metrics-bind-address=127.0.0.1:8080
+{{- end }}
         command:
         - /manager
         env:
@@ -55,12 +67,18 @@ spec:
             memory: {{ .Deployment.Manager.Resources.Requests.Memory }}
         securityContext:
           allowPrivilegeEscalation: false
-{{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
         volumeMounts:
+{{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
 {{- end }}
+{{- if isEnvVarTrue .Deployment.Manager.Env "METRICS_CERTS" }}
+        - mountPath: /tmp/k8s-metrics-server/metrics-certs
+          name: metrics-certs
+          readOnly: true
+{{- end }}
+{{- if isEnvVarFalse .Deployment.Manager.Env "METRICS_CERTS" }}
       - args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
@@ -81,6 +99,7 @@ spec:
             memory: {{ .Deployment.KubeRbacProxy.Resources.Requests.Memory }}
         securityContext:
           allowPrivilegeEscalation: false
+{{- end }}
       securityContext:
         runAsNonRoot: true
       serviceAccountName: {{ .Name }}-operator-controller-manager
@@ -101,12 +120,25 @@ spec:
         tolerationSeconds: {{ .TolerationSeconds }}
 {{- end }}
 {{- end }}
-{{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
       volumes:
+{{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
       - name: cert
         secret:
           defaultMode: 420
           secretName: {{ .Name }}-operator-webhook-server-cert
+{{ end }}
+{{- if isEnvVarTrue .Deployment.Manager.Env "METRICS_CERTS" }}
+      - name: metrics-certs
+        secret:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key
+          optional: false
+          secretName: {{ .Name }}-operator-metrics-server-cert
 {{ end }}
 ---
 {{ end }}
