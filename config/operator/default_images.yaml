@@ -53,6 +53,10 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-cinder-scheduler:current-podified
         - name: RELATED_IMAGE_CINDER_VOLUME_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-cinder-volume:current-podified
+        - name: RELATED_IMAGE_CLOUDKITTY_API_IMAGE_URL_DEFAULT
+          value: quay.rdoproject.org/podified-master-centos10/openstack-cloudkitty-api:current
+        - name: RELATED_IMAGE_CLOUDKITTY_PROC_IMAGE_URL_DEFAULT
+          value: quay.rdoproject.org/podified-master-centos10/openstack-cloudkitty-processor:current
         - name: RELATED_IMAGE_DESIGNATE_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-designate-api:current-podified
         - name: RELATED_IMAGE_DESIGNATE_BACKENDBIND9_IMAGE_URL_DEFAULT

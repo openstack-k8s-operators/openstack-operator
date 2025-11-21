@@ -14379,6 +14379,130 @@ spec:
                             type: string
                         type: object
                     type: object
+                  cloudKittyApiOverride:
+                    properties:
+                      route:
+                        properties:
+                          metadata:
+                            properties:
+                              annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          spec:
+                            properties:
+                              alternateBackends:
+                                items:
+                                  properties:
+                                    kind:
+                                      enum:
+                                      - Service
+                                      - ""
+                                      type: string
+                                    name:
+                                      type: string
+                                    weight:
+                                      format: int32
+                                      maximum: 256
+                                      minimum: 0
+                                      type: integer
+                                  type: object
+                                maxItems: 3
+                                type: array
+                              host:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              path:
+                                pattern: ^/
+                                type: string
+                              port:
+                                properties:
+                                  targetPort:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                required:
+                                - targetPort
+                                type: object
+                              subdomain:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              tls:
+                                properties:
+                                  caCertificate:
+                                    type: string
+                                  certificate:
+                                    type: string
+                                  destinationCACertificate:
+                                    type: string
+                                  externalCertificate:
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  insecureEdgeTerminationPolicy:
+                                    enum:
+                                    - Allow
+                                    - None
+                                    - Redirect
+                                    - ""
+                                    type: string
+                                  key:
+                                    type: string
+                                  termination:
+                                    enum:
+                                    - edge
+                                    - reencrypt
+                                    - passthrough
+                                    type: string
+                                required:
+                                - termination
+                                type: object
+                                x-kubernetes-validations:
+                                - message: 'cannot have both spec.tls.termination:
+                                    passthrough and spec.tls.insecureEdgeTerminationPolicy:
+                                    Allow'
+                                  rule: 'has(self.termination) && has(self.insecureEdgeTerminationPolicy)
+                                    ? !((self.termination==''passthrough'') && (self.insecureEdgeTerminationPolicy==''Allow''))
+                                    : true'
+                              to:
+                                properties:
+                                  kind:
+                                    enum:
+                                    - Service
+                                    - ""
+                                    type: string
+                                  name:
+                                    type: string
+                                  weight:
+                                    format: int32
+                                    maximum: 256
+                                    minimum: 0
+                                    type: integer
+                                type: object
+                              wildcardPolicy:
+                                enum:
+                                - None
+                                - Subdomain
+                                - ""
+                                type: string
+                            type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
+                    type: object
                   enabled:
                     default: true
                     type: boolean
@@ -14610,6 +14734,9 @@ spec:
                                   ceilometerService:
                                     default: CeilometerPassword
                                     type: string
+                                  cloudKittyService:
+                                    default: CloudKittyPassword
+                                    type: string
                                 type: object
                               preserveJobs:
                                 default: false
@@ -14738,6 +14865,9 @@ spec:
                               ceilometerService:
                                 default: CeilometerPassword
                                 type: string
+                              cloudKittyService:
+                                default: CloudKittyPassword
+                                type: string
                             type: object
                           rabbitMqClusterName:
                             default: rabbitmq
@@ -14764,6 +14894,342 @@ spec:
                             type: object
                         required:
                         - secret
+                        type: object
+                      cloudkitty:
+                        properties:
+                          apiTimeout:
+                            default: 60
+                            type: integer
+                          cloudKittyAPI:
+                            properties:
+                              customServiceConfig:
+                                type: string
+                              customServiceConfigSecrets:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
+                              networkAttachments:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
+                              nodeSelector:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              override:
+                                properties:
+                                  service:
+                                    additionalProperties:
+                                      properties:
+                                        endpointURL:
+                                          type: string
+                                        metadata:
+                                          properties:
+                                            annotations:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            labels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                        spec:
+                                          properties:
+                                            externalName:
+                                              type: string
+                                            externalTrafficPolicy:
+                                              type: string
+                                            internalTrafficPolicy:
+                                              type: string
+                                            ipFamilyPolicy:
+                                              type: string
+                                            loadBalancerClass:
+                                              type: string
+                                            loadBalancerSourceRanges:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            sessionAffinity:
+                                              type: string
+                                            sessionAffinityConfig:
+                                              properties:
+                                                clientIP:
+                                                  properties:
+                                                    timeoutSeconds:
+                                                      format: int32
+                                                      type: integer
+                                                  type: object
+                                              type: object
+                                            type:
+                                              type: string
+                                          type: object
+                                      type: object
+                                    type: object
+                                type: object
+                              replicas:
+                                default: 1
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              resources:
+                                properties:
+                                  claims:
+                                    items:
+                                      properties:
+                                        name:
+                                          type: string
+                                        request:
+                                          type: string
+                                      required:
+                                      - name
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-map-keys:
+                                    - name
+                                    x-kubernetes-list-type: map
+                                  limits:
+                                    additionalProperties:
+                                      anyOf:
+                                      - type: integer
+                                      - type: string
+                                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                      x-kubernetes-int-or-string: true
+                                    type: object
+                                  requests:
+                                    additionalProperties:
+                                      anyOf:
+                                      - type: integer
+                                      - type: string
+                                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                      x-kubernetes-int-or-string: true
+                                    type: object
+                                type: object
+                              tls:
+                                properties:
+                                  api:
+                                    properties:
+                                      internal:
+                                        properties:
+                                          secretName:
+                                            type: string
+                                        type: object
+                                      public:
+                                        properties:
+                                          secretName:
+                                            type: string
+                                        type: object
+                                    type: object
+                                  caBundleSecretName:
+                                    type: string
+                                type: object
+                              topologyRef:
+                                properties:
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                          cloudKittyProc:
+                            properties:
+                              customServiceConfig:
+                                type: string
+                              customServiceConfigSecrets:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
+                              networkAttachments:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
+                              nodeSelector:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              replicas:
+                                default: 1
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              resources:
+                                properties:
+                                  claims:
+                                    items:
+                                      properties:
+                                        name:
+                                          type: string
+                                        request:
+                                          type: string
+                                      required:
+                                      - name
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-map-keys:
+                                    - name
+                                    x-kubernetes-list-type: map
+                                  limits:
+                                    additionalProperties:
+                                      anyOf:
+                                      - type: integer
+                                      - type: string
+                                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                      x-kubernetes-int-or-string: true
+                                    type: object
+                                  requests:
+                                    additionalProperties:
+                                      anyOf:
+                                      - type: integer
+                                      - type: string
+                                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                      x-kubernetes-int-or-string: true
+                                    type: object
+                                type: object
+                              tls:
+                                properties:
+                                  caBundleSecretName:
+                                    type: string
+                                  secretName:
+                                    type: string
+                                type: object
+                              topologyRef:
+                                properties:
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                          customServiceConfig:
+                            type: string
+                          databaseAccount:
+                            default: cloudkitty
+                            type: string
+                          databaseInstance:
+                            default: openstack
+                            type: string
+                          enabled:
+                            default: false
+                            type: boolean
+                          lokiStackSize:
+                            default: 1x.demo
+                            enum:
+                            - ""
+                            - 1x.demo
+                            - 1x.pico
+                            - 1x.extra-small
+                            - 1x.small
+                            - 1x.medium
+                            type: string
+                          memcachedInstance:
+                            default: memcached
+                            type: string
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          passwordSelector:
+                            default:
+                              cloudKittyService: CloudKittyPassword
+                            properties:
+                              aodhService:
+                                default: AodhPassword
+                                type: string
+                              ceilometerService:
+                                default: CeilometerPassword
+                                type: string
+                              cloudKittyService:
+                                default: CloudKittyPassword
+                                type: string
+                            type: object
+                          period:
+                            default: 300
+                            format: int32
+                            type: integer
+                          preserveJobs:
+                            default: false
+                            type: boolean
+                          prometheusHost:
+                            type: string
+                          prometheusPort:
+                            format: int32
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          prometheusTLSCaCertSecret:
+                            nullable: true
+                            properties:
+                              key:
+                                type: string
+                              name:
+                                default: ""
+                                type: string
+                              optional:
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          rabbitMqClusterName:
+                            default: rabbitmq
+                            type: string
+                          s3StorageConfig:
+                            default:
+                              secret:
+                                name: cloudkitty-loki-s3
+                                type: s3
+                            properties:
+                              schemas:
+                                default:
+                                - effectiveDate: "2020-10-11"
+                                  version: v11
+                                items:
+                                  properties:
+                                    effectiveDate:
+                                      type: string
+                                    version:
+                                      type: string
+                                  type: object
+                                minItems: 1
+                                type: array
+                                x-kubernetes-list-type: atomic
+                              secret:
+                                properties:
+                                  credentialMode:
+                                    type: string
+                                  name:
+                                    type: string
+                                  type:
+                                    type: string
+                                type: object
+                              tls:
+                                properties:
+                                  caKey:
+                                    type: string
+                                  caName:
+                                    type: string
+                                type: object
+                            type: object
+                          secret:
+                            default: osp-secret
+                            type: string
+                          serviceUser:
+                            default: cloudkitty
+                            type: string
+                          storageClass:
+                            type: string
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
                         type: object
                       logging:
                         properties:
@@ -16201,6 +16667,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  cloudkittyAPIImage:
+                    type: string
+                  cloudkittyProcImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -17824,6 +18294,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  cloudkittyAPIImage:
+                    type: string
+                  cloudkittyProcImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -18056,6 +18530,10 @@ spec:
                       type: string
                     cinderVolumeImage:
                       type: string
+                    cloudkittyAPIImage:
+                      type: string
+                    cloudkittyProcImage:
+                      type: string
                     designateAPIImage:
                       type: string
                     designateBackendbind9Image:
@@ -18252,6 +18730,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  cloudkittyAPIImage:
+                    type: string
+                  cloudkittyProcImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -18460,6 +18942,10 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    cloudkittyAPIImage:
+                      type: string
+                    cloudkittyProcImage:
+                      type: string
                     designateAPIImage:
                       type: string
                     designateBackendbind9Image:
