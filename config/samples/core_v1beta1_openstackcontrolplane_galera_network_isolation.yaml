@@ -359,6 +359,51 @@ spec:
           metallb.universe.tf/loadBalancerIPs: 172.17.0.80
         port: 10514
         cloNamespace: openshift-logging
+      cloudkitty:
+        apiTimeout: 0
+        cloudKittyAPI:
+          override:
+            service:
+              internal:
+                metadata:
+                  annotations:
+                    metallb.universe.tf/address-pool: internalapi
+                    metallb.universe.tf/allow-shared-ip: internalapi
+                    metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+                spec:
+                  type: LoadBalancer
+          replicas: 1
+          resources: {}
+          tls:
+            api:
+              internal: {}
+              public: {}
+            caBundleSecretName: combined-ca-bundle
+        cloudKittyProc:
+          replicas: 1
+          resources: {}
+          tls:
+            caBundleSecretName: combined-ca-bundle
+        databaseAccount: cloudkitty
+        databaseInstance: openstack
+        enabled: false
+        memcachedInstance: memcached
+        passwordSelector:
+          aodhService: AodhPassword
+          ceilometerService: CeilometerPassword
+          cloudKittyService: CloudKittyPassword
+        preserveJobs: false
+        rabbitMqClusterName: rabbitmq
+        s3StorageConfig:
+          schemas:
+          - effectiveDate: "2024-11-18"
+            version: v13
+          secret:
+            name: logging-loki-s3
+            type: s3
+        secret: osp-secret
+        serviceUser: cloudkitty
+        storageClass: local-storage
   swift:
     enabled: true
     proxyOverride:

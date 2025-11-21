@@ -41,8 +41,9 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 				fieldName += strings.ToUpper(matches[i])[0:1]
 				fieldName += strings.ToLower(matches[i])[1:]
 			}
-			// format API so we adhere to go linting standards
+			// format API and CloudKitty so we adhere to go linting standards
 			fieldName = strings.ReplaceAll(fieldName, "Api", "API")
+			fieldName = strings.ReplaceAll(fieldName, "Cloudkitty", "CloudKitty")
 		}
 		//Log.Info(fmt.Sprintf("Initialize Field name: %s", fieldName))
 		field := d.FieldByName(fieldName)
@@ -130,6 +131,8 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			CinderAPIImage:                getImg(instance.Spec.CustomContainerImages.CinderAPIImage, defaults.CinderAPIImage),
 			CinderBackupImage:             getImg(instance.Spec.CustomContainerImages.CinderBackupImage, defaults.CinderBackupImage),
 			CinderSchedulerImage:          getImg(instance.Spec.CustomContainerImages.CinderSchedulerImage, defaults.CinderSchedulerImage),
+			CloudKittyAPIImage:            getImg(instance.Spec.CustomContainerImages.CloudKittyAPIImage, defaults.CloudKittyAPIImage),
+			CloudKittyProcImage:           getImg(instance.Spec.CustomContainerImages.CloudKittyProcImage, defaults.CloudKittyProcImage),
 			DesignateAPIImage:             getImg(instance.Spec.CustomContainerImages.DesignateAPIImage, defaults.DesignateAPIImage),
 			DesignateBackendbind9Image:    getImg(instance.Spec.CustomContainerImages.DesignateBackendbind9Image, defaults.DesignateBackendbind9Image),
 			DesignateCentralImage:         getImg(instance.Spec.CustomContainerImages.DesignateCentralImage, defaults.DesignateCentralImage),

@@ -253,6 +253,10 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 		if !(r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
 			reqs = "RabbitMQ, Keystone"
 		}
+	case "Telemetry.CloudKitty":
+		if !(r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
+			reqs = "RabbitMQ, Keystone"
+		}
 	case "Watcher":
 		if !(r.Spec.Galera.Enabled && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
 			r.Spec.Keystone.Enabled && r.Spec.Telemetry.Enabled && *r.Spec.Telemetry.Template.Ceilometer.Enabled &&
