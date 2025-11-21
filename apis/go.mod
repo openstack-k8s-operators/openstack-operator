@@ -35,9 +35,9 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/tools v0.37.0 // indirect
-	k8s.io/api v0.31.13
-	k8s.io/apimachinery v0.31.13
-	k8s.io/client-go v0.31.13
+	k8s.io/api v0.31.14
+	k8s.io/apimachinery v0.31.14
+	k8s.io/client-go v0.31.14
 	k8s.io/utils v0.0.0-20250820121507-0af2bda4dd1d
 	sigs.k8s.io/controller-runtime v0.19.7
 )
@@ -126,20 +126,20 @@ replace github.com/rabbitmq/cluster-operator/v2 => github.com/openstack-k8s-oper
 // pin to support rabbitmq 2.16.0 rebase
 //replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20250627150254-e9823e99808e //allow-merging
 
-replace k8s.io/apimachinery => k8s.io/apimachinery v0.31.13 //allow-merging
+replace k8s.io/apimachinery => k8s.io/apimachinery v0.31.14 //allow-merging
 
-replace k8s.io/api => k8s.io/api v0.31.13 //allow-merging
+replace k8s.io/api => k8s.io/api v0.31.14 //allow-merging
 
-replace k8s.io/apiserver => k8s.io/apiserver v0.31.13 //allow-merging
+replace k8s.io/apiserver => k8s.io/apiserver v0.31.14 //allow-merging
 
-replace k8s.io/client-go => k8s.io/client-go v0.31.13 //allow-merging
+replace k8s.io/client-go => k8s.io/client-go v0.31.14 //allow-merging
 
-replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.31.13 //allow-merging
+replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.31.14 //allow-merging
 
-replace k8s.io/cli-runtime => k8s.io/cli-runtime v0.31.13 //allow-merging
+replace k8s.io/cli-runtime => k8s.io/cli-runtime v0.31.14 //allow-merging
 
-replace k8s.io/code-generator => k8s.io/code-generator v0.31.13 //allow-merging
+replace k8s.io/code-generator => k8s.io/code-generator v0.31.14 //allow-merging
 
-replace k8s.io/component-base => k8s.io/component-base v0.31.13 //allow-merging
+replace k8s.io/component-base => k8s.io/component-base v0.31.14 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
