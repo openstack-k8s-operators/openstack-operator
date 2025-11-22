@@ -12136,6 +12136,12 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          ovnLogLevel:
+                            default: info
+                            type: string
+                          ovsLogLevel:
+                            default: info
+                            type: string
                           resources:
                             properties:
                               claims:
@@ -13285,12 +13291,58 @@ spec:
                             storageClassName:
                               type: string
                           type: object
+                        podOverride:
+                          properties:
+                            services:
+                              items:
+                                properties:
+                                  metadata:
+                                    properties:
+                                      annotations:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                      labels:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                    type: object
+                                  spec:
+                                    properties:
+                                      externalName:
+                                        type: string
+                                      externalTrafficPolicy:
+                                        type: string
+                                      internalTrafficPolicy:
+                                        type: string
+                                      ipFamilyPolicy:
+                                        type: string
+                                      loadBalancerClass:
+                                        type: string
+                                      loadBalancerSourceRanges:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      sessionAffinity:
+                                        type: string
+                                      sessionAffinityConfig:
+                                        properties:
+                                          clientIP:
+                                            properties:
+                                              timeoutSeconds:
+                                                format: int32
+                                                type: integer
+                                            type: object
+                                        type: object
+                                      type:
+                                        type: string
+                                    type: object
+                                type: object
+                              type: array
+                              x-kubernetes-list-type: atomic
+                          type: object
                         queueType:
-                          default: Mirrored
-                          enum:
-                          - None
-                          - Mirrored
-                          - Quorum
                           type: string
                         rabbitmq:
                           properties:
