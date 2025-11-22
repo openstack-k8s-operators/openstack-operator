@@ -48,6 +48,12 @@ spec:
           spec:
             description: MariaDBAccountSpec defines the desired state of MariaDBAccount
             properties:
+              accountType:
+                default: User
+                enum:
+                - User
+                - System
+                type: string
               requireTLS:
                 default: false
                 description: Account must use TLS to connect to the database
@@ -108,6 +114,14 @@ spec:
                   - type
                   type: object
                 type: array
+              currentSecret:
+                description: |-
+                  the Secret that's currently in use for the account.
+                  keeping a handle to this secret allows us to remove its finalizer
+                  when it's replaced with a new one. It also is useful for storing
+                  the current "root" secret separate from a newly proposed one which is
+                  needed when changing the database root password.
+                type: string
               hash:
                 additionalProperties:
                   type: string
