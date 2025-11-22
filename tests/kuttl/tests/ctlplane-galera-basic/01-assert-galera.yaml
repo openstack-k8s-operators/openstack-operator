@@ -104,7 +104,7 @@ spec:
     template:
       secret: osp-secret
   heat:
-    enabled: false
+    enabled: true
     template:
       databaseInstance: openstack
       heatAPI:
