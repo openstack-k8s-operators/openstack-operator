@@ -8,17 +8,9 @@ rules:
   - ""
   resources:
   - configmaps
-  - pods
-  - secrets
   - services
   verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
+  - '*'
 - apiGroups:
   - ""
   resources:
@@ -36,15 +28,54 @@ rules:
   - ""
   resources:
   - namespaces
-  - projects
   verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - secrets
+  verbs:
+  - create
+  - delete
   - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - ""
   resources:
   - serviceaccounts
   verbs:
+  - '*'
+- apiGroups:
+  - ""
+  - project.openshift.io
+  resources:
+  - projects
+  verbs:
+  - get
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - '*'
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
   - create
+  - delete
   - get
   - list
   - patch
@@ -213,6 +244,7 @@ rules:
   resources:
   - openstackdataplanedeployments/status
   - openstackdataplanenodesets/status
+  - openstackdataplaneservices/status
   verbs:
   - get
   - patch
@@ -221,20 +253,10 @@ rules:
   - dataplane.openstack.org
   resources:
   - openstackdataplanenodesets
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
   - openstackdataplaneservices
   verbs:
   - create
+  - delete
   - get
   - list
   - patch
@@ -395,6 +417,17 @@ rules:
   - update
   - watch
 - apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
   - network.openstack.org
   resources:
   - dnsdata
@@ -477,6 +510,43 @@ rules:
   - list
   - watch
 - apiGroups:
+  - operator.openstack.org
+  resources:
+  - openstacks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.openstack.org
+  resources:
+  - openstacks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - operator.openstack.org
+  resources:
+  - openstacks/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operators.coreos.com
+  resources:
+  - clusterserviceversions
+  - installplans
+  - operators
+  - subscriptions
+  verbs:
+  - delete
+  - get
+  - list
+- apiGroups:
   - ovn.openstack.org
   resources:
   - ovncontrollers
@@ -502,12 +572,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - project.openshift.io
-  resources:
-  - projects
-  verbs:
-  - get
 - apiGroups:
   - rabbitmq.com
   resources:
@@ -535,15 +599,17 @@ rules:
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
+  - clusterrolebindings
+  - clusterroles
+  verbs:
+  - '*'
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
   - rolebindings
   - roles
   verbs:
-  - create
-  - get
-  - list
-  - patch
-  - update
-  - watch
+  - '*'
 - apiGroups:
   - redis.openstack.org
   resources:
