@@ -145,6 +145,12 @@ spec:
                   osImage:
                     default: edpm-hardened-uefi.qcow2
                     type: string
+                  osImageDeploymentType:
+                    default: SelfExtracting
+                    enum:
+                    - SelfExtracting
+                    - PassThrough
+                    type: string
                   passwordSecret:
                     properties:
                       name:

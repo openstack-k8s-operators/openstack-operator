@@ -50,6 +50,7 @@ spec:
           metadata:
             type: object
           spec:
+            description: KeystoneAPISpec defines the desired state of KeystoneAPI
             properties:
               adminProject:
                 default: admin
@@ -102,7 +103,7 @@ spec:
                 description: ExtraMounts containing conf files
                 items:
                   description: |-
-                    KeystoneExtraVolMounts exposes additional parameters processed by keystone-operator
+                    KeystoneExtraMounts exposes additional parameters processed by keystone-operator
                     and defines the common VolMounts structure provided by the main storage module
                   properties:
                     extraVol:

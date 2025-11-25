@@ -55,11 +55,13 @@ spec:
             properties:
               agentImageUrl:
                 description: AgentImageURL - Container image URL for the sidecar container
-                  that discovers provisioning network IPs
+                  that discovers provisioning network IPs. Ignored when osImageDeploymentType
+                  is PassThrough.
                 type: string
               apacheImageUrl:
                 description: ApacheImageURL - Container image URL for the main container
-                  that serves the downloaded OS qcow2 image (osImage)
+                  that serves the downloaded OS qcow2 image (osImage). Ignored when
+                  osImageDeploymentType is PassThrough.
                 type: string
               automatedCleaningMode:
                 default: metadata
@@ -282,12 +284,23 @@ spec:
                     type: object
                 type: object
               osContainerImageUrl:
-                description: OSContainerImageURL - Container image URL for init with
-                  the OS qcow2 image (osImage)
+                description: OSContainerImageURL - When osImageDeploymentType is SelfExtracting,
+                  container image URL for init with the OS qcow2 image (osImage).
+                  When osImageDeploymentType is PassThrough this can be any image
+                  URL which the underlying Metal3 instance supports.
                 type: string
               osImage:
                 default: edpm-hardened-uefi.qcow2
-                description: OSImage - OS qcow2 image Name
+                description: OSImage - OS qcow2 image Name. Ignored when osImageDeploymentType
+                  is PassThrough.
+                type: string
+              osImageDeploymentType:
+                default: SelfExtracting
+                description: OSImageDeploymentType - Whether the OS image deployment
+                  is self-extracting or pass-through based
+                enum:
+                - SelfExtracting
+                - PassThrough
                 type: string
               passwordSecret:
                 description: |-
@@ -307,18 +320,21 @@ spec:
                 x-kubernetes-map-type: atomic
               provisionServerName:
                 description: ProvisionServerName - Optional. Existing OpenStackProvisionServer
-                  to use, else one would be created.
+                  to use, else one would be created. Ignored when osImageDeploymentType
+                  is PassThrough.
                 type: string
               provisionServerNodeSelector:
                 additionalProperties:
                   type: string
                 description: ProvisonServerNodeSelector to target subset of worker
-                  nodes running provision server
+                  nodes running provision server, ignored when osImageDeploymentType
+                  is PassThrough.
                 type: object
               provisioningInterface:
                 description: ProvisioningInterface - Optional. If not provided along
                   with ProvisionServerName, it would be discovered from CBO.  This
-                  is the provisioning interface on the OCP masters/workers.
+                  is the provisioning interface on the OCP masters/workers. Ignored
+                  when osImageDeploymentType is PassThrough.
                 type: string
             required:
             - cloudUserName

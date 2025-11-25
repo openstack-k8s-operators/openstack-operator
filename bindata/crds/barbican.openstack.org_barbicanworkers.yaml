@@ -88,7 +88,7 @@ spec:
                 type: object
               enabledSecretStores:
                 items:
-                  description: This SecretStore type is used by the EnabledSecretStores
+                  description: SecretStore type is used by the EnabledSecretStores
                     variable inside the specification.
                   enum:
                   - simple_crypto
@@ -100,8 +100,8 @@ spec:
                 x-kubernetes-list-type: set
               globalDefaultSecretStore:
                 default: simple_crypto
-                description: This SecretStore type is used by the EnabledSecretStores
-                  variable inside the specification.
+                description: SecretStore type is used by the EnabledSecretStores variable
+                  inside the specification.
                 enum:
                 - simple_crypto
                 - pkcs11

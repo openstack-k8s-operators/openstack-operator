@@ -147,9 +147,19 @@ spec:
                 description: Image used for the ovn-controller container (will be
                   set to environmental default if empty)
                 type: string
+              ovnLogLevel:
+                default: info
+                description: OVNLogLevel - Set log level off, emer, err, warn, info,
+                  or dbg. Default is info.
+                type: string
               ovsContainerImage:
                 description: Image used for the ovsdb-server and ovs-vswitchd containers
                   (will be set to environmental default if empty)
+                type: string
+              ovsLogLevel:
+                default: info
+                description: OVSLogLevel - Set log level off, emer, err, warn, info,
+                  or dbg. Default is info.
                 type: string
               resources:
                 description: |-

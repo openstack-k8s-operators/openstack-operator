@@ -253,16 +253,44 @@ subjects:
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mariadb-operator-operator-metrics-auth-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mariadb-operator-operator-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: mariadb-operator-proxy-rolebinding
+  name: mariadb-operator-operator-metrics-auth-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: mariadb-operator-proxy-role
+  name: mariadb-operator-operator-metrics-auth-role
 subjects:
 - kind: ServiceAccount
-  name: mariadb-operator-controller-manager
+  name: mariadb-operator-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: v1
@@ -282,3 +310,24 @@ spec:
   selector:
     app.kubernetes.io/name: mariadb-operator
     control-plane: controller-manager
+---
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: metrics-certs
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: mariadb-operator
+  name: mariadb-operator-metrics-certs
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - mariadb-operator-metrics-service.{{ .OperatorNamespace }}.svc
+  - mariadb-operator-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: mariadb-operator-selfsigned-issuer
+  secretName: mariadb-operator-metrics-server-cert
