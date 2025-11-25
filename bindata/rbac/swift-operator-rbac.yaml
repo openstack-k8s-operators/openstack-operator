@@ -331,16 +331,44 @@ subjects:
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: swift-operator-operator-metrics-auth-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: swift-operator-operator-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: swift-operator-proxy-rolebinding
+  name: swift-operator-operator-metrics-auth-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: swift-operator-proxy-role
+  name: swift-operator-operator-metrics-auth-role
 subjects:
 - kind: ServiceAccount
-  name: swift-operator-controller-manager
+  name: swift-operator-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: v1
@@ -360,3 +388,24 @@ spec:
   selector:
     app.kubernetes.io/name: swift-operator
     control-plane: controller-manager
+---
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: metrics-certs
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: swift-operator
+  name: swift-operator-metrics-certs
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - swift-operator-metrics-service.{{ .OperatorNamespace }}.svc
+  - swift-operator-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: swift-operator-selfsigned-issuer
+  secretName: swift-operator-metrics-server-cert

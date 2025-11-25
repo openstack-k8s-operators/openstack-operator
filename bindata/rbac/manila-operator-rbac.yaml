@@ -294,16 +294,44 @@ subjects:
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manila-operator-operator-metrics-auth-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manila-operator-operator-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: manila-operator-proxy-rolebinding
+  name: manila-operator-operator-metrics-auth-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: manila-operator-proxy-role
+  name: manila-operator-operator-metrics-auth-role
 subjects:
 - kind: ServiceAccount
-  name: manila-operator-controller-manager
+  name: manila-operator-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: v1
@@ -323,3 +351,24 @@ spec:
   selector:
     app.kubernetes.io/name: manila-operator
     control-plane: controller-manager
+---
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: metrics-certs
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: manila-operator
+  name: manila-operator-metrics-certs
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - manila-operator-metrics-service.{{ .OperatorNamespace }}.svc
+  - manila-operator-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: manila-operator-selfsigned-issuer
+  secretName: manila-operator-metrics-server-cert

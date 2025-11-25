@@ -283,16 +283,44 @@ subjects:
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: heat-operator-operator-metrics-auth-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: heat-operator-operator-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: heat-operator-proxy-rolebinding
+  name: heat-operator-operator-metrics-auth-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: heat-operator-proxy-role
+  name: heat-operator-operator-metrics-auth-role
 subjects:
 - kind: ServiceAccount
-  name: heat-operator-controller-manager
+  name: heat-operator-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: v1
@@ -312,3 +340,24 @@ spec:
   selector:
     app.kubernetes.io/name: heat-operator
     control-plane: controller-manager
+---
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: metrics-certs
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: heat-operator
+  name: heat-operator-metrics-certs
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - heat-operator-metrics-service.{{ .OperatorNamespace }}.svc
+  - heat-operator-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: heat-operator-selfsigned-issuer
+  secretName: heat-operator-metrics-server-cert
