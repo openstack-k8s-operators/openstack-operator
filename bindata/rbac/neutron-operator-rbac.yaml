@@ -289,16 +289,44 @@ subjects:
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: neutron-operator-operator-metrics-auth-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: neutron-operator-operator-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: neutron-operator-proxy-rolebinding
+  name: neutron-operator-operator-metrics-auth-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: neutron-operator-proxy-role
+  name: neutron-operator-operator-metrics-auth-role
 subjects:
 - kind: ServiceAccount
-  name: neutron-operator-controller-manager
+  name: neutron-operator-operator-controller-manager
   namespace: '{{ .OperatorNamespace }}'
 ---
 apiVersion: v1
@@ -318,3 +346,24 @@ spec:
   selector:
     app.kubernetes.io/name: neutron-operator
     control-plane: controller-manager
+---
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: metrics-certs
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: neutron-operator
+  name: neutron-operator-metrics-certs
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - neutron-operator-metrics-service.{{ .OperatorNamespace }}.svc
+  - neutron-operator-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: neutron-operator-selfsigned-issuer
+  secretName: neutron-operator-metrics-server-cert
