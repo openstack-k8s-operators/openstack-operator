@@ -432,6 +432,11 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		if telemetry.Spec.Autoscaling.HeatInstance == "" {
 			telemetry.Spec.Autoscaling.HeatInstance = heatName
 		}
+		if telemetry.Spec.MetricStorage.MonitoringStack != nil &&
+			telemetry.Spec.MetricStorage.MonitoringStack.Persistent != nil &&
+			telemetry.Spec.MetricStorage.MonitoringStack.Persistent.PvcStorageClass == "" {
+			telemetry.Spec.MetricStorage.MonitoringStack.Persistent.PvcStorageClass = instance.Spec.StorageClass
+		}
 		if telemetry.Spec.CloudKitty.StorageClass == "" {
 			telemetry.Spec.CloudKitty.StorageClass = instance.Spec.StorageClass
 		}
