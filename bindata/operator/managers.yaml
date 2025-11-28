@@ -78,28 +78,6 @@ spec:
           name: metrics-certs
           readOnly: true
 {{- end }}
-{{- if isEnvVarFalse .Deployment.Manager.Env "METRICS_CERTS" }}
-      - args:
-        - --secure-listen-address=0.0.0.0:8443
-        - --upstream=http://127.0.0.1:8080/
-        - --logtostderr=true
-        - --v=0
-        image: {{ .Deployment.KubeRbacProxy.Image }}
-        name: kube-rbac-proxy
-        ports:
-        - containerPort: 8443
-          name: https
-          protocol: TCP
-        resources:
-          limits:
-            cpu: {{ .Deployment.KubeRbacProxy.Resources.Limits.CPU }}
-            memory: {{ .Deployment.KubeRbacProxy.Resources.Limits.Memory }}
-          requests:
-            cpu: {{ .Deployment.KubeRbacProxy.Resources.Requests.CPU }}
-            memory: {{ .Deployment.KubeRbacProxy.Resources.Requests.Memory }}
-        securityContext:
-          allowPrivilegeEscalation: false
-{{- end }}
       securityContext:
         runAsNonRoot: true
       serviceAccountName: {{ .Name }}-operator-controller-manager
