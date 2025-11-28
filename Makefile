@@ -157,7 +157,6 @@ bindata: kustomize yq ## Call sync bindata script
 	sed -i bindata/operator/operator.yaml -e "/envCustom/c\\{{- range .OpenStackOperator.Deployment.Manager.Env }}\n        - name: '{{ .Name }}'\n          value: '{{ .Value }}'\n{{- end }}"
 	sed -i bindata/operator/operator.yaml -e "/customLimits/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.Memory }}"
 	sed -i bindata/operator/operator.yaml -e "/customRequests/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.Memory }}"
-	sed -i bindata/operator/operator.yaml -e "s|kube-rbac-proxy:replace_me.*|'{{ .OpenStackOperator.Deployment.KubeRbacProxy.Image }}'|"
 	sed -i bindata/operator/operator.yaml -e "/customTolerations/c\\      tolerations:\n{{- range .OpenStackOperator.Deployment.Tolerations }}\n      - key: \"{{ .Key }}\"\n{{- if .Operator }}\n        operator: \"{{ .Operator }}\"\n{{- end }}\n{{- if .Value }}\n        value: \"{{ .Value }}\"\n{{- end }}\n{{- if .Effect }}\n        effect: \"{{ .Effect }}\"\n{{- end }}\n{{- if .TolerationSeconds }}\n        tolerationSeconds: {{ .TolerationSeconds }}\n{{- end }}\n{{- end }}"
 	cp config/operator/managers.yaml bindata/operator/
 	cp config/operator/rabbit.yaml bindata/operator/

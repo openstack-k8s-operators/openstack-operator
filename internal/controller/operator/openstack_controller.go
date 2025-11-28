@@ -69,7 +69,6 @@ var (
 	envRelatedOperatorImages         (map[string]*string) // operatorName -> image
 	envRelatedOpenStackServiceImages (map[string]*string) // full_related_image_name -> image
 	operatorImage                    string
-	kubeRbacProxyImage               string
 	openstackReleaseVersion          string
 	leaseDuration                    string
 	renewDeadline                    string
@@ -92,8 +91,6 @@ func SetupEnv() {
 			log.Log.Info("Found operator related image", "operator", operatorName, "image", envArr[1])
 		} else if strings.HasPrefix(envArr[0], "RELATED_IMAGE_") {
 			envRelatedOpenStackServiceImages[envArr[0]] = &envArr[1]
-		} else if envArr[0] == "KUBE_RBAC_PROXY" {
-			kubeRbacProxyImage = envArr[1]
 		} else if envArr[0] == "OPERATOR_IMAGE_URL" {
 			operatorImage = envArr[1]
 			envRelatedOperatorImages[operatorv1beta1.OpenStackOperatorName] = &operatorImage
@@ -495,19 +492,6 @@ func (r *OpenStackReconciler) applyRBAC(ctx context.Context, instance *operatorv
 }
 
 func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
-	kubeRbacProxyContainer := operator.Container{
-		Image: kubeRbacProxyImage,
-		Resources: operator.Resource{
-			Limits: &operator.ResourceList{
-				CPU:    operatorv1beta1.DefaultRbacProxyCPULimit.String(),
-				Memory: operatorv1beta1.DefaultRbacProxyMemoryLimit.String(),
-			},
-			Requests: &operator.ResourceList{
-				CPU:    operatorv1beta1.DefaultRbacProxyCPURequests.String(),
-				Memory: operatorv1beta1.DefaultRbacProxyMemoryRequests.String(),
-			},
-		},
-	}
 	defaultEnv := []corev1.EnvVar{
 		{
 			Name:  "LEASE_DURATION",
@@ -566,8 +550,7 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 							},
 						},
 					},
-					KubeRbacProxy: kubeRbacProxyContainer,
-					Tolerations:   operatorv1beta1.DefaultTolerations,
+					Tolerations: operatorv1beta1.DefaultTolerations,
 				},
 			}
 
