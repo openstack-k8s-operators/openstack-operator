@@ -16,6 +16,8 @@ github.com/evanphx/json-patch v5.9.11+incompatible h1:ixHHqfcGvxhWkniF1tWxBHA0yb
 github.com/evanphx/json-patch v5.9.11+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch/v5 v5.9.11 h1:/8HVnzMq13/3x9TPvjG08wUGqBTmZBsCWzjTM0wiaDU=
 github.com/evanphx/json-patch/v5 v5.9.11/go.mod h1:3j+LviiESTElxA4p3EMKAB9HXj3/XEtnUf6OZxqIQTM=
+github.com/fmount/cinder-operator/api v0.1.1-0.20251202091338-541711b0ad64 h1:P3YV/WDy/eyHctxMQATm6RZcoG/2jn0aqLmH1Grs7rs=
+github.com/fmount/cinder-operator/api v0.1.1-0.20251202091338-541711b0ad64/go.mod h1:IrtEtP+mjH2pHLQvk9ZzKebtjMW50HKG0IhooZgmmDw=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
 github.com/fxamacker/cbor/v2 v2.9.0 h1:NpKPmjDBgUfBms6tr6JZkTHtfFGcMKsw3eGcmD/sapM=
@@ -116,8 +118,6 @@ github.com/openshift/api v0.0.0-20250711200046-c86d80652a9e h1:E1OdwSpqWuDPCedyU
 github.com/openshift/api v0.0.0-20250711200046-c86d80652a9e/go.mod h1:Shkl4HanLwDiiBzakv+con/aMGnVE2MAGvoKp5oyYUo=
 github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20251125115107-f489fa5ceb3c h1:cQRQbyBmYfS4Ubj/0hwj5IVs0AAZqMyhqA1i50r4oTI=
 github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20251125115107-f489fa5ceb3c/go.mod h1:HURjuNEy1OrE7bn2snCYMzk148bHaD7u7JleEu9h5ws=
-github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20251125143015-0548029d9df0 h1:BfTkwCr4sP5PlsQu65CHO8ZTIDNK7BfB0UWbFTRh730=
-github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20251125143015-0548029d9df0/go.mod h1:IrtEtP+mjH2pHLQvk9ZzKebtjMW50HKG0IhooZgmmDw=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251125143014-f2b7132f2963 h1:oMTI+YjFMxX2b2Ac9J/YSdpkB1egfSdFDype9sD2y2E=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251125143014-f2b7132f2963/go.mod h1:qzxe5RJalpItYbD3+pDIGMrPer/P5M50LQQyuusU7lI=
 github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20251127153827-e055abae3b33 h1:QwYA2HJKLxOsVBjtGURvhnx2m0yQUB0fN/7IPK1yI74=
