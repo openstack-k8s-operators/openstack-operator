@@ -60,7 +60,7 @@ spec:
                 description: |-
                   CustomServiceConfig - customize the service config using this parameter to change service defaults,
                   or overwrite rendered information using raw OpenStack config format. The content gets added to
-                  to /etc/<service>/<service>.conf.d directory as a custom config file.
+                  the /etc/<service>/<service>.conf.d directory as a custom config file.
                 type: string
               customServiceConfigSecrets:
                 description: |-
