@@ -16,6 +16,7 @@ github.com/evanphx/json-patch v5.9.11+incompatible h1:ixHHqfcGvxhWkniF1tWxBHA0yb
 github.com/evanphx/json-patch v5.9.11+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch/v5 v5.9.11 h1:/8HVnzMq13/3x9TPvjG08wUGqBTmZBsCWzjTM0wiaDU=
 github.com/evanphx/json-patch/v5 v5.9.11/go.mod h1:3j+LviiESTElxA4p3EMKAB9HXj3/XEtnUf6OZxqIQTM=
+github.com/fmount/cinder-operator/api v0.1.1-0.20251212090128-387a4717706b h1:cq4fQg7w9t9S4xx/SB4/BVSL+v1CFZ9JPLn2/txinFU=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
 github.com/fxamacker/cbor/v2 v2.9.0 h1:NpKPmjDBgUfBms6tr6JZkTHtfFGcMKsw3eGcmD/sapM=
@@ -116,8 +117,6 @@ github.com/openshift/api v0.0.0-20250711200046-c86d80652a9e h1:E1OdwSpqWuDPCedyU
 github.com/openshift/api v0.0.0-20250711200046-c86d80652a9e/go.mod h1:Shkl4HanLwDiiBzakv+con/aMGnVE2MAGvoKp5oyYUo=
 github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20251125115107-f489fa5ceb3c h1:cQRQbyBmYfS4Ubj/0hwj5IVs0AAZqMyhqA1i50r4oTI=
 github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20251125115107-f489fa5ceb3c/go.mod h1:HURjuNEy1OrE7bn2snCYMzk148bHaD7u7JleEu9h5ws=
-github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20251204132059-3dda695e96ae h1:KNfIrxh4nfNvh6PC8pekXefNtQgvWuAGpUefqRW9XUU=
-github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20251204132059-3dda695e96ae/go.mod h1:IrtEtP+mjH2pHLQvk9ZzKebtjMW50HKG0IhooZgmmDw=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251203145024-0f6b7a8e7dc5 h1:iUSQ+Goc3KAjL+H41mf1Dqi+L8cxvTU3ooFESVSyDZw=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251203145024-0f6b7a8e7dc5/go.mod h1:n5EzCMhTH/Y0YmTMrOpLUyaE94N183c6kNI8oOWsHsk=
 github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20251203100349-4a406668b8c7 h1:ClmWHUH41VsMru9cD4IciyRJuw1bXXMBjt19JYRON/8=
