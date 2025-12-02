@@ -10,15 +10,15 @@ require (
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20251125115107-f489fa5ceb3c
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20251125143015-0548029d9df0
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20251125143014-f2b7132f2963
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20251127153827-e055abae3b33
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20251128173340-057b4476099f
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20251125115646-26b110b9f3e7
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20251125145341-8bc80a35f9c5
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20251124130651-1ff40691b66d
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20251125165311-d458faac6271
-	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20251125151441-4c2def1dda9b
+	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20251128160419-8b3a77972a77
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20251122131503-b76943960b6c
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20251122131503-b76943960b6c
-	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20251125175220-eb6712fd5b15
+	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20251128162048-2454ee694c60
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20251125174936-3989cc50de31
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20251125150830-633e42336356
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20251127143706-407c63ad016a
