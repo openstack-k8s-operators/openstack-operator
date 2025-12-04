@@ -47,7 +47,7 @@ jobs:
 
     - name: Get branch name
       id: branch-name
-      uses: tj-actions/branch-names@v7
+      uses: tj-actions/branch-names@v9
 
     - name: Set latest tag for non main branch
       if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
