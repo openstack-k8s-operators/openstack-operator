@@ -316,7 +316,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
 			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 		errors = append(errors, errs...)
-		errors = append(errors, r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Cinder.Template.ValidateCreate(basePath.Child("cinder").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Cinder.APIOverride.Route, basePath.Child("cinder").Child("apiOverride").Child("route"))...)
 	}
 
@@ -501,7 +503,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
 			cinderv1.GetCrMaxLengthCorrection(cinderName)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 		errors = append(errors, errs...)
-		errors = append(errors, r.Spec.Cinder.Template.ValidateUpdate(*old.Cinder.Template, basePath.Child("cinder").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Cinder.Template.ValidateUpdate(*old.Cinder.Template, basePath.Child("cinder").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Cinder.APIOverride.Route, basePath.Child("cinder").Child("apiOverride").Child("route"))...)
 	}
 

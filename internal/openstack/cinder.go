@@ -166,6 +166,17 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			cinder.Spec.CinderVolumes[name] = cinderCore
 		}
 
+		if instance.Spec.Cinder.Template.CinderBackups != nil {
+			bkp := make(map[string]cinderv1.CinderBackupTemplate)
+			cinder.Spec.CinderBackups = &bkp
+			for name, backup := range *instance.Spec.Cinder.Template.CinderBackups {
+				cinderBkpCore := cinderv1.CinderBackupTemplate{}
+				backup.DeepCopyInto(&cinderBkpCore.CinderBackupTemplateCore)
+				cinderBkpCore.ContainerImage = *version.Status.ContainerImages.CinderBackupImage
+				(*cinder.Spec.CinderBackups)[name] = cinderBkpCore
+			}
+		}
+
 		if cinder.Spec.Secret == "" {
 			cinder.Spec.Secret = instance.Spec.Secret
 		}
