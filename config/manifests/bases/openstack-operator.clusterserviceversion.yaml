@@ -38,6 +38,9 @@ spec:
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
       specDescriptors:
+      - description: ApplicationCredential - Parameters related to the ApplicationCredential
+        displayName: Application Credential
+        path: applicationCredential
       - description: Barbican - Parameters related to the Barbican service
         displayName: Barbican
         path: barbican
@@ -48,6 +51,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: barbican.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: barbican.applicationCredential
       - description: Enabled - Whether Barbican service should be deployed and managed
         displayName: Enabled
         path: barbican.enabled
@@ -66,6 +73,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: cinder.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: cinder.applicationCredential
       - description: Enabled - Whether Cinder service should be deployed and managed
         displayName: Enabled
         path: cinder.enabled
@@ -131,6 +142,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: glance.apiOverrides.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: glance.applicationCredential
       - description: Enabled - Whether Glance service should be deployed and managed
         displayName: Enabled
         path: glance.enabled
@@ -264,6 +279,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: neutron.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: neutron.applicationCredential
       - description: Enabled - Whether Neutron service should be deployed and managed
         displayName: Enabled
         path: neutron.enabled
@@ -286,6 +305,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: nova.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: nova.applicationCredential
       - description: |-
           CellOverride, provides the ability to override the generated manifest of several child resources
           for a nova cell. cell0 never have compute nodes and therefore it won't have a noVNCProxy deployed.
@@ -364,6 +387,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: placement.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: placement.applicationCredential
       - description: Enabled - Whether Placement service should be deployed and managed
         displayName: Enabled
         path: placement.enabled
@@ -404,6 +431,10 @@ spec:
       - description: Swift - Parameters related to the Swift service
         displayName: Swift
         path: swift
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: swift.applicationCredential
       - description: Enabled - Whether Swift service should be deployed and managed
         displayName: Enabled
         path: swift.enabled
@@ -436,6 +467,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: telemetry.aodhApiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: telemetry.applicationCredential
       - description: Enabled - Whether OpenStack Telemetry services should be deployed
           and managed
         displayName: Enabled
