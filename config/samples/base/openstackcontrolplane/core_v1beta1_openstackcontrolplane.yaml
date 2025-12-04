@@ -158,7 +158,7 @@ spec:
             strategy: persistent
             retention: 24h
             persistent:
-              pvcStorageRequest: 20G
+              pvcStorageRequest: 10G
       autoscaling:
         enabled: false
         aodh:
