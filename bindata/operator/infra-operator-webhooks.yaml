@@ -57,7 +57,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: mdnsmasq.kb.io
+  name: mdnsmasq-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org
@@ -77,10 +77,10 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: minstanceha.kb.io
+  name: minstanceha-v1beta1.kb.io
   rules:
     - apiGroups:
-        - client.openstack.org
+        - instanceha.openstack.org
       apiVersions:
       - v1beta1
       operations:
@@ -93,11 +93,11 @@ webhooks:
     service:
       name: infra-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
-      path: /mutate-client-openstack-org-v1beta1-instanceha
+      path: /mutate-instanceha-openstack-org-v1beta1-instanceha
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: mipset.kb.io
+  name: mipset-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org
@@ -117,7 +117,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: mmemcached.kb.io
+  name: mmemcached-v1beta1.kb.io
   rules:
     - apiGroups:
         - memcached.openstack.org
@@ -137,7 +137,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: mnetconfig.kb.io
+  name: mnetconfig-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org
@@ -157,7 +157,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: mrabbitmq.kb.io
+  name: mrabbitmq-v1beta1.kb.io
   rules:
     - apiGroups:
         - rabbitmq.openstack.org
@@ -177,7 +177,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: mredis.kb.io
+  name: mredis-v1beta1.kb.io
   rules:
     - apiGroups:
         - redis.openstack.org
@@ -197,7 +197,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: mreservation.kb.io
+  name: mreservation-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org
@@ -233,7 +233,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vdnsmasq.kb.io
+  name: vdnsmasq-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org
@@ -253,10 +253,10 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vinstanceha.kb.io
+  name: vinstanceha-v1beta1.kb.io
   rules:
     - apiGroups:
-        - client.openstack.org
+        - instanceha.openstack.org
       apiVersions:
       - v1beta1
       operations:
@@ -269,11 +269,11 @@ webhooks:
     service:
       name: infra-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
-      path: /validate-client-openstack-org-v1beta1-instanceha
+      path: /validate-instanceha-openstack-org-v1beta1-instanceha
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vipset.kb.io
+  name: vipset-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org
@@ -293,7 +293,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vmemcached.kb.io
+  name: vmemcached-v1beta1.kb.io
   rules:
     - apiGroups:
         - memcached.openstack.org
@@ -313,7 +313,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vnetconfig.kb.io
+  name: vnetconfig-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org
@@ -334,7 +334,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vrabbitmq.kb.io
+  name: vrabbitmq-v1beta1.kb.io
   rules:
     - apiGroups:
         - rabbitmq.openstack.org
@@ -354,7 +354,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vredis.kb.io
+  name: vredis-v1beta1.kb.io
   rules:
     - apiGroups:
         - redis.openstack.org
@@ -374,7 +374,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   failurePolicy: Fail
-  name: vreservation.kb.io
+  name: vreservation-v1beta1.kb.io
   rules:
     - apiGroups:
         - network.openstack.org

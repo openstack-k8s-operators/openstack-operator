@@ -142,6 +142,7 @@ spec:
                       bundle file
                     type: string
                   mtls:
+                    description: MTLSSection contains mutual TLS configuration
                     properties:
                       authCertSecret:
                         description: Name of the secret containing the client cert
