@@ -200,8 +200,3 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-horizontest:current-podified
         - name: RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT
           value: quay.io/openstack-k8s-operators/openstack-must-gather:latest
-          # will already be part of relatedImages as it is also directly set in the deployment in the
-          # bundle CSV. We also need an environment variable here to propagate this to the
-          # controller-manager and to other operators that require the same image to be set
-        - name: KUBE_RBAC_PROXY
-          value: quay.io/openstack-k8s-operators/kube-rbac-proxy:v0.16.0
