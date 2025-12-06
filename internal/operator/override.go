@@ -112,9 +112,40 @@ func SetOverrides(opOvr operatorv1beta1.OperatorSpec, op *Operator) {
 			op.Deployment.Manager.Resources.Requests.Memory = opOvr.ControllerManager.Resources.Requests.Memory().String()
 		}
 	}
+	if len(opOvr.ControllerManager.Env) > 0 {
+		op.Deployment.Manager.Env = mergeEnvVars(op.Deployment.Manager.Env, opOvr.ControllerManager.Env)
+	}
 	if len(opOvr.Tolerations) > 0 {
 		op.Deployment.Tolerations = mergeTolerations(op.Deployment.Tolerations, opOvr.Tolerations)
 	}
+}
+
+// mergeEnvVars merges custom environment variables with default environment variables.
+// If a custom env var has the same name as a default one, it overrides the default.
+// Otherwise, the custom env var is added to the list.
+func mergeEnvVars(defaults, custom []corev1.EnvVar) []corev1.EnvVar {
+	if len(custom) == 0 {
+		return defaults
+	}
+
+	// Start with a copy of defaults
+	merged := make([]corev1.EnvVar, len(defaults))
+	copy(merged, defaults)
+
+	// For each custom env var, check if it should override a default one
+	for _, customEnv := range custom {
+		f := func(c corev1.EnvVar) bool {
+			return c.Name == customEnv.Name
+		}
+		idx := slices.IndexFunc(merged, f)
+		if idx >= 0 {
+			merged[idx] = customEnv
+		} else {
+			merged = append(merged, customEnv)
+		}
+	}
+
+	return merged
 }
 
 // mergeTolerations merges custom tolerations with default tolerations.
