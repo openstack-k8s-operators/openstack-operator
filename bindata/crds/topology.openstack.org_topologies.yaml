@@ -1140,6 +1140,9 @@ spec:
                   type: object
                 type: array
             type: object
+          status:
+            description: TopologyStatus defines the observed state of Topology
+            type: object
         type: object
     served: true
     storage: true
