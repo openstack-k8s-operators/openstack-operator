@@ -1,0 +1,725 @@
+= DataPlane Performance Tuning for large scale deployments
+
+This guide covers strategies for scaling and optimizing performance when
+deploying and managing OpenStack External Data Plane Management (EDPM) nodes
+using the openstack-operator.
+
+== Overview
+
+The openstack-operator uses Ansible to configure and manage external compute
+nodes through its DataPlane functionality. Understanding how to structure your
+NodeSets and tune Ansible execution is critical for achieving optimal
+deployment performance, especially in large-scale environments.
+
+=== Key Performance Factors
+
+* *NodeSet organization*: How nodes are grouped affects parallelism
+* *Ansible parallelism*: Configuration of forks and execution strategy
+* *Service execution order*: Services run sequentially within each NodeSet
+* *Network and hardware resources*: Available SSH connections, CPU, memory
+
+== NodeSet Grouping Strategies
+
+A `OpenStackDataPlaneNodeSet` represents a group of nodes with similar
+configuration. How you group nodes significantly impacts deployment performance
+and manageability.
+
+=== Strategy 1: Single Large NodeSet
+
+Group all similar nodes (e.g., all compute nodes) into one NodeSet.
+
+.Single Large NodeSet Example
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: compute-nodes
+spec:
+  nodes:
+    compute-0:
+      hostName: compute-0
+      ansible:
+        ansibleHost: 192.168.122.100
+    compute-1:
+      hostName: compute-1
+      ansible:
+        ansibleHost: 192.168.122.101
+    # ... Up to any large number of computes
+    compute-99:
+      hostName: compute-99
+      ansible:
+        ansibleHost: 192.168.122.199
+----
+
+*Advantages:*
+
+* Single Ansible execution handles all nodes
+* Ansible's built-in parallelism (forks) manages concurrency
+* Simpler to manage - one OpenStackDataPlaneNodeSet CR to track
+* Consistent configuration across all nodes
+* Efficient OpenShift resource usage - less ansible-runner pods during
+  OpenStackDataPlaneDeployment execution
+
+*Disadvantages:*
+
+* Limited parallelism by Ansible forks setting
+* Single failure point - one playbook error may affect all nodes in the NodeSet
+* Harder to isolate problems to specific node subsets
+* Longer serial operations (e.g., gathering facts from 100 nodes)
+
+=== Strategy 2: Multiple Smaller NodeSets
+
+Divide nodes into multiple NodeSets, each with a subset of nodes.
+
+.Multiple NodeSets Example
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: compute-group-1
+spec:
+  nodes:
+    compute-0:
+      hostName: compute-0
+      ansible:
+        ansibleHost: 192.168.122.100
+    # ... compute-1 through compute-24
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: compute-group-2
+spec:
+  nodes:
+    compute-25:
+      hostName: compute-25
+      ansible:
+        ansibleHost: 192.168.122.125
+    # ... compute-26 through compute-49
+----
+
+*Advantages:*
+
+* *Increased parallelism*: Multiple ansible-runner pods execute simultaneously
+  for each NodeSet.
+* Better failure isolation - one NodeSet's failure doesn't block others
+* Easier troubleshooting and isolation of issues
+* Can deploy groups incrementally or independently
+* Lower memory per ansible-runner pod
+
+*Disadvantages:*
+
+* More NodeSet CRs to manage and monitor
+* Potential for configuration drift between NodeSets
+* Higher OpenShift overhead - multiple ansible-runner pods
+* More complex deployment orchestration
+
+=== Strategy 3: Role-Based NodeSets
+
+Group nodes by their role or function rather than arbitrarily.
+
+.Role-Based NodeSets Example
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: compute-standard
+spec:
+  nodes:
+    compute-0:
+      hostName: compute-0
+      ansible:
+        ansibleHost: 192.168.122.100
+    # ... standard compute nodes
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: compute-gpu
+spec:
+  nodeTemplate:
+    ansible:
+      ansibleVars:
+        edpm_nova_pci_passthrough_whitelist:
+          - '{"vendor_id": "10de", "product_id": "1b38"}'
+  nodes:
+    compute-gpu-0:
+      hostName: compute-gpu-0
+      ansible:
+        ansibleHost: 192.168.122.210
+    # ... GPU compute nodes
+----
+
+*Advantages:*
+
+* Different configurations for different node types
+* Clear organizational structure
+* Natural parallelism across different roles
+* Easier capacity planning and management
+
+*Disadvantages:*
+
+* May not maximize parallelism if roles have different node counts
+* Configuration must be carefully managed across NodeSets
+
+Shares similar advantages and disadvantages as using multiple smaller NodeSets.
+
+== Parallel Execution Patterns
+
+Understanding how the openstack-operator executes deployments is key to optimization.
+
+=== NodeSet-Level Parallelism
+
+When you create an `OpenStackDataPlaneDeployment` with multiple NodeSets, the operator starts them sequentially but they execute in parallel:
+
+.Multiple NodeSets Deployment
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-deployment
+spec:
+  nodeSets:
+    - compute-group-1
+    - compute-group-2
+    - compute-group-3
+    - compute-group-4
+----
+
+*Execution flow:*
+
+1. Operator starts deployment for `compute-group-1` → ansible-runner pod launches
+2. Operator starts deployment for `compute-group-2` → ansible-runner pod launches
+3. Operator starts deployment for `compute-group-3` → ansible-runner pod launches
+4. Operator starts deployment for `compute-group-4` → ansible-runner pod launches
+5. All four ansible-runner pods execute in parallel
+
+This means *4 separate Ansible executions run simultaneously*, each processing
+their respective NodeSets.
+
+=== Service-Level Execution
+
+Within each NodeSet, services execute *sequentially* (one after another). You
+cannot parallelize service execution within a single NodeSet, but multiple
+NodeSets executing in parallel means those services run in parallel across
+NodeSets.
+
+=== Node-Level Parallelism Within Ansible
+
+Within a single Ansible execution (one NodeSet), parallelism is controlled by
+Ansible's `forks` setting. This determines how many nodes Ansible configures
+simultaneously.
+
+*Default behavior* (from edpm-ansible playbooks):
+
+* *Strategy*: `linear` (waits for all hosts to complete a task before moving to next task)
+* *Forks*: Defaults to 5 (can be overridden with `ANSIBLE_FORKS`)
+
+== Ansible Performance Tuning
+
+=== Environment Variables
+
+You can configure Ansible behavior by setting Ansible specific environment
+variables in the NodeSet spec:
+
+.Complete Tuned NodeSet Example
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: compute-optimized
+spec:
+  env:
+    # Enable colored output for easier log reading
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+
+    # Increase parallel execution (default: 5)
+    # Set based on your control plane resources
+    - name: ANSIBLE_FORKS
+      value: "50"
+
+    # Increase SSH connection timeout (default: 10)
+    # Useful for slow networks or heavily loaded nodes
+    - name: ANSIBLE_TIMEOUT
+      value: "30"
+
+    # Enable pipelining to reduce SSH overhead
+    # Requires sudo without requiretty
+    - name: ANSIBLE_PIPELINING
+      value: "True"
+
+    # Increase SSH connection persistence
+    # Reuses SSH connections for better performance
+    - name: ANSIBLE_SSH_PIPELINING
+      value: "True"
+
+    # Control SSH connection multiplexing
+    - name: ANSIBLE_SSH_CONTROL_PATH_DIR
+      value: "/tmp/ansible-ssh-%%h-%%p-%%r"
+
+    # Set callback plugins for better output
+    - name: ANSIBLE_STDOUT_CALLBACK
+      value: "yaml"
+
+    # Increase async job status polling
+    - name: ANSIBLE_POLL_INTERVAL
+      value: "5"
+  nodes:
+    compute-0:
+      # ... node definitions
+----
+
+=== Common Ansible Tuning Techniques
+
+See
+https://docs.ansible.com/projects/ansible/latest/reference_appendices/config.html
+for a comprehensive list of ansible configuration settings.
+
+The following are the more common configuration settings related to performance
+tuning for large environments.
+
+==== Optimize Fork Count
+
+The `ANSIBLE_FORKS` setting is the most impactful tuning parameter.
+
+*Considerations:*
+
+* *Control plane resources*: More forks require more CPU/memory in the ansible-runner pod
+* *Network capacity*: More simultaneous SSH connections
+* *Target node capacity*: Nodes must handle concurrent configuration tasks
+
+*Recommendations:*
+
+* Small deployments (< 10 nodes): `ANSIBLE_FORKS=5-10`
+* Medium deployments (10-50 nodes): `ANSIBLE_FORKS=20-30`
+* Large deployments (50-100 nodes): `ANSIBLE_FORKS=50-75`
+* Very large (100+ nodes): Consider multiple NodeSets instead of very high fork count
+
+[source,yaml]
+----
+env:
+  - name: ANSIBLE_FORKS
+    value: "50"  # Tune based on your environment
+----
+
+*Performance impact*: Increased parallelism can decrease deployment times.
+
+==== Enable SSH Pipelining
+
+Pipelining reduces the number of SSH operations required for each task. See
+https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/ssh_connection.html#parameter-pipelining
+for more details.
+
+*Requirements:*
+
+* SSH user must have passwordless sudo or sudo without `requiretty`
+
+[source,yaml]
+----
+env:
+  - name: ANSIBLE_PIPELINING
+    value: "True"
+  - name: ANSIBLE_SSH_PIPELINING
+    value: "True"
+----
+
+==== Increase Timeouts for Slow Environments
+
+If you have slow networks or heavily loaded nodes:
+
+[source,yaml]
+----
+env:
+  - name: ANSIBLE_TIMEOUT
+    value: "60"  # SSH connection timeout in seconds
+  - name: ANSIBLE_GATHER_TIMEOUT
+    value: "60"  # Fact gathering timeout
+----
+
+==== Control Output and Logging
+
+Reduce overhead from excessive logging:
+
+[source,yaml]
+----
+env:
+  - name: ANSIBLE_STDOUT_CALLBACK
+    value: "yaml"  # or "json" for structured output
+  - name: ANSIBLE_DISPLAY_SKIPPED_HOSTS
+    value: "False"
+  - name: ANSIBLE_DISPLAY_OK_HOSTS
+    value: "False"  # Only show changed/failed
+  - name: ANSIBLE_RETRY_FILES_ENABLED
+    value: "False"  # Disable retry files
+----
+
+==== SSH Connection Multiplexing
+
+Reuse SSH connections for better performance:
+
+[source,yaml]
+----
+env:
+  - name: ANSIBLE_SSH_CONTROL_PATH
+    value: "/tmp/ansible-ssh-%%h-%%p-%%r"
+  - name: ANSIBLE_SSH_CONTROL_PERSIST
+    value: "60s"  # Keep connections alive for 60 seconds
+----
+
+== Using ansibleLimit for Targeted Deployments
+
+The `ansibleLimit` field allows you to target specific nodes within your NodeSets without modifying the NodeSet definitions.
+
+=== Basic Usage
+
+Deploy only to specific nodes:
+
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: limited-deployment
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-0,compute-5,compute-10"
+----
+
+This deploys only to `compute-0`, `compute-5`, and `compute-10` within the `compute-nodes` NodeSet.
+
+=== Pattern Matching
+
+Use Ansible patterns for more flexible targeting.
+See
+https://docs.ansible.com/projects/ansible/latest/inventory_guide/intro_patterns.html
+for more details on using ansible limit and pattern matching.
+
+Example OpenStackDataPlaneDeployment's using ansibleLimit and pattern matching:
+
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: pattern-limited-deployment
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-[0:9]"  # First 10 nodes (compute-0 through compute-9)
+----
+
+=== Wildcard Patterns
+
+[source,yaml]
+----
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-1*"  # Matches compute-1, compute-10, compute-11, etc.
+----
+
+=== Use Cases for ansible limit
+
+==== Gradual Rollout
+
+Deploy to nodes incrementally to validate changes:
+
+.Phase 1: Deploy to first subset  of nodes
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: rollout-phase-1
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-[0:9]"
+----
+
+.Phase 2: Deploy to next subset of nodes after validation
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: rollout-phase-2
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-[10:49]"
+----
+
+==== Hotfix Deployment
+
+Fix issues on specific problematic nodes:
+
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: hotfix-deployment
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-15,compute-23,compute-67"
+  servicesOverride
+    - "configure-os"  # Only reconfigure OS
+----
+
+==== Testing Changes
+
+Test configuration changes on a canary node:
+
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: canary-test
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-0"  # Single canary node
+----
+
+==== Combining with Multiple NodeSets
+
+The `ansibleLimit` applies to all NodeSets in the deployment:
+
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: multi-nodeset-limited
+spec:
+  nodeSets:
+    - compute-group-1
+    - compute-group-2
+    - compute-group-3
+  ansibleLimit: "compute-[0:9]"  # Applies to all three NodeSets
+----
+
+This will deploy to `compute-0` through `compute-9`, in which ever NodeSets
+they are specified in the 3 referenced NodeSets.
+
+== Scaling Strategy Comparison
+
+=== Scenario: 100 Compute Nodes Deployment
+
+Let's compare different strategies for deploying 100 compute nodes.
+
+==== Option 1: Single Large NodeSet
+
+.Configuration
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: all-computes
+spec:
+  env:
+    - name: ANSIBLE_FORKS
+      value: "50"
+  nodes:
+    # compute-0 through compute-99 (100 nodes)
+----
+
+*Characteristics:*
+
+* *Ansible executions per service*: 1
+* *Parallelism*: Up to 50 nodes at once (limited by ANSIBLE_FORKS)
+* *ansible-runner pods per service*: 1
+* *Fact gathering*: Serial across 100 nodes (even with forks, each batch completes before next)
+* *Failure handling*: One failure may require redeploying all 100 nodes
+* *Resource usage*: One large ansible-runner pod per service
+
+*Timeline example* (assuming 10 services, 5 minutes per service per node):
+
+* With forks=50: Two batches of 50 nodes
+* Service 1: Batch 1 (50 nodes) runs in parallel = 5 min, then Batch 2 (50 nodes) = 5 min → 10 min total
+* Service 2: Same pattern → 10 min total
+* Total for ~10 services: ~100 minutes
+
+==== Option 2: Four NodeSets (25 nodes each)
+
+.Configuration
+[source,yaml]
+----
+# compute-group-1: compute-0 through compute-24
+# compute-group-2: compute-25 through compute-49
+# compute-group-3: compute-50 through compute-74
+# compute-group-4: compute-75 through compute-99
+
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: compute-group-1
+spec:
+  env:
+    - name: ANSIBLE_FORKS
+      value: "25"
+  nodes:
+    # 25 nodes
+----
+
+.Deployment
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: deploy-all-groups
+spec:
+  nodeSets:
+    - compute-group-1
+    - compute-group-2
+    - compute-group-3
+    - compute-group-4
+----
+
+*Characteristics:*
+
+* *Ansible executions per service*: 4 (in parallel)
+* *Parallelism*: 4 NodeSets × 25 nodes = 100 nodes effectively in parallel
+* *ansible-runner pods per service*: 4
+* *Fact gathering*: Parallel across 4 groups
+* *Failure handling*: One group's failure doesn't block others
+* *Resource usage*: Four medium ansible-runner pods per service
+
+*Timeline example* (same assumptions):
+
+* With forks=25: Each NodeSet processes all 25 nodes in one batch
+* Service 1: All 4 groups run in parallel = 5 min total
+* Service 2: All 4 groups run in parallel = 5 min total
+* Total for all services: ~50 minutes (2x faster than Option 1)
+
+=== Comparison Table
+
+[cols="1,1,1,1",options="header"]
+|===
+| Aspect | Single NodeSet (100) | 4 NodeSets (25 each) | 10 NodeSets (10 each)
+
+| *Parallelism*
+| Limited (50 forks max)
+| High (4 executions)
+| Maximum (10 executions)
+
+| *Deployment Time*
+| ~100 minutes
+| ~50 minutes
+| ~50 minutes
+
+| *Resource Overhead*
+| Low (1 pod)
+| Medium (4 pods)
+| High (10 pods)
+
+| *Failure Isolation*
+| Poor (all-or-nothing)
+| Good (25% chunks)
+| Excellent (10% chunks)
+
+| *Management Complexity*
+| Simple (1 CR)
+| Moderate (4 CRs)
+| Complex (10 CRs)
+
+| *Troubleshooting*
+| Difficult
+| Easier
+| Easiest
+
+| *Best For*
+| Small deployments, uniform nodes
+| Balanced performance/management
+| Maximum speed, good isolation
+|===
+
+=== Recommendations
+
+*Use Single Large NodeSet when:*
+
+* You have less nodes in the NodeSet than a reasonable setting for ansible
+  forks
+* Resources are constrained (can't run multiple pods)
+* Configuration is identical across all nodes
+* Simplicity is more important than speed
+
+*Use Multiple Medium NodeSets when:*
+
+* You want balanced performance and manageability
+* Some failure isolation is important
+* You have sufficient cluster resources for multiple pods
+
+*Use Many Small NodeSets when:*
+
+* Maximum deployment speed is critical
+* Strong failure isolation is required
+* You have ample cluster resources
+* You can manage the additional CRs
+
+*Use Role-Based NodeSets when:*
+
+* Nodes have different configurations
+* Different hardware types exist
+* You need to deploy to subsets frequently
+* Organizational clarity is important
+
+== Best Practices
+
+=== Start Conservative, Then Optimize
+
+Begin with modest settings and increase based on observed performance:
+
+[source,yaml]
+----
+# Initial deployment
+env:
+  - name: ANSIBLE_FORKS
+    value: "10"
+
+# After monitoring, if resources allow
+env:
+  - name: ANSIBLE_FORKS
+    value: "30"
+----
+
+=== Use ansible limit for Validation
+
+Before deploying to all nodes, test on a subset:
+
+.Test deployment
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: validation-deployment
+spec:
+  nodeSets:
+    - compute-nodes
+  ansibleLimit: "compute-0,compute-1"
+----
+
+.Full deployment after validation
+[source,yaml]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: production-deployment
+spec:
+  nodeSets:
+    - compute-nodes
+----
