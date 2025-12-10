@@ -1,10 +1,22 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
-timeout: 60
+timeout: 500
 commands:
+  - script: |
+      echo "Waiting for OpenStack control plane to be ready..."
+      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=400s -l core.openstack.org/openstackcontrolplane
+
   - script: |
       echo "Checking rotation of non API service certificates..."
       NAMESPACE=$NAMESPACE bash ../../common/osp_check_noapi_service_certs.sh
+
+  - script: |
+      echo "Get fingerprints of all service certs after rotation"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_after
+
+  - script: |
+      echo "Check if all services from before are present in after and have rotated fingerprints"
+      bash -s < ../../common/osp_check_fingerprints.sh
 
   - script: |
       echo "Checking issuer of internal certificates..."

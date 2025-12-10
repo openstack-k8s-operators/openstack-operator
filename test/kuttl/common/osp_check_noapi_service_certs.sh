@@ -56,7 +56,7 @@ for service in "${!services_secrets[@]}"; do
         pod_cert=$(oc rsh -n "$NAMESPACE" openstackclient openssl s_client -connect "$cluster_ip:$port" -servername "$cluster_ip" </dev/null 2>/dev/null | sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p')
 
         if [[ -z "$pod_cert" ]]; then
-            echo "Error retrieving certificate from $service at $cluster_ip:$port."
+            echo "Error retrieving certificate from $service at $cluster_ip:$port in namespace $NAMESPACE."
             continue
         fi
 

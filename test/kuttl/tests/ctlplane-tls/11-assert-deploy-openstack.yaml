@@ -292,3 +292,11 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneTestCMReadyCondition
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 500
+commands:
+  - script: |
+      echo "Get fingerprints of all service certs before rotation"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_before
