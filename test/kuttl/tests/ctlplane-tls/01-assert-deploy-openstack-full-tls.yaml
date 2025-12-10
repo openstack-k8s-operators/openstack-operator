@@ -174,14 +174,28 @@ spec:
         replicas: 1
   tls:
     ingress:
-      enabled: true
       ca:
-        customIssuer: rootca-ingress-custom
+        duration: 87600h0m0s
+      cert:
+        duration: 43800h0m0s
+      enabled: true
     podLevel:
       enabled: true
       internal:
         ca:
-          customIssuer: rootca-internal-custom
+          duration: 87600h0m0s
+        cert:
+          duration: 43800h0m0s
+      libvirt:
+        ca:
+          duration: 87600h0m0s
+        cert:
+          duration: 43800h0m0s
+      ovn:
+        ca:
+          duration: 87600h0m0s
+        cert:
+          duration: 43800h0m0s
 status:
   conditions:
   - message: Setup complete
@@ -292,3 +306,27 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneTestCMReadyCondition
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 500
+commands:
+  - script: |
+      echo "Waiting for OpenStack control plane to be ready..."
+      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=400s -l core.openstack.org/openstackcontrolplane
+  - script: |
+      echo "Fail if internal http endpoints are registered (full TLS mode)"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -c "openstack endpoint list --interface internal -f value -c URL" | grep 'http:' && exit 1
+      exit 0
+  - script: |
+      echo "check ovn sb internalDbAddress use ssl"
+      oc get -n $NAMESPACE OVNDBCluster ovndbcluster-sb -o jsonpath={.status.internalDbAddress} | grep -q ssl
+  - script: |
+      echo "check ovn sb DB connection use ssl"
+      oc exec -i statefulset/ovsdbserver-sb -n $NAMESPACE -- bash -c "ovn-sbctl --no-leader-only get-connection | grep -q pssl"
+  - script: |
+      echo "check nova transport_url use ssl"
+      oc exec -i statefulset/nova-cell1-conductor -n $NAMESPACE -- bash -c "grep transport_url /etc/nova/nova.conf.d/01-nova.conf | grep -q 'ssl=1'"
+  - script: |
+      echo "check neutron ovn_sb_connection url ssl"
+      oc exec -i deployment/neutron -n $NAMESPACE -- bash -c "grep ovn_sb_connection /etc/neutron/neutron.conf.d/01-neutron.conf| grep -q ssl"

@@ -11,6 +11,14 @@ commands:
       NAMESPACE=$NAMESPACE bash ../../common/osp_check_noapi_service_certs.sh
 
   - script: |
+      echo "Get fingerprints of all service certs after rotation"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_after
+
+  - script: |
+      echo "Check if all services from before are present in after and have rotated fingerprints"
+      bash -s < ../../common/osp_check_fingerprints.sh
+
+  - script: |
       echo "Checking issuer of internal certificates..."
       oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_check_cert_issuer.sh "rootca-internal" "internal"
 

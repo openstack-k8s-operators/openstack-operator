@@ -1,0 +1,9 @@
+# Deploy with custom TLS service certs and CA certs duration
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      echo "Get fingerprints of all service certs before duration change"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_before
+  - script: |
+      oc kustomize ../../../../config/samples/tls/custom_duration | oc apply -n $NAMESPACE -f -

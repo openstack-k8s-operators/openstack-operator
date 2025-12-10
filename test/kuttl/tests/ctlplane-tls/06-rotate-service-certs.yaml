@@ -1,0 +1,10 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      echo "Get fingerprints of all service certs before rotation"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_before
+  - script: |
+      echo "Deleting secrets to trigger rotation..."
+      oc get secret -l service-cert -n $NAMESPACE -o name > /tmp/deleted-secrets.txt
+      oc delete secret -l service-cert -n $NAMESPACE

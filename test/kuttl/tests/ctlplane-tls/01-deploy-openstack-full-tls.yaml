@@ -1,3 +1,5 @@
+# Deploy with full TLS (podLevel.enabled: true)
+# This tests the transition from ingress-only TLS to full pod-level TLS
 apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:

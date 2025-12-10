@@ -174,13 +174,14 @@ spec:
         replicas: 1
   tls:
     ingress:
-      ca:
-        duration: 87600h0m0s
-      cert:
-        duration: 43800h0m0s
       enabled: true
+      ca:
+        customIssuer: rootca-ingress-custom
     podLevel:
-      enabled: false
+      enabled: true
+      internal:
+        ca:
+          customIssuer: rootca-internal-custom
 status:
   conditions:
   - message: Setup complete
@@ -297,21 +298,5 @@ kind: TestAssert
 timeout: 500
 commands:
   - script: |
-      echo "Waiting for OpenStack control plane to be ready..."
-      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=400s -l core.openstack.org/openstackcontrolplane
-  - script: |
-      echo "Fail if internal https endpoints are registered"
-      oc exec -i openstackclient -n $NAMESPACE -- bash -c "openstack endpoint list --interface internal -f value -c URL" | grep 'https:' && exit 1
-      exit 0
-  - script: |
-      echo "check ovn sb internalDbAddress use tcp"
-      oc get -n $NAMESPACE OVNDBCluster ovndbcluster-sb -o jsonpath={.status.internalDbAddress} | grep -q tcp
-  - script: |
-      echo "check ovn sb DB connection use tcp"
-      oc exec -i statefulset/ovsdbserver-sb -n $NAMESPACE -- bash -c "ovn-sbctl --no-leader-only get-connection | grep -q ptcp"
-  - script: |
-      echo "check nova transport_url use tcp"
-      oc exec -i statefulset/nova-cell1-conductor -n $NAMESPACE -- bash -c "grep transport_url /etc/nova/nova.conf.d/01-nova.conf | grep -q 'ssl=0'"
-  - script: |
-      echo "check neutron ovn_sb_connection url tcp address"
-      oc exec -i deployment/neutron -n $NAMESPACE -- bash -c "grep ovn_sb_connection /etc/neutron/neutron.conf.d/01-neutron.conf | grep -q tcp"
+      echo "Get fingerprints of all service certs before rotation"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_before
