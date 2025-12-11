@@ -58,7 +58,8 @@ spec:
 
             edpm_override_hosts: edpm-compute-no-nodes
             edpm_service_type: configure-os
-            edpm_services_override: [configure-os]
+            edpm_services_override:
+                - configure-os
 
 
         imagePullPolicy: Always

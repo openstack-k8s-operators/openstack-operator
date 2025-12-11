@@ -279,7 +279,8 @@ func (a *EEJob) FormatAEEExtraVars(
 	}
 
 	if len(deployment.Spec.ServicesOverride) > 0 {
-		a.ExtraVars["edpm_services_override"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", deployment.Spec.ServicesOverride)))
+		marshalServicesOverride, _ := json.Marshal(deployment.Spec.ServicesOverride)
+		a.ExtraVars["edpm_services_override"] = json.RawMessage(marshalServicesOverride)
 	}
 }
 

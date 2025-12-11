@@ -204,7 +204,7 @@ spec:
 
             edpm_override_hosts: openstack-edpm-tls
             edpm_service_type: tls-dns-ips
-            edpm_services_override: [install-certs-ovrd tls-dns-ips custom-tls-dns]
+            edpm_services_override: ["install-certs-ovrd","tls-dns-ips","custom-tls-dns"]
 
 
         imagePullPolicy: Always
@@ -315,7 +315,7 @@ spec:
 
             edpm_override_hosts: openstack-edpm-tls
             edpm_service_type: custom-tls-dns
-            edpm_services_override: [install-certs-ovrd tls-dns-ips custom-tls-dns]
+            edpm_services_override: ["install-certs-ovrd","tls-dns-ips","custom-tls-dns"]
 
 
         imagePullPolicy: Always

@@ -3,7 +3,6 @@ package util //nolint:revive // util is an acceptable package name in this conte
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	yaml "gopkg.in/yaml.v3"
@@ -175,22 +174,22 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 
 	// if we have any extra vars for ansible to use set them in the RUNNER_EXTRA_VARS
 	if len(a.ExtraVars) > 0 {
-		keys := make([]string, 0, len(a.ExtraVars))
-		for k := range a.ExtraVars {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		parsedExtraVars := ""
-		// unmarshal nested data structures
-		for _, variable := range keys {
+		extraVarsMap := make(map[string]interface{})
+		for variable, rawValue := range a.ExtraVars {
 			var tmp interface{}
-			err := yaml.Unmarshal(a.ExtraVars[variable], &tmp)
+			err := yaml.Unmarshal(rawValue, &tmp)
 			if err != nil {
 				return nil, err
 			}
-			parsedExtraVars += fmt.Sprintf("%s: %s\n", variable, tmp)
+			extraVarsMap[variable] = tmp
 		}
-		setRunnerEnvVar(h, "RUNNER_EXTRA_VARS", parsedExtraVars, "extraVars", job, hashes)
+
+		yamlBytes, err := yaml.Marshal(extraVarsMap)
+		if err != nil {
+			return nil, err
+		}
+
+		setRunnerEnvVar(h, "RUNNER_EXTRA_VARS", string(yamlBytes), "extraVars", job, hashes)
 	}
 
 	hashPodSpec(h, podSpec, hashes)
