@@ -7,6 +7,9 @@ spec:
   dataSources:
     - secretRef:
         name: neutron-ovn-agent-neutron-config
+    - configMapRef:
+        name: ovn-bgp-agent-extra-config
+        optional: true
   tlsCerts:
     default:
       contents:

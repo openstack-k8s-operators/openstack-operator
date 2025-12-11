@@ -7,6 +7,9 @@ spec:
   dataSources:
     - secretRef:
         name: neutron-dhcp-agent-neutron-config
+    - configMapRef:
+        name: neutron-dhcp-extra-config
+        optional: true
   caCerts: combined-ca-bundle
   containerImageFields:
   - EdpmNeutronDhcpAgentImage
