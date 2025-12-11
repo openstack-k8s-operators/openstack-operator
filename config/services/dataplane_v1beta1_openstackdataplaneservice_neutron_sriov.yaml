@@ -7,6 +7,9 @@ spec:
   dataSources:
     - secretRef:
         name: neutron-sriov-agent-neutron-config
+    - configMapRef:
+        name: neutron-sriov-extra-config
+        optional: true
   caCerts: combined-ca-bundle
   containerImageFields:
   - EdpmNeutronSriovAgentImage
