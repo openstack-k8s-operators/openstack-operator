@@ -166,7 +166,9 @@ func (r *OpenStackDataPlaneService) DefaultLabels() {
 		r.Labels = labels
 	} else {
 		for k, v := range labels {
-			r.Labels[k] = v
+			if _, ok := r.Labels[k]; !ok {
+					r.Labels[k] = v
+			}
 		}
 	}
 }
