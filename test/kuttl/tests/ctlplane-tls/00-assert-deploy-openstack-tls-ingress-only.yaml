@@ -1,24 +1,3 @@
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: keystone-public-route
-spec:
-  duration: 500h0m0s
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: keystone-public-svc
-spec:
-  duration: 500h0m0s
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: keystone-internal-svc
-spec:
-  duration: 500h0m0s
----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
 metadata:
@@ -195,28 +174,13 @@ spec:
         replicas: 1
   tls:
     ingress:
-      enabled: true
       ca:
-        duration: 1000h0m0s
+        duration: 87600h0m0s
       cert:
-        duration: 500h0m0s
-    podLevel:
+        duration: 43800h0m0s
       enabled: true
-      internal:
-        ca:
-          duration: 1000h0m0s
-        cert:
-          duration:  500h0m0s
-      libvirt:
-        ca:
-          duration: 1000h0m0s
-        cert:
-          duration:  500h0m0s
-      ovn:
-        ca:
-          duration: 1000h0m0s
-        cert:
-          duration:  500h0m0s
+    podLevel:
+      enabled: false
 status:
   conditions:
   - message: Setup complete
@@ -327,3 +291,28 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneTestCMReadyCondition
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 500
+commands:
+  - script: |
+      echo "Waiting for OpenStack control plane to be ready..."
+      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=400s -l core.openstack.org/openstackcontrolplane
+  - script: |
+      echo "Fail if internal https endpoints are registered (ingress-only mode)"
+      oc exec -i openstackclient -n $NAMESPACE -- bash -c "openstack endpoint list --interface internal -f value -c URL" | grep 'https:' && exit 1
+      exit 0
+  - script: |
+      echo "check ovn sb internalDbAddress use tcp (not ssl)"
+      oc get -n $NAMESPACE OVNDBCluster ovndbcluster-sb -o jsonpath={.status.internalDbAddress} | grep -q tcp
+  - script: |
+      echo "check ovn sb DB connection use tcp"
+      oc exec -i statefulset/ovsdbserver-sb -n $NAMESPACE -- bash -c "ovn-sbctl --no-leader-only get-connection | grep -q ptcp"
+  - script: |
+      echo "check nova transport_url use tcp"
+      oc exec -i statefulset/nova-cell1-conductor -n $NAMESPACE -- bash -c "grep transport_url /etc/nova/nova.conf.d/01-nova.conf | grep -q 'ssl=0'"
+  - script: |
+      echo "check neutron ovn_sb_connection url tcp address"
+      oc exec -i deployment/neutron -n $NAMESPACE -- bash -c "grep ovn_sb_connection /etc/neutron/neutron.conf.d/01-neutron.conf | grep -q tcp"
+
