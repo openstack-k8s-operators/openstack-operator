@@ -9,6 +9,9 @@ spec:
         name: neutron-ovn-metadata-agent-neutron-config
     - secretRef:
         name: nova-metadata-neutron-config
+    - configMapRef:
+        name: neutron-metadata-extra-config
+        optional: true
   tlsCerts:
     default:
       contents:
