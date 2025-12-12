@@ -36,10 +36,9 @@ type Operator struct {
 
 // Deployment -
 type Deployment struct {
-	Replicas      *int32
-	Manager       Container
-	KubeRbacProxy Container
-	Tolerations   []corev1.Toleration
+	Replicas    *int32
+	Manager     Container
+	Tolerations []corev1.Toleration
 }
 
 // Container -
