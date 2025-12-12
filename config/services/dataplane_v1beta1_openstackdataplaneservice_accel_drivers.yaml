@@ -1,0 +1,8 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: accel-drivers
+spec:
+  playbook: osp.edpm.accel_drivers
+  edpmServiceType: accel-drivers
