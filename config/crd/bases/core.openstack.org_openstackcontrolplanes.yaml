@@ -3425,6 +3425,8 @@ spec:
                                 x-kubernetes-int-or-string: true
                               type: object
                           type: object
+                        rootDatabaseAccount:
+                          type: string
                         secret:
                           type: string
                         storageClass:
@@ -3447,7 +3449,6 @@ spec:
                           type: object
                       required:
                       - replicas
-                      - secret
                       - storageClass
                       - storageRequest
                       type: object
@@ -6819,6 +6820,11 @@ spec:
                               type: string
                             storageRequest:
                               type: string
+                            terminationGracePeriodSeconds:
+                              default: 120
+                              format: int64
+                              minimum: 30
+                              type: integer
                             topologyRef:
                               properties:
                                 name:

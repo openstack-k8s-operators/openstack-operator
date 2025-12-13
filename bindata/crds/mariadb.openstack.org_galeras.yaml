@@ -137,8 +137,18 @@ spec:
                       More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                     type: object
                 type: object
+              rootDatabaseAccount:
+                description: |-
+                  RootDatabaseAccount - name of MariaDBAccount which will be used to
+                  generate root account / password.
+                  this account is generated if not exists, and a name is chosen based
+                  on a naming convention if not present
+                type: string
               secret:
-                description: Name of the secret to look for password keys
+                description: |-
+                  Name of the legacy secret to locate the initial galera root
+                  password
+                  this field will be removed once scripts can adjust to using root_auth.sh
                 type: string
               storageClass:
                 description: Storage class to host the mariadb databases
@@ -177,7 +187,6 @@ spec:
             required:
             - containerImage
             - replicas
-            - secret
             - storageClass
             - storageRequest
             type: object
@@ -296,6 +305,9 @@ spec:
                   the opentack-operator in the top-level CR (e.g. the ContainerImage)
                 format: int64
                 type: integer
+              rootDatabaseSecret:
+                description: name of the Secret that is being used for the root password
+                type: string
               safeToBootstrap:
                 description: Name of the node that can safely bootstrap a cluster
                 type: string
