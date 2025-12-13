@@ -582,6 +582,18 @@ spec:
                     storageRequest:
                       description: StorageRequest
                       type: string
+                    terminationGracePeriodSeconds:
+                      default: 120
+                      description: |-
+                        terminationGracePeriodSeconds - Pod termination grace period in seconds.
+                        Controls how long to wait for conductor pods to shut down gracefully before they are forcefully terminated.
+                        The default value is long enough for periodic tasks to complete but not for long-running tasks (deployment, cleaning).
+                        A node reserved for a long running task will be put into a failed state when the conductor reserving it is forcefully terminated.
+                        The terminationGracePeriodSeconds should be chosen with this and maintenance processes in mind.
+                        Changing terminationGracePeriodSeconds results in conductor pods being restarted with the old value.
+                      format: int64
+                      minimum: 30
+                      type: integer
                     topologyRef:
                       description: |-
                         TopologyRef to apply the Topology defined by the associated CR referenced
