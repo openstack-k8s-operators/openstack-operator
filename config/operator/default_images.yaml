@@ -12,9 +12,9 @@ spec:
       - name: operator
         env:
         - name: RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
+          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:18.0-fr4-latest
         - name: RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT
-          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:18.0-fr4-latest
         - name: RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-aodh-api:current-podified
         - name: RELATED_IMAGE_AODH_EVALUATOR_IMAGE_URL_DEFAULT
@@ -199,7 +199,7 @@ spec:
         - name: TEST_HORIZONTEST_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-horizontest:current-podified
         - name: RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT
-          value: quay.io/openstack-k8s-operators/openstack-must-gather:latest
+          value: quay.io/openstack-k8s-operators/openstack-must-gather:18.0-fr4-latest
           # will already be part of relatedImages as it is also directly set in the deployment in the
           # bundle CSV. We also need an environment variable here to propagate this to the
           # controller-manager and to other operators that require the same image to be set
