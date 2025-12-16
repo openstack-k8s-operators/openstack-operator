@@ -142,4 +142,6 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.13 //allow-merging
 
 replace k8s.io/component-base => k8s.io/component-base v0.31.13 //allow-merging
 
+replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.19.7 //allow-merging
+
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
