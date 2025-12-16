@@ -3,3 +3,6 @@ kind: TestStep
 commands:
   - script: |
       oc apply -n $NAMESPACE -f ../../../../config/samples/core_v1beta1_openstackcontrolplane_collapsed_cell.yaml
+  - script: |
+      # Disable the services that are not needed for the test (these are also already covered in the ctlplane-basic-deployment test)
+      NAMESPACE=$NAMESPACE ../../common/toggle_services.sh openstack-collapsed-cell "barbican,cinder,swift" false
