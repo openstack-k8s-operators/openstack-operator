@@ -4,29 +4,38 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
   creationTimestamp: null
-  name: transporturls.rabbitmq.openstack.org
+  name: rabbitmqvhosts.rabbitmq.openstack.org
 spec:
   group: rabbitmq.openstack.org
   names:
-    kind: TransportURL
-    listKind: TransportURLList
-    plural: transporturls
-    singular: transporturl
+    categories:
+    - all
+    - rabbitmq
+    kind: RabbitMQVhost
+    listKind: RabbitMQVhostList
+    plural: rabbitmqvhosts
+    shortNames:
+    - rmqvhost
+    singular: rabbitmqvhost
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: Status
-      jsonPath: .status.conditions[0].status
+    - jsonPath: .spec.rabbitmqClusterName
+      name: Cluster
+      type: string
+    - jsonPath: .spec.name
+      name: Vhost
+      type: string
+    - jsonPath: .status.conditions[0].status
       name: Status
       type: string
-    - description: Message
-      jsonPath: .status.conditions[0].message
+    - jsonPath: .status.conditions[0].message
       name: Message
       type: string
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: TransportURL is the Schema for the transporturls API
+        description: RabbitMQVhost is the Schema for the rabbitmqvhosts API
         properties:
           apiVersion:
             description: |-
@@ -46,29 +55,21 @@ spec:
           metadata:
             type: object
           spec:
-            description: TransportURLSpec defines the desired state of TransportURL
+            description: RabbitMQVhostSpec defines the desired state of RabbitMQVhost
             properties:
+              name:
+                default: /
+                description: Name - the vhost name in RabbitMQ (defaults to "/")
+                minLength: 1
+                type: string
               rabbitmqClusterName:
-                description: RabbitmqClusterName the name of the Rabbitmq cluster
-                  which to configure the transport URL
-                type: string
-              userRef:
-                description: UserRef - reference to a RabbitMQUser resource. If not
-                  specified, Username will be used to create a RabbitMQUser on-demand
-                type: string
-              username:
-                description: Username - RabbitMQ username. If UserRef is not specified,
-                  a RabbitMQUser will be created with this username
-                type: string
-              vhost:
-                description: Vhost - RabbitMQ vhost name. If specified and vhost doesn't
-                  exist, a RabbitMQVhost will be created. Defaults to "/" if not specified
+                description: RabbitmqClusterName - the name of the RabbitMQ cluster
                 type: string
             required:
             - rabbitmqClusterName
             type: object
           status:
-            description: TransportURLStatus defines the observed state of TransportURL
+            description: RabbitMQVhostStatus defines the observed state of RabbitMQVhost
             properties:
               conditions:
                 description: Conditions
@@ -113,28 +114,10 @@ spec:
                   type: object
                 type: array
               observedGeneration:
-                description: |-
-                  ObservedGeneration - the most recent generation observed for this
-                  service. If the observed generation is less than the spec generation,
-                  then the controller has not processed the latest changes injected by
-                  the opentack-operator in the top-level CR (e.g. the ContainerImage)
+                description: ObservedGeneration - the most recent generation observed
+                  for this resource
                 format: int64
                 type: integer
-              queueType:
-                description: QueueType - the queue type from the associated RabbitMq
-                  instance
-                type: string
-              rabbitmqUsername:
-                description: RabbitmqUsername - the actual username used for the RabbitMQ
-                  user
-                type: string
-              rabbitmqVhost:
-                description: RabbitmqVhost - the actual vhost name used
-                type: string
-              secretName:
-                description: SecretName - name of the secret containing the rabbitmq
-                  transport URL
-                type: string
             type: object
         type: object
     served: true
