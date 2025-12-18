@@ -4,29 +4,41 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
   creationTimestamp: null
-  name: transporturls.rabbitmq.openstack.org
+  name: rabbitmqusers.rabbitmq.openstack.org
 spec:
   group: rabbitmq.openstack.org
   names:
-    kind: TransportURL
-    listKind: TransportURLList
-    plural: transporturls
-    singular: transporturl
+    categories:
+    - all
+    - rabbitmq
+    kind: RabbitMQUser
+    listKind: RabbitMQUserList
+    plural: rabbitmqusers
+    shortNames:
+    - rmquser
+    singular: rabbitmquser
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: Status
-      jsonPath: .status.conditions[0].status
+    - jsonPath: .spec.rabbitmqClusterName
+      name: Cluster
+      type: string
+    - jsonPath: .status.username
+      name: Username
+      type: string
+    - jsonPath: .status.vhost
+      name: Vhost
+      type: string
+    - jsonPath: .status.conditions[0].status
       name: Status
       type: string
-    - description: Message
-      jsonPath: .status.conditions[0].message
+    - jsonPath: .status.conditions[0].message
       name: Message
       type: string
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: TransportURL is the Schema for the transporturls API
+        description: RabbitMQUser is the Schema for the rabbitmqusers API
         properties:
           apiVersion:
             description: |-
@@ -46,29 +58,47 @@ spec:
           metadata:
             type: object
           spec:
-            description: TransportURLSpec defines the desired state of TransportURL
+            description: RabbitMQUserSpec defines the desired state of RabbitMQUser
             properties:
+              permissions:
+                description: Permissions - user permissions on the vhost
+                properties:
+                  configure:
+                    default: .*
+                    description: Configure - configure permission regex (default ".*"
+                      allows all, "" denies all)
+                    type: string
+                  read:
+                    default: .*
+                    description: Read - read permission regex (default ".*" allows
+                      all, "" denies all)
+                    type: string
+                  write:
+                    default: .*
+                    description: Write - write permission regex (default ".*" allows
+                      all, "" denies all)
+                    type: string
+                type: object
               rabbitmqClusterName:
-                description: RabbitmqClusterName the name of the Rabbitmq cluster
-                  which to configure the transport URL
+                description: RabbitmqClusterName - the name of the RabbitMQ cluster
                 type: string
-              userRef:
-                description: UserRef - reference to a RabbitMQUser resource. If not
-                  specified, Username will be used to create a RabbitMQUser on-demand
-                type: string
+              tags:
+                description: Tags - RabbitMQ user tags
+                items:
+                  type: string
+                type: array
               username:
-                description: Username - RabbitMQ username. If UserRef is not specified,
-                  a RabbitMQUser will be created with this username
+                description: Username - the username in RabbitMQ (defaults to CR name)
                 type: string
-              vhost:
-                description: Vhost - RabbitMQ vhost name. If specified and vhost doesn't
-                  exist, a RabbitMQVhost will be created. Defaults to "/" if not specified
+              vhostRef:
+                description: VhostRef - reference to the RabbitMQVhost resource (defaults
+                  to default vhost "/" if empty)
                 type: string
             required:
             - rabbitmqClusterName
             type: object
           status:
-            description: TransportURLStatus defines the observed state of TransportURL
+            description: RabbitMQUserStatus defines the observed state of RabbitMQUser
             properties:
               conditions:
                 description: Conditions
@@ -113,27 +143,22 @@ spec:
                   type: object
                 type: array
               observedGeneration:
-                description: |-
-                  ObservedGeneration - the most recent generation observed for this
-                  service. If the observed generation is less than the spec generation,
-                  then the controller has not processed the latest changes injected by
-                  the opentack-operator in the top-level CR (e.g. the ContainerImage)
+                description: ObservedGeneration - the most recent generation observed
+                  for this resource
                 format: int64
                 type: integer
-              queueType:
-                description: QueueType - the queue type from the associated RabbitMq
-                  instance
-                type: string
-              rabbitmqUsername:
-                description: RabbitmqUsername - the actual username used for the RabbitMQ
-                  user
-                type: string
-              rabbitmqVhost:
-                description: RabbitmqVhost - the actual vhost name used
-                type: string
               secretName:
-                description: SecretName - name of the secret containing the rabbitmq
-                  transport URL
+                description: SecretName - name of the secret containing user credentials
+                type: string
+              username:
+                description: Username - actual username used in RabbitMQ
+                type: string
+              vhost:
+                description: Vhost - actual vhost name used in RabbitMQ
+                type: string
+              vhostRef:
+                description: VhostRef - reference to the RabbitMQVhost CR (for tracking
+                  finalizers)
                 type: string
             type: object
         type: object
