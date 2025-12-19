@@ -250,6 +250,39 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	// Check if OPENSTACK_RELEASE_VERSION has changed - if so, delete all owned resources
+	// This is a one-time fix to handle incompatible upgrades
+	if instance.Status.ReleaseVersion != nil && *instance.Status.ReleaseVersion != openstackReleaseVersion {
+		Log.Info("OpenStack release version changed, deleting all owned resources",
+			"old", *instance.Status.ReleaseVersion,
+			"new", openstackReleaseVersion)
+
+		if err := r.deleteAllOwnedResources(ctx, instance); err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				operatorv1beta1.OpenStackOperatorReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				operatorv1beta1.OpenStackOperatorErrorMessage,
+				err))
+			return ctrl.Result{}, err
+		}
+
+		// Reset the container image status to force re-application of CRDs and RBAC
+		instance.Status.ContainerImage = nil
+
+		// Update the release version in status
+		instance.Status.ReleaseVersion = &openstackReleaseVersion
+
+		// Requeue to allow resources to be deleted before recreating
+		Log.Info("Resources deleted, requeuing to recreate with new version")
+		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+	}
+
+	// Set the release version if not set
+	if instance.Status.ReleaseVersion == nil {
+		instance.Status.ReleaseVersion = &openstackReleaseVersion
+	}
+
 	if err := r.applyManifests(ctx, instance); err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -314,6 +347,91 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	Log.Info("Reconcile complete.")
 	return ctrl.Result{}, nil
 
+}
+
+func (r *OpenStackReconciler) deleteAllOwnedResources(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
+	Log.Info("Deleting all owned resources for release version upgrade")
+
+	// Delete all owned deployments
+	deployments := &appsv1.DeploymentList{}
+	err := r.List(ctx, deployments, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return errors.Wrap(err, "failed to list deployments")
+	}
+	for _, deployment := range deployments.Items {
+		if metav1.IsControlledBy(&deployment, instance) {
+			Log.Info("Deleting deployment", "name", deployment.Name)
+			err := r.Delete(ctx, &deployment)
+			if err != nil && !apierrors.IsNotFound(err) {
+				return errors.Wrapf(err, "failed to delete deployment %s", deployment.Name)
+			}
+		}
+	}
+
+	// Delete all owned service accounts
+	serviceAccounts := &corev1.ServiceAccountList{}
+	err = r.List(ctx, serviceAccounts, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return errors.Wrap(err, "failed to list service accounts")
+	}
+	for _, sa := range serviceAccounts.Items {
+		if metav1.IsControlledBy(&sa, instance) {
+			Log.Info("Deleting service account", "name", sa.Name)
+			err := r.Delete(ctx, &sa)
+			if err != nil && !apierrors.IsNotFound(err) {
+				return errors.Wrapf(err, "failed to delete service account %s", sa.Name)
+			}
+		}
+	}
+
+	// Delete all owned services
+	services := &corev1.ServiceList{}
+	err = r.List(ctx, services, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return errors.Wrap(err, "failed to list services")
+	}
+	for _, svc := range services.Items {
+		if metav1.IsControlledBy(&svc, instance) {
+			Log.Info("Deleting service", "name", svc.Name)
+			err := r.Delete(ctx, &svc)
+			if err != nil && !apierrors.IsNotFound(err) {
+				return errors.Wrapf(err, "failed to delete service %s", svc.Name)
+			}
+		}
+	}
+
+	// Delete webhooks (these are cluster-scoped and not owned, but managed by label)
+	valWebhooks, err := r.Kclient.AdmissionregistrationV1().ValidatingWebhookConfigurations().List(ctx, metav1.ListOptions{
+		LabelSelector: "openstack.openstack.org/managed=true",
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed listing validating webhook configurations")
+	}
+	for _, webhook := range valWebhooks.Items {
+		Log.Info("Deleting validating webhook", "name", webhook.Name)
+		err := r.Kclient.AdmissionregistrationV1().ValidatingWebhookConfigurations().Delete(ctx, webhook.Name, metav1.DeleteOptions{})
+		if err != nil && !apierrors.IsNotFound(err) {
+			return errors.Wrapf(err, "failed to delete validating webhook %s", webhook.Name)
+		}
+	}
+
+	mutWebhooks, err := r.Kclient.AdmissionregistrationV1().MutatingWebhookConfigurations().List(ctx, metav1.ListOptions{
+		LabelSelector: "openstack.openstack.org/managed=true",
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed listing mutating webhook configurations")
+	}
+	for _, webhook := range mutWebhooks.Items {
+		Log.Info("Deleting mutating webhook", "name", webhook.Name)
+		err := r.Kclient.AdmissionregistrationV1().MutatingWebhookConfigurations().Delete(ctx, webhook.Name, metav1.DeleteOptions{})
+		if err != nil && !apierrors.IsNotFound(err) {
+			return errors.Wrapf(err, "failed to delete mutating webhook %s", webhook.Name)
+		}
+	}
+
+	Log.Info("All owned resources deleted successfully")
+	return nil
 }
 
 func (r *OpenStackReconciler) reconcileDelete(ctx context.Context, instance *operatorv1beta1.OpenStack, helper *helper.Helper) (ctrl.Result, error) {
