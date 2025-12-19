@@ -60,10 +60,18 @@ func MergeWebhookConfigurationForUpdate(current, updated *uns.Unstructured) erro
 	gvk := updated.GroupVersionKind()
 
 	if gvk.Group == "admissionregistration.k8s.io" && (gvk.Kind == "MutatingWebhookConfiguration" || gvk.Kind == "ValidatingWebhookConfiguration") {
+		currentWebhooks, currentExists := current.Object["webhooks"].([]interface{})
+		if !currentExists {
+			return nil
+		}
 
 		for i, webhook := range updated.Object["webhooks"].([]interface{}) {
+			// Check if the index exists in the current webhooks list
+			if i >= len(currentWebhooks) {
+				continue
+			}
 
-			currentClientConfig := current.Object["webhooks"].([]interface{})[i].(map[string]interface{})["clientConfig"].(map[string]interface{})
+			currentClientConfig := currentWebhooks[i].(map[string]interface{})["clientConfig"].(map[string]interface{})
 			if currentClientConfig != nil {
 				webhook.(map[string]interface{})["clientConfig"] = currentClientConfig
 			}
