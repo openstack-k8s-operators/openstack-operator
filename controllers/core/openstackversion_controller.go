@@ -262,29 +262,35 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	// minor update in progress
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
 
-		if !openstack.OVNControllerImageMatch(ctx, controlPlane, instance) ||
-			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition) {
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
-				condition.RequestedReason,
-				condition.SeverityInfo,
-				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
-			Log.Info("Minor update for OVN Controlplane in progress")
-			return ctrl.Result{}, nil
+		// Only check OVN when enabled to avoid hanging on a removed condition
+		if controlPlane.Spec.Ovn.Enabled {
+			if !openstack.OVNControllerImageMatch(ctx, controlPlane, instance) ||
+				!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+				Log.Info("Minor update for OVN Controlplane in progress")
+				return ctrl.Result{}, nil
+			}
 		}
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
 		// minor update for Dataplane OVN
-		if !openstack.DataplaneNodesetsOVNControllerImagesMatch(instance, dataplaneNodesets) {
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
-				condition.RequestedReason,
-				condition.SeverityInfo,
-				corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
-			Log.Info("Waiting on OVN Dataplane updates to complete")
-			return ctrl.Result{}, nil
+		// Only check OVN when enabled to avoid hanging on a removed condition
+		if controlPlane.Spec.Ovn.Enabled {
+			if !openstack.DataplaneNodesetsOVNControllerImagesMatch(instance, dataplaneNodesets) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+				Log.Info("Waiting on OVN Dataplane updates to complete")
+				return ctrl.Result{}, nil
+			}
 		}
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
