@@ -121,6 +121,8 @@ spec:
     apiOverride:
       route: {}
     template:
+      ml2MechanismDrivers:
+      - openvswitch
       override:
         service:
           internal:
@@ -231,6 +233,7 @@ spec:
           networkAttachments:
           - storage
   ovn:
+    enabled: false
     template:
       ovnDBCluster:
         ovndbcluster-nb:
