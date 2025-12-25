@@ -137,8 +137,9 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/openstack/cacerts/bootstrap
           name: bootstrap-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-beta-nodeset
+          name: ssh-key-edpm-compute-beta-nodeset
+          subPath: ssh_key_edpm-compute-beta-nodeset
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -154,12 +155,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-beta-nodeset
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-beta-nodeset
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -241,8 +242,9 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-beta-nodeset
+          name: ssh-key-edpm-compute-beta-nodeset
+          subPath: ssh_key_edpm-compute-beta-nodeset
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -254,12 +256,12 @@ spec:
       serviceAccountName: edpm-compute-beta-nodeset
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-beta-nodeset
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-beta-nodeset
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:

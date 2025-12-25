@@ -132,9 +132,9 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -145,12 +145,12 @@ spec:
       serviceAccountName: edpm-compute-no-nodes
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -233,9 +233,9 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/openstack/cacerts/bootstrap
           name: bootstrap-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -250,12 +250,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -337,9 +337,9 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -350,12 +350,12 @@ spec:
       serviceAccountName: edpm-compute-no-nodes
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -437,9 +437,9 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -450,12 +450,12 @@ spec:
       serviceAccountName: edpm-compute-no-nodes
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -537,9 +537,9 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -550,12 +550,12 @@ spec:
       serviceAccountName: edpm-compute-no-nodes
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -653,9 +653,9 @@ spec:
           name: libvirt-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/nova
           name: nova-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -698,12 +698,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -784,9 +784,9 @@ spec:
           subPath: ovsdb-config
         - mountPath: /var/lib/openstack/cacerts/ovn
           name: ovn-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -808,12 +808,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -903,9 +903,9 @@ spec:
           subPath: nova-metadata-config.json
         - mountPath: /var/lib/openstack/cacerts/neutron-metadata
           name: neutron-metadata-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -948,12 +948,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -1034,9 +1034,9 @@ spec:
           subPath: 10-neutron-ovn.conf
         - mountPath: /var/lib/openstack/cacerts/neutron-ovn
           name: neutron-ovn-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -1058,12 +1058,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -1144,9 +1144,9 @@ spec:
           subPath: 10-neutron-sriov.conf
         - mountPath: /var/lib/openstack/cacerts/neutron-sriov
           name: neutron-sriov-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -1168,12 +1168,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -1254,9 +1254,9 @@ spec:
           subPath: 10-neutron-dhcp.conf
         - mountPath: /var/lib/openstack/cacerts/neutron-dhcp
           name: neutron-dhcp-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -1278,12 +1278,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -1364,9 +1364,9 @@ spec:
           subPath: LibvirtPassword
         - mountPath: /var/lib/openstack/cacerts/libvirt
           name: libvirt-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -1388,12 +1388,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -1483,9 +1483,9 @@ spec:
           subPath: ssh-publickey
         - mountPath: /var/lib/openstack/cacerts/nova
           name: nova-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
+          name: ssh-key-edpm-compute-no-nodes
+          subPath: ssh_key_edpm-compute-no-nodes
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -1528,12 +1528,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-compute-no-nodes
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-compute-no-nodes
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
