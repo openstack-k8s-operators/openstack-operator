@@ -1,4 +1,4 @@
-= Scaling DataPlane
+= Scaling the DataPlane
 
 == Scaling Out
 

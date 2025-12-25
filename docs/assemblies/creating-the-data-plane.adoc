@@ -51,7 +51,7 @@ include::proc_troubleshooting-data-plane-creation-and-deployment.adoc[leveloffse
 
 include::tls.adoc[leveloffset=+1]
 
-include::scaling.adoc[leveloffset=+1]
+include::dataplane_scaling_out.adoc[leveloffset=+1]
 
 include::ansible.adoc[leveloffset=+1]
 
