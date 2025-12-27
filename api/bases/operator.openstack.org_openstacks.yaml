@@ -164,6 +164,8 @@ spec:
               observedGeneration:
                 format: int64
                 type: integer
+              releaseVersion:
+                type: string
               totalOperatorCount:
                 type: integer
             type: object
