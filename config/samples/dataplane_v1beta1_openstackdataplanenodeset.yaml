@@ -19,11 +19,8 @@ spec:
     - run-os
     - reboot-os
     - install-certs
-    - ovn
-    - neutron-metadata
     - libvirt
     - nova
-    - telemetry
   preProvisioned: true
   networkAttachments:
   - ctlplane

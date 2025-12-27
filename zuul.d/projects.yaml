@@ -1,15 +1,13 @@
 ---
 - project:
     name: openstack-k8s-operators/openstack-operator
-    templates:
-      - podified-multinode-edpm-baremetal-pipeline
-      - data-plane-adoption-pipeline
     github-check:
       jobs:
         - openstack-k8s-operators-content-provider:
             vars:
               cifmw_install_yamls_sdk_version: v1.41.1
-        - openstack-operator-tempest-multinode
-        - openstack-operator-docs-preview
-        - openstack-operator-kuttl:
-            voting: false
+        - cifmw-crc-podified-edpm-baremetal-minor-update:
+            vars:
+              cifmw_run_tests: false
+            dependencies:
+              - openstack-k8s-operators-content-provider
