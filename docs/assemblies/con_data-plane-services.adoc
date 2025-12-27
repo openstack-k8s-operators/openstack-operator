@@ -83,6 +83,7 @@ spec:
 |`neutron-metadata` |Include this service to run the Neutron OVN Metadata agent on the data plane nodes. This agent is required to provide metadata services to the Compute nodes.
 |`neutron-ovn` |Include this service to run the Neutron OVN agent on the data plane nodes. This agent is required to provide QoS to hardware offloaded ports on the Compute nodes.
 |`neutron-dhcp` |Include this service to run a Neutron DHCP agent on the data plane nodes.
+|`cleanup` |Include this service to clean up containers and configurations for services that have been removed from the nodeset. The cleanup service compares the current services list with previously deployed services, removes containers for services no longer in the list, removes startup_config and configuration files, and runs service-specific cleanup tasks. Use this service via `servicesOverride` for one-time cleanup after removing services from a nodeset, or add to the services list if cleanup should run on every deployment.
 |===
 
 For more information about the available default services, see https://github.com/openstack-k8s-operators/openstack-operator/tree/main/config/services.
@@ -153,4 +154,39 @@ spec:
   servicesOverride:
     - install-certs
     - ovn
+....
+
+=== Cleaning up removed services
+
+When services are removed from a nodeset's services list, their containers and
+configuration files remain on the data plane nodes. Use the `cleanup` service
+to remove these artifacts.
+
+The cleanup service tracks which services were previously deployed on each node.
+When executed, it identifies services that are no longer in the nodeset's
+services list and removes their:
+
+* Containers
+* Startup configuration files
+* Other configuration files
+* Service-specific artifacts (via cleanup tasks defined in each role)
+
+To enable cleanup of orphaned containers, set the `edpm_cleanup_orphaned_containers`
+Ansible variable to `true` using `ansibleExtraVars` on the deployment.
+
+The following example shows how to run a one-time cleanup after removing
+services from a nodeset:
+
+....
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-edpm-cleanup
+spec:
+  nodeSets:
+    - openstack-edpm
+  ansibleExtraVars:
+    edpm_cleanup_orphaned_containers: true
+  servicesOverride:
+    - cleanup
 ....
