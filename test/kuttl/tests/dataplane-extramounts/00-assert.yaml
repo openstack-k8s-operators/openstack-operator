@@ -95,9 +95,9 @@ spec:
           name: edpm-ansible
         - mountPath: /var/lib/openstack/cacerts/test-service
           name: test-service-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_edpm-extramounts
+          name: ssh-key-edpm-extramounts
+          subPath: ssh_key_edpm-extramounts
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -117,12 +117,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-edpm-extramounts
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_edpm-extramounts
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:

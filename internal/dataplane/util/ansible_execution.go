@@ -316,18 +316,13 @@ func SetAeeSSHMounts(
 
 	for _, sshKeyNodeName := range sshKeys {
 		sshKeySecret := sshKeySecrets[sshKeyNodeName]
-		if service.Spec.DeployOnAllNodeSets {
-			sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
-			sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
-			sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
-		} else {
-			if sshKeyNodeName != nodeSet.GetName() {
-				continue
-			}
-			sshKeyName = "ssh-key"
-			sshKeyMountSubPath = "ssh_key"
-			sshKeyMountPath = "/runner/env/ssh_key"
+		if !service.Spec.DeployOnAllNodeSets && sshKeyNodeName != nodeSet.GetName() {
+			continue
 		}
+
+		sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
+		sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
+		sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
 
 		CreateVolume(ansibleEEMounts, sshKeyName, sshKeyMountSubPath, sshKeySecret, "ssh-privatekey")
 		CreateVolumeMount(ansibleEEMounts, sshKeyName, sshKeyMountPath, sshKeyMountSubPath)

@@ -1828,15 +1828,19 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		})
 
 		It("should not reconcile after failure", func() {
-			// Directly set the deployment status to backoff limit exceeded
+			// Wait for the controller to complete initial reconciliation and reach a stable state
+			// by waiting for the deployment to have conditions set and be in a known state
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				g.Expect(deployment.Status.Conditions).ToNot(BeEmpty())
+				// Wait for ObservedGeneration to be set, indicating controller has processed the resource
+				g.Expect(deployment.Status.ObservedGeneration).To(Equal(deployment.Generation))
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// Now manually set the deployment status to backoff limit exceeded
 			// This simulates a deployment that has failed after retries
 			Eventually(func(g Gomega) {
 				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
-
-				// Initialize conditions if not present
-				if deployment.Status.Conditions == nil {
-					deployment.Status.Conditions = condition.Conditions{}
-				}
 
 				// Initialize NodeSetConditions if not present
 				if deployment.Status.NodeSetConditions == nil {
@@ -1852,9 +1856,17 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					"Simulated backoff limit exceeded for testing")
 
 				deployment.Status.Deployed = false
-				deployment.Status.ObservedGeneration = deployment.Generation
 
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, deployment)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// Wait for the status to stabilize - ensure the controller recognizes the failure state
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityError)))
+				g.Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
 			}, th.Timeout, th.Interval).Should(Succeed())
 
 			// Verify the deployment has the correct failure condition

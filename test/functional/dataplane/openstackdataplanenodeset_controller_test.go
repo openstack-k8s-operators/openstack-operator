@@ -1387,11 +1387,11 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				ansibleEE := GetAnsibleee(ansibleeeName)
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(3))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].Name).To(Equal("bootstrap-combined-ca-bundle"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("ssh-key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("ssh-key-edpm-compute-nodeset"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].Name).To(Equal("inventory"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.Secret.SecretName).To(Equal("combined-ca-bundle"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key_edpm-compute-nodeset"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
 
 			}, th.Timeout, th.Interval).Should(Succeed())
@@ -1455,12 +1455,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes).To(HaveLen(4))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].Name).To(Equal("edpm-ansible"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].Name).To(Equal("bootstrap-combined-ca-bundle"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].Name).To(Equal("ssh-key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].Name).To(Equal("ssh-key-edpm-compute-nodeset"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[3].Name).To(Equal("inventory"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[0].VolumeSource.PersistentVolumeClaim.ClaimName).To(Equal("edpm-ansible"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[1].VolumeSource.Secret.SecretName).To(Equal("combined-ca-bundle"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].VolumeSource.Secret.SecretName).To(Equal("dataplane-ansible-ssh-private-key-secret"))
-				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key"))
+				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].VolumeSource.Secret.Items[0].Path).To(Equal("ssh_key_edpm-compute-nodeset"))
 				g.Expect(ansibleEE.Spec.Template.Spec.Volumes[2].VolumeSource.Secret.Items[0].Key).To(Equal("ssh-privatekey"))
 
 			}, th.Timeout, th.Interval).Should(Succeed())
@@ -1734,15 +1734,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(testNodeSetName, nodeSetSpec))
 
-				// Create first deployment (will fail)
+				// Create only the first deployment here (will fail)
 				firstDeploymentSpec := DefaultDataPlaneDeploymentSpec()
 				firstDeploymentSpec["nodeSets"] = []string{testNodeSetName.Name}
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, firstDeploymentSpec))
-
-				// Create second deployment (will complete successfully)
-				secondDeploymentSpec := DefaultDataPlaneDeploymentSpec()
-				secondDeploymentSpec["nodeSets"] = []string{testNodeSetName.Name}
-				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, secondDeploymentSpec))
 
 				CreateSSHSecret(dataplaneSSHSecretName)
 				CreateCABundleSecret(caBundleSecretName)
@@ -1752,7 +1747,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 
 			It("Should show all deployments in status and process completed deployment", func() {
-				// Fail the first deployment
+				// Wait for first AnsibleEE job to be created, then fail it
 				Eventually(func(g Gomega) {
 					ansibleeeName := types.NamespacedName{
 						Name:      "bootstrap-" + dataplaneDeploymentName.Name + "-" + testNodeSetName.Name,
@@ -1763,7 +1758,21 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 				}, th.Timeout, th.Interval).Should(Succeed())
 
-				// Complete the second deployment
+				// Wait for the first deployment to be marked as failed
+				Eventually(func(g Gomega) {
+					deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+					g.Expect(deployment.Status.Conditions).ToNot(BeEmpty())
+					readyCondition := deployment.Status.Conditions.Get(condition.ReadyCondition)
+					g.Expect(readyCondition).ToNot(BeNil())
+					g.Expect(readyCondition.Status).To(Equal(corev1.ConditionFalse))
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Now create the second deployment (will complete successfully)
+				secondDeploymentSpec := DefaultDataPlaneDeploymentSpec()
+				secondDeploymentSpec["nodeSets"] = []string{testNodeSetName.Name}
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(secondDeploymentName, secondDeploymentSpec))
+
+				// Wait for second AnsibleEE job to be created, then complete it
 				Eventually(func(g Gomega) {
 					ansibleeeName := types.NamespacedName{
 						Name:      "bootstrap-" + secondDeploymentName.Name + "-" + testNodeSetName.Name,
