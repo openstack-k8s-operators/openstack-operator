@@ -399,7 +399,7 @@ spec:
           - effectiveDate: "2024-11-18"
             version: v13
           secret:
-            name: logging-loki-s3
+            name: cloudkitty-loki-s3
             type: s3
         secret: osp-secret
         serviceUser: cloudkitty
