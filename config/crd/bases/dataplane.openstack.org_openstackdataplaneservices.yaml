@@ -21,79 +21,189 @@ spec:
   - name: v1beta1
     schema:
       openAPIV3Schema:
+        description: |-
+          OpenStackDataPlaneService defines the Schema for the openstackdataplaneservices API.
+          OpenStackDataPlaneService name must be a valid RFC1123 as it is used in labels
         properties:
           apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
           spec:
+            description: OpenStackDataPlaneServiceSpec defines the desired state of
+              OpenStackDataPlaneService
             properties:
               addCertMounts:
                 default: false
+                description: AddCertMounts - Whether to add cert mounts
                 type: boolean
               caCerts:
                 default: combined-ca-bundle
+                description: CACerts - Secret containing the CA certificate chain
                 maxLength: 253
                 type: string
               certsFrom:
+                description: |-
+                  CertsFrom - Service name used to obtain TLSCert and CACerts data. If both
+                  CertsFrom and either TLSCert or CACerts is set, then those fields take
+                  precedence.
+                  DEPRECATED: Will be removed in a future release. Use EDPMServiceType instead.
                 type: string
               containerImageFields:
+                description: |-
+                  ContainerImageFields - list of container image fields names that this
+                  service deploys. The field names should match the
+                  ContainerImages struct field names from
+                  github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
                 items:
                   type: string
                 type: array
               dataSources:
+                description: |-
+                  DataSources list of DataSource objects to mount as ExtraMounts for the
+                  OpenStackAnsibleEE
                 items:
+                  description: DataSource represents the source of a set of ConfigMaps/Secrets
                   properties:
                     configMapRef:
+                      description: The ConfigMap to select from
                       properties:
                         name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                           maxLength: 253
                           type: string
                         optional:
+                          description: Specify whether the ConfigMap must be defined
                           type: boolean
                       type: object
                       x-kubernetes-map-type: atomic
                     prefix:
+                      description: An optional identifier to prepend to each key in
+                        the ConfigMap. Must be a C_IDENTIFIER.
                       type: string
                     secretRef:
+                      description: The Secret to select from
                       properties:
                         name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                           maxLength: 253
                           type: string
                         optional:
+                          description: Specify whether the Secret must be defined
                           type: boolean
                       type: object
                       x-kubernetes-map-type: atomic
                   type: object
                 type: array
               deployOnAllNodeSets:
+                description: |-
+                  DeployOnAllNodeSets - should the service be deploy across all nodesets
+                  This will override default target of a service play, setting it to 'all'.
                 type: boolean
               edpmServiceType:
+                description: |-
+                  EDPMServiceType - service type, which typically corresponds to one of
+                  the default service names (such as nova, ovn, etc). Also typically
+                  corresponds to the ansible role name (without the "edpm_" prefix) used
+                  to manage the service. If not set, will default to the
+                  OpenStackDataPlaneService name.
                 type: string
               openStackAnsibleEERunnerImage:
+                description: OpenStackAnsibleEERunnerImage image to use as the ansibleEE
+                  runner image
                 type: string
               playbook:
+                description: Playbook is a path to the playbook that ansible will
+                  run on this execution
                 type: string
               playbookContents:
+                description: PlaybookContents is an inline playbook contents that
+                  ansible will run on execution.
                 type: string
               role:
+                description: Role is a path to the role that ansible will run on this
+                  execution
                 type: string
               tlsCerts:
                 additionalProperties:
+                  description: |-
+                    OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for
+                    a dataplane service
                   properties:
                     contents:
+                      description: |-
+                        Contents of the certificate
+                        This is a list of strings for properties that are needed in the cert
                       items:
                         type: string
                       minItems: 1
                       type: array
                     edpmRoleServiceName:
+                      description: |-
+                        EDPMRoleServiceName is the value of the <role>_service_name variable from
+                        the edpm-ansible role where this certificate is used. For example if the
+                        certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be
+                        ovn, which matches the edpm_ovn_service_name variable from the role.  If
+                        not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If
+                        OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then
+                        OpenStackDataPlaneService.Name is used.
+                        DEPRECATED: Will be removed in a future release. Use EDPMServiceType instead.
                       type: string
                     issuer:
+                      description: |-
+                        Issuer is the label for the issuer to issue the cert
+                        Only one issuer should have this label
                       type: string
                     keyUsages:
+                      description: KeyUsages to be added to the issued cert
                       items:
+                        description: |-
+                          KeyUsage specifies valid usage contexts for keys.
+                          See:
+                          https://tools.ietf.org/html/rfc5280#section-4.2.1.3
+                          https://tools.ietf.org/html/rfc5280#section-4.2.1.12
+
+                          Valid KeyUsage values are as follows:
+                          "signing",
+                          "digital signature",
+                          "content commitment",
+                          "key encipherment",
+                          "key agreement",
+                          "data encipherment",
+                          "cert sign",
+                          "crl sign",
+                          "encipher only",
+                          "decipher only",
+                          "any",
+                          "server auth",
+                          "client auth",
+                          "code signing",
+                          "email protection",
+                          "s/mime",
+                          "ipsec end system",
+                          "ipsec tunnel",
+                          "ipsec user",
+                          "timestamping",
+                          "ocsp signing",
+                          "microsoft sgc",
+                          "netscape sgc"
                         enum:
                         - signing
                         - digital signature
@@ -121,32 +231,57 @@ spec:
                         type: string
                       type: array
                     networks:
+                      description: Networks to include in SNI for the cert
                       items:
+                        description: NetNameStr is used for validation of a net name.
                         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
                         type: string
                       type: array
                   required:
                   - contents
                   type: object
+                description: TLSCerts tls certs to be generated
                 type: object
             type: object
           status:
+            description: OpenStackDataPlaneServiceStatus defines the observed state
+              of OpenStackDataPlaneService
             properties:
               conditions:
+                description: Conditions
                 items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
                   properties:
                     lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
+                      description: A human readable message indicating details about
+                        the transition.
                       type: string
                     reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
                       type: string
                     severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
                       type: string
                     status:
+                      description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
+                      description: Type of condition in CamelCase.
                       type: string
                   required:
                   - lastTransitionTime

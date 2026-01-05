@@ -60,7 +60,11 @@ ENVTEST_K8S_VERSION = 1.31
 
 SETUP_ENVTEST_VERSION ?= release-0.22
 
-CRDDESC_OVERRIDE ?= :maxDescLen=0
+# CRD description settings
+# Disable descriptions for OpenStackControlPlane (and OpenStackVersion because it is in the same package),
+# enable for all others
+CRDDESC_CORE ?= :maxDescLen=0
+CRDDESC_OTHER ?=
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -135,10 +139,13 @@ help: ## Display this help.
 
 # (dprince) FIXME: controller-gen crd didn't seem to like multiple paths so I didn't split it. So we can continue using kubebuilder
 # I did split out the rbac for both binaries so we can use separate roles
+# NOTE: we generate the OpenStackControlplane CR in a separate step to avoid the CRD descriptions
+# which increase the size greatly and may ultimately cause issues with CR upgrades
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	mkdir -p config/operator/rbac && \
-	$(CONTROLLER_GEN) crd$(CRDDESC_OVERRIDE) output:crd:artifacts:config=config/crd/bases webhook paths="./..." && \
+	$(CONTROLLER_GEN) crd$(CRDDESC_OTHER) output:crd:artifacts:config=config/crd/bases webhook paths="./..." && \
+	$(CONTROLLER_GEN) crd$(CRDDESC_CORE) output:crd:artifacts:config=config/crd/bases paths="./api/core/..." && \
 	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="{./api/client/...,./api/core/...,./api/dataplane/...,./internal/controller/client/...,./internal/controller/core/...,./internal/controller/dataplane/...,./internal/...}" output:dir=config/rbac && \
 	$(CONTROLLER_GEN) rbac:roleName=operator-role paths="./internal/controller/operator/..." paths="./api/operator/..." output:dir=config/operator/rbac && \
 	rm -f api/bases/* && cp -a config/crd/bases api/
