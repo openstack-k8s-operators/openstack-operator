@@ -34,47 +34,77 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
+        description: |-
+          OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API
+          OpenStackDataPlaneDeployment name must be a valid RFC1123 as it is used in labels
         properties:
           apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
           spec:
+            description: OpenStackDataPlaneDeploymentSpec defines the desired state
+              of OpenStackDataPlaneDeployment
             properties:
               ansibleExtraVars:
+                description: AnsibleExtraVars for ansible execution
                 x-kubernetes-preserve-unknown-fields: true
               ansibleJobNodeSelector:
                 additionalProperties:
                   type: string
+                description: AnsibleJobNodeSelector to target subset of worker nodes
+                  running the ansible jobs
                 type: object
               ansibleLimit:
+                description: AnsibleLimit for ansible execution
                 type: string
               ansibleSkipTags:
+                description: AnsibleSkipTags for ansible execution
                 type: string
               ansibleTags:
+                description: AnsibleTags for ansible execution
                 type: string
               backoffLimit:
                 default: 6
+                description: BackoffLimit allows to define the maximum number of retried
+                  executions (defaults to 6).
                 format: int32
                 type: integer
               deploymentRequeueTime:
                 default: 15
+                description: Time before the deployment is requeued in seconds
                 minimum: 1
                 type: integer
               nodeSets:
+                description: NodeSets is the list of NodeSets deployed
                 items:
                   type: string
                 minItems: 1
                 type: array
               preserveJobs:
                 default: true
+                description: |-
+                  PreserveJobs - do not delete jobs after they finished e.g. to check logs
+                  PreserveJobs default: true
                 enum:
                 - true
                 - false
                 type: boolean
               servicesOverride:
+                description: ServicesOverride list
                 items:
                   type: string
                 type: array
@@ -86,30 +116,54 @@ spec:
             - message: OpenStackDataPlaneDeployment Spec is immutable
               rule: self == oldSelf
           status:
+            description: OpenStackDataPlaneDeploymentStatus defines the observed state
+              of OpenStackDataPlaneDeployment
             properties:
               ansibleEEHashes:
                 additionalProperties:
                   type: string
+                description: AnsibleEEHashes
                 type: object
               bmhRefHashes:
                 additionalProperties:
                   type: string
+                description: BmhRefHashes
                 type: object
               conditions:
+                description: Conditions
                 items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
                   properties:
                     lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
+                      description: A human readable message indicating details about
+                        the transition.
                       type: string
                     reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
                       type: string
                     severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
                       type: string
                     status:
+                      description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
+                      description: Type of condition in CamelCase.
                       type: string
                   required:
                   - lastTransitionTime
@@ -120,31 +174,57 @@ spec:
               configMapHashes:
                 additionalProperties:
                   type: string
+                description: ConfigMapHashes
                 type: object
               containerImages:
                 additionalProperties:
                   type: string
+                description: ContainerImages
                 type: object
               deployed:
+                description: Deployed
                 type: boolean
               deployedVersion:
+                description: DeployedVersion
                 type: string
               nodeSetConditions:
                 additionalProperties:
+                  description: Conditions provide observations of the operational
+                    state of a API resource.
                   items:
+                    description: Condition defines an observation of a API resource
+                      operational state.
                     properties:
                       lastTransitionTime:
+                        description: |-
+                          Last time the condition transitioned from one status to another.
+                          This should be when the underlying condition changed. If that is not known, then using the time when
+                          the API field changed is acceptable.
                         format: date-time
                         type: string
                       message:
+                        description: A human readable message indicating details about
+                          the transition.
                         type: string
                       reason:
+                        description: The reason for the condition's last transition
+                          in CamelCase.
                         type: string
                       severity:
+                        description: |-
+                          Severity provides a classification of Reason code, so the current situation is immediately
+                          understandable and could act accordingly.
+                          It is meant for situations where Status=False and it should be indicated if it is just
+                          informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                          and no actions to automatically resolve the issue can/should be done).
+                          For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
                         type: string
                       status:
+                        description: Status of the condition, one of True, False,
+                          Unknown.
                         type: string
                       type:
+                        description: Type of condition in CamelCase.
                         type: string
                     required:
                     - lastTransitionTime
@@ -152,17 +232,24 @@ spec:
                     - type
                     type: object
                   type: array
+                description: NodeSetConditions
                 type: object
               nodeSetHashes:
                 additionalProperties:
                   type: string
+                description: NodeSetHashes
                 type: object
               observedGeneration:
+                description: ObservedGeneration - the most recent generation observed
+                  for this Deployment. If the observed generation is less than the
+                  spec generation, then the controller has not processed the latest
+                  changes.
                 format: int64
                 type: integer
               secretHashes:
                 additionalProperties:
                   type: string
+                description: SecretHashes
                 type: object
             type: object
         type: object

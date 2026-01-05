@@ -25,28 +25,67 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
+        description: OpenStack defines the Schema for the openstacks API
         properties:
           apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
           spec:
+            description: OpenStackSpec defines the desired state of OpenStack
             properties:
               operatorOverrides:
+                description: OperatorOverrides - list of OperatorSpec which allows
+                  to customize operator deployments
                 items:
+                  description: OperatorSpec - customization for the operator deployment
                   properties:
                     controllerManager:
+                      description: ControllerManager - tunings for the controller
+                        manager container
                       properties:
                         resources:
+                          description: |-
+                            Resources - Compute Resources for the service operator controller manager
+                            https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                           properties:
                             claims:
+                              description: |-
+                                Claims lists the names of resources, defined in spec.resourceClaims,
+                                that are used by this container.
+
+                                This is an alpha field and requires enabling the
+                                DynamicResourceAllocation feature gate.
+
+                                This field is immutable. It can only be set for containers.
                               items:
+                                description: ResourceClaim references one entry in
+                                  PodSpec.ResourceClaims.
                                 properties:
                                   name:
+                                    description: |-
+                                      Name must match the name of one entry in pod.spec.resourceClaims of
+                                      the Pod where this field is used. It makes that resource available
+                                      inside a container.
                                     type: string
                                   request:
+                                    description: |-
+                                      Request is the name chosen for a request in the referenced claim.
+                                      If empty, everything from the claim is made available, otherwise
+                                      only the result of this request.
                                     type: string
                                 required:
                                 - name
@@ -62,6 +101,9 @@ spec:
                                 - type: string
                                 pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                 x-kubernetes-int-or-string: true
+                              description: |-
+                                Limits describes the maximum amount of compute resources allowed.
+                                More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                               type: object
                             requests:
                               additionalProperties:
@@ -70,10 +112,16 @@ spec:
                                 - type: string
                                 pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                 x-kubernetes-int-or-string: true
+                              description: |-
+                                Requests describes the minimum amount of compute resources required.
+                                If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                                otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                                More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                               type: object
                           type: object
                       type: object
                     name:
+                      description: Name of the service operators.
                       enum:
                       - openstack
                       - barbican
@@ -101,23 +149,49 @@ spec:
                       minLength: 1
                       type: string
                     replicas:
+                      description: Replicas of the operator deployment
                       format: int32
                       maximum: 1
                       minimum: 0
                       type: integer
                     tolerations:
+                      description: |-
+                        Tolerations - Tolerations for the service operator deployment pods
+                        https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
                       items:
+                        description: |-
+                          The pod this Toleration is attached to tolerates any taint that matches
+                          the triple <key,value,effect> using the matching operator <operator>.
                         properties:
                           effect:
+                            description: |-
+                              Effect indicates the taint effect to match. Empty means match all taint effects.
+                              When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
                             type: string
                           key:
+                            description: |-
+                              Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                              If the key is empty, operator must be Exists; this combination means to match all values and all keys.
                             type: string
                           operator:
+                            description: |-
+                              Operator represents a key's relationship to the value.
+                              Valid operators are Exists and Equal. Defaults to Equal.
+                              Exists is equivalent to wildcard for value, so that a pod can
+                              tolerate all taints of a particular category.
                             type: string
                           tolerationSeconds:
+                            description: |-
+                              TolerationSeconds represents the period of time the toleration (which must be
+                              of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                              it is not set, which means tolerate the taint forever (do not evict). Zero and
+                              negative values will be treated as 0 (evict immediately) by the system.
                             format: int64
                             type: integer
                           value:
+                            description: |-
+                              Value is the taint value the toleration matches to.
+                              If the operator is Exists, the value should be empty, otherwise just a regular string.
                             type: string
                         type: object
                       type: array
@@ -130,22 +204,43 @@ spec:
                 x-kubernetes-list-type: map
             type: object
           status:
+            description: OpenStackStatus defines the observed state of OpenStack
             properties:
               conditions:
+                description: Conditions
                 items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
                   properties:
                     lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
+                      description: A human readable message indicating details about
+                        the transition.
                       type: string
                     reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
                       type: string
                     severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
                       type: string
                     status:
+                      description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
+                      description: Type of condition in CamelCase.
                       type: string
                   required:
                   - lastTransitionTime
@@ -154,17 +249,27 @@ spec:
                   type: object
                 type: array
               containerImage:
+                description: ContainerImage - the container image that has been successfully
+                  deployed
                 type: string
               deployedOperatorCount:
+                description: DeployedOperatorCount - the number of operators deployed
                 type: integer
               disabledOperatorCount:
+                description: DisabledOperatorCount - the number of operators which
+                  has replicas set to 0
                 type: integer
               enabledOperatorCount:
+                description: EnabledOperatorCount - the number of operators which
+                  has replicas set to 1
                 type: integer
               observedGeneration:
+                description: ObservedGeneration - the most recent generation observed
+                  for this object.
                 format: int64
                 type: integer
               totalOperatorCount:
+                description: TotalOperatorCount - the number all operators available
                 type: integer
             type: object
         type: object
