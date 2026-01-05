@@ -29,17 +29,22 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/go-logr/logr"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
@@ -68,8 +73,11 @@ const (
 // OpenStackDataPlaneNodeSetReconciler reconciles a OpenStackDataPlaneNodeSet object
 type OpenStackDataPlaneNodeSetReconciler struct {
 	client.Client
-	Kclient kubernetes.Interface
-	Scheme  *runtime.Scheme
+	Kclient    kubernetes.Interface
+	Scheme     *runtime.Scheme
+	Controller controller.Controller
+	Cache      cache.Cache
+	Watching   map[string]bool
 }
 
 // GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
@@ -140,6 +148,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 	Log := r.GetLogger(ctx)
 	Log.Info("Reconciling NodeSet")
+
+	// Try to set up MachineConfig watch if not already done
+	// This is done conditionally because MachineConfig CRD may not exist on all clusters
+	r.ensureMachineConfigWatch(ctx)
 
 	validate := validator.New()
 
@@ -669,7 +681,12 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
 		}); err != nil {
 		return err
 	}
-	return ctrl.NewControllerManagedBy(mgr).
+	// Initialize the Watching map for conditional CRD watches
+	r.Watching = make(map[string]bool)
+	r.Cache = mgr.GetCache()
+
+	// Build the controller without MachineConfig watch (added conditionally later)
+	c, err := ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlaneNodeSet{},
 			builder.WithPredicates(predicate.Or(
 				predicate.GenerationChangedPredicate{},
@@ -692,10 +709,15 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Watches(&openstackv1.OpenStackVersion{},
 			handler.EnqueueRequestsFromMapFunc(r.genericWatcherFn)).
-		Watches(&machineconfig.MachineConfig{},
-			handler.EnqueueRequestsFromMapFunc(r.machineConfigWatcherFn),
-			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
-		Complete(r)
+		// NOTE: MachineConfig watch is added conditionally during reconciliation
+		// to avoid failures when the MachineConfig CRD doesn't exist
+		Build(r)
+
+	if err != nil {
+		return err
+	}
+	r.Controller = c
+	return nil
 }
 
 // machineConfigWatcherFn - watches for changes to the registries MachineConfig resource and queues
@@ -732,6 +754,70 @@ func (r *OpenStackDataPlaneNodeSetReconciler) machineConfigWatcherFn(
 			nodeSet.Name, kind, obj.GetName()))
 	}
 	return requests
+}
+
+// machineConfigWatcherFnTyped - typed version of machineConfigWatcherFn for use with source.Kind
+func (r *OpenStackDataPlaneNodeSetReconciler) machineConfigWatcherFnTyped(
+	ctx context.Context, obj *machineconfig.MachineConfig,
+) []reconcile.Request {
+	return r.machineConfigWatcherFn(ctx, obj)
+}
+
+const machineConfigCRDName = "machineconfigs.machineconfiguration.openshift.io"
+
+// ensureMachineConfigWatch attempts to set up a watch for MachineConfig resources.
+// This is done conditionally because the MachineConfig CRD may not exist on all clusters
+// (e.g., non-OpenShift Kubernetes clusters or clusters without the Machine Config Operator).
+// Returns true if the CRD is available (watch was set up or already exists), false otherwise.
+func (r *OpenStackDataPlaneNodeSetReconciler) ensureMachineConfigWatch(ctx context.Context) bool {
+	Log := r.GetLogger(ctx)
+
+	// Check if we're already watching
+	if r.Watching[machineConfigCRDName] {
+		return true
+	}
+
+	// Check if the MachineConfig CRD exists
+	crd := &unstructured.Unstructured{}
+	crd.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "apiextensions.k8s.io",
+		Kind:    "CustomResourceDefinition",
+		Version: "v1",
+	})
+
+	err := r.Get(ctx, client.ObjectKey{Name: machineConfigCRDName}, crd)
+	if err != nil {
+		if k8s_errors.IsNotFound(err) {
+			Log.Info("MachineConfig CRD not found, disconnected environment features disabled")
+		} else {
+			Log.Error(err, "Error checking for MachineConfig CRD")
+		}
+		return false
+	}
+
+	// CRD exists, set up the watch
+	Log.Info("MachineConfig CRD found, enabling watch for disconnected environment support")
+	err = r.Controller.Watch(
+		source.Kind(
+			r.Cache,
+			&machineconfig.MachineConfig{},
+			handler.TypedEnqueueRequestsFromMapFunc(r.machineConfigWatcherFnTyped),
+			predicate.TypedResourceVersionChangedPredicate[*machineconfig.MachineConfig]{},
+		),
+	)
+	if err != nil {
+		Log.Error(err, "Failed to set up MachineConfig watch")
+		return false
+	}
+
+	r.Watching[machineConfigCRDName] = true
+	Log.Info("Successfully set up MachineConfig watch")
+	return true
+}
+
+// IsMachineConfigAvailable returns true if the MachineConfig CRD is available and being watched
+func (r *OpenStackDataPlaneNodeSetReconciler) IsMachineConfigAvailable() bool {
+	return r.Watching[machineConfigCRDName]
 }
 
 func (r *OpenStackDataPlaneNodeSetReconciler) secretWatcherFn(
