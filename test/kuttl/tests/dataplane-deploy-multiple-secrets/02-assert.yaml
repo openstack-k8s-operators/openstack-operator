@@ -179,9 +179,9 @@ spec:
           name: openstack-edpm-tls-generic-service1-default-certs-0
         - mountPath: /var/lib/openstack/cacerts/generic-service1
           name: generic-service1-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_openstack-edpm-tls
+          name: ssh-key-openstack-edpm-tls
+          subPath: ssh_key_openstack-edpm-tls
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -210,12 +210,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-openstack-edpm-tls
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_openstack-edpm-tls
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
@@ -300,9 +300,9 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/openstack/cacerts/generic-service1
           name: generic-service1-combined-ca-bundle
-        - mountPath: /runner/env/ssh_key
-          name: ssh-key
-          subPath: ssh_key
+        - mountPath: /runner/env/ssh_key/ssh_key_openstack-edpm-tls
+          name: ssh-key-openstack-edpm-tls
+          subPath: ssh_key_openstack-edpm-tls
         - mountPath: /runner/inventory/hosts
           name: inventory
           subPath: inventory
@@ -317,12 +317,12 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: ssh-key
+      - name: ssh-key-openstack-edpm-tls
         secret:
           defaultMode: 420
           items:
           - key: ssh-privatekey
-            path: ssh_key
+            path: ssh_key_openstack-edpm-tls
           secretName: dataplane-ansible-ssh-private-key-secret
       - name: inventory
         secret:
