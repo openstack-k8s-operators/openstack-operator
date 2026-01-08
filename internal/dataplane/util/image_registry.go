@@ -81,8 +81,13 @@ func IsDisconnectedOCP(ctx context.Context, helper *helper.Helper) (bool, error)
 
 // IsNoMatchError checks if the error indicates that a CRD/resource type doesn't exist
 func IsNoMatchError(err error) bool {
-	// Check for "no matches for kind" type errors which indicate the CRD doesn't exist
-	return strings.Contains(err.Error(), "no matches for kind")
+	errStr := err.Error()
+	// Check for "no matches for kind" type errors which indicate the CRD doesn't exist.
+	// Also check for "no kind is registered" which occurs when the type isn't in the scheme.
+	// This is specifically needed for functional tests where the fake client returns a different
+	// error type than a real Kubernetes API server when CRDs are not installed.
+	return strings.Contains(errStr, "no matches for kind") ||
+		strings.Contains(errStr, "no kind is registered")
 }
 
 // GetMCRegistryConf - will unmarshal the MachineConfig ignition file the machineConfigIgnition object.
