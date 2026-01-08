@@ -11,5 +11,5 @@ roleRef:
   name: leader-election-role-operator
 subjects:
 - kind: ServiceAccount
-  name: openstack-operator-controller-operator
+  name: openstack-operator-controller-init
   namespace: system

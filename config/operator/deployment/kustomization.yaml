@@ -14,3 +14,16 @@ images:
 - name: controller
   newName: quay.io/openstack-k8s-operators/openstack-operator
   newTag: latest
+patches:
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.5.0-1767875480"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-init
+    namespace: system
+- patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value":
+    {"name": "OPERATOR_IMAGE_URL", "value": "quay.io/openstack-k8s-operators/openstack-operator:latest"}}]'
+  target:
+    kind: Deployment
+    name: openstack-operator-controller-init
+    namespace: system

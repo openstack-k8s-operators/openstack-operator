@@ -2,23 +2,23 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    app.kubernetes.io/name: openstack-operator-controller-operator
+    app.kubernetes.io/name: openstack-operator-controller-init
     control-plane: controller-manager
   name: system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openstack-operator-controller-operator
+  name: openstack-operator-controller-init
   namespace: system
   labels:
-    app.kubernetes.io/name: openstack-operator-controller-operator
+    app.kubernetes.io/name: openstack-operator-controller-init
     control-plane: controller-manager
     openstack.org/operator-name: openstack-init
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: openstack-operator-controller-operator
+      app.kubernetes.io/name: openstack-operator-controller-init
       control-plane: controller-manager
       openstack.org/operator-name: openstack-init
   replicas: 1
@@ -27,7 +27,7 @@ spec:
       annotations:
         kubectl.kubernetes.io/default-container: operator
       labels:
-        app.kubernetes.io/name: openstack-operator-controller-operator
+        app.kubernetes.io/name: openstack-operator-controller-init
         control-plane: controller-manager
         openstack.org/operator-name: openstack-init
     spec:
@@ -89,7 +89,7 @@ spec:
           requests:
             cpu: 10m
             memory: 128Mi
-      serviceAccountName: openstack-operator-controller-operator
+      serviceAccountName: openstack-operator-controller-init
       terminationGracePeriodSeconds: 10
       tolerations:
       - key: "node.kubernetes.io/not-ready"

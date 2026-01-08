@@ -353,7 +353,7 @@ cat > ../config/operator/manager_operator_images.yaml <<EOF_CAT
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openstack-operator-controller-operator
+  name: openstack-operator-controller-init
   namespace: system
 spec:
   template:
