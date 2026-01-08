@@ -38,27 +38,56 @@ type machineConfigIgnition struct {
 
 // IsDisconnectedOCP - Will retrieve a CR's related to disconnected OCP deployments. If the list is not
 // empty, we can infer that the OCP cluster is a disconnected deployment.
+// Returns false without error if the CRDs don't exist (non-OpenShift cluster).
 func IsDisconnectedOCP(ctx context.Context, helper *helper.Helper) (bool, error) {
 	icspList := ocpicsp.ImageContentSourcePolicyList{}
 	idmsList := ocpidms.ImageDigestMirrorSetList{}
 
 	listOpts := []client.ListOption{}
 
-	var err error
-	err = helper.GetClient().List(ctx, &icspList, listOpts...)
+	var icspCount, idmsCount int
+
+	err := helper.GetClient().List(ctx, &icspList, listOpts...)
 	if err != nil {
-		return false, err
+		// If the CRD doesn't exist, this is not an OpenShift cluster or ICSP is not available
+		// This is not an error condition - just means we're not in a disconnected environment
+		if IsNoMatchError(err) {
+			helper.GetLogger().Info("ImageContentSourcePolicy CRD not available, assuming not a disconnected environment")
+		} else {
+			return false, err
+		}
+	} else {
+		icspCount = len(icspList.Items)
 	}
+
 	err = helper.GetClient().List(ctx, &idmsList, listOpts...)
 	if err != nil {
-		return false, err
+		// If the CRD doesn't exist, this is not an OpenShift cluster or IDMS is not available
+		if IsNoMatchError(err) {
+			helper.GetLogger().Info("ImageDigestMirrorSet CRD not available, assuming not a disconnected environment")
+		} else {
+			return false, err
+		}
+	} else {
+		idmsCount = len(idmsList.Items)
 	}
 
-	if len(icspList.Items) != 0 || len(idmsList.Items) != 0 {
-		return true, err
+	if icspCount != 0 || idmsCount != 0 {
+		return true, nil
 	}
 
-	return false, err
+	return false, nil
+}
+
+// IsNoMatchError checks if the error indicates that a CRD/resource type doesn't exist
+func IsNoMatchError(err error) bool {
+	errStr := err.Error()
+	// Check for "no matches for kind" type errors which indicate the CRD doesn't exist.
+	// Also check for "no kind is registered" which occurs when the type isn't in the scheme.
+	// This is specifically needed for functional tests where the fake client returns a different
+	// error type than a real Kubernetes API server when CRDs are not installed.
+	return strings.Contains(errStr, "no matches for kind") ||
+		strings.Contains(errStr, "no kind is registered")
 }
 
 // GetMCRegistryConf - will unmarshal the MachineConfig ignition file the machineConfigIgnition object.

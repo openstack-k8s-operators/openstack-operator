@@ -144,13 +144,28 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	if isDisconnected {
 		registryConfig, err := util.GetMCRegistryConf(ctx, helper)
 		if err != nil {
-			return "", err
-		}
-		helper.GetLogger().Info("disconnected registry was identified via the ImageContentSourcePolicy. Using OCP registry.")
+			// CRD not installed (non-OpenShift or no MCO) - log warning and continue.
+			// This allows graceful degradation when running on non-OpenShift clusters.
+			// Users can manually configure registries.conf via ansibleVars.
+			if util.IsNoMatchError(err) {
+				helper.GetLogger().Info("Disconnected environment detected but MachineConfig CRD not available. "+
+					"Registry configuration will not be propagated to dataplane nodes. "+
+					"You may need to configure registries.conf manually using ansibleVars "+
+					"(edpm_podman_disconnected_ocp and edpm_podman_registries_conf).",
+					"error", err.Error())
+			} else {
+				// CRD exists but resource not found, or other errors (network issues,
+				// permissions, etc.) - return the error. If MCO is installed but the
+				// registry MachineConfig doesn't exist, this indicates a misconfiguration.
+				return "", fmt.Errorf("failed to get MachineConfig registry configuration: %w", err)
+			}
+		} else {
+			helper.GetLogger().Info("disconnected registry was identified via the ImageContentSourcePolicy. Using OCP registry.")
 
-		// Use OCP registries.conf for disconnected deployments
-		nodeSetGroup.Vars["edpm_podman_registries_conf"] = registryConfig
-		nodeSetGroup.Vars["edpm_podman_disconnected_ocp"] = isDisconnected
+			// Use OCP registries.conf for disconnected deployments
+			nodeSetGroup.Vars["edpm_podman_registries_conf"] = registryConfig
+			nodeSetGroup.Vars["edpm_podman_disconnected_ocp"] = isDisconnected
+		}
 	}
 
 	// add TLS ansible variable
