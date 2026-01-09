@@ -61,6 +61,15 @@ spec:
                 description: APIDatabaseHostname - hostname to use when accessing
                   the API DB
                 type: string
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: |-
+                      ApplicationCredentialSecret - the name of the k8s Secret that contains the
+                      application credential data used for authentication
+                    type: string
+                type: object
               cell0DatabaseAccount:
                 default: nova-cell0
                 description: Cell0DatabaseAccount - MariaDBAccount to use when accessing

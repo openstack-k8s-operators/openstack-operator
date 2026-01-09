@@ -52,6 +52,15 @@ spec:
           spec:
             description: NovaComputeSpec defines the desired state of NovaCompute
             properties:
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: |-
+                      ApplicationCredentialSecret - the name of the k8s Secret that contains the
+                      application credential data used for authentication
+                    type: string
+                type: object
               cellName:
                 description: CellName is the name of the Nova Cell this NovaCompute
                   belongs to.

@@ -53,6 +53,15 @@ spec:
                 description: APITimeout for HAProxy, Apache
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication (shared by
+                  IronicAPI, IronicConductor, and IronicNeutronAgent)
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               customServiceConfig:
                 default: '# add your customization here'
                 description: |-
@@ -621,6 +630,14 @@ spec:
                 description: IronicInspector - Spec definition for the inspector service
                   of this Ironic deployment
                 properties:
+                  auth:
+                    description: Auth - Parameters related to authentication
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - Secret containing
+                          Application Credential ID and Secret
+                        type: string
+                    type: object
                   customServiceConfig:
                     default: '# add your customization here'
                     description: |-

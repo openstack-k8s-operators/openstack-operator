@@ -55,6 +55,15 @@ spec:
                 description: APITimeout for Route and Apache
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: |-
+                      ApplicationCredentialSecret - the name of the k8s Secret that contains the
+                      application credential data used for authentication
+                    type: string
+                type: object
               cellDatabaseAccount:
                 default: nova
                 description: CellDatabaseAccount - MariaDBAccount to use when accessing

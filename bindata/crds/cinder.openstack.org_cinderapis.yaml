@@ -52,6 +52,14 @@ spec:
           spec:
             description: CinderAPISpec defines the desired state of CinderAPI
             properties:
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Cinder Container Image URL (will be
                   set to environmental default if empty)

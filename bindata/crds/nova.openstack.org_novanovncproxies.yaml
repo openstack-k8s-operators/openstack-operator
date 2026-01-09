@@ -52,6 +52,15 @@ spec:
           spec:
             description: NovaNoVNCProxySpec defines the desired state of NovaNoVNCProxy
             properties:
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: |-
+                      ApplicationCredentialSecret - the name of the k8s Secret that contains the
+                      application credential data used for authentication
+                    type: string
+                type: object
               cellDatabaseAccount:
                 default: nova
                 description: CellDatabaseAccount - MariaDBAccount to use when accessing
