@@ -156,8 +156,6 @@ github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.2026010707460
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20260107074601-a3a9bc0039f2/go.mod h1:8vbyaXZp+g7hhH88D8CAT6rxtyyVq31k7/c+Dp7/ZLg=
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec h1:saovr368HPAKHN0aRPh8h8n9s9dn3d8Frmfua0UYRlc=
 github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec/go.mod h1:Nh2NEePLjovUQof2krTAg4JaAoLacqtPTZQXK6izNfg=
-github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260109114915-e3610af59955 h1:Ih9zMoWshUFadiskYHa/Cp9PtrEmaHkeEk2whlDi9mc=
-github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260109114915-e3610af59955/go.mod h1:torrWuwy6gLv5xAjhjKdJJD3HJsY8sXin98VGQHopGI=
 github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260109125950-7b71e711b219 h1:kJTfqT0+FOU4Pp1pcO9OXQMIAAP7tzg+jxul6r42zOQ=
 github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260109125950-7b71e711b219/go.mod h1:ZTNsfEk7BGBCJO/dQ4Fu8sDcs5l3fXcdEZtkXoeJuuI=
 github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260109095000-08534876783d h1:vSSrwCe4QfWRMNVOd5JgLfNf2O0APAzxvBI/XJaQS94=
@@ -189,6 +187,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
+github.com/stuggi/swift-operator/api v0.0.0-20260109152558-4346379e0045 h1:yKuxJ7aRTpWawZUHx2t0egBLpnPVW10kMNQp6me7XS0=
+github.com/stuggi/swift-operator/api v0.0.0-20260109152558-4346379e0045/go.mod h1:torrWuwy6gLv5xAjhjKdJJD3HJsY8sXin98VGQHopGI=
 github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
 github.com/tidwall/gjson v1.18.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
