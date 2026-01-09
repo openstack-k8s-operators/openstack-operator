@@ -41,30 +41,6 @@ spec:
           replicas: 1
       storage:
         storageRequest: 10G
-  cinder:
-    template:
-      databaseInstance: openstack
-      secret: osp-secret
-      cinderAPI:
-        replicas: 1
-      cinderScheduler:
-        replicas: 1
-      cinderBackup:
-        replicas: 0 # backend needs to be configured
-      cinderVolumes:
-        volume1:
-          replicas: 0 # backend needs to be configured
-  barbican:
-    enabled: true
-    template:
-      databaseInstance: openstack
-      secret: osp-secret
-      barbicanAPI:
-        replicas: 1
-      barbicanWorker:
-        replicas: 1
-      barbicanKeystoneListener:
-        replicas: 1
   manila:
     template:
       manilaAPI:
@@ -116,18 +92,23 @@ spec:
       ironicNeutronAgent:
         replicas: 1
       secret: osp-secret
-  telemetry:
-    enabled: true
+  designate:
+    enabled: false
     template:
-      autoscaling:
-        aodh:
-          secret: osp-secret
-          serviceUser: aodh
-      ceilometer:
-        passwordSelector:
-          ceilometerService: CeilometerPassword
-        secret: osp-secret
-        serviceUser: ceilometer
+      databaseInstance: openstack
+      secret: osp-secret
+      designateAPI:
+        replicas: 1
+      designateCentral:
+        replicas: 1
+      designateMdns:
+        replicas: 1
+      designateWorker:
+        replicas: 1
+      designateProducer:
+        replicas: 1
+      designateBackendbind9:
+        replicas: 1
   tls:
     ingress:
       ca:
@@ -152,45 +133,20 @@ spec:
           duration: 87600h0m0s
         cert:
           duration: 43800h0m0s
-  swift:
-    enabled: true
-    template:
-      swiftRing:
-        ringReplicas: 1
-      swiftStorage:
-        replicas: 1
-      swiftProxy:
-        replicas: 1
 status:
   conditions:
   - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
-  - message: OpenStackControlPlane Barbican completed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneBarbicanReady
   - message: OpenStackControlPlane CAs completed
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneCAReadyCondition
-  - message: OpenStackControlPlane Cinder completed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneCinderReady
   - message: OpenStackControlPlane Client completed
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneClientReady
-  - message: OpenStackControlPlane barbican service exposed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneExposeBarbicanReady
-  - message: OpenStackControlPlane cinder service exposed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneExposeCinderReady
   - message: OpenStackControlPlane glance service exposed
     reason: Ready
     status: "True"
@@ -211,10 +167,6 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneExposePlacementAPIReady
-  - message: OpenStackControlPlane swift service exposed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneExposeSwiftReady
   - message: OpenStackControlPlane Glance completed
     reason: Ready
     status: "True"
@@ -259,14 +211,6 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneRabbitMQReady
-  - message: OpenStackControlPlane Swift completed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneSwiftReady
-  - message: OpenStackControlPlane Telemetry completed
-    reason: Ready
-    status: "True"
-    type: OpenStackControlPlaneTelemetryReady
   - message: OpenStackControlPlane Test Operator CM is available
     reason: Ready
     status: "True"
