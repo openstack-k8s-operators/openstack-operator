@@ -50,7 +50,7 @@ spec:
         - name: RELATED_IMAGE_RABBITMQ_CLUSTER_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/rabbitmq-cluster-operator@sha256:893e66303c1b0bc1d00a299a3f0380bad55c8dc813c8a1c6a4aab379f5aa12a2
         - name: RELATED_IMAGE_SWIFT_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/swift-operator@sha256:df69e4193043476bc71d0e06ac8bc7bbd17f7b624d495aae6b7c5e5b40c9e1e7
+          value: quay.io/mschuppe/swift-operator@sha256:b16305b6d88bbd65dd707ce13fe33cb5d2843a6f81193144d1851b8d3133f440
         - name: RELATED_IMAGE_TELEMETRY_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/telemetry-operator@sha256:3c1b2858c64110448d801905fbbf3ffe7f78d264cc46ab12ab2d724842dba309
         - name: RELATED_IMAGE_TEST_OPERATOR_MANAGER_IMAGE_URL
