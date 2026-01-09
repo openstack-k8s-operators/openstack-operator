@@ -506,6 +506,14 @@ spec:
                     default: 10Gi
                     description: Minimum size for Swift PVs
                     type: string
+                  tls:
+                    description: TLS - Parameters related to the TLS
+                    properties:
+                      caBundleSecretName:
+                        description: CaBundleSecretName - holding the CA certs in
+                          a pre-created bundle file
+                        type: string
+                    type: object
                   topologyRef:
                     description: |-
                       TopologyRef to apply the Topology defined by the associated CR referenced

@@ -436,6 +436,13 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: telemetry.aodhApiOverride.tls
+      - description: CloudKittyAPIOverride, provides the ability to override the generated
+          manifest of several child resources.
+        displayName: Cloud Kitty APIOverride
+        path: telemetry.cloudKittyApiOverride
+      - description: TLS - overrides tls parameters for public endpoint
+        displayName: TLS
+        path: telemetry.cloudKittyApiOverride.tls
       - description: Enabled - Whether OpenStack Telemetry services should be deployed
           and managed
         displayName: Enabled

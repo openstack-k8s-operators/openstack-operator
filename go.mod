@@ -23,7 +23,7 @@ require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20251206133124-593df0a7a9e1
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20251215094837-5c05ea64c324
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20251215094837-5c05ea64c324
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20251215094837-5c05ea64c324
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20251230215914-6ba873b49a35
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20251215094837-5c05ea64c324
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20251215094837-5c05ea64c324
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20251221204257-893591a14936
@@ -181,3 +181,5 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.14 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.14 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+replace github.com/openstack-k8s-operators/swift-operator/api => github.com/stuggi/swift-operator/api v0.0.0-20260109152558-4346379e0045
