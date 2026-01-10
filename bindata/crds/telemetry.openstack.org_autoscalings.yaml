@@ -70,6 +70,12 @@ spec:
                     default: 60
                     description: APITimeout for Route and Apache
                     type: integer
+                  customConfigsSecretName:
+                    description: |-
+                      A name of a secret containing custom configuration files. Files
+                      from this secret will get copied into /etc/aodh/ and they'll
+                      overwrite any default files already present there.
+                    type: string
                   customServiceConfig:
                     default: '# add your customization here'
                     description: |-
