@@ -392,8 +392,8 @@ endif
 bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
 	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/operator/deployment/ && $(KUSTOMIZE) edit set image controller=$(IMG) && \
-	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
-	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-operator --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/1\", \"value\": {\"name\": \"OPERATOR_IMAGE_URL\", \"value\": \"$(IMG)\"}}]"
+	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-init --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
+	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-init --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/1\", \"value\": {\"name\": \"OPERATOR_IMAGE_URL\", \"value\": \"$(IMG)\"}}]"
 	$(KUSTOMIZE) build config/operator --load-restrictor='LoadRestrictionsNone' | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	$(OPERATOR_SDK) bundle validate ./bundle
 

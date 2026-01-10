@@ -400,7 +400,7 @@ if [ -n "${CSV_NAME}" ]; then
 
     oc patch "${CSV_NAME}" -n openstack-operators --type=json -p="[{'op': 'replace', 'path': '/spec/install/spec/deployments/0/spec/replicas', 'value': 0}]"
     oc patch "${CSV_NAME}" -n openstack-operators --type=json -p="[{'op': 'replace', 'path': '/spec/webhookdefinitions', 'value': []}]"
-    oc wait -n openstack-operators --for=jsonpath='{.spec.replicas}'=0 deploy/openstack-operator-controller-operator
+    oc wait -n openstack-operators --for=jsonpath='{.spec.replicas}'=0 deploy/openstack-operator-controller-init
     oc scale --replicas=0 -n openstack-operators deploy/openstack-operator-controller-manager
     oc delete --ignore-not-found=true validatingwebhookconfiguration openstack-operator-validating-webhook-configuration
     oc delete --ignore-not-found=true mutatingwebhookconfiguration openstack-operator-mutating-webhook-configuration
