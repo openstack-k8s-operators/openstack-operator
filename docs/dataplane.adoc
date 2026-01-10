@@ -29,6 +29,10 @@ include::assemblies/design.adoc[leveloffset=+1]
 
 include::assemblies/creating-the-data-plane.adoc[leveloffset=+1]
 
+include::assemblies/dataplane_performance_tuning_large_scale.adoc[leveloffset=+1]
+
+include::assemblies/dataplane_scaling_out.adoc[leveloffset=+1]
+
 include::assemblies/proc_deploying-in-disconnected-environments.adoc[leveloffset=+1]
 
 include::assemblies/dataplane_resources.adoc[leveloffset=-1]

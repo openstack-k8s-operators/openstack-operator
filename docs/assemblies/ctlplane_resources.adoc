@@ -477,7 +477,6 @@
 * <<swiftspecbase,SwiftSpecBase>>
 * <<swiftspeccore,SwiftSpecCore>>
 * <<swiftstatus,SwiftStatus>>
-* <<apioverridespec,APIOverrideSpec>>
 * <<aodh,Aodh>>
 * <<aodhcore,AodhCore>>
 * <<autoscaling,Autoscaling>>
@@ -492,6 +491,30 @@
 * <<ceilometerspeccore,CeilometerSpecCore>>
 * <<ceilometerstatus,CeilometerStatus>>
 * <<ksmstatus,KSMStatus>>
+* <<cloudkittyapi,CloudKittyAPI>>
+* <<cloudkittyapilist,CloudKittyAPIList>>
+* <<cloudkittyapispec,CloudKittyAPISpec>>
+* <<cloudkittyapistatus,CloudKittyAPIStatus>>
+* <<cloudkittyapitemplate,CloudKittyAPITemplate>>
+* <<cloudkittyapitemplatecore,CloudKittyAPITemplateCore>>
+* <<cloudkittyproc,CloudKittyProc>>
+* <<cloudkittyproclist,CloudKittyProcList>>
+* <<cloudkittyprocspec,CloudKittyProcSpec>>
+* <<cloudkittyprocstatus,CloudKittyProcStatus>>
+* <<cloudkittyproctemplate,CloudKittyProcTemplate>>
+* <<cloudkittyproctemplatecore,CloudKittyProcTemplateCore>>
+* <<caspec,CASpec>>
+* <<cloudkitty,CloudKitty>>
+* <<cloudkittylist,CloudKittyList>>
+* <<cloudkittyservicetemplate,CloudKittyServiceTemplate>>
+* <<cloudkittyspec,CloudKittySpec>>
+* <<cloudkittyspecbase,CloudKittySpecBase>>
+* <<cloudkittyspeccore,CloudKittySpecCore>>
+* <<cloudkittystatus,CloudKittyStatus>>
+* <<cloudkittytemplate,CloudKittyTemplate>>
+* <<objectstorageschema,ObjectStorageSchema>>
+* <<objectstoragesecretspec,ObjectStorageSecretSpec>>
+* <<objectstoragespec,ObjectStorageSpec>>
 * <<logging,Logging>>
 * <<logginglist,LoggingList>>
 * <<loggingspec,LoggingSpec>>
@@ -503,10 +526,13 @@
 * <<monitoringstack,MonitoringStack>>
 * <<persistentstorage,PersistentStorage>>
 * <<storage,Storage>>
+* <<apioverridespec,APIOverrideSpec>>
 * <<autoscalingsection,AutoscalingSection>>
 * <<autoscalingsectioncore,AutoscalingSectionCore>>
 * <<ceilometersection,CeilometerSection>>
 * <<ceilometersectioncore,CeilometerSectionCore>>
+* <<cloudkittysection,CloudKittySection>>
+* <<cloudkittysectioncore,CloudKittySectionCore>>
 * <<loggingsection,LoggingSection>>
 * <<metricstoragesection,MetricStorageSection>>
 * <<passwordsselector,PasswordsSelector>>
@@ -583,6 +609,7 @@
 * <<reservation,Reservation>>
 * <<reservationlist,ReservationList>>
 * <<reservationspec,ReservationSpec>>
+* <<podoverride,PodOverride>>
 * <<rabbitmq,RabbitMq>>
 * <<rabbitmqlist,RabbitMqList>>
 * <<rabbitmqspec,RabbitMqSpec>>
@@ -1799,6 +1826,11 @@ TelemetrySection defines the desired state of OpenStack Telemetry services
 | <<override,Override>>
 | false
 
+| cloudKittyApiOverride
+| CloudKittyAPIOverride, provides the ability to override the generated manifest of several child resources.
+| <<override,Override>>
+| false
+
 | prometheusOverride
 | PrometheusOverride, provides the ability to override the generated manifest of several child resources.
 | <<override,Override>>
@@ -1989,6 +2021,16 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | false
 
 | cinderSchedulerImage
+|
+| *string
+| false
+
+| cloudkittyAPIImage
+|
+| *string
+| false
+
+| cloudkittyProcImage
 |
 | *string
 | false
@@ -2385,7 +2427,7 @@ CustomContainerImages - struct for custom container images
 [#openstackversion]
 ==== OpenStackVersion
 
-OpenStackVersion is the Schema for the openstackversionupdates API
+OpenStackVersion defines the Schema for the openstackversionupdates API
 
 |===
 | Field | Description | Scheme | Required
@@ -2921,7 +2963,7 @@ BarbicanSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -3174,7 +3216,7 @@ BarbicanComponentTemplate - Variables used by every sub-component of Barbican (e
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -3989,7 +4031,7 @@ CinderSpec defines the desired state of Cinder
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config for all Cinder services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -4329,7 +4371,7 @@ CinderServiceTemplate defines the input parameters that can be defined for a giv
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -4433,7 +4475,7 @@ DesignateServiceTemplate defines the input parameters that can be defined for a 
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -5465,7 +5507,7 @@ DesignateSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -5955,7 +5997,7 @@ GlanceAPITemplate defines the desired state of GlanceAPI
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -6392,7 +6434,7 @@ GlanceSpecCore defines the desired state of Glance
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -6613,7 +6655,7 @@ HeatServiceTemplate -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 02-custom-service.conf file.
 | string
 | false
 
@@ -7231,7 +7273,7 @@ HeatSpec defines the desired state of Heat
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/heat/heat.conf.d directory as 01-custom.conf file.
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/heat/heat.conf.d directory as 01-custom.conf file.
 | string
 | false
 
@@ -7494,7 +7536,7 @@ HorizonSpecCore -
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/openstack-dashboard/local_settings.d directory as 9999_custom_settings.py file.
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/openstack-dashboard/local_settings.d directory as 9999_custom_settings.py file.
 | string
 | true
 
@@ -7596,7 +7638,7 @@ IronicServiceTemplate defines the common input parameters for Ironic services
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -8301,7 +8343,7 @@ IronicInspectorTemplate defines the input parameters for Ironic Inspector servic
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -8697,7 +8739,7 @@ IronicSpec defines the desired state of Ironic
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -8912,6 +8954,8 @@ KeystoneAPIList contains a list of KeystoneAPI
 [#keystoneapispec]
 ==== KeystoneAPISpec
 
+KeystoneAPISpec defines the desired state of KeystoneAPI
+
 |===
 | Field | Description | Scheme | Required
 
@@ -8926,7 +8970,7 @@ KeystoneAPIList contains a list of KeystoneAPI
 [#keystoneapispeccore]
 ==== KeystoneAPISpecCore
 
-KeystoneAPISpec defines the desired state of KeystoneAPI
+KeystoneAPISpecCore defines the desired state of KeystoneAPI core spec
 
 |===
 | Field | Description | Scheme | Required
@@ -9017,7 +9061,7 @@ KeystoneAPISpec defines the desired state of KeystoneAPI
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -9143,7 +9187,7 @@ KeystoneAPIStatus defines the observed state of KeystoneAPI
 [#keystoneextramounts]
 ==== KeystoneExtraMounts
 
-KeystoneExtraVolMounts exposes additional parameters processed by keystone-operator and defines the common VolMounts structure provided by the main storage module
+KeystoneExtraMounts exposes additional parameters processed by keystone-operator and defines the common VolMounts structure provided by the main storage module
 
 |===
 | Field | Description | Scheme | Required
@@ -9440,9 +9484,9 @@ ManilaServiceTemplate defines the input parameters that can be defined for a giv
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
 | string
-| false
+| true
 
 | customServiceConfigSecrets
 | CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
@@ -9493,7 +9537,7 @@ ManilaTemplate defines common input parameters used by all Manila services
 | passwordSelectors
 | PasswordSelectors - Selectors to identify the ServiceUser password from the Secret
 | <<passwordselector,PasswordSelector>>
-| false
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -9509,7 +9553,7 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 | service
 | Service - Selector to get the manila service password from the Secret
 | string
-| false
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10091,7 +10135,7 @@ ManilaDebug contains flags related to multiple debug activities. See the individ
 | dbPurge
 | DBPurge increases log verbosity by executing the db_purge command with "--debug".
 | bool
-| false
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10200,12 +10244,12 @@ ManilaSpecBase -
 | preserveJobs
 | PreserveJobs - do not delete jobs after they finished e.g. to check logs
 | bool
-| false
+| true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config for all Manila services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory a custom config file.+++</service>++++++</service>+++
 | string
-| false
+| true
 
 | extraMounts
 | ExtraMounts containing conf files and credentials
@@ -10220,7 +10264,7 @@ ManilaSpecBase -
 | dbPurge
 | DBPurge parameters -
 | <<dbpurge,DBPurge>>
-| false
+| true
 
 | apiTimeout
 | APITimeout for HAProxy, Apache, and rpc_response_timeout
@@ -10750,6 +10794,11 @@ MariaDBAccountSpec defines the desired state of MariaDBAccount
 | Account must use TLS to connect to the database
 | bool
 | true
+
+| accountType
+|
+| AccountType
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -10761,6 +10810,11 @@ MariaDBAccountStatus defines the observed state of MariaDBAccount
 
 |===
 | Field | Description | Scheme | Required
+
+| currentSecret
+| the Secret that's currently in use for the account. keeping a handle to this secret allows us to remove its finalizer when it's replaced with a new one. It also is useful for storing the current "root" secret separate from a newly proposed one which is needed when changing the database root password.
+| string
+| false
 
 | conditions
 | Deployment Conditions
@@ -11037,7 +11091,7 @@ NeutronAPISpecCore -
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -11204,6 +11258,8 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 [#novacellimages]
 ==== NovaCellImages
 
+NovaCellImages defines container images used by NovaCell services
+
 |===
 | Field | Description | Scheme | Required
 
@@ -11232,6 +11288,8 @@ PasswordSelector to identify the DB and AdminUser password from the Secret
 
 [#novaimages]
 ==== NovaImages
+
+NovaImages defines container images used by top level Nova CR
 
 |===
 | Field | Description | Scheme | Required
@@ -11273,7 +11331,7 @@ NovaServiceBase contains the fields that are needed for each nova service CRD
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -11530,7 +11588,7 @@ NovaAPITemplate defines the input parameters specified by the user to create a N
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12057,7 +12115,7 @@ NovaComputeTemplate defines the input parameters specified by the user to create
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12267,7 +12325,7 @@ NovaConductorTemplate defines the input parameters specified by the user to crea
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12503,7 +12561,7 @@ NovaMetadataTemplate defines the input parameters specified by the user to creat
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12713,7 +12771,7 @@ NovaNoVNCProxyTemplate defines the input parameters specified by the user to cre
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -12955,7 +13013,7 @@ NovaSchedulerTemplate defines the input parameters specified by the user to crea
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -13288,7 +13346,7 @@ OctaviaAmphoraControllerSpecCore -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -13564,7 +13622,7 @@ OctaviaAPISpecCore -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -14104,7 +14162,7 @@ OctaviaSpecBase -
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -14748,22 +14806,27 @@ OpenStackBaremetalSetStatus defines the observed state of OpenStackBaremetalSet
 | Field | Description | Scheme | Required
 
 | osImage
-| OSImage - OS qcow2 image Name
+| OSImage - OS qcow2 image Name. Ignored when osImageDeploymentType is PassThrough.
 | string
 | true
 
 | osContainerImageUrl
-| OSContainerImageURL - Container image URL for init with the OS qcow2 image (osImage)
+| OSContainerImageURL - When osImageDeploymentType is SelfExtracting, container image URL for init with the OS qcow2 image (osImage). When osImageDeploymentType is PassThrough this can be any image URL which the underlying Metal3 instance supports.
 | string
 | false
 
+| osImageDeploymentType
+| OSImageDeploymentType - Whether the OS image deployment is self-extracting or pass-through based
+| OSImageDeploymentType
+| true
+
 | apacheImageUrl
-| ApacheImageURL - Container image URL for the main container that serves the downloaded OS qcow2 image (osImage)
+| ApacheImageURL - Container image URL for the main container that serves the downloaded OS qcow2 image (osImage). Ignored when osImageDeploymentType is PassThrough.
 | string
 | false
 
 | agentImageUrl
-| AgentImageURL - Container image URL for the sidecar container that discovers provisioning network IPs
+| AgentImageURL - Container image URL for the sidecar container that discovers provisioning network IPs. Ignored when osImageDeploymentType is PassThrough.
 | string
 | false
 
@@ -14773,17 +14836,17 @@ OpenStackBaremetalSetStatus defines the observed state of OpenStackBaremetalSet
 | true
 
 | provisionServerName
-| ProvisionServerName - Optional. Existing OpenStackProvisionServer to use, else one would be created.
+| ProvisionServerName - Optional. Existing OpenStackProvisionServer to use, else one would be created. Ignored when osImageDeploymentType is PassThrough.
 | string
 | false
 
 | provisionServerNodeSelector
-| ProvisonServerNodeSelector to target subset of worker nodes running provision server
+| ProvisonServerNodeSelector to target subset of worker nodes running provision server, ignored when osImageDeploymentType is PassThrough.
 | map[string]string
 | false
 
 | provisioningInterface
-| ProvisioningInterface - Optional. If not provided along with ProvisionServerName, it would be discovered from CBO.  This is the provisioning interface on the OCP masters/workers.
+| ProvisioningInterface - Optional. If not provided along with ProvisionServerName, it would be discovered from CBO.  This is the provisioning interface on the OCP masters/workers. Ignored when osImageDeploymentType is PassThrough.
 | string
 | false
 
@@ -15166,6 +15229,16 @@ OVNControllerSpecCore -
 | NetworkAttachment is a NetworkAttachment resource name to expose the service to the given network. If specified the IP address of this network is used as the OVNEncapIP.
 | string
 | true
+
+| ovnLogLevel
+| OVNLogLevel - Set log level off, emer, err, warn, info, or dbg. Default is info.
+| string
+| false
+
+| ovsLogLevel
+| OVSLogLevel - Set log level off, emer, err, warn, info, or dbg. Default is info.
+| string
+| false
 
 | tls
 | TLS - Parameters related to TLS
@@ -15822,7 +15895,7 @@ PlacementAPISpecCore -
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | true
 
@@ -16647,22 +16720,6 @@ SwiftStatus defines the observed state of Swift
 
 <<custom-resources,Back to Custom Resources>>
 
-[#apioverridespec-2]
-==== APIOverrideSpec
-
-APIOverrideSpec to override the generated manifest of several child resources.
-
-|===
-| Field | Description | Scheme | Required
-
-| service
-| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
-| map[service.Endpoint]service.RoutedOverrideSpec
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#aodh]
 ==== Aodh
 
@@ -16738,7 +16795,7 @@ Aodh defines the aodh component spec
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -17103,7 +17160,7 @@ CeilometerSpecCore defines the desired state of Ceilometer. This version is used
 | true
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as custom.conf file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -17257,6 +17314,725 @@ KSMStatus defines the observed state of kube-state-metrics [DEPRECATED, Status i
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the openstack-operator in the top-level CR (e.g. the ContainerImage)
 | int64
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyapi]
+==== CloudKittyAPI
+
+CloudKittyAPI is the Schema for the cloudkittyapis API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<cloudkittyapispec,CloudKittyAPISpec>>
+| false
+
+| status
+|
+| <<cloudkittyapistatus,CloudKittyAPIStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyapilist]
+==== CloudKittyAPIList
+
+CloudKittyAPIList contains a list of CloudKittyAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<cloudkittyapi,CloudKittyAPI>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyapispec]
+==== CloudKittyAPISpec
+
+CloudKittyAPISpec defines the desired state of CloudKittyAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseHostname
+| DatabaseHostname - CloudKitty Database Hostname
+| string
+| true
+
+| transportURLSecret
+| Secret containing RabbitMq transport URL
+| string
+| true
+
+| serviceAccount
+| ServiceAccount - service account name used internally to provide CloudKitty services the default SA name
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyapistatus]
+==== CloudKittyAPIStatus
+
+CloudKittyAPIStatus defines the observed state of CloudKittyAPI
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| apiEndpoints
+| API endpoints
+| map[string]map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| readyCount
+| ReadyCount of CloudKitty API instances
+| int32
+| true
+
+| serviceIDs
+| ServiceIDs
+| map[string]string
+| false
+
+| networkAttachments
+| NetworkAttachments status of the deployment pods
+| map[string][]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is different than the spec generation, then the controller has not started processing the latest changes, and the status and its conditions are likely stale.
+| int64
+| false
+
+| lastAppliedTopology
+| LastAppliedTopology - the last applied Topology
+| *topologyv1.TopoRef
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyapitemplate]
+==== CloudKittyAPITemplate
+
+CloudKittyAPITemplate defines the input parameters for the CloudKitty API service
+
+|===
+| Field | Description | Scheme | Required
+
+| containerImage
+| ContainerImage - CloudKitty Container Image URL (will be set to environmental default if empty)
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyapitemplatecore]
+==== CloudKittyAPITemplateCore
+
+CloudKittyAPITemplateCore defines the input parameters for the CloudKitty API service
+
+|===
+| Field | Description | Scheme | Required
+
+| replicas
+| Replicas - CloudKitty API Replicas
+| *int32
+| true
+
+| override
+| Override, provides the ability to override the generated manifest of several child resources.
+| <<apioverridespec,APIOverrideSpec>>
+| false
+
+| tls
+| TLS - Parameters related to the TLS
+| tls.API
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyproc]
+==== CloudKittyProc
+
+CloudKittyProc is the Schema for the cloudkittprocs API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<cloudkittyprocspec,CloudKittyProcSpec>>
+| false
+
+| status
+|
+| <<cloudkittyprocstatus,CloudKittyProcStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyproclist]
+==== CloudKittyProcList
+
+CloudKittyProcList contains a list of CloudKittyProc
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<cloudkittyproc,CloudKittyProc>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyprocspec]
+==== CloudKittyProcSpec
+
+CloudKittyProcSpec defines the desired state of CloudKitty Processor
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseHostname
+| DatabaseHostname - CloudKitty Database Hostname
+| string
+| true
+
+| transportURLSecret
+| Secret containing RabbitMq transport URL
+| string
+| true
+
+| serviceAccount
+| ServiceAccount - service account name used internally to provide CloudKitty services the default SA name
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyprocstatus]
+==== CloudKittyProcStatus
+
+CloudKittyProcStatus defines the observed state of CloudKitty Processor
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| readyCount
+| ReadyCount of CloudKitty Processor instances
+| int32
+| true
+
+| networkAttachments
+| NetworkAttachments status of the deployment pods
+| map[string][]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is different than the spec generation, then the controller has not started processing the latest changes, and the status and its conditions are likely stale.
+| int64
+| false
+
+| lastAppliedTopology
+| LastAppliedTopology - the last applied Topology
+| *topologyv1.TopoRef
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyproctemplate]
+==== CloudKittyProcTemplate
+
+CloudKittyProcTemplate defines the input parameters for the CloudKitty Processor service
+
+|===
+| Field | Description | Scheme | Required
+
+| containerImage
+| ContainerImage - CloudKitty Container Image URL (will be set to environmental default if empty)
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyproctemplatecore]
+==== CloudKittyProcTemplateCore
+
+CloudKittyProcTemplateCore defines the input parameters for the CloudKitty Processor service
+
+|===
+| Field | Description | Scheme | Required
+
+| replicas
+| Replicas - CloudKitty API Replicas
+| *int32
+| true
+
+| tls
+| TLS - Parameters related to the TLS
+| tls.SimpleService
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#caspec]
+==== CASpec
+
+|===
+| Field | Description | Scheme | Required
+
+| caKey
+| Key is the data key of a ConfigMap containing a CA certificate. It needs to be in the same namespace as the CloudKitty custom resource. If empty, it defaults to "service-ca.crt".
+| string
+| false
+
+| caName
+| CA is the name of a ConfigMap containing a CA certificate. It needs to be in the same namespace as the CloudKitty custom resource.
+| string
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkitty]
+==== CloudKitty
+
+CloudKitty is the Schema for the cloudkitties API
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ObjectMeta
+| false
+
+| spec
+|
+| <<cloudkittyspec,CloudKittySpec>>
+| false
+
+| status
+|
+| <<cloudkittystatus,CloudKittyStatus>>
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittylist]
+==== CloudKittyList
+
+CloudKittyList contains a list of CloudKitty
+
+|===
+| Field | Description | Scheme | Required
+
+| metadata
+|
+| metav1.ListMeta
+| false
+
+| items
+|
+| []<<cloudkitty,CloudKitty>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyservicetemplate]
+==== CloudKittyServiceTemplate
+
+CloudKittyServiceTemplate defines the input parameters that can be defined for a given CloudKitty service
+
+|===
+| Field | Description | Scheme | Required
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service. Setting here overrides any global NodeSelector settings within the CloudKitty CR.
+| *map[string]string
+| false
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| string
+| false
+
+| customServiceConfigSecrets
+| CustomServiceConfigSecrets - customize the service config using this parameter to specify Secrets that contain sensitive service config data. The content of each Secret gets added to the /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| []string
+| false
+
+| resources
+| Resources - Compute Resources required by this service (Limits/Requests). https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+| corev1.ResourceRequirements
+| false
+
+| networkAttachments
+| NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
+| []string
+| false
+
+| topologyRef
+| TopologyRef to apply the Topology defined by the associated CR referenced by name
+| *topologyv1.TopoRef
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyspec]
+==== CloudKittySpec
+
+CloudKittySpec defines the desired state of CloudKitty
+
+|===
+| Field | Description | Scheme | Required
+
+| cloudKittyAPI
+| CloudKittyAPI - Spec definition for the API service of this CloudKitty deployment
+| <<cloudkittyapitemplate,CloudKittyAPITemplate>>
+| true
+
+| cloudKittyProc
+| CloudKittyProc - Spec definition for the Scheduler service of this CloudKitty deployment
+| <<cloudkittyproctemplate,CloudKittyProcTemplate>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyspecbase]
+==== CloudKittySpecBase
+
+|===
+| Field | Description | Scheme | Required
+
+| databaseInstance
+| MariaDB instance name Right now required by the maridb-operator to get the credentials from the instance to create the DB Might not be required in future
+| string
+| true
+
+| rabbitMqClusterName
+| RabbitMQ instance name Needed to request a transportURL that is created and used in CloudKitty
+| string
+| true
+
+| memcachedInstance
+| Memcached instance name.
+| string
+| true
+
+| preserveJobs
+| PreserveJobs - do not delete jobs after they finished e.g. to check logs
+| bool
+| true
+
+| customServiceConfig
+| CustomServiceConfig - customize the service config for all CloudKitty services using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| string
+| false
+
+| nodeSelector
+| NodeSelector to target subset of worker nodes running this service. Setting NodeSelector here acts as a default value and can be overridden by service specific NodeSelector Settings.
+| *map[string]string
+| false
+
+| apiTimeout
+| APITimeout for HAProxy, Apache, and rpc_response_timeout
+| int
+| true
+
+| topologyRef
+| TopologyRef to apply the Topology defined by the associated CR referenced by name
+| *topologyv1.TopoRef
+| false
+
+| prometheusHost
+| Host of user deployed prometheus
+| string
+| false
+
+| prometheusPort
+| Port of user deployed prometheus
+| int32
+| false
+
+| prometheusTLSCaCertSecret
+| If defined, specifies which CA certificate to use for user deployed prometheus
+| *corev1.SecretKeySelector
+| false
+
+| period
+| Period for collecting metrics in seconds
+| int32
+| true
+
+| s3StorageConfig
+| S3 related configuration passed to Loki
+| <<objectstoragespec,ObjectStorageSpec>>
+| true
+
+| storageClass
+| Storage class used for Loki
+| string
+| false
+
+| lokiStackSize
+| Size of the LokiStack. Supported are "1x.demo" (default), "1x.pico", "1x.extra-small", "1x.small", "1x.medium"
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittyspeccore]
+==== CloudKittySpecCore
+
+CloudKittySpecCore the same as CloudKittySpec without ContainerImage references
+
+|===
+| Field | Description | Scheme | Required
+
+| cloudKittyAPI
+| CloudKittyAPI - Spec definition for the API service of this CloudKitty deployment
+| <<cloudkittyapitemplatecore,CloudKittyAPITemplateCore>>
+| true
+
+| cloudKittyProc
+| CloudKittyProc - Spec definition for the Scheduler service of this CloudKitty deployment
+| <<cloudkittyproctemplatecore,CloudKittyProcTemplateCore>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittystatus]
+==== CloudKittyStatus
+
+CloudKittyStatus defines the observed state of CloudKitty
+
+|===
+| Field | Description | Scheme | Required
+
+| hash
+| Map of hashes to track e.g. job status
+| map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| databaseHostname
+| CloudKitty Database Hostname
+| string
+| false
+
+| transportURLSecret
+| TransportURLSecret - Secret containing RabbitMQ transportURL
+| string
+| false
+
+| apiEndpoints
+| API endpoints
+| map[string]map[string]string
+| false
+
+| serviceIDs
+| ServiceIDs
+| map[string]string
+| false
+
+| cloudKittyAPIReadyCount
+| ReadyCount of CloudKitty API instance
+| int32
+| true
+
+| cloudKittyProcReadyCounts
+| ReadyCount of CloudKitty Processor instances
+| int32
+| true
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is different than the spec generation, then the controller has not started processing the latest changes, and the status and its conditions are likely stale.
+| int64
+| false
+
+| prometheusHostname
+| PrometheusHost - Hostname for prometheus used for autoscaling
+| string
+| false
+
+| prometheusPort
+| PrometheusPort - Port for prometheus used for autoscaling
+| int32
+| false
+
+| prometheusTLS
+| PrometheusTLS - Determines if TLS should be used for accessing prometheus
+| bool
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittytemplate]
+==== CloudKittyTemplate
+
+CloudKittyTemplate defines common input parameters used by all CloudKitty services
+
+|===
+| Field | Description | Scheme | Required
+
+| serviceUser
+| ServiceUser - optional username used for this service to register in cloudkitty
+| string
+| true
+
+| databaseAccount
+| DatabaseAccount - optional MariaDBAccount used for cloudkitty DB, defaults to cloudkitty
+| string
+| true
+
+| secret
+| Secret containing OpenStack password information
+| string
+| true
+
+| passwordSelector
+| PasswordsSelectors - Selectors to identify the ServiceUser password from the Secret
+| <<passwordsselector,PasswordsSelector>>
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#objectstorageschema]
+==== ObjectStorageSchema
+
+|===
+| Field | Description | Scheme | Required
+
+| version
+| Version for writing and reading logs.
+| string
+| true
+
+| effectiveDate
+| EffectiveDate contains a date in YYYY-MM-DD format which is interpreted in the UTC time zone.\n\nThe configuration always needs at least one schema that is currently valid. This means that when creating a new CloudKitty it is recommended to add a schema with the latest available version and an effective date of "yesterday". New schema versions added to the configuration always needs to be placed "in the future", so that Loki can start using it once the day rolls over.
+| string
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#objectstoragesecretspec]
+==== ObjectStorageSecretSpec
+
+|===
+| Field | Description | Scheme | Required
+
+| type
+| Type of object storage that should be used
+| string
+| true
+
+| name
+| Name of a secret in the namespace configured for object storage secrets.
+| string
+| true
+
+| credentialMode
+| CredentialMode can be used to set the desired credential mode for authenticating with the object storage. If this is not set, then the operator tries to infer the credential mode from the provided secret and its own configuration.
+| string
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#objectstoragespec]
+==== ObjectStorageSpec
+
+|===
+| Field | Description | Scheme | Required
+
+| schemas
+| Schemas for reading and writing logs.
+| []<<objectstorageschema,ObjectStorageSchema>>
+| true
+
+| secret
+| Secret for object storage authentication. Name of a secret in the same namespace as the CloudKitty custom resource.
+| <<objectstoragesecretspec,ObjectStorageSecretSpec>>
+| true
+
+| tls
+| TLS configuration for reaching the object storage endpoint.
+| *<<objectstoragetlsspec,ObjectStorageTLSSpec>>
 | false
 |===
 
@@ -17578,6 +18354,22 @@ Storage defines the options used for storage of metrics
 
 <<custom-resources,Back to Custom Resources>>
 
+[#apioverridespec-2]
+==== APIOverrideSpec
+
+APIOverrideSpec to override the generated manifest of several child resources.
+
+|===
+| Field | Description | Scheme | Required
+
+| service
+| Override configuration for the Service created to serve traffic to the cluster. The key must be the endpoint type (public, internal)
+| map[service.Endpoint]service.RoutedOverrideSpec
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#autoscalingsection]
 ==== AutoscalingSection
 
@@ -17642,6 +18434,38 @@ CeilometerSectionCore defines the desired state of the ceilometer service
 
 <<custom-resources,Back to Custom Resources>>
 
+[#cloudkittysection]
+==== CloudKittySection
+
+CloudKittySpec defines the desired state of the cloudkitty service
+
+|===
+| Field | Description | Scheme | Required
+
+| enabled
+| Enabled - Whether OpenStack CloudKitty service should be deployed and managed
+| *bool
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
+[#cloudkittysectioncore]
+==== CloudKittySectionCore
+
+CloudKittySpec defines the desired state of the cloudkitty service
+
+|===
+| Field | Description | Scheme | Required
+
+| enabled
+| Enabled - Whether OpenStack CloudKitty service should be deployed and managed
+| *bool
+| true
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#loggingsection]
 ==== LoggingSection
 
@@ -17689,6 +18513,11 @@ PasswordsSelector to identify the Service password from the Secret
 
 | aodhService
 | AodhService - Selector to get the aodh service password from the Secret
+| string
+| true
+
+| cloudKittyService
+| CloudKittyService - Selector to get the CloudKitty service password from the Secret
 | string
 | true
 |===
@@ -17759,6 +18588,11 @@ TelemetrySpec defines the desired state of Telemetry
 | Ceilometer - Parameters related to the ceilometer service
 | <<ceilometersection,CeilometerSection>>
 | false
+
+| cloudkitty
+| CloudKitty - Parameters related to the cloudkitty service
+| <<cloudkittysection,CloudKittySection>>
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -17810,6 +18644,11 @@ TelemetrySpecCore defines the desired state of Telemetry. This version has no im
 | ceilometer
 | Ceilometer - Parameters related to the ceilometer service
 | <<ceilometersectioncore,CeilometerSectionCore>>
+| false
+
+| cloudkitty
+| CloudKitty - Parameters related to the cloudkitty service
+| <<cloudkittysectioncore,CloudKittySectionCore>>
 | false
 |===
 
@@ -17896,7 +18735,7 @@ WatcherCommon defines a spec based reusable for all the CRDs
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -17915,6 +18754,8 @@ WatcherCommon defines a spec based reusable for all the CRDs
 
 [#watcherimages]
 ==== WatcherImages
+
+WatcherImages defines the container images for all Watcher services
 
 |===
 | Field | Description | Scheme | Required
@@ -18001,7 +18842,7 @@ WatcherSpecCore defines the fields used from the OpenStackControlPlane CR (does 
 [#watchersubcrscommon]
 ==== WatcherSubCrsCommon
 
-WatcherSubCrsCommon
+WatcherSubCrsCommon defines the common fields for Watcher sub-CRs
 
 |===
 | Field | Description | Scheme | Required
@@ -18043,7 +18884,7 @@ WatcherSubCrsTemplate define de common part of the input parameters specified by
 | false
 
 | customServiceConfig
-| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
+| CustomServiceConfig - customize the service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/+++<service>+++/+++<service>+++.conf.d directory as a custom config file.+++</service>++++++</service>+++
 | string
 | false
 
@@ -18328,7 +19169,7 @@ WatcherApplierStatus defines the observed state of WatcherApplier
 [#watcherappliertemplate]
 ==== WatcherApplierTemplate
 
-WatcherApplierTemplatce defines the input parameters specified by the user to create a WatcherApplier via higher level CRDs.
+WatcherApplierTemplate defines the input parameters specified by the user to create a WatcherApplier via higher level CRDs.
 
 |===
 | Field | Description | Scheme | Required
@@ -18495,6 +19336,8 @@ Watcher is the Schema for the watchers API
 [#watcherdbpurge]
 ==== WatcherDBPurge
 
+WatcherDBPurge defines the parameters for the Watcher database purging cron job
+
 |===
 | Field | Description | Scheme | Required
 
@@ -18580,6 +19423,8 @@ WatcherStatus defines the observed state of Watcher
 
 [#mtlssection]
 ==== MTLSSection
+
+MTLSSection contains mutual TLS configuration
 
 |===
 | Field | Description | Scheme | Required
@@ -18765,7 +19610,7 @@ MemcachedStatus defines the observed state of Memcached
 [#tlssection-2]
 ==== TLSSection
 
-TLSSection
+TLSSection contains TLS and MTLS configuration
 
 |===
 | Field | Description | Scheme | Required
@@ -19657,6 +20502,22 @@ ReservationSpec defines the desired state of Reservation
 
 <<custom-resources,Back to Custom Resources>>
 
+[#podoverride]
+==== PodOverride
+
+PodOverride defines per-pod service configurations
+
+|===
+| Field | Description | Scheme | Required
+
+| services
+| Services - list of per-pod service overrides
+| []service.OverrideSpec
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
+
 [#rabbitmq]
 ==== RabbitMq
 
@@ -19739,9 +20600,14 @@ RabbitMqSpecCore - this version is used by the OpenStackControlplane CR (no cont
 | false
 
 | queueType
-| QueueType to eventually apply the ha-all policy or configure default queue type for the cluster
-| string
-| true
+| QueueType to eventually apply the ha-all policy or configure default queue type for the cluster. Allowed values are: None, Mirrored, Quorum. Defaults to Quorum if not specified.
+| *string
+| false
+
+| podOverride
+| PodOverride - Override configuration for per-pod services. When specified, individual LoadBalancer services will be created for each pod with the provided configuration, and the transport URL will be configured to use these per-pod services.
+| *<<podoverride,PodOverride>>
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -19772,6 +20638,11 @@ RabbitMqStatus defines the observed state of RabbitMq
 | queueType
 | QueueType - store whether default ha-all policy is present or not
 | string
+| false
+
+| serviceHostnames
+| ServiceHostnames - list of per-pod service hostnames for RabbitMQ cluster. When populated, transport URLs use these hostnames instead of pod names.
+| []string
 | false
 |===
 

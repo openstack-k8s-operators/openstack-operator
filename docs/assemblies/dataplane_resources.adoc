@@ -403,7 +403,7 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 [#openstackdataplaneservice]
 ==== OpenStackDataPlaneService
 
-OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API OpenStackDataPlaneService name must be a valid RFC1123 as it is used in labels
+OpenStackDataPlaneService defines the Schema for the openstackdataplaneservices API. OpenStackDataPlaneService name must be a valid RFC1123 as it is used in labels
 
 |===
 | Field | Description | Scheme | Required
