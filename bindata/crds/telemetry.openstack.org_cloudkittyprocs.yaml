@@ -57,6 +57,12 @@ spec:
                 description: ContainerImage - CloudKitty Container Image URL (will
                   be set to environmental default if empty)
                 type: string
+              customConfigsSecretName:
+                description: |-
+                  A name of a secret containing custom configuration files. Files
+                  from this secret will get copied into /etc/cloudkitty/ and they'll
+                  overwrite any default files already present there.
+                type: string
               customServiceConfig:
                 description: |-
                   CustomServiceConfig - customize the service config using this parameter to change service defaults,

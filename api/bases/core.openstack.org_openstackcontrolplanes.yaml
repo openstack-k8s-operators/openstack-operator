@@ -14604,6 +14604,8 @@ spec:
                               apiTimeout:
                                 default: 60
                                 type: integer
+                              customConfigsSecretName:
+                                type: string
                               customServiceConfig:
                                 default: '# add your customization here'
                                 type: string
@@ -14770,6 +14772,8 @@ spec:
                           apiTimeout:
                             default: 60
                             type: integer
+                          customConfigsSecretName:
+                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -14858,6 +14862,8 @@ spec:
                             type: integer
                           cloudKittyAPI:
                             properties:
+                              customConfigsSecretName:
+                                type: string
                               customServiceConfig:
                                 type: string
                               customServiceConfigSecrets:
@@ -14992,6 +14998,8 @@ spec:
                             type: object
                           cloudKittyProc:
                             properties:
+                              customConfigsSecretName:
+                                type: string
                               customServiceConfig:
                                 type: string
                               customServiceConfigSecrets:
