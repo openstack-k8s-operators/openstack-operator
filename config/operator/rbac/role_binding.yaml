@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    app.kubernetes.io/name: openstack-operator-controller-operator
+    app.kubernetes.io/name: openstack-operator-controller-init
     app.kubernetes.io/managed-by: kustomize
   name: operator-rolebinding
 roleRef:
@@ -11,5 +11,5 @@ roleRef:
   name: operator-role
 subjects:
 - kind: ServiceAccount
-  name: openstack-operator-controller-operator
+  name: openstack-operator-controller-init
   namespace: system
