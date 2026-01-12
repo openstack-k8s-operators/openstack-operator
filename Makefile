@@ -309,6 +309,7 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
+.PHONY: $(LOCALBIN)
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
@@ -333,6 +334,7 @@ OC_VERSION ?= 4.16.0
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary. If wrong version is installed, it will be removed before downloading.
+.PHONY: $(KUSTOMIZE)
 $(KUSTOMIZE): $(LOCALBIN)
 	@if test -x $(LOCALBIN)/kustomize && ! $(LOCALBIN)/kustomize version | grep -q $(KUSTOMIZE_VERSION); then \
 		echo "$(LOCALBIN)/kustomize version is not expected $(KUSTOMIZE_VERSION). Removing it before installing."; \
@@ -342,22 +344,26 @@ $(KUSTOMIZE): $(LOCALBIN)
 
 .PHONY: controller-gen
 controller-gen: gowork $(CONTROLLER_GEN) ## Download controller-gen locally if necessary. If wrong version is installed, it will be overwritten.
+.PHONY: $(CONTROLLER_GEN)
 $(CONTROLLER_GEN): $(LOCALBIN)
 	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
 .PHONY: crd-to-markdown
 crd-to-markdown: $(CRD_MARKDOWN) ## Download crd-to-markdown locally if necessary.
+.PHONY: $(CRD_MARKDOWN)
 $(CRD_MARKDOWN): $(LOCALBIN)
 	test -s $(LOCALBIN)/crd-to-markdown || GOBIN=$(LOCALBIN) go install github.com/clamoriniere/crd-to-markdown@$(CRD_MARKDOWN_VERSION)
 
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
+.PHONY: $(ENVTEST)
 $(ENVTEST): $(LOCALBIN)
 	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION)
 
 .PHONY: ginkgo
 ginkgo: $(GINKGO) ## Download ginkgo locally if necessary.
+.PHONY: $(GINKGO)
 $(GINKGO): $(LOCALBIN)
 	test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo
 
@@ -367,6 +373,7 @@ kuttl-test: ## Run kuttl tests
 
 .PHONY: kuttl
 kuttl: $(KUTTL) ## Download kubectl-kuttl locally if necessary.
+.PHONY: $(KUTTL)
 $(KUTTL): $(LOCALBIN)
 	test -s $(LOCALBIN)/kubectl-kuttl || curl -L -o $(LOCALBIN)/kubectl-kuttl https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_linux_x86_64
 	chmod +x $(LOCALBIN)/kubectl-kuttl
