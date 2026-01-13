@@ -43,6 +43,7 @@ import (
 	"github.com/openstack-k8s-operators/openstack-operator/internal/operator"
 	"github.com/openstack-k8s-operators/openstack-operator/internal/operator/bindata"
 	"github.com/pkg/errors"
+	admissionv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
@@ -250,6 +251,48 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	// Check if OPENSTACK_RELEASE_VERSION has changed - if so, delete all owned resources
+	// This is a one-time fix to handle incompatible upgrades
+	shouldReinstall := false
+	if instance.Status.ReleaseVersion != nil && *instance.Status.ReleaseVersion != openstackReleaseVersion {
+		// Explicit version change detected
+		shouldReinstall = true
+	} else if !isNewInstance && instance.Status.ReleaseVersion == nil {
+		// Existing installation upgrading from version without ReleaseVersion field
+		shouldReinstall = true
+	}
+
+	if shouldReinstall {
+		Log.Info("OpenStack release version changed, deleting all owned resources",
+			"old", instance.Status.ReleaseVersion,
+			"new", openstackReleaseVersion)
+
+		if err := r.deleteAllOwnedResources(ctx, instance); err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				operatorv1beta1.OpenStackOperatorReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				operatorv1beta1.OpenStackOperatorErrorMessage,
+				err))
+			return ctrl.Result{}, err
+		}
+
+		// Reset the container image status to force re-application of CRDs and RBAC
+		instance.Status.ContainerImage = nil
+
+		// Update the release version in status
+		instance.Status.ReleaseVersion = &openstackReleaseVersion
+
+		// Requeue to allow resources to be deleted before recreating
+		Log.Info("Resources deleted, requeuing to recreate with new version")
+		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+	}
+
+	// Set the release version if not set (for new installations only)
+	if instance.Status.ReleaseVersion == nil {
+		instance.Status.ReleaseVersion = &openstackReleaseVersion
+	}
+
 	if err := r.applyManifests(ctx, instance); err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -314,6 +357,69 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	Log.Info("Reconcile complete.")
 	return ctrl.Result{}, nil
 
+}
+
+func deleteOwnedResources[L client.ObjectList, T any](
+	ctx context.Context,
+	r *OpenStackReconciler,
+	instance client.Object,
+	list L,
+	itemsGetter func(L) []T,
+) error {
+	log := r.GetLogger(ctx)
+
+	err := r.List(ctx, list, &client.ListOptions{Namespace: instance.GetNamespace()})
+	if err != nil {
+		return errors.Wrap(err, "failed to list resources")
+	}
+
+	for _, item := range itemsGetter(list) {
+		obj := any(&item).(client.Object)
+		if metav1.IsControlledBy(obj, instance) {
+			log.Info("Deleting owned resource", "kind", obj.GetObjectKind().GroupVersionKind().Kind, "name", obj.GetName())
+			err := r.Delete(ctx, obj)
+			if err != nil && !apierrors.IsNotFound(err) {
+				return errors.Wrapf(err, "failed to delete %s", obj.GetName())
+			}
+		}
+	}
+	return nil
+}
+
+func (r *OpenStackReconciler) deleteAllOwnedResources(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
+	Log.Info("Deleting all owned resources for release version upgrade")
+
+	err := deleteOwnedResources(ctx, r, instance, &appsv1.DeploymentList{}, func(l *appsv1.DeploymentList) []appsv1.Deployment { return l.Items })
+	if err != nil {
+		return err
+	}
+
+	err = deleteOwnedResources(ctx, r, instance, &corev1.ServiceAccountList{}, func(l *corev1.ServiceAccountList) []corev1.ServiceAccount { return l.Items })
+	if err != nil {
+		return err
+	}
+
+	err = deleteOwnedResources(ctx, r, instance, &corev1.ServiceList{}, func(l *corev1.ServiceList) []corev1.Service { return l.Items })
+	if err != nil {
+		return err
+	}
+
+	labelSelector, _ := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: map[string]string{"openstack.openstack.org/managed": "true"},
+	})
+
+	deleteOpts := client.DeleteAllOfOptions{
+		ListOptions: client.ListOptions{LabelSelector: labelSelector},
+	}
+
+	err = r.DeleteAllOf(ctx, &admissionv1.ValidatingWebhookConfiguration{}, &deleteOpts)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return errors.Wrap(err, "failed to delete validating webhooks")
+	}
+
+	Log.Info("All owned resources deleted successfully")
+	return nil
 }
 
 func (r *OpenStackReconciler) reconcileDelete(ctx context.Context, instance *operatorv1beta1.OpenStack, helper *helper.Helper) (ctrl.Result, error) {
@@ -987,7 +1093,7 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 				// The horizon-operator.openstack-operators has references to old roles/bindings
 				// the code below will delete those references before continuing
 				for _, ref := range refs {
-					refData := ref.(map[string]interface{})
+					refData := ref.(map[string]any)
 					Log.Info("Deleting operator reference", "Reference", ref)
 					obj := uns.Unstructured{}
 					obj.SetName(refData["name"].(string))
