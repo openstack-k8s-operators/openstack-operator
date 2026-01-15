@@ -1,0 +1,33 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  applicationCredential:
+    enabled: true
+    expirationDays: 200
+    gracePeriodDays: 90
+    roles:
+      - service
+    unrestricted: false
+  barbican:
+    applicationCredential:
+      enabled: true
+  glance:
+    applicationCredential:
+      enabled: true
+  swift:
+    applicationCredential:
+      enabled: true
+  cinder:
+    applicationCredential:
+      enabled: true
+      expirationDays: 10
+      gracePeriodDays: 5
+      roles:
+        - admin
+        - service
+      unrestricted: true
+  manila:
+    applicationCredential:
+      enabled: true

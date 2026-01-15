@@ -305,6 +305,53 @@ spec:
             type: object
           spec:
             properties:
+              applicationCredential:
+                properties:
+                  accessRules:
+                    items:
+                      properties:
+                        method:
+                          minLength: 1
+                          type: string
+                        path:
+                          minLength: 1
+                          type: string
+                        service:
+                          minLength: 1
+                          type: string
+                      required:
+                      - method
+                      - path
+                      - service
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  enabled:
+                    default: false
+                    type: boolean
+                  expirationDays:
+                    default: 365
+                    minimum: 2
+                    type: integer
+                  gracePeriodDays:
+                    default: 182
+                    minimum: 1
+                    type: integer
+                  roles:
+                    default:
+                    - admin
+                    - service
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+                  unrestricted:
+                    default: false
+                    type: boolean
+                type: object
+                x-kubernetes-validations:
+                - message: gracePeriodDays must be smaller than expirationDays
+                  rule: self.gracePeriodDays < self.expirationDays
               barbican:
                 properties:
                   apiOverride:
@@ -431,6 +478,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -440,6 +531,11 @@ spec:
                         default: 90
                         minimum: 10
                         type: integer
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
+                        type: object
                       barbicanAPI:
                         properties:
                           apiTimeout:
@@ -939,6 +1035,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -950,6 +1090,11 @@ spec:
                         type: integer
                       cinderAPI:
                         properties:
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customServiceConfig:
                             type: string
                           customServiceConfigSecrets:
@@ -2032,6 +2177,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: false
                     type: boolean
@@ -2062,6 +2251,11 @@ spec:
                         properties:
                           apiTimeout:
                             type: integer
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           backendMdnsServerProtocol:
                             type: string
                           backendType:
@@ -3911,6 +4105,50 @@ spec:
                           type: object
                       type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -4456,6 +4694,11 @@ spec:
                             apiTimeout:
                               minimum: 1
                               type: integer
+                            auth:
+                              properties:
+                                applicationCredentialSecret:
+                                  type: string
+                              type: object
                             containerImage:
                               type: string
                             customServiceConfig:
@@ -4839,6 +5082,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   cnfAPIOverride:
                     properties:
                       route:
@@ -6774,6 +7061,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: false
                     type: boolean
@@ -6907,6 +7238,11 @@ spec:
                         default: 60
                         minimum: 10
                         type: integer
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
+                        type: object
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -7168,6 +7504,11 @@ spec:
                         type: array
                       ironicInspector:
                         properties:
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -8431,6 +8772,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: false
                     type: boolean
@@ -8975,6 +9360,11 @@ spec:
                         type: array
                       manilaAPI:
                         properties:
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -9498,6 +9888,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -9507,6 +9941,11 @@ spec:
                         default: 120
                         minimum: 1
                         type: integer
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
+                        type: object
                       corePlugin:
                         default: ml2
                         type: string
@@ -10328,6 +10767,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   cellOverride:
                     additionalProperties:
                       properties:
@@ -10611,6 +11094,11 @@ spec:
                         default: 60
                         minimum: 10
                         type: integer
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
+                        type: object
                       cellTemplates:
                         additionalProperties:
                           properties:
@@ -11396,6 +11884,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: false
                     type: boolean
@@ -11431,6 +11963,11 @@ spec:
                       apiTimeout:
                         default: 120
                         type: integer
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
+                        type: object
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -11473,6 +12010,11 @@ spec:
                         properties:
                           apiTimeout:
                             type: integer
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -11681,6 +12223,11 @@ spec:
                           amphoraImageOwnerID:
                             default: ""
                             type: string
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -11833,6 +12380,11 @@ spec:
                           amphoraImageOwnerID:
                             default: ""
                             type: string
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -12091,6 +12643,11 @@ spec:
                           amphoraImageOwnerID:
                             default: ""
                             type: string
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -12878,6 +13435,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -12887,6 +13488,11 @@ spec:
                         default: 60
                         minimum: 10
                         type: integer
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
+                        type: object
                       customServiceConfig:
                         type: string
                       databaseAccount:
@@ -13953,6 +14559,50 @@ spec:
                 type: string
               swift:
                 properties:
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: true
                     type: boolean
@@ -14109,6 +14759,11 @@ spec:
                             default: 60
                             minimum: 1
                             type: integer
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           ceilometerEnabled:
                             default: false
                             type: boolean
@@ -14600,6 +15255,138 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredentialAodh:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
+                  applicationCredentialCeilometer:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
+                  applicationCredentialCloudKitty:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   cloudKittyApiOverride:
                     properties:
                       route:
@@ -14869,6 +15656,11 @@ spec:
                               apiTimeout:
                                 default: 60
                                 type: integer
+                              auth:
+                                properties:
+                                  applicationCredentialSecret:
+                                    type: string
+                                type: object
                               customConfigsSecretName:
                                 type: string
                               customServiceConfig:
@@ -15037,6 +15829,11 @@ spec:
                           apiTimeout:
                             default: 60
                             type: integer
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           customConfigsSecretName:
                             type: string
                           customServiceConfig:
@@ -15125,6 +15922,11 @@ spec:
                           apiTimeout:
                             default: 60
                             type: integer
+                          auth:
+                            properties:
+                              applicationCredentialSecret:
+                                type: string
+                            type: object
                           cloudKittyAPI:
                             properties:
                               customConfigsSecretName:
@@ -16508,6 +17310,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   enabled:
                     default: false
                     type: boolean
@@ -16700,6 +17546,11 @@ spec:
                               namespace:
                                 type: string
                             type: object
+                        type: object
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
                         type: object
                       customServiceConfig:
                         type: string
