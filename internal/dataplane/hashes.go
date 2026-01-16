@@ -148,7 +148,7 @@ func GetNodeSetAnsibleVarsFromHashes(
 		return err
 	}
 
-	// Process individual Node leve AnsibleVarsFrom
+	// Process individual Node level AnsibleVarsFrom
 	for _, node := range instance.Spec.Nodes {
 		if err := processAnsibleVarsFrom(node.Ansible.AnsibleVarsFrom); err != nil {
 			return nil
