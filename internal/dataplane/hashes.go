@@ -100,3 +100,42 @@ func GetDeploymentHashesForService(
 
 	return nil
 }
+
+// ProcessAnsibleVarsFrom computes hashes for ConfigMaps and Secrets
+// referenced in the NodeSet's AnsibleVarsFrom field (both NodeTemplate and
+// individual Nodes)
+func ProcessAnsibleVarsFrom(
+	ctx context.Context,
+	helper *helper.Helper,
+	namespace string,
+	configMapHashes map[string]string,
+	secretHashes map[string]string,
+	varsFrom []dataplanev1.DataSource,
+) error {
+	for _, dataSource := range varsFrom {
+		cm, sec, err := dataplaneutil.GetDataSourceCmSecret(ctx, helper, namespace, dataSource)
+
+		if err != nil {
+			return err
+		}
+
+		if cm != nil {
+			hash, err := configmap.Hash(cm)
+			if err != nil {
+				helper.GetLogger().Error(err, "Unable to hash ConfigMap", "configMap", cm.Name)
+				return err
+			}
+			configMapHashes[cm.Name] = hash
+		}
+
+		if sec != nil {
+			hash, err := secret.Hash(sec)
+			if err != nil {
+				helper.GetLogger().Error(err, "Unable to hash Secret", "secret", sec.Name)
+				return err
+			}
+			secretHashes[sec.Name] = hash
+		}
+	}
+	return nil
+}

@@ -1,0 +1,47 @@
+# Test ansibleVarsFrom ConfigMap/Secret change detection
+# First, delete deployments from previous steps to ensure NodeSet is in a clean state
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: oc delete openstackdataplanedeployment edpm-compute-no-nodes-non-existent-service -n openstack-kuttl-tests --ignore-not-found=true
+  - script: oc delete openstackdataplanedeployment edpm-compute-node-selection -n openstack-kuttl-tests --ignore-not-found=true
+---
+# Create ConfigMap and Secret for ansibleVarsFrom
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ansiblevars-test-cm
+data:
+  test_var: original-value
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ansiblevars-test-secret
+stringData:
+  secret_var: original-secret-value
+---
+# Patch existing NodeSet to add ansibleVarsFrom
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  nodeTemplate:
+    ansible:
+      ansibleVarsFrom:
+        - configMapRef:
+            name: ansiblevars-test-cm
+        - secretRef:
+            name: ansiblevars-test-secret
+---
+# Create deployment to capture the hashes
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-ansiblevars-deploy
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  servicesOverride:
+    - configure-os

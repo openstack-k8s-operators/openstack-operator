@@ -451,6 +451,11 @@ func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
 
 	for _, nodeSet := range nodeSets.Items {
 		instance.Status.NodeSetHashes[nodeSet.Name] = nodeSet.Status.ConfigHash
+
+		err = setNodeSetAnsibleVarsFromHashes(ctx, helper, &nodeSet, instance.Status.ConfigMapHashes, instance.Status.SecretHashes)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -546,4 +551,28 @@ func (r *OpenStackDataPlaneDeploymentReconciler) listNodeSets(ctx context.Contex
 		nodeSets.Items = append(nodeSets.Items, *nodeSetInstance)
 	}
 	return &nodeSets, err
+}
+
+func setNodeSetAnsibleVarsFromHashes(
+	ctx context.Context,
+	helper *helper.Helper,
+	nodeSetInstance *dataplanev1.OpenStackDataPlaneNodeSet,
+	configMapHashes map[string]string, // configMapHashes from deployment.instance.configMapHashes
+	secretHashes map[string]string, // secretHashes from deployment.instance.secretHashes
+) error {
+	namespace := nodeSetInstance.Namespace
+
+	// Process NodeTemplate level AnsibleVarsFrom
+	if err := deployment.ProcessAnsibleVarsFrom(ctx, helper, namespace, configMapHashes, secretHashes, nodeSetInstance.Spec.NodeTemplate.Ansible.AnsibleVarsFrom); err != nil {
+		return err
+	}
+
+	// Process individual Node level AnsibleVarsFrom
+	for _, node := range nodeSetInstance.Spec.Nodes {
+		if err := deployment.ProcessAnsibleVarsFrom(ctx, helper, namespace, configMapHashes, secretHashes, node.Ansible.AnsibleVarsFrom); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

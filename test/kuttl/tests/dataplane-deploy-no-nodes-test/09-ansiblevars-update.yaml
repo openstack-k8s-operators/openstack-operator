@@ -1,0 +1,25 @@
+# Update ConfigMap and Secret content to trigger change detection
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ansiblevars-test-cm
+data:
+  test_var: updated-value
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ansiblevars-test-secret
+stringData:
+  secret_var: updated-secret-value
+---
+# Create deployment to capture the new hashes after content update
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-ansiblevars-deploy-update
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  servicesOverride:
+    - configure-os
