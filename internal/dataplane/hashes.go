@@ -100,3 +100,60 @@ func GetDeploymentHashesForService(
 
 	return nil
 }
+
+// GetNodeSetAnsibleVarsFromHashes computes hashes for ConfigMaps and Secrets
+// referenced in the NModeSet's AnsibleVarsFrom field (both NodeTemplate and
+// individual Nodes)
+func GetNodeSetAnsibleVarsFromHashes(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	configMapHashes map[string]string,
+	secretHashes map[string]string,
+) error {
+	namespace := instance.Namespace
+
+	// helper function to process AnsibleVarsFrom data source
+	processAnsibleVarsFrom := func(varsFrom []dataplanev1.DataSource) error {
+		for _, dataSource := range varsFrom {
+			cm, sec, err := dataplaneutil.GetDataSourceCmSecret(ctx, helper, namespace, dataSource)
+
+			if err != nil {
+				return err
+			}
+
+			if cm != nil {
+				hash, err := configmap.Hash(cm)
+				if err != nil {
+					helper.GetLogger().Error(err, "Unable to hash ConfigMap", "configMap", cm.Name)
+					return err
+				}
+				configMapHashes[cm.Name] = hash
+			}
+
+			if sec != nil {
+				hash, err := secret.Hash(sec)
+				if err != nil {
+					helper.GetLogger().Error(err, "Unable to hash Secret", "secret", sec.Name)
+					return err
+				}
+				secretHashes[sec.Name] = hash
+			}
+		}
+		return nil
+	}
+
+	// Process NodeTemplate level AnsibleVarsFrom
+	if err := processAnsibleVarsFrom(instance.Spec.NodeTemplate.Ansible.AnsibleVarsFrom); err != nil {
+		return err
+	}
+
+	// Process individual Node level AnsibleVarsFrom
+	for _, node := range instance.Spec.Nodes {
+		if err := processAnsibleVarsFrom(node.Ansible.AnsibleVarsFrom); err != nil {
+			return nil
+		}
+	}
+
+	return nil
+}
