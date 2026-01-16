@@ -576,6 +576,17 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 					deployment.Status.BmhRefHashes[instance.Name] != instance.Status.BmhRefHash) {
 				continue
 			}
+
+			hasAnsibleVarsFromChanged, err := checkAnsibleVarsFromChanged(ctx, helper, instance, deployment.Status.ConfigMapHashes, deployment.Status.SecretHashes)
+
+			if err != nil {
+				return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+			}
+
+			if hasAnsibleVarsFromChanged {
+				continue
+			}
+
 			isNodeSetDeploymentReady = true
 			for k, v := range deployment.Status.ConfigMapHashes {
 				instance.Status.ConfigMapHashes[k] = v
@@ -910,4 +921,44 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetSpecConfigHash(instance *datapl
 		return "", err
 	}
 	return configHash, nil
+}
+
+// checkAnsibleVarsFromChanged computes current hashes for ConfigMaps/Secrets
+// referenced in AnsibleVarsFrom and compares them with deployed hashes.
+// Returns true if any content has changed, false otherwise.
+func checkAnsibleVarsFromChanged(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	deployedConfigMapHashes map[string]string,
+	deployedSecretHashes map[string]string,
+) (bool, error) {
+	// Compute current hashes for AnsibleVarsFrom ConfigMaps/Secrets
+	currentConfigMapHashes := make(map[string]string)
+	currentSecretHashes := make(map[string]string)
+
+	err := deployment.GetNodeSetAnsibleVarsFromHashes(
+		ctx, helper, instance, currentConfigMapHashes, currentSecretHashes)
+	if err != nil {
+		helper.GetLogger().Error(err, "Unable to compute AnsibleVarsFrom hashes")
+		return false, err
+	}
+
+	// Compare current ConfigMap hashes with deployed hashes
+	for name, currentHash := range currentConfigMapHashes {
+		if deployedHash, exists := deployedConfigMapHashes[name]; !exists || deployedHash != currentHash {
+			helper.GetLogger().Info("ConfigMap content changed", "configMap", name)
+			return true, nil
+		}
+	}
+
+	// Compare current Secret hashes with deployed hashes
+	for name, currentHash := range currentSecretHashes {
+		if deployedHash, exists := deployedSecretHashes[name]; !exists || deployedHash != currentHash {
+			helper.GetLogger().Info("Secret content changed", "secret", name)
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
