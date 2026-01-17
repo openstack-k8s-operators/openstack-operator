@@ -7344,6 +7344,9 @@ spec:
                       enableSecureRBAC:
                         default: true
                         type: boolean
+                      externalKeystoneAPI:
+                        default: false
+                        type: boolean
                       extraMounts:
                         default: []
                         items:

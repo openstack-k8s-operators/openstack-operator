@@ -1505,6 +1505,14 @@ spec:
                   type: array
                 description: NetworkAttachments status of the deployment pods
                 type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this
+                  service. If the observed generation is less than the spec generation,
+                  then the controller has not processed the latest changes injected by
+                  the opentack-operator in the top-level CR (e.g. the ContainerImage)
+                format: int64
+                type: integer
             type: object
         type: object
     served: true
