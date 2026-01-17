@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	github.com/cert-manager/cert-manager v1.16.5
 	github.com/go-playground/validator/v10 v10.30.1
-	github.com/onsi/ginkgo/v2 v2.27.4
+	github.com/onsi/ginkgo/v2 v2.27.5
 	github.com/onsi/gomega v1.39.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260110162342-e35a031250e0
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260110072618-6b9f87dd7e5c
