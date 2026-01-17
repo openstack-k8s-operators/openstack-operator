@@ -14,7 +14,16 @@ spec:
     singular: cloudkittyapi
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: CloudKittyAPI is the Schema for the cloudkittyapis API
