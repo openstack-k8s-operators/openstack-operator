@@ -98,6 +98,11 @@ spec:
                 description: EnableSecureRBAC - Enable Consistent and Secure RBAC
                   policies
                 type: boolean
+              externalKeystoneAPI:
+                default: false
+                description: ExternalKeystoneAPI - Enable use of external Keystone
+                  API endpoints instead of deploying a local Keystone API
+                type: boolean
               extraMounts:
                 default: []
                 description: ExtraMounts containing conf files
