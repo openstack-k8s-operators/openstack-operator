@@ -256,6 +256,9 @@ type OpenStackStatus struct {
 
 	// ContainerImage - the container image that has been successfully deployed
 	ContainerImage *string `json:"containerImage,omitempty"`
+
+	// ReleaseVersion - the OpenStack release version that has been successfully deployed
+	ReleaseVersion *string `json:"releaseVersion,omitempty"`
 }
 
 // +kubebuilder:object:root=true
