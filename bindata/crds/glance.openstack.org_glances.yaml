@@ -1229,10 +1229,6 @@ spec:
                         APITimeout
                       minimum: 1
                       type: integer
-                    containerImage:
-                      description: Glance Container Image URL (will be set to environmental
-                        default if empty)
-                      type: string
                     customServiceConfig:
                       description: |-
                         CustomServiceConfig - customize the service config using this parameter to change service defaults,
@@ -1578,8 +1574,6 @@ spec:
                       - single
                       - edge
                       type: string
-                  required:
-                  - containerImage
                   type: object
                 default: {}
                 description: GlanceAPIs - Spec definition for the API service of this

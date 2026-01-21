@@ -66,8 +66,7 @@ spec:
                 - edge
                 type: string
               containerImage:
-                description: Glance Container Image URL (will be set to environmental
-                  default if empty)
+                description: ContainerImage - GlanceAPI Container Image URL
                 type: string
               customServiceConfig:
                 description: |-

@@ -4456,8 +4456,6 @@ spec:
                             apiTimeout:
                               minimum: 1
                               type: integer
-                            containerImage:
-                              type: string
                             customServiceConfig:
                               type: string
                             customServiceConfigSecrets:
@@ -4618,8 +4616,6 @@ spec:
                               - single
                               - edge
                               type: string
-                          required:
-                          - containerImage
                           type: object
                         default: {}
                         type: object
@@ -7608,6 +7604,9 @@ spec:
                         type: object
                       enableSecureRBAC:
                         default: true
+                        type: boolean
+                      externalKeystoneAPI:
+                        default: false
                         type: boolean
                       extraMounts:
                         default: []
