@@ -102,7 +102,7 @@ spec:
           secretName: combined-ca-bundle
       - name: ssh-key-edpm-compute-no-nodes
         secret:
-          defaultMode: 420
+          defaultMode: 384
           items:
           - key: ssh-privatekey
             path: ssh_key_edpm-compute-no-nodes
