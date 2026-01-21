@@ -134,4 +134,6 @@ UnDeploy the controller to the cluster:
 make undeploy
 ----
 
+include::assemblies/prc_configuring-custom-heat-resource-plugins.adoc[leveloffset=+1]
+
 include::assemblies/ctlplane_resources.adoc[leveloffset=-1]
