@@ -1,0 +1,62 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
+  name: operator-logs
+---
+# Assert NodeSet is Ready after deployment with updated ConfigMap/Secret completes
+# The hash values will differ from step 08 due to content change
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+status:
+  conditions:
+  - message: NodeSet Ready
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Deployment completed
+    reason: Ready
+    status: "True"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+  configMapHashes:
+    ansiblevars-test-cm: nd7h5fdh54bh8chb7h5hc8h654hf8h5d5h66bh54dh56fh7bhf5h98h66fh59ch87h9ch5d6h664h668hb7h66fh7fh598h9fh57dhfh5fch655q
+  secretHashes:
+    ansiblevars-test-secret: n56hffh656h98hc9h4h79h86h5bfh695hd7h5f9h5d4h87h85h546h7dhc5h98h676h5fh66bh66bhb5h679h77hf8hdbh569h66dhb5h59dq
+---
+# Assert deployment completed with new hashes
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-ansiblevars-deploy-update
+  namespace: openstack-kuttl-tests
+status:
+  deployed: true
+  configMapHashes:
+    ansiblevars-test-cm: nd7h5fdh54bh8chb7h5hc8h654hf8h5d5h66bh54dh56fh7bhf5h98h66fh59ch87h9ch5d6h664h668hb7h66fh7fh598h9fh57dhfh5fch655q
+  secretHashes:
+    ansiblevars-test-secret: n56hffh656h98hc9h4h79h86h5bfh695hd7h5f9h5d4h87h85h546h7dhc5h98h676h5fh66bh66bhb5h679h77hf8hdbh569h66dhb5h59dq
