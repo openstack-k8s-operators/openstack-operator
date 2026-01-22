@@ -59,6 +59,15 @@ spec:
             description: OpenStackDataPlaneDeploymentSpec defines the desired state
               of OpenStackDataPlaneDeployment
             properties:
+              ansibleEEEnvConfigMapName:
+                description: |-
+                  AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment
+                  variables to inject into the Ansible Execution Environment pod.
+                  If set, this takes precedence over the NodeSet's AnsibleEEEnvConfigMapName.
+                  If not specified, the NodeSet's AnsibleEEEnvConfigMapName is used, or the
+                  default "openstack-aee-default-env" if neither is set.
+                maxLength: 253
+                type: string
               ansibleExtraVars:
                 description: AnsibleExtraVars for ansible execution
                 x-kubernetes-preserve-unknown-fields: true

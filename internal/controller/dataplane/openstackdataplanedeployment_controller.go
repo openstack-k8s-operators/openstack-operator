@@ -288,6 +288,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		ansibleEESpec.AnsibleSkipTags = instance.Spec.AnsibleSkipTags
 		ansibleEESpec.AnsibleLimit = instance.Spec.AnsibleLimit
 		ansibleEESpec.ExtraVars = instance.Spec.AnsibleExtraVars
+		// override the ansibleEEEnvConfigMapName on nodeset if there is any provided for a specific deployment.
+		if instance.Spec.AnsibleEEEnvConfigMapName != "" {
+			ansibleEESpec.AnsibleEEEnvConfigMapName = instance.Spec.AnsibleEEEnvConfigMapName
+		}
 
 		if nodeSet.Status.DNSClusterAddresses != nil && nodeSet.Status.CtlplaneSearchDomain != "" {
 			ansibleEESpec.DNSConfig = &corev1.PodDNSConfig{

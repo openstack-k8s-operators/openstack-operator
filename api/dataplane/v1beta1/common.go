@@ -198,4 +198,7 @@ type AnsibleEESpec struct {
 	// the ansible execution run with. Without specifying, it will run with
 	// default serviceaccount
 	ServiceAccountName string
+	// AnsibleEEEnvConfigMapName is the name of ConfigMap containing environment
+	// variables to inject to the Ansible execution environment pod.
+	AnsibleEEEnvConfigMapName string `json:"ansibleEEEnvConfigMapName,omitempty"`
 }
