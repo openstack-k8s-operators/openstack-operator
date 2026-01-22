@@ -65,11 +65,18 @@ func AnsibleExecution(
 		return nil
 	}
 
+	// Fallback for backwards compatibility with existing NodeSets created
+	// before ansibleEEEnvConfigMapName field was added
+	envConfigMapName := aeeSpec.AnsibleEEEnvConfigMapName
+	if envConfigMapName == "" {
+		envConfigMapName = "openstack-aee-default-env"
+	}
+
 	ansibleEE := EEJob{
 		Name:             executionName,
 		Namespace:        deployment.GetNamespace(),
 		Labels:           labels,
-		EnvConfigMapName: "openstack-aee-default-env",
+		EnvConfigMapName: envConfigMapName,
 	}
 
 	ansibleEE.NetworkAttachments = aeeSpec.NetworkAttachments

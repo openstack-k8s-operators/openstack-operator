@@ -17144,6 +17144,15 @@ spec:
             description: OpenStackDataPlaneDeploymentSpec defines the desired state
               of OpenStackDataPlaneDeployment
             properties:
+              ansibleEEEnvConfigMapName:
+                description: |-
+                  AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment
+                  variables to inject into the Ansible Execution Environment pod.
+                  If set, this takes precedence over the NodeSet's AnsibleEEEnvConfigMapName.
+                  If not specified, the NodeSet's AnsibleEEEnvConfigMapName is used, or the
+                  default "openstack-aee-default-env" if neither is set.
+                maxLength: 253
+                type: string
               ansibleExtraVars:
                 description: AnsibleExtraVars for ansible execution
                 x-kubernetes-preserve-unknown-fields: true
@@ -17399,6 +17408,18 @@ spec:
             description: OpenStackDataPlaneNodeSetSpec defines the desired state of
               OpenStackDataPlaneNodeSet
             properties:
+              ansibleEEEnvConfigMapName:
+                default: openstack-aee-default-env
+                description: |-
+                  AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment
+                  variables to inject into the Ansible Execution Environment pod.
+                  The ConfigMap should contain environment variables used by ansible-runner
+                  such as ANSIBLE_VERBOSITY, ANSIBLE_FORCE_COLOR, or other runner settings.
+                  See https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
+                  If not specified, defaults to "openstack-aee-default-env".
+                  This can be overridden at the Deployment level.
+                maxLength: 253
+                type: string
               baremetalSetTemplate:
                 description: BaremetalSetTemplate Template for BaremetalSet for the
                   NodeSet

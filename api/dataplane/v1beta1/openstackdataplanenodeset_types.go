@@ -86,6 +86,18 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:default=true
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	TLSEnabled bool `json:"tlsEnabled" yaml:"tlsEnabled"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="openstack-aee-default-env"
+	// +kubebuilder:validation:MaxLength:=253
+	// AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment
+	// variables to inject into the Ansible Execution Environment pod.
+	// The ConfigMap should contain environment variables used by ansible-runner
+	// such as ANSIBLE_VERBOSITY, ANSIBLE_FORCE_COLOR, or other runner settings.
+	// See https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
+	// If not specified, defaults to "openstack-aee-default-env".
+	// This can be overridden at the Deployment level.
+	AnsibleEEEnvConfigMapName string `json:"ansibleEEEnvConfigMapName,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -205,10 +217,11 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 // GetAnsibleEESpec - get the fields that will be passed to AEE Job
 func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 	return AnsibleEESpec{
-		NetworkAttachments: instance.Spec.NetworkAttachments,
-		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
-		Env:                instance.Spec.Env,
-		ServiceAccountName: instance.Name,
+		NetworkAttachments:        instance.Spec.NetworkAttachments,
+		ExtraMounts:               instance.Spec.NodeTemplate.ExtraMounts,
+		Env:                       instance.Spec.Env,
+		ServiceAccountName:        instance.Name,
+		AnsibleEEEnvConfigMapName: instance.Spec.AnsibleEEEnvConfigMapName,
 	}
 }
 

@@ -71,6 +71,15 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleJobNodeSelector to target subset of worker nodes running the ansible jobs
 	AnsibleJobNodeSelector map[string]string `json:"ansibleJobNodeSelector,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxLength:=253
+	// AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment
+	// variables to inject into the Ansible Execution Environment pod.
+	// If set, this takes precedence over the NodeSet's AnsibleEEEnvConfigMapName.
+	// If not specified, the NodeSet's AnsibleEEEnvConfigMapName is used, or the
+	// default "openstack-aee-default-env" if neither is set.
+	AnsibleEEEnvConfigMapName string `json:"ansibleEEEnvConfigMapName,omitempty"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
