@@ -23,7 +23,11 @@ spec:
 +
 * Replace `<nodeSet_name>` with the names of the `OpenStackDataPlaneNodeSet` CRs that you want to include in your data plane deployment.
 
-* You can optionally provide  `ansibleJobNodeSelector` to run the ansible jobs on specific set of OCP worker nodes. For example, worker nodes with `ctlplane` network, as ansible jobs require `ctlplane` NAD.
+* You can optionally provide  `ansibleJobNodeSelector` to run the ansible jobs
+  on specific set of OCP worker nodes. For example, worker nodes with
+  `ctlplane` network, as ansible jobs require `ctlplane` NAD.
+  The `ansibleJobNodeSelector` field contains key/value pairs that a node's
+  labels must match in order to be selected to run the job.
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
