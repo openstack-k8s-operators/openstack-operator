@@ -176,6 +176,9 @@ spec:
               pxeContainerImage:
                 description: PxeContainerImage - Ironic DHCP/TFTP/HTTP Container Image
                 type: string
+              region:
+                description: Region - OpenStack region name
+                type: string
               replicas:
                 default: 1
                 description: Replicas -

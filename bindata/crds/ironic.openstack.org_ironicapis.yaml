@@ -276,6 +276,9 @@ spec:
                       from the Secret
                     type: string
                 type: object
+              region:
+                description: Region - OpenStack region name
+                type: string
               replicas:
                 default: 1
                 description: Replicas -

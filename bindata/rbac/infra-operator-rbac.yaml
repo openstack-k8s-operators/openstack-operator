@@ -112,6 +112,29 @@ rules:
     - update
     - watch
 - apiGroups:
+    - barbican.openstack.org
+    - cinder.openstack.org
+    - designate.openstack.org
+    - glance.openstack.org
+    - heat.openstack.org
+    - horizon.openstack.org
+    - ironic.openstack.org
+    - keystone.openstack.org
+    - manila.openstack.org
+    - neutron.openstack.org
+    - nova.openstack.org
+    - octavia.openstack.org
+    - ovn.openstack.org
+    - placement.openstack.org
+    - swift.openstack.org
+    - telemetry.openstack.org
+    - watcher.openstack.org
+  resources:
+    - '*'
+  verbs:
+    - get
+    - list
+- apiGroups:
     - config.openshift.io
   resources:
     - networks

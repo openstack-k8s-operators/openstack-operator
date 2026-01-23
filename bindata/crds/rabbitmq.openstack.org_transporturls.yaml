@@ -124,6 +124,11 @@ spec:
                 description: QueueType - the queue type from the associated RabbitMq
                   instance
                 type: string
+              rabbitmqUserRef:
+                description: |-
+                  RabbitmqUserRef - the name of the RabbitMQUser CR that was created or referenced by this TransportURL.
+                  Empty if using default cluster admin credentials (no dedicated RabbitMQUser CR)
+                type: string
               rabbitmqUsername:
                 description: RabbitmqUsername - the actual username used for the RabbitMQ
                   user
