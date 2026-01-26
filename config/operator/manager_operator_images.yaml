@@ -14,7 +14,7 @@ spec:
       - name: operator
         env:
         - name: RELATED_IMAGE_BARBICAN_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/lmiccini/barbican-operator@sha256:8f6bff7643bfd4761d3f4efe9ee40a00c636088ea26bd42672327927d0441f83
+          value: quay.io/lmiccini/barbican-operator@sha256:44022a4042de334e1f04985eb102df0076ddbe3065e85b243a02a7c509952977
         - name: RELATED_IMAGE_CINDER_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/lmiccini/cinder-operator@sha256:7619b8e8814c4d22fcdcc392cdaba2ce279d356fc9263275c91acfba86533591
         - name: RELATED_IMAGE_DESIGNATE_OPERATOR_MANAGER_IMAGE_URL
@@ -22,7 +22,7 @@ spec:
         - name: RELATED_IMAGE_GLANCE_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/lmiccini/glance-operator@sha256:bc45409dff26aca6bd982684cfaf093548adb6a71928f5257fe60ab5535dda39
         - name: RELATED_IMAGE_HEAT_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/lmiccini/heat-operator@sha256:bab18497176432c9cb3115e7b6a8d35ccbcf2366cb3c4681870396a327ce1f1f
+          value: quay.io/lmiccini/heat-operator@sha256:dd1b778223d83d3ea17ce52d6b749c3f89a13a4944710b090cc0ca63247fb462
         - name: RELATED_IMAGE_HORIZON_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/horizon-operator@sha256:027cd7ab61ef5071d9ad6b729c95a98e51cd254642f01dc019d44cc98a9232f8
         - name: RELATED_IMAGE_INFRA_OPERATOR_MANAGER_IMAGE_URL
@@ -40,7 +40,7 @@ spec:
         - name: RELATED_IMAGE_NOVA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/lmiccini/nova-operator@sha256:dbde47574a2204e5cb6af468e5c74df5124b1daab0ebcb0dc8c489fa40c8942f
         - name: RELATED_IMAGE_OCTAVIA_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/lmiccini/octavia-operator@sha256:7c854adeefcf36df519c8d48e1cfc8ca8959c5023083f2b923ba50134c4dfa22
+          value: quay.io/lmiccini/octavia-operator@sha256:bb8d23f38682e4b987b621a3116500a76d0dc380a1bfb9ea77f18dfacdee4f49
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:89f6fd332fabefd2fff5619432986b37c1c6d197dd1c510f21dfe4609939b8a6
         - name: RELATED_IMAGE_OVN_OPERATOR_MANAGER_IMAGE_URL
