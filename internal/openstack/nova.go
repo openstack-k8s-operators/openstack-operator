@@ -72,10 +72,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Nova.Template.NotificationsBusInstance == nil {
-		instance.Spec.Nova.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Nova.Template.NotificationsBus == nil {
+		instance.Spec.Nova.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	// When there's no Topology referenced in the Service Template, inject the

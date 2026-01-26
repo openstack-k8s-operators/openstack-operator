@@ -540,6 +540,23 @@ spec:
                         MemcachedInstance is the name of the Memcached CR that the services in the cell will use.
                         If defined then this takes precedence over Nova.Spec.MemcachedInstance for this cel
                       type: string
+                    messagingBus:
+                      description: MessagingBus configuration (username, vhost, and
+                        cluster)
+                      properties:
+                        cluster:
+                          description: Name of the cluster
+                          minLength: 1
+                          type: string
+                        user:
+                          description: User - RabbitMQ username
+                          type: string
+                        vhost:
+                          description: Vhost - RabbitMQ vhost name
+                          type: string
+                      required:
+                      - cluster
+                      type: object
                     metadataServiceTemplate:
                       description: |-
                         MetadataServiceTemplate - defines the metadata service dedicated for the
@@ -1340,6 +1357,22 @@ spec:
                 description: MemcachedInstance is the name of the Memcached CR that
                   all nova service will use.
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               metadataContainerImageURL:
                 description: MetadataContainerImageURL
                 type: string
@@ -1647,6 +1680,23 @@ spec:
                   NodeSelector to target subset of worker nodes running this service. Setting
                   NodeSelector here acts as a default value and can be overridden by service
                   specific NodeSelector Settings.
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               notificationsBusInstance:
                 description: |-

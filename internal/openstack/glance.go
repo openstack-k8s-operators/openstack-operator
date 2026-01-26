@@ -74,10 +74,10 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Glance.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Glance.Template.NotificationBusInstance == nil {
-		instance.Spec.Glance.Template.NotificationBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Glance.Template.NotificationsBus == nil {
+		instance.Spec.Glance.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	// When component services got created check if there is the need to create a route
