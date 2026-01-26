@@ -4380,6 +4380,18 @@ spec:
                         type: object
                       notificationBusInstance:
                         type: string
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       passwordSelectors:
                         default:
                           service: GlancePassword

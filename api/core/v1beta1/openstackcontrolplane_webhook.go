@@ -303,7 +303,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)
@@ -489,7 +491,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)

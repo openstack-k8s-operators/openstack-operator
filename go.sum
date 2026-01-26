@@ -114,6 +114,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
+github.com/lmiccini/glance-operator/api v0.0.0-20260126082232-7d867f42a4dc h1:UGlIvMGviaqeBSnCuv6nhr3DBzPbkaIEZ8qXML3d7XE=
+github.com/lmiccini/glance-operator/api v0.0.0-20260126082232-7d867f42a4dc/go.mod h1:AEZ1xH8KnaDA/3rJDQQMbEBzMD8nitomm36d/TZvMj0=
 github.com/lmiccini/keystone-operator/api v0.0.0-20260126134229-5c4ccd648c80 h1:IRu3VJ/zCDbkebLngjmBV4jgSx6m9lcLj1rgsu4itro=
 github.com/lmiccini/keystone-operator/api v0.0.0-20260126134229-5c4ccd648c80/go.mod h1:097T7Mt1uDKyKjAEPpZ8M4GBe9OdrisDNogCecclK6k=
 github.com/mailru/easyjson v0.9.0 h1:PrnmzHw7262yW8sTBwxi1PdJA3Iw/EKBa8psRf7d9a4=
@@ -146,8 +148,6 @@ github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260123201723-6
 github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260123201723-60da1f2d9b83/go.mod h1:zGIXNYjHyRfNIEF9RJehBZ5Azd5AUtoHXx7FxpQOJ54=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260116130311-be0d2af32151 h1:HFozpOv84PL+hlXFQfqtC39htH+Nsvy+0xFqJDpAmoU=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260116130311-be0d2af32151/go.mod h1:X8ULjyhQmjJVZIH19etCLZf60/KPxc1i1YI9/osYQvw=
-github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260120080045-1c470da1ed9b h1:bTelVTmjxylpcJbtrnxBT1qtP4ziMjt2fUv7+ZEC3h8=
-github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260120080045-1c470da1ed9b/go.mod h1:ghegwjz1c0J8GSjZiM/qSIzg+qjZNCwUbwbPEbrcrno=
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260110225157-5b3bf0296d6e h1:ynaKOj8sQcZBWXBmiB+TnxLKJ3oVEuBhfOvC/jwX4Ao=
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260110225157-5b3bf0296d6e/go.mod h1:kZ/HozGVLmv4LrhsoxjjKT/zckenLznLQY1ud6z1CbY=
 github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260111154931-be9fdcb15911 h1:yO+lHq/SGfFyGjKMcD6xgaqC19fHtrRfTQ/5MZpRo1M=
