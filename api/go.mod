@@ -34,7 +34,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
-	golang.org/x/tools v0.39.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	k8s.io/api v0.31.14
 	k8s.io/apimachinery v0.31.14
 	k8s.io/client-go v0.31.14
@@ -93,13 +93,13 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.46.0 // indirect
-	golang.org/x/mod v0.30.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/term v0.38.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/term v0.39.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/protobuf v1.36.7 // indirect
@@ -144,7 +144,7 @@ replace k8s.io/component-base => k8s.io/component-base v0.31.14 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
 
-replace github.com/openstack-k8s-operators/barbican-operator/api => github.com/lmiccini/barbican-operator/api v0.0.0-20260126121545-bf682ebf8ff1
+replace github.com/openstack-k8s-operators/barbican-operator/api => github.com/lmiccini/barbican-operator/api v0.0.0-20260126220103-3c1a406634e0
 
 replace github.com/openstack-k8s-operators/cinder-operator/api => github.com/lmiccini/cinder-operator/api v0.0.0-20260126132031-a3b37e4b86ae
 
@@ -152,7 +152,7 @@ replace github.com/openstack-k8s-operators/designate-operator/api => github.com/
 
 replace github.com/openstack-k8s-operators/glance-operator/api => github.com/lmiccini/glance-operator/api v0.0.0-20260126082232-7d867f42a4dc
 
-replace github.com/openstack-k8s-operators/heat-operator/api => github.com/lmiccini/heat-operator/api v0.0.0-20260126122111-966501a2e966
+replace github.com/openstack-k8s-operators/heat-operator/api => github.com/lmiccini/heat-operator/api v0.0.0-20260127054124-683e1784b7eb
 
 replace github.com/openstack-k8s-operators/ironic-operator/api => github.com/lmiccini/ironic-operator/api v0.0.0-20260126122431-1f3ba4559582
 
@@ -164,8 +164,8 @@ replace github.com/openstack-k8s-operators/neutron-operator/api => github.com/lm
 
 replace github.com/openstack-k8s-operators/nova-operator/api => github.com/lmiccini/nova-operator/api v0.0.0-20260126124220-1804867abea6
 
-replace github.com/openstack-k8s-operators/octavia-operator/api => github.com/lmiccini/octavia-operator/api v0.0.0-20260126124920-2a687d475a0f
+replace github.com/openstack-k8s-operators/octavia-operator/api => github.com/lmiccini/octavia-operator/api v0.0.0-20260126220543-7499a1432042
 
 replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/lmiccini/telemetry-operator/api v0.0.0-20260126124705-8bd837c8c2e9
 
-replace github.com/openstack-k8s-operators/watcher-operator/api => github.com/lmiccini/watcher-operator/api v0.0.0-20260126124749-09b2d9800e26
+replace github.com/openstack-k8s-operators/watcher-operator/api => github.com/lmiccini/watcher-operator/api v0.0.0-20260127055809-ce41ef12e898
