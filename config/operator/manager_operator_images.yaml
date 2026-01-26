@@ -26,11 +26,11 @@ spec:
         - name: RELATED_IMAGE_HORIZON_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/horizon-operator@sha256:3311e627bcb860d9443592a2c67078417318c9eb77d8ef4d07f9aa7027d46822
         - name: RELATED_IMAGE_INFRA_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/infra-operator@sha256:72c534cbfa71ed3501bee4937ab2beb8fda27b890ef7a26789824f52710b3846
+          value: quay.io/openstack-k8s-operators/infra-operator@sha256:7137aa48f59841d0cc267a9afc5ea6b2924ba0670638dd3409307e412c021e96
         - name: RELATED_IMAGE_IRONIC_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/ironic-operator@sha256:4d55bd6418df3f63f4d3fe47bebf3f5498a520b3e14af98fe16c85ef9fd54d5e
         - name: RELATED_IMAGE_KEYSTONE_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/keystone-operator@sha256:8e340ff11922b38e811261de96982e1aff5f4eb8f225d1d9f5973025a4fe8349
+          value: quay.io/lmiccini/keystone-operator@sha256:008a2e338430e7dd513f81f66320cc5c1332c332a3191b537d75786489d7f487
         - name: RELATED_IMAGE_MANILA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/manila-operator@sha256:8bee4480babd6fd8f686e0ba52a304acb6ffb90f09c7c57e7f5df5f7658836d8
         - name: RELATED_IMAGE_MARIADB_OPERATOR_MANAGER_IMAGE_URL

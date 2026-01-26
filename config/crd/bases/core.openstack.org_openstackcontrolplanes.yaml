@@ -7888,6 +7888,18 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       override:
                         properties:
                           service:
