@@ -114,10 +114,10 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Watcher.Template.NotificationsBusInstance == nil {
-		instance.Spec.Watcher.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Watcher.Template.NotificationsBus == nil {
+		instance.Spec.Watcher.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	helper.GetLogger().Info("Reconciling Watcher", "Watcher.Namespace", instance.Namespace, "Watcher.Name", "watcher")

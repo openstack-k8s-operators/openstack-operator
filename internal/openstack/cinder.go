@@ -130,10 +130,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Cinder.Template.NotificationsBusInstance == nil {
-		instance.Spec.Cinder.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Cinder.Template.NotificationsBus == nil {
+		instance.Spec.Cinder.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", cinderName)
