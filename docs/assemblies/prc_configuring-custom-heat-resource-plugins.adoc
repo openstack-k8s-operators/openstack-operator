@@ -1,0 +1,169 @@
+[id="prc_configuring-custom-heat-resource-plugins_{context}"]
+= Configuring custom Heat resource plugins
+
+[role="_abstract"]
+You can deploy custom Heat resource plugins to extend the orchestration service with custom resource types. This procedure uses the `extraMounts` feature to mount plugin files into the heat-engine pods. For information about writing Heat plugins, refer to the upstream Heat documentation.
+
+.Prerequisites
+
+* A deployed OpenStack control plane with Heat enabled.
+* Access to the OpenShift cluster with `oc` CLI.
+* Your custom Heat plugin Python file(s).
+
+== Procedure
+
+Create a `ConfigMap` containing your plugin files and mount it into the heat-engine pods using `extraMounts`.
+
+. Create a `ConfigMap` containing your custom Heat plugin:
++
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: heat-custom-plugins
+  namespace: openstack
+data:
+  my_custom_resource.py: |
+    <your_plugin_code>
+----
++
+* Replace `<your_plugin_code>` with your custom Heat plugin Python code.
+
+. Apply the `ConfigMap`:
++
+----
+$ oc apply -f heat-custom-plugins-configmap.yaml
+----
+
+. Patch the `OpenStackControlPlane` CR to add `extraMounts` to the Heat section:
++
+----
+$ oc patch openstackcontrolplane <controlplane_name> -n openstack --type=merge -p '
+spec:
+  heat:
+    template:
+      extraMounts:
+        - name: custom-plugins
+          extraVol:
+            - extraVolType: heat-plugins
+              volumes:
+                - name: heat-custom-plugins
+                  configMap:
+                    name: heat-custom-plugins
+              mounts:
+                - name: heat-custom-plugins
+                  mountPath: /usr/lib/heat
+                  readOnly: true
+              propagation:
+                - HeatEngine
+'
+----
++
+* Replace `<controlplane_name>` with your `OpenStackControlPlane` CR name.
+
+. Wait for the heat-engine pods to restart:
++
+----
+$ oc rollout status deployment/heat-engine -n openstack
+----
+
+. Verify the plugin files are mounted in the heat-engine pod:
++
+----
+$ oc exec deployment/heat-engine -n openstack -- ls -la /usr/lib/heat/
+----
+
+. Verify the custom resource type is available:
++
+----
+$ oc rsh -n openstack openstackclient openstack orchestration resource type list | grep <resource_type>
+----
++
+* Replace `<resource_type>` with the resource type name defined in your plugin.
+
+== Using a PersistentVolumeClaim for plugins larger than 1 MiB
+
+If your plugin files exceed the 1 MiB `ConfigMap` size limit, use a `PersistentVolumeClaim` (PVC) instead.
+
+.Procedure
+
+. Create a `PersistentVolumeClaim`:
++
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: heat-custom-plugins
+  namespace: openstack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+----
+
+. Apply the PVC:
++
+----
+$ oc apply -f heat-custom-plugins-pvc.yaml
+----
+
+. Copy your plugin files to the PVC using a temporary pod:
++
+----
+$ oc run copy-plugins --image=registry.access.redhat.com/ubi9/ubi-minimal --restart=Never \
+  --overrides='{"spec":{"containers":[{"name":"copy-plugins","image":"registry.access.redhat.com/ubi9/ubi-minimal","command":["sleep","3600"],"volumeMounts":[{"name":"plugins","mountPath":"/plugins"}]}],"volumes":[{"name":"plugins","persistentVolumeClaim":{"claimName":"heat-custom-plugins"}}]}}' \
+  -n openstack
+$ oc wait --for=condition=Ready pod/copy-plugins -n openstack
+$ oc cp <local_plugin_path> openstack/copy-plugins:/plugins/
+$ oc delete pod copy-plugins -n openstack
+----
++
+* Replace `<local_plugin_path>` with the path to your plugin file or folder.
+
+. Patch the `OpenStackControlPlane` CR to add `extraMounts` to the Heat section:
++
+----
+$ oc patch openstackcontrolplane <controlplane_name> -n openstack --type=merge -p '
+spec:
+  heat:
+    template:
+      extraMounts:
+        - name: custom-plugins
+          extraVol:
+            - extraVolType: heat-plugins
+              volumes:
+                - name: heat-custom-plugins
+                  persistentVolumeClaim:
+                    claimName: heat-custom-plugins
+              mounts:
+                - name: heat-custom-plugins
+                  mountPath: /usr/lib/heat
+                  readOnly: true
+              propagation:
+                - HeatEngine
+'
+----
++
+* Replace `<controlplane_name>` with your `OpenStackControlPlane` CR name.
+
+. Wait for the heat-engine pods to restart:
++
+----
+$ oc rollout status deployment/heat-engine -n openstack
+----
+
+. Verify the plugin files are mounted in the heat-engine pod:
++
+----
+$ oc exec deployment/heat-engine -n openstack -- ls -la /usr/lib/heat/
+----
+
+. Verify the custom resource type is available:
++
+----
+$ oc rsh -n openstack openstackclient openstack orchestration resource type list | grep <resource_type>
+----
++
+* Replace `<resource_type>` with the resource type name defined in your plugin.
