@@ -92,7 +92,13 @@ for MOD_PATH in ${MOD_PATHS}; do
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/?page_size=100 | jq -r '.results // [] | .[].name' | sort -u | { grep $REF || true; })
     elif [[ "${CURL_REGISTRY}" != "quay.io" ]]; then
         # quay.rdoproject.io doesn't support filter_tag_name, so increase limit to 100
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true?limit=100 | jq -r '.tags // [] | .[].name' | sort -u | { grep $REF || true; })
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&limit=100 | jq -r '.tags // [] | .[].name' | sort -u | { grep $REF || true; })
+        # If non-quay.io registry doesn't have the bundle for openstack-k8s-operators, fall back to quay.io
+        if [[ -z "$SHA" && "$GITHUB_USER" == "openstack-k8s-operators" ]]; then
+            SHA=$(curl -s https://quay.io/api/v1/repository/openstack-k8s-operators/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r '.tags // [] | .[].name')
+            # Update REPO_URL to use quay.io since we're falling back
+            REPO_URL="quay.io/openstack-k8s-operators"
+        fi
     else
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r '.tags // [] | .[].name')
     fi

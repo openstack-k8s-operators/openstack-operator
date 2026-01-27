@@ -22,7 +22,7 @@ spec:
         - name: RELATED_IMAGE_GLANCE_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/lmiccini/glance-operator@sha256:bc45409dff26aca6bd982684cfaf093548adb6a71928f5257fe60ab5535dda39
         - name: RELATED_IMAGE_HEAT_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/lmiccini/heat-operator@sha256:dd1b778223d83d3ea17ce52d6b749c3f89a13a4944710b090cc0ca63247fb462
+          value: quay.io/lmiccini/heat-operator@sha256:027f3118543388d561b452a9777783b1f866ffaf59d9a1b16a225b1c5636111f
         - name: RELATED_IMAGE_HORIZON_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/horizon-operator@sha256:3311e627bcb860d9443592a2c67078417318c9eb77d8ef4d07f9aa7027d46822
         - name: RELATED_IMAGE_INFRA_OPERATOR_MANAGER_IMAGE_URL
@@ -38,7 +38,7 @@ spec:
         - name: RELATED_IMAGE_NEUTRON_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/lmiccini/neutron-operator@sha256:14786c3a66c41213a03d6375c03209f22d439dd6e752317ddcbe21dda66bb569
         - name: RELATED_IMAGE_NOVA_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/lmiccini/nova-operator@sha256:dbde47574a2204e5cb6af468e5c74df5124b1daab0ebcb0dc8c489fa40c8942f
+          value: quay.io/lmiccini/nova-operator@sha256:a992613466db3478a00c20c28639c4a12f6326aa52c40a418d1ec40038c83b61
         - name: RELATED_IMAGE_OCTAVIA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/lmiccini/octavia-operator@sha256:bb8d23f38682e4b987b621a3116500a76d0dc380a1bfb9ea77f18dfacdee4f49
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL
@@ -56,4 +56,4 @@ spec:
         - name: RELATED_IMAGE_TEST_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/test-operator@sha256:c8dde42dafd41026ed2e4cfc26efc0fff63c4ba9d31326ae7dc644ccceaafa9d
         - name: RELATED_IMAGE_WATCHER_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/lmiccini/watcher-operator@sha256:53ed5a94d4b8864152053b8d3c3ac0765d178c4db033fefe0ca8dab887d74922
+          value: quay.io/lmiccini/watcher-operator@sha256:b242a833be95e9682e8cdebdd9f1a52de864dfe83df6ddc1a9dafa283e98852f

@@ -79,6 +79,21 @@ spec:
                   Right now required by the maridb-operator to get the credentials from the instance to create the DB.
                   Might not be required in future.
                 type: string
+              dbPurge:
+                description: DBPurge defines parameters for the database purge CronJob
+                properties:
+                  age:
+                    default: 30
+                    description: Age is the DBPurgeAge parameter and indicates the
+                      number of days of purging DB records
+                    minimum: 1
+                    type: integer
+                  schedule:
+                    default: 1 0 * * *
+                    description: Schedule defines the crontab format string to schedule
+                      the DBPurge cronJob
+                    type: string
+                type: object
               defaultConfigOverwrite:
                 additionalProperties:
                   type: string
