@@ -176,6 +176,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", glanceName)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), glance, func() error {
 		instance.Spec.Glance.Template.DeepCopyInto(&glance.Spec.GlanceSpecCore)
+		// Explicitly set NotificationsBus to propagate nil values (strategic merge patch doesn't clear nil pointers)
+		glance.Spec.NotificationsBus = instance.Spec.Glance.Template.NotificationsBus
 		glance.Spec.ContainerImage = *version.Status.ContainerImages.GlanceAPIImage
 		if glance.Spec.Secret == "" {
 			glance.Spec.Secret = instance.Spec.Secret

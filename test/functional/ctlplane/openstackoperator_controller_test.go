@@ -3046,11 +3046,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 		)
 		DescribeTable("An OpenStackControlplane removes the notificationsBus reference",
 			func(serviceNameFunc func() (client.Object, *string)) {
-				Eventually(func(g Gomega) {
-					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-					ctlplane.Spec.NotificationsBus = nil
-					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
+				ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				ctlplane.Spec.NotificationsBus = nil
+				Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
 
+				Eventually(func(g Gomega) {
 					svc, notif := serviceNameFunc()
 					g.Expect(svc).Should(Not(BeNil()))
 					g.Expect(notif).To(BeNil())

@@ -19734,6 +19734,11 @@ spec:
                 description: InventorySecretName Name of a secret containing the ansible
                   inventory
                 type: string
+              novaCellSecretHash:
+                description: |-
+                  NovaCellSecretHash - Hash of nova-cellX-compute-config secrets to detect changes.
+                  When this hash changes, UpdatedNodesAfterSecretChange is reset.
+                type: string
               observedGeneration:
                 description: ObservedGeneration - the most recent generation observed
                   for this NodeSet. If the observed generation is less than the spec
@@ -19745,6 +19750,15 @@ spec:
                   type: string
                 description: SecretHashes
                 type: object
+              updatedNodesAfterSecretChange:
+                description: |-
+                  UpdatedNodesAfterSecretChange - List of node names that have been successfully
+                  updated after the most recent nova cell secret change. This is used to track
+                  progress across multiple AnsibleLimit deployments and ensure all nodes are
+                  updated before removing RabbitMQ user finalizers.
+                items:
+                  type: string
+                type: array
             type: object
         type: object
     served: true

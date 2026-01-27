@@ -123,6 +123,8 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 	helper.GetLogger().Info("Reconciling Watcher", "Watcher.Namespace", instance.Namespace, "Watcher.Name", "watcher")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), watcher, func() error {
 		instance.Spec.Watcher.Template.DeepCopyInto(&watcher.Spec.WatcherSpecCore)
+		// Explicitly propagate NotificationsBus (including nil) since strategic merge patch doesn't clear nil pointers
+		watcher.Spec.NotificationsBus = instance.Spec.Watcher.Template.NotificationsBus
 
 		if version.Status.ContainerImages.WatcherAPIImage == nil ||
 			version.Status.ContainerImages.WatcherApplierImage == nil ||

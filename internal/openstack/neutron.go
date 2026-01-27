@@ -164,6 +164,8 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 	Log.Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), neutronAPI, func() error {
 		instance.Spec.Neutron.Template.DeepCopyInto(&neutronAPI.Spec.NeutronAPISpecCore)
+		// Explicitly propagate NotificationsBus (including nil) since strategic merge patch doesn't clear nil pointers
+		neutronAPI.Spec.NotificationsBus = instance.Spec.Neutron.Template.NotificationsBus
 		neutronAPI.Spec.ContainerImage = *version.Status.ContainerImages.NeutronAPIImage
 		if neutronAPI.Spec.Secret == "" {
 			neutronAPI.Spec.Secret = instance.Spec.Secret

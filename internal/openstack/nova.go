@@ -353,6 +353,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// we need to support either rabbitmq vhosts or deploy a separate
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec.NovaSpecCore)
+		// Explicitly propagate NotificationsBus (including nil) since strategic merge patch doesn't clear nil pointers
+		nova.Spec.NotificationsBus = instance.Spec.Nova.Template.NotificationsBus
 
 		nova.Spec.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
 		nova.Spec.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage

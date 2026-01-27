@@ -160,6 +160,13 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	//DeployedBmhHash - Hash of BMHs deployed
 	DeployedBmhHash string `json:"deployedBmhHash,omitempty"`
+
+	// FinalizerHash is a short, deterministic hash derived from the nodeset name.
+	// Used to create unique, collision-free finalizer names for RabbitMQ users.
+	// Format: first 8 characters of SHA256(nodeset.metadata.name)
+	// Example: "a3f2b5c8"
+	// This allows easy lookup of which nodeset owns a specific finalizer.
+	FinalizerHash string `json:"finalizerHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

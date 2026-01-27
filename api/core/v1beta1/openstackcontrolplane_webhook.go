@@ -881,11 +881,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Cinder.Template.MessagingBus.Cluster == "" {
 			r.Spec.Cinder.Template.MessagingBus.Cluster = "rabbitmq"
 		}
-		// Propagate top-level NotificationsBus to template if not already set
-		// This prevents the service operator's Default() from using the deprecated field
-		if r.Spec.Cinder.Template.NotificationsBus == nil && r.Spec.NotificationsBus != nil {
-			r.Spec.Cinder.Template.NotificationsBus = r.Spec.NotificationsBus
-		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Cinder.Template.Default()
 		initializeOverrideSpec(&r.Spec.Cinder.APIOverride.Route, true)
 		r.Spec.Cinder.Template.SetDefaultRouteAnnotations(r.Spec.Cinder.APIOverride.Route.Annotations)
@@ -915,11 +913,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Glance.Template == nil {
 			r.Spec.Glance.Template = &glancev1.GlanceSpecCore{}
 		}
-		// Propagate top-level NotificationsBus to template if not already set
-		// This prevents the service operator's Default() from using the deprecated field
-		if r.Spec.Glance.Template.NotificationsBus == nil && r.Spec.NotificationsBus != nil {
-			r.Spec.Glance.Template.NotificationsBus = r.Spec.NotificationsBus
-		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Glance.Template.Default()
 		// initialize the main APIOverride struct
 		if r.Spec.Glance.APIOverride == nil {
@@ -984,11 +980,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Keystone.Template == nil {
 			r.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
 		}
-		// Propagate top-level NotificationsBus to template if not already set
-		// This prevents the service operator's Default() from using the deprecated field
-		if r.Spec.Keystone.Template.NotificationsBus == nil && r.Spec.NotificationsBus != nil {
-			r.Spec.Keystone.Template.NotificationsBus = r.Spec.NotificationsBus
-		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Keystone.Template.Default()
 		initializeOverrideSpec(&r.Spec.Keystone.APIOverride.Route, true)
 		r.Spec.Keystone.Template.SetDefaultRouteAnnotations(r.Spec.Keystone.APIOverride.Route.Annotations)
@@ -1003,11 +997,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Manila.Template.MessagingBus.Cluster == "" {
 			r.Spec.Manila.Template.MessagingBus.Cluster = "rabbitmq"
 		}
-		// Propagate top-level NotificationsBus to template if not already set
-		// This prevents the service operator's Default() from using the deprecated field
-		if r.Spec.Manila.Template.NotificationsBus == nil && r.Spec.NotificationsBus != nil {
-			r.Spec.Manila.Template.NotificationsBus = r.Spec.NotificationsBus
-		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Manila.Template.Default()
 		initializeOverrideSpec(&r.Spec.Manila.APIOverride.Route, true)
 		r.Spec.Manila.Template.SetDefaultRouteAnnotations(r.Spec.Manila.APIOverride.Route.Annotations)
@@ -1035,11 +1027,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Neutron.Template.MessagingBus.Cluster == "" {
 			r.Spec.Neutron.Template.MessagingBus.Cluster = "rabbitmq"
 		}
-		// Propagate top-level NotificationsBus to template if not already set
-		// This prevents the service operator's Default() from using the deprecated field
-		if r.Spec.Neutron.Template.NotificationsBus == nil && r.Spec.NotificationsBus != nil {
-			r.Spec.Neutron.Template.NotificationsBus = r.Spec.NotificationsBus
-		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Neutron.Template.Default()
 		initializeOverrideSpec(&r.Spec.Neutron.APIOverride.Route, true)
 		r.Spec.Neutron.Template.SetDefaultRouteAnnotations(r.Spec.Neutron.APIOverride.Route.Annotations)
@@ -1055,11 +1045,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Nova.Template.MessagingBus.Cluster == "" {
 			r.Spec.Nova.Template.MessagingBus.Cluster = "rabbitmq"
 		}
-		// Propagate top-level NotificationsBus to template if not already set
-		// This prevents the service operator's Default() from using the deprecated field
-		if r.Spec.Nova.Template.NotificationsBus == nil && r.Spec.NotificationsBus != nil {
-			r.Spec.Nova.Template.NotificationsBus = r.Spec.NotificationsBus
-		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Nova.Template.Default()
 		initializeOverrideSpec(&r.Spec.Nova.APIOverride.Route, true)
 		r.Spec.Nova.Template.SetDefaultRouteAnnotations(r.Spec.Nova.APIOverride.Route.Annotations)
@@ -1211,11 +1199,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Watcher.Template.MessagingBus.Cluster == "" {
 			r.Spec.Watcher.Template.MessagingBus.Cluster = "rabbitmq"
 		}
-		// Propagate top-level NotificationsBus to template if not already set
-		// This prevents the service operator's Default() from using the deprecated field
-		if r.Spec.Watcher.Template.NotificationsBus == nil && r.Spec.NotificationsBus != nil {
-			r.Spec.Watcher.Template.NotificationsBus = r.Spec.NotificationsBus
-		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Watcher.Template.Default()
 
 		if r.Spec.Watcher.Enabled {
