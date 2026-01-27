@@ -114,15 +114,17 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Watcher.Template.NotificationsBusInstance == nil {
-		instance.Spec.Watcher.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Watcher.Template.NotificationsBus == nil {
+		instance.Spec.Watcher.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	helper.GetLogger().Info("Reconciling Watcher", "Watcher.Namespace", instance.Namespace, "Watcher.Name", "watcher")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), watcher, func() error {
 		instance.Spec.Watcher.Template.DeepCopyInto(&watcher.Spec.WatcherSpecCore)
+		// Explicitly propagate NotificationsBus (including nil) since strategic merge patch doesn't clear nil pointers
+		watcher.Spec.NotificationsBus = instance.Spec.Watcher.Template.NotificationsBus
 
 		if version.Status.ContainerImages.WatcherAPIImage == nil ||
 			version.Status.ContainerImages.WatcherApplierImage == nil ||

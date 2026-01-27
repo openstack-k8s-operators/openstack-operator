@@ -154,32 +154,50 @@ var _ = Describe("OpenStackOperator controller", func() {
 		glanceNotifSvc = Entry("the Glance service", func() (
 			client.Object, *string) {
 			svc := GetGlance(names.GlanceName)
-			return svc, svc.Spec.NotificationBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		cinderNotifSvc = Entry("the Cinder service", func() (
 			client.Object, *string) {
 			svc := GetCinder(names.CinderName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		manilaNotifSvc = Entry("the Manila service", func() (
 			client.Object, *string) {
 			svc := GetManila(names.ManilaName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		neutronNotifSvc = Entry("the Neutron service", func() (
 			client.Object, *string) {
 			svc := GetNeutron(names.NeutronName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		novaNotifSvc = Entry("the Nova service", func() (
 			client.Object, *string) {
 			svc := GetNova(names.NovaName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		watcherNotifSvc = Entry("the Watcher service", func() (
 			client.Object, *string) {
 			svc := GetWatcher(names.WatcherName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 	)
 	//
@@ -2875,12 +2893,14 @@ var _ = Describe("OpenStackOperator controller", func() {
 		)
 	})
 
-	When("An OpenStackControlplane instance references a notificationsBusInstance", func() {
+	When("An OpenStackControlplane instance references a notificationsBus", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 
-			// point notificationsBusInstance to the default rabbitmq instance
-			spec["notificationsBusInstance"] = names.RabbitMQName.Name
+			// point notificationsBus.cluster to the default rabbitmq instance
+			spec["notificationsBus"] = map[string]interface{}{
+				"cluster": names.RabbitMQName.Name,
+			}
 
 			spec["telemetry"] = map[string]interface{}{
 				"enabled": true,
@@ -2964,11 +2984,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 				svc, notif := serviceNameFunc()
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-				// service exists and notificationsBusInstance has been propagated
+				// service exists and notificationsBus.cluster has been propagated
 				Eventually(func(g Gomega) {
 					g.Expect(OSCtlplane).Should(Not(BeNil()))
 					g.Expect(svc).Should(Not(BeNil()))
-					g.Expect(notif).To(Equal(OSCtlplane.Spec.NotificationsBusInstance))
+					g.Expect(OSCtlplane.Spec.NotificationsBus).ToNot(BeNil())
+					g.Expect(notif).To(Equal(&OSCtlplane.Spec.NotificationsBus.Cluster))
 				}, timeout, interval).Should(Succeed())
 			},
 			// The entry list depends on the services that currently implement
@@ -2987,7 +3008,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 				Eventually(func(g Gomega) {
 					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 
-					ctlplane.Spec.Nova.Template.NotificationsBusInstance = &rabbitMqOverride
+					if ctlplane.Spec.Nova.Template.NotificationsBus == nil {
+						ctlplane.Spec.Nova.Template.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+					}
+					ctlplane.Spec.Nova.Template.NotificationsBus.Cluster = rabbitMqOverride
 					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
 				}, timeout, interval).Should(Succeed())
 
@@ -2997,8 +3021,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 					nova := GetNova(names.NovaName)
 					g.Expect(OSCtlplane).Should(Not(BeNil()))
 					g.Expect(nova).Should(Not(BeNil()))
-					g.Expect(nova.Spec.NotificationsBusInstance).To(Equal(OSCtlplane.Spec.Nova.Template.NotificationsBusInstance))
-					g.Expect(*nova.Spec.NotificationsBusInstance).To(Equal(rabbitMqOverride))
+					g.Expect(nova.Spec.NotificationsBus).ToNot(BeNil())
+					g.Expect(OSCtlplane.Spec.Nova.Template.NotificationsBus).ToNot(BeNil())
+					g.Expect(nova.Spec.NotificationsBus.Cluster).To(Equal(OSCtlplane.Spec.Nova.Template.NotificationsBus.Cluster))
+					g.Expect(nova.Spec.NotificationsBus.Cluster).To(Equal(rabbitMqOverride))
 				}, timeout, interval).Should(Succeed())
 
 				// The rest of the services still point to the top-level rabbit
@@ -3006,7 +3032,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 				Eventually(func(g Gomega) {
 					g.Expect(OSCtlplane).Should(Not(BeNil()))
 					g.Expect(svc).Should(Not(BeNil()))
-					g.Expect(notif).To(Equal(OSCtlplane.Spec.NotificationsBusInstance))
+					g.Expect(OSCtlplane.Spec.NotificationsBus).ToNot(BeNil())
+					g.Expect(notif).To(Equal(&OSCtlplane.Spec.NotificationsBus.Cluster))
 				}, timeout, interval).Should(Succeed())
 			},
 			// The entry list depends on the services that currently implement
@@ -3017,13 +3044,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronNotifSvc,
 			watcherNotifSvc,
 		)
-		DescribeTable("An OpenStackControlplane removes the notificationsBusInstance reference",
+		DescribeTable("An OpenStackControlplane removes the notificationsBus reference",
 			func(serviceNameFunc func() (client.Object, *string)) {
-				Eventually(func(g Gomega) {
-					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-					ctlplane.Spec.NotificationsBusInstance = nil
-					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
+				ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				ctlplane.Spec.NotificationsBus = nil
+				Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
 
+				Eventually(func(g Gomega) {
 					svc, notif := serviceNameFunc()
 					g.Expect(svc).Should(Not(BeNil()))
 					g.Expect(notif).To(BeNil())

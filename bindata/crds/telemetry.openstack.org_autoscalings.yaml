@@ -110,6 +110,23 @@ spec:
                     default: memcached
                     description: Memcached instance name.
                     type: string
+                  messagingBus:
+                    description: MessagingBus configuration (username, vhost, and
+                      cluster)
+                    properties:
+                      cluster:
+                        description: Name of the cluster
+                        minLength: 1
+                        type: string
+                      user:
+                        description: User - RabbitMQ username
+                        type: string
+                      vhost:
+                        description: Vhost - RabbitMQ vhost name
+                        type: string
+                    required:
+                    - cluster
+                    type: object
                   networkAttachmentDefinitions:
                     description: NetworkAttachmentDefinitions list of network attachment
                       definitions the service pod gets attached to
@@ -121,6 +138,23 @@ spec:
                       type: string
                     description: NodeSelector to target subset of worker nodes running
                       this service
+                    type: object
+                  notificationsBus:
+                    description: NotificationsBus configuration (username, vhost,
+                      and cluster) for notifications
+                    properties:
+                      cluster:
+                        description: Name of the cluster
+                        minLength: 1
+                        type: string
+                      user:
+                        description: User - RabbitMQ username
+                        type: string
+                      vhost:
+                        description: Vhost - RabbitMQ vhost name
+                        type: string
+                    required:
+                    - cluster
                     type: object
                   notifierImage:
                     type: string
@@ -315,6 +349,7 @@ spec:
                     description: |-
                       RabbitMQ instance name
                       Needed to request a transportURL that is created and used in Aodh
+                      Deprecated: Use MessagingBus.Cluster instead
                     type: string
                   secret:
                     default: osp-secret
@@ -502,6 +537,10 @@ spec:
                 items:
                   type: string
                 type: array
+              notificationsURLSecret:
+                description: NotificationsURLSecret - Secret containing RabbitMQ notification
+                  transportURL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

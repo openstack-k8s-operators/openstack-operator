@@ -118,10 +118,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Manila.Template.NotificationsBusInstance == nil {
-		instance.Spec.Manila.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Manila.Template.NotificationsBus == nil {
+		instance.Spec.Manila.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")
@@ -130,6 +130,8 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.ManilaAPI.DeepCopyInto(&manila.Spec.ManilaAPI.ManilaAPITemplateCore)
 		instance.Spec.Manila.Template.ManilaScheduler.DeepCopyInto(&manila.Spec.ManilaScheduler.ManilaSchedulerTemplateCore)
 		manila.Spec.NodeSelector = instance.Spec.Manila.Template.NodeSelector
+		// Explicitly propagate NotificationsBus (including nil) since strategic merge patch doesn't clear nil pointers
+		manila.Spec.NotificationsBus = instance.Spec.Manila.Template.NotificationsBus
 
 		manila.Spec.ManilaAPI.ContainerImage = *version.Status.ContainerImages.ManilaAPIImage
 		manila.Spec.ManilaScheduler.ContainerImage = *version.Status.ContainerImages.ManilaSchedulerImage

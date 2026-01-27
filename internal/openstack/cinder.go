@@ -130,10 +130,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Cinder.Template.NotificationsBusInstance == nil {
-		instance.Spec.Cinder.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Cinder.Template.NotificationsBus == nil {
+		instance.Spec.Cinder.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", cinderName)
@@ -142,6 +142,8 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.CinderAPI.DeepCopyInto(&cinder.Spec.CinderAPI.CinderAPITemplateCore)
 		instance.Spec.Cinder.Template.CinderScheduler.DeepCopyInto(&cinder.Spec.CinderScheduler.CinderSchedulerTemplateCore)
 		instance.Spec.Cinder.Template.CinderBackup.DeepCopyInto(&cinder.Spec.CinderBackup.CinderBackupTemplateCore)
+		// Explicitly propagate NotificationsBus (including nil) since strategic merge patch doesn't clear nil pointers
+		cinder.Spec.NotificationsBus = instance.Spec.Cinder.Template.NotificationsBus
 
 		cinder.Spec.CinderAPI.ContainerImage = *version.Status.ContainerImages.CinderAPIImage
 		cinder.Spec.CinderScheduler.ContainerImage = *version.Status.ContainerImages.CinderSchedulerImage

@@ -72,10 +72,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Nova.Template.NotificationsBusInstance == nil {
-		instance.Spec.Nova.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Nova.Template.NotificationsBus == nil {
+		instance.Spec.Nova.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	// When there's no Topology referenced in the Service Template, inject the
@@ -353,6 +353,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		// we need to support either rabbitmq vhosts or deploy a separate
 		// RabbitMQCluster per nova cell.
 		instance.Spec.Nova.Template.DeepCopyInto(&nova.Spec.NovaSpecCore)
+		// Explicitly propagate NotificationsBus (including nil) since strategic merge patch doesn't clear nil pointers
+		nova.Spec.NotificationsBus = instance.Spec.Nova.Template.NotificationsBus
 
 		nova.Spec.APIContainerImageURL = *version.Status.ContainerImages.NovaAPIImage
 		nova.Spec.NovaComputeContainerImageURL = *version.Status.ContainerImages.NovaComputeImage

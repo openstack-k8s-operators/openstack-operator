@@ -79,6 +79,21 @@ spec:
                   Right now required by the maridb-operator to get the credentials from the instance to create the DB.
                   Might not be required in future.
                 type: string
+              dbPurge:
+                description: DBPurge defines parameters for the database purge CronJob
+                properties:
+                  age:
+                    default: 30
+                    description: Age is the DBPurgeAge parameter and indicates the
+                      number of days of purging DB records
+                    minimum: 1
+                    type: integer
+                  schedule:
+                    default: 1 0 * * *
+                    description: Schedule defines the crontab format string to schedule
+                      the DBPurge cronJob
+                    type: string
+                type: object
               defaultConfigOverwrite:
                 additionalProperties:
                   type: string
@@ -1959,11 +1974,44 @@ spec:
                 default: memcached
                 description: Memcached instance name.
                 type: string
+              messagingBus:
+                description: MessagingBus - Messaging Bus configuration
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
                 description: NodeSelector to target subset of worker nodes for running
                   the Heat services
+                type: object
+              notificationsBus:
+                description: NotificationsBus - Notifications Bus configuration (optional,
+                  separate from MessagingBus)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               passwordSelectors:
                 default:
@@ -1998,7 +2046,26 @@ spec:
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Heat
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
+              rabbitmq:
+                description: |-
+                  RabbitMQ - RabbitMQ configuration overrides
+                  Deprecated: Use MessagingBus instead
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               secret:
                 description: |-
                   Secret containing OpenStack password information for heat HeatDatabasePassword, HeatPassword
@@ -2100,6 +2167,10 @@ spec:
                 description: ReadyCount of Heat Engine instance
                 format: int32
                 type: integer
+              notificationsTransportURLSecret:
+                description: NotificationsTransportURLSecret - Secret containing Notifications
+                  RabbitMQ transportURL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this
