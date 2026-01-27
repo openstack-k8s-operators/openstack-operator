@@ -66,6 +66,11 @@ const (
 	GlanceName = "glance"
 	// CinderName - Default Cinder name
 	CinderName = "cinder"
+
+	// DeploymentStageAnnotation - Annotation key for controlling deployment stages
+	DeploymentStageAnnotation = "core.openstack.org/deployment-stage"
+	// DeploymentStageInfrastructureOnly - Annotation value to pause after infrastructure deployment
+	DeploymentStageInfrastructureOnly = "infrastructure-only"
 )
 
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
@@ -951,6 +956,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOpenStackVersionInitializationReadyCondition, condition.InitReason, OpenStackControlPlaneOpenStackVersionInitializationReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneWatcherReadyCondition, condition.InitReason, OpenStackControlPlaneWatcherReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneInfrastructureReadyCondition, condition.InitReason, OpenStackControlPlaneInfrastructureReadyInitMessage),
 
 		// Also add the overall status condition as Unknown
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),

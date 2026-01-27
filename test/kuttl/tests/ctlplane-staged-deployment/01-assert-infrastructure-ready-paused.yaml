@@ -1,0 +1,101 @@
+# Assert that infrastructure is ready but deployment is paused
+# OpenStackControlPlaneInfrastructureReady should be True with pause message
+# Infrastructure components (CAs, RabbitMQ, MariaDB, Memcached, OVN) should be Ready
+# Service components should still be in Init/Unknown state
+# Overall Ready should be False
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+  annotations:
+    core.openstack.org/deployment-stage: infrastructure-only
+status:
+  conditions:
+  # Overall deployment should not be ready yet (paused after infrastructure)
+  - message: OpenStackControlPlane Infrastructure ready - deployment paused. Remove annotation to resume reconcile of OpenStack services
+    reason: Requested
+    status: "False"
+    type: Ready
+  # Following conditions are alphabetically sorted by type
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneBarbicanReady
+  - message: OpenStackControlPlane CAs completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCAReadyCondition
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneCinderReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneClientReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneDesignateReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneGlanceReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneHeatReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneHorizonReady
+  - message: OpenStackControlPlane Infrastructure ready - deployment paused. Remove annotation to resume reconcile of OpenStack services
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneInfrastructureReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneIronicReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneKeystoneAPIReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneManilaReady
+  - message: OpenStackControlPlane MariaDB completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneMariaDBReady
+  - message: OpenStackControlPlane Memcached completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneMemcachedReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneNeutronReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneNovaReady
+  - message: OpenStackControlPlane OVN completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneOVNReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneOctaviaReady
+  - message: OpenStackControlPlane OpenStackVersion initialized
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneOpenStackVersionInitializationReadyCondition
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlanePlacementAPIReady
+  - message: OpenStackControlPlane RabbitMQ completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneRabbitMQReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneRedisReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneSwiftReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneTelemetryReady
+  - reason: Init
+    status: Unknown
+    type: OpenStackControlPlaneWatcherReady

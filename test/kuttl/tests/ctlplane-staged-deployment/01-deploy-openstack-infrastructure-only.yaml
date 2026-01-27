@@ -1,0 +1,10 @@
+# Deploy OpenStackControlPlane with deployment-stage annotation set to infrastructure-only
+# This should pause deployment after infrastructure (CAs, RabbitMQ, Galera, Memcached, OVN) is ready
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      oc kustomize ../../../../config/samples/base/openstackcontrolplane | \
+      oc annotate -f - --local=true --dry-run=none \
+        core.openstack.org/deployment-stage=infrastructure-only -o yaml | \
+      oc apply -n $NAMESPACE -f -

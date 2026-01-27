@@ -161,6 +161,11 @@ const (
 
 	// OpenStackControlPlaneExposeWatcherReadyCondition Status=True condition which indicates if Watcher is exposed via a route
 	OpenStackControlPlaneExposeWatcherReadyCondition condition.Type = "OpenStackControlPlaneExposeWatcherReady"
+
+	// OpenStackControlPlaneInfrastructureReadyCondition Status=True condition which indicates if infrastructure components are ready
+	// Infrastructure includes: CAs, DNSMasq, RabbitMQ, Galera (MariaDB), Memcached, and OVN databases
+	// This condition is set to True when deployment-stage annotation is "infrastructure-only" and all infrastructure is ready
+	OpenStackControlPlaneInfrastructureReadyCondition condition.Type = "OpenStackControlPlaneInfrastructureReady"
 )
 
 // Common Messages used by API objects.
@@ -507,6 +512,24 @@ const (
 
 	// OpenStackControlPlaneWatcherReadyErrorMessage
 	OpenStackControlPlaneWatcherReadyErrorMessage = "OpenStackControlPlane Watcher error occured %s"
+
+	// OpenStackControlPlaneInfrastructureReadyInitMessage
+	OpenStackControlPlaneInfrastructureReadyInitMessage = "OpenStackControlPlane Infrastructure not started"
+
+	// OpenStackControlPlaneInfrastructureReadyMessage
+	OpenStackControlPlaneInfrastructureReadyMessage = "OpenStackControlPlane Infrastructure ready"
+
+	// OpenStackControlPlaneInfrastructureReadyRunningMessage
+	OpenStackControlPlaneInfrastructureReadyRunningMessage = "OpenStackControlPlane Infrastructure in progress"
+
+	// OpenStackControlPlaneInfrastructureReadyWaitingMessage
+	OpenStackControlPlaneInfrastructureReadyWaitingMessage = "OpenStackControlPlane Infrastructure in progress - waiting for: %s"
+
+	// OpenStackControlPlaneInfrastructureReadyPausedMessage
+	OpenStackControlPlaneInfrastructureReadyPausedMessage = "OpenStackControlPlane Infrastructure ready - deployment paused. Remove annotation to resume reconcile of OpenStack services"
+
+	// OpenStackControlPlaneInfrastructureReadyErrorMessage
+	OpenStackControlPlaneInfrastructureReadyErrorMessage = "OpenStackControlPlane Infrastructure error occured %s"
 )
 
 // Version Conditions used by to drive minor updates

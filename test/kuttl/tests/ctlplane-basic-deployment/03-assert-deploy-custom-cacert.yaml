@@ -63,6 +63,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneGlanceReady
+  - message: OpenStackControlPlane Infrastructure ready
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneInfrastructureReady
   - message: OpenStackControlPlane InstanceHa CM is available
     reason: Ready
     status: "True"

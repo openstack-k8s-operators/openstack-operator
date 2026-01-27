@@ -20,6 +20,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	routev1 "github.com/openshift/api/route/v1"
@@ -186,9 +187,23 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
 				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
-			// and recalculate it based on the state of the rest of the conditions
-			instance.Status.Conditions.Set(
-				instance.Status.Conditions.Mirror(condition.ReadyCondition))
+
+			// In infrastructure-only mode with infrastructure ready, set Ready to False with pause message
+			// This prevents service conditions (which are still Unknown/Init) from being mirrored to Ready
+			if stage, ok := instance.Annotations[corev1beta1.DeploymentStageAnnotation]; ok &&
+				stage == corev1beta1.DeploymentStageInfrastructureOnly &&
+				instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneInfrastructureReadyCondition) {
+				// Set Ready to False with the infrastructure pause message
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					condition.ReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					corev1beta1.OpenStackControlPlaneInfrastructureReadyPausedMessage))
+			} else {
+				// Normal mode or infrastructure not ready yet: use default mirror behavior
+				instance.Status.Conditions.Set(
+					instance.Status.Conditions.Mirror(condition.ReadyCondition))
+			}
 		}
 
 		condition.RestoreLastTransitionTimes(&instance.Status.Conditions, savedConditions)
@@ -386,6 +401,36 @@ func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Co
 	return ctrl.Result{}, nil
 }
 
+// isInfrastructureReady checks if all enabled infrastructure components are ready
+// Returns true if ready, and a list of components that are not ready (empty if all ready)
+func isInfrastructureReady(instance *corev1beta1.OpenStackControlPlane) (bool, []string) {
+	notReady := []string{}
+
+	// CAs are always deployed (no enabled flag)
+	if !instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneCAReadyCondition) {
+		notReady = append(notReady, "CAs")
+	}
+
+	// Only check each infrastructure component if it's enabled
+	if instance.Spec.DNS.Enabled && !instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneDNSReadyCondition) {
+		notReady = append(notReady, "DNS")
+	}
+	if instance.Spec.Rabbitmq.Enabled && !instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition) {
+		notReady = append(notReady, "RabbitMQs")
+	}
+	if instance.Spec.Galera.Enabled && !instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition) {
+		notReady = append(notReady, "Galeras")
+	}
+	if instance.Spec.Memcached.Enabled && !instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneMemcachedReadyCondition) {
+		notReady = append(notReady, "Memcached")
+	}
+	if instance.Spec.Ovn.Enabled && !instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition) {
+		notReady = append(notReady, "OVN")
+	}
+
+	return len(notReady) == 0, notReady
+}
+
 func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
 	if instance.Spec.TopologyRef != nil {
 		if err := r.checkTopologyRef(ctx, helper,
@@ -402,6 +447,11 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		instance.Status.Conditions.MarkTrue(condition.TopologyReadyCondition, condition.TopologyReadyMessage)
 	}
 
+	// Check for deployment-stage annotation
+	deploymentStage := instance.Annotations[corev1beta1.DeploymentStageAnnotation]
+	infrastructureOnly := deploymentStage == corev1beta1.DeploymentStageInfrastructureOnly
+
+	// Reconcile infrastructure components (always run)
 	ctrlResult, err := openstack.ReconcileCAs(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -437,6 +487,57 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	// OVN databases are part of infrastructure
+	ctrlResult, err = openstack.ReconcileOVN(ctx, instance, version, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
+	// Update InfrastructureReady condition based on infrastructure component readiness
+	// This is useful for observability regardless of staged deployment mode
+	infrastructureReady, notReadyComponents := isInfrastructureReady(instance)
+
+	if infrastructureReady {
+		// Set different messages based on whether deployment is paused
+		if infrastructureOnly {
+			// Infrastructure-only mode: indicate deployment is paused
+			instance.Status.Conditions.MarkTrue(
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyCondition,
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyPausedMessage)
+			r.GetLogger(ctx).Info("Infrastructure components ready - deployment paused at infrastructure-only stage")
+		} else {
+			// Normal mode: infrastructure is ready
+			instance.Status.Conditions.MarkTrue(
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyCondition,
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyMessage)
+		}
+	} else {
+		// Build a descriptive message showing which components are not ready
+		if len(notReadyComponents) > 0 {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyWaitingMessage,
+				strings.Join(notReadyComponents, ", ")))
+		} else {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				corev1beta1.OpenStackControlPlaneInfrastructureReadyRunningMessage))
+		}
+	}
+
+	// Check if we're in infrastructure-only mode and should pause deployment
+	if infrastructureOnly {
+		// Stop here - do not reconcile OpenStack services
+		return ctrl.Result{}, nil
+	}
+
+	// Continue with OpenStack service reconciliation
 	ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -465,12 +566,7 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
-	ctrlResult, err = openstack.ReconcileOVN(ctx, instance, version, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
+	// OVN already reconciled in infrastructure section above
 
 	ctrlResult, err = openstack.ReconcileNeutron(ctx, instance, version, helper)
 	if err != nil {
