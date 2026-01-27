@@ -73,6 +73,15 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
+	// Propagate NotificationsBus from top-level to template sub-components if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus == nil {
+		instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus = instance.Spec.NotificationsBus
+	}
+	if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus == nil {
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus = instance.Spec.NotificationsBus
+	}
+
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "telemetry", Namespace: instance.Namespace}, telemetry); err != nil {
 		if !k8s_errors.IsNotFound(err) {
 			return ctrl.Result{}, err
@@ -381,6 +390,14 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyAPI.CloudKittyAPITemplateCore)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyProc.CloudKittyProcTemplateCore)
 
+		// Explicitly propagate NotificationsBus only if non-nil to allow webhook defaulting from rabbitMqClusterName
+		if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus != nil {
+			telemetry.Spec.Ceilometer.NotificationsBus = instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus
+		}
+		if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus != nil {
+			telemetry.Spec.Autoscaling.Aodh.NotificationsBus = instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus
+		}
+
 		// TODO: investigate if the following could be simplified to
 		// telemetry.Spec.<service>.Enabled = instance.Spec.Telemetry.Template.<service>.Enabled
 		// With current implementation we essentially create a copy of the bools and point to that, so the
@@ -439,6 +456,9 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 		if telemetry.Spec.CloudKitty.StorageClass == "" {
 			telemetry.Spec.CloudKitty.StorageClass = instance.Spec.StorageClass
+		}
+		if telemetry.Spec.CloudKitty.Secret == "" {
+			telemetry.Spec.CloudKitty.Secret = instance.Spec.Secret
 		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), telemetry, helper.GetScheme())

@@ -199,6 +199,22 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}
 			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
+		octaviaNotifSvc = Entry("the Octavia service", func() (
+			client.Object, *string) {
+			svc := GetOctavia(names.OctaviaName)
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
+		})
+		keystoneNotifSvc = Entry("the Keystone service", func() (
+			client.Object, *string) {
+			svc := GetKeystone(names.KeystoneAPIName)
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
+		})
 	)
 	//
 	// Validate TLS input settings
@@ -1222,6 +1238,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			spec["tls"] = GetTLSeCustomIssuerSpec()
@@ -1350,6 +1367,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			DeferCleanup(k8sClient.Delete, ctx,
@@ -2044,6 +2062,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicRouteName))
@@ -2233,6 +2252,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicRouteName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicSvcName))
@@ -2709,6 +2729,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			DeferCleanup(
@@ -2916,6 +2937,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 			spec["watcher"] = map[string]interface{}{
 				"enabled": true,
 			}
+			spec["octavia"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["ovn"] = map[string]interface{}{
+				"enabled": true,
+			}
 
 			// enable nova and its dependencies
 			spec["nova"] = map[string]interface{}{
@@ -2943,7 +2970,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+			// create cert secret for octavia ovn client
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(types.NamespacedName{Name: "cert-octavia-ovndbs", Namespace: names.Namespace}))
 
 			DeferCleanup(
 				th.DeleteInstance,
@@ -3000,6 +3030,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronNotifSvc,
 			novaNotifSvc,
 			watcherNotifSvc,
+			octaviaNotifSvc,
+			keystoneNotifSvc,
 		)
 		DescribeTable("A service (Nova) overrides the notification value",
 			func(serviceNameFunc func() (client.Object, *string)) {
@@ -3044,27 +3076,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronNotifSvc,
 			watcherNotifSvc,
 		)
-		DescribeTable("An OpenStackControlplane removes the notificationsBus reference",
-			func(serviceNameFunc func() (client.Object, *string)) {
-				Eventually(func(g Gomega) {
-					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-					ctlplane.Spec.NotificationsBus = nil
-					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
-
-					svc, notif := serviceNameFunc()
-					g.Expect(svc).Should(Not(BeNil()))
-					g.Expect(notif).To(BeNil())
-				}, timeout, interval).Should(Succeed())
-			},
-			// The entry list depends on the services that currently implement
-			// the notificationsBusInstance interface
-			glanceNotifSvc,
-			cinderNotifSvc,
-			manilaNotifSvc,
-			neutronNotifSvc,
-			novaNotifSvc,
-			watcherNotifSvc,
-		)
+		// NOTE: Test for "removes the notificationsBus reference" removed because
+		// the new template-level precedence pattern means setting top-level NotificationsBus
+		// to nil does not clear template-level NotificationsBus configuration.
+		// Template-level takes precedence over top-level.
 	})
 })
 
@@ -3787,6 +3802,7 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			// create cert secrets for memcached instance

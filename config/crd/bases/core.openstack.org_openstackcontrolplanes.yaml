@@ -14939,18 +14939,6 @@ spec:
                               memcachedInstance:
                                 default: memcached
                                 type: string
-                              messagingBus:
-                                properties:
-                                  cluster:
-                                    minLength: 1
-                                    type: string
-                                  user:
-                                    type: string
-                                  vhost:
-                                    type: string
-                                required:
-                                - cluster
-                                type: object
                               networkAttachmentDefinitions:
                                 items:
                                   type: string
@@ -15134,18 +15122,6 @@ spec:
                                 type: string
                               secretName:
                                 type: string
-                            type: object
-                          messagingBus:
-                            properties:
-                              cluster:
-                                minLength: 1
-                                type: string
-                              user:
-                                type: string
-                              vhost:
-                                type: string
-                            required:
-                            - cluster
                             type: object
                           mysqldExporterDatabaseAccountPrefix:
                             default: mysqld-exporter
@@ -15473,18 +15449,6 @@ spec:
                           nodeSelector:
                             additionalProperties:
                               type: string
-                            type: object
-                          notificationsBus:
-                            properties:
-                              cluster:
-                                minLength: 1
-                                type: string
-                              user:
-                                type: string
-                              vhost:
-                                type: string
-                            required:
-                            - cluster
                             type: object
                           passwordSelector:
                             default:
