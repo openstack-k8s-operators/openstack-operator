@@ -161,6 +161,9 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(ctx context.Context, old runt
 		)
 
 	}
+
+	var warnings []string
+
 	if oldNodeSet.Status.DeploymentStatuses != nil {
 		for deployName, deployConditions := range oldNodeSet.Status.DeploymentStatuses {
 			deployCondition := deployConditions.Get(NodeSetDeploymentReadyCondition)
@@ -172,10 +175,19 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(ctx context.Context, old runt
 						deployName, string(deployCondition.Type)),
 				)
 			}
+
+			// Warn user that a failed deployment blocks inventory updates.
+			// NodeSet changes won't take effect until the failed deployment is deleted.
+			if !deployConditions.IsTrue(NodeSetDeploymentReadyCondition) && condition.IsError(deployCondition) {
+				warnings = append(warnings, fmt.Sprintf(
+					"NodeSet has been updated, but OpenStackDataPlaneDeployment %s is in a failed state. "+
+						"Inventory changes will not take effect until this deployment is deleted.",
+					deployName))
+			}
 		}
 	}
 
-	return nil, nil
+	return warnings, nil
 }
 
 // ValidateUpdate validates the OpenStackDataPlaneNodeSetSpec on update
