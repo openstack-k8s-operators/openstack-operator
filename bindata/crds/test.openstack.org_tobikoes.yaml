@@ -1250,6 +1250,16 @@ spec:
                 description: Number of processes/workers used to run tobiko tests
                   - value 0 results in automatic decision
                 type: integer
+              openStackConfigMap:
+                default: openstack-config
+                description: OpenStackConfigMap is the name of the ConfigMap containing
+                  the clouds.yaml
+                type: string
+              openStackConfigSecret:
+                default: openstack-config-secret
+                description: OpenStackConfigSecret is the name of the Secret containing
+                  the secure.yaml
+                type: string
               parallel:
                 default: false
                 description: |-
@@ -1498,6 +1508,16 @@ spec:
                       description: Number of processes/workers used to run tobiko
                         tests - value 0 results in automatic decision
                       type: integer
+                    openStackConfigMap:
+                      default: openstack-config
+                      description: OpenStackConfigMap is the name of the ConfigMap
+                        containing the clouds.yaml
+                      type: string
+                    openStackConfigSecret:
+                      default: openstack-config-secret
+                      description: OpenStackConfigSecret is the name of the Secret
+                        containing the secure.yaml
+                      type: string
                     patch:
                       description: Optional patch to apply to the Tobiko repository
                         for this step.

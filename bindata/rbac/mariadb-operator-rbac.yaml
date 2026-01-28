@@ -138,6 +138,7 @@ rules:
     - mariadb.openstack.org
   resources:
     - galerabackups
+    - galerarestores
     - galeras
     - mariadbaccounts
     - mariadbdatabases
@@ -153,12 +154,14 @@ rules:
     - mariadb.openstack.org
   resources:
     - galerabackups/finalizers
+    - galerarestores/finalizers
   verbs:
     - update
 - apiGroups:
     - mariadb.openstack.org
   resources:
     - galerabackups/status
+    - galerarestores/status
     - mariadbaccounts/status
     - mariadbdatabases/status
   verbs:
