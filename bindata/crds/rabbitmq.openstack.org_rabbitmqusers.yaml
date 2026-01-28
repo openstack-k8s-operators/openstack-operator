@@ -60,6 +60,22 @@ spec:
           spec:
             description: RabbitMQUserSpec defines the desired state of RabbitMQUser
             properties:
+              credentialSelectors:
+                description: |-
+                  CredentialSelectors - selectors to identify username and password keys in the secret
+                  Defaults to {username: "username", password: "password"} when not specified
+                properties:
+                  password:
+                    default: password
+                    description: Password - key name for password in the secret (default
+                      "password")
+                    type: string
+                  username:
+                    default: username
+                    description: Username - key name for username in the secret (default
+                      "username")
+                    type: string
+                type: object
               permissions:
                 description: Permissions - user permissions on the vhost
                 properties:
@@ -81,6 +97,11 @@ spec:
                 type: object
               rabbitmqClusterName:
                 description: RabbitmqClusterName - the name of the RabbitMQ cluster
+                type: string
+              secret:
+                description: |-
+                  Secret - name of secret containing user credentials (username and password)
+                  If specified, credentials will be read from this secret instead of being auto-generated
                 type: string
               tags:
                 description: Tags - RabbitMQ user tags

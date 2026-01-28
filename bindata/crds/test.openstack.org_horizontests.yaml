@@ -1284,6 +1284,16 @@ spec:
                   This value contains a nodeSelector value that is applied to test pods
                   spawned by the test operator.
                 type: object
+              openStackConfigMap:
+                default: openstack-config
+                description: OpenStackConfigMap is the name of the ConfigMap containing
+                  the clouds.yaml
+                type: string
+              openStackConfigSecret:
+                default: openstack-config-secret
+                description: OpenStackConfigSecret is the name of the Secret containing
+                  the secure.yaml
+                type: string
               parallel:
                 default: false
                 description: Parallel

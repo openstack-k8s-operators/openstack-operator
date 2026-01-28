@@ -4715,6 +4715,16 @@ spec:
                       databaseInstance:
                         default: openstack
                         type: string
+                      dbPurge:
+                        properties:
+                          age:
+                            default: 30
+                            minimum: 1
+                            type: integer
+                          schedule:
+                            default: 1 0 * * *
+                            type: string
+                        type: object
                       defaultConfigOverwrite:
                         additionalProperties:
                           type: string

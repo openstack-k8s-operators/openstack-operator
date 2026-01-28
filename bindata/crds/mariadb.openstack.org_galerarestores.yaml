@@ -4,14 +4,14 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
   creationTimestamp: null
-  name: galerabackups.mariadb.openstack.org
+  name: galerarestores.mariadb.openstack.org
 spec:
   group: mariadb.openstack.org
   names:
-    kind: GaleraBackup
-    listKind: GaleraBackupList
-    plural: galerabackups
-    singular: galerabackup
+    kind: GaleraRestore
+    listKind: GaleraRestoreList
+    plural: galerarestores
+    singular: galerarestore
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -26,7 +26,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: GaleraBackup is the Schema for the galerabackups API
+        description: GaleraRestore is the Schema for the galerabackups API
         properties:
           apiVersion:
             description: |-
@@ -46,42 +46,14 @@ spec:
           metadata:
             type: object
           spec:
-            description: GaleraBackupSpec defines the desired state of GaleraBackup
+            description: GaleraRestoreSpec defines the desired state of GaleraBackup
             properties:
-              databaseInstance:
-                description: Galera cluster to backup
+              backupSource:
+                description: Galera backup to restore into its associated Galera CR
                 type: string
-              retention:
-                description: Time duration after which old backups must be reclaimed
-                  on disk
-                type: string
-              schedule:
-                default: '@daily'
-                description: The schedule in Cron format
-                type: string
-              storageClass:
-                description: Storage volume for backup data
-                type: string
-              storageRequest:
-                description: Storage Request for backup data
-                type: string
-              transferStorage:
-                description: Configuration of storage used for intermediate data transfer
-                properties:
-                  storageClass:
-                    description: Storage volume for backup data
-                    type: string
-                  storageRequest:
-                    description: Storage Request for backup data
-                    type: string
-                required:
-                - storageRequest
-                type: object
-            required:
-            - schedule
             type: object
           status:
-            description: GaleraBackupStatus defines the observed state of GaleraBackup
+            description: GaleraRestoreStatus defines the observed state of GaleraRestore
             properties:
               conditions:
                 description: Deployment Conditions
