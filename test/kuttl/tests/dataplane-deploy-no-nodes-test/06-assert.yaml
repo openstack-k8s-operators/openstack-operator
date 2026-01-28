@@ -157,7 +157,7 @@ spec:
           secretName: combined-ca-bundle
       - name: ssh-key-edpm-compute-beta-nodeset
         secret:
-          defaultMode: 420
+          defaultMode: 384
           items:
           - key: ssh-privatekey
             path: ssh_key_edpm-compute-beta-nodeset
@@ -258,7 +258,7 @@ spec:
       volumes:
       - name: ssh-key-edpm-compute-beta-nodeset
         secret:
-          defaultMode: 420
+          defaultMode: 384
           items:
           - key: ssh-privatekey
             path: ssh_key_edpm-compute-beta-nodeset
