@@ -116,6 +116,14 @@ spec:
                 default: 60
                 description: APITimeout for Apache
                 type: integer
+              auth:
+                description: Auth - authentication settings for keystone integration
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - secret name for application
+                      credential
+                    type: string
+                type: object
               centralImage:
                 type: string
               computeImage:

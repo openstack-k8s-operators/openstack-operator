@@ -38,6 +38,13 @@ spec:
       kind: OpenStackControlPlane
       name: openstackcontrolplanes.core.openstack.org
       specDescriptors:
+      - description: |-
+          ApplicationCredential - Global configuration for ApplicationCredentials.
+          Both this global section AND the per-service applicationCredential section
+          must be enabled for a service to use ApplicationCredentials.
+          If omitted, defaults to enabled=false with standard expiration/grace periods.
+        displayName: Application Credential
+        path: applicationCredential
       - description: Barbican - Parameters related to the Barbican service
         displayName: Barbican
         path: barbican
@@ -48,6 +55,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: barbican.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: barbican.applicationCredential
       - description: Enabled - Whether Barbican service should be deployed and managed
         displayName: Enabled
         path: barbican.enabled
@@ -66,6 +77,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: cinder.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: cinder.applicationCredential
       - description: Enabled - Whether Cinder service should be deployed and managed
         displayName: Enabled
         path: cinder.enabled
@@ -84,6 +99,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: designate.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: designate.applicationCredential
       - description: Enabled - Whether the Designate service should be deployed and
           managed
         displayName: Enabled
@@ -131,6 +150,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: glance.apiOverrides.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: glance.applicationCredential
       - description: Enabled - Whether Glance service should be deployed and managed
         displayName: Enabled
         path: glance.enabled
@@ -149,6 +172,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: heat.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: heat.applicationCredential
       - description: CnfAPIOverride, provides the ability to override the generated
           manifest of several child resources.
         displayName: Cnf APIOverride
@@ -192,6 +219,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: ironic.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: ironic.applicationCredential
       - description: Enabled - Whether Ironic services should be deployed and managed
         displayName: Enabled
         path: ironic.enabled
@@ -235,6 +266,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: manila.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: manila.applicationCredential
       - description: Enabled - Whether Manila service should be deployed and managed
         displayName: Enabled
         path: manila.enabled
@@ -264,6 +299,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: neutron.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: neutron.applicationCredential
       - description: Enabled - Whether Neutron service should be deployed and managed
         displayName: Enabled
         path: neutron.enabled
@@ -286,6 +325,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: nova.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: nova.applicationCredential
       - description: |-
           CellOverride, provides the ability to override the generated manifest of several child resources
           for a nova cell. cell0 never have compute nodes and therefore it won't have a noVNCProxy deployed.
@@ -313,6 +356,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: octavia.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: octavia.applicationCredential
       - description: Enabled - Whether the Octavia service should be deployed and
           managed
         displayName: Enabled
@@ -329,9 +376,6 @@ spec:
           Resource
         displayName: Template
         path: openstackclient.template
-      - description: List of environment variables to set in the container.
-        displayName: Env
-        path: openstackclient.template.env
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn
@@ -364,6 +408,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: placement.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: placement.applicationCredential
       - description: Enabled - Whether Placement service should be deployed and managed
         displayName: Enabled
         path: placement.enabled
@@ -404,6 +452,10 @@ spec:
       - description: Swift - Parameters related to the Swift service
         displayName: Swift
         path: swift
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: swift.applicationCredential
       - description: Enabled - Whether Swift service should be deployed and managed
         displayName: Enabled
         path: swift.enabled
@@ -436,6 +488,18 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: telemetry.aodhApiOverride.tls
+      - description: ApplicationCredentialAodh allows service-specific overrides of
+          the global AC configuration for Aodh.
+        displayName: Application Credential Aodh
+        path: telemetry.applicationCredentialAodh
+      - description: ApplicationCredentialCeilometer allows service-specific overrides
+          of the global AC configuration for Ceilometer.
+        displayName: Application Credential Ceilometer
+        path: telemetry.applicationCredentialCeilometer
+      - description: ApplicationCredentialCloudKitty allows service-specific overrides
+          of the global AC configuration for CloudKitty.
+        displayName: Application Credential Cloud Kitty
+        path: telemetry.applicationCredentialCloudKitty
       - description: CloudKittyAPIOverride, provides the ability to override the generated
           manifest of several child resources.
         displayName: Cloud Kitty APIOverride
@@ -524,6 +588,10 @@ spec:
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
         path: watcher.apiOverride.tls
+      - description: ApplicationCredential allows service-specific overrides of the
+          global AC configuration.
+        displayName: Application Credential
+        path: watcher.applicationCredential
       - description: Enabled - Whether Watcher service should be deployed and managed
         displayName: Enabled
         path: watcher.enabled

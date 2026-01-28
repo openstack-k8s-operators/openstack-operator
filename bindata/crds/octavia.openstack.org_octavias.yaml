@@ -83,6 +83,15 @@ spec:
                 default: 120
                 description: Octavia API timeout
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication (shared by
+                  all Octavia components)
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               customServiceConfig:
                 default: '# add your customization here'
                 description: |-
@@ -162,6 +171,14 @@ spec:
                     description: APITimeout for HAProxy and Apache defaults to OctaviaSpecCore
                       APITimeout (seconds)
                     type: integer
+                  auth:
+                    description: Auth - Parameters related to authentication
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - Secret containing
+                          Application Credential ID and Secret
+                        type: string
+                    type: object
                   containerImage:
                     description: Octavia Container Image URL
                     type: string
@@ -582,6 +599,14 @@ spec:
                   amphoraImageOwnerID:
                     default: ""
                     type: string
+                  auth:
+                    description: Auth - Parameters related to authentication
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - Secret containing
+                          Application Credential ID and Secret
+                        type: string
+                    type: object
                   containerImage:
                     description: ContainerImage - Amphora Controller Container Image
                       URL
@@ -830,6 +855,14 @@ spec:
                   amphoraImageOwnerID:
                     default: ""
                     type: string
+                  auth:
+                    description: Auth - Parameters related to authentication
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - Secret containing
+                          Application Credential ID and Secret
+                        type: string
+                    type: object
                   containerImage:
                     description: ContainerImage - Amphora Controller Container Image
                       URL
@@ -1254,6 +1287,14 @@ spec:
                   amphoraImageOwnerID:
                     default: ""
                     type: string
+                  auth:
+                    description: Auth - Parameters related to authentication
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - Secret containing
+                          Application Credential ID and Secret
+                        type: string
+                    type: object
                   containerImage:
                     description: ContainerImage - Amphora Controller Container Image
                       URL

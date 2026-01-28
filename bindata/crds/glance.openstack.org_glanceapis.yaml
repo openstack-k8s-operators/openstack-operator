@@ -65,6 +65,14 @@ spec:
                 - single
                 - edge
                 type: string
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - GlanceAPI Container Image URL
                 type: string

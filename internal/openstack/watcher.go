@@ -60,6 +60,61 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	// Watcher uses pointer fields, safely extract values
+	watcherReady := watcher.Status.ObservedGeneration == watcher.Generation && watcher.IsReady()
+
+	// Helper to get Watcher values (which are pointers) with fallback logic
+	getWatcherSecret := func() string {
+		if instance.Spec.Watcher.Template.Secret != nil && *instance.Spec.Watcher.Template.Secret != "" {
+			return *instance.Spec.Watcher.Template.Secret
+		}
+		// Apply same fallback as in CreateOrPatch
+		return instance.Spec.Secret
+	}
+	getWatcherServiceUser := func() string {
+		if instance.Spec.Watcher.Template.ServiceUser != nil {
+			return *instance.Spec.Watcher.Template.ServiceUser
+		}
+		return ""
+	}
+	getWatcherPasswordSelector := func() string {
+		if instance.Spec.Watcher.Template.PasswordSelectors.Service != nil {
+			return *instance.Spec.Watcher.Template.PasswordSelectors.Service
+		}
+		return ""
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Watcher.ApplicationCredential) ||
+		instance.Spec.Watcher.Template.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			watcher.Name,
+			watcherReady,
+			getWatcherSecret(),
+			getWatcherPasswordSelector(),
+			getWatcherServiceUser(),
+			instance.Spec.Watcher.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Watcher.Template.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Watcher.Template.APIServiceTemplate.TLS = watcher.Spec.APIServiceTemplate.TLS

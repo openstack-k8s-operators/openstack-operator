@@ -14,16 +14,7 @@ spec:
     singular: cloudkitty
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - description: Status
-      jsonPath: .status.conditions[0].status
-      name: Status
-      type: string
-    - description: Message
-      jsonPath: .status.conditions[0].message
-      name: Message
-      type: string
-    name: v1beta1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: CloudKitty is the Schema for the cloudkitties API
@@ -52,6 +43,14 @@ spec:
                 default: 60
                 description: APITimeout for HAProxy, Apache, and rpc_response_timeout
                 type: integer
+              auth:
+                description: Auth - authentication settings for keystone integration
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - secret name for application
+                      credential
+                    type: string
+                type: object
               cloudKittyAPI:
                 description: CloudKittyAPI - Spec definition for the API service of
                   this CloudKitty deployment

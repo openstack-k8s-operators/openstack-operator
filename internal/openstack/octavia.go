@@ -139,6 +139,45 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	octaviaReady := octavia.Status.ObservedGeneration == octavia.Generation && octavia.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	octaviaSecret := instance.Spec.Octavia.Template.Secret
+	if octaviaSecret == "" {
+		octaviaSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Octavia.ApplicationCredential) ||
+		instance.Spec.Octavia.Template.OctaviaAPI.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			octavia.Name,
+			octaviaReady,
+			octaviaSecret,
+			instance.Spec.Octavia.Template.PasswordSelectors.Service,
+			instance.Spec.Octavia.Template.ServiceUser,
+			instance.Spec.Octavia.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Octavia.Template.OctaviaAPI.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	svcs, err := service.GetServicesListWithLabel(
 		ctx,
 		helper,

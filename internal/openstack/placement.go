@@ -70,6 +70,45 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	placementReady := placementAPI.Status.ObservedGeneration == placementAPI.Generation && placementAPI.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	placementSecret := instance.Spec.Placement.Template.Secret
+	if placementSecret == "" {
+		placementSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Placement.ApplicationCredential) ||
+		instance.Spec.Placement.Template.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			placementAPI.Name,
+			placementReady,
+			placementSecret,
+			instance.Spec.Placement.Template.PasswordSelectors.Service,
+			instance.Spec.Placement.Template.ServiceUser,
+			instance.Spec.Placement.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Placement.Template.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	// set CA cert and preserve any previously set TLS certs
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Placement.Template.TLS = placementAPI.Spec.TLS

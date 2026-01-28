@@ -61,6 +61,45 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	barbicanReady := barbican.Status.ObservedGeneration == barbican.Generation && barbican.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	barbicanSecret := instance.Spec.Barbican.Template.Secret
+	if barbicanSecret == "" {
+		barbicanSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Barbican.ApplicationCredential) ||
+		instance.Spec.Barbican.Template.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			barbican.Name,
+			barbicanReady,
+			barbicanSecret,
+			instance.Spec.Barbican.Template.PasswordSelectors.Service,
+			instance.Spec.Barbican.Template.ServiceUser,
+			instance.Spec.Barbican.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Barbican.Template.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Barbican.Template.BarbicanAPI.TLS = barbican.Spec.BarbicanAPI.TLS

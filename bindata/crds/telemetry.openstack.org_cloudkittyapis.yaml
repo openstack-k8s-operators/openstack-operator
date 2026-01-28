@@ -14,16 +14,7 @@ spec:
     singular: cloudkittyapi
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - description: Status
-      jsonPath: .status.conditions[0].status
-      name: Status
-      type: string
-    - description: Message
-      jsonPath: .status.conditions[0].message
-      name: Message
-      type: string
-    name: v1beta1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: CloudKittyAPI is the Schema for the cloudkittyapis API
@@ -48,6 +39,14 @@ spec:
           spec:
             description: CloudKittyAPISpec defines the desired state of CloudKittyAPI
             properties:
+              auth:
+                description: Auth - authentication settings for keystone integration
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - secret name for application
+                      credential
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - CloudKitty Container Image URL (will
                   be set to environmental default if empty)
