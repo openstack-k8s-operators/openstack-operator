@@ -183,6 +183,10 @@ func (a *EEJob) JobForOpenStackAnsibleEE(h *helper.Helper) (*batchv1.Job, error)
 		parsedExtraVars := ""
 		// unmarshal nested data structures
 		for _, variable := range keys {
+			if variable == "edpm_services_override" {
+				parsedExtraVars += fmt.Sprintf("%s: %s\n", variable, a.ExtraVars[variable])
+				continue
+			}
 			var tmp interface{}
 			err := yaml.Unmarshal(a.ExtraVars[variable], &tmp)
 			if err != nil {
