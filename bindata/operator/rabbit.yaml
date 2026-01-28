@@ -29,7 +29,26 @@ spec:
               fieldPath: metadata.namespace
 {{- range .RabbitmqOperator.Deployment.Manager.Env }}
         - name: '{{ .Name }}'
+{{- if .Value }}
           value: '{{ .Value }}'
+{{- end }}
+{{- if .ValueFrom }}
+          valueFrom:
+{{- if .ValueFrom.FieldRef }}
+            fieldRef:
+              fieldPath: '{{ .ValueFrom.FieldRef.FieldPath }}'
+{{- end }}
+{{- if .ValueFrom.ConfigMapKeyRef }}
+            configMapKeyRef:
+              name: '{{ .ValueFrom.ConfigMapKeyRef.Name }}'
+              key: '{{ .ValueFrom.ConfigMapKeyRef.Key }}'
+{{- end }}
+{{- if .ValueFrom.SecretKeyRef }}
+            secretKeyRef:
+              name: '{{ .ValueFrom.SecretKeyRef.Name }}'
+              key: '{{ .ValueFrom.SecretKeyRef.Key }}'
+{{- end }}
+{{- end }}
 {{- end }}
         image: {{ .RabbitmqOperator.Deployment.Manager.Image }}
         name: operator
