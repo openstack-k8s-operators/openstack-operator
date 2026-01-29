@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"slices"
+	"sort"
 	"strings"
 	"time"
 
@@ -21,9 +22,9 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
+	dputil "github.com/openstack-k8s-operators/openstack-operator/internal/dataplane/util"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -441,6 +442,37 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			err = bundle.getCertsFromPEM(caCert)
 			if err != nil {
 				return ctrl.Result{}, err
+			}
+		}
+	}
+
+	// Add mirror registry CA certificates from image.config.openshift.io/cluster if configured.
+	// This is needed for dataplane nodes to trust mirror registries using private/self-signed CAs.
+	mirrorRegistryCACerts, err := dputil.GetMirrorRegistryCACerts(ctx, helper)
+	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			corev1.OpenStackControlPlaneCAReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			"Failed to get mirror registry CA certificates: %s",
+			err.Error()))
+		return ctrl.Result{}, err
+	}
+	if len(mirrorRegistryCACerts) > 0 {
+		Log.Info("Adding mirror registry CA certificates to bundle", "count", len(mirrorRegistryCACerts))
+		// Sort registry hosts for deterministic ordering to avoid unnecessary secret updates
+		registryHosts := make([]string, 0, len(mirrorRegistryCACerts))
+		for host := range mirrorRegistryCACerts {
+			registryHosts = append(registryHosts, host)
+		}
+		sort.Strings(registryHosts)
+
+		for _, registryHost := range registryHosts {
+			caCert := mirrorRegistryCACerts[registryHost]
+			if parseErr := bundle.getCertsFromPEM([]byte(caCert)); parseErr != nil {
+				Log.Info("Failed to parse mirror registry CA certificate", "registry", registryHost, "error", parseErr.Error())
+				// Continue with other certs even if one fails
+				continue
 			}
 		}
 	}

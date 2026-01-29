@@ -135,8 +135,8 @@ func TestIsNoMatchError(t *testing.T) {
 	}
 }
 
-// Test IsDisconnectedOCP scenarios
-func TestIsDisconnectedOCP_WithICSP(t *testing.T) {
+// Test HasMirrorRegistries scenarios
+func TestHasMirrorRegistries_WithICSP(t *testing.T) {
 	g := NewWithT(t)
 	ctx := context.Background()
 
@@ -157,12 +157,12 @@ func TestIsDisconnectedOCP_WithICSP(t *testing.T) {
 
 	h := setupTestHelper(true, icsp)
 
-	disconnected, err := IsDisconnectedOCP(ctx, h)
+	hasMirrors, err := HasMirrorRegistries(ctx, h)
 	g.Expect(err).ToNot(HaveOccurred())
-	g.Expect(disconnected).To(BeTrue(), "Should detect disconnected environment when ICSP exists")
+	g.Expect(hasMirrors).To(BeTrue(), "Should detect mirror registries when ICSP exists")
 }
 
-func TestIsDisconnectedOCP_WithIDMS(t *testing.T) {
+func TestHasMirrorRegistries_WithIDMS(t *testing.T) {
 	g := NewWithT(t)
 	ctx := context.Background()
 
@@ -185,12 +185,12 @@ func TestIsDisconnectedOCP_WithIDMS(t *testing.T) {
 
 	h := setupTestHelper(true, idms)
 
-	disconnected, err := IsDisconnectedOCP(ctx, h)
+	hasMirrors, err := HasMirrorRegistries(ctx, h)
 	g.Expect(err).ToNot(HaveOccurred())
-	g.Expect(disconnected).To(BeTrue(), "Should detect disconnected environment when IDMS exists")
+	g.Expect(hasMirrors).To(BeTrue(), "Should detect mirror registries when IDMS exists")
 }
 
-func TestIsDisconnectedOCP_WithBothICSPAndIDMS(t *testing.T) {
+func TestHasMirrorRegistries_WithBothICSPAndIDMS(t *testing.T) {
 	g := NewWithT(t)
 	ctx := context.Background()
 
@@ -208,33 +208,33 @@ func TestIsDisconnectedOCP_WithBothICSPAndIDMS(t *testing.T) {
 
 	h := setupTestHelper(true, icsp, idms)
 
-	disconnected, err := IsDisconnectedOCP(ctx, h)
+	hasMirrors, err := HasMirrorRegistries(ctx, h)
 	g.Expect(err).ToNot(HaveOccurred())
-	g.Expect(disconnected).To(BeTrue(), "Should detect disconnected environment when both ICSP and IDMS exist")
+	g.Expect(hasMirrors).To(BeTrue(), "Should detect mirror registries when both ICSP and IDMS exist")
 }
 
-func TestIsDisconnectedOCP_EmptyLists(t *testing.T) {
+func TestHasMirrorRegistries_EmptyLists(t *testing.T) {
 	g := NewWithT(t)
 	ctx := context.Background()
 
 	// No ICSP or IDMS resources, but CRDs are registered
 	h := setupTestHelper(true)
 
-	disconnected, err := IsDisconnectedOCP(ctx, h)
+	hasMirrors, err := HasMirrorRegistries(ctx, h)
 	g.Expect(err).ToNot(HaveOccurred())
-	g.Expect(disconnected).To(BeFalse(), "Should not detect disconnected environment when lists are empty")
+	g.Expect(hasMirrors).To(BeFalse(), "Should not detect mirror registries when lists are empty")
 }
 
-func TestIsDisconnectedOCP_CRDsNotInstalled(t *testing.T) {
+func TestHasMirrorRegistries_CRDsNotInstalled(t *testing.T) {
 	g := NewWithT(t)
 	ctx := context.Background()
 
 	// Don't register OpenShift CRDs - simulates non-OpenShift cluster
 	h := setupTestHelper(false)
 
-	disconnected, err := IsDisconnectedOCP(ctx, h)
+	hasMirrors, err := HasMirrorRegistries(ctx, h)
 	g.Expect(err).ToNot(HaveOccurred(), "Should not return error when CRDs don't exist")
-	g.Expect(disconnected).To(BeFalse(), "Should return false when CRDs don't exist (graceful degradation)")
+	g.Expect(hasMirrors).To(BeFalse(), "Should return false when CRDs don't exist (graceful degradation)")
 }
 
 // Test GetMCRegistryConf scenarios
@@ -290,7 +290,7 @@ func TestGetMCRegistryConf_MachineConfigNotFound(t *testing.T) {
 	// MachineConfig CRD is registered but no resource exists
 	// This simulates the case where MCO is installed but the specific
 	// registry MachineConfig doesn't exist - this should be treated as an error,
-	// not a warning, because if MCO is present and disconnected env is detected,
+	// not a warning, because if MCO is present and mirror registries are detected,
 	// the registry config should exist.
 	h := setupTestHelper(true)
 
@@ -412,11 +412,11 @@ func TestGetMCRegistryConf_InvalidBase64Content(t *testing.T) {
 }
 
 // Test real-world scenarios
-func TestDisconnectedEnvironment_FullScenario(t *testing.T) {
+func TestMirrorRegistryEnvironment_FullScenario(t *testing.T) {
 	g := NewWithT(t)
 	ctx := context.Background()
 
-	// Simulate a full disconnected environment with IDMS and MachineConfig
+	// Simulate a mirror registry environment with IDMS and MachineConfig
 	expectedConfig := `[[registry]]
   prefix = ""
   location = "registry.redhat.io/rhosp-dev-preview"
@@ -467,10 +467,10 @@ func TestDisconnectedEnvironment_FullScenario(t *testing.T) {
 
 	h := setupTestHelper(true, idms, machineConfig)
 
-	// Check for disconnected environment
-	disconnected, err := IsDisconnectedOCP(ctx, h)
+	// Check for mirror registries
+	hasMirrors, err := HasMirrorRegistries(ctx, h)
 	g.Expect(err).ToNot(HaveOccurred())
-	g.Expect(disconnected).To(BeTrue())
+	g.Expect(hasMirrors).To(BeTrue())
 
 	// Get the registry configuration
 	config, err := GetMCRegistryConf(ctx, h)
@@ -485,14 +485,62 @@ func TestNonOpenShiftCluster_GracefulDegradation(t *testing.T) {
 	// Simulate a non-OpenShift Kubernetes cluster (no OpenShift CRDs registered)
 	h := setupTestHelper(false)
 
-	// IsDisconnectedOCP should return false without error
-	disconnected, err := IsDisconnectedOCP(ctx, h)
+	// HasMirrorRegistries should return false without error
+	hasMirrors, err := HasMirrorRegistries(ctx, h)
 	g.Expect(err).ToNot(HaveOccurred(), "Should gracefully handle missing CRDs")
-	g.Expect(disconnected).To(BeFalse())
+	g.Expect(hasMirrors).To(BeFalse())
 
 	// GetMCRegistryConf should return an error that can be identified as "CRD not found"
 	config, err := GetMCRegistryConf(ctx, h)
 	g.Expect(err).To(HaveOccurred())
 	g.Expect(IsNoMatchError(err)).To(BeTrue(), "Error should indicate CRD is not installed")
 	g.Expect(config).To(BeEmpty())
+}
+
+func TestGetMirrorRegistryCACerts(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+
+	imageConfig := &ocpidms.Image{
+		ObjectMeta: metav1.ObjectMeta{Name: "cluster"},
+		Spec:       ocpidms.ImageSpec{AdditionalTrustedCA: ocpidms.ConfigMapNameReference{Name: "registry-cas"}},
+	}
+	caConfigMap := &k8s_corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{Name: "registry-cas", Namespace: "openshift-config"},
+		Data:       map[string]string{"mirror.example.com": "-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----"},
+	}
+	h := setupTestHelper(true, imageConfig, caConfigMap)
+	caCerts, err := GetMirrorRegistryCACerts(ctx, h)
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(caCerts).To(HaveLen(1))
+	g.Expect(caCerts).To(HaveKey("mirror.example.com"))
+
+	imageConfigNoCA := &ocpidms.Image{
+		ObjectMeta: metav1.ObjectMeta{Name: "cluster"},
+		Spec:       ocpidms.ImageSpec{},
+	}
+	h = setupTestHelper(true, imageConfigNoCA)
+	caCerts, err = GetMirrorRegistryCACerts(ctx, h)
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(caCerts).To(BeNil())
+
+	h = setupTestHelper(false)
+	caCerts, err = GetMirrorRegistryCACerts(ctx, h)
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(caCerts).To(BeNil())
+}
+
+func TestGetMirrorRegistryCACerts_ConfigMapNotFound(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+
+	imageConfig := &ocpidms.Image{
+		ObjectMeta: metav1.ObjectMeta{Name: "cluster"},
+		Spec:       ocpidms.ImageSpec{AdditionalTrustedCA: ocpidms.ConfigMapNameReference{Name: "non-existent-ca"}},
+	}
+	h := setupTestHelper(true, imageConfig)
+
+	caCerts, err := GetMirrorRegistryCACerts(ctx, h)
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(caCerts).To(BeNil())
 }
