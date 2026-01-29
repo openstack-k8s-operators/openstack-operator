@@ -132,7 +132,12 @@ type OpenStackControlPlaneSpec struct {
 	// Bus Service instance used by all services that produce or consume notifications.
 	// Avoid colocating it with RabbitMQ services used for PRC.
 	// That instance will be pushed down for services, unless overriden in templates.
+	// Deprecated: Use NotificationsBus.Cluster instead
 	NotificationsBusInstance *string `json:"notificationsBusInstance,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// NotificationsBus configuration (username, vhost, and cluster) for notifications
+	NotificationsBus *rabbitmqv1.RabbitMqConfig `json:"notificationsBus,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec

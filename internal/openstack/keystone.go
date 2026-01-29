@@ -115,9 +115,19 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		instance.Spec.Keystone.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
+	// Propagate NotificationsBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Keystone.Template.NotificationsBus == nil {
+		instance.Spec.Keystone.Template.NotificationsBus = instance.Spec.NotificationsBus
+	}
+
 	Log.Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec.KeystoneAPISpecCore)
+		// Explicitly propagate NotificationsBus only if non-nil to allow webhook defaulting from rabbitMqClusterName
+		if instance.Spec.Keystone.Template.NotificationsBus != nil {
+			keystoneAPI.Spec.NotificationsBus = instance.Spec.Keystone.Template.NotificationsBus
+		}
 
 		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneAPIImage
 		if keystoneAPI.Spec.Secret == "" {

@@ -125,6 +125,23 @@ spec:
                         description: NodeSelector to target subset of worker nodes
                           running this service
                         type: object
+                      notificationsBus:
+                        description: NotificationsBus configuration (username, vhost,
+                          and cluster) for notifications
+                        properties:
+                          cluster:
+                            description: Name of the cluster
+                            minLength: 1
+                            type: string
+                          user:
+                            description: User - RabbitMQ username
+                            type: string
+                          vhost:
+                            description: Vhost - RabbitMQ vhost name
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       notifierImage:
                         type: string
                       override:
@@ -318,6 +335,7 @@ spec:
                         description: |-
                           RabbitMQ instance name
                           Needed to request a transportURL that is created and used in Aodh
+                          Deprecated: Use NotificationsBus.Cluster instead
                         type: string
                       secret:
                         default: osp-secret
@@ -527,6 +545,23 @@ spec:
                     type: object
                   notificationImage:
                     type: string
+                  notificationsBus:
+                    description: NotificationsBus configuration (username, vhost,
+                      and cluster) for notifications
+                    properties:
+                      cluster:
+                        description: Name of the cluster
+                        minLength: 1
+                        type: string
+                      user:
+                        description: User - RabbitMQ username
+                        type: string
+                      vhost:
+                        description: Vhost - RabbitMQ vhost name
+                        type: string
+                    required:
+                    - cluster
+                    type: object
                   passwordSelector:
                     default:
                       ceilometerService: CeilometerPassword
@@ -556,6 +591,7 @@ spec:
                     description: |-
                       RabbitMQ instance name
                       Needed to request a transportURL that is created and used in Telemetry
+                      Deprecated: Use NotificationsBus.Cluster instead
                     type: string
                   secret:
                     default: osp-secret
@@ -1112,6 +1148,23 @@ spec:
                     default: memcached
                     description: Memcached instance name.
                     type: string
+                  messagingBus:
+                    description: MessagingBus configuration (username, vhost, and
+                      cluster)
+                    properties:
+                      cluster:
+                        description: Name of the cluster
+                        minLength: 1
+                        type: string
+                      user:
+                        description: User - RabbitMQ username
+                        type: string
+                      vhost:
+                        description: Vhost - RabbitMQ vhost name
+                        type: string
+                    required:
+                    - cluster
+                    type: object
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -1192,6 +1245,7 @@ spec:
                     description: |-
                       RabbitMQ instance name
                       Needed to request a transportURL that is created and used in CloudKitty
+                      Deprecated: Use MessagingBus.Cluster instead
                     type: string
                   s3StorageConfig:
                     default:
