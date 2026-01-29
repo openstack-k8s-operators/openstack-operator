@@ -119,7 +119,7 @@ spec:
           secretName: combined-ca-bundle
       - name: ssh-key-edpm-extramounts
         secret:
-          defaultMode: 420
+          defaultMode: 384
           items:
           - key: ssh-privatekey
             path: ssh_key_edpm-extramounts

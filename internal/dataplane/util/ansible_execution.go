@@ -30,6 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
@@ -324,7 +325,7 @@ func SetAeeSSHMounts(
 		sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
 		sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
 
-		CreateVolume(ansibleEEMounts, sshKeyName, sshKeyMountSubPath, sshKeySecret, "ssh-privatekey")
+		CreateVolume(ansibleEEMounts, sshKeyName, sshKeyMountSubPath, sshKeySecret, "ssh-privatekey", ptr.To(int32(0600)))
 		CreateVolumeMount(ansibleEEMounts, sshKeyName, sshKeyMountPath, sshKeyMountSubPath)
 	}
 }
@@ -361,18 +362,20 @@ func SetAeeInvMounts(
 			inventoryMountPath = "/runner/inventory/hosts"
 		}
 
-		CreateVolume(ansibleEEMounts, inventoryName, inventoryName, inventorySecrets[nodeName], "inventory")
+		CreateVolume(ansibleEEMounts, inventoryName, inventoryName, inventorySecrets[nodeName], "inventory", nil)
 		CreateVolumeMount(ansibleEEMounts, inventoryName, inventoryMountPath, inventoryName)
 	}
 }
 
 // CreateVolume creates a volume configuration for Ansible Execution Environment mounts
-func CreateVolume(ansibleEEMounts *storage.VolMounts, volumeName string, volumeMountPath string, secretName string, keyToPathKey string) {
+// If defaultMode is nil, Kubernetes default (0644) is used
+func CreateVolume(ansibleEEMounts *storage.VolMounts, volumeName string, volumeMountPath string, secretName string, keyToPathKey string, defaultMode *int32) {
 	volume := storage.Volume{
 		Name: volumeName,
 		VolumeSource: storage.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
-				SecretName: secretName,
+				SecretName:  secretName,
+				DefaultMode: defaultMode,
 				Items: []corev1.KeyToPath{
 					{
 						Key:  keyToPathKey,

@@ -249,7 +249,7 @@ spec:
           secretName: combined-ca-bundle
       - name: ssh-key-openstack-edpm-tls
         secret:
-          defaultMode: 420
+          defaultMode: 384
           items:
           - key: ssh-privatekey
             path: ssh_key_openstack-edpm-tls
@@ -361,7 +361,7 @@ spec:
           secretName: combined-ca-bundle
       - name: ssh-key-openstack-edpm-tls
         secret:
-          defaultMode: 420
+          defaultMode: 384
           items:
           - key: ssh-privatekey
             path: ssh_key_openstack-edpm-tls
