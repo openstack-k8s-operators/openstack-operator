@@ -1032,6 +1032,15 @@ spec:
         - mountPath: /var/lib/openstack/configs/neutron-ovn/10-neutron-ovn.conf
           name: neutron-ovn-agent-neutron-config-0
           subPath: 10-neutron-ovn.conf
+        - mountPath: /var/lib/openstack/configs/neutron-ovn/05-nova-metadata.conf
+          name: nova-metadata-neutron-config-0
+          subPath: 05-nova-metadata.conf
+        - mountPath: /var/lib/openstack/configs/neutron-ovn/httpd.conf
+          name: nova-metadata-neutron-config-1
+          subPath: httpd.conf
+        - mountPath: /var/lib/openstack/configs/neutron-ovn/nova-metadata-config.json
+          name: nova-metadata-neutron-config-2
+          subPath: nova-metadata-config.json
         - mountPath: /var/lib/openstack/cacerts/neutron-ovn
           name: neutron-ovn-combined-ca-bundle
         - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
@@ -1054,6 +1063,27 @@ spec:
           - key: 10-neutron-ovn.conf
             path: 10-neutron-ovn.conf
           secretName: neutron-ovn-agent-neutron-config
+      - name: nova-metadata-neutron-config-0
+        secret:
+          defaultMode: 420
+          items:
+          - key: 05-nova-metadata.conf
+            path: 05-nova-metadata.conf
+          secretName: nova-metadata-neutron-config
+      - name: nova-metadata-neutron-config-1
+        secret:
+          defaultMode: 420
+          items:
+          - key: httpd.conf
+            path: httpd.conf
+          secretName: nova-metadata-neutron-config
+      - name: nova-metadata-neutron-config-2
+        secret:
+          defaultMode: 420
+          items:
+          - key: nova-metadata-config.json
+            path: nova-metadata-config.json
+          secretName: nova-metadata-neutron-config
       - name: neutron-ovn-combined-ca-bundle
         secret:
           defaultMode: 420
