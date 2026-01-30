@@ -46,65 +46,70 @@ import (
 )
 
 type Names struct {
-	Namespace                          string
-	OpenStackControlplaneName          types.NamespacedName
-	OpenStackVersionName               types.NamespacedName
-	OpenStackVersionName2              types.NamespacedName
-	KeystoneAPIName                    types.NamespacedName
-	MemcachedName                      types.NamespacedName
-	MemcachedCertName                  types.NamespacedName
-	CinderName                         types.NamespacedName
-	ManilaName                         types.NamespacedName
-	GlanceName                         types.NamespacedName
-	NeutronName                        types.NamespacedName
-	HorizonName                        types.NamespacedName
-	HeatName                           types.NamespacedName
-	NovaName                           types.NamespacedName
-	TelemetryName                      types.NamespacedName
-	WatcherName                        types.NamespacedName
-	DBName                             types.NamespacedName
-	DBCertName                         types.NamespacedName
-	DBCell1Name                        types.NamespacedName
-	DBCell1CertName                    types.NamespacedName
-	RabbitMQName                       types.NamespacedName
-	RabbitMQCertName                   types.NamespacedName
-	RabbitMQCell1Name                  types.NamespacedName
-	RabbitMQCell1CertName              types.NamespacedName
-	RabbitMQNotificationsName          types.NamespacedName
-	RabbitMQNotificationsCertName      types.NamespacedName
-	NoVNCProxyCell1CertPublicRouteName types.NamespacedName
-	NoVNCProxyCell1CertPublicSvcName   types.NamespacedName
-	NoVNCProxyCell1CertVencryptName    types.NamespacedName
-	ServiceAccountName                 types.NamespacedName
-	RoleName                           types.NamespacedName
-	RoleBindingName                    types.NamespacedName
-	RootCAPublicName                   types.NamespacedName
-	RootCAInternalName                 types.NamespacedName
-	RootCAOvnName                      types.NamespacedName
-	RootCALibvirtName                  types.NamespacedName
-	SelfSignedIssuerName               types.NamespacedName
-	CustomIssuerName                   types.NamespacedName
-	CustomServiceCertSecretName        types.NamespacedName
-	CABundleName                       types.NamespacedName
-	OpenStackClientName                types.NamespacedName
-	OVNNorthdName                      types.NamespacedName
-	OVNNorthdCertName                  types.NamespacedName
-	OVNControllerName                  types.NamespacedName
-	OVNControllerCertName              types.NamespacedName
-	OVNDbServerNBName                  types.NamespacedName
-	OVNDbServerSBName                  types.NamespacedName
-	OVNMetricsCertName                 types.NamespacedName
-	NeutronOVNCertName                 types.NamespacedName
-	OpenStackTopology                  []types.NamespacedName
-	WatcherCertPublicRouteName         types.NamespacedName
-	WatcherCertPublicSvcName           types.NamespacedName
-	WatcherCertInternalName            types.NamespacedName
+	Namespace                            string
+	OpenStackControlplaneName            types.NamespacedName
+	OpenStackDataplaneNodeSetNoNodesName types.NamespacedName
+	OpenStackVersionName                 types.NamespacedName
+	OpenStackVersionName2                types.NamespacedName
+	KeystoneAPIName                      types.NamespacedName
+	MemcachedName                        types.NamespacedName
+	MemcachedCertName                    types.NamespacedName
+	CinderName                           types.NamespacedName
+	ManilaName                           types.NamespacedName
+	GlanceName                           types.NamespacedName
+	NeutronName                          types.NamespacedName
+	HorizonName                          types.NamespacedName
+	HeatName                             types.NamespacedName
+	NovaName                             types.NamespacedName
+	TelemetryName                        types.NamespacedName
+	WatcherName                          types.NamespacedName
+	DBName                               types.NamespacedName
+	DBCertName                           types.NamespacedName
+	DBCell1Name                          types.NamespacedName
+	DBCell1CertName                      types.NamespacedName
+	RabbitMQName                         types.NamespacedName
+	RabbitMQCertName                     types.NamespacedName
+	RabbitMQCell1Name                    types.NamespacedName
+	RabbitMQCell1CertName                types.NamespacedName
+	RabbitMQNotificationsName            types.NamespacedName
+	RabbitMQNotificationsCertName        types.NamespacedName
+	NoVNCProxyCell1CertPublicRouteName   types.NamespacedName
+	NoVNCProxyCell1CertPublicSvcName     types.NamespacedName
+	NoVNCProxyCell1CertVencryptName      types.NamespacedName
+	ServiceAccountName                   types.NamespacedName
+	RoleName                             types.NamespacedName
+	RoleBindingName                      types.NamespacedName
+	RootCAPublicName                     types.NamespacedName
+	RootCAInternalName                   types.NamespacedName
+	RootCAOvnName                        types.NamespacedName
+	RootCALibvirtName                    types.NamespacedName
+	SelfSignedIssuerName                 types.NamespacedName
+	CustomIssuerName                     types.NamespacedName
+	CustomServiceCertSecretName          types.NamespacedName
+	CABundleName                         types.NamespacedName
+	OpenStackClientName                  types.NamespacedName
+	OVNNorthdName                        types.NamespacedName
+	OVNNorthdCertName                    types.NamespacedName
+	OVNControllerName                    types.NamespacedName
+	OVNControllerCertName                types.NamespacedName
+	OVNDbServerNBName                    types.NamespacedName
+	OVNDbServerSBName                    types.NamespacedName
+	OVNMetricsCertName                   types.NamespacedName
+	NeutronOVNCertName                   types.NamespacedName
+	OpenStackTopology                    []types.NamespacedName
+	WatcherCertPublicRouteName           types.NamespacedName
+	WatcherCertPublicSvcName             types.NamespacedName
+	WatcherCertInternalName              types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 	return Names{
 		Namespace:                 openstackControlplaneName.Namespace,
 		OpenStackControlplaneName: openstackControlplaneName,
+		OpenStackDataplaneNodeSetNoNodesName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "openstack-dataplane-nodeset-no-nodes",
+		},
 		OpenStackVersionName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      openstackControlplaneName.Name, // same name as controlplane
@@ -392,6 +397,8 @@ func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]inte
 }
 
 // Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
+// NOTE: The function seems improperly named, given that the nodeset is
+// in fact given a node in the spec.
 func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 	spec := map[string]interface{}{
 		"preProvisioned": true,
@@ -401,8 +408,7 @@ func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
-		"nodes":            map[string]interface{}{},
-		"servicesOverride": []string{},
+		"nodes": map[string]interface{}{},
 	}
 	if tlsEnabled {
 		spec["tlsEnabled"] = true

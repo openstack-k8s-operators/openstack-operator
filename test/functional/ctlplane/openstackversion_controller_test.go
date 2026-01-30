@@ -422,6 +422,16 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// 5) simulate 1 more dataplanenodeset update to finish the minor update workflow
 		It("updating targetVersion triggers a minor update workflow", Serial, func() {
 
+			// Also create an empty dataplanenodeset with no nodes. This allows the test to
+			// verify that the minor update workflow works even with dataplane nodesets
+			// present that also happen to have no nodes
+			dataplanenodesetSpec := DefaultDataPlaneNoNodeSetSpec(false)
+			dataplanenodesetSpec["nodes"] = map[string]interface{}{}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateDataplaneNodeSet(names.OpenStackDataplaneNodeSetNoNodesName, dataplanenodesetSpec),
+			)
+
 			// 1) switch to version 0.0.1, this triggers a minor update
 			osversion := GetOpenStackVersion(names.OpenStackVersionName)
 
@@ -514,6 +524,11 @@ var _ = Describe("OpenStackOperator controller", func() {
 			dataplanenodeset.Status.ContainerImages = make(map[string]string)
 			dataplanenodeset.Status.ContainerImages["OvnControllerImage"] = targetOvnControllerVersion
 			dataplanenodeset.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.NodeSetReadyMessage)
+			Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
+
+			// Simulate the empty dataplanenodeset generation status as well
+			dataplanenodeset = GetDataplaneNodeset(names.OpenStackDataplaneNodeSetNoNodesName)
+			dataplanenodeset.Status.ObservedGeneration = dataplanenodeset.Generation
 			Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
 
 			// and now finally we verify that OpenStackVersion is in the correct state (data plane OVN got updated)

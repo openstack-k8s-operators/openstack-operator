@@ -41,8 +41,10 @@ func DataplaneNodesetsOVNControllerImagesMatch(version *corev1beta1.OpenStackVer
 		if nodeset.Generation != nodeset.Status.ObservedGeneration {
 			return false
 		}
-		// we only check nodesets if they deploy OVN
-		if nodeset.Status.ContainerImages["OvnControllerImage"] != "" {
+		// After considering generation (to make sure reconciliation has quiesced for
+		// the current nodeset spec), we only check nodesets if they have any nodes
+		// and have deployed OVN
+		if len(nodeset.Spec.Nodes) > 0 && nodeset.Status.ContainerImages["OvnControllerImage"] != "" {
 			if !nodeset.IsReady() {
 				return false
 			}
@@ -59,6 +61,12 @@ func DataplaneNodesetsDeployed(version *corev1beta1.OpenStackVersion, dataplaneN
 	for _, nodeset := range dataplaneNodesets.Items {
 		if nodeset.Generation != nodeset.Status.ObservedGeneration {
 			return false
+		}
+		// After considering generation (to make sure reconciliation has quiesced for
+		// the current nodeset spec), we only care about deployed status if the nodeset
+		// has nodes
+		if len(nodeset.Spec.Nodes) == 0 {
+			continue
 		}
 		if !nodeset.IsReady() {
 			return false
