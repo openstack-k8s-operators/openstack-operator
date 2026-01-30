@@ -71,6 +71,11 @@ const (
 	DeploymentStageAnnotation = "core.openstack.org/deployment-stage"
 	// DeploymentStageInfrastructureOnly - Annotation value to pause after infrastructure deployment
 	DeploymentStageInfrastructureOnly = "infrastructure-only"
+
+	// ReconcileTriggerAnnotation - Generic annotation to trigger reconciliation and webhook
+	// Value is typically a timestamp to ensure annotation changes trigger updates
+	// Used by controller to trigger UPDATE webhook when needed (e.g., for service name caching)
+	ReconcileTriggerAnnotation = "openstack.org/reconcile-trigger"
 )
 
 // OpenStackControlPlaneSpec defines the desired state of OpenStackControlPlane
@@ -450,6 +455,12 @@ type GlanceSection struct {
 	// Convenient to avoid podname (and thus hostname) collision between different deployments.
 	// Useful for CI jobs as well as preproduction and production environments that use the same storage backend, etc.
 	UniquePodNames bool `json:"uniquePodNames"`
+
+	// +kubebuilder:validation:Optional
+	// ServiceName - Cached service name for Glance CR. Set automatically when UniquePodNames is enabled.
+	// This field preserves the service name (with UID suffix) across reconciliations and restores,
+	// ensuring consistent resource naming even when the CR is recreated. Should not be manually set.
+	ServiceName string `json:"serviceName,omitempty"`
 }
 
 // CinderSection defines the desired state of Cinder service
@@ -476,6 +487,12 @@ type CinderSection struct {
 	// Convenient to avoid podname (and thus hostname) collision between different deployments.
 	// Useful for CI jobs as well as preproduction and production environments that use the same storage backend, etc.
 	UniquePodNames bool `json:"uniquePodNames"`
+
+	// +kubebuilder:validation:Optional
+	// ServiceName - Cached service name for Cinder CR. Set automatically when UniquePodNames is enabled.
+	// This field preserves the service name (with UID suffix) across reconciliations and restores,
+	// ensuring consistent resource naming even when the CR is recreated. Should not be manually set.
+	ServiceName string `json:"serviceName,omitempty"`
 }
 
 // GaleraSection defines the desired state of Galera services
@@ -1036,10 +1053,33 @@ func (c CertConfig) GetRenewBeforeHours() string {
 // GetServiceName - returns the name and altName depending if
 // UniquePodNames is configured
 func (instance OpenStackControlPlane) GetServiceName(name string, uniquePodNames bool) (string, string) {
-	altName := fmt.Sprintf("%s-%s", name, instance.UID[:5])
+	// Generate UID suffix only if UID is available and has sufficient length
+	var uidSuffix string
+	if len(instance.UID) >= 5 {
+		uidSuffix = string(instance.UID[:5])
+	}
+
+	altName := name
+	if uidSuffix != "" {
+		altName = fmt.Sprintf("%s-%s", name, uidSuffix)
+	}
+
 	if uniquePodNames {
 		name, altName = altName, name
 	}
 
 	return name, altName
+}
+
+// GetServiceNameCached - returns the name and altName depending if UniquePodNames is configured.
+// If cachedName is provided (non-empty), it will be used instead of generating a new name with UID.
+// This ensures consistent naming across reconciliations and restores.
+func (instance OpenStackControlPlane) GetServiceNameCached(name string, uniquePodNames bool, cachedName string) (string, string) {
+	// If we have a cached name and uniquePodNames is enabled, use it
+	if uniquePodNames && cachedName != "" {
+		return cachedName, name
+	}
+
+	// Otherwise, fall back to the original logic
+	return instance.GetServiceName(name, uniquePodNames)
 }
