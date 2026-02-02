@@ -1973,6 +1973,14 @@ spec:
                 items:
                   type: string
                 type: array
+              finalizerHash:
+                description: |-
+                  FinalizerHash is a short, deterministic hash derived from the nodeset name.
+                  Used to create unique, collision-free finalizer names for RabbitMQ users.
+                  Format: first 8 characters of SHA256(nodeset.metadata.name)
+                  Example: "a3f2b5c8"
+                  This allows easy lookup of which nodeset owns a specific finalizer.
+                type: string
               inventorySecretName:
                 description: InventorySecretName Name of a secret containing the ansible
                   inventory

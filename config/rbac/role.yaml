@@ -607,6 +607,23 @@ rules:
   - update
   - watch
 - apiGroups:
+  - rabbitmq.openstack.org
+  resources:
+  - rabbitmqusers
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rabbitmq.openstack.org
+  resources:
+  - rabbitmqusers/finalizers
+  verbs:
+  - patch
+  - update
+- apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - clusterrolebindings
