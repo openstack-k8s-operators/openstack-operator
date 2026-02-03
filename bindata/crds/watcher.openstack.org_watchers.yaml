@@ -608,12 +608,45 @@ spec:
                 description: MemcachedInstance is the name of the Memcached CR that
                   all watcher service will use.
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
                 description: |-
                   NodeSelector to target subset of worker nodes running this component. Setting here overrides
                   any global NodeSelector settings within the Watcher CR.
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               notificationsBusInstance:
                 description: |-
@@ -623,6 +656,7 @@ spec:
                   If undefined, the value will be inherited from OpenStackControlPlane.
                   An empty value "" leaves the notification drivers unconfigured and emitting no notifications at all.
                   Avoid colocating it with RabbitMqClusterName or other message bus instances used for RPC.
+                  Deprecated: Use NotificationsBus.Cluster instead
                 type: string
               passwordSelectors:
                 default:
@@ -646,10 +680,10 @@ spec:
                 description: Secret containing prometheus connection parameters
                 type: string
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Watcher
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               secret:
                 default: osp-secret
@@ -685,7 +719,6 @@ spec:
             - databaseInstance
             - decisionengineContainerImageURL
             - decisionengineServiceTemplate
-            - rabbitMqClusterName
             type: object
           status:
             description: WatcherStatus defines the observed state of Watcher

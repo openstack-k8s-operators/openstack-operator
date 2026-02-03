@@ -10,6 +10,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -46,6 +47,21 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		instance.Spec.Swift.Template = &swiftv1.SwiftSpecCore{}
 	}
 
+	// Migration: Ensure SwiftProxy NotificationsBus.Cluster is set from deprecated RabbitMqClusterName if needed
+	if instance.Spec.Swift.Template.SwiftProxy.NotificationsBus == nil || instance.Spec.Swift.Template.SwiftProxy.NotificationsBus.Cluster == "" {
+		if instance.Spec.Swift.Template.SwiftProxy.RabbitMqClusterName != "" {
+			if instance.Spec.Swift.Template.SwiftProxy.NotificationsBus == nil {
+				instance.Spec.Swift.Template.SwiftProxy.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+			}
+			instance.Spec.Swift.Template.SwiftProxy.NotificationsBus.Cluster = instance.Spec.Swift.Template.SwiftProxy.RabbitMqClusterName
+		}
+		// NotificationsBus.Cluster is not defaulted - it must be explicitly set if NotificationsBus is configured
+	}
+	// Clear deprecated field if new field is set
+	if instance.Spec.Swift.Template.SwiftProxy.NotificationsBus != nil && instance.Spec.Swift.Template.SwiftProxy.NotificationsBus.Cluster != "" {
+		instance.Spec.Swift.Template.SwiftProxy.RabbitMqClusterName = ""
+	}
+
 	if instance.Spec.Swift.Template.NodeSelector == nil {
 		instance.Spec.Swift.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
@@ -56,6 +72,12 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 	// subCRs inherit the top-level TopologyRef unless an override is present
 	if instance.Spec.Swift.Template.TopologyRef == nil {
 		instance.Spec.Swift.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
+	// Propagate NotificationsBus from top-level to SwiftProxy template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Swift.Template.SwiftProxy.NotificationsBus == nil {
+		instance.Spec.Swift.Template.SwiftProxy.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	// add selector to service overrides

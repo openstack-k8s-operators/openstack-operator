@@ -199,6 +199,23 @@ spec:
                 type: object
               notificationImage:
                 type: string
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               passwordSelector:
                 default:
                   ceilometerService: CeilometerPassword
@@ -224,10 +241,10 @@ spec:
               proxyImage:
                 type: string
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Telemetry
+                  Deprecated: Use NotificationsBus.Cluster instead
                 type: string
               secret:
                 default: osp-secret
@@ -373,6 +390,10 @@ spec:
                 items:
                   type: string
                 type: array
+              notificationsURLSecret:
+                description: NotificationsURLSecret - Secret containing RabbitMQ notification
+                  transportURL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

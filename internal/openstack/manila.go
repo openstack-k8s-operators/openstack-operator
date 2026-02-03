@@ -45,6 +45,24 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template = &manilav1.ManilaSpecCore{}
 	}
 
+	// Migration and inheritance: Set MessagingBus.Cluster with correct priority order
+	if instance.Spec.Manila.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Manila.Template.RabbitMqClusterName != "" {
+			instance.Spec.Manila.Template.MessagingBus.Cluster = instance.Spec.Manila.Template.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Manila.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Manila.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Manila.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Manila.Template.RabbitMqClusterName = ""
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Manila.Template.ManilaAPI.Override.Service == nil {
@@ -118,10 +136,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Manila.Template.NotificationsBusInstance == nil {
-		instance.Spec.Manila.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Manila.Template.NotificationsBus == nil {
+		instance.Spec.Manila.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")

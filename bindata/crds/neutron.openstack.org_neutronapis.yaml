@@ -1215,6 +1215,22 @@ spec:
                 default: memcached
                 description: Memcached instance name.
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               ml2MechanismDrivers:
                 default:
                 - ovn
@@ -1234,6 +1250,23 @@ spec:
                   type: string
                 description: NodeSelector to target subset of worker nodes running
                   this service
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               notificationsBusInstance:
                 description: |-
@@ -1420,10 +1453,10 @@ spec:
                   e.g. to check logs
                 type: boolean
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Neutron
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               replicas:
                 default: 1
@@ -1561,7 +1594,6 @@ spec:
             - containerImage
             - databaseInstance
             - memcachedInstance
-            - rabbitMqClusterName
             - secret
             type: object
           status:

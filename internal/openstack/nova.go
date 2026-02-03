@@ -68,14 +68,55 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template = &novav1.NovaSpecCore{}
 	}
 
+	// Migration and inheritance: Set API-level MessagingBus.Cluster with correct priority order
+	if instance.Spec.Nova.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Nova.Template.APIMessageBusInstance != "" {
+			instance.Spec.Nova.Template.MessagingBus.Cluster = instance.Spec.Nova.Template.APIMessageBusInstance
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Nova.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Nova.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Nova.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Nova.Template.APIMessageBusInstance = ""
+	}
+
+	// Migration and inheritance: Set each cell's MessagingBus.Cluster with correct priority order
+	if instance.Spec.Nova.Template.CellTemplates != nil {
+		for cellName, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
+			if cellTemplate.MessagingBus.Cluster == "" {
+				// Priority 1: Migrate from cell-level deprecated field
+				if cellTemplate.CellMessageBusInstance != "" {
+					cellTemplate.MessagingBus.Cluster = cellTemplate.CellMessageBusInstance
+					// Priority 2: Inherit from Nova API-level MessagingBus
+				} else if instance.Spec.Nova.Template.MessagingBus.Cluster != "" {
+					cellTemplate.MessagingBus = instance.Spec.Nova.Template.MessagingBus
+					// Priority 3: Default to "rabbitmq" (required for CRD validation)
+				} else {
+					cellTemplate.MessagingBus.Cluster = "rabbitmq"
+				}
+			}
+			// Clear deprecated field after migration
+			if cellTemplate.MessagingBus.Cluster != "" {
+				cellTemplate.CellMessageBusInstance = ""
+			}
+			instance.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
+		}
+	}
+
 	if instance.Spec.Nova.Template.NodeSelector == nil {
 		instance.Spec.Nova.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Nova.Template.NotificationsBusInstance == nil {
-		instance.Spec.Nova.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Nova.Template.NotificationsBus == nil {
+		instance.Spec.Nova.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	// When there's no Topology referenced in the Service Template, inject the

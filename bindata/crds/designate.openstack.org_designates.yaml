@@ -2086,11 +2086,44 @@ spec:
                 required:
                 - containerImage
                 type: object
+              messagingBus:
+                description: MessagingBus configuration (cluster, username, and vhost)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
                 description: NodeSelector to target subset of worker nodes running
                   this service
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (cluster, username, and
+                  vhost) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               nsRecords:
                 description: NSRecords contains the list of nameserver records for
@@ -2130,10 +2163,10 @@ spec:
                   e.g. to check logs
                 type: boolean
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Designate
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               redisServiceName:
                 default: designate-redis
@@ -2235,7 +2268,6 @@ spec:
             - designateMdns
             - designateProducer
             - designateWorker
-            - rabbitMqClusterName
             - secret
             type: object
           status:
@@ -2324,6 +2356,10 @@ spec:
                   type: string
                 description: Map of hashes to track e.g. job status
                 type: object
+              notificationsTransportURLSecret:
+                description: NotificationsTransportURLSecret - Secret containing RabbitMQ
+                  notifications transportURL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

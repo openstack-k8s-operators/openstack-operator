@@ -58,6 +58,24 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template = &cinderv1.CinderSpecCore{}
 	}
 
+	// Migration and inheritance: Set MessagingBus.Cluster with correct priority order
+	if instance.Spec.Cinder.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Cinder.Template.RabbitMqClusterName != "" {
+			instance.Spec.Cinder.Template.MessagingBus.Cluster = instance.Spec.Cinder.Template.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Cinder.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Cinder.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Cinder.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Cinder.Template.RabbitMqClusterName = ""
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Cinder.Template.CinderAPI.Override.Service == nil {
@@ -130,10 +148,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Cinder.Template.NotificationsBusInstance == nil {
-		instance.Spec.Cinder.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.Cinder.Template.NotificationsBus == nil {
+		instance.Spec.Cinder.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	Log.Info("Reconciling Cinder", "Cinder.Namespace", instance.Namespace, "Cinder.Name", cinderName)

@@ -47,6 +47,42 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Ironic.Template = &ironicv1.IronicSpecCore{}
 	}
 
+	// Migration and inheritance: Set MessagingBus.Cluster with correct priority order
+	if instance.Spec.Ironic.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Ironic.Template.RabbitMqClusterName != "" {
+			instance.Spec.Ironic.Template.MessagingBus.Cluster = instance.Spec.Ironic.Template.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Ironic.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Ironic.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Ironic.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Ironic.Template.RabbitMqClusterName = ""
+	}
+
+	// Migration and inheritance: Set IronicNeutronAgent MessagingBus.Cluster with correct priority order
+	if instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from agent-level deprecated field
+		if instance.Spec.Ironic.Template.IronicNeutronAgent.RabbitMqClusterName != "" {
+			instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster = instance.Spec.Ironic.Template.IronicNeutronAgent.RabbitMqClusterName
+			// Priority 2: Inherit from Ironic-level MessagingBus
+		} else if instance.Spec.Ironic.Template.MessagingBus.Cluster != "" {
+			instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus = instance.Spec.Ironic.Template.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster != "" {
+		instance.Spec.Ironic.Template.IronicNeutronAgent.RabbitMqClusterName = ""
+	}
+
 	if instance.Spec.Ironic.Template.NodeSelector == nil {
 		instance.Spec.Ironic.Template.NodeSelector = &instance.Spec.NodeSelector
 	}

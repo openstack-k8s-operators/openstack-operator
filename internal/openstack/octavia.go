@@ -66,6 +66,24 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Octavia.Template = &octaviav1.OctaviaSpecCore{}
 	}
 
+	// Migration and inheritance: Set MessagingBus.Cluster with correct priority order
+	if instance.Spec.Octavia.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Octavia.Template.RabbitMqClusterName != "" {
+			instance.Spec.Octavia.Template.MessagingBus.Cluster = instance.Spec.Octavia.Template.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Octavia.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Octavia.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Octavia.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Octavia.Template.RabbitMqClusterName = ""
+	}
+
 	if instance.Spec.Octavia.Template.NodeSelector == nil {
 		instance.Spec.Octavia.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
@@ -76,6 +94,12 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 	// subCRs inherit the top-level TopologyRef unless an override is present
 	if instance.Spec.Octavia.Template.TopologyRef == nil {
 		instance.Spec.Octavia.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
+	// Propagate NotificationsBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Octavia.Template.NotificationsBus == nil {
+		instance.Spec.Octavia.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	// add selector to service overrides
@@ -184,6 +208,10 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Octavia.Template.OctaviaHealthManager.DeepCopyInto(&octavia.Spec.OctaviaHealthManager.OctaviaAmphoraControllerSpecCore)
 		instance.Spec.Octavia.Template.OctaviaWorker.DeepCopyInto(&octavia.Spec.OctaviaWorker.OctaviaAmphoraControllerSpecCore)
 		instance.Spec.Octavia.Template.OctaviaRsyslog.DeepCopyInto(&octavia.Spec.OctaviaRsyslog.OctaviaRsyslogSpecCore)
+		// Explicitly propagate NotificationsBus only if non-nil to allow webhook defaulting from rabbitMqClusterName
+		if instance.Spec.Octavia.Template.NotificationsBus != nil {
+			octavia.Spec.NotificationsBus = instance.Spec.Octavia.Template.NotificationsBus
+		}
 
 		octavia.Spec.OctaviaAPI.ContainerImage = *version.Status.ContainerImages.OctaviaAPIImage
 		octavia.Spec.OctaviaWorker.ContainerImage = *version.Status.ContainerImages.OctaviaWorkerImage

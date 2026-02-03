@@ -57,6 +57,14 @@ spec:
                 description: APITimeout for HAProxy, Apache
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Ironic Inspector Container Image
                 type: string
@@ -131,6 +139,23 @@ spec:
                 description: IronicPythonAgentImage - Image containing the ironic-python-agent
                   kernel and ramdisk
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                  for RPC messaging
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               networkAttachments:
                 description: NetworkAttachments is a list of NetworkAttachment resource
                   names to expose the services to the given network
@@ -143,6 +168,23 @@ spec:
                 description: |-
                   NodeSelector to target subset of worker nodes running this service. Setting here overrides
                   any global NodeSelector settings within the Ironic CR
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               override:
                 description: Override, provides the ability to override the generated
@@ -325,10 +367,10 @@ spec:
                   Image
                 type: string
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Ironic Inspector
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               replicas:
                 default: 1
@@ -555,6 +597,10 @@ spec:
                   type: array
                 description: NetworkAttachments status of the deployment pods
                 type: object
+              notificationsURLSecret:
+                description: NotificationsURLSecret - Secret containing RabbitMQ notifications
+                  URL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

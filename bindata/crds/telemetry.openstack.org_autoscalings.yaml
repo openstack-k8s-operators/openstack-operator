@@ -122,6 +122,23 @@ spec:
                     description: NodeSelector to target subset of worker nodes running
                       this service
                     type: object
+                  notificationsBus:
+                    description: NotificationsBus configuration (username, vhost,
+                      and cluster) for notifications
+                    properties:
+                      cluster:
+                        description: Name of the cluster
+                        minLength: 1
+                        type: string
+                      user:
+                        description: User - RabbitMQ username
+                        type: string
+                      vhost:
+                        description: Vhost - RabbitMQ vhost name
+                        type: string
+                    required:
+                    - cluster
+                    type: object
                   notifierImage:
                     type: string
                   override:
@@ -311,10 +328,10 @@ spec:
                       e.g. to check logs
                     type: boolean
                   rabbitMqClusterName:
-                    default: rabbitmq
                     description: |-
                       RabbitMQ instance name
                       Needed to request a transportURL that is created and used in Aodh
+                      Deprecated: Use NotificationsBus.Cluster instead
                     type: string
                   secret:
                     default: osp-secret
@@ -502,6 +519,10 @@ spec:
                 items:
                   type: string
                 type: array
+              notificationsURLSecret:
+                description: NotificationsURLSecret - Secret containing RabbitMQ notification
+                  transportURL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

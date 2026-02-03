@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -61,6 +62,54 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
 	}
 
+	// Migration and inheritance: Set CloudKitty MessagingBus.Cluster with correct priority order
+	if instance.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Telemetry.Template.CloudKitty.RabbitMqClusterName != "" {
+			instance.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster = instance.Spec.Telemetry.Template.CloudKitty.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Telemetry.Template.CloudKitty.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster != "" {
+		instance.Spec.Telemetry.Template.CloudKitty.RabbitMqClusterName = ""
+	}
+
+	// Migration: Ensure Aodh NotificationsBus.Cluster is set from deprecated RabbitMqClusterName if needed
+	if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus == nil || instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus.Cluster == "" {
+		if instance.Spec.Telemetry.Template.Autoscaling.Aodh.RabbitMqClusterName != "" {
+			if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus == nil {
+				instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+			}
+			instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus.Cluster = instance.Spec.Telemetry.Template.Autoscaling.Aodh.RabbitMqClusterName
+		}
+		// NotificationsBus.Cluster is not defaulted - it must be explicitly set if NotificationsBus is configured
+	}
+	// Clear deprecated field if new field is set
+	if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus != nil && instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus.Cluster != "" {
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.RabbitMqClusterName = ""
+	}
+
+	// Migration: Ensure Ceilometer NotificationsBus.Cluster is set from deprecated RabbitMqClusterName if needed
+	if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus == nil || instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus.Cluster == "" {
+		if instance.Spec.Telemetry.Template.Ceilometer.RabbitMqClusterName != "" {
+			if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus == nil {
+				instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+			}
+			instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus.Cluster = instance.Spec.Telemetry.Template.Ceilometer.RabbitMqClusterName
+		}
+		// NotificationsBus.Cluster is not defaulted - it must be explicitly set if NotificationsBus is configured
+	}
+	// Clear deprecated field if new field is set
+	if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus != nil && instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus.Cluster != "" {
+		instance.Spec.Telemetry.Template.Ceilometer.RabbitMqClusterName = ""
+	}
+
 	if instance.Spec.Telemetry.Template.NodeSelector == nil {
 		instance.Spec.Telemetry.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
@@ -71,6 +120,15 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	// subCRs inherit the top-level TopologyRef unless an override is present
 	if instance.Spec.Telemetry.Template.TopologyRef == nil {
 		instance.Spec.Telemetry.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
+	// Propagate NotificationsBus from top-level to template sub-components if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus == nil {
+		instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus = instance.Spec.NotificationsBus
+	}
+	if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus == nil {
+		instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{Name: "telemetry", Namespace: instance.Namespace}, telemetry); err != nil {
@@ -381,6 +439,14 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyAPI.CloudKittyAPITemplateCore)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyProc.CloudKittyProcTemplateCore)
 
+		// Explicitly propagate NotificationsBus only if non-nil to allow webhook defaulting from rabbitMqClusterName
+		if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus != nil {
+			telemetry.Spec.Ceilometer.NotificationsBus = instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus
+		}
+		if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus != nil {
+			telemetry.Spec.Autoscaling.Aodh.NotificationsBus = instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus
+		}
+
 		// TODO: investigate if the following could be simplified to
 		// telemetry.Spec.<service>.Enabled = instance.Spec.Telemetry.Template.<service>.Enabled
 		// With current implementation we essentially create a copy of the bools and point to that, so the
@@ -439,6 +505,9 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 		if telemetry.Spec.CloudKitty.StorageClass == "" {
 			telemetry.Spec.CloudKitty.StorageClass = instance.Spec.StorageClass
+		}
+		if telemetry.Spec.CloudKitty.Secret == "" {
+			telemetry.Spec.CloudKitty.Secret = instance.Spec.Secret
 		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), telemetry, helper.GetScheme())

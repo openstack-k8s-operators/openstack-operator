@@ -43,6 +43,24 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template = &watcherv1.WatcherSpecCore{}
 	}
 
+	// Migration and inheritance: Set MessagingBus.Cluster with correct priority order
+	if instance.Spec.Watcher.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field (pointer type)
+		if instance.Spec.Watcher.Template.RabbitMqClusterName != nil && *instance.Spec.Watcher.Template.RabbitMqClusterName != "" {
+			instance.Spec.Watcher.Template.MessagingBus.Cluster = *instance.Spec.Watcher.Template.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Watcher.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Watcher.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Watcher.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Watcher.Template.RabbitMqClusterName = nil
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Watcher.Template.APIServiceTemplate.Override.Service == nil {
@@ -114,15 +132,19 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
-	// try to inject the top-level one if defined
-	if instance.Spec.Watcher.Template.NotificationsBusInstance == nil {
-		instance.Spec.Watcher.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	// Propagate NotificationsBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Watcher.Template.NotificationsBus == nil {
+		instance.Spec.Watcher.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	helper.GetLogger().Info("Reconciling Watcher", "Watcher.Namespace", instance.Namespace, "Watcher.Name", "watcher")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), watcher, func() error {
 		instance.Spec.Watcher.Template.DeepCopyInto(&watcher.Spec.WatcherSpecCore)
+		// Explicitly propagate NotificationsBus only if non-nil to allow webhook defaulting from rabbitMqClusterName
+		if instance.Spec.Watcher.Template.NotificationsBus != nil {
+			watcher.Spec.NotificationsBus = instance.Spec.Watcher.Template.NotificationsBus
+		}
 
 		if version.Status.ContainerImages.WatcherAPIImage == nil ||
 			version.Status.ContainerImages.WatcherApplierImage == nil ||

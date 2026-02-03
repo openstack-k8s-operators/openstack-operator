@@ -402,6 +402,19 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		instance.Status.Conditions.MarkTrue(condition.TopologyReadyCondition, condition.TopologyReadyMessage)
 	}
 
+	// Migration: Migrate top-level deprecated NotificationsBusInstance to NotificationsBus
+	// This must happen before service reconciliation so services can inherit the migrated value
+	if instance.Spec.NotificationsBusInstance != nil && *instance.Spec.NotificationsBusInstance != "" {
+		if instance.Spec.NotificationsBus == nil {
+			instance.Spec.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+		}
+		if instance.Spec.NotificationsBus.Cluster == "" {
+			instance.Spec.NotificationsBus.Cluster = *instance.Spec.NotificationsBusInstance
+		}
+		// Clear deprecated field once migrated
+		instance.Spec.NotificationsBusInstance = nil
+	}
+
 	ctrlResult, err := openstack.ReconcileCAs(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err

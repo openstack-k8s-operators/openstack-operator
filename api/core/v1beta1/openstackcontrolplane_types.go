@@ -128,11 +128,25 @@ type OpenStackControlPlaneSpec struct {
 	Rabbitmq RabbitmqSection `json:"rabbitmq,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// MessagingBus configuration (username, vhost, and cluster) for RPC communication.
+	// This is the default configuration for all services.
+	// Individual services can override by setting their own Template.MessagingBus.
+	MessagingBus *rabbitmqv1.RabbitMqConfig `json:"messagingBus,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// NotificationsBusInstance - the name of RabbitMQ Cluster CR to select a Messaging
 	// Bus Service instance used by all services that produce or consume notifications.
 	// Avoid colocating it with RabbitMQ services used for PRC.
 	// That instance will be pushed down for services, unless overriden in templates.
+	// Deprecated: Use NotificationsBus.Cluster instead
 	NotificationsBusInstance *string `json:"notificationsBusInstance,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// NotificationsBus configuration (username, vhost, and cluster) for notifications.
+	// This is the default configuration for all services.
+	// Individual services can override by setting their own Template.NotificationsBus.
+	// Avoid colocating with MessagingBus used for RPC.
+	NotificationsBus *rabbitmqv1.RabbitMqConfig `json:"notificationsBus,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec

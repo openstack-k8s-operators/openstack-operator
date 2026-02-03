@@ -82,6 +82,14 @@ spec:
               amphoraImageOwnerID:
                 default: ""
                 type: string
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Amphora Controller Container Image URL
                 type: string
@@ -132,6 +140,10 @@ spec:
                 description: NodeSelector to target subset of worker nodes running
                   this service
                 type: object
+              notificationsTransportURLSecret:
+                description: NotificationsTransportURLSecret - Secret containing RabbitMQ
+                  notifications transportURL
+                type: string
               octaviaProviderSubnetCIDR:
                 description: OctaviaProviderSubnetCIDR -
                 type: string

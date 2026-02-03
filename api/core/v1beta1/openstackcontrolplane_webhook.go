@@ -106,7 +106,13 @@ func (r *OpenStackControlPlane) ValidateCreate(ctx context.Context, c client.Cli
 		return nil, err
 	}
 
-	allWarn, errs := r.ValidateCreateServices(basePath)
+	// Validate deprecated fields using centralized validation
+	warnings, errs := r.validateDeprecatedFieldsCreate(basePath)
+	allWarn = append(allWarn, warnings...)
+	allErrs = append(allErrs, errs...)
+
+	warns, errs := r.ValidateCreateServices(basePath)
+	allWarn = append(allWarn, warns...)
 	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
@@ -115,6 +121,10 @@ func (r *OpenStackControlPlane) ValidateCreate(ctx context.Context, c client.Cli
 
 	if err := r.ValidateNotificationsBusInstance(basePath); err != nil {
 		allErrs = append(allErrs, err)
+	}
+
+	if errs := r.ValidateMessagingBusConfig(basePath); len(errs) != 0 {
+		allErrs = append(allErrs, errs...)
 	}
 
 	if len(allErrs) != 0 {
@@ -139,7 +149,13 @@ func (r *OpenStackControlPlane) ValidateUpdate(ctx context.Context, old runtime.
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
 
-	allWarn, errs := r.ValidateUpdateServices(oldControlPlane.Spec, basePath)
+	// Validate deprecated fields using centralized validation
+	warnings, errs := r.validateDeprecatedFieldsUpdate(*oldControlPlane, basePath)
+	allWarn = append(allWarn, warnings...)
+	allErrs = append(allErrs, errs...)
+
+	warns, errs := r.ValidateUpdateServices(oldControlPlane.Spec, basePath)
+	allWarn = append(allWarn, warns...)
 	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
@@ -148,6 +164,10 @@ func (r *OpenStackControlPlane) ValidateUpdate(ctx context.Context, old runtime.
 
 	if err := r.ValidateNotificationsBusInstance(basePath); err != nil {
 		allErrs = append(allErrs, err)
+	}
+
+	if errs := r.ValidateMessagingBusConfig(basePath); len(errs) != 0 {
+		allErrs = append(allErrs, errs...)
 	}
 
 	if len(allErrs) != 0 {
@@ -263,17 +283,23 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 
 	// Call internal validation logic for individual service operators
 	if r.Spec.Keystone.Enabled {
-		errors = append(errors, r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Ironic.Enabled {
-		errors = append(errors, r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Ironic.APIOverride.Route, basePath.Child("ironic").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Nova.Enabled {
-		errors = append(errors, r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Nova.APIOverride.Route, basePath.Child("nova").Child("apiOverride").Child("route"))...)
 	}
 
@@ -283,12 +309,16 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Barbican.Enabled {
-		errors = append(errors, r.Spec.Barbican.Template.ValidateCreate(basePath.Child("barbican").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Barbican.Template.ValidateCreate(basePath.Child("barbican").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Barbican.APIOverride.Route, basePath.Child("barbican").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Neutron.Enabled {
-		errors = append(errors, r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Neutron.APIOverride.Route, basePath.Child("neutron").Child("apiOverride").Child("route"))...)
 	}
 
@@ -301,7 +331,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)
@@ -323,12 +355,16 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Heat.Enabled {
-		errors = append(errors, r.Spec.Heat.Template.ValidateCreate(basePath.Child("heat").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Heat.Template.ValidateCreate(basePath.Child("heat").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Heat.APIOverride.Route, basePath.Child("heat").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Manila.Enabled {
-		errors = append(errors, r.Spec.Manila.Template.ValidateCreate(basePath.Child("manila").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Manila.Template.ValidateCreate(basePath.Child("manila").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Manila.APIOverride.Route, basePath.Child("manila").Child("apiOverride").Child("route"))...)
 	}
 
@@ -338,22 +374,30 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Octavia.Enabled {
-		errors = append(errors, r.Spec.Octavia.Template.ValidateCreate(basePath.Child("octavia").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Octavia.Template.ValidateCreate(basePath.Child("octavia").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Octavia.APIOverride.Route, basePath.Child("octavia").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Designate.Enabled {
-		errors = append(errors, r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Watcher.Enabled {
-		errors = append(errors, r.Spec.Watcher.Template.ValidateCreate(basePath.Child("watcher").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Watcher.Template.ValidateCreate(basePath.Child("watcher").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Telemetry.Enabled {
-		errors = append(errors, r.Spec.Telemetry.Template.ValidateCreate(basePath.Child("telemetry").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Telemetry.Template.ValidateCreate(basePath.Child("telemetry").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
@@ -429,7 +473,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Keystone.Template == nil {
 			old.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
@@ -437,7 +483,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Ironic.Template == nil {
 			old.Ironic.Template = &ironicv1.IronicSpecCore{}
 		}
-		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(*old.Ironic.Template, basePath.Child("ironic").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Ironic.Template.ValidateUpdate(*old.Ironic.Template, basePath.Child("ironic").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Ironic.APIOverride.Route, basePath.Child("ironic").Child("apiOverride").Child("route"))...)
 	}
 
@@ -445,7 +493,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Nova.Template == nil {
 			old.Nova.Template = &novav1.NovaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Nova.Template.ValidateUpdate(*old.Nova.Template, basePath.Child("nova").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Nova.Template.ValidateUpdate(*old.Nova.Template, basePath.Child("nova").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Nova.APIOverride.Route, basePath.Child("nova").Child("apiOverride").Child("route"))...)
 	}
 
@@ -461,7 +511,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Barbican.Template == nil {
 			old.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
 		}
-		errors = append(errors, r.Spec.Barbican.Template.ValidateUpdate(*old.Barbican.Template, basePath.Child("barbican").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Barbican.Template.ValidateUpdate(*old.Barbican.Template, basePath.Child("barbican").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Barbican.APIOverride.Route, basePath.Child("barbican").Child("apiOverride").Child("route"))...)
 	}
 
@@ -469,7 +521,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Neutron.Template == nil {
 			old.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Neutron.Template.ValidateUpdate(*old.Neutron.Template, basePath.Child("neutron").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Neutron.Template.ValidateUpdate(*old.Neutron.Template, basePath.Child("neutron").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Neutron.APIOverride.Route, basePath.Child("neutron").Child("apiOverride").Child("route"))...)
 	}
 
@@ -485,7 +539,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)
@@ -513,7 +569,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Heat.Template == nil {
 			old.Heat.Template = &heatv1.HeatSpecCore{}
 		}
-		errors = append(errors, r.Spec.Heat.Template.ValidateUpdate(*old.Heat.Template, basePath.Child("heat").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Heat.Template.ValidateUpdate(*old.Heat.Template, basePath.Child("heat").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Heat.APIOverride.Route, basePath.Child("heat").Child("apiOverride").Child("route"))...)
 	}
 
@@ -521,7 +579,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Manila.Template == nil {
 			old.Manila.Template = &manilav1.ManilaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Manila.Template.ValidateUpdate(*old.Manila.Template, basePath.Child("manila").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Manila.Template.ValidateUpdate(*old.Manila.Template, basePath.Child("manila").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Manila.APIOverride.Route, basePath.Child("manila").Child("apiOverride").Child("route"))...)
 	}
 
@@ -537,7 +597,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Octavia.Template == nil {
 			old.Octavia.Template = &octaviav1.OctaviaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Octavia.Template.ValidateUpdate(*old.Octavia.Template, basePath.Child("octavia").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Octavia.Template.ValidateUpdate(*old.Octavia.Template, basePath.Child("octavia").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Octavia.APIOverride.Route, basePath.Child("octavia").Child("apiOverride").Child("route"))...)
 	}
 
@@ -545,7 +607,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Designate.Template == nil {
 			old.Designate.Template = &designatev1.DesignateSpecCore{}
 		}
-		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
@@ -553,14 +617,18 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Watcher.Template == nil {
 			old.Watcher.Template = &watcherv1.WatcherSpecCore{}
 		}
-		errors = append(errors, r.Spec.Watcher.Template.ValidateUpdate(*old.Watcher.Template, basePath.Child("watcher").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Watcher.Template.ValidateUpdate(*old.Watcher.Template, basePath.Child("watcher").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
 	}
 	if r.Spec.Telemetry.Enabled {
 		if old.Telemetry.Template == nil {
 			old.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
 		}
-		errors = append(errors, r.Spec.Telemetry.Template.ValidateUpdate(*old.Telemetry.Template, basePath.Child("telemetry").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Telemetry.Template.ValidateUpdate(*old.Telemetry.Template, basePath.Child("telemetry").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
@@ -804,11 +872,19 @@ func setOverrideSpec(override **route.OverrideSpec, anno map[string]string) {
 
 // DefaultServices - common function for calling individual services' defaulting functions
 func (r *OpenStackControlPlane) DefaultServices() {
+	// Top-level NotificationsBusInstance migration is handled in the reconcile loop
+	// to properly support migration from the deprecated field. The webhook doesn't
+	// have access to the old object to distinguish between user overrides and defaults.
+
 	// Cinder
 	if r.Spec.Cinder.Enabled || r.Spec.Cinder.Template != nil {
 		if r.Spec.Cinder.Template == nil {
 			r.Spec.Cinder.Template = &cinderv1.CinderSpecCore{}
 		}
+		// MessagingBus and NotificationsBus defaults are handled in the reconcile loop
+		// to properly support migration from deprecated fields and inheritance.
+		// The webhook doesn't have access to the old object to distinguish between
+		// user overrides and inherited values.
 		r.Spec.Cinder.Template.Default()
 		initializeOverrideSpec(&r.Spec.Cinder.APIOverride.Route, true)
 		r.Spec.Cinder.Template.SetDefaultRouteAnnotations(r.Spec.Cinder.APIOverride.Route.Annotations)
@@ -838,6 +914,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Glance.Template == nil {
 			r.Spec.Glance.Template = &glancev1.GlanceSpecCore{}
 		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Glance.Template.Default()
 		// initialize the main APIOverride struct
 		if r.Spec.Glance.APIOverride == nil {
@@ -885,6 +964,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Ironic.Template.StorageClass == "" {
 			r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
 		}
+		// MessagingBus defaults are handled in the reconcile loop to properly support
+		// migration from deprecated fields. The webhook doesn't have access to the old
+		// object to distinguish between user overrides and inherited values.
 		r.Spec.Ironic.Template.Default()
 
 		initializeOverrideSpec(&r.Spec.Ironic.APIOverride.Route, true)
@@ -898,6 +980,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Keystone.Template == nil {
 			r.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
 		}
+		// NotificationsBus propagation is handled in the reconcile loop to properly support
+		// both inheritance and clearing. The webhook doesn't have access to the old object
+		// to distinguish between user overrides and inherited values.
 		r.Spec.Keystone.Template.Default()
 		initializeOverrideSpec(&r.Spec.Keystone.APIOverride.Route, true)
 		r.Spec.Keystone.Template.SetDefaultRouteAnnotations(r.Spec.Keystone.APIOverride.Route.Annotations)
@@ -908,6 +993,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Manila.Template == nil {
 			r.Spec.Manila.Template = &manilav1.ManilaSpecCore{}
 		}
+		// MessagingBus and NotificationsBus defaults are handled in the reconcile loop
+		// to properly support migration from deprecated fields and inheritance.
+		// The webhook doesn't have access to the old object to distinguish between
+		// user overrides and inherited values.
 		r.Spec.Manila.Template.Default()
 		initializeOverrideSpec(&r.Spec.Manila.APIOverride.Route, true)
 		r.Spec.Manila.Template.SetDefaultRouteAnnotations(r.Spec.Manila.APIOverride.Route.Annotations)
@@ -931,6 +1020,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Neutron.Template == nil {
 			r.Spec.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
 		}
+		// MessagingBus and NotificationsBus defaults are handled in the reconcile loop
+		// to properly support migration from deprecated fields and inheritance.
+		// The webhook doesn't have access to the old object to distinguish between
+		// user overrides and inherited values.
 		r.Spec.Neutron.Template.Default()
 		initializeOverrideSpec(&r.Spec.Neutron.APIOverride.Route, true)
 		r.Spec.Neutron.Template.SetDefaultRouteAnnotations(r.Spec.Neutron.APIOverride.Route.Annotations)
@@ -941,6 +1034,11 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Nova.Template == nil {
 			r.Spec.Nova.Template = &novav1.NovaSpecCore{}
 		}
+		// MessagingBus and NotificationsBus defaults (including per-cell MessagingBus)
+		// are handled in the reconcile loop to properly support migration from
+		// deprecated fields (APIMessageBusInstance and CellMessageBusInstance).
+		// The webhook doesn't have access to the old object to distinguish between
+		// user overrides and inherited values.
 		r.Spec.Nova.Template.Default()
 		initializeOverrideSpec(&r.Spec.Nova.APIOverride.Route, true)
 		r.Spec.Nova.Template.SetDefaultRouteAnnotations(r.Spec.Nova.APIOverride.Route.Annotations)
@@ -996,6 +1094,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Heat.Template == nil {
 			r.Spec.Heat.Template = &heatv1.HeatSpecCore{}
 		}
+		// MessagingBus and NotificationsBus defaults are handled in the reconcile loop
+		// to properly support migration from deprecated fields and inheritance.
+		// The webhook doesn't have access to the old object to distinguish between
+		// user overrides and inherited values.
 		r.Spec.Heat.Template.Default()
 		initializeOverrideSpec(&r.Spec.Heat.APIOverride.Route, true)
 		r.Spec.Heat.Template.SetDefaultRouteAnnotations(r.Spec.Heat.APIOverride.Route.Annotations)
@@ -1031,6 +1133,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Octavia.Template = &octaviav1.OctaviaSpecCore{}
 		}
 
+		// MessagingBus defaults are handled in the reconcile loop to properly support
+		// migration from deprecated fields. The webhook doesn't have access to the old
+		// object to distinguish between user overrides and inherited values.
 		r.Spec.Octavia.Template.Default()
 		initializeOverrideSpec(&r.Spec.Octavia.APIOverride.Route, true)
 		r.Spec.Octavia.Template.SetDefaultRouteAnnotations(r.Spec.Octavia.APIOverride.Route.Annotations)
@@ -1041,6 +1146,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Barbican.Template == nil {
 			r.Spec.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
 		}
+		// MessagingBus defaults are handled in the reconcile loop to properly support
+		// migration from deprecated fields. The webhook doesn't have access to the old
+		// object to distinguish between user overrides and inherited values.
 		r.Spec.Barbican.Template.Default()
 		initializeOverrideSpec(&r.Spec.Barbican.APIOverride.Route, true)
 		r.Spec.Barbican.Template.SetDefaultRouteAnnotations(r.Spec.Barbican.APIOverride.Route.Annotations)
@@ -1051,6 +1159,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Designate.Template == nil {
 			r.Spec.Designate.Template = &designatev1.DesignateSpecCore{}
 		}
+		// MessagingBus defaults are handled in the reconcile loop to properly support
+		// migration from deprecated fields. The webhook doesn't have access to the old
+		// object to distinguish between user overrides and inherited values.
 		r.Spec.Designate.Template.Default()
 	}
 
@@ -1072,6 +1183,10 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Watcher.Template == nil {
 			r.Spec.Watcher.Template = &watcherv1.WatcherSpecCore{}
 		}
+		// MessagingBus and NotificationsBus defaults are handled in the reconcile loop
+		// to properly support migration from deprecated fields and inheritance.
+		// The webhook doesn't have access to the old object to distinguish between
+		// user overrides and inherited values.
 		r.Spec.Watcher.Template.Default()
 
 		if r.Spec.Watcher.Enabled {
@@ -1134,6 +1249,39 @@ func (r *OpenStackControlPlane) ValidateTopology(basePath *field.Path) *field.Er
 	return nil
 }
 
+// ValidateMessagingBusConfig validates that the User field is not set in top-level
+// messagingBus and notificationsBus configurations. Setting a shared username would
+// cause webhook validation failures in infra-operator when multiple services try to
+// create RabbitMQUser resources with the same username. The Cluster and Vhost fields
+// are allowed at the top level since they can be safely shared across services.
+func (r *OpenStackControlPlane) ValidateMessagingBusConfig(basePath *field.Path) field.ErrorList {
+	var allErrs field.ErrorList
+
+	// Validate messagingBus
+	if r.Spec.MessagingBus != nil {
+		messagingBusPath := basePath.Child("messagingBus")
+		if r.Spec.MessagingBus.User != "" {
+			allErrs = append(allErrs, field.Forbidden(
+				messagingBusPath.Child("user"),
+				"user field is not allowed at the top level. Each service operator creates its own TransportURL with a unique user. Set user in individual service templates if needed.",
+			))
+		}
+	}
+
+	// Validate notificationsBus
+	if r.Spec.NotificationsBus != nil {
+		notificationsBusPath := basePath.Child("notificationsBus")
+		if r.Spec.NotificationsBus.User != "" {
+			allErrs = append(allErrs, field.Forbidden(
+				notificationsBusPath.Child("user"),
+				"user field is not allowed at the top level. Each service operator creates its own TransportURL with a unique user. Set user in individual service templates if needed.",
+			))
+		}
+	}
+
+	return allErrs
+}
+
 // ValidateNotificationsBusInstance - returns an error if the notificationsBusInstance
 // parameter is not valid.
 // - nil or empty string must be raised as an error
@@ -1157,4 +1305,55 @@ func (r *OpenStackControlPlane) ValidateNotificationsBusInstance(basePath *field
 		}
 	}
 	return field.Invalid(notificationsField, *r.Spec.NotificationsBusInstance, "notificationsBusInstance must match an existing RabbitMQ instance name")
+}
+
+// getDeprecatedFields returns the centralized list of deprecated fields for OpenStackControlPlane
+func (r *OpenStackControlPlane) getDeprecatedFields(old *OpenStackControlPlane) []common_webhook.DeprecatedFieldUpdate {
+	// Handle NewValue pointer - NotificationsBus can be nil
+	var newValue *string
+	if r.Spec.NotificationsBus != nil {
+		newValue = &r.Spec.NotificationsBus.Cluster
+	}
+
+	deprecatedFields := []common_webhook.DeprecatedFieldUpdate{
+		{
+			DeprecatedFieldName: "notificationsBusInstance",
+			NewFieldPath:        []string{"notificationsBus", "cluster"},
+			NewDeprecatedValue:  r.Spec.NotificationsBusInstance,
+			NewValue:            newValue,
+		},
+	}
+
+	// If old spec is provided (UPDATE operation), add old values
+	if old != nil {
+		deprecatedFields[0].OldDeprecatedValue = old.Spec.NotificationsBusInstance
+	}
+
+	return deprecatedFields
+}
+
+// validateDeprecatedFieldsCreate validates deprecated fields during CREATE operations
+func (r *OpenStackControlPlane) validateDeprecatedFieldsCreate(basePath *field.Path) ([]string, field.ErrorList) {
+	// Get deprecated fields list (without old values for CREATE)
+	deprecatedFieldsUpdate := r.getDeprecatedFields(nil)
+
+	// Convert to DeprecatedField list for CREATE validation
+	deprecatedFields := make([]common_webhook.DeprecatedField, len(deprecatedFieldsUpdate))
+	for i, df := range deprecatedFieldsUpdate {
+		deprecatedFields[i] = common_webhook.DeprecatedField{
+			DeprecatedFieldName: df.DeprecatedFieldName,
+			NewFieldPath:        df.NewFieldPath,
+			DeprecatedValue:     df.NewDeprecatedValue,
+			NewValue:            df.NewValue,
+		}
+	}
+
+	return common_webhook.ValidateDeprecatedFieldsCreate(deprecatedFields, basePath), nil
+}
+
+// validateDeprecatedFieldsUpdate validates deprecated fields during UPDATE operations
+func (r *OpenStackControlPlane) validateDeprecatedFieldsUpdate(old OpenStackControlPlane, basePath *field.Path) ([]string, field.ErrorList) {
+	// Get deprecated fields list with old values
+	deprecatedFields := r.getDeprecatedFields(&old)
+	return common_webhook.ValidateDeprecatedFieldsUpdate(deprecatedFields, basePath)
 }

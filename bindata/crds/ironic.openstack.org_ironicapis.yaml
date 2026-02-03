@@ -57,6 +57,15 @@ spec:
                 description: APITimeout for HAProxy, Apache
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication (inherited
+                  from parent Ironic CR)
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Ironic API Container Image
                 type: string
@@ -105,6 +114,9 @@ spec:
                   NodeSelector to target subset of worker nodes running this service. Setting here overrides
                   any global NodeSelector settings within the Ironic CR
                 type: object
+              notificationsURLSecret:
+                description: Secret containing RabbitMq notifications URL
+                type: string
               override:
                 description: Override, provides the ability to override the generated
                   manifest of several child resources.

@@ -92,6 +92,14 @@ spec:
                       to 60 seconds
                     minimum: 1
                     type: integer
+                  auth:
+                    description: Auth - Parameters related to authentication
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - Secret containing
+                          Application Credential ID and Secret
+                        type: string
+                    type: object
                   ceilometerEnabled:
                     default: false
                     description: Enables ceilometer in the swift proxy and creates
@@ -126,6 +134,23 @@ spec:
                       type: string
                     description: NodeSelector to target subset of worker nodes running
                       this service
+                    type: object
+                  notificationsBus:
+                    description: NotificationsBus configuration (username, vhost,
+                      and cluster)
+                    properties:
+                      cluster:
+                        description: Name of the cluster
+                        minLength: 1
+                        type: string
+                      user:
+                        description: User - RabbitMQ username
+                        type: string
+                      vhost:
+                        description: Vhost - RabbitMQ vhost name
+                        type: string
+                    required:
+                    - cluster
                     type: object
                   override:
                     description: Override, provides the ability to override the generated
@@ -299,9 +324,9 @@ spec:
                         type: string
                     type: object
                   rabbitMqClusterName:
-                    default: rabbitmq
-                    description: RabbitMQ instance name to request a transportURL
-                      for Ceilometer middleware
+                    description: |-
+                      Deprecated: Use NotificationsBus.Cluster instead
+                      RabbitMQ instance name to request a transportURL for Ceilometer middleware
                     type: string
                   replicas:
                     default: 1
@@ -378,7 +403,6 @@ spec:
                 required:
                 - containerImageProxy
                 - memcachedInstance
-                - rabbitMqClusterName
                 - replicas
                 - secret
                 - serviceUser

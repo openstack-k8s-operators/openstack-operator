@@ -48,6 +48,24 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Designate.Template = &designatev1.DesignateSpecCore{}
 	}
 
+	// Migration and inheritance: Set MessagingBus.Cluster with correct priority order
+	if instance.Spec.Designate.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Designate.Template.RabbitMqClusterName != "" {
+			instance.Spec.Designate.Template.MessagingBus.Cluster = instance.Spec.Designate.Template.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Designate.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Designate.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Designate.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Designate.Template.RabbitMqClusterName = ""
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Designate.Template.DesignateAPI.Override.Service == nil {
@@ -120,6 +138,12 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 	// subCRs inherit the top-level TopologyRef unless an override is present
 	if instance.Spec.Designate.Template.TopologyRef == nil {
 		instance.Spec.Designate.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
+	// Propagate NotificationsBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Designate.Template.NotificationsBus == nil {
+		instance.Spec.Designate.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	helper.GetLogger().Info("Reconciling Designate", "Designate.Namespace", instance.Namespace, "Designate.Name", "designate")

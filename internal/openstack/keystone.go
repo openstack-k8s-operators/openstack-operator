@@ -10,6 +10,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -41,6 +42,21 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 
 	if instance.Spec.Keystone.Template == nil {
 		instance.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
+	}
+
+	// Migration: Ensure NotificationsBus.Cluster is set from deprecated RabbitMqClusterName if needed
+	if instance.Spec.Keystone.Template.NotificationsBus == nil || instance.Spec.Keystone.Template.NotificationsBus.Cluster == "" {
+		if instance.Spec.Keystone.Template.RabbitMqClusterName != "" {
+			if instance.Spec.Keystone.Template.NotificationsBus == nil {
+				instance.Spec.Keystone.Template.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+			}
+			instance.Spec.Keystone.Template.NotificationsBus.Cluster = instance.Spec.Keystone.Template.RabbitMqClusterName
+		}
+		// NotificationsBus.Cluster is not defaulted - it must be explicitly set if NotificationsBus is configured
+	}
+	// Clear deprecated field if new field is set
+	if instance.Spec.Keystone.Template.NotificationsBus != nil && instance.Spec.Keystone.Template.NotificationsBus.Cluster != "" {
+		instance.Spec.Keystone.Template.RabbitMqClusterName = ""
 	}
 
 	// add selector to service overrides
@@ -115,9 +131,19 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		instance.Spec.Keystone.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
+	// Propagate NotificationsBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Keystone.Template.NotificationsBus == nil {
+		instance.Spec.Keystone.Template.NotificationsBus = instance.Spec.NotificationsBus
+	}
+
 	Log.Info("Reconciling KeystoneAPI", "KeystoneAPI.Namespace", instance.Namespace, "KeystoneAPI.Name", "keystone")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), keystoneAPI, func() error {
 		instance.Spec.Keystone.Template.DeepCopyInto(&keystoneAPI.Spec.KeystoneAPISpecCore)
+		// Explicitly propagate NotificationsBus only if non-nil to allow webhook defaulting from rabbitMqClusterName
+		if instance.Spec.Keystone.Template.NotificationsBus != nil {
+			keystoneAPI.Spec.NotificationsBus = instance.Spec.Keystone.Template.NotificationsBus
+		}
 
 		keystoneAPI.Spec.ContainerImage = *version.Status.ContainerImages.KeystoneAPIImage
 		if keystoneAPI.Spec.Secret == "" {

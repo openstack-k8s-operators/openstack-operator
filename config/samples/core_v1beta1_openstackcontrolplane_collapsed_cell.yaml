@@ -9,6 +9,8 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
+      notificationsBus:
+        cluster: rabbitmq  # Required for Barbican KeystoneListener
   galera:
     templates:
       openstack:
@@ -32,6 +34,8 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
+      notificationsBus:
+        cluster: rabbitmq  # Match Keystone for complete notification integration
       barbicanAPI:
         replicas: 1
       barbicanWorker:
@@ -114,7 +118,8 @@ spec:
           cell1:
             cellDatabaseAccount: nova-cell1
             cellDatabaseInstance: openstack
-            cellMessageBusInstance: rabbitmq
+            messagingBus:
+              cluster: rabbitmq
             conductorServiceTemplate:
               replicas: 1
             hasAPIAccess: true
@@ -151,10 +156,14 @@ spec:
           databaseAccount: aodh
           databaseInstance: openstack
           secret: osp-secret
+          notificationsBus:
+            cluster: rabbitmq  # Required for receiving notifications from OpenStack services
         heatInstance: heat
       ceilometer:
         enabled: true
         secret: osp-secret
+        notificationsBus:
+          cluster: rabbitmq  # Required for receiving notifications from OpenStack services
       logging:
         enabled: false
         ipaddr: 172.17.0.80

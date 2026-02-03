@@ -1974,11 +1974,44 @@ spec:
                 default: memcached
                 description: Memcached instance name.
                 type: string
+              messagingBus:
+                description: MessagingBus - Messaging Bus configuration
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
                 description: NodeSelector to target subset of worker nodes for running
                   the Heat services
+                type: object
+              notificationsBus:
+                description: NotificationsBus - Notifications Bus configuration (optional,
+                  separate from MessagingBus)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               passwordSelectors:
                 default:
@@ -2009,11 +2042,29 @@ spec:
                   e.g. to check logs
                 type: boolean
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Heat
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
+              rabbitmq:
+                description: |-
+                  RabbitMQ - RabbitMQ configuration overrides
+                  Deprecated: Use MessagingBus instead
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               secret:
                 description: |-
                   Secret containing OpenStack password information for heat HeatDatabasePassword, HeatPassword
@@ -2047,7 +2098,6 @@ spec:
             - heatCfnAPI
             - heatEngine
             - memcachedInstance
-            - rabbitMqClusterName
             - secret
             type: object
           status:
@@ -2115,6 +2165,10 @@ spec:
                 description: ReadyCount of Heat Engine instance
                 format: int32
                 type: integer
+              notificationsTransportURLSecret:
+                description: NotificationsTransportURLSecret - Secret containing Notifications
+                  RabbitMQ transportURL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

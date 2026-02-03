@@ -52,6 +52,15 @@ spec:
           spec:
             description: IronicConductorSpec defines the desired state of IronicConductor
             properties:
+              auth:
+                description: Auth - Parameters related to authentication (inherited
+                  from parent Ironic CR)
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               conductorGroup:
                 description: ConductorGroup - Ironic Conductor conductor group.
                 type: string
@@ -154,6 +163,9 @@ spec:
                   NodeSelector to target subset of worker nodes running this service. Setting here overrides
                   any global NodeSelector settings within the Ironic CR
                 type: object
+              notificationsURLSecret:
+                description: Secret containing RabbitMq notifications URL
+                type: string
               novncproxyImage:
                 description: NoVNCProxyImage - Ironic NoVNCProxy Container Image
                 type: string

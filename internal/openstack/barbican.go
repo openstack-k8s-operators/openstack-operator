@@ -44,6 +44,24 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		instance.Spec.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
 	}
 
+	// Migration and inheritance: Set MessagingBus.Cluster with correct priority order
+	if instance.Spec.Barbican.Template.MessagingBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field
+		if instance.Spec.Barbican.Template.RabbitMqClusterName != "" {
+			instance.Spec.Barbican.Template.MessagingBus.Cluster = instance.Spec.Barbican.Template.RabbitMqClusterName
+			// Priority 2: Inherit from top-level MessagingBus
+		} else if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+			instance.Spec.Barbican.Template.MessagingBus = *instance.Spec.MessagingBus
+			// Priority 3: Default to "rabbitmq" (required for CRD validation)
+		} else {
+			instance.Spec.Barbican.Template.MessagingBus.Cluster = "rabbitmq"
+		}
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Barbican.Template.MessagingBus.Cluster != "" {
+		instance.Spec.Barbican.Template.RabbitMqClusterName = ""
+	}
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Barbican.Template.BarbicanAPI.Override.Service == nil {
@@ -113,6 +131,12 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 	// subCRs inherit the top-level TopologyRef unless an override is present
 	if instance.Spec.Barbican.Template.TopologyRef == nil {
 		instance.Spec.Barbican.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
+	// Propagate NotificationsBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.Barbican.Template.NotificationsBus == nil {
+		instance.Spec.Barbican.Template.NotificationsBus = instance.Spec.NotificationsBus
 	}
 
 	helper.GetLogger().Info("Reconciling Barbican", "Barbican.Namespace", instance.Namespace, "Barbican.Name", "barbican")
