@@ -1,0 +1,244 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack-galera
+spec:
+  secret: osp-secret
+  storageClass: local-storage
+  keystone:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+  galera:
+    templates:
+      openstack:
+        storageRequest: 500M
+        secret: osp-secret
+        replicas: 1
+      openstack-cell1:
+        storageRequest: 500M
+        secret: osp-secret
+        replicas: 1
+  rabbitmq:
+    templates:
+      rabbitmq:
+        replicas: 1
+        #resources:
+        #  requests:
+        #    cpu: 500m
+        #    memory: 1Gi
+        #  limits:
+        #    cpu: 800m
+        #    memory: 1Gi
+      rabbitmq-cell1:
+        replicas: 1
+  memcached:
+    templates:
+      memcached:
+        replicas: 1
+  barbican:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      barbicanAPI:
+        replicas: 1
+      barbicanWorker:
+        replicas: 1
+      barbicanKeystoneListener:
+        replicas: 1
+  placement:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+  glance:
+    template:
+      secret: osp-secret
+      databaseInstance: openstack
+      customServiceConfig: |
+        [DEFAULT]
+        enabled_backends = default_backend:swift
+        [glance_store]
+        default_backend = default_backend
+        [default_backend]
+        swift_store_create_container_on_put = True
+        swift_store_auth_version = 3
+        swift_store_auth_address = {{ .KeystoneInternalURL }}
+        swift_store_endpoint_type = internalURL
+        swift_store_user = service:glance
+        swift_store_key = {{ .ServicePassword }}
+      storage:
+        storageClass: ""
+        storageRequest: 10G
+      keystoneEndpoint: default
+      glanceAPIs:
+        default:
+          replicas: 1
+  cinder:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      cinderAPI:
+        replicas: 1
+      cinderScheduler:
+        replicas: 1
+      cinderBackup:
+        replicas: 0 # backend needs to be configured
+      cinderVolumes:
+        volume1:
+          replicas: 0 # backend needs to be configured
+  manila:
+    template:
+      databaseInstance: openstack
+      manilaAPI:
+        replicas: 1
+      manilaScheduler:
+        replicas: 1
+      manilaShares:
+        share1:
+          replicas: 1
+  ovn:
+    template:
+      ovnDBCluster:
+        ovndbcluster-nb:
+          replicas: 1
+          dbType: NB
+          storageRequest: 10G
+        ovndbcluster-sb:
+          replicas: 1
+          dbType: SB
+          storageRequest: 10G
+      ovnNorthd:
+        replicas: 1
+      ovnController: {}
+  neutron:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+  horizon:
+    template:
+      replicas: 1
+      secret: osp-secret
+  nova:
+    template:
+      secret: osp-secret
+      cellTemplates:
+        cell0:
+          cellDatabaseAccount: nova-cell0
+          cellDatabaseInstance: openstack
+          cellMessageBusInstance: rabbitmq
+          conductorServiceTemplate:
+            replicas: 1
+          hasAPIAccess: true
+        cell1:
+          cellDatabaseAccount: nova-cell1
+          cellDatabaseInstance: openstack-cell1
+          cellMessageBusInstance: rabbitmq-cell1
+          conductorServiceTemplate:
+            replicas: 1
+          hasAPIAccess: true
+  heat:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      heatAPI:
+        replicas: 1
+      heatEngine:
+        replicas: 1
+      secret: osp-secret
+  ironic:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      ironicAPI:
+        replicas: 1
+      ironicConductors:
+      - replicas: 1
+        storageRequest: 10G
+      ironicInspector:
+        replicas: 1
+      ironicNeutronAgent:
+        replicas: 1
+      secret: osp-secret
+  telemetry:
+    enabled: true
+    template:
+      metricStorage:
+        enabled: false
+        monitoringStack:
+          alertingEnabled: true
+          scrapeInterval: 30s
+          storage:
+            strategy: persistent
+            retention: 24h
+            persistent:
+              pvcStorageRequest: 10G
+      autoscaling:
+        enabled: false
+        aodh:
+          passwordSelectors:
+          databaseAccount: aodh
+          databaseInstance: openstack
+          secret: osp-secret
+        heatInstance: heat
+      ceilometer:
+        enabled: true
+        secret: osp-secret
+      logging:
+        enabled: false
+        ipaddr: 172.17.0.80
+        port: 10514
+        cloNamespace: openshift-logging
+  swift:
+    enabled: true
+    template:
+      swiftRing:
+        ringReplicas: 1
+      swiftStorage:
+        replicas: 1
+      swiftProxy:
+        replicas: 1
+  octavia:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      octaviaAPI:
+        replicas: 1
+      secret: osp-secret
+  redis:
+    enabled: false
+  designate:
+    enabled: false
+    apiOverride:
+      route: {}
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      designateAPI:
+        override:
+          service:
+            internal:
+              metadata:
+                annotations:
+                  metallb.universe.tf/address-pool: internalapi
+                  metallb.universe.tf/allow-shared-ip: internalapi
+                  metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+              spec:
+                type: LoadBalancer
+      designateCentral:
+        replicas: 1
+      designateWorker:
+        replicas: 1
+        networkAttachments:
+          - designate
+      designateProducer:
+        replicas: 1
+      designateMdns:
+        replicas: 1
+        networkAttachments:
+          - designate
+      designateBackendbind9:
+        replicas: 1
+        storageClass: local-storage
+        storageRequest: 10G
+        networkAttachments:
+          - designate
