@@ -230,6 +230,10 @@ type ContainerSpec struct {
 	// Resources - Compute Resources for the service operator controller manager
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// Env - Environment variables for the container
+	Env []corev1.EnvVar `json:"env,omitempty"`
 }
 
 // OpenStackStatus defines the observed state of OpenStack
