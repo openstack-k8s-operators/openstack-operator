@@ -149,6 +149,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.InfraRedisImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.IronicAPIImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.IronicConductorImage).ShouldNot(BeNil())
+				//TODO(stevebaker) uncomment when these images are available
+				// g.Expect(version.Status.ContainerImages.IronicGraphicalConsoleImage).ShouldNot(BeNil())
+				// g.Expect(version.Status.ContainerImages.IronicNovncImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.IronicInspectorImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.IronicNeutronAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.IronicPxeImage).ShouldNot(BeNil())
