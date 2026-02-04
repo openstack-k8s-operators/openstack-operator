@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	routev1 "github.com/openshift/api/route/v1"
@@ -36,6 +37,7 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	corev1 "k8s.io/api/core/v1"
 
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
@@ -452,6 +454,36 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 	// Check for deployment-stage annotation
 	deploymentStage := instance.Annotations[corev1beta1.DeploymentStageAnnotation]
 	infrastructureOnly := deploymentStage == corev1beta1.DeploymentStageInfrastructureOnly
+
+	// Trigger webhook migration for deprecated messaging bus fields
+	needsMigration := false
+	if instance.Spec.NotificationsBusInstance != nil && *instance.Spec.NotificationsBusInstance != "" {
+		if instance.Spec.NotificationsBus == nil || instance.Spec.NotificationsBus.Cluster == "" {
+			needsMigration = true
+		}
+	}
+
+	// Check service-level rabbitMqClusterName migrations
+	if !needsMigration {
+		needsMigration = r.needsServiceLevelMigration(instance)
+	}
+
+	if needsMigration {
+		ctrlResult, err := webhook.EnsureWebhookTrigger(
+			ctx,
+			instance,
+			openstack.ReconcileTriggerAnnotation,
+			"messaging bus migration",
+			helper.GetLogger(),
+			5*time.Minute,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+	}
 
 	// Reconcile infrastructure components (always run)
 	ctrlResult, err := openstack.ReconcileCAs(ctx, instance, helper)
@@ -873,6 +905,167 @@ func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context,
 	}
 
 	return requests
+}
+
+// needsServiceLevelMigration checks if any service-level rabbitMqClusterName fields need migration
+func (r *OpenStackControlPlaneReconciler) needsServiceLevelMigration(instance *corev1beta1.OpenStackControlPlane) bool {
+	// Helper function to check if a service needs migration
+	needsMigration := func(messagingBus *rabbitmqv1.RabbitMqConfig, deprecatedField *string) bool {
+		if deprecatedField != nil && *deprecatedField != "" {
+			return messagingBus.Cluster == ""
+		}
+		return false
+	}
+
+	// Helper function to check if a service needs notificationsBusInstance migration
+	needsNotificationsMigration := func(notificationsBus **rabbitmqv1.RabbitMqConfig, deprecatedField **string) bool {
+		if deprecatedField != nil && *deprecatedField != nil && **deprecatedField != "" {
+			return *notificationsBus == nil || (*notificationsBus).Cluster == ""
+		}
+		return false
+	}
+
+	// Check each service that has messaging bus fields
+	if instance.Spec.Cinder.Template != nil {
+		if needsMigration(&instance.Spec.Cinder.Template.MessagingBus, &instance.Spec.Cinder.Template.RabbitMqClusterName) {
+			return true
+		}
+		if needsNotificationsMigration(&instance.Spec.Cinder.Template.NotificationsBus, &instance.Spec.Cinder.Template.NotificationsBusInstance) {
+			return true
+		}
+	}
+
+	if instance.Spec.Manila.Template != nil {
+		if needsMigration(&instance.Spec.Manila.Template.MessagingBus, &instance.Spec.Manila.Template.RabbitMqClusterName) {
+			return true
+		}
+		if needsNotificationsMigration(&instance.Spec.Manila.Template.NotificationsBus, &instance.Spec.Manila.Template.NotificationsBusInstance) {
+			return true
+		}
+	}
+
+	if instance.Spec.Neutron.Template != nil {
+		if needsMigration(&instance.Spec.Neutron.Template.MessagingBus, &instance.Spec.Neutron.Template.RabbitMqClusterName) {
+			return true
+		}
+		if needsNotificationsMigration(&instance.Spec.Neutron.Template.NotificationsBus, &instance.Spec.Neutron.Template.NotificationsBusInstance) {
+			return true
+		}
+	}
+
+	if instance.Spec.Heat.Template != nil {
+		if needsMigration(&instance.Spec.Heat.Template.MessagingBus, &instance.Spec.Heat.Template.RabbitMqClusterName) {
+			return true
+		}
+	}
+
+	if instance.Spec.Ironic.Template != nil {
+		if needsMigration(&instance.Spec.Ironic.Template.MessagingBus, &instance.Spec.Ironic.Template.RabbitMqClusterName) {
+			return true
+		}
+		// IronicNeutronAgent has its own messaging bus
+		if needsMigration(&instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus,
+			&instance.Spec.Ironic.Template.IronicNeutronAgent.RabbitMqClusterName) {
+			return true
+		}
+	}
+
+	if instance.Spec.Barbican.Template != nil {
+		if needsMigration(&instance.Spec.Barbican.Template.MessagingBus, &instance.Spec.Barbican.Template.RabbitMqClusterName) {
+			return true
+		}
+	}
+
+	if instance.Spec.Designate.Template != nil {
+		if needsMigration(&instance.Spec.Designate.Template.MessagingBus, &instance.Spec.Designate.Template.RabbitMqClusterName) {
+			return true
+		}
+	}
+
+	if instance.Spec.Octavia.Template != nil {
+		if needsMigration(&instance.Spec.Octavia.Template.MessagingBus, &instance.Spec.Octavia.Template.RabbitMqClusterName) {
+			return true
+		}
+	}
+
+	if instance.Spec.Watcher.Template != nil && instance.Spec.Watcher.Template.RabbitMqClusterName != nil {
+		if needsMigration(&instance.Spec.Watcher.Template.MessagingBus, instance.Spec.Watcher.Template.RabbitMqClusterName) {
+			return true
+		}
+	}
+
+	if instance.Spec.Watcher.Template != nil {
+		if needsNotificationsMigration(&instance.Spec.Watcher.Template.NotificationsBus, &instance.Spec.Watcher.Template.NotificationsBusInstance) {
+			return true
+		}
+	}
+
+	// Keystone - uses NotificationsBus instead of MessagingBus
+	if instance.Spec.Keystone.Template != nil && instance.Spec.Keystone.Template.RabbitMqClusterName != "" {
+		if instance.Spec.Keystone.Template.NotificationsBus == nil ||
+			instance.Spec.Keystone.Template.NotificationsBus.Cluster == "" {
+			return true
+		}
+	}
+
+	// Swift - SwiftProxy uses NotificationsBus for Ceilometer middleware
+	if instance.Spec.Swift.Template != nil && instance.Spec.Swift.Template.SwiftProxy.RabbitMqClusterName != "" {
+		if instance.Spec.Swift.Template.SwiftProxy.NotificationsBus == nil ||
+			instance.Spec.Swift.Template.SwiftProxy.NotificationsBus.Cluster == "" {
+			return true
+		}
+	}
+
+	// Nova - has API-level and per-cell messaging bus fields
+	if instance.Spec.Nova.Template != nil {
+		// Check API-level migration
+		if instance.Spec.Nova.Template.APIMessageBusInstance != "" &&
+			instance.Spec.Nova.Template.MessagingBus.Cluster == "" {
+			return true
+		}
+
+		// Check per-cell migration
+		if instance.Spec.Nova.Template.CellTemplates != nil {
+			for _, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
+				if cellTemplate.CellMessageBusInstance != "" &&
+					cellTemplate.MessagingBus.Cluster == "" {
+					return true
+				}
+			}
+		}
+
+		// Check notificationsBusInstance migration
+		if needsNotificationsMigration(&instance.Spec.Nova.Template.NotificationsBus, &instance.Spec.Nova.Template.NotificationsBusInstance) {
+			return true
+		}
+	}
+
+	// Telemetry - has multiple sub-services
+	if instance.Spec.Telemetry.Template != nil {
+		// CloudKitty uses MessagingBus
+		if instance.Spec.Telemetry.Template.CloudKitty.RabbitMqClusterName != "" &&
+			instance.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster == "" {
+			return true
+		}
+
+		// Autoscaling.Aodh uses NotificationsBus
+		if instance.Spec.Telemetry.Template.Autoscaling.Aodh.RabbitMqClusterName != "" {
+			if instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus == nil ||
+				instance.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus.Cluster == "" {
+				return true
+			}
+		}
+
+		// Ceilometer uses NotificationsBus
+		if instance.Spec.Telemetry.Template.Ceilometer.RabbitMqClusterName != "" {
+			if instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus == nil ||
+				instance.Spec.Telemetry.Template.Ceilometer.NotificationsBus.Cluster == "" {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 // Verify the referenced topology exists

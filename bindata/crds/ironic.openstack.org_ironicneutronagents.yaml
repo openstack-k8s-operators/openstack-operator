@@ -81,12 +81,46 @@ spec:
                   ConfigOverwrite - interface to overwrite default config files like e.g. policy.json.
                   But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
                 type: object
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                  for RPC messaging
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
                 description: |-
                   NodeSelector to target subset of worker nodes running this service. Setting here overrides
                   any global NodeSelector settings within the Ironic CR
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               passwordSelectors:
                 default:
@@ -101,10 +135,10 @@ spec:
                     type: string
                 type: object
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Ironic
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               replicas:
                 default: 1
@@ -275,6 +309,10 @@ spec:
                       current project
                     type: string
                 type: object
+              notificationsURLSecret:
+                description: NotificationsURLSecret - Secret containing RabbitMQ notifications
+                  URL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

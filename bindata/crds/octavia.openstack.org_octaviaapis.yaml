@@ -108,6 +108,10 @@ spec:
                 description: NodeSelector to target subset of worker nodes running
                   this service
                 type: object
+              notificationsTransportURLSecret:
+                description: NotificationsTransportURLSecret - Secret containing RabbitMQ
+                  notifications transportURL
+                type: string
               override:
                 description: Override, provides the ability to override the generated
                   manifest of several child resources.

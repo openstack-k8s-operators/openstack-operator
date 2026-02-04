@@ -558,6 +558,22 @@ spec:
                 default: memcached
                 description: Memcached instance name.
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -633,10 +649,10 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in CloudKitty
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               s3StorageConfig:
                 default:

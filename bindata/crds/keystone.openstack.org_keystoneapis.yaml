@@ -1285,6 +1285,23 @@ spec:
                 description: NodeSelector to target subset of worker nodes running
                   this service
                 type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               override:
                 description: Override, provides the ability to override the generated
                   manifest of several child resources.
@@ -1462,10 +1479,10 @@ spec:
                   e.g. to check logs
                 type: boolean
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Keystone
+                  Deprecated: Use NotificationsBus.Cluster instead
                 type: string
               region:
                 default: regionOne
@@ -1608,7 +1625,6 @@ spec:
             - containerImage
             - databaseInstance
             - memcachedInstance
-            - rabbitMqClusterName
             - secret
             type: object
           status:

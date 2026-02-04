@@ -45,6 +45,9 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template = &manilav1.ManilaSpecCore{}
 	}
 
+	// Note: Migration from rabbitMqClusterName to messagingBus.cluster is handled by the webhook
+	// via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Manila.Template.ManilaAPI.Override.Service == nil {
@@ -157,10 +160,20 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// Propagate MessagingBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+		if instance.Spec.Manila.Template.MessagingBus.Cluster == "" {
+			instance.Spec.Manila.Template.MessagingBus = *instance.Spec.MessagingBus
+		}
+	}
+
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Manila.Template.NotificationsBusInstance == nil {
-		instance.Spec.Manila.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.NotificationsBus != nil {
+		if instance.Spec.Manila.Template.NotificationsBus == nil {
+			instance.Spec.Manila.Template.NotificationsBus = instance.Spec.NotificationsBus
+		}
 	}
 
 	Log.Info("Reconciling Manila", "Manila.Namespace", instance.Namespace, "Manila.Name", "manila")

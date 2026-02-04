@@ -47,6 +47,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Ironic.Template = &ironicv1.IronicSpecCore{}
 	}
 
+	// Note: Migration from rabbitMqClusterName to messagingBus.cluster is handled by the webhook
+	// via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
+	// This applies to both Ironic main template and IronicNeutronAgent.
+
 	if instance.Spec.Ironic.Template.NodeSelector == nil {
 		instance.Spec.Ironic.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
@@ -57,6 +61,22 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	// subCRs inherit the top-level TopologyRef unless an override is present
 	if instance.Spec.Ironic.Template.TopologyRef == nil {
 		instance.Spec.Ironic.Template.TopologyRef = instance.Spec.TopologyRef
+	}
+
+	// Propagate MessagingBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+		if instance.Spec.Ironic.Template.MessagingBus.Cluster == "" {
+			instance.Spec.Ironic.Template.MessagingBus = *instance.Spec.MessagingBus
+		}
+	}
+
+	// Propagate MessagingBus to IronicNeutronAgent if not set
+	// IronicNeutronAgent inherits from Ironic service-level if not set
+	if instance.Spec.Ironic.Template.MessagingBus.Cluster != "" {
+		if instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster == "" {
+			instance.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus = instance.Spec.Ironic.Template.MessagingBus
+		}
 	}
 
 	// add selector to service overrides

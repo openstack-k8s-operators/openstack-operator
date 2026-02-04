@@ -116,6 +116,22 @@ spec:
                 - simple_crypto
                 - pkcs11
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               networkAttachments:
                 description: NetworkAttachments is a list of NetworkAttachment resource
                   names to expose the services to the given network
@@ -129,6 +145,27 @@ spec:
                   NodeSelector to target subset of worker nodes running this component. Setting here overrides
                   any global NodeSelector settings within the Barbican CR.
                 type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
+              notificationsURLSecret:
+                description: NotificationsURLSecret - Secret containing notifications
+                  transport URL
+                type: string
               override:
                 description: Override, provides the ability to override the generated
                   manifest of several child resources.
@@ -336,10 +373,10 @@ spec:
                 - loginSecret
                 type: object
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Barbican
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               replicas:
                 default: 1
@@ -481,7 +518,6 @@ spec:
             - containerImage
             - databaseHostname
             - databaseInstance
-            - rabbitMqClusterName
             - serviceAccount
             type: object
           status:

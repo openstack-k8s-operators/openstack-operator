@@ -157,11 +157,44 @@ spec:
                       creates the Neutron resources needed for its Management Network
                     type: boolean
                 type: object
+              messagingBus:
+                description: MessagingBus configuration (cluster, username, and vhost)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
                 description: NodeSelector to target subset of worker nodes running
                   this service
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (cluster, username, and
+                  vhost) for a dedicated notifications RabbitMQ cluster
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               octaviaAPI:
                 description: OctaviaAPI - Spec definition for the API service of the
@@ -223,6 +256,10 @@ spec:
                     description: NodeSelector to target subset of worker nodes running
                       this service
                     type: object
+                  notificationsTransportURLSecret:
+                    description: NotificationsTransportURLSecret - Secret containing
+                      RabbitMQ notifications transportURL
+                    type: string
                   override:
                     description: Override, provides the ability to override the generated
                       manifest of several child resources.
@@ -658,6 +695,10 @@ spec:
                     description: NodeSelector to target subset of worker nodes running
                       this service
                     type: object
+                  notificationsTransportURLSecret:
+                    description: NotificationsTransportURLSecret - Secret containing
+                      RabbitMQ notifications transportURL
+                    type: string
                   octaviaProviderSubnetCIDR:
                     description: OctaviaProviderSubnetCIDR -
                     type: string
@@ -914,6 +955,10 @@ spec:
                     description: NodeSelector to target subset of worker nodes running
                       this service
                     type: object
+                  notificationsTransportURLSecret:
+                    description: NotificationsTransportURLSecret - Secret containing
+                      RabbitMQ notifications transportURL
+                    type: string
                   octaviaProviderSubnetCIDR:
                     description: OctaviaProviderSubnetCIDR -
                     type: string
@@ -1346,6 +1391,10 @@ spec:
                     description: NodeSelector to target subset of worker nodes running
                       this service
                     type: object
+                  notificationsTransportURLSecret:
+                    description: NotificationsTransportURLSecret - Secret containing
+                      RabbitMQ notifications transportURL
+                    type: string
                   octaviaProviderSubnetCIDR:
                     description: OctaviaProviderSubnetCIDR -
                     type: string
@@ -1539,10 +1588,10 @@ spec:
                   e.g. to check logs
                 type: boolean
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Octavia
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               redisServiceName:
                 default: octavia-redis
@@ -1662,7 +1711,6 @@ spec:
             - databaseInstance
             - octaviaAPI
             - octaviaNetworkAttachment
-            - rabbitMqClusterName
             - secret
             type: object
           status:
@@ -1730,6 +1778,10 @@ spec:
                 description: ReadyCount of octavia Housekeeping instances
                 format: int32
                 type: integer
+              notificationsTransportURLSecret:
+                description: NotificationsTransportURLSecret - Secret containing RabbitMQ
+                  notifications transportURL
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this

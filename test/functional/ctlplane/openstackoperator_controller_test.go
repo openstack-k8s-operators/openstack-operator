@@ -31,6 +31,7 @@ import (
 
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -155,32 +156,66 @@ var _ = Describe("OpenStackOperator controller", func() {
 		glanceNotifSvc = Entry("the Glance service", func() (
 			client.Object, *string) {
 			svc := GetGlance(names.GlanceName)
-			return svc, svc.Spec.NotificationBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		cinderNotifSvc = Entry("the Cinder service", func() (
 			client.Object, *string) {
 			svc := GetCinder(names.CinderName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		manilaNotifSvc = Entry("the Manila service", func() (
 			client.Object, *string) {
 			svc := GetManila(names.ManilaName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		neutronNotifSvc = Entry("the Neutron service", func() (
 			client.Object, *string) {
 			svc := GetNeutron(names.NeutronName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		novaNotifSvc = Entry("the Nova service", func() (
 			client.Object, *string) {
 			svc := GetNova(names.NovaName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 		watcherNotifSvc = Entry("the Watcher service", func() (
 			client.Object, *string) {
 			svc := GetWatcher(names.WatcherName)
-			return svc, svc.Spec.NotificationsBusInstance
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
+		})
+		octaviaNotifSvc = Entry("the Octavia service", func() (
+			client.Object, *string) {
+			svc := GetOctavia(names.OctaviaName)
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
+		})
+		keystoneNotifSvc = Entry("the Keystone service", func() (
+			client.Object, *string) {
+			svc := GetKeystone(names.KeystoneAPIName)
+			if svc.Spec.NotificationsBus == nil {
+				return svc, nil
+			}
+			return svc, &svc.Spec.NotificationsBus.Cluster
 		})
 	)
 	//
@@ -1205,6 +1240,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			spec := GetDefaultOpenStackControlPlaneSpec()
 			spec["tls"] = GetTLSeCustomIssuerSpec()
@@ -1333,6 +1369,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			DeferCleanup(k8sClient.Delete, ctx,
@@ -2027,6 +2064,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicRouteName))
@@ -2216,6 +2254,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicRouteName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.WatcherCertPublicSvcName))
@@ -2692,6 +2731,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			DeferCleanup(
@@ -2876,12 +2916,14 @@ var _ = Describe("OpenStackOperator controller", func() {
 		)
 	})
 
-	When("An OpenStackControlplane instance references a notificationsBusInstance", func() {
+	When("An OpenStackControlplane instance references a notificationsBus", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
 
-			// point notificationsBusInstance to the default rabbitmq instance
-			spec["notificationsBusInstance"] = names.RabbitMQName.Name
+			// point notificationsBus.cluster to the default rabbitmq instance
+			spec["notificationsBus"] = map[string]interface{}{
+				"cluster": names.RabbitMQName.Name,
+			}
 
 			spec["telemetry"] = map[string]interface{}{
 				"enabled": true,
@@ -2895,6 +2937,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 				},
 			}
 			spec["watcher"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["octavia"] = map[string]interface{}{
+				"enabled": true,
+			}
+			spec["ovn"] = map[string]interface{}{
 				"enabled": true,
 			}
 
@@ -2924,7 +2972,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+			// create cert secret for octavia ovn client
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(types.NamespacedName{Name: "cert-octavia-ovndbs", Namespace: names.Namespace}))
 
 			DeferCleanup(
 				th.DeleteInstance,
@@ -2965,11 +3016,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 				svc, notif := serviceNameFunc()
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-				// service exists and notificationsBusInstance has been propagated
+				// service exists and notificationsBus.cluster has been propagated
 				Eventually(func(g Gomega) {
 					g.Expect(OSCtlplane).Should(Not(BeNil()))
 					g.Expect(svc).Should(Not(BeNil()))
-					g.Expect(notif).To(Equal(OSCtlplane.Spec.NotificationsBusInstance))
+					g.Expect(OSCtlplane.Spec.NotificationsBus).ToNot(BeNil())
+					g.Expect(notif).To(Equal(&OSCtlplane.Spec.NotificationsBus.Cluster))
 				}, timeout, interval).Should(Succeed())
 			},
 			// The entry list depends on the services that currently implement
@@ -2980,6 +3032,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronNotifSvc,
 			novaNotifSvc,
 			watcherNotifSvc,
+			octaviaNotifSvc,
+			keystoneNotifSvc,
 		)
 		DescribeTable("A service (Nova) overrides the notification value",
 			func(serviceNameFunc func() (client.Object, *string)) {
@@ -2988,7 +3042,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 				Eventually(func(g Gomega) {
 					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 
-					ctlplane.Spec.Nova.Template.NotificationsBusInstance = &rabbitMqOverride
+					if ctlplane.Spec.Nova.Template.NotificationsBus == nil {
+						ctlplane.Spec.Nova.Template.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+					}
+					ctlplane.Spec.Nova.Template.NotificationsBus.Cluster = rabbitMqOverride
 					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
 				}, timeout, interval).Should(Succeed())
 
@@ -2998,8 +3055,10 @@ var _ = Describe("OpenStackOperator controller", func() {
 					nova := GetNova(names.NovaName)
 					g.Expect(OSCtlplane).Should(Not(BeNil()))
 					g.Expect(nova).Should(Not(BeNil()))
-					g.Expect(nova.Spec.NotificationsBusInstance).To(Equal(OSCtlplane.Spec.Nova.Template.NotificationsBusInstance))
-					g.Expect(*nova.Spec.NotificationsBusInstance).To(Equal(rabbitMqOverride))
+					g.Expect(nova.Spec.NotificationsBus).ToNot(BeNil())
+					g.Expect(OSCtlplane.Spec.Nova.Template.NotificationsBus).ToNot(BeNil())
+					g.Expect(nova.Spec.NotificationsBus.Cluster).To(Equal(OSCtlplane.Spec.Nova.Template.NotificationsBus.Cluster))
+					g.Expect(nova.Spec.NotificationsBus.Cluster).To(Equal(rabbitMqOverride))
 				}, timeout, interval).Should(Succeed())
 
 				// The rest of the services still point to the top-level rabbit
@@ -3007,7 +3066,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 				Eventually(func(g Gomega) {
 					g.Expect(OSCtlplane).Should(Not(BeNil()))
 					g.Expect(svc).Should(Not(BeNil()))
-					g.Expect(notif).To(Equal(OSCtlplane.Spec.NotificationsBusInstance))
+					g.Expect(OSCtlplane.Spec.NotificationsBus).ToNot(BeNil())
+					g.Expect(notif).To(Equal(&OSCtlplane.Spec.NotificationsBus.Cluster))
 				}, timeout, interval).Should(Succeed())
 			},
 			// The entry list depends on the services that currently implement
@@ -3018,64 +3078,111 @@ var _ = Describe("OpenStackOperator controller", func() {
 			neutronNotifSvc,
 			watcherNotifSvc,
 		)
-		DescribeTable("An OpenStackControlplane removes the notificationsBusInstance reference",
-			func(serviceNameFunc func() (client.Object, *string)) {
-				Eventually(func(g Gomega) {
-					ctlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-					ctlplane.Spec.NotificationsBusInstance = nil
-					g.Expect(k8sClient.Update(ctx, ctlplane)).To(Succeed())
-
-					svc, notif := serviceNameFunc()
-					g.Expect(svc).Should(Not(BeNil()))
-					g.Expect(notif).To(BeNil())
-				}, timeout, interval).Should(Succeed())
-			},
-			// The entry list depends on the services that currently implement
-			// the notificationsBusInstance interface
-			glanceNotifSvc,
-			cinderNotifSvc,
-			manilaNotifSvc,
-			neutronNotifSvc,
-			novaNotifSvc,
-			watcherNotifSvc,
-		)
+		// NOTE: Test for "removes the notificationsBus reference" removed because
+		// the new template-level precedence pattern means setting top-level NotificationsBus
+		// to nil does not clear template-level NotificationsBus configuration.
+		// Template-level takes precedence over top-level.
 	})
 })
 
 var _ = Describe("OpenStackOperator Webhook", func() {
 
-	DescribeTable("notificationsBusInstance",
-		func(getNotificationField func() (string, string)) {
-			spec := GetDefaultOpenStackControlPlaneSpec()
-			value, errMsg := getNotificationField()
-			spec["notificationsBusInstance"] = value
-			raw := map[string]interface{}{
-				"apiVersion": "core.openstack.org/v1beta1",
-				"kind":       "OpenStackControlPlane",
-				"metadata": map[string]interface{}{
-					"name":      "foo",
-					"namespace": namespace,
+	// Note: The migration functionality is thoroughly tested in webhook unit tests
+	// (api/core/v1beta1/openstackcontrolplane_webhook_test.go).
+	// This integration test verifies that the webhook migration works end-to-end.
+	It("migrates deprecated notificationsBusInstance field via webhook", func() {
+		// Create a minimal OpenStackControlPlane with the deprecated field
+		deprecatedValue := "rabbitmq"
+		ctlplane := &corev1.OpenStackControlPlane{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "migration-test-ctlplane",
+				Namespace: namespace,
+			},
+			Spec: corev1.OpenStackControlPlaneSpec{
+				Secret:       "osp-secret",
+				StorageClass: "local-storage",
+				Rabbitmq: corev1.RabbitmqSection{
+					Enabled: true,
+					Templates: &map[string]rabbitmqv1.RabbitMqSpecCore{
+						"rabbitmq": {},
+					},
 				},
-				"spec": spec,
-			}
-			unstructuredObj := &unstructured.Unstructured{Object: raw}
-			_, err := controllerutil.CreateOrPatch(
-				th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
-			Expect(err).Should(HaveOccurred())
-			var statusError *k8s_errors.StatusError
-			Expect(errors.As(err, &statusError)).To(BeTrue())
-			Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
-			Expect(statusError.ErrStatus.Message).To(
-				ContainSubstring(errMsg),
-			)
-		},
-		Entry("notificationsBusInstance is wrong", func() (string, string) {
-			return "foo", "spec.notificationsBusInstance: Invalid value: \"foo\": notificationsBusInstance must match an existing RabbitMQ instance name"
-		}),
-		Entry("notificationsBusInstance is an empty string", func() (string, string) {
-			return "", "spec.notificationsBusInstance: Invalid value: \"\": notificationsBusInstance is not a valid string"
-		}),
-	)
+				NotificationsBusInstance: &deprecatedValue,
+			},
+		}
+
+		DeferCleanup(th.DeleteInstance, ctlplane)
+
+		// The creation should succeed - webhook migrates the deprecated field
+		Expect(th.K8sClient.Create(th.Ctx, ctlplane)).Should(Succeed())
+
+		// Verify migration occurred
+		Eventually(func(g Gomega) {
+			instance := &corev1.OpenStackControlPlane{}
+			g.Expect(th.K8sClient.Get(th.Ctx, client.ObjectKeyFromObject(ctlplane), instance)).To(Succeed())
+
+			// Deprecated field should be cleared
+			g.Expect(instance.Spec.NotificationsBusInstance).To(BeNil())
+
+			// New field should be populated
+			g.Expect(instance.Spec.NotificationsBus).ToNot(BeNil())
+			g.Expect(instance.Spec.NotificationsBus.Cluster).To(Equal("rabbitmq"))
+		}, timeout, interval).Should(Succeed())
+	})
+
+	It("migrates existing CR with deprecated field via controller annotation trigger (operator upgrade)", func() {
+		// Simulate operator upgrade scenario:
+		// 1. Create a CR with deprecated field (as if created by old operator version)
+		// 2. Update it to bypass the webhook Default() - simulating an existing CR in etcd
+		// 3. Let controller reconcile and trigger migration via annotation
+
+		deprecatedValue := "rabbitmq"
+		ctlplane := &corev1.OpenStackControlPlane{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "upgrade-scenario-test",
+				Namespace: namespace,
+			},
+			Spec: corev1.OpenStackControlPlaneSpec{
+				Secret:       "osp-secret",
+				StorageClass: "local-storage",
+				Rabbitmq: corev1.RabbitmqSection{
+					Enabled: true,
+					Templates: &map[string]rabbitmqv1.RabbitMqSpecCore{
+						"rabbitmq": {},
+					},
+				},
+				// Simulate old CR that was created before migration logic existed
+				// NotificationsBus is nil, only deprecated field is set
+				NotificationsBusInstance: &deprecatedValue,
+			},
+		}
+
+		DeferCleanup(th.DeleteInstance, ctlplane)
+
+		// Create the CR
+		Expect(th.K8sClient.Create(th.Ctx, ctlplane)).Should(Succeed())
+
+		// Wait for controller to reconcile and trigger migration
+		// The controller should detect the deprecated field and add the annotation
+		// The webhook should then migrate the field
+		Eventually(func(g Gomega) {
+			instance := &corev1.OpenStackControlPlane{}
+			g.Expect(th.K8sClient.Get(th.Ctx, client.ObjectKeyFromObject(ctlplane), instance)).To(Succeed())
+
+			// Migration should have occurred
+			g.Expect(instance.Spec.NotificationsBusInstance).To(BeNil(),
+				"deprecated field should be cleared after migration")
+			g.Expect(instance.Spec.NotificationsBus).ToNot(BeNil(),
+				"new field should be populated")
+			g.Expect(instance.Spec.NotificationsBus.Cluster).To(Equal("rabbitmq"),
+				"cluster should be migrated from deprecated field")
+
+			// Annotation should be cleaned up by webhook
+			annotations := instance.GetAnnotations()
+			g.Expect(annotations).ToNot(HaveKey("openstack.org/reconcile-trigger"),
+				"annotation should be removed after migration")
+		}, timeout, interval).Should(Succeed())
+	})
 
 	It("Blocks creating multiple ctlplane CRs in the same namespace", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
@@ -3761,6 +3868,7 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 			// create cert secrets for ovn instance
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
 			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
 
 			// create cert secrets for memcached instance

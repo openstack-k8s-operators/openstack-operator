@@ -46,6 +46,9 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
 	}
 
+	// Note: Migration from rabbitMqClusterName to messagingBus.cluster is handled by the webhook
+	// via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Neutron.Template.Override.Service == nil {
@@ -194,10 +197,20 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Neutron.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// Propagate MessagingBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+		if instance.Spec.Neutron.Template.MessagingBus.Cluster == "" {
+			instance.Spec.Neutron.Template.MessagingBus = *instance.Spec.MessagingBus
+		}
+	}
+
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Neutron.Template.NotificationsBusInstance == nil {
-		instance.Spec.Neutron.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.NotificationsBus != nil {
+		if instance.Spec.Neutron.Template.NotificationsBus == nil {
+			instance.Spec.Neutron.Template.NotificationsBus = instance.Spec.NotificationsBus
+		}
 	}
 
 	Log.Info("Reconciling NeutronAPI", "NeutronAPI.Namespace", instance.Namespace, "NeutronAPI.Name", "neutron")

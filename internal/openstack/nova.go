@@ -68,14 +68,41 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Spec.Nova.Template = &novav1.NovaSpecCore{}
 	}
 
+	// Note: Migration from apiMessageBusInstance and cellMessageBusInstance to messagingBus.cluster
+	// is handled by the webhook via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
+
 	if instance.Spec.Nova.Template.NodeSelector == nil {
 		instance.Spec.Nova.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
+	// When no NotificationsBus is referenced in the subCR (override)
 	// try to inject the top-level one if defined
-	if instance.Spec.Nova.Template.NotificationsBusInstance == nil {
-		instance.Spec.Nova.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	if instance.Spec.NotificationsBus != nil {
+		if instance.Spec.Nova.Template.NotificationsBus == nil {
+			instance.Spec.Nova.Template.NotificationsBus = instance.Spec.NotificationsBus
+		}
+	}
+
+	// Propagate MessagingBus from top-level to template if not set (for Nova API)
+	// Template-level takes precedence over top-level
+	if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+		if instance.Spec.Nova.Template.MessagingBus.Cluster == "" {
+			instance.Spec.Nova.Template.MessagingBus = *instance.Spec.MessagingBus
+		}
+	}
+
+	// Propagate MessagingBus to cell0 only if not set
+	// Cell0 is special (handles failed scheduling) and inherits from Nova API-level
+	// Other cells (cell1+) should be explicitly configured for isolation
+	if instance.Spec.Nova.Template.CellTemplates != nil {
+		if cell0Template, exists := instance.Spec.Nova.Template.CellTemplates["cell0"]; exists {
+			if instance.Spec.Nova.Template.MessagingBus.Cluster != "" {
+				if cell0Template.MessagingBus.Cluster == "" {
+					cell0Template.MessagingBus = instance.Spec.Nova.Template.MessagingBus
+					instance.Spec.Nova.Template.CellTemplates["cell0"] = cell0Template
+				}
+			}
+		}
 	}
 
 	// When there's no Topology referenced in the Service Template, inject the
