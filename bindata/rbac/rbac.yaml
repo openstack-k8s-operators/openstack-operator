@@ -234,6 +234,7 @@ rules:
   - config.openshift.io
   resources:
   - imagedigestmirrorsets
+  - images
   - networks
   verbs:
   - get

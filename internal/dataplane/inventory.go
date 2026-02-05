@@ -136,12 +136,12 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	// add the NodeSet name variable
 	nodeSetGroup.Vars["edpm_nodeset_name"] = instance.Name
 
-	isDisconnected, err := util.IsDisconnectedOCP(ctx, helper)
+	hasMirrorRegistries, err := util.HasMirrorRegistries(ctx, helper)
 	if err != nil {
 		return "", err
 	}
 
-	if isDisconnected {
+	if hasMirrorRegistries {
 		registryConfig, err := util.GetMCRegistryConf(ctx, helper)
 		if err != nil {
 			// CRD not installed (non-OpenShift or no MCO) - log warning and continue.
@@ -160,11 +160,11 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 				return "", fmt.Errorf("failed to get MachineConfig registry configuration: %w", err)
 			}
 		} else {
-			helper.GetLogger().Info("disconnected registry was identified via the ImageContentSourcePolicy. Using OCP registry.")
+			helper.GetLogger().Info("Mirror registries detected via IDMS/ICSP. Using OCP registry configuration.")
 
-			// Use OCP registries.conf for disconnected deployments
+			// Use OCP registries.conf for mirror registry deployments
 			nodeSetGroup.Vars["edpm_podman_registries_conf"] = registryConfig
-			nodeSetGroup.Vars["edpm_podman_disconnected_ocp"] = isDisconnected
+			nodeSetGroup.Vars["edpm_podman_disconnected_ocp"] = hasMirrorRegistries
 		}
 	}
 
