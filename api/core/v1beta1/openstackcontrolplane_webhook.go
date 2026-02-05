@@ -18,11 +18,14 @@ package v1beta1
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"slices"
 	"strings"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/object"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -32,6 +35,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -60,6 +64,95 @@ import (
 
 // log is for logging in this package.
 var openstackcontrolplanelog = logf.Log.WithName("openstackcontrolplane-resource")
+
+// generateRandomID generates a random 5-character hexadecimal ID
+// Used for service naming when UniquePodNames is enabled and UID is not yet available
+func generateRandomID() (string, error) {
+	bytes := make([]byte, 3) // 3 bytes = 6 hex chars, we'll take first 5
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes)[:5], nil
+}
+
+// lookupServiceCR attempts to find an existing service CR in the cluster owned by this OpenStackControlPlane
+// Returns the CR name if found, empty string if not found or not owned by the given owner UID
+// serviceName should be the base service name (e.g., CinderName, GlanceName)
+// ownerUID is the UID of the OpenStackControlPlane that should own the CR
+// This function lists CRs and finds ones that start with the service name prefix and are owned by ownerUID
+func lookupServiceCR(ctx context.Context, c client.Client, namespace, serviceName string, ownerUID types.UID) (string, error) {
+	switch serviceName {
+	case CinderName:
+		cinderList := &cinderv1.CinderList{}
+		if err := c.List(ctx, cinderList, client.InNamespace(namespace)); err != nil {
+			return "", fmt.Errorf("failed to list Cinder CRs: %w", err)
+		}
+		// Find any Cinder CR that starts with "cinder" and is owned by this OpenStackControlPlane
+		for _, cinder := range cinderList.Items {
+			if strings.HasPrefix(cinder.Name, CinderName) && object.CheckOwnerRefExist(ownerUID, cinder.GetOwnerReferences()) {
+				return cinder.Name, nil
+			}
+		}
+
+	case GlanceName:
+		glanceList := &glancev1.GlanceList{}
+		if err := c.List(ctx, glanceList, client.InNamespace(namespace)); err != nil {
+			return "", fmt.Errorf("failed to list Glance CRs: %w", err)
+		}
+		// Find any Glance CR that starts with "glance" and is owned by this OpenStackControlPlane
+		for _, glance := range glanceList.Items {
+			if strings.HasPrefix(glance.Name, GlanceName) && object.CheckOwnerRefExist(ownerUID, glance.GetOwnerReferences()) {
+				return glance.Name, nil
+			}
+		}
+
+	default:
+		return "", fmt.Errorf("unsupported service name: %s", serviceName)
+	}
+
+	return "", nil // Not found or not owned
+}
+
+// CacheServiceNameForCreate handles service name caching during CREATE operations
+// Generates a random ID since UID is not yet available
+func (r *OpenStackControlPlane) CacheServiceNameForCreate(serviceName string) (string, error) {
+	randomID, err := generateRandomID()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate random ID: %w", err)
+	}
+	return fmt.Sprintf("%s-%s", serviceName, randomID), nil
+}
+
+// CacheServiceNameForUpdate handles service name caching during UPDATE operations
+// Uses existing CR name if it's owned by this OpenStackControlPlane, otherwise generates based on current settings
+// This provides robust flip detection: if we created a CR previously, we preserve its name to avoid creating duplicates
+func (r *OpenStackControlPlane) CacheServiceNameForUpdate(ctx context.Context, c client.Client, serviceName string) (string, error) {
+	// Lookup existing CR owned by this OpenStackControlPlane
+	existingName, err := lookupServiceCR(ctx, c, r.Namespace, serviceName, r.UID)
+	if err != nil {
+		return "", fmt.Errorf("failed to lookup existing CR: %w", err)
+	}
+
+	// If we find a CR owned by us, preserve its name regardless of format
+	// This handles both flip scenarios and prevents creating duplicate CRs:
+	// - If UniquePodNames changed from false→true, we keep the old "cinder" name
+	// - If UniquePodNames changed from true→false, we keep the old "cinder-abc" name
+	// - If UniquePodNames didn't change, we keep the existing name
+	if existingName != "" {
+		return existingName, nil
+	}
+
+	// No existing CR found owned by us - generate name based on current UniquePodNames setting
+	// This handles:
+	// - First time deployment
+	// - Operator upgrade scenarios where ServiceName wasn't cached yet
+	name, _ := r.GetServiceName(serviceName, true)
+	if name == serviceName {
+		// GetServiceName returned base name, meaning UID is not available
+		return "", fmt.Errorf("unable to generate service name: no existing CR and UID not available")
+	}
+	return name, nil
+}
 
 // ValidateCreate validates the OpenStackControlPlane on creation
 func (r *OpenStackControlPlane) ValidateCreate(ctx context.Context, c client.Client) (admission.Warnings, error) {
@@ -293,7 +386,7 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Glance.Enabled {
-		glanceName, _ := r.GetServiceName(GlanceName, r.Spec.Glance.UniquePodNames)
+		glanceName, _ := r.GetServiceNameCached(GlanceName, r.Spec.Glance.UniquePodNames, r.Spec.Glance.ServiceName)
 		for key, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
 			err := common_webhook.ValidateDNS1123Label(
 				basePath.Child("glance").Child("template").Child("glanceAPIs"),
@@ -310,7 +403,7 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Cinder.Enabled {
-		cinderName, _ := r.GetServiceName(CinderName, r.Spec.Cinder.UniquePodNames)
+		cinderName, _ := r.GetServiceNameCached(CinderName, r.Spec.Cinder.UniquePodNames, r.Spec.Cinder.ServiceName)
 		errs := common_webhook.ValidateDNS1123Label(
 			basePath.Child("cinder").Child("template").Child("cinderVolumes"),
 			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),
@@ -477,7 +570,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Glance.Template == nil {
 			old.Glance.Template = &glancev1.GlanceSpecCore{}
 		}
-		glanceName, _ := r.GetServiceName(GlanceName, r.Spec.Glance.UniquePodNames)
+		glanceName, _ := r.GetServiceNameCached(GlanceName, r.Spec.Glance.UniquePodNames, r.Spec.Glance.ServiceName)
 		for key, glanceAPI := range r.Spec.Glance.Template.GlanceAPIs {
 			err := common_webhook.ValidateDNS1123Label(
 				basePath.Child("glance").Child("template").Child("glanceAPIs"),
@@ -497,7 +590,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Cinder.Template == nil {
 			old.Cinder.Template = &cinderv1.CinderSpecCore{}
 		}
-		cinderName, _ := r.GetServiceName(CinderName, r.Spec.Cinder.UniquePodNames)
+		cinderName, _ := r.GetServiceNameCached(CinderName, r.Spec.Cinder.UniquePodNames, r.Spec.Cinder.ServiceName)
 		errs := common_webhook.ValidateDNS1123Label(
 			basePath.Child("cinder").Child("template").Child("cinderVolumes"),
 			maps.Keys(r.Spec.Cinder.Template.CinderVolumes),

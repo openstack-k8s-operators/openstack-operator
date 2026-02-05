@@ -942,6 +942,8 @@ spec:
                   enabled:
                     default: true
                     type: boolean
+                  serviceName:
+                    type: string
                   template:
                     properties:
                       apiTimeout:
@@ -3914,6 +3916,8 @@ spec:
                   enabled:
                     default: true
                     type: boolean
+                  serviceName:
+                    type: string
                   template:
                     properties:
                       apiTimeout:

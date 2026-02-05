@@ -9,6 +9,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,8 +29,16 @@ const (
 
 // ReconcileGlance -
 func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
-	glanceName, altGlanceName := instance.GetServiceName(corev1beta1.GlanceName, instance.Spec.Glance.UniquePodNames)
-	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
+	Log := GetLogger(ctx)
+
+	// Trigger webhook to cache service name if UniquePodNames is enabled and not yet cached
+	// This handles operator upgrade scenario where existing CRs don't have ServiceName set
+	if instance.Spec.Glance.UniquePodNames && instance.Spec.Glance.ServiceName == "" {
+		return webhook.EnsureWebhookTrigger(ctx, instance, corev1beta1.ReconcileTriggerAnnotation, "Glance service name caching", Log, 0)
+	}
+
+	glanceName, altGlanceName := instance.GetServiceNameCached(corev1beta1.GlanceName, instance.Spec.Glance.UniquePodNames, instance.Spec.Glance.ServiceName)
+	// Ensure the alternate glance CR doesn't exist, as the randomPodNames flag may have been toggled
 	glance := &glancev1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      altGlanceName,
@@ -46,7 +55,6 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			Namespace: instance.Namespace,
 		},
 	}
-	Log := GetLogger(ctx)
 
 	if !instance.Spec.Glance.Enabled {
 		if res, err := EnsureDeleted(ctx, helper, glance); err != nil {

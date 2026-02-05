@@ -8,6 +8,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -21,8 +22,16 @@ import (
 
 // ReconcileCinder -
 func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
-	cinderName, altCinderName := instance.GetServiceName(corev1beta1.CinderName, instance.Spec.Cinder.UniquePodNames)
-	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
+	Log := GetLogger(ctx)
+
+	// Trigger webhook to cache service name if UniquePodNames is enabled and not yet cached
+	// This handles operator upgrade scenario where existing CRs don't have ServiceName set
+	if instance.Spec.Cinder.UniquePodNames && instance.Spec.Cinder.ServiceName == "" {
+		return webhook.EnsureWebhookTrigger(ctx, instance, corev1beta1.ReconcileTriggerAnnotation, "Cinder service name caching", Log, 0)
+	}
+
+	cinderName, altCinderName := instance.GetServiceNameCached(corev1beta1.CinderName, instance.Spec.Cinder.UniquePodNames, instance.Spec.Cinder.ServiceName)
+	// Ensure the alternate cinder CR doesn't exist, as the randomPodNames flag may have been toggled
 	cinder := &cinderv1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      altCinderName,
@@ -52,7 +61,6 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.ContainerImages.CinderVolumeImages = make(map[string]*string)
 		return ctrl.Result{}, nil
 	}
-	Log := GetLogger(ctx)
 
 	if instance.Spec.Cinder.Template == nil {
 		instance.Spec.Cinder.Template = &cinderv1.CinderSpecCore{}

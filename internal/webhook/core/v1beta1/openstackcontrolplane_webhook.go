@@ -64,7 +64,7 @@ type OpenStackControlPlaneCustomDefaulter struct {
 var _ webhook.CustomDefaulter = &OpenStackControlPlaneCustomDefaulter{}
 
 // Default implements webhook.CustomDefaulter so a webhook will be registered for the Kind OpenStackControlPlane.
-func (d *OpenStackControlPlaneCustomDefaulter) Default(_ context.Context, obj runtime.Object) error {
+func (d *OpenStackControlPlaneCustomDefaulter) Default(ctx context.Context, obj runtime.Object) error {
 	openstackcontrolplane, ok := obj.(*corev1beta1.OpenStackControlPlane)
 
 	if !ok {
@@ -72,8 +72,69 @@ func (d *OpenStackControlPlaneCustomDefaulter) Default(_ context.Context, obj ru
 	}
 	openstackcontrolplanelog.Info("Defaulting for OpenStackControlPlane", "name", openstackcontrolplane.GetName())
 
-	// Call the Default method on the OpenStackControlPlane type
+	// Call the Default method on the OpenStackControlPlane type for existing defaulting logic
 	openstackcontrolplane.Default()
+
+	// Cache service names for services with UniquePodNames enabled
+	// This ensures consistent naming across reconciliations and restores
+	if err := d.cacheServiceNames(ctx, openstackcontrolplane); err != nil {
+		openstackcontrolplanelog.Error(err, "Failed to cache service names")
+		return err
+	}
+
+	return nil
+}
+
+// cacheServiceNames handles service name caching for Cinder and Glance
+func (d *OpenStackControlPlaneCustomDefaulter) cacheServiceNames(ctx context.Context, r *corev1beta1.OpenStackControlPlane) error {
+	isCreate := r.UID == ""
+	serviceNameCached := false
+
+	// Cache Cinder service name
+	if r.Spec.Cinder.UniquePodNames && r.Spec.Cinder.ServiceName == "" {
+		var err error
+		if isCreate {
+			r.Spec.Cinder.ServiceName, err = r.CacheServiceNameForCreate(corev1beta1.CinderName)
+		} else {
+			r.Spec.Cinder.ServiceName, err = r.CacheServiceNameForUpdate(ctx, ctlplaneWebhookClient, corev1beta1.CinderName)
+		}
+		if err != nil {
+			return fmt.Errorf("failed to cache Cinder service name: %w", err)
+		}
+		openstackcontrolplanelog.Info("Cached Cinder service name", "serviceName", r.Spec.Cinder.ServiceName, "isCreate", isCreate)
+		serviceNameCached = true
+	}
+
+	// Cache Glance service name
+	if r.Spec.Glance.UniquePodNames && r.Spec.Glance.ServiceName == "" {
+		var err error
+		if isCreate {
+			r.Spec.Glance.ServiceName, err = r.CacheServiceNameForCreate(corev1beta1.GlanceName)
+		} else {
+			r.Spec.Glance.ServiceName, err = r.CacheServiceNameForUpdate(ctx, ctlplaneWebhookClient, corev1beta1.GlanceName)
+		}
+		if err != nil {
+			return fmt.Errorf("failed to cache Glance service name: %w", err)
+		}
+		openstackcontrolplanelog.Info("Cached Glance service name", "serviceName", r.Spec.Glance.ServiceName, "isCreate", isCreate)
+		serviceNameCached = true
+	}
+
+	// Always clean up the reconcile-trigger annotation if present
+	// This annotation may have been added by the controller to trigger this webhook
+	// Remove it regardless of whether we cached anything to avoid annotation pollution
+	annotations := r.GetAnnotations()
+	if annotations != nil {
+		if _, exists := annotations[corev1beta1.ReconcileTriggerAnnotation]; exists {
+			delete(annotations, corev1beta1.ReconcileTriggerAnnotation)
+			r.SetAnnotations(annotations)
+			if serviceNameCached {
+				openstackcontrolplanelog.Info("Removed reconcile-trigger annotation after caching service name")
+			} else {
+				openstackcontrolplanelog.Info("Removed reconcile-trigger annotation (no caching needed)")
+			}
+		}
+	}
 
 	return nil
 }
