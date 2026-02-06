@@ -54,6 +54,15 @@ spec:
             description: IronicNeutronAgentSpec defines the desired state of ML2 baremetal
               - ironic-neutron-agent agents
             properties:
+              auth:
+                description: Auth - Parameters related to authentication (inherited
+                  from parent Ironic CR)
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - ML2 baremtal - Ironic Neutron Agent
                   Image

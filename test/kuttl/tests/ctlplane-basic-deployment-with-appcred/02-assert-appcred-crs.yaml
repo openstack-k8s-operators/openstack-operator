@@ -1,0 +1,141 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |-
+      set -euo pipefail
+      NS="${NAMESPACE}"
+
+      wait_ready() {
+        echo "Waiting for appcred/ac-$1 to be Ready..."
+        oc wait appcred/ac-$1 -n "$NS" --for=condition=Ready --timeout=180s
+      }
+
+      check_field() {
+        local name=$1 field=$2 expected=$3
+        local actual=$(oc get appcred ac-$name -n "$NS" -o jsonpath="{.spec.$field}" 2>/dev/null || echo "")
+        if [ "$actual" != "$expected" ]; then
+          echo "ERROR: ac-$name.$field: expected '$expected', got '$actual'"
+          exit 1
+        fi
+        echo "✓ ac-$name.$field = $expected"
+      }
+
+      check_roles() {
+        local name=$1
+        shift
+        local expected_roles=("$@")
+        local roles=$(oc get appcred ac-$name -n "$NS" -o jsonpath='{.spec.roles[*]}')
+
+        # Check each expected role is present
+        for role in "${expected_roles[@]}"; do
+          if [[ ! " $roles " =~ " $role " ]]; then
+            echo "ERROR: ac-$name: Role '$role' not found. Got: $roles"
+            exit 1
+          fi
+        done
+
+        # Check role count matches
+        local role_count=$(echo "$roles" | wc -w)
+        if [ "$role_count" -ne "${#expected_roles[@]}" ]; then
+          echo "ERROR: ac-$name: Expected ${#expected_roles[@]} roles, got $role_count: $roles"
+          exit 1
+        fi
+
+        echo "✓ ac-$name.roles = [${expected_roles[*]}]"
+      }
+
+      echo "========================================="
+      echo "Testing Application Credential CRs"
+      echo "========================================="
+      echo
+
+      echo "=== Checking global ApplicationCredential is enabled ==="
+      global_enabled=$(oc get openstackcontrolplane openstack -n "$NS" -o jsonpath='{.spec.applicationCredential.enabled}')
+      if [ "$global_enabled" != "true" ]; then
+        echo "ERROR: OpenStackControlPlane.spec.applicationCredential.enabled expected 'true', got '$global_enabled'"
+        exit 1
+      fi
+      echo "✓ OpenStackControlPlane.spec.applicationCredential.enabled = true"
+      echo
+
+      # ---- ac-barbican ----
+      # Pure defaults: expirationDays=730, gracePeriodDays=364, roles=[admin,service], unrestricted=false
+      echo "=== Testing ac-barbican (pure defaults) ==="
+      wait_ready barbican
+      check_field barbican expirationDays 730
+      check_field barbican gracePeriodDays 364
+      check_roles barbican "admin" "service"
+      check_field barbican unrestricted "false"
+      echo
+
+      # ---- ac-cinder ----
+      # Full custom overrides
+      echo "=== Testing ac-cinder (full custom overrides) ==="
+      wait_ready cinder
+      check_field cinder expirationDays 10
+      check_field cinder gracePeriodDays 5
+      check_roles cinder "admin" "service"
+      check_field cinder unrestricted "true"
+      echo
+
+      # ---- ac-glance ----
+      # Partial overrides (expiration values only)
+      echo "=== Testing ac-glance (partial overrides) ==="
+      wait_ready glance
+      check_field glance expirationDays 180
+      check_field glance gracePeriodDays 60
+      check_roles glance "admin" "service"
+      check_field glance unrestricted "false"
+      echo
+
+      # ---- ac-swift ----
+      # Role override only
+      echo "=== Testing ac-swift (roles override) ==="
+      wait_ready swift
+      check_field swift expirationDays 730
+      check_field swift gracePeriodDays 364
+      check_roles swift "service"
+      check_field swift unrestricted "false"
+      echo
+
+      # ---- ac-neutron ----
+      # Inherits all defaults
+      echo "=== Testing ac-neutron (inherits defaults) ==="
+      wait_ready neutron
+      check_field neutron expirationDays 730
+      check_field neutron gracePeriodDays 364
+      check_roles neutron "admin" "service"
+      check_field neutron unrestricted "false"
+      echo
+
+      # ---- ac-placement ----
+      # Custom expiration only
+      echo "=== Testing ac-placement (expiration override) ==="
+      wait_ready placement
+      check_field placement expirationDays 90
+      check_field placement gracePeriodDays 30
+      check_roles placement "admin" "service"
+      check_field placement unrestricted "false"
+      echo
+
+      # ---- ac-nova ----
+      # Multiple roles
+      echo "=== Testing ac-nova (multiple roles) ==="
+      wait_ready nova
+      check_field nova expirationDays 730
+      check_field nova gracePeriodDays 364
+      check_roles nova "admin" "service" "member"
+      check_field nova unrestricted "false"
+      echo
+
+      # ---- ac-ceilometer ----
+      # Telemetry/Ceilometer component (enabled by default in base sample)
+      echo "=== Testing ac-ceilometer (telemetry/ceilometer) ==="
+      wait_ready ceilometer
+      check_field ceilometer expirationDays 45
+      check_field ceilometer gracePeriodDays 20
+      check_roles ceilometer "service"
+      check_field ceilometer unrestricted "false"
+      echo
+
+      echo "All ApplicationCredential CRs validated successfully"

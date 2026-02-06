@@ -73,6 +73,45 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	designateReady := designate.Status.ObservedGeneration == designate.Generation && designate.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	designateSecret := instance.Spec.Designate.Template.Secret
+	if designateSecret == "" {
+		designateSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Designate.ApplicationCredential) ||
+		instance.Spec.Designate.Template.DesignateAPI.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			designate.Name,
+			designateReady,
+			designateSecret,
+			instance.Spec.Designate.Template.PasswordSelectors.Service,
+			instance.Spec.Designate.Template.ServiceUser,
+			instance.Spec.Designate.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Designate.Template.DesignateAPI.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	svcs, err := service.GetServicesListWithLabel(
 		ctx,
 		helper,

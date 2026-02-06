@@ -84,6 +84,45 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// Application Credential Management (Day-2 operation)
+	cinderReady := cinder.Status.ObservedGeneration == cinder.Generation && cinder.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	cinderSecret := instance.Spec.Cinder.Template.Secret
+	if cinderSecret == "" {
+		cinderSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Cinder.ApplicationCredential) ||
+		instance.Spec.Cinder.Template.Auth.ApplicationCredentialSecret != "" {
+
+		acSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			cinder.Name,
+			cinderReady,
+			cinderSecret,
+			instance.Spec.Cinder.Template.PasswordSelectors.Service,
+			instance.Spec.Cinder.Template.ServiceUser,
+			instance.Spec.Cinder.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Cinder.Template.Auth.ApplicationCredentialSecret = acSecretName
+	}
+
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Cinder.Template.CinderAPI.TLS = cinder.Spec.CinderAPI.TLS

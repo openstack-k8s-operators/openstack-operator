@@ -1,0 +1,14 @@
+resources:
+- ../base/openstackcontrolplane
+
+patches:
+- target:
+    kind: OpenStackControlPlane
+    name: .*
+  patch: |-
+    - op: replace
+      path: /metadata/name
+      value: openstack
+- target:
+    kind: OpenStackControlPlane
+  path: patch.yaml

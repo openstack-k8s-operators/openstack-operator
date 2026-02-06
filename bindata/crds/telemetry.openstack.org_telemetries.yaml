@@ -73,6 +73,14 @@ spec:
                         default: 60
                         description: APITimeout for Route and Apache
                         type: integer
+                      auth:
+                        description: Auth - authentication settings for keystone integration
+                        properties:
+                          applicationCredentialSecret:
+                            description: ApplicationCredentialSecret - secret name
+                              for application credential
+                            type: string
+                        type: object
                       customConfigsSecretName:
                         description: |-
                           A name of a secret containing custom configuration files. Files
@@ -439,6 +447,14 @@ spec:
                     default: 60
                     description: APITimeout for Apache
                     type: integer
+                  auth:
+                    description: Auth - authentication settings for keystone integration
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - secret name for
+                          application credential
+                        type: string
+                    type: object
                   centralImage:
                     type: string
                   computeImage:
@@ -614,6 +630,14 @@ spec:
                     default: 60
                     description: APITimeout for HAProxy, Apache, and rpc_response_timeout
                     type: integer
+                  auth:
+                    description: Auth - authentication settings for keystone integration
+                    properties:
+                      applicationCredentialSecret:
+                        description: ApplicationCredentialSecret - secret name for
+                          application credential
+                        type: string
+                    type: object
                   cloudKittyAPI:
                     description: CloudKittyAPI - Spec definition for the API service
                       of this CloudKitty deployment
@@ -1096,6 +1120,12 @@ spec:
                     description: Enabled - Whether OpenStack CloudKitty service should
                       be deployed and managed
                     type: boolean
+                  lokiRetentionDays:
+                    default: 95
+                    description: |-
+                      LokiRetentionDays defines the number of days logs are kept in Loki storage.
+                      Set to 0 to disable retention limits.
+                    type: integer
                   lokiStackSize:
                     default: 1x.demo
                     description: Size of the LokiStack. Supported are "1x.demo" (default),

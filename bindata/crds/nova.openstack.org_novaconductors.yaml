@@ -138,6 +138,11 @@ spec:
                 description: PreserveJobs - do not delete jobs after they finished
                   e.g. to check logs
                 type: boolean
+              region:
+                default: regionOne
+                description: Region - the region name to use for service endpoint
+                  discovery
+                type: string
               replicas:
                 default: 1
                 description: Replicas of the service to run

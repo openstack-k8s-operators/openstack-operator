@@ -57,6 +57,14 @@ spec:
                 description: APITimeout for HAProxy, Apache
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Ironic Inspector Container Image
                 type: string

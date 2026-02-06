@@ -4064,7 +4064,253 @@ var _ = Describe("OpenStackOperator controller nova cell deletion", func() {
 					g.Expect(k8s_errors.IsNotFound(err)).To(BeTrue())
 				}, timeout, interval).Should(Succeed())
 			})
+		})
+	})
+})
 
+var _ = Describe("Application Credentials configuration in control plane", func() {
+	When("global application credentials are enabled", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["applicationCredential"] = map[string]interface{}{
+				"enabled":         true,
+				"expirationDays":  730,
+				"gracePeriodDays": 364,
+				"roles":           []string{"service", "admin"},
+				"unrestricted":    false,
+			}
+			spec["cinder"] = map[string]interface{}{
+				"enabled": true,
+				"applicationCredential": map[string]interface{}{
+					"enabled":         true,
+					"expirationDays":  100,
+					"gracePeriodDays": 50,
+					"roles":           []string{"custom", "role"},
+					"unrestricted":    true,
+				},
+			}
+
+			DeferCleanup(th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should fill defaults correctly", func() {
+			Eventually(func(g Gomega) {
+				cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(cp.Spec.ApplicationCredential.Enabled).To(BeTrue())
+				g.Expect(*cp.Spec.ApplicationCredential.ExpirationDays).To(Equal(730))
+				g.Expect(*cp.Spec.ApplicationCredential.GracePeriodDays).To(Equal(364))
+				g.Expect(cp.Spec.ApplicationCredential.Roles).To(ConsistOf("admin", "service"))
+				g.Expect(*cp.Spec.ApplicationCredential.Unrestricted).To(BeFalse())
+
+				ac := cp.Spec.Cinder.ApplicationCredential
+				g.Expect(ac).NotTo(BeNil())
+				g.Expect(*ac.ExpirationDays).To(Equal(100))
+				g.Expect(*ac.GracePeriodDays).To(Equal(50))
+				g.Expect(ac.Roles).To(ConsistOf("custom", "role"))
+				g.Expect(*ac.Unrestricted).To(BeTrue())
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should configure ApplicationCredential with service-specific overrides and global defaults", func() {
+			cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+			// Verify global AC configuration
+			global := cp.Spec.ApplicationCredential
+			Expect(global.Enabled).To(BeTrue())
+			Expect(*global.ExpirationDays).To(Equal(730))
+			Expect(*global.GracePeriodDays).To(Equal(364))
+			Expect(global.Roles).To(ConsistOf("admin", "service"))
+			Expect(*global.Unrestricted).To(BeFalse())
+
+			// Verify Cinder has service-specific overrides
+			Expect(cp.Spec.Cinder.Enabled).To(BeTrue())
+			Expect(cp.Spec.Cinder.ApplicationCredential).NotTo(BeNil())
+			Expect(cp.Spec.Cinder.ApplicationCredential.Enabled).To(BeTrue())
+			cinderAC := cp.Spec.Cinder.ApplicationCredential
+			Expect(*cinderAC.ExpirationDays).To(Equal(100))
+			Expect(*cinderAC.GracePeriodDays).To(Equal(50))
+			Expect(cinderAC.Roles).To(ConsistOf("custom", "role"))
+			Expect(*cinderAC.Unrestricted).To(BeTrue())
+
+			// Verify Glance and Manila inherit global defaults (no service-specific AC overrides)
+			// The service specific values are nil/empty, they inherit the global defaults with mergeAppCred function
+			Expect(cp.Spec.Glance.Enabled).To(BeTrue())
+			Expect(cp.Spec.Manila.Enabled).To(BeTrue())
+			Expect(cp.Spec.Manila.Template).NotTo(BeNil())
+
+			if cp.Spec.Glance.ApplicationCredential != nil {
+				glanceAC := cp.Spec.Glance.ApplicationCredential
+				Expect(glanceAC.ExpirationDays).To(BeNil())
+				Expect(glanceAC.GracePeriodDays).To(BeNil())
+				Expect(glanceAC.Roles).To(BeEmpty())
+				Expect(glanceAC.Unrestricted).To(BeNil())
+			}
+
+			if cp.Spec.Manila.ApplicationCredential != nil {
+				manilaAC := cp.Spec.Manila.ApplicationCredential
+				Expect(manilaAC.ExpirationDays).To(BeNil())
+				Expect(manilaAC.GracePeriodDays).To(BeNil())
+				Expect(manilaAC.Roles).To(BeEmpty())
+				Expect(manilaAC.Unrestricted).To(BeNil())
+			}
+		})
+	})
+
+	When("global application credentials are disabled", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["applicationCredential"] = map[string]interface{}{"enabled": false}
+			spec["cinder"] = map[string]interface{}{
+				"enabled": true,
+				"applicationCredential": map[string]interface{}{
+					"enabled": true,
+				},
+			}
+			spec["glance"] = map[string]interface{}{
+				"enabled": true,
+			}
+
+			DeferCleanup(th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have global AC disabled in spec", func() {
+			cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(cp.Spec.ApplicationCredential.Enabled).To(BeFalse())
+		})
+	})
+
+	When("service-specific application credentials are disabled", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["applicationCredential"] = map[string]interface{}{"enabled": true}
+			spec["glance"] = map[string]interface{}{
+				"enabled": true,
+				"applicationCredential": map[string]interface{}{
+					"enabled": false,
+				},
+			}
+			spec["cinder"] = map[string]interface{}{
+				"enabled": true,
+				"applicationCredential": map[string]interface{}{
+					"enabled": true,
+				},
+			}
+
+			DeferCleanup(th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should have service-specific AC disabled in spec", func() {
+			cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+			// Glance is disabled
+			Expect(cp.Spec.Glance.Enabled).To(BeTrue())
+			Expect(cp.Spec.Glance.ApplicationCredential).NotTo(BeNil())
+			Expect(cp.Spec.Glance.ApplicationCredential.Enabled).To(BeFalse())
+
+			// Cidner is enabled
+			Expect(cp.Spec.Cinder.Enabled).To(BeTrue())
+			Expect(cp.Spec.Cinder.ApplicationCredential).NotTo(BeNil())
+			Expect(cp.Spec.Cinder.ApplicationCredential.Enabled).To(BeTrue())
+		})
+
+		It("should NOT set ApplicationCredentialSecret field before services are ready", func() {
+			cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+
+			// In functional tests, no actual services are deployed, so they never become "Ready"
+			// The reconciler should NOT set ApplicationCredentialSecret until service is ready (Day-2)
+			// This verifies the new dynamic behavior where AC is only applied after service readiness
+
+			if cp.Spec.Cinder.Template != nil {
+				Expect(cp.Spec.Cinder.Template.Auth.ApplicationCredentialSecret).To(BeEmpty(),
+					"ApplicationCredentialSecret should be empty when service is not ready")
+			}
+
+			if cp.Spec.Glance.Template != nil && len(cp.Spec.Glance.Template.GlanceAPIs) > 0 {
+				for apiName, glanceAPI := range cp.Spec.Glance.Template.GlanceAPIs {
+					Expect(glanceAPI.Auth.ApplicationCredentialSecret).To(BeEmpty(),
+						"ApplicationCredentialSecret for Glance API %s should be empty when service is not ready", apiName)
+				}
+			}
+		})
+	})
+
+	When("Heat service with application credentials enabled", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["applicationCredential"] = map[string]interface{}{
+				"enabled":         true,
+				"expirationDays":  730,
+				"gracePeriodDays": 364,
+			}
+			spec["heat"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"databaseInstance": "openstack",
+					"secret":           "osp-secret",
+					"apiTimeout":       60,
+				},
+				"applicationCredential": map[string]interface{}{
+					"enabled": true,
+				},
+			}
+
+			DeferCleanup(th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should configure ApplicationCredential in spec for Heat service", func() {
+			// Verify the spec is configured correctly for Heat AC
+			cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(cp.Spec.Heat.Enabled).To(BeTrue())
+			Expect(cp.Spec.Heat.ApplicationCredential).NotTo(BeNil())
+			Expect(cp.Spec.Heat.ApplicationCredential.Enabled).To(BeTrue())
+			Expect(cp.Spec.Heat.Template).NotTo(BeNil())
+		})
+	})
+
+	When("Ironic service with application credentials enabled", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["applicationCredential"] = map[string]interface{}{
+				"enabled":         true,
+				"expirationDays":  730,
+				"gracePeriodDays": 364,
+			}
+			spec["ironic"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"databaseInstance": "openstack",
+					"secret":           "osp-secret",
+					"ironicConductors": []map[string]interface{}{
+						{
+							"replicas": 1,
+						},
+					},
+				},
+				"applicationCredential": map[string]interface{}{
+					"enabled": true,
+				},
+			}
+
+			DeferCleanup(th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should configure ApplicationCredential in spec for Ironic service", func() {
+			// Verify the spec is configured correctly for Ironic AC
+			cp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(cp.Spec.Ironic.Enabled).To(BeTrue())
+			Expect(cp.Spec.Ironic.ApplicationCredential).NotTo(BeNil())
+			Expect(cp.Spec.Ironic.ApplicationCredential.Enabled).To(BeTrue())
+			Expect(cp.Spec.Ironic.Template).NotTo(BeNil())
 		})
 	})
 

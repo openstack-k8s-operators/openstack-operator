@@ -48,6 +48,14 @@ spec:
           spec:
             description: HeatEngineSpec defines the desired state of HeatEngine
             properties:
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: ApplicationCredentialSecret - Secret containing Application
+                      Credential ID and Secret
+                    type: string
+                type: object
               containerImage:
                 description: ContainerImage - Container Image URL
                 type: string

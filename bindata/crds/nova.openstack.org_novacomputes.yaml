@@ -96,6 +96,11 @@ spec:
                 description: NodeSelector to target subset of worker nodes running
                   this service
                 type: object
+              region:
+                default: regionOne
+                description: Region - the region name to use for service endpoint
+                  discovery
+                type: string
               replicas:
                 default: 1
                 description: Replicas of the service to run

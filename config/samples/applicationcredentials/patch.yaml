@@ -1,0 +1,77 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  # Test only services that are enabled by default in basic deployment.
+  #
+  applicationCredential:
+    enabled: true
+
+  # barbican: inherits kubebuilder defaults (no overrides)
+  # Expected: expirationDays=730, gracePeriodDays=364, roles=[admin,service], unrestricted=false
+  barbican:
+    applicationCredential:
+      enabled: true
+
+  # cinder: custom service-specific overrides
+  # Tests: all fields customized
+  cinder:
+    applicationCredential:
+      enabled: true
+      expirationDays: 10
+      gracePeriodDays: 5
+      roles:
+        - admin
+        - service
+      unrestricted: true
+
+  # glance: partial overrides (only expiration values)
+  # Tests: partial override, inherits default roles
+  glance:
+    applicationCredential:
+      enabled: true
+      expirationDays: 180
+      gracePeriodDays: 60
+
+  # swift: only roles override
+  # Tests: role customization, inherits default expiration values
+  swift:
+    applicationCredential:
+      enabled: true
+      roles:
+        - service
+
+  # neutron: minimal override (only enabled)
+  # Tests: inherits all defaults
+  neutron:
+    applicationCredential:
+      enabled: true
+
+  # placement: custom expiration only
+  # Tests: single field override
+  placement:
+    applicationCredential:
+      enabled: true
+      expirationDays: 90
+      gracePeriodDays: 30
+
+  # nova: custom roles with multiple values
+  # Tests: multiple role assignment
+  nova:
+    applicationCredential:
+      enabled: true
+      roles:
+        - admin
+        - service
+        - member
+
+  # telemetry/ceilometer: enabled by default in the base sample (telemetry.enabled=true, ceilometer.enabled=true)
+  # Tests: telemetry-specific AC override path
+  telemetry:
+    applicationCredentialCeilometer:
+      enabled: true
+      expirationDays: 45
+      gracePeriodDays: 20
+      roles:
+        - service

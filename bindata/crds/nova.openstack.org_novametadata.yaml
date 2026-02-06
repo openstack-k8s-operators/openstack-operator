@@ -272,6 +272,11 @@ spec:
                         type: object
                     type: object
                 type: object
+              region:
+                default: regionOne
+                description: Region - the region name to use for service endpoint
+                  discovery
+                type: string
               registeredCells:
                 additionalProperties:
                   type: string

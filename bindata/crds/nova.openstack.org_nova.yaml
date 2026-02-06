@@ -371,6 +371,16 @@ spec:
                 description: APITimeout for Route and Apache
                 minimum: 10
                 type: integer
+              auth:
+                description: Auth - Parameters related to authentication (shared by
+                  all Nova services)
+                properties:
+                  applicationCredentialSecret:
+                    description: |-
+                      ApplicationCredentialSecret - the name of the k8s Secret that contains the
+                      application credential data used for authentication
+                    type: string
+                type: object
               cellTemplates:
                 additionalProperties:
                   description: |-

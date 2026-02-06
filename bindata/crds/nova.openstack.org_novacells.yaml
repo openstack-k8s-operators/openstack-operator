@@ -967,6 +967,11 @@ spec:
                 description: PreserveJobs - do not delete jobs after they finished
                   e.g. to check logs
                 type: boolean
+              region:
+                default: regionOne
+                description: Region - the region name to use for service endpoint
+                  discovery
+                type: string
               secret:
                 description: |-
                   Secret is the name of the Secret instance containing password

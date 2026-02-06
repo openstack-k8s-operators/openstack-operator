@@ -93,6 +93,75 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	instance.Spec.Ironic.Template.IronicAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Ironic.Template.IronicInspector.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
+	// Application Credential Management (Day-2 operation)
+	// Ironic has 2 users: ironic (main service) and ironic-inspector
+	ironicReady := ironic.Status.ObservedGeneration == ironic.Generation && ironic.IsReady()
+
+	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
+	// Both ironic and ironic-inspector share the same secret
+	ironicSecret := instance.Spec.Ironic.Template.Secret
+	if ironicSecret == "" {
+		ironicSecret = instance.Spec.Secret
+	}
+
+	// Only call if AC enabled or currently configured
+	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Ironic.ApplicationCredential) ||
+		instance.Spec.Ironic.Template.Auth.ApplicationCredentialSecret != "" ||
+		instance.Spec.Ironic.Template.IronicInspector.Auth.ApplicationCredentialSecret != "" {
+
+		// AC for main ironic service
+		ironicACSecretName, acResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			ironic.Name,
+			ironicReady,
+			ironicSecret,
+			instance.Spec.Ironic.Template.PasswordSelectors.Service,
+			instance.Spec.Ironic.Template.ServiceUser,
+			instance.Spec.Ironic.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (acResult != ctrl.Result{}) {
+			return acResult, nil
+		}
+
+		// Set ApplicationCredentialSecret for main ironic service based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Ironic.Template.Auth.ApplicationCredentialSecret = ironicACSecretName
+
+		// AC for ironic-inspector (separate user, separate AC, but shares the same secret as ironic)
+		inspectorACSecretName, inspectorACResult, err := EnsureApplicationCredentialForService(
+			ctx,
+			helper,
+			instance,
+			"ironic-inspector",
+			ironicReady,
+			ironicSecret, // Inspector shares the same secret as ironic
+			instance.Spec.Ironic.Template.IronicInspector.PasswordSelectors.Service,
+			instance.Spec.Ironic.Template.IronicInspector.ServiceUser,
+			instance.Spec.Ironic.ApplicationCredential,
+		)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// If AC is not ready, return immediately without updating the service CR
+		if (inspectorACResult != ctrl.Result{}) {
+			return inspectorACResult, nil
+		}
+
+		// Set ApplicationCredentialSecret for ironic-inspector based on what the helper returned:
+		// - If AC disabled: returns ""
+		// - If AC enabled and ready: returns the AC secret name
+		instance.Spec.Ironic.Template.IronicInspector.Auth.ApplicationCredentialSecret = inspectorACSecretName
+	}
+
 	// Ironic API
 	svcs, err := service.GetServicesListWithLabel(
 		ctx,
