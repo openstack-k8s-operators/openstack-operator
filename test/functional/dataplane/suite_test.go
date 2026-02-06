@@ -133,7 +133,26 @@ var _ = BeforeSuite(func() {
 			// failing on the colons in ::1
 			LocalServingHost: "127.0.0.1",
 		},
-		ErrorIfCRDPathMissing: true,
+		ErrorIfCRDPathMissing:    true,
+		ControlPlaneStartTimeout: 2 * time.Minute,
+		ControlPlaneStopTimeout:  2 * time.Minute,
+		CRDInstallOptions: envtest.CRDInstallOptions{
+			MaxTime: 5 * time.Minute,
+		},
+		ControlPlane: envtest.ControlPlane{
+			APIServer: &envtest.APIServer{
+				Args: []string{
+					"--request-timeout=5m",
+					"--max-requests-inflight=800",
+					"--max-mutating-requests-inflight=400",
+				},
+			},
+			Etcd: &envtest.Etcd{
+				Args: []string{
+					"--quota-backend-bytes=8589934592", // 8GB
+				},
+			},
+		},
 	}
 
 	// cfg is defined in this file globally.

@@ -216,7 +216,26 @@ var _ = BeforeSuite(func() {
 			ocpconfigv1CRDs,
 			watcherCRDs,
 		},
-		ErrorIfCRDPathMissing: true,
+		ErrorIfCRDPathMissing:    true,
+		ControlPlaneStartTimeout: 2 * time.Minute,
+		ControlPlaneStopTimeout:  2 * time.Minute,
+		CRDInstallOptions: envtest.CRDInstallOptions{
+			MaxTime: 5 * time.Minute,
+		},
+		ControlPlane: envtest.ControlPlane{
+			APIServer: &envtest.APIServer{
+				Args: []string{
+					"--request-timeout=5m",
+					"--max-requests-inflight=800",
+					"--max-mutating-requests-inflight=400",
+				},
+			},
+			Etcd: &envtest.Etcd{
+				Args: []string{
+					"--quota-backend-bytes=8589934592", // 8GB
+				},
+			},
+		},
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
 			Paths: []string{filepath.Join("..", "..", "..", "config", "webhook")},
 			// NOTE(gibi): if localhost is resolved to ::1 (ipv6) then starting
