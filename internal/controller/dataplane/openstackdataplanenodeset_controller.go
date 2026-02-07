@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/iancoleman/strcase"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -35,11 +36,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -108,6 +111,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 // +kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update;patch
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch
+// +kubebuilder:rbac:groups=rabbitmq.openstack.org,resources=rabbitmqusers,verbs=get;list;watch;update;patch
+// +kubebuilder:rbac:groups=rabbitmq.openstack.org,resources=rabbitmqusers/finalizers,verbs=update;patch
 
 // RBAC for the ServiceAccount for the internal image registry
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
@@ -229,6 +234,35 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 	if instance.Status.ContainerImages == nil {
 		instance.Status.ContainerImages = make(map[string]string)
+	}
+
+	// Compute and store finalizer hash if not already set
+	// This hash is used to create unique, collision-free finalizer names for RabbitMQ users
+	// The hash is deterministic (same nodeset name -> same hash) and allows easy lookup
+	if instance.Status.FinalizerHash == "" {
+		instance.Status.FinalizerHash = computeFinalizerHash(instance.Name)
+		Log.Info("Computed finalizer hash for nodeset",
+			"nodeset", instance.Name,
+			"hash", instance.Status.FinalizerHash)
+	}
+
+	// Add finalizer to the nodeset if it's not being deleted
+	if instance.DeletionTimestamp.IsZero() {
+		if controllerutil.AddFinalizer(instance, helper.GetFinalizer()) {
+			// Finalizer was added, update the instance to persist it
+			if err := r.Update(ctx, instance); err != nil {
+				Log.Error(err, "Failed to add finalizer to NodeSet")
+				return ctrl.Result{}, err
+			}
+			Log.Info("Added finalizer to NodeSet", "finalizer", helper.GetFinalizer())
+			// Don't return early - continue with normal reconcile logic
+			// The deferred patch will persist status changes
+		}
+	}
+
+	// Handle nodeset deletion - clean up RabbitMQ user finalizers before allowing deletion
+	if !instance.DeletionTimestamp.IsZero() {
+		return r.reconcileDelete(ctx, instance, helper)
 	}
 
 	instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
@@ -404,7 +438,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(
-		ctx, helper, instance)
+		ctx, helper, instance, r)
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -489,7 +523,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 }
 
 func checkDeployment(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneNodeSet) (
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	r *OpenStackDataPlaneNodeSetReconciler) (
 	isNodeSetDeploymentReady bool, isNodeSetDeploymentRunning bool,
 	isNodeSetDeploymentFailed bool, failedDeploymentName string, err error) {
 
@@ -516,9 +551,13 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		}
 	}
 
+	// If there are no active deployments, we should not manage RabbitMQ finalizers
+	// because we can't reliably verify the current state
+	hasActiveDeployments := len(relevantDeployments) > 0
+
 	// Sort relevant deployments from oldest to newest, then take the last one
 	var latestRelevantDeployment *dataplanev1.OpenStackDataPlaneDeployment
-	if len(relevantDeployments) > 0 {
+	if hasActiveDeployments {
 		slices.SortFunc(relevantDeployments, func(a, b *dataplanev1.OpenStackDataPlaneDeployment) int {
 			aReady := a.Status.Conditions.Get(condition.DeploymentReadyCondition)
 			bReady := b.Status.Conditions.Get(condition.DeploymentReadyCondition)
@@ -530,6 +569,83 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			return 1
 		})
 		latestRelevantDeployment = relevantDeployments[len(relevantDeployments)-1]
+	}
+
+	// Get Nova, Neutron, and Ironic secrets with their modification times
+	// Do this before the loop to avoid variable shadowing of 'deployment' package
+	novaSecretsLastModified, errNovaSecrets := deployment.GetNovaCellSecretsLastModified(ctx, helper, instance.Namespace)
+	neutronSecretsLastModified, errNeutronSecrets := deployment.GetNeutronSecretsLastModified(ctx, helper, instance.Namespace)
+	ironicSecretsLastModified, errIronicSecrets := deployment.GetIronicSecretsLastModified(ctx, helper, instance.Namespace)
+
+	// Get owner references for the tracking ConfigMap
+	ownerRefs := []v1.OwnerReference{
+		{
+			APIVersion: instance.APIVersion,
+			Kind:       instance.Kind,
+			Name:       instance.Name,
+			UID:        instance.UID,
+			Controller: ptr.To(true),
+		},
+	}
+
+	// Check Nova credential changes and update tracking ConfigMap
+	currentNovaHash, errNovaHash := deployment.ComputeNovaCellSecretsHash(ctx, helper, instance.Namespace)
+	if errNovaHash != nil {
+		helper.GetLogger().Error(errNovaHash, "Failed to compute Nova cell secrets hash")
+	} else if currentNovaHash != "" {
+		novaTracking, err := deployment.GetServiceTracking(ctx, helper, instance.Name, instance.Namespace, "nova")
+		if err != nil {
+			helper.GetLogger().Error(err, "Failed to get Nova service tracking")
+		} else if novaTracking.SecretHash != currentNovaHash {
+			// Nova secret hash changed - reset Nova node update tracking
+			helper.GetLogger().Info("Nova secret hash changed, resetting Nova node update tracking",
+				"oldHash", novaTracking.SecretHash,
+				"newHash", currentNovaHash)
+			err := deployment.ResetServiceNodeTracking(ctx, helper, instance.Name, instance.Namespace, "nova", currentNovaHash, ownerRefs)
+			if err != nil {
+				helper.GetLogger().Error(err, "Failed to reset Nova service tracking")
+			}
+		}
+	}
+
+	// Check Neutron credential changes and update tracking ConfigMap
+	currentNeutronHash, errNeutronHash := deployment.ComputeNeutronSecretsHash(ctx, helper, instance.Namespace)
+	if errNeutronHash != nil {
+		helper.GetLogger().Error(errNeutronHash, "Failed to compute Neutron secrets hash")
+	} else if currentNeutronHash != "" {
+		neutronTracking, err := deployment.GetServiceTracking(ctx, helper, instance.Name, instance.Namespace, "neutron")
+		if err != nil {
+			helper.GetLogger().Error(err, "Failed to get Neutron service tracking")
+		} else if neutronTracking.SecretHash != currentNeutronHash {
+			// Neutron secret hash changed - reset Neutron node update tracking
+			helper.GetLogger().Info("Neutron secret hash changed, resetting Neutron node update tracking",
+				"oldHash", neutronTracking.SecretHash,
+				"newHash", currentNeutronHash)
+			err := deployment.ResetServiceNodeTracking(ctx, helper, instance.Name, instance.Namespace, "neutron", currentNeutronHash, ownerRefs)
+			if err != nil {
+				helper.GetLogger().Error(err, "Failed to reset Neutron service tracking")
+			}
+		}
+	}
+
+	// Check Ironic credential changes and update tracking ConfigMap
+	currentIronicHash, errIronicHash := deployment.ComputeIronicSecretsHash(ctx, helper, instance.Namespace)
+	if errIronicHash != nil {
+		helper.GetLogger().Error(errIronicHash, "Failed to compute Ironic secrets hash")
+	} else if currentIronicHash != "" {
+		ironicTracking, err := deployment.GetServiceTracking(ctx, helper, instance.Name, instance.Namespace, "ironic")
+		if err != nil {
+			helper.GetLogger().Error(err, "Failed to get Ironic service tracking")
+		} else if ironicTracking.SecretHash != currentIronicHash {
+			// Ironic secret hash changed - reset Ironic node update tracking
+			helper.GetLogger().Info("Ironic secret hash changed, resetting Ironic node update tracking",
+				"oldHash", ironicTracking.SecretHash,
+				"newHash", currentIronicHash)
+			err := deployment.ResetServiceNodeTracking(ctx, helper, instance.Name, instance.Namespace, "ironic", currentIronicHash, ownerRefs)
+			if err != nil {
+				helper.GetLogger().Error(err, "Failed to reset Ironic service tracking")
+			}
+		}
 	}
 
 	for _, deployment := range relevantDeployments {
@@ -609,6 +725,124 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				services = instance.Spec.Services
 			}
 
+			// Check each service's edpmServiceType to detect which RabbitMQ services were deployed
+			// Track Nova, Neutron, and Ironic separately for independent credential rotation
+			novaServiceDeployed := false
+			neutronServiceDeployed := false
+			ironicServiceDeployed := false
+			var novaServiceName string
+			var neutronServiceName string
+			var ironicServiceName string
+
+			for _, serviceName := range services {
+				service := &dataplanev1.OpenStackDataPlaneService{}
+				name := types.NamespacedName{
+					Namespace: instance.Namespace,
+					Name:      serviceName,
+				}
+				err := helper.GetClient().Get(ctx, name, service)
+				if err != nil {
+					helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService", "service", serviceName)
+					continue
+				}
+
+				// Check if this is a RabbitMQ-using service based on edpmServiceType
+				serviceType := service.Spec.EDPMServiceType
+				if serviceType == "" {
+					// If not set, defaults to the service name
+					serviceType = serviceName
+				}
+
+				// Check Nova service
+				if serviceType == "nova" {
+					novaServiceName = serviceName
+					serviceCondition := condition.Type(fmt.Sprintf("Service%sDeploymentReady", strcase.ToCamel(serviceName)))
+					if deploymentConditions.IsTrue(serviceCondition) {
+						novaServiceDeployed = true
+					}
+				}
+
+				// Check Neutron services (DHCP and SRIOV)
+				// neutron-ovn and neutron-metadata don't use RabbitMQ (only OVN connections)
+				if serviceType == "neutron-dhcp" || serviceType == "neutron-sriov" {
+					neutronServiceName = serviceName
+					serviceCondition := condition.Type(fmt.Sprintf("Service%sDeploymentReady", strcase.ToCamel(serviceName)))
+					if deploymentConditions.IsTrue(serviceCondition) {
+						neutronServiceDeployed = true
+					}
+				}
+
+				// Check Ironic Neutron Agent service
+				if serviceType == "ironic-neutron-agent" {
+					ironicServiceName = serviceName
+					serviceCondition := condition.Type(fmt.Sprintf("Service%sDeploymentReady", strcase.ToCamel(serviceName)))
+					if deploymentConditions.IsTrue(serviceCondition) {
+						ironicServiceDeployed = true
+					}
+				}
+			}
+
+			// If Nova service was deployed successfully, track which nodes were updated for Nova
+			if novaServiceDeployed && isCurrentDeploymentReady {
+				// Update the status to track which nodes were covered by this deployment
+				// This persists the state so it survives pod restarts and deployment deletions
+				r.updateNodeCoverageForService(ctx, helper, instance, deployment, "nova", novaSecretsLastModified)
+			}
+
+			// If Neutron service was deployed successfully, track which nodes were updated for Neutron
+			if neutronServiceDeployed && isCurrentDeploymentReady {
+				// Update the status to track which nodes were covered by this deployment
+				r.updateNodeCoverageForService(ctx, helper, instance, deployment, "neutron", neutronSecretsLastModified)
+			}
+
+			// If Ironic service was deployed successfully, track which nodes were updated for Ironic
+			if ironicServiceDeployed && isCurrentDeploymentReady {
+				r.updateNodeCoverageForService(ctx, helper, instance, deployment, "ironic", ironicSecretsLastModified)
+			}
+
+			// Manage finalizers separately for Nova, Neutron, and Ironic
+			// This allows independent credential rotation for each service
+			// IMPORTANT: Check that no other deployment is running to avoid premature cleanup
+			// IMPORTANT: Don't manage finalizers if the deployment is being deleted
+			// IMPORTANT: Require at least one active deployment to ensure reliable state
+			isDeploymentBeingDeleted := !deployment.DeletionTimestamp.IsZero()
+
+			// Manage Nova user finalizers if Nova service was deployed
+			if novaServiceDeployed && isLatestDeployment && !isNodeSetDeploymentRunning && !isDeploymentBeingDeleted && hasActiveDeployments {
+				helper.GetLogger().Info("Checking if Nova RabbitMQ finalizers should be managed",
+					"deployment", deployment.Name,
+					"service", novaServiceName)
+				if errNovaSecrets != nil {
+					helper.GetLogger().Error(errNovaSecrets, "Failed to get Nova secrets last modified times")
+				} else {
+					r.manageServiceFinalizers(ctx, helper, instance, "nova", novaServiceName, novaSecretsLastModified)
+				}
+			}
+
+			// Manage Neutron user finalizers if Neutron service was deployed
+			if neutronServiceDeployed && isLatestDeployment && !isNodeSetDeploymentRunning && !isDeploymentBeingDeleted && hasActiveDeployments {
+				helper.GetLogger().Info("Checking if Neutron RabbitMQ finalizers should be managed",
+					"deployment", deployment.Name,
+					"service", neutronServiceName)
+				if errNeutronSecrets != nil {
+					helper.GetLogger().Error(errNeutronSecrets, "Failed to get Neutron secrets last modified times")
+				} else {
+					r.manageServiceFinalizers(ctx, helper, instance, "neutron", neutronServiceName, neutronSecretsLastModified)
+				}
+			}
+
+			// Manage Ironic user finalizers if Ironic service was deployed
+			if ironicServiceDeployed && isLatestDeployment && !isNodeSetDeploymentRunning && !isDeploymentBeingDeleted && hasActiveDeployments {
+				helper.GetLogger().Info("Checking if Ironic RabbitMQ finalizers should be managed",
+					"deployment", deployment.Name,
+					"service", ironicServiceName)
+				if errIronicSecrets != nil {
+					helper.GetLogger().Error(errIronicSecrets, "Failed to get Ironic secrets last modified times")
+				} else {
+					r.manageServiceFinalizers(ctx, helper, instance, "ironic", ironicServiceName, ironicSecretsLastModified)
+				}
+			}
+
 			// For each service, check if EDPMServiceType is "update" or "update-services", and
 			// if so, copy Deployment.Status.DeployedVersion to
 			// NodeSet.Status.DeployedVersion
@@ -637,6 +871,430 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 	}
 
 	return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+}
+
+// updateNodeCoverageForService updates the service tracking ConfigMap to track which nodes
+// have been covered by a successful deployment after the secret change for a specific service
+func (r *OpenStackDataPlaneNodeSetReconciler) updateNodeCoverageForService(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	deploymentObj *dataplanev1.OpenStackDataPlaneDeployment,
+	serviceName string,
+	secretsLastModified map[string]time.Time,
+) {
+	Log := r.GetLogger(ctx)
+
+	// Check if this deployment completed after the secret change
+	// We check the deployment's ready condition timestamp, not creation timestamp,
+	// because deployments can be created before they run.
+	deploymentConditions := deploymentObj.Status.NodeSetConditions[instance.Name]
+	readyCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+	if readyCondition == nil {
+		return
+	}
+
+	deploymentCompletedTime := readyCondition.LastTransitionTime.Time
+	for _, secretModTime := range secretsLastModified {
+		if deploymentCompletedTime.Before(secretModTime) {
+			// This deployment completed before the secret change, don't track it
+			Log.Info("Deployment completed before secret change, skipping node coverage tracking",
+				"service", serviceName,
+				"deployment", deploymentObj.Name,
+				"deploymentCompletedTime", deploymentCompletedTime,
+				"secretModTime", secretModTime)
+			return
+		}
+	}
+
+	// Get all nodes in the nodeset
+	allNodeNames := r.getAllNodeNamesFromNodeset(instance)
+	if len(allNodeNames) == 0 {
+		return
+	}
+
+	// Determine which nodes were covered by this deployment
+	coveredNodes := r.getNodesCoveredByDeployment(deploymentObj, allNodeNames)
+	if len(coveredNodes) == 0 {
+		return
+	}
+
+	// Get owner references for the ConfigMap
+	ownerRefs := []v1.OwnerReference{
+		{
+			APIVersion: instance.APIVersion,
+			Kind:       instance.Kind,
+			Name:       instance.Name,
+			UID:        instance.UID,
+			Controller: ptr.To(true),
+		},
+	}
+
+	// Add newly covered nodes to the ConfigMap
+	err := deployment.AddUpdatedNodes(ctx, helper, instance.Name, instance.Namespace, serviceName, coveredNodes, ownerRefs)
+	if err != nil {
+		Log.Error(err, "Failed to add updated nodes to service tracking",
+			"service", serviceName,
+			"deployment", deploymentObj.Name)
+		return
+	}
+
+	// Get updated tracking to log
+	tracking, err := deployment.GetServiceTracking(ctx, helper, instance.Name, instance.Namespace, serviceName)
+	if err != nil {
+		Log.Error(err, "Failed to get updated service tracking", "service", serviceName)
+	} else {
+		Log.Info("Updated node coverage tracking in ConfigMap",
+			"service", serviceName,
+			"deployment", deploymentObj.Name,
+			"coveredByThisDeployment", len(coveredNodes),
+			"totalCovered", len(tracking.UpdatedNodes),
+			"totalNodes", len(allNodeNames))
+	}
+}
+
+// allNodesetsUsingClusterUpdated checks if all nodesets using the same RabbitMQ cluster
+// for a specific service have been fully updated after the secret was modified.
+// This ensures we don't remove the finalizer from the old RabbitMQUser until ALL nodesets
+// that might be using it for that service have been updated to the new configuration.
+func (r *OpenStackDataPlaneNodeSetReconciler) allNodesetsUsingClusterUpdated(
+	ctx context.Context,
+	helper *helper.Helper,
+	currentNodeset *dataplanev1.OpenStackDataPlaneNodeSet,
+	serviceName string,
+	secretsLastModified map[string]time.Time,
+) (bool, error) {
+	Log := r.GetLogger(ctx)
+
+	// Collect all RabbitMQ clusters used by this nodeset for the specified service
+	clustersUsedByCurrentNodeset := make(map[string]bool)
+
+	if serviceName == "nova" {
+		// Get Nova clusters
+		cellNames, err := deployment.GetNovaComputeConfigCellNames(ctx, helper, currentNodeset.Namespace)
+		if err != nil {
+			Log.Info("Failed to get Nova cell names", "error", err)
+		} else {
+			for _, cellName := range cellNames {
+				cluster, err := deployment.GetRabbitMQClusterForCell(ctx, helper, currentNodeset.Namespace, cellName)
+				if err != nil {
+					Log.Info("Failed to get RabbitMQ cluster for Nova cell", "cell", cellName, "error", err)
+					continue
+				}
+				if cluster != "" {
+					clustersUsedByCurrentNodeset[cluster] = true
+				}
+			}
+		}
+	} else if serviceName == "neutron" {
+		// Get Neutron cluster
+		neutronCluster, err := deployment.GetRabbitMQClusterForNeutron(ctx, helper, currentNodeset.Namespace)
+		if err != nil {
+			Log.Info("Failed to get RabbitMQ cluster for Neutron", "error", err)
+		} else if neutronCluster != "" {
+			clustersUsedByCurrentNodeset[neutronCluster] = true
+		}
+	} else if serviceName == "ironic" {
+		// Get Ironic cluster
+		ironicCluster, err := deployment.GetRabbitMQClusterForIronic(ctx, helper, currentNodeset.Namespace)
+		if err != nil {
+			Log.Info("Failed to get RabbitMQ cluster for Ironic", "error", err)
+		} else if ironicCluster != "" {
+			clustersUsedByCurrentNodeset[ironicCluster] = true
+		}
+	}
+
+	if len(clustersUsedByCurrentNodeset) == 0 {
+		// No clusters identified - this likely means the RabbitMQ cluster info
+		// is not available yet. We should NOT proceed with finalizer removal
+		// until we can properly verify all nodes are updated.
+		Log.Info("No RabbitMQ clusters identified, cannot verify node coverage - skipping finalizer management",
+			"service", serviceName,
+			"nodeset", currentNodeset.Name)
+		return false, nil
+	}
+
+	// Get all nodesets in the namespace
+	nodesetList := &dataplanev1.OpenStackDataPlaneNodeSetList{}
+	err := r.List(ctx, nodesetList, client.InNamespace(currentNodeset.Namespace))
+	if err != nil {
+		return false, fmt.Errorf("failed to list nodesets: %w", err)
+	}
+
+	// Check each nodeset that might be using the same cluster for this service
+	for _, nodeset := range nodesetList.Items {
+		// Check if this nodeset uses any of the same clusters for this service
+		usesSharedCluster := false
+
+		if serviceName == "nova" {
+			// Check Nova cells
+			nodesetCellNames, err := deployment.GetNovaComputeConfigCellNames(ctx, helper, nodeset.Namespace)
+			if err == nil {
+				for _, cellName := range nodesetCellNames {
+					cluster, err := deployment.GetRabbitMQClusterForCell(ctx, helper, nodeset.Namespace, cellName)
+					if err != nil {
+						continue
+					}
+					if clustersUsedByCurrentNodeset[cluster] {
+						usesSharedCluster = true
+						break
+					}
+				}
+			}
+		} else if serviceName == "neutron" {
+			// Check Neutron cluster
+			nodesetNeutronCluster, err := deployment.GetRabbitMQClusterForNeutron(ctx, helper, nodeset.Namespace)
+			if err == nil && nodesetNeutronCluster != "" && clustersUsedByCurrentNodeset[nodesetNeutronCluster] {
+				usesSharedCluster = true
+			}
+		} else if serviceName == "ironic" {
+			// Check Ironic cluster
+			nodesetIronicCluster, err := deployment.GetRabbitMQClusterForIronic(ctx, helper, nodeset.Namespace)
+			if err == nil && nodesetIronicCluster != "" && clustersUsedByCurrentNodeset[nodesetIronicCluster] {
+				usesSharedCluster = true
+			}
+		}
+
+		if !usesSharedCluster {
+			// This nodeset doesn't use the same cluster for this service, skip it
+			continue
+		}
+
+		// This nodeset uses the same cluster for this service, check if it's been updated
+		// IMPORTANT: If this is the current nodeset, use the in-memory version
+		// to avoid stale data (ConfigMap may have been updated but not refreshed yet)
+		nodesetToCheck := &nodeset
+		if nodeset.Name == currentNodeset.Name && nodeset.Namespace == currentNodeset.Namespace {
+			nodesetToCheck = currentNodeset
+		}
+
+		nodesetUpdated, err := r.isNodesetFullyUpdated(ctx, helper, nodesetToCheck, serviceName, secretsLastModified)
+		if err != nil {
+			Log.Error(err, "Failed to check if nodeset is fully updated", "service", serviceName, "nodeset", nodeset.Name)
+			return false, err
+		}
+
+		if !nodesetUpdated {
+			Log.Info("Nodeset using same RabbitMQ cluster has not been fully updated yet for service",
+				"service", serviceName,
+				"nodeset", nodeset.Name,
+				"currentNodeset", currentNodeset.Name)
+			return false, nil
+		}
+	}
+
+	// All nodesets using the same cluster for this service have been updated
+	return true, nil
+}
+
+// isNodesetFullyUpdated checks if all nodes in a nodeset have been successfully deployed
+// after the secrets were last modified for a specific service. This uses the ConfigMap
+// tracking as the source of truth, which survives pod restarts and deployment deletions.
+func (r *OpenStackDataPlaneNodeSetReconciler) isNodesetFullyUpdated(
+	ctx context.Context,
+	helper *helper.Helper,
+	nodeset *dataplanev1.OpenStackDataPlaneNodeSet,
+	serviceName string,
+	secretsLastModified map[string]time.Time,
+) (bool, error) {
+	Log := r.GetLogger(ctx)
+
+	// Get all node names/hostnames from the nodeset
+	allNodeNames := r.getAllNodeNamesFromNodeset(nodeset)
+	if len(allNodeNames) == 0 {
+		// No nodes defined in nodeset, consider it updated
+		return true, nil
+	}
+
+	// Get the tracking data from the ConfigMap
+	tracking, err := deployment.GetServiceTracking(ctx, helper, nodeset.Name, nodeset.Namespace, serviceName)
+	if err != nil {
+		return false, fmt.Errorf("failed to get service tracking for %s: %w", serviceName, err)
+	}
+
+	// Use the persisted ConfigMap as the source of truth for node coverage
+	// This survives pod restarts and deployment deletions
+	coveredNodes := make(map[string]bool)
+	for _, nodeName := range tracking.UpdatedNodes {
+		coveredNodes[nodeName] = true
+	}
+
+	// Check if all nodes are covered
+	uncoveredNodes := make([]string, 0)
+	for _, nodeName := range allNodeNames {
+		if !coveredNodes[nodeName] {
+			uncoveredNodes = append(uncoveredNodes, nodeName)
+		}
+	}
+
+	if len(uncoveredNodes) > 0 {
+		Log.Info("Not all nodes have been updated yet for service",
+			"service", serviceName,
+			"nodeset", nodeset.Name,
+			"allNodeNames", allNodeNames,
+			"coveredNodesList", tracking.UpdatedNodes,
+			"coveredNodes", len(coveredNodes),
+			"totalNodes", len(allNodeNames),
+			"uncoveredCount", len(uncoveredNodes),
+			"uncoveredNodes", uncoveredNodes)
+		return false, nil
+	}
+
+	Log.Info("All nodes in nodeset have been successfully updated for service",
+		"service", serviceName,
+		"nodeset", nodeset.Name,
+		"allNodeNames", allNodeNames,
+		"coveredNodesList", tracking.UpdatedNodes,
+		"totalNodes", len(allNodeNames),
+		"coveredNodes", len(coveredNodes))
+	return true, nil
+}
+
+// getAllNodeNamesFromNodeset extracts all node names from a nodeset
+// Only returns the node names (map keys), not hostnames or ansible_host values,
+// since those are just aliases for the same node
+func (r *OpenStackDataPlaneNodeSetReconciler) getAllNodeNamesFromNodeset(
+	nodeset *dataplanev1.OpenStackDataPlaneNodeSet,
+) []string {
+	nodeNames := make([]string, 0, len(nodeset.Spec.Nodes))
+
+	for nodeName := range nodeset.Spec.Nodes {
+		// Only add the node name from the map key
+		// Don't add hostname or ansible_host as they're just aliases for the same node
+		nodeNames = append(nodeNames, nodeName)
+	}
+
+	return nodeNames
+}
+
+// getNodesCoveredByDeployment determines which nodes were covered by a deployment
+// based on its AnsibleLimit setting
+func (r *OpenStackDataPlaneNodeSetReconciler) getNodesCoveredByDeployment(
+	deployment *dataplanev1.OpenStackDataPlaneDeployment,
+	allNodes []string,
+) []string {
+	ansibleLimit := strings.TrimSpace(deployment.Spec.AnsibleLimit)
+
+	// If no AnsibleLimit or it's "*", all nodes are covered
+	if ansibleLimit == "" || ansibleLimit == "*" {
+		return allNodes
+	}
+
+	// Parse AnsibleLimit to find covered nodes
+	// AnsibleLimit can be a comma-separated list of node names, patterns, or groups
+	limitParts := strings.Split(ansibleLimit, ",")
+
+	coveredNodes := make([]string, 0)
+	for _, node := range allNodes {
+		if r.nodeMatchesAnsibleLimit(node, limitParts) {
+			coveredNodes = append(coveredNodes, node)
+		}
+	}
+
+	return coveredNodes
+}
+
+// nodeMatchesAnsibleLimit checks if a node matches any pattern in the AnsibleLimit
+func (r *OpenStackDataPlaneNodeSetReconciler) nodeMatchesAnsibleLimit(
+	nodeName string,
+	limitParts []string,
+) bool {
+	for _, part := range limitParts {
+		part = strings.TrimSpace(part)
+
+		// Exact match
+		if part == nodeName {
+			return true
+		}
+
+		// Simple wildcard matching (* at the end)
+		// e.g., "compute-*" matches "compute-0", "compute-1", etc.
+		if strings.HasSuffix(part, "*") {
+			prefix := strings.TrimSuffix(part, "*")
+			if strings.HasPrefix(nodeName, prefix) {
+				return true
+			}
+		}
+
+		// Simple wildcard matching (* at the beginning)
+		// e.g., "*-0" matches "compute-0", "controller-0", etc.
+		if strings.HasPrefix(part, "*") {
+			suffix := strings.TrimPrefix(part, "*")
+			if strings.HasSuffix(nodeName, suffix) {
+				return true
+			}
+		}
+
+		// TODO: More complex Ansible patterns could be supported here
+		// For now, we handle the most common cases (exact match and simple wildcards)
+	}
+
+	return false
+}
+
+// reconcileDelete handles the deletion of a NodeSet by cleaning up RabbitMQ user finalizers
+func (r *OpenStackDataPlaneNodeSetReconciler) reconcileDelete(
+	ctx context.Context,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	helper *helper.Helper,
+) (ctrl.Result, error) {
+	Log := r.GetLogger(ctx)
+	Log.Info("Reconciling NodeSet deletion")
+
+	// Get all RabbitMQ users in the namespace to clean up our finalizers
+	rabbitmqUsers := &unstructured.UnstructuredList{}
+	rabbitmqUsers.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "rabbitmq.openstack.org",
+		Version: "v1beta1",
+		Kind:    "RabbitMQUserList",
+	})
+
+	listOpts := &client.ListOptions{
+		Namespace: instance.Namespace,
+	}
+
+	err := r.List(ctx, rabbitmqUsers, listOpts)
+	if err != nil {
+		Log.Error(err, "Failed to list RabbitMQ users during deletion")
+		return ctrl.Result{}, err
+	}
+
+	// Remove our finalizers from all RabbitMQ users
+	// Our finalizers follow the pattern: nodeset.os/{finalizerHash}-{service}
+	finalizerPrefix := fmt.Sprintf("nodeset.os/%s-", instance.Status.FinalizerHash)
+
+	for _, userObj := range rabbitmqUsers.Items {
+		user := userObj.DeepCopy()
+		originalFinalizers := user.GetFinalizers()
+		updatedFinalizers := []string{}
+
+		// Keep only finalizers that don't belong to this nodeset
+		for _, f := range originalFinalizers {
+			if !strings.HasPrefix(f, finalizerPrefix) {
+				updatedFinalizers = append(updatedFinalizers, f)
+			} else {
+				Log.Info("Removing finalizer from RabbitMQ user during nodeset deletion",
+					"user", user.GetName(),
+					"finalizer", f)
+			}
+		}
+
+		// Update the user if we removed any finalizers
+		if len(updatedFinalizers) != len(originalFinalizers) {
+			user.SetFinalizers(updatedFinalizers)
+			if err := r.Update(ctx, user); err != nil {
+				Log.Error(err, "Failed to remove finalizer from RabbitMQ user",
+					"user", user.GetName())
+				return ctrl.Result{}, err
+			}
+		}
+	}
+
+	// Remove the nodeset's own finalizer to allow deletion
+	controllerutil.RemoveFinalizer(instance, helper.GetFinalizer())
+	Log.Info("Finalizer removed from NodeSet, allowing deletion", "nodeset", instance.Name)
+
+	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

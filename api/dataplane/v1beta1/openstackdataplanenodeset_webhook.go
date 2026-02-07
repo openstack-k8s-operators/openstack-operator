@@ -27,6 +27,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -165,6 +166,27 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(ctx context.Context, old runt
 		for deployName, deployConditions := range oldNodeSet.Status.DeploymentStatuses {
 			deployCondition := deployConditions.Get(NodeSetDeploymentReadyCondition)
 			if !deployConditions.IsTrue(NodeSetDeploymentReadyCondition) && !condition.IsError(deployCondition) {
+				// Check if the deployment is being deleted - if so, allow the NodeSet update
+				deployment := &OpenStackDataPlaneDeployment{}
+				err := c.Get(ctx, types.NamespacedName{Name: deployName, Namespace: r.Namespace}, deployment)
+				if err != nil {
+					if apierrors.IsNotFound(err) {
+						// Deployment no longer exists, allow the update
+						continue
+					}
+					// If we can't check the deployment, log but don't block
+					openstackdataplanenodesetlog.Info("could not check deployment status during validation",
+						"deployment", deployName, "error", err)
+					continue
+				}
+
+				// If deployment is being deleted, allow the NodeSet update
+				if deployment.DeletionTimestamp != nil {
+					openstackdataplanenodesetlog.Info("allowing NodeSet update because deployment is being deleted",
+						"deployment", deployName)
+					continue
+				}
+
 				return nil, apierrors.NewConflict(
 					schema.GroupResource{Group: "dataplane.openstack.org", Resource: "OpenStackDataPlaneNodeSet"},
 					r.Name,
