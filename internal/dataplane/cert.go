@@ -31,6 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/util/validation"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -38,6 +39,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
 )
 
@@ -85,6 +87,12 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	service dataplanev1.OpenStackDataPlaneService,
 	certKey string,
 ) (*ctrl.Result, error) {
+	if instance.Status.ConfigHash != instance.Status.DeployedConfigHash {
+		if err := cleanupStaleCertificates(ctx, helper, instance, allHostnames, service, certKey); err != nil {
+			return &ctrl.Result{}, err
+		}
+	}
+
 	certsData := map[string][]byte{}
 	secretMaxSize := instance.Spec.SecretMaxSize
 
@@ -292,4 +300,61 @@ func GetServiceCertsSecretName(instance *dataplanev1.OpenStackDataPlaneNodeSet, 
 		name = "cert-" + hex.EncodeToString(hash[:])
 	}
 	return name
+}
+
+func cleanupStaleCertificates(ctx context.Context, helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	allHostnames map[string]map[infranetworkv1.NetNameStr]string,
+	service dataplanev1.OpenStackDataPlaneService,
+	certKey string) error {
+
+	labelSelector := map[string]string{
+		NodeSetLabel:    instance.Name,
+		ServiceLabel:    service.Name,
+		ServiceKeyLabel: certKey,
+	}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels(labelSelector),
+	}
+
+	certList := &certmgrv1.CertificateList{}
+	if err := helper.GetClient().List(ctx, certList, listOpts...); err != nil {
+		return fmt.Errorf("failed to list certificates for cleanup: %w", err)
+	}
+
+	for i := range certList.Items {
+		cert := &certList.Items[i]
+		hostname, ok := cert.Labels[HostnameLabel]
+		if !ok {
+			continue
+		}
+		if _, exists := allHostnames[hostname]; !exists {
+			util.LogForObject(helper, fmt.Sprintf("Deleting stale certificate %s for removed node %s", cert.Name, hostname), instance)
+			if err := helper.GetClient().Delete(ctx, cert); client.IgnoreNotFound(err) != nil {
+				return fmt.Errorf("failed to delete stale certificate %s: %w", cert.Name, err)
+			}
+		}
+	}
+
+	secretList := &corev1.SecretList{}
+	if err := helper.GetClient().List(ctx, secretList, listOpts...); err != nil {
+		return fmt.Errorf("failed to list certificate secrets for cleanup: %w", err)
+	}
+
+	for i := range secretList.Items {
+		secret := &secretList.Items[i]
+		hostname, ok := secret.Labels[HostnameLabel]
+		if !ok {
+			continue
+		}
+		if _, exists := allHostnames[hostname]; !exists {
+			util.LogForObject(helper, fmt.Sprintf("Deleting stale certificate secret %s for removed node %s", secret.Name, hostname), instance)
+			if err := helper.GetClient().Delete(ctx, secret); client.IgnoreNotFound(err) != nil {
+				return fmt.Errorf("failed to delete stale certificate secret %s: %w", secret.Name, err)
+			}
+		}
+	}
+
+	return nil
 }
