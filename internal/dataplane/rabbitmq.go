@@ -32,7 +32,9 @@ import (
 )
 
 // GetNovaCellRabbitMqUserFromSecret extracts the RabbitMQ username from a nova-cellX-compute-config secret
-// Returns the username extracted from transport_url in the secret
+// Returns the username extracted from rabbitmq_user_name field (preferred) or transport_url (fallback)
+// As of nova-operator PR #1066, the RabbitMQUser CR name is propagated directly in the
+// rabbitmq_user_name and notification_rabbitmq_user_name fields for easier tracking.
 func GetNovaCellRabbitMqUserFromSecret(
 	ctx context.Context,
 	h *helper.Helper,
@@ -56,7 +58,13 @@ func GetNovaCellRabbitMqUserFromSecret(
 			continue
 		}
 
-		// Extract transport_url from secret data
+		// Preferred: Use the rabbitmq_user_name field directly if available
+		// This field is populated by nova-operator PR #1066 with the RabbitMQUser CR name
+		if rabbitmqUserName, ok := secret.Data["rabbitmq_user_name"]; ok && len(rabbitmqUserName) > 0 {
+			return string(rabbitmqUserName), nil
+		}
+
+		// Fallback: Extract transport_url from secret data for backwards compatibility
 		transportURLBytes, ok := secret.Data["transport_url"]
 		if !ok {
 			// Try to extract from config files as fallback (in case it's embedded)
@@ -88,6 +96,49 @@ func GetNovaCellRabbitMqUserFromSecret(
 	}
 
 	return "", fmt.Errorf("no RabbitMQ username found for cell %s", cellName)
+}
+
+// GetNovaCellNotificationRabbitMqUserFromSecret extracts the notification RabbitMQ username
+// from a nova-cellX-compute-config secret. This is used for tracking the RabbitMQUser CR
+// used for notifications (separate from the messaging/RPC bus).
+// Returns the username extracted from notification_rabbitmq_user_name field (preferred)
+// or attempts to extract from notification transport_url (fallback).
+func GetNovaCellNotificationRabbitMqUserFromSecret(
+	ctx context.Context,
+	h *helper.Helper,
+	namespace string,
+	cellName string,
+) (string, error) {
+	// List all secrets in the namespace
+	secretList := &corev1.SecretList{}
+	err := h.GetClient().List(ctx, secretList, client.InNamespace(namespace))
+	if err != nil {
+		return "", fmt.Errorf("failed to list secrets: %w", err)
+	}
+
+	// Pattern to match nova-cellX-compute-config secrets
+	secretPattern := regexp.MustCompile(`^nova-(` + cellName + `)-compute-config(-\d+)?$`)
+
+	for _, secret := range secretList.Items {
+		matches := secretPattern.FindStringSubmatch(secret.Name)
+		if matches == nil {
+			continue
+		}
+
+		// Preferred: Use the notification_rabbitmq_user_name field directly if available
+		// This field is populated by nova-operator PR #1066 with the RabbitMQUser CR name
+		if notificationRabbitmqUserName, ok := secret.Data["notification_rabbitmq_user_name"]; ok && len(notificationRabbitmqUserName) > 0 {
+			return string(notificationRabbitmqUserName), nil
+		}
+
+		// If notification_rabbitmq_user_name is not available, this likely means:
+		// 1. Nova-operator hasn't been updated to PR #1066 yet, or
+		// 2. Notifications are not configured for this cell
+		// Return empty string to indicate no notification user (not an error)
+		return "", nil
+	}
+
+	return "", fmt.Errorf("no compute-config secret found for cell %s", cellName)
 }
 
 // parseUsernameFromTransportURL extracts the username from a RabbitMQ transport URL

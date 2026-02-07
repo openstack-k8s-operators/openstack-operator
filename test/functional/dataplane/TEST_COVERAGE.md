@@ -4,7 +4,9 @@ This document summarizes the comprehensive test coverage for RabbitMQ user final
 
 ## Test File Location
 - **Main Tests**: `test/functional/dataplane/openstackdataplanenodeset_rabbitmq_finalizer_test.go`
-- **Unit Tests**: `internal/controller/dataplane/manage_service_finalizers_test.go`
+- **Unit Tests**:
+  - `internal/controller/dataplane/manage_service_finalizers_test.go`
+  - `internal/dataplane/rabbitmq_test.go`
 
 ## Coverage Summary
 
@@ -144,6 +146,41 @@ This document summarizes the comprehensive test coverage for RabbitMQ user final
 
 ---
 
+### Nova RabbitMQ User Extraction
+**Location**: `internal/dataplane/rabbitmq_test.go`
+
+**What it validates**:
+
+#### GetNovaCellRabbitMqUserFromSecret Tests
+- ✅ New format: `rabbitmq_user_name` field extraction (nova-operator PR #1066)
+- ✅ Old format: Fallback to `transport_url` parsing (backward compatibility)
+- ✅ Preference: Uses `rabbitmq_user_name` when both fields present
+- ✅ Secret versioning: Handles versioned secret names (e.g., `nova-cell1-compute-config-1`)
+- ✅ Empty field handling: Falls back to transport_url when `rabbitmq_user_name` is empty
+- ✅ Error handling: Proper error when no matching secret found
+- ✅ Error handling: Proper error when secret has neither field
+- ✅ TLS support: Parses `rabbit+tls://` URLs correctly
+- ✅ Complex URLs: Handles multi-host, complex password characters
+- ✅ Special characters: Cell names with hyphens and underscores
+
+#### GetNovaCellNotificationRabbitMqUserFromSecret Tests
+- ✅ New format: `notification_rabbitmq_user_name` field extraction
+- ✅ Not configured: Returns empty string (not error) when field absent
+- ✅ Empty field: Returns empty string when field is empty
+- ✅ Secret versioning: Handles versioned secret names
+- ✅ Error handling: Proper error when no matching secret found
+- ✅ Multi-cell: Correctly matches the requested cell among multiple cells
+
+**Test Count**: 17 test cases total (8 basic + 3 edge cases + 6 notification)
+
+**Coverage**: Complete coverage of both new functions and all code paths including:
+- Preferred path (new `rabbitmq_user_name` field)
+- Fallback path (transport_url parsing)
+- Error conditions
+- Edge cases
+
+---
+
 ## Test Helpers
 
 ### RabbitMQ User Management
@@ -250,10 +287,10 @@ Each test follows this pattern:
 ## Code Coverage Metrics
 
 **Files Covered**:
-- ✅ `internal/controller/dataplane/manage_service_finalizers.go`
-- ✅ `internal/controller/dataplane/openstackdataplanenodeset_controller.go` (finalizer logic)
-- ✅ `internal/dataplane/rabbitmq.go`
-- ✅ `internal/dataplane/service_tracking.go`
+- ✅ `internal/controller/dataplane/manage_service_finalizers.go` (unit tests)
+- ✅ `internal/controller/dataplane/openstackdataplanenodeset_controller.go` (functional tests - finalizer logic)
+- ✅ `internal/dataplane/rabbitmq.go` (unit tests - complete coverage of all functions)
+- ✅ `internal/dataplane/service_tracking.go` (functional tests)
 
 **Critical Paths Tested**:
 - ✅ Hash computation (deterministic, unique)
