@@ -1,10 +1,8 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 approvers:
-  - ci-approvers
   - openstack-approvers
   - dataplane-approvers
 
 reviewers:
-  - ci-approvers
   - openstack-approvers
   - dataplane-approvers
