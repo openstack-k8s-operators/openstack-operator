@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -70,6 +71,25 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Glance.Template = &glancev1.GlanceSpecCore{}
 	}
 
+	// Migration and inheritance: Set NotificationsBus.Cluster with correct priority order
+	if instance.Spec.Glance.Template.NotificationsBus == nil || instance.Spec.Glance.Template.NotificationsBus.Cluster == "" {
+		// Priority 1: Migrate from service-level deprecated field (pointer type)
+		if instance.Spec.Glance.Template.NotificationBusInstance != nil && *instance.Spec.Glance.Template.NotificationBusInstance != "" {
+			if instance.Spec.Glance.Template.NotificationsBus == nil {
+				instance.Spec.Glance.Template.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+			}
+			instance.Spec.Glance.Template.NotificationsBus.Cluster = *instance.Spec.Glance.Template.NotificationBusInstance
+			// Priority 2: Inherit from top-level NotificationsBus
+		} else if instance.Spec.NotificationsBus != nil && instance.Spec.NotificationsBus.Cluster != "" {
+			instance.Spec.Glance.Template.NotificationsBus = instance.Spec.NotificationsBus
+		}
+		// No Priority 3 default - NotificationsBus is optional
+	}
+	// Clear deprecated field after migration
+	if instance.Spec.Glance.Template.NotificationsBus != nil && instance.Spec.Glance.Template.NotificationsBus.Cluster != "" {
+		instance.Spec.Glance.Template.NotificationBusInstance = nil
+	}
+
 	if instance.Spec.Glance.Template.NodeSelector == nil {
 		instance.Spec.Glance.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
@@ -80,12 +100,6 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	// subCRs inherit the top-level TopologyRef unless an override is present
 	if instance.Spec.Glance.Template.TopologyRef == nil {
 		instance.Spec.Glance.Template.TopologyRef = instance.Spec.TopologyRef
-	}
-
-	// When no NotificationsBusInstance is referenced in the subCR (override)
-	// try to inject the top-level one if defined
-	if instance.Spec.Glance.Template.NotificationBusInstance == nil {
-		instance.Spec.Glance.Template.NotificationBusInstance = instance.Spec.NotificationsBusInstance
 	}
 
 	// When component services got created check if there is the need to create a route

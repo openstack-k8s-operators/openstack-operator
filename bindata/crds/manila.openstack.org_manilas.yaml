@@ -1796,6 +1796,22 @@ spec:
                 default: memcached
                 description: Memcached instance name.
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -1804,10 +1820,28 @@ spec:
                   NodeSelector here acts as a default value and can be overridden by service
                   specific NodeSelector Settings.
                 type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               notificationsBusInstance:
                 description: |-
                   RabbitMQ instance name used to request a transportURL that is used for
                   notification purposes
+                  Deprecated: Use NotificationsBus.Cluster instead
                 type: string
               passwordSelectors:
                 default:
@@ -1827,10 +1861,10 @@ spec:
                   e.g. to check logs
                 type: boolean
               rabbitMqClusterName:
-                default: rabbitmq
                 description: |-
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used in Manila
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               secret:
                 description: Secret containing OpenStack password information for
@@ -1863,7 +1897,6 @@ spec:
             - manilaAPI
             - manilaScheduler
             - memcachedInstance
-            - rabbitMqClusterName
             type: object
           status:
             description: ManilaStatus defines the observed state of Manila

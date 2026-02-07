@@ -43,6 +43,9 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template = &watcherv1.WatcherSpecCore{}
 	}
 
+	// Note: Migration from rabbitMqClusterName to messagingBus.cluster is handled by the webhook
+	// via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
+
 	// add selector to service overrides
 	for _, endpointType := range []service.Endpoint{service.EndpointPublic, service.EndpointInternal} {
 		if instance.Spec.Watcher.Template.APIServiceTemplate.Override.Service == nil {
@@ -169,15 +172,29 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template.TopologyRef = instance.Spec.TopologyRef
 	}
 
-	// When no NotificationsBusInstance is referenced in the subCR (override)
-	// try to inject the top-level one if defined
-	if instance.Spec.Watcher.Template.NotificationsBusInstance == nil {
-		instance.Spec.Watcher.Template.NotificationsBusInstance = instance.Spec.NotificationsBusInstance
+	// Propagate MessagingBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.MessagingBus != nil && instance.Spec.MessagingBus.Cluster != "" {
+		if instance.Spec.Watcher.Template.MessagingBus.Cluster == "" {
+			instance.Spec.Watcher.Template.MessagingBus = *instance.Spec.MessagingBus
+		}
+	}
+
+	// Propagate NotificationsBus from top-level to template if not set
+	// Template-level takes precedence over top-level
+	if instance.Spec.NotificationsBus != nil {
+		if instance.Spec.Watcher.Template.NotificationsBus == nil {
+			instance.Spec.Watcher.Template.NotificationsBus = instance.Spec.NotificationsBus
+		}
 	}
 
 	helper.GetLogger().Info("Reconciling Watcher", "Watcher.Namespace", instance.Namespace, "Watcher.Name", "watcher")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), watcher, func() error {
 		instance.Spec.Watcher.Template.DeepCopyInto(&watcher.Spec.WatcherSpecCore)
+		// Explicitly propagate NotificationsBus only if non-nil to allow webhook defaulting from rabbitMqClusterName
+		if instance.Spec.Watcher.Template.NotificationsBus != nil {
+			watcher.Spec.NotificationsBus = instance.Spec.Watcher.Template.NotificationsBus
+		}
 
 		if version.Status.ContainerImages.WatcherAPIImage == nil ||
 			version.Status.ContainerImages.WatcherApplierImage == nil ||

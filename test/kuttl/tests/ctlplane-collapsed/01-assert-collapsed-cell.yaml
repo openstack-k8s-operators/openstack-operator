@@ -85,7 +85,8 @@ spec:
           cell1:
             cellDatabaseAccount: nova-cell1
             cellDatabaseInstance: openstack
-            cellMessageBusInstance: rabbitmq
+            messagingBus:
+              cluster: rabbitmq
             conductorServiceTemplate:
               replicas: 1
             hasAPIAccess: true

@@ -574,9 +574,33 @@ spec:
                         - simple_crypto
                         - pkcs11
                         type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       passwordSelectors:
                         default:
@@ -615,7 +639,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       secret:
                         default: osp-secret
@@ -640,7 +663,6 @@ spec:
                     - barbicanKeystoneListener
                     - barbicanWorker
                     - databaseInstance
-                    - rabbitMqClusterName
                     - serviceAccount
                     type: object
                 type: object
@@ -1744,9 +1766,33 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       notificationsBusInstance:
                         type: string
@@ -1762,7 +1808,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       secret:
                         type: string
@@ -1781,7 +1826,6 @@ spec:
                     - cinderScheduler
                     - databaseInstance
                     - memcachedInstance
-                    - rabbitMqClusterName
                     - secret
                     type: object
                   uniquePodNames:
@@ -2918,9 +2962,33 @@ spec:
                           transportURLSecret:
                             type: string
                         type: object
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       nsRecords:
                         items:
@@ -2949,7 +3017,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       redisServiceName:
                         default: designate-redis
@@ -3007,7 +3074,6 @@ spec:
                     - designateMdns
                     - designateProducer
                     - designateWorker
-                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
@@ -4627,6 +4693,18 @@ spec:
                         type: object
                       notificationBusInstance:
                         type: string
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       passwordSelectors:
                         default:
                           service: GlancePassword
@@ -5866,9 +5944,33 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       passwordSelectors:
                         default:
@@ -5889,7 +5991,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       secret:
                         type: string
@@ -5909,7 +6010,6 @@ spec:
                     - heatCfnAPI
                     - heatEngine
                     - memcachedInstance
-                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
@@ -7444,12 +7544,35 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          messagingBus:
+                            properties:
+                              cluster:
+                                minLength: 1
+                                type: string
+                              user:
+                                type: string
+                              vhost:
+                                type: string
+                            required:
+                            - cluster
+                            type: object
                           nodeSelector:
                             additionalProperties:
                               type: string
                             type: object
+                          notificationsBus:
+                            properties:
+                              cluster:
+                                minLength: 1
+                                type: string
+                              user:
+                                type: string
+                              vhost:
+                                type: string
+                            required:
+                            - cluster
+                            type: object
                           rabbitMqClusterName:
-                            default: rabbitmq
                             type: string
                           replicas:
                             default: 1
@@ -7498,9 +7621,33 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       passwordSelectors:
                         default:
@@ -7514,7 +7661,6 @@ spec:
                         default: true
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       rpcTransport:
                         type: string
@@ -8248,6 +8394,18 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       override:
                         properties:
                           service:
@@ -8312,7 +8470,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       region:
                         default: regionOne
@@ -8395,7 +8552,6 @@ spec:
                     required:
                     - databaseInstance
                     - memcachedInstance
-                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
@@ -9383,9 +9539,33 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       notificationsBusInstance:
                         type: string
@@ -9401,7 +9581,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       secret:
                         type: string
@@ -9420,7 +9599,6 @@ spec:
                     - manilaAPI
                     - manilaScheduler
                     - memcachedInstance
-                    - rabbitMqClusterName
                     type: object
                 type: object
               memcached:
@@ -9514,6 +9692,18 @@ spec:
                       - replicas
                       type: object
                     type: object
+                type: object
+              messagingBus:
+                properties:
+                  cluster:
+                    minLength: 1
+                    type: string
+                  user:
+                    type: string
+                  vhost:
+                    type: string
+                required:
+                - cluster
                 type: object
               neutron:
                 properties:
@@ -10225,6 +10415,18 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       ml2MechanismDrivers:
                         default:
                         - ovn
@@ -10238,6 +10440,18 @@ spec:
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       notificationsBusInstance:
                         type: string
@@ -10305,7 +10519,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       replicas:
                         default: 1
@@ -10384,13 +10597,24 @@ spec:
                     required:
                     - databaseInstance
                     - memcachedInstance
-                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
               nodeSelector:
                 additionalProperties:
                   type: string
+                type: object
+              notificationsBus:
+                properties:
+                  cluster:
+                    minLength: 1
+                    type: string
+                  user:
+                    type: string
+                  vhost:
+                    type: string
+                required:
+                - cluster
                 type: object
               notificationsBusInstance:
                 type: string
@@ -10706,7 +10930,6 @@ spec:
                         default: openstack
                         type: string
                       apiMessageBusInstance:
-                        default: rabbitmq
                         type: string
                       apiServiceTemplate:
                         default:
@@ -10861,7 +11084,6 @@ spec:
                               default: openstack
                               type: string
                             cellMessageBusInstance:
-                              default: rabbitmq
                               type: string
                             conductorServiceTemplate:
                               properties:
@@ -10940,6 +11162,18 @@ spec:
                               type: boolean
                             memcachedInstance:
                               type: string
+                            messagingBus:
+                              properties:
+                                cluster:
+                                  minLength: 1
+                                  type: string
+                                user:
+                                  type: string
+                                vhost:
+                                  type: string
+                              required:
+                              - cluster
+                              type: object
                             metadataServiceTemplate:
                               properties:
                                 customServiceConfig:
@@ -11280,8 +11514,9 @@ spec:
                           cell1:
                             cellDatabaseAccount: nova-cell1
                             cellDatabaseInstance: openstack-cell1
-                            cellMessageBusInstance: rabbitmq-cell1
                             hasAPIAccess: true
+                            messagingBus:
+                              cluster: rabbitmq-cell1
                         type: object
                       keystoneInstance:
                         default: keystone
@@ -11289,6 +11524,18 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       metadataServiceTemplate:
                         default:
                           enabled: true
@@ -11414,6 +11661,18 @@ spec:
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       notificationsBusInstance:
                         type: string
@@ -11755,9 +12014,33 @@ spec:
                             default: true
                             type: boolean
                         type: object
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       octaviaAPI:
                         properties:
@@ -11790,6 +12073,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          notificationsTransportURLSecret:
+                            type: string
                           override:
                             properties:
                               service:
@@ -12009,6 +12294,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          notificationsTransportURLSecret:
+                            type: string
                           octaviaProviderSubnetCIDR:
                             type: string
                           octaviaProviderSubnetExtraCIDRs:
@@ -12166,6 +12453,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          notificationsTransportURLSecret:
+                            type: string
                           octaviaProviderSubnetCIDR:
                             type: string
                           octaviaProviderSubnetExtraCIDRs:
@@ -12429,6 +12718,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          notificationsTransportURLSecret:
+                            type: string
                           octaviaProviderSubnetCIDR:
                             type: string
                           octaviaProviderSubnetExtraCIDRs:
@@ -12543,7 +12834,6 @@ spec:
                         default: false
                         type: boolean
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       redisServiceName:
                         default: octavia-redis
@@ -12610,7 +12900,6 @@ spec:
                     - databaseInstance
                     - octaviaAPI
                     - octaviaNetworkAttachment
-                    - rabbitMqClusterName
                     - secret
                     type: object
                 type: object
@@ -14538,6 +14827,18 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          notificationsBus:
+                            properties:
+                              cluster:
+                                minLength: 1
+                                type: string
+                              user:
+                                type: string
+                              vhost:
+                                type: string
+                            required:
+                            - cluster
+                            type: object
                           override:
                             properties:
                               service:
@@ -14599,7 +14900,6 @@ spec:
                                 type: string
                             type: object
                           rabbitMqClusterName:
-                            default: rabbitmq
                             type: string
                           replicas:
                             default: 1
@@ -14646,7 +14946,6 @@ spec:
                             type: object
                         required:
                         - memcachedInstance
-                        - rabbitMqClusterName
                         - replicas
                         - secret
                         - serviceUser
@@ -15440,6 +15739,18 @@ spec:
                                 additionalProperties:
                                   type: string
                                 type: object
+                              notificationsBus:
+                                properties:
+                                  cluster:
+                                    minLength: 1
+                                    type: string
+                                  user:
+                                    type: string
+                                  vhost:
+                                    type: string
+                                required:
+                                - cluster
+                                type: object
                               override:
                                 properties:
                                   service:
@@ -15510,7 +15821,6 @@ spec:
                                 default: false
                                 type: boolean
                               rabbitMqClusterName:
-                                default: rabbitmq
                                 type: string
                               secret:
                                 default: osp-secret
@@ -15630,6 +15940,18 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          notificationsBus:
+                            properties:
+                              cluster:
+                                minLength: 1
+                                type: string
+                              user:
+                                type: string
+                              vhost:
+                                type: string
+                            required:
+                            - cluster
+                            type: object
                           passwordSelector:
                             default:
                               ceilometerService: CeilometerPassword
@@ -15645,7 +15967,6 @@ spec:
                                 type: string
                             type: object
                           rabbitMqClusterName:
-                            default: rabbitmq
                             type: string
                           secret:
                             default: osp-secret
@@ -15916,6 +16237,18 @@ spec:
                           memcachedInstance:
                             default: memcached
                             type: string
+                          messagingBus:
+                            properties:
+                              cluster:
+                                minLength: 1
+                                type: string
+                              user:
+                                type: string
+                              vhost:
+                                type: string
+                            required:
+                            - cluster
+                            type: object
                           nodeSelector:
                             additionalProperties:
                               type: string
@@ -15963,7 +16296,6 @@ spec:
                             type: object
                             x-kubernetes-map-type: atomic
                           rabbitMqClusterName:
-                            default: rabbitmq
                             type: string
                           s3StorageConfig:
                             default:
@@ -17385,9 +17717,33 @@ spec:
                       memcachedInstance:
                         default: memcached
                         type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        type: object
+                      notificationsBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
                         type: object
                       notificationsBusInstance:
                         type: string
@@ -17406,7 +17762,6 @@ spec:
                         default: metric-storage-prometheus-endpoint
                         type: string
                       rabbitMqClusterName:
-                        default: rabbitmq
                         type: string
                       secret:
                         default: osp-secret
@@ -17426,7 +17781,6 @@ spec:
                     - applierServiceTemplate
                     - databaseInstance
                     - decisionengineServiceTemplate
-                    - rabbitMqClusterName
                     type: object
                 type: object
             required:

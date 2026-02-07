@@ -43,35 +43,64 @@ for MOD_PATH in ${MOD_PATHS}; do
     CURL_REGISTRY="quay.io"
     REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/openstack-k8s-operators"
     REPO_URL="${CURL_REGISTRY}/openstack-k8s-operators"
-    if [[ "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ]]; then
-        if [[ "$IMAGENAMESPACE" != "openstack-k8s-operators" || "${IMAGEREGISTRY}" != "quay.io" ]]; then
-            REPO_URL="${IMAGEREGISTRY}/${IMAGENAMESPACE}"
-            CURL_REGISTRY="${IMAGEREGISTRY}"
-            # Quay registry v2 api does not return all the tags that's why keeping v1 for quay and v2
-            # for local registry
-            if [[ ${LOCAL_REGISTRY} -eq 1 ]]; then
-                REPO_CURL_URL="${CURL_REGISTRY}/v2/${IMAGENAMESPACE}"
-            elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
-                # replace docker.io by hub.docker.com to read tags
-                REPO_CURL_URL="https://hub.docker.com/v2/repositories/${IMAGENAMESPACE}"
-            else
-                REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
-            fi
+
+    # IMAGEBASE takes precedence - if this operator matches IMAGEBASE, use custom registry
+    if [[ "$BASE" == "$IMAGEBASE" ]]; then
+        REPO_URL="${IMAGEREGISTRY}/${IMAGENAMESPACE}"
+        CURL_REGISTRY="${IMAGEREGISTRY}"
+        if [[ ${LOCAL_REGISTRY} -eq 1 ]]; then
+            REPO_CURL_URL="http://${CURL_REGISTRY}/v2/${IMAGENAMESPACE}"
+        elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
+            REPO_CURL_URL="https://hub.docker.com/v2/repositories/${IMAGENAMESPACE}"
         else
-            REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${GITHUB_USER}"
-            REPO_URL="${CURL_REGISTRY}/${GITHUB_USER}"
+            REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
+        fi
+    # For operators with replace directives (non-openstack-k8s-operators users),
+    # bundle images are only on quay.io, not mirrored to local registry
+    elif [[ "$GITHUB_USER" != "openstack-k8s-operators" ]]; then
+        # Force quay.io for replaced operators, use the GitHub user's namespace
+        CURL_REGISTRY="quay.io"
+        REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${GITHUB_USER}"
+        REPO_URL="${CURL_REGISTRY}/${GITHUB_USER}"
+    # For standard operators with custom registry settings
+    elif [[ "$IMAGENAMESPACE" != "openstack-k8s-operators" || "${IMAGEREGISTRY}" != "quay.io" ]]; then
+        REPO_URL="${IMAGEREGISTRY}/${IMAGENAMESPACE}"
+        CURL_REGISTRY="${IMAGEREGISTRY}"
+        # Quay registry v2 api does not return all the tags that's why keeping v1 for quay and v2
+        # for local registry
+        if [[ ${LOCAL_REGISTRY} -eq 1 ]]; then
+            REPO_CURL_URL="http://${CURL_REGISTRY}/v2/${IMAGENAMESPACE}"
+        elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
+            # replace docker.io by hub.docker.com to read tags
+            REPO_CURL_URL="https://hub.docker.com/v2/repositories/${IMAGENAMESPACE}"
+        else
+            REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
         fi
     fi
 
-    if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r .tags[] | sort -u | grep $REF)
+    # Query local registry only for standard operators (openstack-k8s-operators) or custom IMAGEBASE
+    # Replaced operators (e.g., lmiccini/*) always query quay.io since bundles aren't mirrored locally
+    if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" == "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r '.tags // [] | .[]' | sort -u | { grep $REF || true; })
+        # If local registry doesn't have the bundle, fall back to quay.io
+        if [ -z "$SHA" ]; then
+            SHA=$(curl -s https://quay.io/api/v1/repository/openstack-k8s-operators/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r '.tags // [] | .[].name')
+            # Update REPO_URL to use quay.io since we're falling back
+            REPO_URL="quay.io/openstack-k8s-operators"
+        fi
     elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/?page_size=100 | jq -r .results[].name | sort -u | grep $REF)
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/?page_size=100 | jq -r '.results // [] | .[].name' | sort -u | { grep $REF || true; })
     elif [[ "${CURL_REGISTRY}" != "quay.io" ]]; then
         # quay.rdoproject.io doesn't support filter_tag_name, so increase limit to 100
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true?limit=100 | jq -r .tags[].name | sort -u | grep $REF)
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&limit=100 | jq -r '.tags // [] | .[].name' | sort -u | { grep $REF || true; })
+        # If non-quay.io registry doesn't have the bundle for openstack-k8s-operators, fall back to quay.io
+        if [[ -z "$SHA" && "$GITHUB_USER" == "openstack-k8s-operators" ]]; then
+            SHA=$(curl -s https://quay.io/api/v1/repository/openstack-k8s-operators/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r '.tags // [] | .[].name')
+            # Update REPO_URL to use quay.io since we're falling back
+            REPO_URL="quay.io/openstack-k8s-operators"
+        fi
     else
-        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r .tags[].name)
+        SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tag/?onlyActiveTags=true\&filter_tag_name=like:$REF | jq -r '.tags // [] | .[].name')
     fi
 
     if [ -z "$SHA" ]; then

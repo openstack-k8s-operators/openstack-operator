@@ -1630,7 +1630,25 @@ spec:
                   RabbitMQ instance name
                   Needed to request a transportURL that is created and used for notification
                   purposes
+                  deprecated: Use NotificationsBus.Cluster instead
                 type: string
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               passwordSelectors:
                 default:
                   service: GlancePassword

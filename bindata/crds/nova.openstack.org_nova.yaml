@@ -54,11 +54,11 @@ spec:
                   Service instance used for the Nova API DB.
                 type: string
               apiMessageBusInstance:
-                default: rabbitmq
                 description: |-
                   APIMessageBusInstance is the name of the RabbitMqCluster CR to select
                   the Message Bus Service instance used by the Nova top level services to
                   communicate.
+                  Deprecated: Use MessagingBus.Cluster instead
                 type: string
               apiServiceTemplate:
                 default:
@@ -398,11 +398,11 @@ spec:
                         Service instance used as the DB of this cell.
                       type: string
                     cellMessageBusInstance:
-                      default: rabbitmq
                       description: |-
                         CellMessageBusInstance is the name of the RabbitMqCluster CR to select
                         the Message Bus Service instance used by the nova services to
                         communicate in this cell. For cell0 it is unused.
+                        Deprecated: Use MessagingBus.Cluster instead
                       type: string
                     conductorServiceTemplate:
                       description: ConductorServiceTemplate - defines the cell conductor
@@ -550,6 +550,23 @@ spec:
                         MemcachedInstance is the name of the Memcached CR that the services in the cell will use.
                         If defined then this takes precedence over Nova.Spec.MemcachedInstance for this cel
                       type: string
+                    messagingBus:
+                      description: MessagingBus configuration (username, vhost, and
+                        cluster)
+                      properties:
+                        cluster:
+                          description: Name of the cluster
+                          minLength: 1
+                          type: string
+                        user:
+                          description: User - RabbitMQ username
+                          type: string
+                        vhost:
+                          description: Vhost - RabbitMQ vhost name
+                          type: string
+                      required:
+                      - cluster
+                      type: object
                     metadataServiceTemplate:
                       description: |-
                         MetadataServiceTemplate - defines the metadata service dedicated for the
@@ -1325,8 +1342,9 @@ spec:
                   cell1:
                     cellDatabaseAccount: nova-cell1
                     cellDatabaseInstance: openstack-cell1
-                    cellMessageBusInstance: rabbitmq-cell1
                     hasAPIAccess: true
+                    messagingBus:
+                      cluster: rabbitmq-cell1
                 description: |-
                   Cells is a mapping of cell names to NovaCellTemplate objects defining
                   the cells in the deployment. The "cell0" cell is a mandatory cell in
@@ -1350,6 +1368,22 @@ spec:
                 description: MemcachedInstance is the name of the Memcached CR that
                   all nova service will use.
                 type: string
+              messagingBus:
+                description: MessagingBus configuration (username, vhost, and cluster)
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
+                type: object
               metadataContainerImageURL:
                 description: MetadataContainerImageURL
                 type: string
@@ -1657,6 +1691,23 @@ spec:
                   NodeSelector to target subset of worker nodes running this service. Setting
                   NodeSelector here acts as a default value and can be overridden by service
                   specific NodeSelector Settings.
+                type: object
+              notificationsBus:
+                description: NotificationsBus configuration (username, vhost, and
+                  cluster) for notifications
+                properties:
+                  cluster:
+                    description: Name of the cluster
+                    minLength: 1
+                    type: string
+                  user:
+                    description: User - RabbitMQ username
+                    type: string
+                  vhost:
+                    description: Vhost - RabbitMQ vhost name
+                    type: string
+                required:
+                - cluster
                 type: object
               notificationsBusInstance:
                 description: |-

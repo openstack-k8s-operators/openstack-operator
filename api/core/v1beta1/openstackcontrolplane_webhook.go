@@ -199,15 +199,21 @@ func (r *OpenStackControlPlane) ValidateCreate(ctx context.Context, c client.Cli
 		return nil, err
 	}
 
-	allWarn, errs := r.ValidateCreateServices(basePath)
+	// Validate deprecated fields using centralized validation
+	warnings, errs := r.validateDeprecatedFieldsCreate(basePath)
+	allWarn = append(allWarn, warnings...)
+	allErrs = append(allErrs, errs...)
+
+	warns, errs := r.ValidateCreateServices(basePath)
+	allWarn = append(allWarn, warns...)
 	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
 		allErrs = append(allErrs, err)
 	}
 
-	if err := r.ValidateNotificationsBusInstance(basePath); err != nil {
-		allErrs = append(allErrs, err)
+	if errs := r.ValidateMessagingBusConfig(basePath); len(errs) != 0 {
+		allErrs = append(allErrs, errs...)
 	}
 
 	if len(allErrs) != 0 {
@@ -228,19 +234,37 @@ func (r *OpenStackControlPlane) ValidateUpdate(ctx context.Context, old runtime.
 		return nil, apierrors.NewInternalError(fmt.Errorf("unable to convert existing object"))
 	}
 
+	// Handle annotation-triggered migration from controller
+	const reconcileTriggerAnnotation = "openstack.org/reconcile-trigger"
+	if annotations := r.GetAnnotations(); annotations != nil {
+		if _, exists := annotations[reconcileTriggerAnnotation]; exists {
+			openstackcontrolplanelog.Info("Reconcile trigger annotation detected, performing migration",
+				"instance", r.Name)
+			r.migrateDeprecatedFields()
+			delete(annotations, reconcileTriggerAnnotation)
+			r.SetAnnotations(annotations)
+		}
+	}
+
 	var allWarn []string
 	var allErrs field.ErrorList
 	basePath := field.NewPath("spec")
 
-	allWarn, errs := r.ValidateUpdateServices(oldControlPlane.Spec, basePath)
+	// Validate deprecated fields using centralized validation
+	warnings, errs := r.validateDeprecatedFieldsUpdate(*oldControlPlane, basePath)
+	allWarn = append(allWarn, warnings...)
+	allErrs = append(allErrs, errs...)
+
+	warns, errs := r.ValidateUpdateServices(oldControlPlane.Spec, basePath)
+	allWarn = append(allWarn, warns...)
 	allErrs = append(allErrs, errs...)
 
 	if err := r.ValidateTopology(basePath); err != nil {
 		allErrs = append(allErrs, err)
 	}
 
-	if err := r.ValidateNotificationsBusInstance(basePath); err != nil {
-		allErrs = append(allErrs, err)
+	if errs := r.ValidateMessagingBusConfig(basePath); len(errs) != 0 {
+		allErrs = append(allErrs, errs...)
 	}
 
 	if len(allErrs) != 0 {
@@ -356,17 +380,23 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 
 	// Call internal validation logic for individual service operators
 	if r.Spec.Keystone.Enabled {
-		errors = append(errors, r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Ironic.Enabled {
-		errors = append(errors, r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Ironic.Template.ValidateCreate(basePath.Child("ironic").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Ironic.APIOverride.Route, basePath.Child("ironic").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Nova.Enabled {
-		errors = append(errors, r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Nova.Template.ValidateCreate(basePath.Child("nova").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Nova.APIOverride.Route, basePath.Child("nova").Child("apiOverride").Child("route"))...)
 	}
 
@@ -376,12 +406,16 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Barbican.Enabled {
-		errors = append(errors, r.Spec.Barbican.Template.ValidateCreate(basePath.Child("barbican").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Barbican.Template.ValidateCreate(basePath.Child("barbican").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Barbican.APIOverride.Route, basePath.Child("barbican").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Neutron.Enabled {
-		errors = append(errors, r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Neutron.Template.ValidateCreate(basePath.Child("neutron").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Neutron.APIOverride.Route, basePath.Child("neutron").Child("apiOverride").Child("route"))...)
 	}
 
@@ -394,7 +428,9 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Glance.Template.ValidateCreate(basePath.Child("glance").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)
@@ -416,12 +452,16 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Heat.Enabled {
-		errors = append(errors, r.Spec.Heat.Template.ValidateCreate(basePath.Child("heat").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Heat.Template.ValidateCreate(basePath.Child("heat").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Heat.APIOverride.Route, basePath.Child("heat").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Manila.Enabled {
-		errors = append(errors, r.Spec.Manila.Template.ValidateCreate(basePath.Child("manila").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Manila.Template.ValidateCreate(basePath.Child("manila").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Manila.APIOverride.Route, basePath.Child("manila").Child("apiOverride").Child("route"))...)
 	}
 
@@ -431,22 +471,30 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Octavia.Enabled {
-		errors = append(errors, r.Spec.Octavia.Template.ValidateCreate(basePath.Child("octavia").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Octavia.Template.ValidateCreate(basePath.Child("octavia").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Octavia.APIOverride.Route, basePath.Child("octavia").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Designate.Enabled {
-		errors = append(errors, r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Designate.Template.ValidateCreate(basePath.Child("designate").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Watcher.Enabled {
-		errors = append(errors, r.Spec.Watcher.Template.ValidateCreate(basePath.Child("watcher").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Watcher.Template.ValidateCreate(basePath.Child("watcher").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Telemetry.Enabled {
-		errors = append(errors, r.Spec.Telemetry.Template.ValidateCreate(basePath.Child("telemetry").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Telemetry.Template.ValidateCreate(basePath.Child("telemetry").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
@@ -522,7 +570,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Keystone.Template == nil {
 			old.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
@@ -530,7 +580,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Ironic.Template == nil {
 			old.Ironic.Template = &ironicv1.IronicSpecCore{}
 		}
-		errors = append(errors, r.Spec.Ironic.Template.ValidateUpdate(*old.Ironic.Template, basePath.Child("ironic").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Ironic.Template.ValidateUpdate(*old.Ironic.Template, basePath.Child("ironic").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Ironic.APIOverride.Route, basePath.Child("ironic").Child("apiOverride").Child("route"))...)
 	}
 
@@ -538,7 +590,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Nova.Template == nil {
 			old.Nova.Template = &novav1.NovaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Nova.Template.ValidateUpdate(*old.Nova.Template, basePath.Child("nova").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Nova.Template.ValidateUpdate(*old.Nova.Template, basePath.Child("nova").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Nova.APIOverride.Route, basePath.Child("nova").Child("apiOverride").Child("route"))...)
 	}
 
@@ -554,7 +608,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Barbican.Template == nil {
 			old.Barbican.Template = &barbicanv1.BarbicanSpecCore{}
 		}
-		errors = append(errors, r.Spec.Barbican.Template.ValidateUpdate(*old.Barbican.Template, basePath.Child("barbican").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Barbican.Template.ValidateUpdate(*old.Barbican.Template, basePath.Child("barbican").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Barbican.APIOverride.Route, basePath.Child("barbican").Child("apiOverride").Child("route"))...)
 	}
 
@@ -562,7 +618,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Neutron.Template == nil {
 			old.Neutron.Template = &neutronv1.NeutronAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Neutron.Template.ValidateUpdate(*old.Neutron.Template, basePath.Child("neutron").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Neutron.Template.ValidateUpdate(*old.Neutron.Template, basePath.Child("neutron").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Neutron.APIOverride.Route, basePath.Child("neutron").Child("apiOverride").Child("route"))...)
 	}
 
@@ -578,7 +636,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 				glancev1.GetCrMaxLengthCorrection(glanceName, glanceAPI.Type)) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
 		}
-		errors = append(errors, r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Glance.Template.ValidateUpdate(*old.Glance.Template, basePath.Child("glance").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 
 		for key, override := range r.Spec.Glance.APIOverride {
 			overridePath := basePath.Child("glance").Child("apiOverride").Key(key)
@@ -606,7 +666,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Heat.Template == nil {
 			old.Heat.Template = &heatv1.HeatSpecCore{}
 		}
-		errors = append(errors, r.Spec.Heat.Template.ValidateUpdate(*old.Heat.Template, basePath.Child("heat").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Heat.Template.ValidateUpdate(*old.Heat.Template, basePath.Child("heat").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Heat.APIOverride.Route, basePath.Child("heat").Child("apiOverride").Child("route"))...)
 	}
 
@@ -614,7 +676,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Manila.Template == nil {
 			old.Manila.Template = &manilav1.ManilaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Manila.Template.ValidateUpdate(*old.Manila.Template, basePath.Child("manila").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Manila.Template.ValidateUpdate(*old.Manila.Template, basePath.Child("manila").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Manila.APIOverride.Route, basePath.Child("manila").Child("apiOverride").Child("route"))...)
 	}
 
@@ -630,7 +694,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Octavia.Template == nil {
 			old.Octavia.Template = &octaviav1.OctaviaSpecCore{}
 		}
-		errors = append(errors, r.Spec.Octavia.Template.ValidateUpdate(*old.Octavia.Template, basePath.Child("octavia").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Octavia.Template.ValidateUpdate(*old.Octavia.Template, basePath.Child("octavia").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Octavia.APIOverride.Route, basePath.Child("octavia").Child("apiOverride").Child("route"))...)
 	}
 
@@ -638,7 +704,9 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Designate.Template == nil {
 			old.Designate.Template = &designatev1.DesignateSpecCore{}
 		}
-		errors = append(errors, r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Designate.Template.ValidateUpdate(*old.Designate.Template, basePath.Child("designate").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Designate.APIOverride.Route, basePath.Child("designate").Child("apiOverride").Child("route"))...)
 	}
 
@@ -646,14 +714,18 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Watcher.Template == nil {
 			old.Watcher.Template = &watcherv1.WatcherSpecCore{}
 		}
-		errors = append(errors, r.Spec.Watcher.Template.ValidateUpdate(*old.Watcher.Template, basePath.Child("watcher").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Watcher.Template.ValidateUpdate(*old.Watcher.Template, basePath.Child("watcher").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
 	}
 	if r.Spec.Telemetry.Enabled {
 		if old.Telemetry.Template == nil {
 			old.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
 		}
-		errors = append(errors, r.Spec.Telemetry.Template.ValidateUpdate(*old.Telemetry.Template, basePath.Child("telemetry").Child("template"), r.Namespace)...)
+		warns, errs := r.Spec.Telemetry.Template.ValidateUpdate(*old.Telemetry.Template, basePath.Child("telemetry").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
@@ -872,6 +944,7 @@ func (r *OpenStackControlPlane) Default() {
 	openstackcontrolplanelog.Info("default", "name", r.Name)
 
 	r.DefaultLabel()
+	r.migrateDeprecatedFields()
 	r.DefaultServices()
 }
 
@@ -967,15 +1040,12 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			r.Spec.Ironic.Template = &ironicv1.IronicSpecCore{}
 		}
 
-		// Default Secret
 		if r.Spec.Ironic.Template.Secret == "" {
 			r.Spec.Ironic.Template.Secret = r.Spec.Secret
 		}
-		// Default DatabaseInstance
 		if r.Spec.Ironic.Template.DatabaseInstance == "" {
 			r.Spec.Ironic.Template.DatabaseInstance = "openstack"
 		}
-		// Default StorageClass
 		if r.Spec.Ironic.Template.StorageClass == "" {
 			r.Spec.Ironic.Template.StorageClass = r.Spec.StorageClass
 		}
@@ -1228,6 +1298,39 @@ func (r *OpenStackControlPlane) ValidateTopology(basePath *field.Path) *field.Er
 	return nil
 }
 
+// ValidateMessagingBusConfig validates that the User field is not set in top-level
+// messagingBus and notificationsBus configurations. Setting a shared username would
+// cause webhook validation failures in infra-operator when multiple services try to
+// create RabbitMQUser resources with the same username. The Cluster and Vhost fields
+// are allowed at the top level since they can be safely shared across services.
+func (r *OpenStackControlPlane) ValidateMessagingBusConfig(basePath *field.Path) field.ErrorList {
+	var allErrs field.ErrorList
+
+	// Validate messagingBus
+	if r.Spec.MessagingBus != nil {
+		messagingBusPath := basePath.Child("messagingBus")
+		if r.Spec.MessagingBus.User != "" {
+			allErrs = append(allErrs, field.Forbidden(
+				messagingBusPath.Child("user"),
+				"user field is not allowed at the top level. Each service operator creates its own TransportURL with a unique user. Set user in individual service templates if needed.",
+			))
+		}
+	}
+
+	// Validate notificationsBus
+	if r.Spec.NotificationsBus != nil {
+		notificationsBusPath := basePath.Child("notificationsBus")
+		if r.Spec.NotificationsBus.User != "" {
+			allErrs = append(allErrs, field.Forbidden(
+				notificationsBusPath.Child("user"),
+				"user field is not allowed at the top level. Each service operator creates its own TransportURL with a unique user. Set user in individual service templates if needed.",
+			))
+		}
+	}
+
+	return allErrs
+}
+
 // ValidateNotificationsBusInstance - returns an error if the notificationsBusInstance
 // parameter is not valid.
 // - nil or empty string must be raised as an error
@@ -1251,4 +1354,374 @@ func (r *OpenStackControlPlane) ValidateNotificationsBusInstance(basePath *field
 		}
 	}
 	return field.Invalid(notificationsField, *r.Spec.NotificationsBusInstance, "notificationsBusInstance must match an existing RabbitMQ instance name")
+}
+
+// getDeprecatedFields returns the centralized list of deprecated fields for OpenStackControlPlane
+func (r *OpenStackControlPlane) getDeprecatedFields(old *OpenStackControlPlane) []common_webhook.DeprecatedFieldUpdate {
+	// Handle NewValue pointer - NotificationsBus can be nil
+	var newValue *string
+	if r.Spec.NotificationsBus != nil {
+		newValue = &r.Spec.NotificationsBus.Cluster
+	}
+
+	deprecatedFields := []common_webhook.DeprecatedFieldUpdate{
+		{
+			DeprecatedFieldName: "notificationsBusInstance",
+			NewFieldPath:        []string{"notificationsBus", "cluster"},
+			NewDeprecatedValue:  r.Spec.NotificationsBusInstance,
+			NewValue:            newValue,
+		},
+	}
+
+	// If old spec is provided (UPDATE operation), add old values
+	if old != nil {
+		deprecatedFields[0].OldDeprecatedValue = old.Spec.NotificationsBusInstance
+	}
+
+	return deprecatedFields
+}
+
+// validateDeprecatedFieldsCreate validates deprecated fields during CREATE operations
+func (r *OpenStackControlPlane) validateDeprecatedFieldsCreate(basePath *field.Path) ([]string, field.ErrorList) {
+	// Get deprecated fields list (without old values for CREATE)
+	deprecatedFieldsUpdate := r.getDeprecatedFields(nil)
+
+	// Convert to DeprecatedField list for CREATE validation
+	deprecatedFields := make([]common_webhook.DeprecatedField, len(deprecatedFieldsUpdate))
+	for i, df := range deprecatedFieldsUpdate {
+		deprecatedFields[i] = common_webhook.DeprecatedField{
+			DeprecatedFieldName: df.DeprecatedFieldName,
+			NewFieldPath:        df.NewFieldPath,
+			DeprecatedValue:     df.NewDeprecatedValue,
+			NewValue:            df.NewValue,
+		}
+	}
+
+	return common_webhook.ValidateDeprecatedFieldsCreate(deprecatedFields, basePath), nil
+}
+
+// validateDeprecatedFieldsUpdate validates deprecated fields during UPDATE operations
+func (r *OpenStackControlPlane) validateDeprecatedFieldsUpdate(old OpenStackControlPlane, basePath *field.Path) ([]string, field.ErrorList) {
+	// Get deprecated fields list with old values
+	deprecatedFields := r.getDeprecatedFields(&old)
+	return common_webhook.ValidateDeprecatedFieldsUpdate(deprecatedFields, basePath)
+}
+
+// migrateDeprecatedFields performs migration from deprecated fields to new fields.
+// This is called during CREATE (from Default()) and UPDATE (when triggered by annotation).
+// It transparently migrates:
+// - Top-level: NotificationsBusInstance -> NotificationsBus.Cluster
+// - Service-level: <service>.template.rabbitMqClusterName -> <service>.template.messagingBus.cluster
+func (r *OpenStackControlPlane) migrateDeprecatedFields() {
+	// Migration: Top-level NotificationsBusInstance -> NotificationsBus.Cluster
+	if r.Spec.NotificationsBusInstance != nil && *r.Spec.NotificationsBusInstance != "" {
+		// Initialize NotificationsBus if needed
+		if r.Spec.NotificationsBus == nil {
+			r.Spec.NotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+		}
+		// Migrate the cluster name if not already set
+		if r.Spec.NotificationsBus.Cluster == "" {
+			r.Spec.NotificationsBus.Cluster = *r.Spec.NotificationsBusInstance
+			openstackcontrolplanelog.Info("Migrated notificationsBusInstance to notificationsBus.cluster",
+				"instance", r.Name,
+				"cluster", r.Spec.NotificationsBus.Cluster)
+		}
+		// Clear the deprecated field after migration
+		r.Spec.NotificationsBusInstance = nil
+	}
+
+	// Service-level migrations: rabbitMqClusterName -> messagingBus.cluster
+	// Each service follows the priority: deprecated field -> top-level -> default
+	// Only services that have both MessagingBus and RabbitMqClusterName fields
+
+	// Cinder
+	if r.Spec.Cinder.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Cinder.Template.MessagingBus,
+			&r.Spec.Cinder.Template.RabbitMqClusterName,
+			"cinder",
+		)
+		r.migrateServiceNotificationsBusInstance(
+			&r.Spec.Cinder.Template.NotificationsBus,
+			&r.Spec.Cinder.Template.NotificationsBusInstance,
+			"cinder",
+		)
+	}
+
+	// Manila
+	if r.Spec.Manila.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Manila.Template.MessagingBus,
+			&r.Spec.Manila.Template.RabbitMqClusterName,
+			"manila",
+		)
+		r.migrateServiceNotificationsBusInstance(
+			&r.Spec.Manila.Template.NotificationsBus,
+			&r.Spec.Manila.Template.NotificationsBusInstance,
+			"manila",
+		)
+	}
+
+	// Neutron
+	if r.Spec.Neutron.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Neutron.Template.MessagingBus,
+			&r.Spec.Neutron.Template.RabbitMqClusterName,
+			"neutron",
+		)
+		r.migrateServiceNotificationsBusInstance(
+			&r.Spec.Neutron.Template.NotificationsBus,
+			&r.Spec.Neutron.Template.NotificationsBusInstance,
+			"neutron",
+		)
+	}
+
+	// Heat
+	if r.Spec.Heat.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Heat.Template.MessagingBus,
+			&r.Spec.Heat.Template.RabbitMqClusterName,
+			"heat",
+		)
+	}
+
+	// Ironic - has main template and IronicNeutronAgent
+	if r.Spec.Ironic.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Ironic.Template.MessagingBus,
+			&r.Spec.Ironic.Template.RabbitMqClusterName,
+			"ironic",
+		)
+
+		// IronicNeutronAgent has its own messaging bus - only migrate from deprecated field
+		if r.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster == "" && r.Spec.Ironic.Template.IronicNeutronAgent.RabbitMqClusterName != "" {
+			r.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster = r.Spec.Ironic.Template.IronicNeutronAgent.RabbitMqClusterName
+			openstackcontrolplanelog.Info("Migrated ironic neutron agent rabbitMqClusterName to messagingBus.cluster",
+				"instance", r.Name,
+				"cluster", r.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster)
+		}
+		if r.Spec.Ironic.Template.IronicNeutronAgent.MessagingBus.Cluster != "" {
+			r.Spec.Ironic.Template.IronicNeutronAgent.RabbitMqClusterName = ""
+		}
+	}
+
+	// Barbican
+	if r.Spec.Barbican.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Barbican.Template.MessagingBus,
+			&r.Spec.Barbican.Template.RabbitMqClusterName,
+			"barbican",
+		)
+	}
+
+	// Designate
+	if r.Spec.Designate.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Designate.Template.MessagingBus,
+			&r.Spec.Designate.Template.RabbitMqClusterName,
+			"designate",
+		)
+	}
+
+	// Octavia
+	if r.Spec.Octavia.Template != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Octavia.Template.MessagingBus,
+			&r.Spec.Octavia.Template.RabbitMqClusterName,
+			"octavia",
+		)
+	}
+
+	// Watcher (RabbitMqClusterName is *string, so handle specially)
+	if r.Spec.Watcher.Template != nil && r.Spec.Watcher.Template.RabbitMqClusterName != nil {
+		r.migrateServiceMessagingBus(
+			&r.Spec.Watcher.Template.MessagingBus,
+			r.Spec.Watcher.Template.RabbitMqClusterName,
+			"watcher",
+		)
+		// Set pointer to nil instead of empty string (Watcher uses *string)
+		r.Spec.Watcher.Template.RabbitMqClusterName = nil
+	}
+
+	// Watcher - migrate notificationsBusInstance
+	if r.Spec.Watcher.Template != nil {
+		r.migrateServiceNotificationsBusInstance(
+			&r.Spec.Watcher.Template.NotificationsBus,
+			&r.Spec.Watcher.Template.NotificationsBusInstance,
+			"watcher",
+		)
+	}
+
+	// Keystone - uses NotificationsBus instead of MessagingBus
+	if r.Spec.Keystone.Template != nil {
+		r.migrateServiceNotificationsBus(
+			&r.Spec.Keystone.Template.NotificationsBus,
+			&r.Spec.Keystone.Template.RabbitMqClusterName,
+			"keystone",
+		)
+	}
+
+	// Swift - SwiftProxy uses NotificationsBus for Ceilometer middleware
+	if r.Spec.Swift.Template != nil {
+		r.migrateServiceNotificationsBus(
+			&r.Spec.Swift.Template.SwiftProxy.NotificationsBus,
+			&r.Spec.Swift.Template.SwiftProxy.RabbitMqClusterName,
+			"swift-proxy",
+		)
+	}
+
+	// Nova - has API-level and per-cell messaging bus fields
+	if r.Spec.Nova.Template != nil {
+		// API-level migration - only migrate from deprecated field
+		if r.Spec.Nova.Template.MessagingBus.Cluster == "" && r.Spec.Nova.Template.APIMessageBusInstance != "" {
+			r.Spec.Nova.Template.MessagingBus.Cluster = r.Spec.Nova.Template.APIMessageBusInstance
+			openstackcontrolplanelog.Info("Migrated nova APIMessageBusInstance to messagingBus.cluster",
+				"instance", r.Name,
+				"cluster", r.Spec.Nova.Template.MessagingBus.Cluster)
+		}
+
+		// Clear deprecated field after migration
+		if r.Spec.Nova.Template.MessagingBus.Cluster != "" {
+			r.Spec.Nova.Template.APIMessageBusInstance = ""
+		}
+
+		// Per-cell migration - only migrate from deprecated field
+		if r.Spec.Nova.Template.CellTemplates != nil {
+			for cellName, cellTemplate := range r.Spec.Nova.Template.CellTemplates {
+				if cellTemplate.MessagingBus.Cluster == "" && cellTemplate.CellMessageBusInstance != "" {
+					cellTemplate.MessagingBus.Cluster = cellTemplate.CellMessageBusInstance
+					openstackcontrolplanelog.Info("Migrated nova cell cellMessageBusInstance to messagingBus.cluster",
+						"instance", r.Name,
+						"cell", cellName,
+						"cluster", cellTemplate.MessagingBus.Cluster)
+				}
+
+				// Clear deprecated field after migration
+				if cellTemplate.MessagingBus.Cluster != "" {
+					cellTemplate.CellMessageBusInstance = ""
+				}
+
+				// Save back to map
+				r.Spec.Nova.Template.CellTemplates[cellName] = cellTemplate
+			}
+		}
+
+		// Migrate notificationsBusInstance
+		r.migrateServiceNotificationsBusInstance(
+			&r.Spec.Nova.Template.NotificationsBus,
+			&r.Spec.Nova.Template.NotificationsBusInstance,
+			"nova",
+		)
+	}
+
+	// Telemetry - has multiple sub-services with different bus types
+	if r.Spec.Telemetry.Template != nil {
+		// CloudKitty uses MessagingBus - only migrate from deprecated field
+		if r.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster == "" && r.Spec.Telemetry.Template.CloudKitty.RabbitMqClusterName != "" {
+			r.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster = r.Spec.Telemetry.Template.CloudKitty.RabbitMqClusterName
+			openstackcontrolplanelog.Info("Migrated telemetry cloudkitty rabbitMqClusterName to messagingBus.cluster",
+				"instance", r.Name,
+				"cluster", r.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster)
+		}
+		if r.Spec.Telemetry.Template.CloudKitty.MessagingBus.Cluster != "" {
+			r.Spec.Telemetry.Template.CloudKitty.RabbitMqClusterName = ""
+		}
+
+		// Autoscaling.Aodh uses NotificationsBus
+		r.migrateServiceNotificationsBus(
+			&r.Spec.Telemetry.Template.Autoscaling.Aodh.NotificationsBus,
+			&r.Spec.Telemetry.Template.Autoscaling.Aodh.RabbitMqClusterName,
+			"telemetry.autoscaling.aodh",
+		)
+
+		// Ceilometer uses NotificationsBus
+		r.migrateServiceNotificationsBus(
+			&r.Spec.Telemetry.Template.Ceilometer.NotificationsBus,
+			&r.Spec.Telemetry.Template.Ceilometer.RabbitMqClusterName,
+			"telemetry.ceilometer",
+		)
+	}
+}
+
+// migrateServiceMessagingBus migrates a service-level rabbitMqClusterName to messagingBus.cluster
+// Only handles migration from deprecated field to new field.
+// Inheritance from top-level and defaults are handled at runtime in service reconciliation.
+func (r *OpenStackControlPlane) migrateServiceMessagingBus(
+	serviceMessagingBus *rabbitmqv1.RabbitMqConfig,
+	deprecatedField *string,
+	serviceName string,
+) {
+	// Only migrate if the new field is not already set and deprecated field has a value
+	if serviceMessagingBus.Cluster == "" && deprecatedField != nil && *deprecatedField != "" {
+		serviceMessagingBus.Cluster = *deprecatedField
+		openstackcontrolplanelog.Info("Migrated service rabbitMqClusterName to messagingBus.cluster",
+			"instance", r.Name,
+			"service", serviceName,
+			"cluster", serviceMessagingBus.Cluster)
+	}
+
+	// Clear deprecated field after migration
+	if serviceMessagingBus.Cluster != "" && deprecatedField != nil {
+		*deprecatedField = ""
+	}
+}
+
+// migrateServiceNotificationsBus migrates a service-level rabbitMqClusterName to notificationsBus.cluster
+// This is used for services like Keystone that use notifications instead of messaging.
+// Only handles migration from deprecated field to new field.
+// Inheritance from top-level is handled at runtime in service reconciliation.
+func (r *OpenStackControlPlane) migrateServiceNotificationsBus(
+	serviceNotificationsBus **rabbitmqv1.RabbitMqConfig,
+	deprecatedField *string,
+	serviceName string,
+) {
+	// Only migrate if deprecated field is set
+	if deprecatedField != nil && *deprecatedField != "" {
+		// Initialize NotificationsBus if needed
+		if *serviceNotificationsBus == nil {
+			*serviceNotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+		}
+
+		// Only migrate if cluster is not already set
+		if (*serviceNotificationsBus).Cluster == "" {
+			(*serviceNotificationsBus).Cluster = *deprecatedField
+			openstackcontrolplanelog.Info("Migrated service rabbitMqClusterName to notificationsBus.cluster",
+				"instance", r.Name,
+				"service", serviceName,
+				"cluster", (*serviceNotificationsBus).Cluster)
+		}
+
+		// Clear deprecated field after migration
+		*deprecatedField = ""
+	}
+}
+
+// migrateServiceNotificationsBusInstance migrates a service-level notificationsBusInstance to notificationsBus.cluster
+// This handles the deprecated string field notificationsBusInstance that exists on some service specs.
+// Only handles migration from deprecated field to new field.
+// Inheritance from top-level is handled at runtime in service reconciliation.
+func (r *OpenStackControlPlane) migrateServiceNotificationsBusInstance(
+	serviceNotificationsBus **rabbitmqv1.RabbitMqConfig,
+	deprecatedField **string,
+	serviceName string,
+) {
+	// Only migrate if deprecated field is set
+	if deprecatedField != nil && *deprecatedField != nil && **deprecatedField != "" {
+		// Initialize NotificationsBus if needed
+		if *serviceNotificationsBus == nil {
+			*serviceNotificationsBus = &rabbitmqv1.RabbitMqConfig{}
+		}
+
+		// Only migrate if cluster is not already set
+		if (*serviceNotificationsBus).Cluster == "" {
+			(*serviceNotificationsBus).Cluster = **deprecatedField
+			openstackcontrolplanelog.Info("Migrated service notificationsBusInstance to notificationsBus.cluster",
+				"instance", r.Name,
+				"service", serviceName,
+				"cluster", (*serviceNotificationsBus).Cluster)
+		}
+
+		// Clear deprecated field after migration
+		*deprecatedField = nil
+	}
 }

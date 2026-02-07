@@ -33,11 +33,13 @@ import (
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
+	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
@@ -61,6 +63,7 @@ type Names struct {
 	HorizonName                          types.NamespacedName
 	HeatName                             types.NamespacedName
 	NovaName                             types.NamespacedName
+	OctaviaName                          types.NamespacedName
 	TelemetryName                        types.NamespacedName
 	WatcherName                          types.NamespacedName
 	DBName                               types.NamespacedName
@@ -194,6 +197,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		NovaName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "nova",
+		},
+		OctaviaName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "octavia",
 		},
 		WatcherName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -944,6 +951,24 @@ func GetTelemetry(name types.NamespacedName) *telemetryv1.Telemetry {
 // GetWatcher
 func GetWatcher(name types.NamespacedName) *watcherv1.Watcher {
 	instance := &watcherv1.Watcher{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetOctavia
+func GetOctavia(name types.NamespacedName) *octaviav1.Octavia {
+	instance := &octaviav1.Octavia{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetKeystone
+func GetKeystone(name types.NamespacedName) *keystonev1.KeystoneAPI {
+	instance := &keystonev1.KeystoneAPI{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
