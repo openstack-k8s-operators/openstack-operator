@@ -124,7 +124,8 @@ spec:
 
             edpm_override_hosts: edpm-compute-no-nodes
             edpm_service_type: ovn
-            edpm_services_override: [ovn]
+            edpm_services_override:
+                - ovn
 
 
         imagePullPolicy: Always
