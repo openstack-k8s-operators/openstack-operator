@@ -15,7 +15,7 @@ require (
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260126075741-b4441a3d7bf7
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260126075741-93eefa56fcfe
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260126075741-1781a3c667ca
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260117090654-a7f2b9e6a657
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260131140726-368b30a849f7
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260126080025-f70a040b3783
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260126080313-e38eb5e75297
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20251223144638-200e41d75013
@@ -36,7 +36,7 @@ require (
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260111155522-143e96d730f8
 	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20260126093341-300f72f24bf9
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260126082803-7b35e190e2cd
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260126082802-5f3260556e1c
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260203083035-70ae1753056c
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20251209084401-4ebc795b96ca
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260121145423-331772c21931
 	github.com/pkg/errors v0.9.1
