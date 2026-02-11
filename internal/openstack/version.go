@@ -230,6 +230,9 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 	trueString := "true"
 	defaults.GlanceWsgi = &trueString // all new glance deployments use WSGI by default (FR3 and later)
 
+	versionString := "4.0"
+	defaults.RabbitmqVersion = &versionString // all new rabbitmq deployments will have rabbitm-server 4.0 (FR5)
+
 	return defaults
 }
 
