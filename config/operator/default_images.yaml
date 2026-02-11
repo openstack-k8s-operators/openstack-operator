@@ -174,7 +174,7 @@ spec:
         - name: RELATED_IMAGE_PLACEMENT_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-placement-api:current-podified
         - name: RELATED_IMAGE_RABBITMQ_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-rabbitmq:current-podified
+          value: quay.io/lmiccini/openstack-rabbitmq:r42p
         - name: RELATED_IMAGE_SWIFT_ACCOUNT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-swift-account:current-podified
         - name: RELATED_IMAGE_SWIFT_CONTAINER_IMAGE_URL_DEFAULT
