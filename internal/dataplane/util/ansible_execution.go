@@ -19,6 +19,8 @@ package util //nolint:revive // util is an acceptable package name in this conte
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -167,29 +169,23 @@ func GetAnsibleExecution(ctx context.Context,
 	return ansibleEE, nil
 }
 
-// getAnsibleExecutionNamePrefix compute the name of the AnsibleEE
-func getAnsibleExecutionNamePrefix(serviceName string) string {
-	AnsibleExecutionServiceNameLen := apimachineryvalidation.DNS1123LabelMaxLength - 10
-
-	if len(serviceName) > AnsibleExecutionServiceNameLen {
-		return serviceName[:AnsibleExecutionServiceNameLen]
-	}
-
-	return serviceName
-}
-
 // GetAnsibleExecutionNameAndLabels Name and Labels of AnsibleEE
 func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneService,
 	deploymentName string,
 	nodeSetName string,
 ) (string, map[string]string) {
-	executionName := fmt.Sprintf("%s-%s", getAnsibleExecutionNamePrefix(service.Name), deploymentName)
+	executionName := fmt.Sprintf("%s-%s", service.Name, deploymentName)
 	if !service.Spec.DeployOnAllNodeSets {
 		executionName = fmt.Sprintf("%s-%s", executionName, nodeSetName)
 	}
 
 	if len(executionName) > apimachineryvalidation.DNS1123LabelMaxLength {
-		executionName = strings.TrimRight(executionName[:apimachineryvalidation.DNS1123LabelMaxLength], "-.")
+		hash := sha256.Sum256([]byte(executionName))
+		hashSuffix := hex.EncodeToString(hash[:])[:8]
+		// 9 = "-" + 8 char hash suffix
+		maxPrefix := apimachineryvalidation.DNS1123LabelMaxLength - 9
+		prefix := strings.TrimRight(executionName[:maxPrefix], "-.")
+		executionName = fmt.Sprintf("%s-%s", prefix, hashSuffix)
 	}
 
 	labels := map[string]string{
