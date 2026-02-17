@@ -66,10 +66,11 @@ func AnsibleExecution(
 		return nil
 	}
 
-	// Fallback for backwards compatibility with existing NodeSets created
-	// before ansibleEEEnvConfigMapName field was added
+	// Use Deployment's ansibleEEEnvConfigMapName if set, otherwise default
 	envConfigMapName := aeeSpec.AnsibleEEEnvConfigMapName
 	if envConfigMapName == "" {
+		// Default must match kubebuilder:default in
+		// openstackdataplanedeployment_types.go for backward compatibility
 		envConfigMapName = "openstack-aee-default-env"
 	}
 

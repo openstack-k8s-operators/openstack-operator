@@ -60,12 +60,11 @@ spec:
               of OpenStackDataPlaneDeployment
             properties:
               ansibleEEEnvConfigMapName:
+                default: openstack-aee-default-env
                 description: |-
                   AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment
                   variables to inject into the Ansible Execution Environment pod.
-                  If set, this takes precedence over the NodeSet's AnsibleEEEnvConfigMapName.
-                  If not specified, the NodeSet's AnsibleEEEnvConfigMapName is used, or the
-                  default "openstack-aee-default-env" if neither is set.
+                  If not specified, defaults to "openstack-aee-default-env".
                 maxLength: 253
                 type: string
               ansibleExtraVars:
