@@ -1,0 +1,66 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |-
+      set -euo pipefail
+      NS="${NAMESPACE}"
+
+      wait_ready() {
+        echo "Waiting for appcred/ac-$1 to be Ready..."
+        oc wait appcred/ac-$1 -n "$NS" --for=condition=Ready --timeout=180s
+      }
+
+      check_field() {
+        local name=$1 field=$2 expected=$3
+        local actual
+        actual=$(oc get appcred ac-$name -n "$NS" -o jsonpath="{.spec.$field}" 2>/dev/null || echo "")
+        if [ "$actual" != "$expected" ]; then
+          echo "ERROR: ac-$name.$field: expected '$expected', got '$actual'"
+          exit 1
+        fi
+        echo "✓ ac-$name.$field = $expected"
+      }
+
+      check_roles() {
+        local name=$1
+        shift
+        local expected_roles=("$@")
+        local roles
+        roles=$(oc get appcred ac-$name -n "$NS" -o jsonpath='{.spec.roles[*]}')
+
+        for role in "${expected_roles[@]}"; do
+          if [[ ! " $roles " =~ " $role " ]]; then
+            echo "ERROR: ac-$name: Role '$role' not found. Got: $roles"
+            exit 1
+          fi
+        done
+
+        local role_count
+        role_count=$(echo "$roles" | wc -w)
+        if [ "$role_count" -ne "${#expected_roles[@]}" ]; then
+          echo "ERROR: ac-$name: Expected ${#expected_roles[@]} roles, got $role_count: $roles"
+          exit 1
+        fi
+
+        echo "✓ ac-$name.roles = [${expected_roles[*]}]"
+      }
+
+      echo "========================================="
+      echo "Testing ApplicationCredential Spec Propagation"
+      echo "========================================="
+      echo
+
+      # ---- ac-barbican: expirationDays 730 -> 365, gracePeriodDays 364 -> 180 ----
+      echo "=== Verifying expirationDays propagation on ac-barbican ==="
+      wait_ready barbican
+      check_field barbican expirationDays 365
+      check_field barbican gracePeriodDays 180
+      echo
+
+      # ---- ac-glance: roles [admin,service] -> [service] ----
+      echo "=== Verifying roles propagation on ac-glance ==="
+      wait_ready glance
+      check_roles glance "service"
+      echo
+
+      echo "All spec changes propagated to existing ApplicationCredential CRs successfully"

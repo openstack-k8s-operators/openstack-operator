@@ -1,0 +1,51 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |-
+      set -euo pipefail
+      NS="${NAMESPACE}"
+
+      SERVICES=(barbican cinder glance swift neutron placement nova ceilometer)
+
+      wait_deleted() {
+        local kind=$1 name=$2 timeout=${3:-180}
+        echo "Waiting for $kind/$name to be deleted..."
+        local end=$((SECONDS + timeout))
+        while [ $SECONDS -lt $end ]; do
+          if ! oc get "$kind" "$name" -n "$NS" &>/dev/null; then
+            echo "✓ $kind/$name deleted"
+            return 0
+          fi
+          sleep 5
+        done
+        echo "ERROR: $kind/$name still exists after ${timeout}s"
+        exit 1
+      }
+
+      echo "========================================="
+      echo "Testing Application Credential Cleanup"
+      echo "========================================="
+      echo
+
+      echo "=== Verifying global ApplicationCredential is disabled ==="
+      global_enabled=$(oc get openstackcontrolplane openstack -n "$NS" -o jsonpath='{.spec.applicationCredential.enabled}')
+      if [ "$global_enabled" != "false" ]; then
+        echo "ERROR: OpenStackControlPlane.spec.applicationCredential.enabled expected 'false', got '$global_enabled'"
+        exit 1
+      fi
+      echo "✓ OpenStackControlPlane.spec.applicationCredential.enabled = false"
+      echo
+
+      echo "=== Verifying AC CRs are deleted ==="
+      for svc in "${SERVICES[@]}"; do
+        wait_deleted appcred "ac-$svc" 180
+      done
+      echo
+
+      echo "=== Verifying AC Secrets are cleaned up ==="
+      for svc in "${SERVICES[@]}"; do
+        wait_deleted secret "ac-$svc-secret" 120
+      done
+      echo
+
+      echo "All ApplicationCredential CRs and Secrets cleaned up successfully"

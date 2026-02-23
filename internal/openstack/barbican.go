@@ -37,6 +37,10 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		instance.Status.ContainerImages.BarbicanAPIImage = nil
 		instance.Status.ContainerImages.BarbicanWorkerImage = nil
 		instance.Status.ContainerImages.BarbicanKeystoneListenerImage = nil
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, barbican.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -73,8 +77,8 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		barbicanSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Barbican.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Barbican.ApplicationCredential != nil ||
 		instance.Spec.Barbican.Template.Auth.ApplicationCredentialSecret != "" {
 
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(

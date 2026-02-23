@@ -54,6 +54,12 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.AodhListenerImage = nil
 		instance.Status.ContainerImages.CloudKittyAPIImage = nil
 		instance.Status.ContainerImages.CloudKittyProcImage = nil
+		// Clean up AC CRs when service is disabled (telemetry has three: aodh, ceilometer, cloudkitty)
+		for _, svcName := range []string{"aodh", "ceilometer", "cloudkitty"} {
+			if err := CleanupApplicationCredentialForService(ctx, helper, instance, svcName); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -127,8 +133,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	// AC for Aodh (if service enabled)
 	if instance.Spec.Telemetry.Template.Autoscaling.Enabled != nil && *instance.Spec.Telemetry.Template.Autoscaling.Enabled {
-		// Only call if AC enabled or currently configured
-		if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Telemetry.ApplicationCredentialAodh) ||
+		// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+		if instance.Spec.Telemetry.ApplicationCredentialAodh != nil ||
 			instance.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret != "" {
 
 			// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
@@ -163,14 +169,17 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret = aodhACSecretName
 		}
 	} else {
-		// Aodh service disabled, clear the field
+		// Aodh sub-service disabled - clean up AC CR and clear secret field
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, "aodh"); err != nil {
+			return ctrl.Result{}, err
+		}
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.Auth.ApplicationCredentialSecret = ""
 	}
 
 	// AC for Ceilometer (if service enabled)
 	if instance.Spec.Telemetry.Template.Ceilometer.Enabled != nil && *instance.Spec.Telemetry.Template.Ceilometer.Enabled {
-		// Only call if AC enabled or currently configured
-		if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Telemetry.ApplicationCredentialCeilometer) ||
+		// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+		if instance.Spec.Telemetry.ApplicationCredentialCeilometer != nil ||
 			instance.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret != "" {
 
 			// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
@@ -205,14 +214,16 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret = ceilometerACSecretName
 		}
 	} else {
-		// Ceilometer service disabled, clear the field
+		// Ceilometer sub-service disabled - clean up AC CR and clear secret field
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, "ceilometer"); err != nil {
+			return ctrl.Result{}, err
+		}
 		instance.Spec.Telemetry.Template.Ceilometer.Auth.ApplicationCredentialSecret = ""
 	}
-
 	// AC for CloudKitty (if service enabled)
 	if instance.Spec.Telemetry.Template.CloudKitty.Enabled != nil && *instance.Spec.Telemetry.Template.CloudKitty.Enabled {
-		// Only call if AC enabled or currently configured
-		if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Telemetry.ApplicationCredentialCloudKitty) ||
+		// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+		if instance.Spec.Telemetry.ApplicationCredentialCloudKitty != nil ||
 			instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret != "" {
 
 			// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
@@ -247,7 +258,10 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret = cloudkittyACSecretName
 		}
 	} else {
-		// CloudKitty service disabled, clear the field
+		// CloudKitty sub-service disabled - clean up AC CR and clear secret field
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, "cloudkitty"); err != nil {
+			return ctrl.Result{}, err
+		}
 		instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret = ""
 	}
 
