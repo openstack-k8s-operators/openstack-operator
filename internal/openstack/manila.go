@@ -38,6 +38,10 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.ContainerImages.ManilaAPIImage = nil
 		instance.Status.ContainerImages.ManilaSchedulerImage = nil
 		instance.Status.ContainerImages.ManilaShareImages = make(map[string]*string)
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, manila.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -75,8 +79,8 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		manilaSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Manila.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Manila.ApplicationCredential != nil ||
 		instance.Spec.Manila.Template.Auth.ApplicationCredentialSecret != "" {
 
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(

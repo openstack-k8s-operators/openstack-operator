@@ -59,6 +59,10 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.ContainerImages.CinderSchedulerImage = nil
 		instance.Status.ContainerImages.CinderBackupImage = nil
 		instance.Status.ContainerImages.CinderVolumeImages = make(map[string]*string)
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, cinder.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -96,8 +100,8 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		cinderSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Cinder.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Cinder.ApplicationCredential != nil ||
 		instance.Spec.Cinder.Template.Auth.ApplicationCredentialSecret != "" {
 
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(

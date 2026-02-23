@@ -40,6 +40,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Status.ContainerImages.HeatAPIImage = nil
 		instance.Status.ContainerImages.HeatCfnapiImage = nil
 		instance.Status.ContainerImages.HeatEngineImage = nil
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, heat.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -120,8 +124,8 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		heatSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Heat.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Heat.ApplicationCredential != nil ||
 		instance.Spec.Heat.Template.Auth.ApplicationCredentialSecret != "" {
 
 		heatACSecretName, acResult, err := EnsureApplicationCredentialForService(

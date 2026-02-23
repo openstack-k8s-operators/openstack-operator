@@ -40,6 +40,10 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		instance.Status.ContainerImages.SwiftContainerImage = nil
 		instance.Status.ContainerImages.SwiftObjectImage = nil
 		instance.Status.ContainerImages.SwiftProxyImage = nil
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, swift.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -109,8 +113,8 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		swiftSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Swift.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Swift.ApplicationCredential != nil ||
 		instance.Spec.Swift.Template.SwiftProxy.Auth.ApplicationCredentialSecret != "" {
 
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(
