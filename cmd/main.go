@@ -337,9 +337,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err := (&dataplanecontroller.OpenStackDataPlaneNodeSetReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
+		Client:    mgr.GetClient(),
+		APIReader: mgr.GetAPIReader(),
+		Scheme:    mgr.GetScheme(),
+		Kclient:   kclient,
 	}).SetupWithManager(ctx, mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNodeSet")
 		os.Exit(1)

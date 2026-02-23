@@ -143,6 +143,14 @@ rules:
     - list
     - watch
 - apiGroups:
+    - dataplane.openstack.org
+  resources:
+    - openstackdataplanenodesets
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
     - frrk8s.metallb.io
   resources:
     - frrconfigurations
