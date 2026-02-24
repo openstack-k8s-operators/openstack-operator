@@ -990,9 +990,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 			if template.StorageClass == "" {
 				template.StorageClass = r.Spec.StorageClass
 			}
-			if template.Secret == "" {
-				template.Secret = r.Spec.Secret
-			}
+			// Don't default Secret here - it's handled conditionally in reconciliation
+			// to support both default (osp-secret) and auto-generated (blank) passwords
 			template.Default()
 			// By-value copy, need to update
 			(*r.Spec.Galera.Templates)[key] = template
