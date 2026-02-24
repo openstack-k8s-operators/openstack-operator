@@ -14,7 +14,7 @@
     attempts: 1
     required-projects:
       - github.com/openstack-k8s-operators/openstack-operator
-    irrelevant-files:
+    irrelevant-files: &irrelevant-files
       - .*/*.md
       - ^\..*$
       - ^docs/.*$
@@ -32,16 +32,7 @@
     name: openstack-operator-tempest-multinode
     parent: podified-multinode-edpm-deployment-crc-3comp
     dependencies: ["openstack-k8s-operators-content-provider"]
-    irrelevant-files:
-      - .*/*.md
-      - ^\..*$
-      - ^docs/.*$
-      - ^LICENSE$
-      - ^OWNERS$
-      - ^OWNERS_ALIASES$
-      - ^PROJECT$
-      - ^README.md$
-      - tests?\/functional
+    irrelevant-files: *irrelevant-files
     vars:
       cifmw_operator_build_golang_ct: "docker.io/library/golang:1.24"
       cifmw_operator_build_golang_alt_ct: "quay.rdoproject.org/openstack-k8s-operators/golang:1.24"
@@ -87,3 +78,9 @@
         [libvirt]
         cpu_mode = custom
         cpu_models = Nehalem
+
+- job:
+    name: openstack-operator-edpm-baremetal-minor-update
+    parent: cifmw-crc-podified-edpm-baremetal-minor-update
+    dependencies: ["openstack-k8s-operators-content-provider"]
+    irrelevant-files: *irrelevant-files

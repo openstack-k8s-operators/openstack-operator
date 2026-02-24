@@ -26,3 +26,6 @@
         - openstack-operator-docs-preview
         - openstack-operator-kuttl:
             voting: false
+        - openstack-operator-edpm-baremetal-minor-update:
+            dependencies: ["openstack-k8s-operators-content-provider"]
+            irrelevant-files: *irrelevant-files
