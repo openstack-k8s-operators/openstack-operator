@@ -45,9 +45,11 @@ func DataplaneNodesetsOVNControllerImagesMatch(version *corev1beta1.OpenStackVer
 		// the current nodeset spec), we only check nodesets if they have any nodes
 		// and have deployed OVN
 		if len(nodeset.Spec.Nodes) > 0 && nodeset.Status.ContainerImages["OvnControllerImage"] != "" {
-			if !nodeset.IsReady() {
-				return false
-			}
+			// Check if OVN controller image matches the target version.
+			// Note: We don't check nodeset.IsReady() here because this is an intermediate
+			// step in the minor update workflow. The nodeset might be not-Ready due to
+			// subsequent deployments running (e.g. edpm-update), but if the OVN image matches,
+			// it means the OVN update deployment already completed.
 			if nodeset.Status.ContainerImages["OvnControllerImage"] != *version.Status.ContainerImages.OvnControllerImage {
 				return false
 			}
