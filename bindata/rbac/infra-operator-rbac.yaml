@@ -297,6 +297,12 @@ rules:
     - update
     - watch
 - apiGroups:
+    - rabbitmq.com
+  resources:
+    - rabbitmqclusters/finalizers
+  verbs:
+    - update
+- apiGroups:
     - rabbitmq.openstack.org
   resources:
     - rabbitmqpolicies

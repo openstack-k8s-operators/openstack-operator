@@ -84,6 +84,12 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - pods/log
+  verbs:
+    - get
+- apiGroups:
+    - ""
+  resources:
     - serviceaccounts
   verbs:
     - create

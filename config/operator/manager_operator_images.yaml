@@ -14,46 +14,46 @@ spec:
       - name: operator
         env:
         - name: RELATED_IMAGE_BARBICAN_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/barbican-operator@sha256:90ad8fd8c1889b6be77925016532218eb6149d2c1c8535a5f9f1775c776fa6cc
+          value: quay.io/openstack-k8s-operators/barbican-operator@sha256:3f9b0446a124745439306dc3bb7faec8c02c0b6be33f788b9d455fa57fb60120
         - name: RELATED_IMAGE_CINDER_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/cinder-operator@sha256:7961c67cfc87de69055f8330771af625f73d857426c4bb17ebb888ead843fff3
         - name: RELATED_IMAGE_DESIGNATE_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/designate-operator@sha256:c1e33e962043cd6e3d09ebd225cb72781451dba7af2d57522e5c6eedbdc91642
+          value: quay.io/openstack-k8s-operators/designate-operator@sha256:508859beb0e5b69169393dbb0039dc03a9d4ba05f16f6ff74f9b25e19d446214
         - name: RELATED_IMAGE_GLANCE_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/glance-operator@sha256:8f06b9963e5b324856ce8ed80872cf04fdfb299d4f5cf13cb1d26f4e69ed42be
+          value: quay.io/openstack-k8s-operators/glance-operator@sha256:81e43c058d9af1d3bc31704010c630bc2a574c2ee388aa0ffe8c7b9621a7d051
         - name: RELATED_IMAGE_HEAT_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/heat-operator@sha256:e8a675284ff97a1d3f0f07583863be20b20b4aa48ebb34dbc80d83fe39d757b2
+          value: quay.io/openstack-k8s-operators/heat-operator@sha256:ee642fcf655f9897d480460008cba2e98b497d3ffdf7ab1d48ea460eb20c2053
         - name: RELATED_IMAGE_HORIZON_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/horizon-operator@sha256:9f2e1299d908411457e53b49e1062265d2b9d76f6719db24d1be9347c388e4da
+          value: quay.io/openstack-k8s-operators/horizon-operator@sha256:114c0dee0bab1d453890e9dcc7727de749055bdbea049384d5696e7ac8d78fe3
         - name: RELATED_IMAGE_INFRA_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/infra-operator@sha256:aef5ea3dc1d4f5b63416ee1cc12d0360a64229bb3fb954be3dd85eec8f4ae62a
+          value: quay.io/openstack-k8s-operators/infra-operator@sha256:e97889bd4dd6896d3272e1237f231c79ecc661730a8a757a527ec6c6716908e5
         - name: RELATED_IMAGE_IRONIC_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/ironic-operator@sha256:7e1b0b7b172ad0d707ab80dd72d609e1d0f5bbd38a22c24a28ed0f17a960c867
+          value: quay.io/openstack-k8s-operators/ironic-operator@sha256:e41dfadd2c3bbcae29f8c43cd2feea6724a48cdef127d65d1d37816bb9945a01
         - name: RELATED_IMAGE_KEYSTONE_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/keystone-operator@sha256:c6ad383f55f955902b074d1ee947a2233a5fcbf40698479ae693ce056c80dcc1
+          value: quay.io/openstack-k8s-operators/keystone-operator@sha256:12fa31d2a2dfe1a832c6a2c0eb58876a3a62595a1a1f49b13c2a1f9b6d378735
         - name: RELATED_IMAGE_MANILA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/manila-operator@sha256:f1158ec4d879c4646eee4323bc501eba4d377beb2ad6fbe08ed30070c441ac26
         - name: RELATED_IMAGE_MARIADB_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/mariadb-operator@sha256:a18f12497b7159b100fcfd72c7ba2273d0669a5c00600a9ff1333bca028f256a
+          value: quay.io/openstack-k8s-operators/mariadb-operator@sha256:71f2ab3bb41d1743287a3270dd49e32192b347d8ba7353d2250cbd7e8528219b
         - name: RELATED_IMAGE_NEUTRON_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/neutron-operator@sha256:14ae1fb8d065e2317959ce7490a878dc87731d27ebf40259f801ba1a83cfefcf
+          value: quay.io/openstack-k8s-operators/neutron-operator@sha256:b242403a27609ac87a0ed3a7dd788aceaf8f3da3620981cf5e000d56862d77a4
         - name: RELATED_IMAGE_NOVA_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/nova-operator@sha256:fe85dd595906fac0fe1e7a42215bb306a963cf87d55e07cd2573726b690b2838
+          value: quay.io/openstack-k8s-operators/nova-operator@sha256:172f24bd4603ac3498536a8a2c8fffb07cf9113dd52bc132778ea0aa275c6b84
         - name: RELATED_IMAGE_OCTAVIA_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/octavia-operator@sha256:c7c7d4228994efb8b93cfabe4d78b40b085d91848dc49db247b7bbca689dae06
+          value: quay.io/openstack-k8s-operators/octavia-operator@sha256:2d59045b8d8e6f9c5483c4fdda7c5057218d553200dc4bcf26789980ac1d9abd
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/openstack-baremetal-operator@sha256:e6f7c2a75883f63d270378b283faeee4c4c14fbd74b509c7da82621166f07b24
         - name: RELATED_IMAGE_OVN_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/ovn-operator@sha256:f4143497c70c048a7733c284060347a0c74ef4e628aca22ee191e5bc9e4c7192
+          value: quay.io/openstack-k8s-operators/ovn-operator@sha256:9f73c84a9581b5739d8da333c7b64403d7b7ca284b22c624d0effe07f3d2819c
         - name: RELATED_IMAGE_PLACEMENT_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/placement-operator@sha256:a57336b9f95b703f80453db87e43a2834ca1bdc89480796d28ebbe0a9702ecfd
+          value: quay.io/openstack-k8s-operators/placement-operator@sha256:bb939885bd04593ad03af901adb77ee2a2d18529b328c23288c7cc7a2ba5282e
         - name: RELATED_IMAGE_RABBITMQ_CLUSTER_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/rabbitmq-cluster-operator@sha256:893e66303c1b0bc1d00a299a3f0380bad55c8dc813c8a1c6a4aab379f5aa12a2
         - name: RELATED_IMAGE_SWIFT_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/swift-operator@sha256:3d676f1281e24ef07de617570d2f7fbf625032e41866d1551a856c052248bb04
+          value: quay.io/openstack-k8s-operators/swift-operator@sha256:f309cdea8084a4b1e8cbcd732d6e250fd93c55cfd1b48ba9026907c8591faab7
         - name: RELATED_IMAGE_TELEMETRY_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/telemetry-operator@sha256:4eb8fab5530a08915d3ab3e11e2808aeae16c8a220ed34ee04a186b2ae2303dc
+          value: quay.io/openstack-k8s-operators/telemetry-operator@sha256:1b9074a4ce16396d8bd2d30a475fc8c2f004f75a023e3eef8950661e89c0bcc6
         - name: RELATED_IMAGE_TEST_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/test-operator@sha256:38e6a5bd24ab1684f22a64186fe99a7cdc7897eb7feb715ec1704eea7596dd98
+          value: quay.io/openstack-k8s-operators/test-operator@sha256:9d03f03aa9a460f1fcac8875064808c03e4ecd0388873bbfb9c7dc58331f3968
         - name: RELATED_IMAGE_WATCHER_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/watcher-operator@sha256:06311600a491c689493552e7ff26e36df740fa4e7c143fca874bef19f24afb97
