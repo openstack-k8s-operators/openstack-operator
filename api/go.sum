@@ -140,8 +140,8 @@ github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.202602050
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260205083029-d03e9df035ef/go.mod h1:jofj+VqDszxLCZSBYo794KGkCjMo01xzhQ/gffYzf3I=
 github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260214081335-54dcd155038a h1:fHVV6vVQC+3d2rgs/PEh0+/yIz0zRZHXCfm90KGu6d8=
 github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260214081335-54dcd155038a/go.mod h1:6BPq0xOb/jSRBlYP7la5s22kInbBTEVWwhlrQWdaGk0=
-github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260226091216-155db6fc7196 h1:pn/a/PS6VqHvjKCNV28AjN9men9elVRDqx8JvfzyPOI=
-github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260226091216-155db6fc7196/go.mod h1:HlvcjS3KItm9ERZHe6KXutwQDwetT/nQwUe4EsstVgg=
+github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260227104035-1a270e0235d2 h1:4t+qyaTNd1UqY+3mJElWtD+SmvpWfMD6aZwaZx/Hwy0=
+github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260227104035-1a270e0235d2/go.mod h1:HlvcjS3KItm9ERZHe6KXutwQDwetT/nQwUe4EsstVgg=
 github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260223151853-d97a67f42300 h1:muPHaBazC9vJoVWtgfcw/JL3IXVNwZqMRhffmwmDxFU=
 github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260223151853-d97a67f42300/go.mod h1:zuijCiXVKPEY5P6OjzOKiVVt+vXnhZ40qKl3tUGO/Fg=
 github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260224065916-8d6c0fd6d547 h1:9LIgH7MFhOEVyI5e4HZ38qogQJZpqkOxE/auCRdG3Sg=
