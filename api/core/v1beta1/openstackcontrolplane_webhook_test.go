@@ -942,4 +942,131 @@ var _ = Describe("OpenStackControlPlane Webhook", func() {
 			})
 		})
 	})
+
+	Context("ValidateCreateServices - RabbitMQ instance requirement", func() {
+		var instance *OpenStackControlPlane
+		var basePath *field.Path
+
+		BeforeEach(func() {
+			instance = &OpenStackControlPlane{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-controlplane",
+					Namespace: "openstack",
+				},
+				Spec: OpenStackControlPlaneSpec{
+					Rabbitmq: RabbitmqSection{
+						Enabled: true,
+					},
+				},
+			}
+			basePath = field.NewPath("spec")
+		})
+
+		It("should fail when RabbitMQ is enabled but no instances are defined (nil templates)", func() {
+			instance.Spec.Rabbitmq.Templates = nil
+
+			warnings, errs := instance.ValidateCreateServices(basePath)
+			Expect(warnings).To(BeEmpty())
+			Expect(errs).To(HaveLen(1))
+			Expect(errs[0].Type).To(Equal(field.ErrorTypeRequired))
+			Expect(errs[0].Field).To(Equal("spec.rabbitmq.templates"))
+			Expect(errs[0].Detail).To(ContainSubstring("At least one RabbitMQ instance must be defined"))
+		})
+
+		It("should fail when RabbitMQ is enabled but no instances are defined (empty templates)", func() {
+			emptyTemplates := map[string]rabbitmqv1.RabbitMqSpecCore{}
+			instance.Spec.Rabbitmq.Templates = &emptyTemplates
+
+			warnings, errs := instance.ValidateCreateServices(basePath)
+			Expect(warnings).To(BeEmpty())
+			Expect(errs).To(HaveLen(1))
+			Expect(errs[0].Type).To(Equal(field.ErrorTypeRequired))
+			Expect(errs[0].Field).To(Equal("spec.rabbitmq.templates"))
+			Expect(errs[0].Detail).To(ContainSubstring("At least one RabbitMQ instance must be defined"))
+		})
+
+		It("should succeed when RabbitMQ is enabled and at least one instance is defined", func() {
+			templates := map[string]rabbitmqv1.RabbitMqSpecCore{
+				"rabbitmq": {},
+			}
+			instance.Spec.Rabbitmq.Templates = &templates
+
+			warnings, errs := instance.ValidateCreateServices(basePath)
+			Expect(warnings).To(BeEmpty())
+			Expect(errs).To(BeEmpty())
+		})
+
+		It("should succeed when RabbitMQ is disabled and no instances are defined", func() {
+			instance.Spec.Rabbitmq.Enabled = false
+			instance.Spec.Rabbitmq.Templates = nil
+
+			warnings, errs := instance.ValidateCreateServices(basePath)
+			Expect(warnings).To(BeEmpty())
+			Expect(errs).To(BeEmpty())
+		})
+	})
+
+	Context("ValidateUpdateServices - RabbitMQ instance requirement", func() {
+		var instance *OpenStackControlPlane
+		var oldSpec OpenStackControlPlaneSpec
+		var basePath *field.Path
+
+		BeforeEach(func() {
+			oldTemplates := map[string]rabbitmqv1.RabbitMqSpecCore{
+				"rabbitmq": {},
+			}
+			oldSpec = OpenStackControlPlaneSpec{
+				Rabbitmq: RabbitmqSection{
+					Enabled:   true,
+					Templates: &oldTemplates,
+				},
+			}
+
+			instance = &OpenStackControlPlane{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-controlplane",
+					Namespace: "openstack",
+				},
+				Spec: OpenStackControlPlaneSpec{
+					Rabbitmq: RabbitmqSection{
+						Enabled: true,
+					},
+				},
+			}
+			basePath = field.NewPath("spec")
+		})
+
+		It("should fail when trying to remove all RabbitMQ instances while enabled", func() {
+			emptyTemplates := map[string]rabbitmqv1.RabbitMqSpecCore{}
+			instance.Spec.Rabbitmq.Templates = &emptyTemplates
+
+			warnings, errs := instance.ValidateUpdateServices(oldSpec, basePath)
+			Expect(warnings).To(BeEmpty())
+			Expect(errs).To(HaveLen(1))
+			Expect(errs[0].Type).To(Equal(field.ErrorTypeRequired))
+			Expect(errs[0].Field).To(Equal("spec.rabbitmq.templates"))
+			Expect(errs[0].Detail).To(ContainSubstring("At least one RabbitMQ instance must be defined"))
+		})
+
+		It("should succeed when updating with at least one RabbitMQ instance", func() {
+			templates := map[string]rabbitmqv1.RabbitMqSpecCore{
+				"rabbitmq": {},
+			}
+			instance.Spec.Rabbitmq.Templates = &templates
+
+			warnings, errs := instance.ValidateUpdateServices(oldSpec, basePath)
+			Expect(warnings).To(BeEmpty())
+			Expect(errs).To(BeEmpty())
+		})
+
+		It("should succeed when disabling RabbitMQ and removing all instances", func() {
+			instance.Spec.Rabbitmq.Enabled = false
+			emptyTemplates := map[string]rabbitmqv1.RabbitMqSpecCore{}
+			instance.Spec.Rabbitmq.Templates = &emptyTemplates
+
+			warnings, errs := instance.ValidateUpdateServices(oldSpec, basePath)
+			Expect(warnings).To(BeEmpty())
+			Expect(errs).To(BeEmpty())
+		})
+	})
 })
