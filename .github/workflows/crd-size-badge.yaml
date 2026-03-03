@@ -1,0 +1,117 @@
+name: CRD Size Badge
+
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+-fr[0-9]+'
+  pull_request_target:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+-fr[0-9]+'
+
+permissions:
+  pull-requests: write
+
+jobs:
+  crd-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install yq
+        uses: mikefarah/yq@v4
+
+      - name: Compute CRD JSON size
+        id: size
+        run: |
+          CRD_FILE="config/crd/bases/core.openstack.org_openstackcontrolplanes.yaml"
+          SIZE=$(yq eval -o=json "$CRD_FILE" | jq -c . | wc -c)
+          echo "bytes=$SIZE" >> "$GITHUB_OUTPUT"
+
+          if [ "$SIZE" -lt 307200 ]; then
+            echo "color=green" >> "$GITHUB_OUTPUT"
+            echo "status=comfortable" >> "$GITHUB_OUTPUT"
+          elif [ "$SIZE" -lt 409600 ]; then
+            echo "color=yellow" >> "$GITHUB_OUTPUT"
+            echo "status=growing" >> "$GITHUB_OUTPUT"
+          elif [ "$SIZE" -lt 768000 ]; then
+            echo "color=orange" >> "$GITHUB_OUTPUT"
+            echo "status=concerning" >> "$GITHUB_OUTPUT"
+          else
+            echo "color=red" >> "$GITHUB_OUTPUT"
+            echo "status=approaching etcd limit" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Human-readable size
+          if [ "$SIZE" -ge 1048576 ]; then
+            HUMAN="$(awk "BEGIN {printf \"%.1f\", $SIZE/1048576}")MB"
+          else
+            HUMAN="$(awk "BEGIN {printf \"%.0f\", $SIZE/1024}")KB"
+          fi
+          echo "human=$HUMAN" >> "$GITHUB_OUTPUT"
+
+      - name: Compute base branch size
+        if: github.event_name == 'pull_request_target'
+        id: base_size
+        run: |
+          CRD_FILE="config/crd/bases/core.openstack.org_openstackcontrolplanes.yaml"
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          BASE_SIZE=$(git show "origin/${{ github.base_ref }}:${CRD_FILE}" | yq eval -o=json - | jq -c . | wc -c)
+          echo "bytes=$BASE_SIZE" >> "$GITHUB_OUTPUT"
+
+          CHANGE=$(awk "BEGIN {if ($BASE_SIZE == 0) printf \"N/A\"; else printf \"%+.2f\", ((${{ steps.size.outputs.bytes }} - $BASE_SIZE) / $BASE_SIZE) * 100}")
+          echo "change=$CHANGE" >> "$GITHUB_OUTPUT"
+
+      - name: Find existing comment
+        if: github.event_name == 'pull_request_target'
+        uses: peter-evans/find-comment@v3
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- crd-size-badge -->'
+
+      - name: Post or update PR comment
+        if: github.event_name == 'pull_request_target'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- crd-size-badge -->
+            ## OpenStackControlPlane CRD Size Report
+
+            | Metric | Value |
+            |--------|-------|
+            | **CRD JSON size** | ${{ steps.size.outputs.bytes }} bytes (${{ steps.size.outputs.human }}) |
+            | **Base branch size** | ${{ steps.base_size.outputs.bytes }} bytes |
+            | **Change** | ${{ steps.base_size.outputs.change }}% |
+            | **Status** | ${{ steps.size.outputs.color }} — ${{ steps.size.outputs.status }} |
+
+            <details>
+            <summary>Threshold reference</summary>
+
+            | Color | Range | Meaning |
+            |-------|-------|---------|
+            | :green_circle: green | < 300KB | Comfortable |
+            | :yellow_circle: yellow | 300–400KB | Growing |
+            | :orange_circle: orange | 400–750KB | Concerning |
+            | :red_circle: red | > 750KB | Approaching 1.5MB etcd limit (cut in half to allow space for update) |
+
+            </details>
+
+      - name: Update badge gist
+        if: github.event_name == 'push'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ vars.GIST_ID }}
+          filename: crd-size-${{ github.ref_name }}.json
+          label: CRD Size
+          message: ${{ steps.size.outputs.human }}
+          color: ${{ steps.size.outputs.color }}
