@@ -3,6 +3,7 @@
 [![CodeQL](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml)
 [![CRD sync check main](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml)
 [![CRD sync check latest fr](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-fr.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-fr.yaml)
+[![CtrlPlane CRD Size](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/openstack-k8s-ci-robot/cb95c1626e1946e428bed7ee50a73348/raw/crd-size-main.json)](https://github.com/openstack-k8s-ci-robot/openstack-operator/actions/workflows/crd-size-badge.yaml)
 
 This is the primary operator for OpenStack. It is a "meta" operator, meaning it
 serves to coordinate the other operators for OpenStack by watching and configuring
