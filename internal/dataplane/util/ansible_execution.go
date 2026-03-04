@@ -66,11 +66,19 @@ func AnsibleExecution(
 		return nil
 	}
 
+	// Use Deployment's ansibleEEEnvConfigMapName if set, otherwise default
+	envConfigMapName := aeeSpec.AnsibleEEEnvConfigMapName
+	if envConfigMapName == "" {
+		// Default must match kubebuilder:default in
+		// openstackdataplanedeployment_types.go for backward compatibility
+		envConfigMapName = "openstack-aee-default-env"
+	}
+
 	ansibleEE := EEJob{
 		Name:             executionName,
 		Namespace:        deployment.GetNamespace(),
 		Labels:           labels,
-		EnvConfigMapName: "openstack-aee-default-env",
+		EnvConfigMapName: envConfigMapName,
 	}
 
 	ansibleEE.NetworkAttachments = aeeSpec.NetworkAttachments

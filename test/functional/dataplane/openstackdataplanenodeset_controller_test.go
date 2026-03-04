@@ -1822,4 +1822,74 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 		})
 	})
+
+	When("A Deployment is created without specifying ansibleEEEnvConfigMapName", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+			nodeSetSpec["preProvisioned"] = true
+			nodeSetSpec["services"] = []string{"bootstrap"}
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+
+		It("Should use default openstack-aee-default-env ConfigMap in the Job", func() {
+			Eventually(func(g Gomega) {
+				ansibleeeName := types.NamespacedName{
+					Name:      fmt.Sprintf("bootstrap-%s-%s", dataplaneDeploymentName.Name, dataplaneNodeSetName.Name),
+					Namespace: namespace,
+				}
+				ansibleEE := GetAnsibleee(ansibleeeName)
+
+				// Verify EnvFrom references the default ConfigMap
+				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom).To(HaveLen(1))
+				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef).NotTo(BeNil())
+				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef.LocalObjectReference.Name).To(Equal("openstack-aee-default-env"))
+				g.Expect(*ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef.Optional).To(BeTrue())
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+	})
+
+	When("A Deployment specifies custom ansibleEEEnvConfigMapName", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+			nodeSetSpec["preProvisioned"] = true
+			nodeSetSpec["services"] = []string{"bootstrap"}
+
+			deploymentSpec := DefaultDataPlaneDeploymentSpec()
+			deploymentSpec["ansibleEEEnvConfigMapName"] = "custom-deployment-env"
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, deploymentSpec))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+
+		It("Should use Deployment's custom ConfigMap name in the Job", func() {
+			Eventually(func(g Gomega) {
+				ansibleeeName := types.NamespacedName{
+					Name:      fmt.Sprintf("bootstrap-%s-%s", dataplaneDeploymentName.Name, dataplaneNodeSetName.Name),
+					Namespace: namespace,
+				}
+				ansibleEE := GetAnsibleee(ansibleeeName)
+
+				// Verify EnvFrom references the Deployment's custom ConfigMap
+				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom).To(HaveLen(1))
+				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef).NotTo(BeNil())
+				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef.LocalObjectReference.Name).To(Equal("custom-deployment-env"))
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+	})
 })

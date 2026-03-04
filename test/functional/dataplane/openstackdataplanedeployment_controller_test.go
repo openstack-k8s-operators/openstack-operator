@@ -156,14 +156,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              []string{"edpm-compute-nodeset"},
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
+				NodeSets:                  []string{"edpm-compute-nodeset"},
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -352,14 +353,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              nodeSetsNames,
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
+				NodeSets:                  nodeSetsNames,
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -562,14 +564,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              nodeSetsNames,
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
+				NodeSets:                  nodeSetsNames,
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -676,14 +679,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              []string{"edpm-compute-nodeset"},
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
+				NodeSets:                  []string{"edpm-compute-nodeset"},
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -828,14 +832,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              nodeSetsNames,
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
+				NodeSets:                  nodeSetsNames,
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -991,14 +996,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              []string{"edpm-compute-nodeset"},
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      []string{dataplaneServiceName.Name, "duplicate-service"},
+				NodeSets:                  []string{"edpm-compute-nodeset"},
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          []string{dataplaneServiceName.Name, "duplicate-service"},
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1153,14 +1159,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              nodeSetsNames,
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      []string{"global-service"},
+				NodeSets:                  nodeSetsNames,
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          []string{"global-service"},
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1361,14 +1368,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              nodeSetsNames,
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      []string{"foo-service", "global-service", "foo-update-service"},
+				NodeSets:                  nodeSetsNames,
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          []string{"foo-service", "global-service", "foo-update-service"},
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1524,14 +1532,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              []string{"edpm-compute-nodeset"},
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				BackoffLimit:          &DefaultBackoffLimit,
-				PreserveJobs:          true,
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
+				NodeSets:                  []string{"edpm-compute-nodeset"},
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				BackoffLimit:              &DefaultBackoffLimit,
+				PreserveJobs:              true,
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1626,14 +1635,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              []string{"edpm-compute-nodeset"},
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
-				BackoffLimit:          ptr.To(int32(6)),
-				PreserveJobs:          true,
+				NodeSets:                  []string{"edpm-compute-nodeset"},
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				BackoffLimit:              ptr.To(int32(6)),
+				PreserveJobs:              true,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1727,14 +1737,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:              []string{"edpm-compute-nodeset"},
-				AnsibleTags:           "",
-				AnsibleLimit:          "",
-				AnsibleSkipTags:       "",
-				DeploymentRequeueTime: 15,
-				ServicesOverride:      nil,
-				BackoffLimit:          ptr.To(int32(6)),
-				PreserveJobs:          true,
+				NodeSets:                  []string{"edpm-compute-nodeset"},
+				AnsibleTags:               "",
+				AnsibleLimit:              "",
+				AnsibleSkipTags:           "",
+				DeploymentRequeueTime:     15,
+				ServicesOverride:          nil,
+				BackoffLimit:              ptr.To(int32(6)),
+				PreserveJobs:              true,
+				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
