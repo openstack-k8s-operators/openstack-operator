@@ -13696,6 +13696,34 @@ spec:
                   enabled:
                     default: true
                     type: boolean
+                  federation:
+                    additionalProperties:
+                      properties:
+                        ackMode:
+                          default: on-confirm
+                          enum:
+                          - on-confirm
+                          - on-publish
+                          - no-ack
+                          type: string
+                        localClusterName:
+                          type: string
+                        policyPattern:
+                          default: .*
+                          type: string
+                        upstreamClusterName:
+                          type: string
+                        upstreamSecretRef:
+                          properties:
+                            name:
+                              default: ""
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      required:
+                      - localClusterName
+                      type: object
+                    type: object
                   templates:
                     additionalProperties:
                       properties:

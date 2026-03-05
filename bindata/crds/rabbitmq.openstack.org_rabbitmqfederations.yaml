@@ -1,0 +1,211 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.18.0
+  name: rabbitmqfederations.rabbitmq.openstack.org
+spec:
+  group: rabbitmq.openstack.org
+  names:
+    categories:
+    - all
+    - rabbitmq
+    kind: RabbitMQFederation
+    listKind: RabbitMQFederationList
+    plural: rabbitmqfederations
+    shortNames:
+    - rmqfed
+    singular: rabbitmqfederation
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.rabbitmqClusterName
+      name: Local Cluster
+      type: string
+    - jsonPath: .spec.upstreamClusterName
+      name: Upstream Cluster
+      type: string
+    - jsonPath: .spec.upstreamSecretRef
+      name: Upstream Secret
+      type: string
+    - jsonPath: .spec.exchangePattern
+      name: Exchange Pattern
+      type: string
+    - jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          RabbitMQFederation is the Schema for the rabbitmqfederations API.
+          It configures RabbitMQ federation between two RabbitMQ clusters,
+          allowing exchanges matching a pattern on the upstream cluster to be
+          federated to the local (downstream) cluster. This is used in multi-region
+          deployments to replicate messages (e.g. keystone notifications) across regions.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              RabbitMQFederationSpec defines the desired state of RabbitMQFederation.
+
+              The upstream connection can be specified in one of two ways:
+
+              1. UpstreamClusterName: references a RabbitmqCluster CR in the same namespace.
+                 The controller will look up its credentials secret to build the AMQP URI.
+                 Use this when both clusters are managed in the same Kubernetes namespace.
+
+              2. UpstreamSecretRef: references a Secret containing the upstream AMQP URI
+                 in a key called "uri" (e.g. "amqps://user:pass@remote-host:5671/").
+                 Use this for cross-cluster / cross-region federation where the upstream
+                 RabbitMQ is on a different Kubernetes cluster.
+
+              Exactly one of UpstreamClusterName or UpstreamSecretRef must be specified.
+            properties:
+              ackMode:
+                default: on-confirm
+                description: |-
+                  AckMode - determines how the federation link should acknowledge messages.
+                  Defaults to "on-confirm" which provides the strongest guarantee.
+                enum:
+                - on-confirm
+                - on-publish
+                - no-ack
+                type: string
+              exchangePattern:
+                description: |-
+                  ExchangePattern - regex pattern to match exchange names that should be federated.
+                  For example, "^keystone$" to federate only the keystone exchange.
+                type: string
+              expires:
+                default: 3600000
+                description: |-
+                  Expires - time in milliseconds that the upstream will be remembered
+                  after disconnecting. Defaults to 3600000 (1 hour).
+                format: int64
+                type: integer
+              priority:
+                default: 0
+                description: Priority - priority of the federation policy (higher
+                  value = higher priority)
+                type: integer
+              rabbitmqClusterName:
+                description: |-
+                  RabbitmqClusterName - the name of the local (downstream) RabbitMQ cluster
+                  where federation will be configured
+                type: string
+              trustUserID:
+                description: |-
+                  TrustUserID - whether to trust the user-id header from the upstream.
+                  Defaults to false.
+                type: boolean
+              upstreamClusterName:
+                description: |-
+                  UpstreamClusterName - the name of an upstream RabbitmqCluster CR in the
+                  same namespace. The controller will read its default-user secret to
+                  construct the AMQP URI. Mutually exclusive with UpstreamSecretRef.
+                type: string
+              upstreamName:
+                description: UpstreamName - name for the federation upstream definition
+                  in RabbitMQ
+                type: string
+              upstreamSecretRef:
+                description: |-
+                  UpstreamSecretRef - name of a Secret in the same namespace that contains
+                  the upstream AMQP URI in a key called "uri"
+                  (e.g. "amqps://user:pass@remote-rabbitmq.region1.svc:5671/").
+                  Use this for cross-region federation where the upstream RabbitMQ is on
+                  a different Kubernetes cluster. Mutually exclusive with UpstreamClusterName.
+                type: string
+              upstreamVhost:
+                description: |-
+                  UpstreamVhost - the vhost on the upstream cluster to federate from.
+                  Only used with UpstreamClusterName; ignored when UpstreamSecretRef is set
+                  (include the vhost in the URI instead).
+                type: string
+              vhostRef:
+                description: |-
+                  VhostRef - reference to the RabbitMQVhost resource on the local cluster
+                  (if empty, uses default vhost "/")
+                type: string
+            required:
+            - exchangePattern
+            - rabbitmqClusterName
+            - upstreamName
+            type: object
+          status:
+            description: RabbitMQFederationStatus defines the observed state of RabbitMQFederation
+            properties:
+              conditions:
+                description: Conditions
+                items:
+                  description: Condition defines an observation of a API resource
+                    operational state.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        Last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed. If that is not known, then using the time when
+                        the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition
+                        in CamelCase.
+                      type: string
+                    severity:
+                      description: |-
+                        Severity provides a classification of Reason code, so the current situation is immediately
+                        understandable and could act accordingly.
+                        It is meant for situations where Status=False and it should be indicated if it is just
+                        informational, warning (next reconciliation might fix it) or an error (e.g. DB create issue
+                        and no actions to automatically resolve the issue can/should be done).
+                        For conditions where Status=Unknown or Status=True the Severity should be SeverityNone.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                description: ObservedGeneration - the most recent generation observed
+                  for this resource
+                format: int64
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

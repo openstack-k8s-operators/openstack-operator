@@ -49,6 +49,7 @@ import (
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -564,6 +565,47 @@ type RabbitmqSection struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Templates - Overrides to use when creating the Rabbitmq clusters
 	Templates *map[string]rabbitmqv1.RabbitMqSpecCore `json:"templates"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Federation - Map of federation configurations, keyed by name.
+	// Each entry defines a federation upstream from a remote RabbitMQ cluster
+	// to a local cluster. This is used in multi-region deployments to replicate
+	// messages (e.g. keystone notifications) between regions.
+	Federation *map[string]RabbitmqFederationConfig `json:"federation,omitempty"`
+}
+
+// RabbitmqFederationConfig defines a federation upstream configuration.
+// Exactly one of UpstreamClusterName or UpstreamSecretRef must be set.
+type RabbitmqFederationConfig struct {
+	// +kubebuilder:validation:Required
+	// LocalClusterName - name of the local (downstream) RabbitMQ cluster
+	// where messages will be replicated to
+	LocalClusterName string `json:"localClusterName"`
+
+	// +kubebuilder:validation:Optional
+	// UpstreamClusterName - name of a RabbitmqCluster CR in the same namespace
+	// to federate from. Use this when both clusters are in the same namespace.
+	// Mutually exclusive with UpstreamSecretRef.
+	UpstreamClusterName string `json:"upstreamClusterName,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// UpstreamSecretRef - reference to secret containing AMQP URI(s) for remote upstream.
+	// Secret must contain key "uri" with one or more AMQP URIs (comma-separated).
+	// Use this for cross-region federation where the upstream RabbitMQ is on
+	// a different Kubernetes cluster. Mutually exclusive with UpstreamClusterName.
+	UpstreamSecretRef *corev1.LocalObjectReference `json:"upstreamSecretRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=".*"
+	// PolicyPattern - regex pattern for matching exchanges/queues to apply federation policy
+	PolicyPattern string `json:"policyPattern,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="on-confirm"
+	// +kubebuilder:validation:Enum=on-confirm;on-publish;no-ack
+	// AckMode - determines how the federation link acknowledges messages
+	AckMode string `json:"ackMode,omitempty"`
 }
 
 // MemcachedSection defines the desired state of Memcached services
