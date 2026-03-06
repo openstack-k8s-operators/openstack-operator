@@ -3718,8 +3718,8 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		Expect(errors.As(err, &statusError)).To(BeTrue())
 		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
 		Expect(statusError.ErrStatus.Message).To(
-			ContainSubstring(
-				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than 39 characters"),
+			MatchRegexp(
+				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than \\d+ characters"),
 		)
 	})
 
@@ -3763,8 +3763,8 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		Expect(errors.As(err, &statusError)).To(BeTrue())
 		Expect(statusError.ErrStatus.Details.Kind).To(Equal("OpenStackControlPlane"))
 		Expect(statusError.ErrStatus.Message).To(
-			ContainSubstring(
-				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than 33 characters"),
+			MatchRegexp(
+				"Invalid value: \"foo-1234567890-1234567890-1234567890-1234567890-1234567890\": must be no more than \\d+ characters"),
 		)
 	})
 

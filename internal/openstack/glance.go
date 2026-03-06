@@ -271,6 +271,11 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		} else {
 			glance.GetAnnotations()[glancev1.GlanceWSGILabel] = "false"
 		}
+		if version.Status.ServiceDefaults.GlanceLocationAPI != nil && *version.Status.ServiceDefaults.GlanceLocationAPI == "true" {
+			glance.GetAnnotations()[glancev1.GlanceLocationAPILabel] = "true"
+		} else {
+			glance.GetAnnotations()[glancev1.GlanceLocationAPILabel] = "false"
+		}
 
 		// Append globally defined extraMounts to the service's own list.
 		for _, ev := range instance.Spec.ExtraMounts {
