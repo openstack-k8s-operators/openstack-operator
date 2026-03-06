@@ -3,3 +3,6 @@ kind: TestStep
 commands:
   - script: |
       oc kustomize ../../../../config/samples/base/openstackcontrolplane | oc apply -n $NAMESPACE -f -
+  - script: |
+      # Disable the services that are not needed for the test (these are also already covered in the ctlplane-basic-deployment test)
+      NAMESPACE=$NAMESPACE ../../common/toggle_services.sh openstack "barbican,cinder,swift,telemetry" false
