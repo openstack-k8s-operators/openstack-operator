@@ -58,7 +58,7 @@ spec:
                 minimum: 1
                 type: integer
               apiType:
-                default: external
+                default: single
                 enum:
                 - internal
                 - external
@@ -1581,7 +1581,7 @@ spec:
                     type: string
                 type: object
               type:
-                default: split
+                default: single
                 description: Type - represents the layout of the glanceAPI deployment.
                 enum:
                 - split

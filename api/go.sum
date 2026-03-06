@@ -16,6 +16,8 @@ github.com/evanphx/json-patch v5.9.11+incompatible h1:ixHHqfcGvxhWkniF1tWxBHA0yb
 github.com/evanphx/json-patch v5.9.11+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch/v5 v5.9.11 h1:/8HVnzMq13/3x9TPvjG08wUGqBTmZBsCWzjTM0wiaDU=
 github.com/evanphx/json-patch/v5 v5.9.11/go.mod h1:3j+LviiESTElxA4p3EMKAB9HXj3/XEtnUf6OZxqIQTM=
+github.com/fmount/glance-operator/api v0.1.2-0.20260305205814-319db2e0e586 h1:JGoFeaOx2eHXnXSeE63wE+8RYfUcpBe/3G8+VCYPM8Y=
+github.com/fmount/glance-operator/api v0.1.2-0.20260305205814-319db2e0e586/go.mod h1:4Y0Q6mnvhxYe4ZXhfr20NAZ23QOT5qsaU3R1E5tdd34=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
 github.com/fxamacker/cbor/v2 v2.9.0 h1:NpKPmjDBgUfBms6tr6JZkTHtfFGcMKsw3eGcmD/sapM=
@@ -120,8 +122,6 @@ github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260304071337-6
 github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260304071337-63312061d576/go.mod h1:Ta5iogB0ASRIz3tZBV5tmuWBkxKfLcCX/zm1sLLs4MM=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260302083231-563bef879f57 h1:vgIrNDgCARoTi/EvPG8U4DPt9YXeCbneJEAI1Yyi2KQ=
 github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260302083231-563bef879f57/go.mod h1:mvJ6d6hH6vM9KH3Gs7Z7coAEaHe0oI4KNA+Q5sqM+tA=
-github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260307070902-e95146e9e7f0 h1:qxvQv2nb4JKTUt+0izG6kEoicSgqUutqZOyz9SbtDVw=
-github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260307070902-e95146e9e7f0/go.mod h1:HFww0mYz6ziCXbUqF5QH0OHVVfv+2At3zxG3gpIDjYA=
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260304090236-61c1f63e5bfb h1:LRrECidXOAJXJts+1TJgum1ZGNJIQj3v73hdC+NSqo8=
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260304090236-61c1f63e5bfb/go.mod h1:sXlGVZlqKvRJ0RXGb1ze6a7e5+N/ZOVqSpOTGrBVhIo=
 github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260228155252-bb17197b83a6 h1:AtuwSvzQs3UoVY37KouH27un8uMqJ+mZvpCc/Y019Ho=
