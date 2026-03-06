@@ -24,6 +24,7 @@
       - ^PROJECT$
       - ^README.md$
       - tests?\/functional
+      - roles/.*/molecule/.*
     vars:
       cifmw_kuttl_tests_operator_list:
         - openstack
