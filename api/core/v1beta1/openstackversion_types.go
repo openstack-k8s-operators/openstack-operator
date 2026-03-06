@@ -178,6 +178,7 @@ type ContainerTemplate struct {
 // but are associated with a specific OpenStack release version
 type ServiceDefaults struct {
 	GlanceWsgi *string `json:"glanceWsgi,omitempty"`
+	GlanceLocationAPI *string `json:"glanceLocationAPI,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
