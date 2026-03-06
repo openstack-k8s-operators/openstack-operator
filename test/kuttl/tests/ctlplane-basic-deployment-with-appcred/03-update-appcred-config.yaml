@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      # Change barbican's expirationDays from the default (730) to 365
+      oc patch openstackcontrolplane openstack -n $NAMESPACE --type merge -p \
+        '{"spec":{"barbican":{"applicationCredential":{"expirationDays":365,"gracePeriodDays":180}}}}'
+
+      # Change glance's roles from [admin,service] to [service] only
+      oc patch openstackcontrolplane openstack -n $NAMESPACE --type merge -p \
+        '{"spec":{"glance":{"applicationCredential":{"roles":["service"]}}}}'

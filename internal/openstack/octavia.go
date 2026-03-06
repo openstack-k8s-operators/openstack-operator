@@ -59,6 +59,10 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Status.ContainerImages.OctaviaHousekeepingImage = nil
 		instance.Status.ContainerImages.OctaviaApacheImage = nil
 		instance.Status.ContainerImages.OctaviaRsyslogImage = nil
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, octavia.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -167,9 +171,9 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		octaviaSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Octavia.ApplicationCredential) ||
-		instance.Spec.Octavia.Template.OctaviaAPI.Auth.ApplicationCredentialSecret != "" {
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Octavia.ApplicationCredential != nil ||
+		instance.Spec.Octavia.Template.Auth.ApplicationCredentialSecret != "" {
 
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(
 			ctx,
@@ -194,7 +198,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 		// Set ApplicationCredentialSecret based on what the helper returned:
 		// - If AC disabled: returns ""
 		// - If AC enabled and ready: returns the AC secret name
-		instance.Spec.Octavia.Template.OctaviaAPI.Auth.ApplicationCredentialSecret = acSecretName
+		instance.Spec.Octavia.Template.Auth.ApplicationCredentialSecret = acSecretName
 	}
 
 	svcs, err := service.GetServicesListWithLabel(
