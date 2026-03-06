@@ -11,6 +11,7 @@ import (
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -228,7 +229,8 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 	// but get set to true here for FR3 available versions and thus provide a way for services to migrate
 	// to new deployment topologies
 	trueString := "true"
-	defaults.GlanceWsgi = &trueString // all new glance deployments use WSGI by default (FR3 and later)
+	defaults.GlanceWsgi = &trueString            // all new glance deployments use WSGI by default (FR3 and later)
+	defaults.GlanceLocationAPI = ptr.To("false") // disable location-api for RHOSO 18: this boolean can be switched to true with RHOSO 19 release
 
 	return defaults
 }

@@ -4658,7 +4658,7 @@ spec:
                                   type: string
                               type: object
                             type:
-                              default: split
+                              default: single
                               enum:
                               - split
                               - single
