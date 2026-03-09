@@ -160,6 +160,28 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	//DeployedBmhHash - Hash of BMHs deployed
 	DeployedBmhHash string `json:"deployedBmhHash,omitempty"`
+
+	// SecretDeployment tracks secret deployment progress across nodeset nodes
+	// Details are stored in a ConfigMap to avoid bloating the CR status
+	SecretDeployment *SecretDeploymentStatus `json:"secretDeployment,omitempty"`
+}
+
+// SecretDeploymentStatus tracks secret deployment progress across nodeset nodes
+type SecretDeploymentStatus struct {
+	// AllNodesUpdated indicates all nodes have current versions of all tracked secrets
+	AllNodesUpdated bool `json:"allNodesUpdated"`
+
+	// TotalNodes is the total number of nodes in the nodeset
+	TotalNodes int `json:"totalNodes"`
+
+	// UpdatedNodes is count of nodes with all current secret versions
+	UpdatedNodes int `json:"updatedNodes"`
+
+	// ConfigMapName references the ConfigMap containing detailed per-secret tracking
+	ConfigMapName string `json:"configMapName,omitempty"`
+
+	// LastUpdateTime is when this status was last updated
+	LastUpdateTime *metav1.Time `json:"lastUpdateTime,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -178,6 +200,14 @@ func init() {
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneNodeSet) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+}
+
+// AreAllNodesUpdated returns true if all nodes in the nodeset have been updated
+// with current versions of all tracked secrets. Returns false if secret deployment
+// tracking is not initialized or if any nodes have pending updates.
+func (instance OpenStackDataPlaneNodeSet) AreAllNodesUpdated() bool {
+	return instance.Status.SecretDeployment != nil &&
+		instance.Status.SecretDeployment.AllNodesUpdated
 }
 
 // InitConditions - Initializes Status Conditons

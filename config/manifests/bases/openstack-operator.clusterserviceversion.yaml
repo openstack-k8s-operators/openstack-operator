@@ -376,6 +376,9 @@ spec:
           Resource
         displayName: Template
         path: openstackclient.template
+      - description: List of environment variables to set in the container.
+        displayName: Env
+        path: openstackclient.template.env
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn
