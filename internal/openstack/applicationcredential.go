@@ -59,6 +59,34 @@ func isACEnabled(globalAC corev1beta1.ApplicationCredentialSection, serviceAC *c
 	return serviceAC != nil && serviceAC.Enabled
 }
 
+// CleanupApplicationCredentialForService deletes the AC CR for a service if it exists.
+// Used when a service or its AC is disabled - deletes the AC CR if it exists regardless
+// of the AC enabled flag.
+func CleanupApplicationCredentialForService(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *corev1beta1.OpenStackControlPlane,
+	serviceName string,
+) error {
+	acName := keystonev1.GetACCRName(serviceName)
+	acCR := &keystonev1.KeystoneApplicationCredential{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      acName,
+			Namespace: instance.Namespace,
+		},
+	}
+	Log := GetLogger(ctx)
+	err := helper.GetClient().Delete(ctx, acCR)
+	if k8s_errors.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	Log.Info("Service disabled, deleted existing KeystoneApplicationCredential CR", "service", serviceName, "acName", acName)
+	return nil
+}
+
 // EnsureApplicationCredentialForService handles AC creation for a single service.
 // If service is not ready, AC creation is deferred
 // If AC already exists and is ready, it's used immediately
@@ -125,6 +153,11 @@ func EnsureApplicationCredentialForService(
 
 	// Check if AC CR exists and is ready
 	if acExists {
+		// We want to run reconcileApplicationCredential to update the AC CR if it exists and is ready and AC config fields changed
+		err = reconcileApplicationCredential(ctx, helper, instance, acName, serviceUser, secretName, passwordSelector, merged)
+		if err != nil {
+			return "", ctrl.Result{}, err
+		}
 		if acCR.IsReady() {
 			Log.Info("Application Credential is ready", "service", serviceName, "acName", acName, "secretName", acCR.Status.SecretName)
 			return acCR.Status.SecretName, ctrl.Result{}, nil

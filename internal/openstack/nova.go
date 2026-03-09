@@ -61,6 +61,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		instance.Status.ContainerImages.NovaConductorImage = nil
 		instance.Status.ContainerImages.NovaNovncImage = nil
 		instance.Status.ContainerImages.NovaSchedulerImage = nil
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, nova.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -191,8 +195,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		novaSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Nova.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Nova.ApplicationCredential != nil ||
 		instance.Spec.Nova.Template.Auth.ApplicationCredentialSecret != "" {
 
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(

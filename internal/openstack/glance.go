@@ -64,6 +64,10 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneGlanceReadyCondition)
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition)
 		instance.Status.ContainerImages.GlanceAPIImage = nil
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, glance.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -128,9 +132,8 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Glance.ApplicationCredential) || hasACConfigured {
-
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Glance.ApplicationCredential != nil || hasACConfigured {
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(
 			ctx,
 			helper,

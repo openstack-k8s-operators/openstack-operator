@@ -41,6 +41,10 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.DesignateBackendbind9Image = nil
 		instance.Status.ContainerImages.DesignateUnboundImage = nil
 		instance.Status.ContainerImages.NetUtilsImage = nil
+		// Clean up AC CRs when service is disabled
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, designate.Name); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -85,8 +89,8 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		designateSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Designate.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Designate.ApplicationCredential != nil ||
 		instance.Spec.Designate.Template.DesignateAPI.Auth.ApplicationCredentialSecret != "" {
 
 		acSecretName, acResult, err := EnsureApplicationCredentialForService(
