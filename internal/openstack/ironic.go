@@ -40,6 +40,13 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.ContainerImages.IronicNeutronAgentImage = nil
 		instance.Status.ContainerImages.IronicPxeImage = nil
 		instance.Status.ContainerImages.IronicPythonAgentImage = nil
+		// Clean up AC CRs when service is disabled (ironic has two: ironic and ironic-inspector)
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, ironic.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, "ironic-inspector"); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -124,8 +131,8 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		ironicSecret = instance.Spec.Secret
 	}
 
-	// Only call if AC enabled or currently configured
-	if isACEnabled(instance.Spec.ApplicationCredential, instance.Spec.Ironic.ApplicationCredential) ||
+	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
+	if instance.Spec.Ironic.ApplicationCredential != nil ||
 		instance.Spec.Ironic.Template.Auth.ApplicationCredentialSecret != "" ||
 		instance.Spec.Ironic.Template.IronicInspector.Auth.ApplicationCredentialSecret != "" {
 
