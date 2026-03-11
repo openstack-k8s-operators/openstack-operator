@@ -7,9 +7,16 @@ commands:
       NAMESPACE=$NAMESPACE bash ../../common/osp_check_noapi_service_certs.sh
 
   - script: |
-      echo "Get fingerprints of all service certs"
+      echo "Checking endpoint cert rotation..."
+      for i in $(seq 1 30); do
+        oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_after
+        if bash ../../common/osp_check_fingerprints.sh 2>/dev/null; then
+          echo "All endpoint certs rotated successfully."
+          exit 0
+        fi
+        echo "Attempt $i/30: Not all certs rotated yet, waiting 20s..."
+        sleep 20
+      done
+      echo "Collecting final fingerprints for failure diagnostics..."
       oc exec -i openstackclient -n $NAMESPACE -- bash -s < ../../common/osp_endpoint_fingerprints.sh > /tmp/endpoint_fingerprints_after
-
-  - script: |
-      echo "Check if all services from before are present in after and have valid fingerprints"
       bash -s < ../../common/osp_check_fingerprints.sh
