@@ -592,6 +592,9 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			for k, v := range deployment.Status.ConfigMapHashes {
 				instance.Status.ConfigMapHashes[k] = v
 			}
+			if len(deployment.Spec.ServicesOverride) == 0 {
+				instance.Status.SecretHashes = make(map[string]string, len(deployment.Status.SecretHashes))
+			}
 			for k, v := range deployment.Status.SecretHashes {
 				instance.Status.SecretHashes[k] = v
 			}
