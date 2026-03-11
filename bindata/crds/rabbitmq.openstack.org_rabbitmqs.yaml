@@ -1804,6 +1804,14 @@ spec:
                   Has no effect if the cluster only consists of one node.
                   For more information, see https://www.rabbitmq.com/rabbitmq-queues.8.html#rebalance
                 type: boolean
+              targetVersion:
+                description: |-
+                  TargetVersion - the desired RabbitMQ version (e.g., "4.2", "3.13.1").
+                  When set to a version different from Status.CurrentVersion, the controller
+                  will initiate a storage wipe and version upgrade. The controller updates
+                  Status.CurrentVersion once the upgrade completes.
+                pattern: ^\d+\.\d+(\.\d+)?$
+                type: string
               terminationGracePeriodSeconds:
                 default: 604800
                 description: |-
@@ -1944,7 +1952,7 @@ spec:
                 description: |-
                   CurrentVersion - the currently deployed RabbitMQ version (e.g., "3.9", "4.2")
                   This is controller-managed and reflects the actual running version.
-                  openstack-operator should use the "rabbitmq.openstack.org/target-version" annotation to request version changes.
+                  Set Spec.TargetVersion to request a version change.
                 type: string
               lastAppliedTopology:
                 description: LastAppliedTopology - the last applied Topology
@@ -1974,7 +1982,7 @@ spec:
                   ProxyRequired - tracks whether the AMQP proxy sidecar is required for this cluster.
                   Set to true when upgrading from RabbitMQ 3.x to 4.x with Quorum queues.
                   The proxy allows non-durable clients to work with quorum queues during the upgrade window.
-                  Only cleared when the "rabbitmq.openstack.org/clients-reconfigured" annotation is set.
+                  Only cleared when the AnnotationClientsReconfigured annotation is set to "true".
                 type: boolean
               queueType:
                 description: QueueType - store whether default ha-all policy is present
@@ -1990,12 +1998,13 @@ spec:
                 x-kubernetes-list-type: atomic
               upgradePhase:
                 description: |-
-                  UpgradePhase - tracks the current phase of a version upgrade or migration
-                  Valid values:
-                    "" (no upgrade in progress)
-                    "DeletingResources" (deleting ha-all policy and StatefulSet)
-                    "WaitingForCluster" (waiting for cluster to become ready with new version)
+                  UpgradePhase - tracks the current phase of a version upgrade or migration.
                   This allows resuming upgrades that failed midway.
+                type: string
+              wipeReason:
+                description: |-
+                  WipeReason - tracks why the current storage wipe was initiated.
+                  Persisted so that resumed upgrades use the correct handling path.
                 type: string
             type: object
         type: object

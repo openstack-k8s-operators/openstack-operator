@@ -14456,6 +14456,9 @@ spec:
                           type: object
                         skipPostDeploySteps:
                           type: boolean
+                        targetVersion:
+                          pattern: ^\d+\.\d+(\.\d+)?$
+                          type: string
                         terminationGracePeriodSeconds:
                           default: 604800
                           format: int64
