@@ -1742,6 +1742,12 @@ spec:
                     default: true
                     description: AlertingEnabled allows to enable or disable alertmanager
                     type: boolean
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: NodeSelector to target subset of worker nodes running
+                      this service
+                    type: object
                   scrapeInterval:
                     default: 30s
                     description: ScrapeInterval sets the interval between scrapes

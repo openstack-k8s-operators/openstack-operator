@@ -56,6 +56,15 @@ spec:
                 description: ContainerImage for the InstanceHa container (will be
                   set to environmental default if empty)
                 type: string
+              disabled:
+                default: "False"
+                description: |-
+                  Disabled allows disabling the InstanceHA process so that it does not
+                  fence and evacuate compute nodes
+                enum:
+                - "True"
+                - "False"
+                type: string
               fencingSecret:
                 default: fencing-secret
                 description: FencingSecret is the name of the Secret containing the
