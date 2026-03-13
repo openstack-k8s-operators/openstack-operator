@@ -17613,6 +17613,10 @@ spec:
                               alertingEnabled:
                                 default: true
                                 type: boolean
+                              nodeSelector:
+                                additionalProperties:
+                                  type: string
+                                type: object
                               scrapeInterval:
                                 default: 30s
                                 type: string
