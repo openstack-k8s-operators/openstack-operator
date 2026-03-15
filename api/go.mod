@@ -143,3 +143,5 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.14 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.14 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+replace github.com/openstack-k8s-operators/glance-operator/api => github.com/fmount/glance-operator/api v0.1.2-0.20260305205814-319db2e0e586

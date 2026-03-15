@@ -4923,7 +4923,7 @@ spec:
                                   type: string
                               type: object
                             type:
-                              default: split
+                              default: single
                               enum:
                               - split
                               - single
@@ -21463,6 +21463,8 @@ spec:
               availableServiceDefaults:
                 additionalProperties:
                   properties:
+                    glanceLocationAPI:
+                      type: string
                     glanceWsgi:
                       type: string
                   type: object
@@ -21898,6 +21900,8 @@ spec:
                 type: integer
               serviceDefaults:
                 properties:
+                  glanceLocationAPI:
+                    type: string
                   glanceWsgi:
                     type: string
                 type: object
