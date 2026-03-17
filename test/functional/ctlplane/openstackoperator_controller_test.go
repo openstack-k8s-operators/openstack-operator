@@ -3083,6 +3083,168 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// to nil does not clear template-level NotificationsBus configuration.
 		// Template-level takes precedence over top-level.
 	})
+
+	//
+	// Galera Secret field behavior tests
+	//
+	When("A OpenStackControlPlane with blank Galera secret is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+
+			// Modify galera template to have blank secret for auto-generation
+			galeraTemplate := spec["galera"].(map[string]interface{})
+			templates := galeraTemplate["templates"].(map[string]interface{})
+			dbTemplate := templates[names.DBName.Name].(map[string]interface{})
+			dbTemplate["secret"] = "" // Explicitly blank for auto-generated password
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should create Galera CR with blank secret allowing auto-generation", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Galera.Enabled).Should(BeTrue())
+
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).Should(Not(BeNil()))
+				// When created fresh with blank secret, it should remain blank
+				// (allowing mariadb-operator to auto-generate the root password)
+				g.Expect(db.Spec.Secret).To(Equal(""))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A OpenStackControlPlane with omitted Galera secret is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+
+			// Modify galera template to omit secret entirely (not set)
+			galeraTemplate := spec["galera"].(map[string]interface{})
+			templates := galeraTemplate["templates"].(map[string]interface{})
+			dbTemplate := templates[names.DBName.Name].(map[string]interface{})
+			delete(dbTemplate, "secret") // Omit the field entirely
+
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec))
+		})
+
+		It("should create Galera CR with blank secret for auto-generation", func() {
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).ShouldNot(BeNil())
+				// When omitted (not explicitly set), should remain blank
+				// allowing mariadb-operator to auto-generate the password
+				g.Expect(db.Spec.Secret).To(Equal(""))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A OpenStackControlPlane with explicit custom Galera secret is created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+
+			// Modify galera template to use custom secret
+			galeraTemplate := spec["galera"].(map[string]interface{})
+			templates := galeraTemplate["templates"].(map[string]interface{})
+			dbTemplate := templates[names.DBName.Name].(map[string]interface{})
+			dbTemplate["secret"] = "custom-galera-secret"
+
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec))
+		})
+
+		It("should create Galera CR with the custom secret", func() {
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).ShouldNot(BeNil())
+				g.Expect(db.Spec.Secret).To(Equal("custom-galera-secret"))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("Multiple Galera templates with different secret configurations are created", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+
+			// Modify galera templates to have different secret configurations
+			galeraTemplate := spec["galera"].(map[string]interface{})
+			templates := map[string]interface{}{
+				names.DBName.Name: map[string]interface{}{
+					"storageRequest": "500M",
+					// secret is omitted
+				},
+				names.DBCell1Name.Name: map[string]interface{}{
+					"storageRequest": "500M",
+					"secret":         "cell1-secret", // Explicit secret
+				},
+			}
+			galeraTemplate["templates"] = templates
+
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec))
+		})
+
+		It("should create each Galera CR with its respective secret configuration", func() {
+			// Verify main DB with blank secret
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).ShouldNot(BeNil())
+				g.Expect(db.Spec.Secret).To(Equal(""))
+			}, timeout, interval).Should(Succeed())
+
+			// Verify cell1 DB with explicit secret
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBCell1Name)
+				g.Expect(db).ShouldNot(BeNil())
+				g.Expect(db.Spec.Secret).To(Equal("cell1-secret"))
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	// Test that we can change from explicit secret to auto-generated
+	When("An OpenStackControlPlane Galera secret starts as osp-secret", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+
+			// Start with an EXPLICIT secret (old deployment style)
+			galeraTemplate := spec["galera"].(map[string]interface{})
+			templates := galeraTemplate["templates"].(map[string]interface{})
+			dbTemplate := templates[names.DBName.Name].(map[string]interface{})
+			dbTemplate["secret"] = "osp-secret" // Explicit secret, as in pre-FR6 versions
+
+			DeferCleanup(th.DeleteInstance, CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec))
+		})
+
+		It("should allow changing to blank secret for auto-generation", func() {
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).ShouldNot(BeNil())
+				g.Expect(db.Spec.Secret).To(Equal("osp-secret"))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				oscp := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				templates := *oscp.Spec.Galera.Templates
+				t := templates[names.DBName.Name]
+				t.Secret = "" // User removes secret to enable auto-gen
+				templates[names.DBName.Name] = t
+				oscp.Spec.Galera.Templates = &templates
+				g.Expect(k8sClient.Update(ctx, oscp)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db).ShouldNot(BeNil())
+				g.Expect(db.Spec.Secret).To(Equal(""))
+			}, timeout, interval).Should(Succeed())
+		})
+
+	})
 })
 
 var _ = Describe("OpenStackOperator Webhook", func() {

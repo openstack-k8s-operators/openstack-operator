@@ -11,6 +11,7 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
+	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
@@ -19,6 +20,7 @@ import (
 	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/utils/ptr"
 )
 
 var _ = Describe("OpenStackControlPlane Webhook", func() {
@@ -940,6 +942,71 @@ var _ = Describe("OpenStackControlPlane Webhook", func() {
 				// Should not panic, messagingBus should remain empty
 				Expect(instance.Spec.Watcher.Template.MessagingBus.Cluster).To(Equal(""))
 			})
+		})
+	})
+
+	Context("Galera Secret field defaulting behavior", func() {
+		var instance *OpenStackControlPlane
+
+		BeforeEach(func() {
+			instance = &OpenStackControlPlane{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test-namespace",
+				},
+				Spec: OpenStackControlPlaneSpec{
+					Secret:       "osp-secret",
+					StorageClass: "local-storage",
+					Galera: GaleraSection{
+						Enabled: true,
+					},
+				},
+			}
+		})
+
+		It("should not default template Secret when omitted in webhook", func() {
+			instance.Spec.Galera.Templates = ptr.To(map[string]mariadbv1.GaleraSpecCore{
+				"openstack": {
+					StorageRequest: "500M",
+					// Secret field is omitted/empty
+				},
+			})
+
+			instance.DefaultServices()
+
+			template := (*instance.Spec.Galera.Templates)["openstack"]
+			Expect(template.Secret).To(Equal(""))
+		})
+
+		It("should preserve explicitly set Secret value", func() {
+			// Create a Galera template with explicit Secret
+			instance.Spec.Galera.Templates = ptr.To(map[string]mariadbv1.GaleraSpecCore{
+				"openstack": {
+					StorageRequest: "500M",
+					Secret:         "custom-secret",
+				},
+			})
+
+			instance.DefaultServices()
+
+			template := (*instance.Spec.Galera.Templates)["openstack"]
+			Expect(template.Secret).To(Equal("custom-secret"))
+		})
+
+		It("should preserve explicitly blank Secret for auto-generation", func() {
+			// Create a Galera template with explicitly blank Secret
+			instance.Spec.Galera.Templates = ptr.To(map[string]mariadbv1.GaleraSpecCore{
+				"openstack": {
+					StorageRequest: "500M",
+					Secret:         "", // Explicitly blank for auto-generation
+				},
+			})
+
+			instance.DefaultServices()
+
+			template := (*instance.Spec.Galera.Templates)["openstack"]
+			// Should remain blank to allow mariadb-operator auto-generation
+			Expect(template.Secret).To(Equal(""))
 		})
 	})
 })
