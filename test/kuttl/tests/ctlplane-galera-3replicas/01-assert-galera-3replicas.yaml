@@ -12,11 +12,11 @@ spec:
     enabled: true
     templates:
       openstack:
-        storageRequest: 500M
+        storageRequest: 500Mi
         secret: osp-secret
         replicas: 3
       openstack-cell1:
-        storageRequest: 500M
+        storageRequest: 500Mi
         secret: osp-secret
         replicas: 3
   rabbitmq:
@@ -40,7 +40,7 @@ spec:
         default:
           replicas: 1
       storage:
-        storageRequest: 10G
+        storageRequest: 10Gi
   cinder:
     template:
       databaseInstance: openstack
@@ -80,11 +80,11 @@ spec:
         ovndbcluster-nb:
           replicas: 1
           dbType: NB
-          storageRequest: 10G
+          storageRequest: 10Gi
         ovndbcluster-sb:
           replicas: 1
           dbType: SB
-          storageRequest: 10G
+          storageRequest: 10Gi
       ovnNorthd:
         replicas: 1
       ovnController:
@@ -110,7 +110,7 @@ spec:
         replicas: 1
       ironicConductors:
       - replicas: 1
-        storageRequest: 10G
+        storageRequest: 10Gi
       ironicInspector:
         replicas: 1
       ironicNeutronAgent:

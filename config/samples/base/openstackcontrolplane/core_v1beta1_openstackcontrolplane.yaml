@@ -15,12 +15,12 @@ spec:
     templates:
       openstack:
         storageClass: local-storage
-        storageRequest: 500M
+        storageRequest: 500Mi
         secret: osp-secret
         replicas: 1
       openstack-cell1:
         storageClass: local-storage
-        storageRequest: 500M
+        storageRequest: 500Mi
         secret: osp-secret
         replicas: 1
   rabbitmq:
@@ -74,7 +74,7 @@ spec:
         swift_store_key = {{ .ServicePassword }}
       storage:
         storageClass: ""
-        storageRequest: 10G
+        storageRequest: 10Gi
       keystoneEndpoint: default
       glanceAPIs:
         default:
@@ -108,11 +108,11 @@ spec:
         ovndbcluster-nb:
           replicas: 1
           dbType: NB
-          storageRequest: 10G
+          storageRequest: 10Gi
         ovndbcluster-sb:
           replicas: 1
           dbType: SB
-          storageRequest: 10G
+          storageRequest: 10Gi
       ovnController: {}
       ovnNorthd:
         replicas: 1
@@ -144,7 +144,7 @@ spec:
         replicas: 1
       ironicConductors:
       - replicas: 1
-        storageRequest: 10G
+        storageRequest: 10Gi
       ironicInspector:
         replicas: 1
       ironicNeutronAgent:
@@ -162,7 +162,7 @@ spec:
             strategy: persistent
             retention: 24h
             persistent:
-              pvcStorageRequest: 10G
+              pvcStorageRequest: 10Gi
       autoscaling:
         enabled: false
         aodh:
@@ -218,4 +218,4 @@ spec:
       designateBackendbind9:
         replicas: 1 # backend needs to be configured
         storageClass: local-storage
-        storageRequest: 10G
+        storageRequest: 10Gi

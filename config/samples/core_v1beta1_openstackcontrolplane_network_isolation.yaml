@@ -93,7 +93,7 @@ spec:
         swift_store_key = {{ .ServicePassword }}
       storage:
         storageClass: ""
-        storageRequest: 10G
+        storageRequest: 10Gi
       secret: osp-secret
       keystoneEndpoint: default
       glanceAPIs:
@@ -132,9 +132,9 @@ spec:
   galera:
     templates:
       openstack:
-        storageRequest: 500M
+        storageRequest: 500Mi
       openstack-cell1:
-        storageRequest: 500M
+        storageRequest: 500Mi
   memcached:
     templates:
       memcached:
@@ -237,11 +237,11 @@ spec:
       ovnDBCluster:
         ovndbcluster-nb:
           dbType: NB
-          storageRequest: 10G
+          storageRequest: 10Gi
           networkAttachment: internalapi
         ovndbcluster-sb:
           dbType: SB
-          storageRequest: 10G
+          storageRequest: 10Gi
           networkAttachment: internalapi
       ovnController:
         networkAttachment: tenant
@@ -322,7 +322,7 @@ spec:
         replicas: 1
       ironicConductors:
       - replicas: 1
-        storageRequest: 10G
+        storageRequest: 10Gi
       ironicInspector:
         replicas: 1
       ironicNeutronAgent:
@@ -340,7 +340,7 @@ spec:
             strategy: persistent
             retention: 24h
             persistent:
-              pvcStorageRequest: 10G
+              pvcStorageRequest: 10Gi
       autoscaling:
         enabled: false
         aodh:
@@ -432,6 +432,6 @@ spec:
       designateBackendbind9:
         replicas: 1
         storageClass: local-storage
-        storageRequest: 10G
+        storageRequest: 10Gi
         networkAttachments:
           - designate
