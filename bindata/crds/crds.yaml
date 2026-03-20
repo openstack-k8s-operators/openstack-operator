@@ -14403,10 +14403,25 @@ spec:
                                   x-kubernetes-list-type: atomic
                               type: object
                           type: object
+                        config:
+                          properties:
+                            additionalConfig:
+                              type: string
+                            additionalPlugins:
+                              items:
+                                type: string
+                              type: array
+                              x-kubernetes-list-type: atomic
+                            advancedConfig:
+                              type: string
+                            envConfig:
+                              type: string
+                            erlangInetConfig:
+                              type: string
+                          type: object
                         delayStartSeconds:
                           default: 30
                           format: int32
-                          minimum: 0
                           type: integer
                         nodeSelector:
                           additionalProperties:
@@ -14525,9 +14540,8 @@ spec:
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                           type: object
+                          x-kubernetes-preserve-unknown-fields: true
                         persistence:
-                          default:
-                            storage: 10Gi
                           properties:
                             storage:
                               anyOf:
@@ -14595,23 +14609,16 @@ spec:
                         rabbitmq:
                           properties:
                             additionalConfig:
-                              maxLength: 100000
                               type: string
                             additionalPlugins:
                               items:
-                                maxLength: 100
-                                pattern: ^\w+$
                                 type: string
-                              maxItems: 100
                               type: array
                             advancedConfig:
-                              maxLength: 100000
                               type: string
                             envConfig:
-                              maxLength: 100000
                               type: string
                             erlangInetConfig:
-                              maxLength: 2000
                               type: string
                           type: object
                         replicas:
@@ -14702,27 +14709,33 @@ spec:
                                 type: string
                               type: object
                             ipFamilyPolicy:
-                              enum:
-                              - SingleStack
-                              - PreferDualStack
-                              - RequireDualStack
                               type: string
                             labels:
                               additionalProperties:
                                 type: string
                               type: object
                             type:
-                              default: ClusterIP
-                              enum:
-                              - ClusterIP
-                              - LoadBalancer
-                              - NodePort
                               type: string
                           type: object
                         skipPostDeploySteps:
                           type: boolean
+                        storage:
+                          properties:
+                            storage:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              default: 10Gi
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            storageClassName:
+                              type: string
+                          type: object
+                        targetVersion:
+                          pattern: ^\d+\.\d+(\.\d+)?$
+                          type: string
                         terminationGracePeriodSeconds:
-                          default: 604800
+                          default: 60
                           format: int64
                           minimum: 0
                           type: integer
@@ -14751,6 +14764,7 @@ spec:
                                 type: string
                             type: object
                           type: array
+                          x-kubernetes-list-type: atomic
                         topologyRef:
                           properties:
                             name:
@@ -21465,6 +21479,8 @@ spec:
                   properties:
                     glanceWsgi:
                       type: string
+                    rabbitmqVersion:
+                      type: string
                   type: object
                 type: object
               availableVersion:
@@ -21899,6 +21915,8 @@ spec:
               serviceDefaults:
                 properties:
                   glanceWsgi:
+                    type: string
+                  rabbitmqVersion:
                     type: string
                 type: object
               trackedCustomImages:

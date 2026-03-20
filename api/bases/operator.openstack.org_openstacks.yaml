@@ -141,7 +141,6 @@ spec:
                       - openstack-baremetal
                       - ovn
                       - placement
-                      - rabbitmq-cluster
                       - swift
                       - telemetry
                       - test
