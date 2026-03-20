@@ -44,7 +44,6 @@ const (
 	OpenStackBaremetalOperatorName = "openstack-baremetal"
 	OvnOperatorName                = "ovn"
 	PlacementOperatorName          = "placement"
-	RabbitMQOperatorName           = "rabbitmq-cluster"
 	SwiftOperatorName              = "swift"
 	TelemetryOperatorName          = "telemetry"
 	TestOperatorName               = "test"
@@ -162,21 +161,6 @@ var (
 			Name: PlacementOperatorName,
 		},
 		{
-			Name: RabbitMQOperatorName,
-			ControllerManager: ContainerSpec{
-				Resources: corev1.ResourceRequirements{
-					Requests: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("5m"),
-						corev1.ResourceMemory: resource.MustParse("64Mi"),
-					},
-					Limits: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("200m"),
-						corev1.ResourceMemory: resource.MustParse("500Mi"),
-					},
-				},
-			},
-		},
-		{
 			Name: SwiftOperatorName,
 		},
 		{
@@ -204,7 +188,7 @@ type OpenStackSpec struct {
 type OperatorSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:validation:Enum:=openstack;barbican;cinder;designate;glance;heat;horizon;infra;ironic;keystone;manila;mariadb;neutron;nova;octavia;openstack-baremetal;ovn;placement;rabbitmq-cluster;swift;telemetry;test;watcher
+	// +kubebuilder:validation:Enum:=openstack;barbican;cinder;designate;glance;heat;horizon;infra;ironic;keystone;manila;mariadb;neutron;nova;octavia;openstack-baremetal;ovn;placement;swift;telemetry;test;watcher
 	// Name of the service operators.
 	Name string `json:"name"`
 

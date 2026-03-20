@@ -90,6 +90,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
+github.com/lmiccini/infra-operator/apis v0.0.0-20260320164938-2057972ad9de h1:kapZ0xUDC+MrtXXLmqvuWQg5nxuFNoxM/EfhXhsxdnY=
+github.com/lmiccini/infra-operator/apis v0.0.0-20260320164938-2057972ad9de/go.mod h1:QXzR9220I2d7CcoHqL4HWtU1PogJSN3NLmnh+bK3mco=
 github.com/mailru/easyjson v0.9.0 h1:PrnmzHw7262yW8sTBwxi1PdJA3Iw/EKBa8psRf7d9a4=
 github.com/mailru/easyjson v0.9.0/go.mod h1:1+xMtQp2MRNVL/V1bOzuP3aP8VNwRW55fQUto+XFtTU=
 github.com/maruel/natural v1.1.1 h1:Hja7XhhmvEFhcByqDoHz9QZbkWey+COd9xWfCfn1ioo=
@@ -126,8 +128,6 @@ github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260314075609-1b8
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260314075609-1b85a36fcef9/go.mod h1:8o0wLkMYyDDqZAdvU/YKMwgwiOyQzADWrmy38rZcHyE=
 github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260314075038-6794e497bcfc h1:3r2wVspdAWx4j7ZScrukfLiPcGM7J9S/ClyOHsbY7ro=
 github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260314075038-6794e497bcfc/go.mod h1:P0hUdNDsv8ISnK2GyFogNQF+dxatbKhtQ76UKhX6t7w=
-github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260314122830-5d1715fa2f64 h1:1orzxWFuQH+QarnH32GXtc4GbE0efL4NddSsRFx3QYM=
-github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260314122830-5d1715fa2f64/go.mod h1:nC/Jf3OYJRML8UEzJ/mn/TQcSCv/nhqO6x6LGkdDt60=
 github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260314080422-d98151f45e34 h1:UgaEid1bqgUzsLg21BHtXSYOV2pljxR1Z3i1BcRVNQc=
 github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260314080422-d98151f45e34/go.mod h1:xEHdAz96FYfnBb1QAFgbfR2BCWCBIqhqKYT84IqU6zc=
 github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260314080138-b41734470581 h1:FntUoWPVWx8xaGCwP7kdUVT/N8Z0kfIxLLK4L+oQJ7c=
@@ -154,8 +154,6 @@ github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260314104343-4225
 github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260314104343-4225d7a41ec7/go.mod h1:PxLz6iV8Z3Ql2QDylxLiljfoisGptsUVWEvbcXC8I3o=
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20260314091105-4ba8bc4c4955 h1:5LJ5YAEGNRZh5hVolC23bzViQoaT1P0MgRQu9xc7RRU=
 github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20260314091105-4ba8bc4c4955/go.mod h1:+8lsJYJYsR8fBvgY4Wtvde4iY+l9O5PBPf6yhVQ1LQU=
-github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec h1:saovr368HPAKHN0aRPh8h8n9s9dn3d8Frmfua0UYRlc=
-github.com/openstack-k8s-operators/rabbitmq-cluster-operator/v2 v2.6.1-0.20250929174222-a0d328fa4dec/go.mod h1:Nh2NEePLjovUQof2krTAg4JaAoLacqtPTZQXK6izNfg=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260314085148-07c5c7f39186 h1:2uSOOWJJXomiSegRgMrhbOcUQsyxEV+m7OJP4pXlCE0=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260314085148-07c5c7f39186/go.mod h1:kOdVr5xAw1jdwYJ8P9yKaqc+qbEzKhuxvOQdPfelPdg=
 github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260314104344-15c2ffcfe08e h1:mjuYX0PJjdZCuXzq+S4VLmZcAZ6BgcQLm7WB1DSfd14=

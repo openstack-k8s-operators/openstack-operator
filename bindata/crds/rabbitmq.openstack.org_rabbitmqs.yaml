@@ -52,7 +52,7 @@ spec:
             description: RabbitMqSpec defines the desired state of RabbitMq
             properties:
               affinity:
-                description: Affinity scheduling rules to be applied on created Pods.
+                description: Affinity - Pod affinity/anti-affinity rules
                 properties:
                   nodeAffinity:
                     description: Describes node affinity scheduling rules for the
@@ -971,6 +971,33 @@ spec:
                         x-kubernetes-list-type: atomic
                     type: object
                 type: object
+              config:
+                description: Config - RabbitMQ configuration options
+                properties:
+                  additionalConfig:
+                    description: AdditionalConfig - Additional RabbitMQ configuration
+                    type: string
+                  additionalPlugins:
+                    description: AdditionalPlugins - Additional RabbitMQ plugins to
+                      enable
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  advancedConfig:
+                    description: AdvancedConfig - Erlang advanced configuration
+                    type: string
+                  envConfig:
+                    description: |-
+                      EnvConfig - Additional environment variables for RabbitMQ (rabbitmq-env.conf format).
+                      These are shell variables sourced by rabbitmq-server at startup.
+                    type: string
+                  erlangInetConfig:
+                    description: |-
+                      ErlangInetConfig - Erlang inet configuration (erl_inetrc format).
+                      When set, overrides the default IPv6 inet configuration.
+                    type: string
+                type: object
               containerImage:
                 description: Name of the rabbitmq container image to run (will be
                   set to environmental default if empty)
@@ -978,15 +1005,9 @@ spec:
               delayStartSeconds:
                 default: 30
                 description: |-
-                  DelayStartSeconds is the time the init container (`setup-container`) will sleep before terminating.
-                  This effectively delays the time between starting the Pod and starting the `rabbitmq` container.
-                  RabbitMQ relies on up-to-date DNS entries early during peer discovery.
-                  The purpose of this artificial delay is to ensure that DNS entries are up-to-date when booting RabbitMQ.
-                  For more information, see https://github.com/kubernetes/kubernetes/issues/92559
-                  If your Kubernetes DNS backend is configured with a low DNS cache value or publishes not ready addresses
-                  promptly, you can decrase this value or set it to 0.
+                  DEPRECATED: For backward compatibility with old rabbitmq-cluster-operator format.
+                  This field is no longer used and will be removed in a future release.
                 format: int32
-                minimum: 0
                 type: integer
               nodeSelector:
                 additionalProperties:
@@ -995,41 +1016,30 @@ spec:
                   this service
                 type: object
               override:
-                description: Provides the ability to override the generated manifest
-                  of several child resources.
+                description: |-
+                  DEPRECATED: For backward compatibility with old RabbitmqClusterSpecCore format.
+                  Use explicit fields above instead. This will be removed in a future release.
                 properties:
                   service:
                     description: Override configuration for the Service created to
                       serve traffic to the cluster.
                     properties:
                       metadata:
-                        description: |-
-                          EmbeddedLabelsAnnotations is an embedded subset of the fields included in k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta.
-                          Only labels and annotations are included.
+                        description: DeprecatedEmbeddedLabelsAnnotations mirrors the
+                          old rabbitmq-cluster-operator EmbeddedLabelsAnnotations
+                          type.
                         properties:
                           annotations:
                             additionalProperties:
                               type: string
-                            description: |-
-                              Annotations is an unstructured key value map stored with a resource that may be
-                              set by external tools to store and retrieve arbitrary metadata. They are not
-                              queryable and should be preserved when modifying objects.
-                              More info: http://kubernetes.io/docs/user-guide/annotations
                             type: object
                           labels:
                             additionalProperties:
                               type: string
-                            description: |-
-                              Map of string keys and values that can be used to organize and categorize
-                              (scope and select) objects. May match selectors of replication controllers
-                              and services.
-                              More info: http://kubernetes.io/docs/user-guide/labels
                             type: object
                         type: object
                       spec:
-                        description: |-
-                          Spec defines the behavior of a Service.
-                          https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+                        description: Spec defines the behavior of a Service.
                         properties:
                           allocateLoadBalancerNodePorts:
                             description: |-
@@ -1378,21 +1388,18 @@ spec:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
                 type: object
+                x-kubernetes-preserve-unknown-fields: true
               persistence:
-                default:
-                  storage: 10Gi
-                description: The desired persistent storage configuration for each
-                  Pod in the cluster.
+                description: |-
+                  DEPRECATED: For backward compatibility with old format.
+                  Use Storage field instead.
                 properties:
                   storage:
                     anyOf:
                     - type: integer
                     - type: string
                     default: 10Gi
-                    description: |-
-                      The requested size of the persistent volume attached to each Pod in the RabbitmqCluster.
-                      The format of this field matches that defined by kubernetes/apimachinery.
-                      See https://pkg.go.dev/k8s.io/apimachinery/pkg/api/resource#Quantity for more info on the format of this field.
+                    description: The requested size of the persistent volume.
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   storageClassName:
@@ -1401,10 +1408,7 @@ spec:
                     type: string
                 type: object
               podOverride:
-                description: |-
-                  PodOverride - Override configuration for per-pod services. When specified, individual LoadBalancer
-                  services will be created for each pod with the provided configuration, and the transport URL will be
-                  configured to use these per-pod services.
+                description: PodOverride - Override configuration for per-pod services
                 properties:
                   services:
                     description: Services - list of per-pod service overrides
@@ -1560,55 +1564,31 @@ spec:
                 type: object
               queueType:
                 description: |-
-                  QueueType to eventually apply the ha-all policy or configure default queue type for the cluster.
-                  Allowed values are: None, Mirrored, Quorum. Defaults to Quorum if not specified.
+                  QueueType - the default queue type for the cluster.
+                  Allowed values: Mirrored, Quorum. New clusters default to Quorum.
+                  Existing clusters without a value default to Mirrored.
                 type: string
               rabbitmq:
-                description: Configuration options for RabbitMQ Pods created in the
-                  cluster.
+                description: |-
+                  DEPRECATED: For backward compatibility with old format.
+                  Use Config field instead.
                 properties:
                   additionalConfig:
-                    description: |-
-                      Modify to add to the rabbitmq.conf file in addition to default configurations set by the operator.
-                      Modifying this property on an existing RabbitmqCluster will trigger a StatefulSet rolling restart and will cause rabbitmq downtime.
-                      For more information on this config, see https://www.rabbitmq.com/configure.html#config-file
-                    maxLength: 100000
                     type: string
                   additionalPlugins:
-                    description: 'List of plugins to enable in addition to essential
-                      plugins: rabbitmq_management, rabbitmq_prometheus, and rabbitmq_peer_discovery_k8s.'
                     items:
-                      description: A Plugin to enable on the RabbitmqCluster.
-                      maxLength: 100
-                      pattern: ^\w+$
                       type: string
-                    maxItems: 100
                     type: array
                   advancedConfig:
-                    description: |-
-                      Specify any rabbitmq advanced.config configurations to apply to the cluster.
-                      For more information on advanced config, see https://www.rabbitmq.com/configure.html#advanced-config-file
-                    maxLength: 100000
                     type: string
                   envConfig:
-                    description: |-
-                      Modify to add to the rabbitmq-env.conf file. Modifying this property on an existing RabbitmqCluster will trigger a StatefulSet rolling restart and will cause rabbitmq downtime.
-                      For more information on env config, see https://www.rabbitmq.com/man/rabbitmq-env.conf.5.html
-                    maxLength: 100000
                     type: string
                   erlangInetConfig:
-                    description: |-
-                      Erlang Inet configuration to apply to the Erlang VM running rabbit.
-                      See also: https://www.erlang.org/doc/apps/erts/inet_cfg.html
-                    maxLength: 2000
                     type: string
                 type: object
               replicas:
                 default: 1
-                description: |-
-                  Replicas is the number of nodes in the RabbitMQ cluster. Each node is deployed as a Replica in a StatefulSet. Only 1, 3, 5 replicas clusters are tested.
-                  This value should be an odd number to ensure the resultant cluster can establish exactly one quorum of nodes
-                  in the event of a fragmenting network partition.
+                description: Replicas - Number of RabbitMQ nodes in the cluster
                 format: int32
                 minimum: 0
                 type: integer
@@ -1620,8 +1600,7 @@ spec:
                   requests:
                     cpu: 1000m
                     memory: 2Gi
-                description: The desired compute resource requirements of Pods in
-                  the cluster.
+                description: Resources - Resource requirements for RabbitMQ containers
                 properties:
                   claims:
                     description: |-
@@ -1681,8 +1660,8 @@ spec:
                 type: object
               secretBackend:
                 description: |-
-                  Secret backend configuration for the RabbitmqCluster.
-                  Enables to fetch default user credentials and certificates from K8s external secret stores.
+                  DEPRECATED: For backward compatibility with old rabbitmq-cluster-operator format.
+                  This field is no longer used and will be removed in a future release.
                 properties:
                   externalSecret:
                     description: |-
@@ -1701,143 +1680,108 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   vault:
-                    description: |-
-                      VaultSpec will add Vault annotations (see https://www.vaultproject.io/docs/platform/k8s/injector/annotations)
-                      to RabbitMQ Pods. It requires a Vault Agent Sidecar Injector (https://www.vaultproject.io/docs/platform/k8s/injector)
-                      to be installed in the K8s cluster. The injector is a K8s Mutation Webhook Controller that alters RabbitMQ Pod specifications
-                      (based on the added Vault annotations) to include Vault Agent containers that render Vault secrets to the volume.
+                    description: DeprecatedVaultSpec mirrors the old rabbitmq-cluster-operator
+                      VaultSpec type.
                     properties:
                       annotations:
                         additionalProperties:
                           type: string
-                        description: |-
-                          Vault annotations that override the Vault annotations set by the cluster-operator.
-                          For a list of valid Vault annotations, see https://www.vaultproject.io/docs/platform/k8s/injector/annotations
                         type: object
                       defaultUserPath:
-                        description: |-
-                          Path in Vault to access a KV (Key-Value) secret with the fields username and password for the default user.
-                          For example "secret/data/rabbitmq/config".
                         type: string
                       defaultUserUpdaterImage:
-                        description: |-
-                          Sidecar container that updates the default user's password in RabbitMQ when it changes in Vault.
-                          Additionally, it updates /var/lib/rabbitmq/.rabbitmqadmin.conf (used by rabbitmqadmin CLI).
-                          Set to empty string to disable the sidecar container.
                         type: string
                       role:
-                        description: |-
-                          Role in Vault.
-                          If vault.defaultUserPath is set, this role must have capability to read the pre-created default user credential in Vault.
-                          If vault.tls is set, this role must have capability to create and update certificates in the Vault PKI engine for the domains
-                          "<namespace>" and "<namespace>.svc".
                         type: string
                       tls:
+                        description: DeprecatedVaultTLSSpec mirrors the old rabbitmq-cluster-operator
+                          VaultSpec TLS fields.
                         properties:
                           altNames:
-                            description: |-
-                              Specifies the requested Subject Alternative Names (SANs), in a comma-delimited list.
-                              These will be appended to the SANs added by the cluster-operator.
-                              The cluster-operator will add SANs:
-                              "<RabbitmqCluster name>-server-<index>.<RabbitmqCluster name>-nodes.<namespace>" for each pod,
-                              e.g. "myrabbit-server-0.myrabbit-nodes.default".
                             type: string
                           commonName:
-                            description: |-
-                              Specifies the requested certificate Common Name (CN).
-                              Defaults to <serviceName>.<namespace>.svc if not provided.
                             type: string
                           ipSans:
-                            description: Specifies the requested IP Subject Alternative
-                              Names, in a comma-delimited list.
                             type: string
                           pkiIssuerPath:
-                            description: |-
-                              Path in Vault PKI engine.
-                              For example "pki/issue/hashicorp-com".
-                              required
                             type: string
                           pkiRootPath:
-                            description: Specifies an optional path to retrieve the
-                              root CA from vault.  Useful if certificates are issued
-                              by an intermediate CA
                             type: string
                         type: object
                     type: object
                 type: object
               service:
-                description: Settable attributes for the Service resource.
+                description: Service - Service configuration
                 properties:
                   annotations:
                     additionalProperties:
                       type: string
-                    description: Annotations to add to the Service.
+                    description: Annotations - Service annotations
                     type: object
                   ipFamilyPolicy:
-                    description: |-
-                      IPFamilyPolicy represents the dual-stack-ness requested or required by a Service
-                      See also: https://pkg.go.dev/k8s.io/api/core/v1#IPFamilyPolicy
-                    enum:
-                    - SingleStack
-                    - PreferDualStack
-                    - RequireDualStack
+                    description: IPFamilyPolicy - IP family policy for the service
                     type: string
                   labels:
                     additionalProperties:
                       type: string
+                    description: 'DEPRECATED: For backward compatibility with old
+                      format. Use override.service.metadata.labels instead.'
                     type: object
                   type:
-                    default: ClusterIP
-                    description: |-
-                      Type of Service to create for the cluster. Must be one of: ClusterIP, LoadBalancer, NodePort.
-                      For more info see https://pkg.go.dev/k8s.io/api/core/v1#ServiceType
-                    enum:
-                    - ClusterIP
-                    - LoadBalancer
-                    - NodePort
+                    description: Type - Service type (ClusterIP, LoadBalancer, etc.)
                     type: string
                 type: object
               skipPostDeploySteps:
-                description: |-
-                  If unset, or set to false, the cluster will run `rabbitmq-queues rebalance all` whenever the cluster is updated.
-                  Set to true to prevent the operator rebalancing queue leaders after a cluster update.
-                  Has no effect if the cluster only consists of one node.
-                  For more information, see https://www.rabbitmq.com/rabbitmq-queues.8.html#rebalance
+                description: SkipPostDeploySteps - Skip post-deploy queue rebalancing
                 type: boolean
-              terminationGracePeriodSeconds:
-                default: 604800
+              storage:
+                description: Storage - Persistent storage configuration
+                properties:
+                  storage:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    default: 10Gi
+                    description: Storage - Size of the persistent volume claim
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  storageClassName:
+                    description: StorageClassName - Storage class name for the persistent
+                      volume claim
+                    type: string
+                type: object
+              targetVersion:
                 description: |-
-                  TerminationGracePeriodSeconds is the timeout that each rabbitmqcluster pod will have to terminate gracefully.
-                  It defaults to 604800 seconds ( a week long) to ensure that the container preStop lifecycle hook can finish running.
-                  For more information, see: https://github.com/rabbitmq/cluster-operator/blob/main/docs/design/20200520-graceful-pod-termination.md
+                  TargetVersion - the desired RabbitMQ version (e.g., "4.2", "3.13.1").
+                  When set to a version different from Status.CurrentVersion, the controller
+                  will initiate a storage wipe and version upgrade. The controller updates
+                  Status.CurrentVersion once the upgrade completes.
+                pattern: ^\d+\.\d+(\.\d+)?$
+                type: string
+              terminationGracePeriodSeconds:
+                default: 60
+                description: TerminationGracePeriodSeconds - Timeout for graceful
+                  pod termination
                 format: int64
                 minimum: 0
                 type: integer
               tls:
-                description: TLS-related configuration for the RabbitMQ cluster.
+                description: TLS - TLS configuration
                 properties:
                   caSecretName:
-                    description: |-
-                      Name of a Secret in the same Namespace as the RabbitmqCluster, containing the Certificate Authority's public certificate for TLS.
-                      The Secret must store this as ca.crt.
-                      This Secret can be created by running `kubectl create secret generic ca-secret --from-file=ca.crt=path/to/ca.crt`
-                      Used for mTLS, and TLS for rabbitmq_web_stomp and rabbitmq_web_mqtt.
+                    description: CaSecretName - Name of the secret containing CA certificate
+                      (ca.crt)
                     type: string
                   disableNonTLSListeners:
-                    description: |-
-                      When set to true, the RabbitmqCluster disables non-TLS listeners for RabbitMQ, management plugin and for any enabled plugins in the following list: stomp, mqtt, web_stomp, web_mqtt.
-                      Only TLS-enabled clients will be able to connect.
+                    description: DisableNonTLSListeners - Disable non-TLS listeners
                     type: boolean
                   secretName:
-                    description: |-
-                      Name of a Secret in the same Namespace as the RabbitmqCluster, containing the server's private key & public certificate for TLS.
-                      The Secret must store these as tls.key and tls.crt, respectively.
-                      This Secret can be created by running `kubectl create secret tls tls-secret --cert=path/to/tls.crt --key=path/to/tls.key`
+                    description: SecretName - Name of the secret containing TLS certificates
+                      (tls.crt and tls.key)
                     type: string
                 type: object
               tolerations:
-                description: Tolerations is the list of Toleration resources attached
-                  to each Pod in the RabbitmqCluster.
+                description: Tolerations - Pod tolerations
                 items:
                   description: |-
                     The pod this Toleration is attached to tolerates any taint that matches
@@ -1875,10 +1819,10 @@ spec:
                       type: string
                   type: object
                 type: array
+                x-kubernetes-list-type: atomic
               topologyRef:
-                description: |-
-                  TopologyRef to apply the Topology defined by the associated CR referenced
-                  by name
+                description: TopologyRef to apply the Topology defined by the associated
+                  CR referenced by name
                 properties:
                   name:
                     description: Name - The Topology CR name that the Service references
@@ -1940,6 +1884,43 @@ spec:
                   - type
                   type: object
                 type: array
+              currentVersion:
+                description: |-
+                  CurrentVersion - the currently deployed RabbitMQ version (e.g., "3.9", "4.2")
+                  This is controller-managed and reflects the actual running version.
+                  Set Spec.TargetVersion to request a version change.
+                type: string
+              defaultUser:
+                description: DefaultUser - Identifying information on default user
+                  secret
+                properties:
+                  secretReference:
+                    description: SecretReference - reference to the secret containing
+                      credentials
+                    properties:
+                      keys:
+                        additionalProperties:
+                          type: string
+                        description: Keys in the secret
+                        type: object
+                      name:
+                        description: Name of the secret
+                        type: string
+                      namespace:
+                        description: Namespace of the secret
+                        type: string
+                    type: object
+                  serviceReference:
+                    description: ServiceReference - reference to the service
+                    properties:
+                      name:
+                        description: Name of the service
+                        type: string
+                      namespace:
+                        description: Namespace of the service
+                        type: string
+                    type: object
+                type: object
               lastAppliedTopology:
                 description: LastAppliedTopology - the last applied Topology
                 properties:
@@ -1963,10 +1944,33 @@ spec:
                   the opentack-operator in the top-level CR (e.g. the ContainerImage)
                 format: int64
                 type: integer
-              queueType:
-                description: QueueType - store whether default ha-all policy is present
-                  or not
+              oldCRCleaned:
+                description: |-
+                  OldCRCleaned - set to "True" when the old rabbitmq.com RabbitmqCluster CR has been
+                  cleaned up during migration from rabbitmq-cluster-operator.
+                enum:
+                - "True"
+                - "False"
+                - ""
                 type: string
+              proxyRequired:
+                description: |-
+                  ProxyRequired - set to "True" when the AMQP proxy sidecar is required for this cluster.
+                  Set when upgrading from RabbitMQ 3.x to 4.x with Quorum queues.
+                  The proxy allows non-durable clients to work with quorum queues during the upgrade window.
+                  Only cleared when the AnnotationClientsReconfigured annotation is set to "true".
+                enum:
+                - "True"
+                - "False"
+                - ""
+                type: string
+              queueType:
+                description: QueueType - the active queue type for this cluster
+                type: string
+              readyCount:
+                description: ReadyCount tracks ready replicas
+                format: int32
+                type: integer
               serviceHostnames:
                 description: |-
                   ServiceHostnames - list of per-pod service hostnames for RabbitMQ cluster.
@@ -1975,6 +1979,25 @@ spec:
                   type: string
                 type: array
                 x-kubernetes-list-type: atomic
+              upgradePhase:
+                description: |-
+                  UpgradePhase - tracks the current phase of a version upgrade or migration.
+                  This allows resuming upgrades that failed midway.
+                type: string
+              vctCleaned:
+                description: |-
+                  VCTCleaned - set to "True" when stale ownerReferences in the StatefulSet's
+                  volumeClaimTemplates have been cleaned up during migration.
+                enum:
+                - "True"
+                - "False"
+                - ""
+                type: string
+              wipeReason:
+                description: |-
+                  WipeReason - tracks why the current storage wipe was initiated.
+                  Persisted so that resumed upgrades use the correct handling path.
+                type: string
             type: object
         type: object
     served: true
