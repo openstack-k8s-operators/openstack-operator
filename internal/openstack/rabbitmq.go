@@ -163,7 +163,88 @@ func ReconcileRabbitMQs(
 		return ctrl.Result{}, errs
 	}
 
+	// Reconcile federation only when all RabbitMQ clusters are ready
+	if len(failures) == 0 && len(inprogress) == 0 {
+		if err := reconcileRabbitMQFederations(ctx, instance, helper); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrlResult, nil
+}
+
+// reconcileRabbitMQFederations reconciles RabbitMQFederation CRs based on the
+// OpenStackControlPlane spec. Federation allows replicating exchanges (e.g. keystone
+// notifications) between RabbitMQ clusters in a multi-region deployment.
+// It creates/patches federation CRs that are defined in the spec and deletes
+// any that are no longer defined (but were previously owned by this controller).
+func reconcileRabbitMQFederations(
+	ctx context.Context,
+	instance *corev1beta1.OpenStackControlPlane,
+	helper *helper.Helper,
+) error {
+	log := GetLogger(ctx)
+
+	// Build the set of desired federation names
+	desiredFederations := map[string]corev1beta1.RabbitmqFederationConfig{}
+	if instance.Spec.Rabbitmq.Federation != nil {
+		desiredFederations = *instance.Spec.Rabbitmq.Federation
+	}
+
+	// Create/patch desired federations
+	for name, fedConfig := range desiredFederations {
+		log.Info("Reconciling RabbitMQ Federation", "name", name)
+
+		federation := &rabbitmqv1.RabbitMQFederation{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: instance.Namespace,
+			},
+		}
+
+		ackMode := fedConfig.AckMode
+		if ackMode == "" {
+			ackMode = "on-confirm"
+		}
+
+		op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), federation, func() error {
+			federation.Spec.RabbitmqClusterName = fedConfig.LocalClusterName
+			federation.Spec.UpstreamClusterName = fedConfig.UpstreamClusterName
+			federation.Spec.UpstreamSecretRef = fedConfig.UpstreamSecretRef
+			federation.Spec.UpstreamName = name
+			federation.Spec.PolicyPattern = fedConfig.PolicyPattern
+			federation.Spec.AckMode = ackMode
+
+			return controllerutil.SetControllerReference(helper.GetBeforeObject(), federation, helper.GetScheme())
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to reconcile RabbitMQ federation %s: %w", name, err)
+		}
+		if op != controllerutil.OperationResultNone {
+			log.Info(fmt.Sprintf("RabbitMQ Federation %s - %s", name, op))
+		}
+	}
+
+	// Delete federations that are no longer in the spec
+	fedList := &rabbitmqv1.RabbitMQFederationList{}
+	if err := helper.GetClient().List(ctx, fedList, client.InNamespace(instance.Namespace)); err != nil {
+		return fmt.Errorf("failed to list RabbitMQ federations: %w", err)
+	}
+
+	for i := range fedList.Items {
+		fedObj := &fedList.Items[i]
+		if _, exists := desiredFederations[fedObj.Name]; !exists {
+			if object.CheckOwnerRefExist(instance.GetUID(), fedObj.OwnerReferences) {
+				log.Info("Deleting RabbitMQ Federation no longer in spec", "name", fedObj.Name)
+				if _, err := EnsureDeleted(ctx, helper, fedObj); err != nil {
+					return fmt.Errorf("failed to delete RabbitMQ federation %s: %w", fedObj.Name, err)
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func reconcileRabbitMQ(

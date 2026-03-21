@@ -1,0 +1,129 @@
+# Example: RabbitMQ Federation for Multi-Region Keystone Notifications
+#
+# This example shows how to configure RabbitMQ federation in a multi-region
+# OpenStack deployment where Keystone is only deployed in regionOne, but
+# barbican-keystone-listener in regionTwo needs to consume Keystone notifications.
+#
+# Architecture:
+#   regionOne (Keystone region):
+#     - RabbitMQ cluster "rabbitmq" with Keystone publishing notifications
+#     - Exposed via LoadBalancer on the internalapi network
+#
+#   regionTwo (non-Keystone region):
+#     - RabbitMQ cluster "rabbitmq" configured to federate FROM regionOne
+#     - barbican-keystone-listener consumes from its local RabbitMQ
+#     - Federation replicates the keystone exchange automatically
+#
+# This follows the same pattern as externalKeystoneAPI: services in regionTwo
+# don't know that messages originate from regionOne. They connect to their
+# local RabbitMQ as usual, and federation handles replication transparently.
+#
+# Prerequisites:
+#   1. The rabbitmq_federation and rabbitmq_federation_management plugins
+#      must be enabled on the downstream (regionTwo) RabbitMQ cluster.
+#   2. The upstream (regionOne) RabbitMQ must be network-reachable from
+#      regionTwo (e.g., via LoadBalancer or external DNS).
+#   3. A Secret must exist in regionTwo's namespace with the upstream URI.
+
+---
+# Step 1: Create a Secret in regionTwo with the upstream AMQP connection URI.
+# The user/password here are for the regionOne RabbitMQ default user.
+# You can get them from regionOne's rabbitmq-default-user secret.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-upstream-uri
+  namespace: openstack
+type: Opaque
+stringData:
+  # The AMQP URI of the upstream (regionOne) RabbitMQ.
+  # Format: amqp[s]://user:password@host:port/vhost
+  # Use amqps:// if TLS is enabled on the upstream cluster.
+  uri: "amqps://user:password@rabbitmq.regionone.example.com:5671/"
+
+---
+# Step 2: Configure federation in the regionTwo OpenStackControlPlane.
+#
+# In the regionTwo OpenStackControlPlane, add the federation section
+# under spec.rabbitmq:
+#
+# spec:
+#   keystone:
+#     template:
+#       externalKeystoneAPI: true           # <-- Keystone is remote
+#       override:
+#         service:
+#           internal:
+#             endpointURL: https://keystone-internal.regionone.example.com:5000
+#           public:
+#             endpointURL: https://keystone-public.regionone.example.com:5000
+#       region: regionTwo
+#
+#   rabbitmq:
+#     templates:
+#       rabbitmq:
+#         # Enable federation plugins on the downstream cluster
+#         rabbitmq:
+#           additionalPlugins:
+#             - rabbitmq_federation
+#             - rabbitmq_federation_management
+#
+#     # Federation config: replicate keystone exchange from regionOne
+#     federation:
+#       keystone-from-region1:
+#         # The local RabbitMQ cluster that will receive federated messages
+#         localClusterName: rabbitmq
+#         # Reference to the Secret containing the upstream AMQP URI
+#         upstreamSecretRef: rabbitmq-upstream-uri
+#         # Only federate the keystone notifications exchange
+#         exchangePattern: "^keystone$"
+#         # Acknowledge messages after the upstream confirms receipt
+#         ackMode: on-confirm
+
+---
+# Alternative: Create the RabbitMQFederation CR directly (without OpenStackControlPlane).
+# This is useful for testing or standalone deployments.
+apiVersion: rabbitmq.openstack.org/v1beta1
+kind: RabbitMQFederation
+metadata:
+  name: keystone-from-region1
+  namespace: openstack
+spec:
+  # The local (downstream) RabbitMQ cluster where federation will be configured
+  rabbitmqClusterName: rabbitmq
+
+  # A descriptive name for this federation upstream definition
+  upstreamName: keystone-from-region1
+
+  # The Secret containing the upstream AMQP URI (cross-region mode)
+  upstreamSecretRef: rabbitmq-upstream-uri
+
+  # Regex pattern matching exchange names to federate
+  # "^keystone$" federates only the keystone notifications exchange
+  exchangePattern: "^keystone$"
+
+  # How to acknowledge messages on the federation link
+  # on-confirm: wait for upstream to confirm (strongest guarantee)
+  ackMode: on-confirm
+
+  # Time in ms the upstream definition is remembered after disconnect
+  expires: 3600000
+
+  # Priority of the federation policy (higher = higher priority)
+  priority: 0
+
+---
+# For same-namespace testing (both clusters in one Kubernetes cluster):
+# Use upstreamClusterName instead of upstreamSecretRef:
+#
+# apiVersion: rabbitmq.openstack.org/v1beta1
+# kind: RabbitMQFederation
+# metadata:
+#   name: keystone-from-other-cluster
+#   namespace: openstack
+# spec:
+#   rabbitmqClusterName: rabbitmq-downstream
+#   upstreamName: keystone-upstream
+#   upstreamClusterName: rabbitmq-upstream  # <-- must be a CR in same namespace
+#   exchangePattern: "^keystone$"
+#   ackMode: on-confirm
