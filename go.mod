@@ -34,8 +34,8 @@ require (
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260321082950-d7798d4bc5bd
 	github.com/openstack-k8s-operators/openstack-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260314104343-4225d7a41ec7
-	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20260314091105-4ba8bc4c4955
-	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260314085148-07c5c7f39186
+	github.com/openstack-k8s-operators/placement-operator/api v0.6.1-0.20260321143858-aaffa49d81f5
+	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260321143859-b86b733f44bb
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260320110651-64eb99221d5a
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20260318144924-0bd3d126dcef
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260309154718-a9587689aba5
