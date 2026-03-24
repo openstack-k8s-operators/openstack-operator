@@ -108,6 +108,9 @@ spec:
                     - geneve
                     - vxlan
                     type: string
+                  ovn-remote-probe-interval:
+                    default: 60000
+                    type: integer
                   system-id:
                     default: random
                     type: string
