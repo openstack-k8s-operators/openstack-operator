@@ -46,3 +46,9 @@ go.work.sum
 docs_build/
 Gemfile.lock
 local/
+
+# personal configs not to commit
+# Cursor AI
+.cursor
+# Claude AI
+.claude
