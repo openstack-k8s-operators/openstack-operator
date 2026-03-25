@@ -40,7 +40,7 @@ import (
 	manila_operatorapiv1beta1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadb_operatorapiv1beta1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutron_operatorapiv1beta1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
-	nova_operatorapiv1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	octavia_operatorapiv1beta1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	ovn_operatorapiv1beta1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placement_operatorapiv1beta1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
@@ -1146,7 +1146,7 @@ func (in *NovaSection) DeepCopyInto(out *NovaSection) {
 	*out = *in
 	if in.Template != nil {
 		in, out := &in.Template, &out.Template
-		*out = new(nova_operatorapiv1beta1.NovaSpecCore)
+		*out = new(novav1beta1.NovaSpecCore)
 		(*in).DeepCopyInto(*out)
 	}
 	in.APIOverride.DeepCopyInto(&out.APIOverride)
