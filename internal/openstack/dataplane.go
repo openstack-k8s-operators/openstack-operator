@@ -7,6 +7,7 @@ import (
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -56,6 +57,83 @@ func DataplaneNodesetsOVNControllerImagesMatch(version *corev1beta1.OpenStackVer
 		}
 	}
 	return true
+}
+
+// IsDataplaneDeploymentRunningForServiceType checks whether any in-progress
+// OpenStackDataPlaneDeployment is deploying a service with the given
+// EDPMServiceType (e.g. "ovn"). It resolves which services each deployment
+// runs (from ServicesOverride or the nodeset's service list) and inspects
+// the service's EDPMServiceType to determine if it matches.
+func IsDataplaneDeploymentRunningForServiceType(
+	ctx context.Context,
+	h *helper.Helper,
+	namespace string,
+	dataplaneNodesets *dataplanev1.OpenStackDataPlaneNodeSetList,
+	serviceType string,
+) (bool, error) {
+	// List all deployments in the namespace
+	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
+	opts := []client.ListOption{
+		client.InNamespace(namespace),
+	}
+	err := h.GetClient().List(ctx, deployments, opts...)
+	if err != nil {
+		return false, err
+	}
+
+	// Build a map of nodeset name -> nodeset for quick lookup
+	nodesetMap := make(map[string]*dataplanev1.OpenStackDataPlaneNodeSet, len(dataplaneNodesets.Items))
+	for i := range dataplaneNodesets.Items {
+		nodesetMap[dataplaneNodesets.Items[i].Name] = &dataplaneNodesets.Items[i]
+	}
+
+	// Cache service lookups to avoid repeated API calls
+	serviceCache := make(map[string]*dataplanev1.OpenStackDataPlaneService)
+
+	for _, deployment := range deployments.Items {
+		// Skip completed deployments
+		if deployment.Status.Deployed {
+			continue
+		}
+
+		// Determine which services this deployment runs for each of its nodesets
+		for _, nodesetName := range deployment.Spec.NodeSets {
+			nodeset, exists := nodesetMap[nodesetName]
+			if !exists || len(nodeset.Spec.Nodes) == 0 {
+				continue
+			}
+
+			var services []string
+			if len(deployment.Spec.ServicesOverride) != 0 {
+				services = deployment.Spec.ServicesOverride
+			} else {
+				services = nodeset.Spec.Services
+			}
+
+			for _, serviceName := range services {
+				svc, cached := serviceCache[serviceName]
+				if !cached {
+					foundService := &dataplanev1.OpenStackDataPlaneService{}
+					err := h.GetClient().Get(ctx, types.NamespacedName{
+						Name:      serviceName,
+						Namespace: namespace,
+					}, foundService)
+					if err != nil {
+						// Service not found — skip it
+						continue
+					}
+					svc = foundService
+					serviceCache[serviceName] = svc
+				}
+
+				if svc.Spec.EDPMServiceType == serviceType {
+					return true, nil
+				}
+			}
+		}
+	}
+
+	return false, nil
 }
 
 // DataplaneNodesetsDeployed returns true if all nodesets are deployed with the latest version
