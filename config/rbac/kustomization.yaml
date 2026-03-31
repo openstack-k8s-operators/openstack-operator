@@ -32,6 +32,9 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the openstack-operator itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
+- backup_openstackbackupconfig_admin_role.yaml
+- backup_openstackbackupconfig_editor_role.yaml
+- backup_openstackbackupconfig_viewer_role.yaml
 #- operator_openstack_admin_role.yaml
 #- operator_openstack_editor_role.yaml
 #- operator_openstack_viewer_role.yaml
