@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -165,9 +166,10 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 
 		if instance.Spec.TLS.PodLevel.Enabled {
 			// create certificate for ovndbclusters
+			certName := fmt.Sprintf("%s-ovndbs", name)
 			certRequest := certmanager.CertificateRequest{
 				IssuerName: instance.GetOvnIssuer(),
-				CertName:   fmt.Sprintf("%s-ovndbs", name),
+				CertName:   certName,
 				// Cert needs to be valid for the individual pods in the statefulset so make this a wildcard cert
 				Hostnames: []string{
 					fmt.Sprintf("*.%s.svc", instance.Namespace),
@@ -180,7 +182,8 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 					certmgrv1.UsageServerAuth,
 					certmgrv1.UsageClientAuth,
 				},
-				Labels: map[string]string{serviceCertSelector: ""},
+				Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+					map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 			}
 			if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
 				certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
@@ -306,9 +309,10 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 		serviceName := ovnv1.ServiceNameOvnNorthd
 		// create certificate for ovnnorthd
+		certName := fmt.Sprintf("%s-ovndbs", "ovnnorthd")
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetOvnIssuer(),
-			CertName:   fmt.Sprintf("%s-ovndbs", "ovnnorthd"),
+			CertName:   certName,
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
 				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, dnsSuffix),
@@ -320,7 +324,8 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 				certmgrv1.UsageServerAuth,
 				certmgrv1.UsageClientAuth,
 			},
-			Labels: map[string]string{serviceCertSelector: ""},
+			Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+				map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 		}
 		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
@@ -450,9 +455,10 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 
 		serviceName := ovnv1.ServiceNameOvnController
 		// create certificate for ovncontroller
+		certName := fmt.Sprintf("%s-ovndbs", "ovncontroller")
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetOvnIssuer(),
-			CertName:   fmt.Sprintf("%s-ovndbs", "ovncontroller"),
+			CertName:   certName,
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
 				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, dnsSuffix),
@@ -464,7 +470,8 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 				certmgrv1.UsageServerAuth,
 				certmgrv1.UsageClientAuth,
 			},
-			Labels: map[string]string{serviceCertSelector: ""},
+			Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+				map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 		}
 		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
@@ -592,9 +599,10 @@ func EnsureOVNMetricsCert(ctx context.Context, instance *corev1beta1.OpenStackCo
 
 	dnsSuffix := clusterdns.GetDNSClusterDomain()
 
+	certName := "ovn-metrics"
 	certRequest := certmanager.CertificateRequest{
 		IssuerName: instance.GetOvnIssuer(),
-		CertName:   "ovn-metrics",
+		CertName:   certName,
 		Hostnames: []string{
 			// Cert needs to be valid for the individual pods services so make this a wildcard cert
 			fmt.Sprintf("*.%s.svc", instance.Namespace),
@@ -607,7 +615,8 @@ func EnsureOVNMetricsCert(ctx context.Context, instance *corev1beta1.OpenStackCo
 			certmgrv1.UsageServerAuth,
 			certmgrv1.UsageClientAuth,
 		},
-		Labels: map[string]string{serviceCertSelector: ""},
+		Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+			map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 	}
 
 	// Apply certificate duration settings if configured

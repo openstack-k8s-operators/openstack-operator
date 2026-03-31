@@ -37,6 +37,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -114,10 +115,11 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		// For now we just add the hostname so we can select all the certs on one node
 		hostName := node.HostName
 		labels := map[string]string{
-			HostnameLabel:   hostName,
-			ServiceLabel:    service.Name,
-			ServiceKeyLabel: certKey,
-			NodeSetLabel:    instance.Name,
+			HostnameLabel:             hostName,
+			ServiceLabel:              service.Name,
+			ServiceKeyLabel:           certKey,
+			NodeSetLabel:              instance.Name,
+			backup.BackupRestoreLabel: "false",
 		}
 		certName = service.Name + "-" + certKey + "-" + hostName
 

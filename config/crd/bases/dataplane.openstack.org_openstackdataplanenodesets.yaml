@@ -4,6 +4,10 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
+  labels:
+    backup.openstack.org/category: dataplane
+    backup.openstack.org/restore: "true"
+    backup.openstack.org/restore-order: "60"
   name: openstackdataplanenodesets.dataplane.openstack.org
 spec:
   group: dataplane.openstack.org

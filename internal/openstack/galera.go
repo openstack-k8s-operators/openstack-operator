@@ -10,6 +10,7 @@ import (
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -117,9 +118,10 @@ func ReconcileGaleras(
 
 		// Galera gets always configured to support TLS connections.
 		// If TLS can/must be used is a per user configuration.
+		certName := fmt.Sprintf("galera-%s-svc", name)
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
-			CertName:   fmt.Sprintf("galera-%s-svc", name),
+			CertName:   certName,
 			Hostnames: []string{
 				hostname,
 				fmt.Sprintf("%s.%s", hostname, clusterDomain),
@@ -142,7 +144,8 @@ func ReconcileGaleras(
 				"server auth",
 				"client auth",
 			},
-			Labels: map[string]string{serviceCertSelector: ""},
+			Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+				map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
