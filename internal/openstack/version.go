@@ -9,6 +9,7 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -244,15 +245,21 @@ func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackContro
 
 	Log := GetLogger(ctx)
 
-	// return if OpenStackVersion CR already exists
 	if err := helper.GetClient().Get(ctx, types.NamespacedName{
 		Name:      instance.Name,
 		Namespace: instance.Namespace,
-	},
-		version); err == nil {
-		Log.Info(fmt.Sprintf("OpenStackVersion found. Name: %s", version.Name))
-	} else {
+	}, version); err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return ctrl.Result{}, nil, err
+		}
 		Log.Info(fmt.Sprintf("OpenStackVersion does not exist. Creating: %s", version.Name))
+	} else {
+		Log.Info(fmt.Sprintf("OpenStackVersion found. Name: %s", version.Name))
+	}
+
+	// Don't create or update the OpenStackVersion when the controlplane is being deleted
+	if !instance.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, version, nil
 	}
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), version, func() error {
