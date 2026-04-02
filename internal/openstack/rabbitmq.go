@@ -26,6 +26,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -267,6 +268,7 @@ func reconcileRabbitMQ(
 
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), rabbitmq, func() error {
 		spec.DeepCopyInto(&rabbitmq.Spec.RabbitMqSpecCore)
+
 		if rabbitmq.Spec.Persistence.StorageClassName == nil {
 			log.Info(fmt.Sprintf("Setting StorageClassName: %s", instance.Spec.StorageClass))
 			rabbitmq.Spec.Persistence.StorageClassName = &instance.Spec.StorageClass
@@ -277,6 +279,13 @@ func reconcileRabbitMQ(
 			rabbitmq.Spec.TLS.CaSecretName = tlsCert
 			rabbitmq.Spec.TLS.DisableNonTLSListeners = true
 		}
+		// set the target rabbitmq-server version in spec
+		if version.Status.ServiceDefaults.RabbitmqVersion != nil {
+			rabbitmq.Spec.TargetVersion = version.Status.ServiceDefaults.RabbitmqVersion
+		} else {
+			rabbitmq.Spec.TargetVersion = ptr.To("3.9")
+		}
+
 		rabbitmq.Spec.ContainerImage = *version.Status.ContainerImages.RabbitmqImage
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), rabbitmq, helper.GetScheme())
 		if err != nil {
@@ -313,7 +322,7 @@ func removeRabbitmqClusterControllerReference(
 		Namespace: instance.Namespace,
 	}
 	if err := helper.GetClient().Get(ctx, namespacedName, rabbitmqCluster); err != nil {
-		if k8s_errors.IsNotFound(err) {
+		if k8s_errors.IsNotFound(err) || apimeta.IsNoMatchError(err) {
 			return nil
 		}
 		return err

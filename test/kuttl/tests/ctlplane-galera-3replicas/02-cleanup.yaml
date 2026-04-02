@@ -7,6 +7,8 @@ delete:
 commands:
 - script: |
     oc delete --ignore-not-found=true -n $NAMESPACE pvc \
+    persistence-rabbitmq-server-0 \
+    persistence-rabbitmq-cell1-server-0 \
     mysql-db-openstack-galera-0 \
     mysql-db-openstack-galera-1 \
     mysql-db-openstack-galera-2 \

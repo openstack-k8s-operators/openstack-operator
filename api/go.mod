@@ -16,7 +16,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260316100655-863ae03d41af
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260321081258-5c806856eeb6
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260321081256-de45f3b1de4f
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260324115114-e3be8a47a45e
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260331122750-ecff41ebb61d
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260324115114-e3be8a47a45e
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260321081547-64d64a0c02c7
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260321081546-85bcf5293c70
@@ -86,7 +86,6 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.65.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	github.com/rabbitmq/cluster-operator/v2 v2.16.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
@@ -143,3 +142,5 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.14 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.14 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+replace github.com/openstack-k8s-operators/infra-operator/apis => github.com/lmiccini/infra-operator/apis v0.0.0-20260402125746-e4e3813a70bd

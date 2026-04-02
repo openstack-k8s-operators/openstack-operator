@@ -14264,8 +14264,6 @@ spec:
                               x-kubernetes-preserve-unknown-fields: true
                           type: object
                         persistence:
-                          default:
-                            storage: 10Gi
                           properties:
                             storage:
                               anyOf:
@@ -14329,6 +14327,10 @@ spec:
                               x-kubernetes-list-type: atomic
                           type: object
                         queueType:
+                          enum:
+                          - Mirrored
+                          - Quorum
+                          - ""
                           type: string
                         rabbitmq:
                           properties:
@@ -14459,8 +14461,11 @@ spec:
                           type: object
                         skipPostDeploySteps:
                           type: boolean
+                        targetVersion:
+                          pattern: ^\d+\.\d+(\.\d+)?$
+                          type: string
                         terminationGracePeriodSeconds:
-                          default: 604800
+                          default: 60
                           format: int64
                           minimum: 0
                           type: integer
@@ -14489,6 +14494,7 @@ spec:
                                 type: string
                             type: object
                           type: array
+                          x-kubernetes-list-type: atomic
                         topologyRef:
                           properties:
                             name:
