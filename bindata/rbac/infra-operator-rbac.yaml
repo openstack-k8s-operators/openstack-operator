@@ -72,6 +72,7 @@ rules:
     - configmaps
     - pods
     - secrets
+    - serviceaccounts
     - services
   verbs:
     - create
@@ -84,15 +85,24 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - endpoints
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - ""
+  resources:
+    - events
     - pods/exec
   verbs:
     - create
 - apiGroups:
     - ""
   resources:
-    - serviceaccounts
+    - persistentvolumeclaims
   verbs:
-    - create
+    - delete
     - get
     - list
     - patch
@@ -289,19 +299,12 @@ rules:
   resources:
     - rabbitmqclusters
   verbs:
-    - create
     - delete
     - get
     - list
     - patch
     - update
     - watch
-- apiGroups:
-    - rabbitmq.com
-  resources:
-    - rabbitmqclusters/finalizers
-  verbs:
-    - update
 - apiGroups:
     - rabbitmq.openstack.org
   resources:
@@ -347,6 +350,7 @@ rules:
     - roles
   verbs:
     - create
+    - delete
     - get
     - list
     - patch

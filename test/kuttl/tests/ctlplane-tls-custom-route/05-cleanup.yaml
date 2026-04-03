@@ -7,6 +7,8 @@ delete:
 commands:
 - script: |
     oc delete --ignore-not-found=true -n $NAMESPACE pvc \
+    persistence-rabbitmq-server-0 \
+    persistence-rabbitmq-cell1-server-0 \
     srv-swift-storage-0
     oc delete --ignore-not-found=true -n $NAMESPACE issuer rootca-internal-custom rootca-ingress-custom
     oc delete secret --ignore-not-found=true combined-ca-bundle -n $NAMESPACE

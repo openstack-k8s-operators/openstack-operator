@@ -23,7 +23,7 @@ require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260321081256-de45f3b1de4f
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20260324115114-e3be8a47a45e
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20260324115114-e3be8a47a45e
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260324115114-e3be8a47a45e
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260331122750-ecff41ebb61d
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260324115114-e3be8a47a45e
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20260324115114-e3be8a47a45e
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260321081547-64d64a0c02c7
@@ -181,3 +181,5 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.14 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.14 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+replace github.com/openstack-k8s-operators/infra-operator/apis => github.com/lmiccini/infra-operator/apis v0.0.0-20260402125746-e4e3813a70bd
