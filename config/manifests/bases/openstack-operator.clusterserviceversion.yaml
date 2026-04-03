@@ -23,6 +23,18 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: |-
+        OpenStackBackupConfig is the Schema for the openstackbackupconfigs API.
+        It configures automatic backup labeling for user-provided resources (without ownerReferences).
+      displayName: Open Stack Backup Config
+      kind: OpenStackBackupConfig
+      name: openstackbackupconfigs.backup.openstack.org
+      statusDescriptors:
+      - description: Conditions represents the latest available observations of the
+          resource's current state
+        displayName: Conditions
+        path: conditions
+      version: v1beta1
     - description: OpenStackClient is the Schema for the openstackclients API
       displayName: OpenStack Client
       kind: OpenStackClient
@@ -376,6 +388,9 @@ spec:
           Resource
         displayName: Template
         path: openstackclient.template
+      - description: List of environment variables to set in the container.
+        displayName: Env
+        path: openstackclient.template.env
       - description: Ovn - Overrides to use when creating the OVN Services
         displayName: Ovn
         path: ovn

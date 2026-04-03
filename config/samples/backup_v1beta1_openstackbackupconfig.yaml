@@ -1,0 +1,32 @@
+apiVersion: backup.openstack.org/v1beta1
+kind: OpenStackBackupConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: openstackbackupconfig-sample
+spec:
+  # Target namespace to watch for resources
+  targetNamespace: openstack
+
+  # Default restore order for user-provided resources (foundation resources)
+  defaultRestoreOrder: "10"
+
+  # Secrets configuration - defaults shown for reference
+  # These defaults are applied automatically, no need to specify unless overriding
+  # secrets:
+  #   enabled: true
+  #   excludeLabelKeys:
+  #   - service-cert          # Service-cert managed secrets (auto-recreated)
+  #   - osdp-service          # Dataplane service certs (recreated on deployment)
+
+  # ConfigMaps configuration - defaults shown for reference
+  # configMaps:
+  #   enabled: true
+  #   excludeNames:
+  #   - kube-root-ca.crt      # Kubernetes system CA (auto-created)
+  #   - openshift-service-ca.crt  # OpenShift service CA (auto-created)
+
+  # NetworkAttachmentDefinitions configuration - defaults shown for reference
+  # networkAttachmentDefinitions:
+  #   enabled: true

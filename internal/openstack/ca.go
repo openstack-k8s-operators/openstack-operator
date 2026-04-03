@@ -17,6 +17,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	certmgrmetav1 "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
@@ -654,9 +655,11 @@ func createRootCACertAndIssuer(
 			Duration:    caCfg.Duration,
 			RenewBefore: caCfg.RenewBefore,
 			SecretTemplate: &certmgrv1.CertificateSecretTemplate{
-				Labels: map[string]string{
-					caCertSelector: "",
-				},
+				Labels: util.MergeMaps(
+					map[string]string{caCertSelector: ""},
+					backup.GetBackupLabels(backup.CategoryControlPlane),
+					backup.GetRestoreLabels(backup.RestoreOrder10, backup.CategoryControlPlane),
+				),
 			},
 		})
 	cert := certmanager.NewCertificate(caCertReq, 5)

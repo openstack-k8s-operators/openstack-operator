@@ -15,6 +15,7 @@ import (
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 	"go.uber.org/zap/zapcore"
 
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -29,6 +30,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	k8s_networkingv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
@@ -48,6 +50,7 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
+	backupv1 "github.com/openstack-k8s-operators/openstack-operator/api/backup/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
@@ -58,6 +61,7 @@ import (
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 
+	backup_ctrl "github.com/openstack-k8s-operators/openstack-operator/internal/controller/backup"
 	client_ctrl "github.com/openstack-k8s-operators/openstack-operator/internal/controller/client"
 	core_ctrl "github.com/openstack-k8s-operators/openstack-operator/internal/controller/core"
 
@@ -187,6 +191,9 @@ var _ = BeforeSuite(func() {
 	watcherCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/watcher-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	nadCRDs, err := test.GetCRDDirFromModule(
+		"github.com/k8snetworkplumbingwg/network-attachment-definition-client", gomod, "artifacts/networks-crd.yaml")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -220,6 +227,9 @@ var _ = BeforeSuite(func() {
 		ControlPlaneStartTimeout: 2 * time.Minute,
 		ControlPlaneStopTimeout:  2 * time.Minute,
 		CRDInstallOptions: envtest.CRDInstallOptions{
+			Paths: []string{
+				nadCRDs,
+			},
 			MaxTime: 5 * time.Minute,
 		},
 		ControlPlane: envtest.ControlPlane{
@@ -312,6 +322,12 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = watcherv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+	err = backupv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = apiextensionsv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = k8s_networkingv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme
 
@@ -387,6 +403,15 @@ var _ = BeforeSuite(func() {
 		Scheme:  k8sManager.GetScheme(),
 		Kclient: kclient,
 	}).SetupWithManager(ctx, k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+
+	// Setup OpenStackBackupConfig controller
+	// CRD label cache is built lazily on first reconcile
+	err = (&backup_ctrl.OpenStackBackupConfigReconciler{
+		Client:  k8sManager.GetClient(),
+		Scheme:  k8sManager.GetScheme(),
+		Kclient: kclient,
+	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {

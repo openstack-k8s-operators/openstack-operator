@@ -23,7 +23,7 @@ require (
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260321081256-de45f3b1de4f
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20260324115114-e3be8a47a45e
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20260324115114-e3be8a47a45e
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260324115114-e3be8a47a45e
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260326092926-8a2950f0575b
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260324115114-e3be8a47a45e
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20260324115114-e3be8a47a45e
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260321081547-64d64a0c02c7
@@ -45,6 +45,7 @@ require (
 	go.uber.org/zap v1.27.1
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.31.14
+	k8s.io/apiextensions-apiserver v0.33.2
 	k8s.io/apimachinery v0.31.14
 	k8s.io/client-go v0.31.14
 	k8s.io/utils v0.0.0-20250820121507-0af2bda4dd1d
@@ -139,7 +140,6 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiextensions-apiserver v0.33.2 // indirect
 	k8s.io/apiserver v0.33.2 // indirect
 	k8s.io/component-base v0.33.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
@@ -181,3 +181,17 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.14 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.14 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+replace github.com/openstack-k8s-operators/lib-common/modules/common => github.com/stuggi/lib-common/modules/common v0.0.0-20260331130034-f04bcb447a79
+
+replace github.com/openstack-k8s-operators/lib-common/modules/certmanager => github.com/stuggi/lib-common/modules/certmanager v0.0.0-20260331130034-f04bcb447a79
+
+replace github.com/openstack-k8s-operators/mariadb-operator/api => github.com/stuggi/mariadb-operator/api v0.0.0-20260331140344-c186516b2136
+
+replace github.com/openstack-k8s-operators/glance-operator/api => github.com/stuggi/glance-operator/api v0.0.0-20260331140204-06f4c758ae17
+
+replace github.com/openstack-k8s-operators/infra-operator/apis => github.com/stuggi/infra-operator/apis v0.0.0-20260331140545-6350ea9574d9
+
+replace github.com/openstack-k8s-operators/swift-operator/api => github.com/stuggi/swift-operator/api v0.0.0-20260331140240-2d47591ad16b
+
+replace github.com/openstack-k8s-operators/designate-operator/api => github.com/stuggi/designate-operator/api v0.0.0-20260331140431-da1a258454e2

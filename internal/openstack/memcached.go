@@ -10,6 +10,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -204,16 +205,18 @@ func reconcileMemcached(
 	if instance.Spec.TLS.PodLevel.Enabled {
 		Log.Info("Reconciling Memcached TLS", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
 		clusterDomain := clusterdns.GetDNSClusterDomain()
+		certName := fmt.Sprintf("%s-svc", memcached.Name)
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
-			CertName:   fmt.Sprintf("%s-svc", memcached.Name),
+			CertName:   certName,
 			Hostnames: []string{
 				fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
 				fmt.Sprintf("*.%s.%s.svc", name, instance.Namespace),
 				fmt.Sprintf("%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
 				fmt.Sprintf("*.%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
 			},
-			Labels: map[string]string{serviceCertSelector: ""},
+			Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+				map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
@@ -238,14 +241,16 @@ func reconcileMemcached(
 		if spec.TLS.MTLS.SslVerifyMode == "Request" || spec.TLS.MTLS.SslVerifyMode == "Require" {
 			Log.Info("Reconciling Memcached mTLS", "Memcached.Namespace", instance.Namespace, "Memcached.Name", name)
 			clusterDomain = clusterdns.GetDNSClusterDomain()
+			mtlsCertName := fmt.Sprintf("%s-mtls", memcached.Name)
 			certRequest = certmanager.CertificateRequest{
 				IssuerName: instance.GetInternalIssuer(),
-				CertName:   fmt.Sprintf("%s-mtls", memcached.Name),
+				CertName:   mtlsCertName,
 				Hostnames: []string{
 					fmt.Sprintf("*.%s.svc", instance.Namespace),
 					fmt.Sprintf("*.%s.svc.%s", instance.Namespace, clusterDomain),
 				},
-				Labels: map[string]string{serviceCertSelector: ""},
+				Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), mtlsCertName, instance.Namespace,
+					map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 				Usages: []certmgrv1.KeyUsage{
 					certmgrv1.UsageKeyEncipherment,
 					certmgrv1.UsageDigitalSignature,

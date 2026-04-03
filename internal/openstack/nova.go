@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -273,7 +274,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			nova.Namespace,
 			instance.Spec.Nova.Template.MetadataServiceTemplate.Override.Service.Labels,
 			instance.GetInternalIssuer(),
-			nil)
+			nil,
+			map[string]string{backup.BackupRestoreLabel: "false"})
 		if err != nil && !k8s_errors.IsNotFound(err) {
 			return ctrlResult, err
 		} else if (ctrlResult != ctrl.Result{}) {
@@ -296,7 +298,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				nova.Namespace,
 				cellTemplate.MetadataServiceTemplate.Override.Service.Labels,
 				instance.GetInternalIssuer(),
-				nil)
+				nil,
+				map[string]string{backup.BackupRestoreLabel: "false"})
 			if err != nil && !k8s_errors.IsNotFound(err) {
 				return ctrlResult, err
 			} else if (ctrlResult != ctrl.Result{}) {
@@ -361,9 +364,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 					clusterDomain := clusterdns.GetDNSClusterDomain()
 					serviceName := endpointDetails.EndpointDetails[service.EndpointPublic].Service.Spec.Name
 					hostname := fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace)
+					certName := nova.Name + "-novncproxy-" + cellName + "-vencrypt"
 					certRequest := certmanager.CertificateRequest{
 						IssuerName: instance.GetLibvirtIssuer(),
-						CertName:   nova.Name + "-novncproxy-" + cellName + "-vencrypt",
+						CertName:   certName,
 						CommonName: ptr.To(serviceName), // common name has a max length of 64bytes, therefore just set the short name
 						Hostnames: []string{
 							hostname,
@@ -378,7 +382,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 							certmgrv1.UsageServerAuth,
 							certmgrv1.UsageClientAuth,
 						},
-						Labels: map[string]string{serviceCertSelector: ""},
+						Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+							map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 					}
 					if instance.Spec.TLS.PodLevel.Libvirt.Cert.Duration != nil {
 						certRequest.Duration = &instance.Spec.TLS.PodLevel.Libvirt.Cert.Duration.Duration

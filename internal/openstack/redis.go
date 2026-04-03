@@ -10,6 +10,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -215,9 +216,10 @@ func reconcileRedis(
 	tlsCert := ""
 	if instance.Spec.TLS.PodLevel.Enabled {
 		clusterDomain := clusterdns.GetDNSClusterDomain()
+		certName := fmt.Sprintf("%s-svc", redis.Name)
 		certRequest := certmanager.CertificateRequest{
 			IssuerName: instance.GetInternalIssuer(),
-			CertName:   fmt.Sprintf("%s-svc", redis.Name),
+			CertName:   certName,
 			Hostnames: []string{
 				fmt.Sprintf("redis-%s.%s.svc", name, instance.Namespace),
 				fmt.Sprintf("*.redis-%s.%s.svc", name, instance.Namespace),
@@ -233,6 +235,8 @@ func reconcileRedis(
 				"server auth",
 				"client auth",
 			},
+			Labels: getCertSecretBackupLabels(ctx, helper.GetClient(), certName, instance.Namespace,
+				map[string]string{ServiceCertSelector: "", backup.BackupRestoreLabel: "false"}),
 		}
 		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
 			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration

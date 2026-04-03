@@ -215,6 +215,9 @@ type OpenStackVersionStatus struct {
 // +kubebuilder:printcolumn:name="Target Version",type=string,JSONPath=`.spec.targetVersion`
 // +kubebuilder:printcolumn:name="Available Version",type=string,JSONPath=`.status.availableVersion`
 // +kubebuilder:printcolumn:name="Deployed Version",type=string,JSONPath=`.status.deployedVersion`
+// +kubebuilder:metadata:labels=backup.openstack.org/restore=true
+// +kubebuilder:metadata:labels=backup.openstack.org/category=controlplane
+// +kubebuilder:metadata:labels=backup.openstack.org/restore-order=20
 
 // OpenStackVersion defines the Schema for the openstackversionupdates API
 type OpenStackVersion struct {

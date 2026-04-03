@@ -4,6 +4,10 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
   creationTimestamp: null
+  labels:
+    backup.openstack.org/category: dataplane
+    backup.openstack.org/restore: "true"
+    backup.openstack.org/restore-order: "20"
   name: bgpconfigurations.network.openstack.org
 spec:
   group: network.openstack.org
