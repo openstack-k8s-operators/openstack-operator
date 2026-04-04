@@ -58,7 +58,7 @@ spec:
                 minimum: 1
                 type: integer
               apiType:
-                default: external
+                default: single
                 enum:
                 - internal
                 - external
