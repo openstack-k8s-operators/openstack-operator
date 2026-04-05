@@ -17676,6 +17676,8 @@ spec:
                                 type: object
                             type: object
                           networkAttachments:
+                            default:
+                            - ctlplane
                             items:
                               type: string
                             type: array
