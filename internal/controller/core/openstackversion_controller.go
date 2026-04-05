@@ -291,6 +291,75 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 				Log.Info("Waiting on OVN Dataplane updates to complete")
 				return ctrl.Result{}, nil
 			}
+
+			// When the OVN controller image is the same between the deployed
+			// version and the target version, the image comparison above always
+			// passes because the nodeset already has the matching image from
+			// the previous update. In this case we need additional checks to
+			// confirm the OVN dataplane deployment for this update cycle has
+			// actually completed.
+			//
+			// We use the saved condition state (from before Init reset) to
+			// track whether we have observed a running OVN deployment during
+			// this update cycle:
+			// - If we see a running OVN deployment now: set condition False
+			//   (RequestedReason) to record that we observed one
+			// - If no running OVN deployment AND the previous condition was
+			//   False/RequestedReason: the deployment we saw previously has
+			//   completed → proceed (fall through to set True)
+			// - If no running OVN deployment AND the previous condition was
+			//   NOT False/RequestedReason (e.g. still Unknown from Init):
+			//   we haven't seen a deployment yet → keep waiting
+			//
+			// When the image differs between versions, the image match alone
+			// is sufficient proof that a deployment updated it, since the
+			// nodeset's ContainerImages are only set on successful completion.
+			deployedDefaults, hasDeployedDefaults := instance.Status.ContainerImageVersionDefaults[*instance.Status.DeployedVersion]
+			if hasDeployedDefaults &&
+				deployedDefaults.OvnControllerImage != nil &&
+				instance.Status.ContainerImages.OvnControllerImage != nil &&
+				*deployedDefaults.OvnControllerImage == *instance.Status.ContainerImages.OvnControllerImage {
+
+				ovnDeploymentRunning, err := openstack.IsDataplaneDeploymentRunningForServiceType(
+					ctx, versionHelper, instance.Namespace, dataplaneNodesets, "ovn")
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+
+				if ovnDeploymentRunning {
+					// OVN deployment is actively running — record this in
+					// the condition so we can detect its completion later.
+					instance.Status.Conditions.Set(condition.FalseCondition(
+						corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
+						condition.RequestedReason,
+						condition.SeverityInfo,
+						corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+					Log.Info("Waiting on OVN Dataplane deployment to complete (OVN image unchanged between versions)")
+					return ctrl.Result{}, nil
+				}
+
+				// No OVN deployment running. Check the saved condition state
+				// from the previous reconciliation to determine if we ever
+				// observed one running during this update cycle.
+				prevOvnDataplaneCond := savedConditions.Get(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane)
+				if prevOvnDataplaneCond == nil ||
+					prevOvnDataplaneCond.Reason != condition.RequestedReason {
+					// We have never observed a running OVN deployment in
+					// this update cycle — the deployment has not been
+					// created yet. Keep waiting.
+					instance.Status.Conditions.Set(condition.FalseCondition(
+						corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
+						condition.InitReason,
+						condition.SeverityInfo,
+						corev1beta1.OpenStackVersionMinorUpdateReadyRunningMessage))
+					Log.Info("Waiting for OVN Dataplane deployment to be created (OVN image unchanged between versions)")
+					return ctrl.Result{}, nil
+				}
+				// Previously saw a running OVN deployment (condition was
+				// False/RequestedReason), now no OVN deployment is running
+				// → the deployment has completed. Fall through to set True.
+				Log.Info("OVN Dataplane deployment completed (OVN image unchanged between versions)")
+			}
 		}
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
