@@ -21468,6 +21468,8 @@ spec:
               availableServiceDefaults:
                 additionalProperties:
                   properties:
+                    glanceLocationAPI:
+                      type: string
                     glanceWsgi:
                       type: string
                   type: object
@@ -21903,6 +21905,8 @@ spec:
                 type: integer
               serviceDefaults:
                 properties:
+                  glanceLocationAPI:
+                    type: string
                   glanceWsgi:
                     type: string
                 type: object
