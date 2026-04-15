@@ -55,7 +55,10 @@ func MergeObjectForUpdate(current, updated *uns.Unstructured) error {
 	return nil
 }
 
-// MergeWebhookConfigurationForUpdate merges certs and clientConfig from the current object
+// MergeWebhookConfigurationForUpdate merges the caBundle from the current
+// webhook configuration into the updated one, matching webhooks by name.
+// This preserves the CA certificate injected by cert-manager while keeping
+// the service path and other clientConfig fields from the updated template.
 func MergeWebhookConfigurationForUpdate(current, updated *uns.Unstructured) error {
 	gvk := updated.GroupVersionKind()
 
@@ -65,17 +68,49 @@ func MergeWebhookConfigurationForUpdate(current, updated *uns.Unstructured) erro
 			return nil
 		}
 
-		for i, webhook := range updated.Object["webhooks"].([]interface{}) {
-			// Check if the index exists in the current webhooks list
-			if i >= len(currentWebhooks) {
+		// Build a lookup of current caBundle values keyed by webhook name
+		caBundleByName := make(map[string]interface{})
+		for _, cw := range currentWebhooks {
+			cwMap, ok := cw.(map[string]interface{})
+			if !ok {
 				continue
 			}
-
-			currentClientConfig := currentWebhooks[i].(map[string]interface{})["clientConfig"].(map[string]interface{})
-			if currentClientConfig != nil {
-				webhook.(map[string]interface{})["clientConfig"] = currentClientConfig
+			name, _ := cwMap["name"].(string)
+			if name == "" {
+				continue
 			}
+			cc, ok := cwMap["clientConfig"].(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if caBundle, exists := cc["caBundle"]; exists {
+				caBundleByName[name] = caBundle
+			}
+		}
 
+		updatedWebhooks, updatedExists := updated.Object["webhooks"].([]interface{})
+		if !updatedExists {
+			return nil
+		}
+
+		for _, webhook := range updatedWebhooks {
+			whMap, ok := webhook.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			name, _ := whMap["name"].(string)
+			if name == "" {
+				continue
+			}
+			caBundle, found := caBundleByName[name]
+			if !found {
+				continue
+			}
+			cc, ok := whMap["clientConfig"].(map[string]interface{})
+			if !ok {
+				continue
+			}
+			cc["caBundle"] = caBundle
 		}
 	}
 	return nil
