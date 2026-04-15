@@ -25,6 +25,10 @@ var DefaultEdpmServiceAnsibleVarList = []string{
 	"edpm_nova_compute_image",
 	"edpm_ovn_controller_agent_image",
 	"edpm_ovn_bgp_agent_image",
+	"edpm_swift_account_image",
+	"edpm_swift_container_image",
+	"edpm_swift_object_image",
+	"edpm_swift_proxy_image",
 }
 
 var CustomEdpmServiceDomainTag = "test-image:latest"

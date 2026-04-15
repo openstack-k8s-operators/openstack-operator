@@ -81,6 +81,10 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.OsContainerImage = version.Status.ContainerImages.OsContainerImage
 		containerImages.AgentImage = version.Status.ContainerImages.AgentImage
 		containerImages.ApacheImage = version.Status.ContainerImages.ApacheImage
+		containerImages.SwiftAccountImage = version.Status.ContainerImages.SwiftAccountImage
+		containerImages.SwiftContainerImage = version.Status.ContainerImages.SwiftContainerImage
+		containerImages.SwiftObjectImage = version.Status.ContainerImages.SwiftObjectImage
+		containerImages.SwiftProxyImage = version.Status.ContainerImages.SwiftProxyImage
 	} else {
 		containerImages.AnsibleeeImage = dataplanev1.ContainerImages.AnsibleeeImage
 		containerImages.CeilometerComputeImage = dataplanev1.ContainerImages.CeilometerComputeImage
@@ -103,6 +107,10 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.OsContainerImage = dataplanev1.ContainerImages.OsContainerImage
 		containerImages.AgentImage = dataplanev1.ContainerImages.AgentImage
 		containerImages.ApacheImage = dataplanev1.ContainerImages.ApacheImage
+		containerImages.SwiftAccountImage = dataplanev1.ContainerImages.SwiftAccountImage
+		containerImages.SwiftContainerImage = dataplanev1.ContainerImages.SwiftContainerImage
+		containerImages.SwiftObjectImage = dataplanev1.ContainerImages.SwiftObjectImage
+		containerImages.SwiftProxyImage = dataplanev1.ContainerImages.SwiftProxyImage
 
 	}
 

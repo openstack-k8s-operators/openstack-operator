@@ -348,6 +348,18 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_ovn_bgp_agent_image"] == nil {
 		group.Vars["edpm_ovn_bgp_agent_image"] = containerImages.EdpmOvnBgpAgentImage
 	}
+	if template.Ansible.AnsibleVars["edpm_swift_account_image"] == nil {
+		group.Vars["edpm_swift_account_image"] = containerImages.SwiftAccountImage
+	}
+	if template.Ansible.AnsibleVars["edpm_swift_container_image"] == nil {
+		group.Vars["edpm_swift_container_image"] = containerImages.SwiftContainerImage
+	}
+	if template.Ansible.AnsibleVars["edpm_swift_object_image"] == nil {
+		group.Vars["edpm_swift_object_image"] = containerImages.SwiftObjectImage
+	}
+	if template.Ansible.AnsibleVars["edpm_swift_proxy_image"] == nil {
+		group.Vars["edpm_swift_proxy_image"] = containerImages.SwiftProxyImage
+	}
 	if template.Ansible.AnsibleVars["edpm_telemetry_ceilometer_compute_image"] == nil {
 		group.Vars["edpm_telemetry_ceilometer_compute_image"] = containerImages.CeilometerComputeImage
 	}

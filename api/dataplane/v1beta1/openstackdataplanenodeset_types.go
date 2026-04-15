@@ -237,6 +237,10 @@ var ContainerImageDefaults = openstackv1.ContainerImages{
 		EdpmPodmanExporterImage:       getStrPtr("quay.io/navidys/prometheus-podman-exporter:v1.10.1"),
 		OpenstackNetworkExporterImage: getStrPtr("quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified"),
 		OsContainerImage:              getStrPtr("quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified"),
+		SwiftAccountImage:             getStrPtr("quay.io/podified-antelope-centos9/openstack-swift-account:current-podified"),
+		SwiftContainerImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-swift-container:current-podified"),
+		SwiftObjectImage:              getStrPtr("quay.io/podified-antelope-centos9/openstack-swift-object:current-podified"),
+		SwiftProxyImage:               getStrPtr("quay.io/podified-antelope-centos9/openstack-swift-proxy-server:current-podified"),
 	}}
 
 // ContainerImages - the values if no OpenStackVersion is used
@@ -269,6 +273,10 @@ func SetupDefaults() {
 			NovaComputeImage:              getImageDefault("RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.NovaComputeImage),
 			OvnControllerImage:            getImageDefault("RELATED_IMAGE_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.OvnControllerImage),
 			OsContainerImage:              getImageDefault("RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OsContainerImage),
+			SwiftAccountImage:             getImageDefault("RELATED_IMAGE_SWIFT_ACCOUNT_IMAGE_URL_DEFAULT", ContainerImageDefaults.SwiftAccountImage),
+			SwiftContainerImage:           getImageDefault("RELATED_IMAGE_SWIFT_CONTAINER_IMAGE_URL_DEFAULT", ContainerImageDefaults.SwiftContainerImage),
+			SwiftObjectImage:              getImageDefault("RELATED_IMAGE_SWIFT_OBJECT_IMAGE_URL_DEFAULT", ContainerImageDefaults.SwiftObjectImage),
+			SwiftProxyImage:               getImageDefault("RELATED_IMAGE_SWIFT_PROXY_IMAGE_URL_DEFAULT", ContainerImageDefaults.SwiftProxyImage),
 		},
 	}
 }
