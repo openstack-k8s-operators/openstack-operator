@@ -260,8 +260,10 @@ spec:
                 type: object
               probeIntervalToActive:
                 default: 60000
-                description: Active probe interval from standby to active ovsdb-server
-                  remote
+                description: |-
+                  DEPRECATED: ProbeIntervalToActive is only relevant for active/standby ovsdb configurations.
+                  This parameter is not used in RAFT clustered deployments and will be ignored.
+                  Active probe interval from standby to active ovsdb-server remote
                 format: int32
                 type: integer
               replicas:
