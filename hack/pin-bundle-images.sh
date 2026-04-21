@@ -104,6 +104,13 @@ for MOD_PATH in ${MOD_PATHS}; do
     fi
 
     if [ -z "$SHA" ]; then
+        echo "ERROR: Failed to find bundle image SHA for:"
+        echo "  MOD_PATH: $MOD_PATH"
+        echo "  BASE: $BASE"
+        echo "  REF: $REF"
+        echo "  REPO_URL: $REPO_URL"
+        echo "  REPO_CURL_URL: $REPO_CURL_URL"
+        echo "  Bundle: ${REPO_URL}/${BASE}-operator-bundle:$REF"
         echo ",EMPTY_SHA:$REF:$REPO_CURL_URL"
         exit 1
     fi
