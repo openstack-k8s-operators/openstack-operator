@@ -530,7 +530,11 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 	}
 
 	if r.Spec.Rabbitmq.Enabled {
-		if r.Spec.Rabbitmq.Templates != nil {
+		if r.Spec.Rabbitmq.Templates == nil || len(*r.Spec.Rabbitmq.Templates) == 0 {
+			err := field.Required(basePath.Child("rabbitmq").Child("templates"),
+				"At least one RabbitMQ instance must be defined when rabbitmq is enabled")
+			errors = append(errors, err)
+		} else {
 			err := common_webhook.ValidateDNS1123Label(
 				basePath.Child("rabbitmq").Child("templates"),
 				maps.Keys(*r.Spec.Rabbitmq.Templates),
@@ -745,19 +749,24 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Rabbitmq.Templates == nil {
 			old.Rabbitmq.Templates = &map[string]rabbitmqv1.RabbitMqSpecCore{}
 		}
-		if r.Spec.Rabbitmq.Templates != nil {
+		if r.Spec.Rabbitmq.Templates == nil || len(*r.Spec.Rabbitmq.Templates) == 0 {
+			err := field.Required(basePath.Child("rabbitmq").Child("templates"),
+				"At least one RabbitMQ instance must be defined when rabbitmq is enabled")
+			errors = append(errors, err)
+		} else {
 			err := common_webhook.ValidateDNS1123Label(
 				basePath.Child("rabbitmq").Child("templates"),
 				maps.Keys(*r.Spec.Rabbitmq.Templates),
 				memcachedv1.CrMaxLengthCorrection) // omit issue with statefulset pod label "controller-revision-hash": "<statefulset_name>-<hash>"
 			errors = append(errors, err...)
-		}
-		oldRabbitmqs := *old.Rabbitmq.Templates
-		for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
-			if oldRabbitmq, ok := oldRabbitmqs[rabbitmqName]; ok {
-				warn, errs := rabbitmqSpec.ValidateUpdate(oldRabbitmq, basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)
-				warnings = append(warnings, warn...)
-				errors = append(errors, errs...)
+
+			oldRabbitmqs := *old.Rabbitmq.Templates
+			for rabbitmqName, rabbitmqSpec := range *r.Spec.Rabbitmq.Templates {
+				if oldRabbitmq, ok := oldRabbitmqs[rabbitmqName]; ok {
+					warn, errs := rabbitmqSpec.ValidateUpdate(oldRabbitmq, basePath.Child("rabbitmq").Child("template").Key(rabbitmqName), r.Namespace)
+					warnings = append(warnings, warn...)
+					errors = append(errors, errs...)
+				}
 			}
 		}
 	}
