@@ -493,6 +493,12 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		ovnControllerSpec.MetricsTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	}
 
+	// Pass the OVN CA issuer name so the OVNController can create per-node
+	// cert-manager Certificate resources for OVN RBAC
+	if instance.Spec.TLS.PodLevel.Enabled {
+		ovnControllerSpec.OvnIssuerName = instance.GetOvnIssuer()
+	}
+
 	if ovnControllerSpec.NodeSelector == nil {
 		ovnControllerSpec.NodeSelector = &instance.Spec.NodeSelector
 	}
