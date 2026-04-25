@@ -13075,9 +13075,23 @@ spec:
                             type: object
                           ovnLogLevel:
                             default: info
+                            enum:
+                            - "off"
+                            - emer
+                            - err
+                            - warn
+                            - info
+                            - dbg
                             type: string
                           ovsLogLevel:
                             default: info
+                            enum:
+                            - "off"
+                            - emer
+                            - err
+                            - warn
+                            - info
+                            - dbg
                             type: string
                           resources:
                             properties:
@@ -13144,6 +13158,13 @@ spec:
                               type: integer
                             logLevel:
                               default: info
+                              enum:
+                              - "off"
+                              - emer
+                              - err
+                              - warn
+                              - info
+                              - dbg
                               type: string
                             metricsEnabled:
                               default: true
@@ -13279,6 +13300,13 @@ spec:
                         properties:
                           logLevel:
                             default: info
+                            enum:
+                            - "off"
+                            - emer
+                            - err
+                            - warn
+                            - info
+                            - dbg
                             type: string
                           metricsEnabled:
                             default: true

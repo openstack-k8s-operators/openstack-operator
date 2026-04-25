@@ -152,8 +152,15 @@ spec:
                 type: string
               ovnLogLevel:
                 default: info
-                description: OVNLogLevel - Set log level off, emer, err, warn, info,
+                description: OVNLogLevel - Set log level off, emer, err, warn, info
                   or dbg. Default is info.
+                enum:
+                - "off"
+                - emer
+                - err
+                - warn
+                - info
+                - dbg
                 type: string
               ovsContainerImage:
                 description: Image used for the ovsdb-server and ovs-vswitchd containers
@@ -161,8 +168,15 @@ spec:
                 type: string
               ovsLogLevel:
                 default: info
-                description: OVSLogLevel - Set log level off, emer, err, warn, info,
+                description: OVSLogLevel - Set log level off, emer, err, warn, info
                   or dbg. Default is info.
+                enum:
+                - "off"
+                - emer
+                - err
+                - warn
+                - info
+                - dbg
                 type: string
               resources:
                 description: |-
