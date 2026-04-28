@@ -115,7 +115,7 @@ func SetupEnv() {
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;delete
-// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;create;update
+// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch;create;update
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=discovery.k8s.io,resources=endpointslices,verbs=get;list;watch;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
