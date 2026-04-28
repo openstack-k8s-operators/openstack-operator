@@ -90,6 +90,32 @@ rules:
   - update
   - watch
 - apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - backup.openstack.org
   resources:
   - openstackbackupconfigs
