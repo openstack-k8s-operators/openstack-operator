@@ -216,12 +216,6 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-backup-openstack-org-v1beta1-openstackbackupconfig
-  failurePolicy: Fail
-  name: vopenstackbackupconfig-v1beta1.kb.io
-  rules:
-  - apiGroups:
-    - backup.openstack.org
       path: /validate-assistant-openstack-org-v1beta1-openstackassistant
   failurePolicy: Fail
   name: vopenstackassistant-v1beta1.kb.io
@@ -234,11 +228,27 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-<<<<<<< HEAD
-    - openstackbackupconfigs
-=======
     - openstackassistants
->>>>>>> 9492f621 (Add OpenStackAssistant CRD, controller, and webhook)
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-backup-openstack-org-v1beta1-openstackbackupconfig
+  failurePolicy: Fail
+  name: vopenstackbackupconfig-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - backup.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackbackupconfigs
   sideEffects: None
 - admissionReviewVersions:
   - v1
