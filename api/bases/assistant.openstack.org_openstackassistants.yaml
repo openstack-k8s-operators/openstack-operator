@@ -4,17 +4,17 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: openstackclients.client.openstack.org
+  name: openstackassistants.assistant.openstack.org
 spec:
-  group: client.openstack.org
+  group: assistant.openstack.org
   names:
-    kind: OpenStackClient
-    listKind: OpenStackClientList
-    plural: openstackclients
+    kind: OpenStackAssistant
+    listKind: OpenStackAssistantList
+    plural: openstackassistants
     shortNames:
-    - osclient
-    - osclients
-    singular: openstackclient
+    - osassistant
+    - osassistants
+    singular: openstackassistant
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -29,7 +29,8 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: OpenStackClient is the Schema for the openstackclients API
+        description: OpenStackAssistant is the Schema for the openstackassistants
+          API
         properties:
           apiVersion:
             description: |-
@@ -49,18 +50,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: OpenStackClientSpec defines the desired state of OpenStackClient
+            description: OpenStackAssistantSpec defines the desired state of OpenStackAssistant
             properties:
-              caBundleSecretName:
-                description: CaBundleSecretName - holding the CA certs in a pre-created
-                  bundle file
-                type: string
               containerImage:
-                description: ContainerImage for the OpenstackClient container (will
-                  be set to environmental default if empty)
+                description: ContainerImage for the assistant container (will be set
+                  to environmental default if empty).
                 type: string
               env:
-                description: List of environment variables to set in the container.
+                description: Env is a list of additional environment variables for
+                  the container.
                 items:
                   description: EnvVar represents an environment variable present in
                     a Container.
@@ -180,47 +178,95 @@ spec:
                 x-kubernetes-list-map-keys:
                 - name
                 x-kubernetes-list-type: map
-              mcp:
+              goose:
                 description: |-
-                  MCP is the optional MCP server sidecar configuration.
-                  When enabled, the rhos-mcps server runs alongside the openstackclient
-                  container and is exposed via a k8s Service. Typically used by OpenStackAssistant.
+                  Goose contains Goose-specific provider configuration.
+                  Only applicable when provider is "goose".
                 properties:
-                  enabled:
-                    default: false
-                    description: Enabled controls whether the MCP server sidecar is
-                      added to the pod.
-                    type: boolean
+                  hints:
+                    description: |-
+                      Hints is a ConfigMap name containing Goose hints/context.
+                      The ConfigMap must have a key "hints" with the content that
+                      will be written to ~/.goosehints in the pod.
+                    type: string
+                  mcpServers:
+                    description: MCPServers lists MCP server endpoints to configure
+                      as Goose extensions.
+                    items:
+                      description: |-
+                        MCPServerRef references an MCP server endpoint to configure as a Goose extension.
+                        Either URL or OpenStackClientRef must be specified, but not both.
+                      properties:
+                        name:
+                          description: Name is the extension name in Goose config
+                          type: string
+                        openstackClientRef:
+                          description: |-
+                            OpenStackClientRef is the name of an OpenStackClient CR in the same
+                            namespace that has MCP enabled. The controller auto-computes the
+                            correct service URL and TLS CA configuration.
+                            Mutually exclusive with URL.
+                          type: string
+                        url:
+                          description: |-
+                            URL is the MCP server's Streamable HTTP endpoint.
+                            Mutually exclusive with OpenStackClientRef.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  model:
+                    description: |-
+                      Model is the model identifier for the Goose AI agent
+                      (e.g., "gemini/models/gemini-2.5-flash"). Sets the GOOSE_MODEL env var.
+                    type: string
+                  recipes:
+                    description: |-
+                      Recipes is a ConfigMap name containing Goose recipe YAML files.
+                      Each key in the ConfigMap becomes a recipe file registered as a
+                      Goose slash command (e.g., /cluster-health).
+                    type: string
                 type: object
-              mcpContainerImage:
-                description: MCPContainerImage for the MCP server sidecar container
-                  (set via OpenStackVersion)
-                type: string
+              lightspeedStack:
+                description: LightspeedStack configuration for the AI backend.
+                properties:
+                  caBundleSecretName:
+                    description: |-
+                      CaBundleSecretName is the name of a Secret containing CA certs
+                      to trust for TLS connections to the lightspeed-stack endpoint.
+                      The Secret must contain a key "ca-bundle.crt" with PEM-encoded certs.
+                    type: string
+                  providerSecret:
+                    description: |-
+                      ProviderSecret is the name of a Secret containing the lightspeed
+                      provider config JSON (custom_providers/lightspeed.json content).
+                      Must contain key "lightspeed.json".
+                    type: string
+                required:
+                - providerSecret
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
-                description: NodeSelector to target subset of worker nodes
+                description: NodeSelector to target subset of worker nodes for pod
+                  scheduling.
                 type: object
-              openStackConfigMap:
-                default: openstack-config
-                description: OpenStackConfigMap is the name of the ConfigMap containing
-                  the clouds.yaml
-                type: string
-              openStackConfigSecret:
-                default: openstack-config-secret
-                description: OpenStackConfigSecret is the name of the Secret containing
-                  the secure.yaml
+              provider:
+                default: goose
+                description: Provider is the AI agent provider type. Currently only
+                  "goose" is supported.
+                enum:
+                - goose
                 type: string
             required:
-            - containerImage
-            - openStackConfigMap
-            - openStackConfigSecret
+            - lightspeedStack
             type: object
           status:
-            description: OpenStackClientStatus defines the observed state of OpenStackClient
+            description: OpenStackAssistantStatus defines the observed state of OpenStackAssistant
             properties:
               conditions:
-                description: Conditions
+                description: Conditions tracks the state of each sub-resource
                 items:
                   description: Condition defines an observation of a API resource
                     operational state.
@@ -264,15 +310,14 @@ spec:
               hash:
                 additionalProperties:
                   type: string
-                description: Map of hashes to track e.g. pod spec
+                description: Hash tracks input hashes to detect changes
                 type: object
               observedGeneration:
                 description: ObservedGeneration - the most recent generation observed
-                  for this object.
                 format: int64
                 type: integer
               podName:
-                description: PodName
+                description: PodName is the name of the running assistant pod
                 type: string
             type: object
         type: object

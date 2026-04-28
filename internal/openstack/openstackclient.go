@@ -56,6 +56,9 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec.OpenStackClientSpecCore)
 
 		openstackclient.Spec.ContainerImage = *version.Status.ContainerImages.OpenstackClientImage
+		if version.Status.ContainerImages.OpenstackMcpImage != nil {
+			openstackclient.Spec.MCPContainerImage = *version.Status.ContainerImages.OpenstackMcpImage
+		}
 
 		if instance.Spec.TLS.Ingress.Enabled || instance.Spec.TLS.PodLevel.Enabled {
 			openstackclient.Spec.CaBundleSecretName = tls.CABundleSecret
@@ -85,6 +88,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 	if openstackclient.Status.ObservedGeneration == openstackclient.Generation && openstackclient.IsReady() {
 		Log.Info("OpenStackClient ready condition is true")
 		instance.Status.ContainerImages.OpenstackClientImage = version.Status.ContainerImages.OpenstackClientImage
+		instance.Status.ContainerImages.OpenstackMcpImage = version.Status.ContainerImages.OpenstackMcpImage
 		instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneClientReadyCondition, corev1.OpenStackControlPlaneClientReadyMessage)
 	} else {
 		// We want to mirror the condition of the highest priority from the OpenStackClient resource into the instance
@@ -115,6 +119,10 @@ func ClientImageMatch(ctx context.Context, controlPlane *corev1.OpenStackControl
 	//FIXME: (dprince) - OpenStackClientSection should have Enabled?
 	if !stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackClientImage, version.Status.ContainerImages.OpenstackClientImage) {
 		Log.Info("OpenStackClient images do not match", "controlPlane.Status.ContainerImages.OpenstackClientImage", controlPlane.Status.ContainerImages.OpenstackClientImage, "version.Status.ContainerImages.OpenstackClientImage", version.Status.ContainerImages.OpenstackClientImage)
+		return false
+	}
+	if !stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackMcpImage, version.Status.ContainerImages.OpenstackMcpImage) {
+		Log.Info("OpenStackClient MCP images do not match", "controlPlane.Status.ContainerImages.OpenstackMcpImage", controlPlane.Status.ContainerImages.OpenstackMcpImage, "version.Status.ContainerImages.OpenstackMcpImage", version.Status.ContainerImages.OpenstackMcpImage)
 		return false
 	}
 	return true

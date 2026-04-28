@@ -23,6 +23,11 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: OpenStackAssistant is the Schema for the openstackassistants API
+      displayName: OpenStack Assistant
+      kind: OpenStackAssistant
+      name: openstackassistants.assistant.openstack.org
+      version: v1beta1
     - description: |-
         OpenStackBackupConfig is the Schema for the openstackbackupconfigs API.
         It configures automatic backup labeling for user-provided resources (without ownerReferences).

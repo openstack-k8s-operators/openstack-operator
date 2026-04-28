@@ -40,20 +40,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/endpoint"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/env"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	common_rbac "github.com/openstack-k8s-operators/lib-common/modules/common/rbac"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
-	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
-
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/internal/openstackclient"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 )
 
 // OpenStackClientReconciler reconciles a OpenStackClient object
@@ -73,7 +76,7 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 // +kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/finalizers,verbs=update
 // +kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch
 // +kubebuilder:rbac:groups=telemetry.openstack.org,resources=metricstorages,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;
 // service account, role, rolebinding
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
@@ -82,6 +85,9 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 // service account permissions that are needed to grant permission to the above
 // +kubebuilder:rbac:groups="security.openshift.io",resourceNames=anyuid,resources=securitycontextconstraints,verbs=use
 // +kubebuilder:rbac:groups="",resources=pods,verbs=create;delete;get;list;patch;update;watch;patch
+// +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch
+// +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile -
 func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
@@ -212,7 +218,8 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	clientLabels := map[string]string{
-		common.AppSelector: "openstackclient",
+		common.AppSelector:   "openstackclient",
+		common.OwnerSelector: instance.Name,
 	}
 
 	configVars := make(map[string]env.Setter)
@@ -306,9 +313,132 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// all cert input checks out so report InputReady
 	instance.Status.Conditions.MarkTrue(condition.TLSInputReadyCondition, condition.InputReadyMessage)
 
+	// Reconcile MCP sidecar resources when enabled
+	mcpTLSCertSecret := ""
+	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
+		if instance.Spec.MCPContainerImage == "" {
+			return ctrl.Result{}, fmt.Errorf("MCP is enabled but MCPContainerImage is not set")
+		}
+		// Use the internal Keystone endpoint for the MCP sidecar's clouds.yaml
+		internalAuthURL, err := keystoneAPI.GetEndpoint(endpoint.EndpointInternal)
+		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				clientv1.OpenStackClientReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				"waiting for internal Keystone endpoint"))
+			return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+		}
+
+		// Create TLS certificate for MCP server when TLS is enabled
+		if instance.Spec.CaBundleSecretName != "" {
+			issuerName := tls.DefaultCAPrefix + string(service.EndpointInternal)
+			mcpSvcName := instance.Name + "-mcp"
+			certRequest := certmanager.CertificateRequest{
+				IssuerName: issuerName,
+				CertName:   mcpSvcName + "-tls",
+				Hostnames: []string{
+					fmt.Sprintf("%s.%s.svc", mcpSvcName, instance.Namespace),
+					fmt.Sprintf("%s.%s.svc.cluster.local", mcpSvcName, instance.Namespace),
+				},
+				Usages: []certmgrv1.KeyUsage{
+					certmgrv1.UsageKeyEncipherment,
+					certmgrv1.UsageDigitalSignature,
+					certmgrv1.UsageServerAuth,
+				},
+				Labels: map[string]string{},
+			}
+			certSecret, ctrlResult, err := certmanager.EnsureCert(ctx, helper, certRequest, nil)
+			if err != nil {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					clientv1.OpenStackClientReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					clientv1.OpenStackClientReadyErrorMessage,
+					err.Error()))
+				return ctrlResult, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					clientv1.OpenStackClientReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					clientv1.OpenStackClientReadyRunningMessage))
+				return ctrlResult, nil
+			}
+			mcpTLSCertSecret = certSecret.Name
+			configVars[mcpTLSCertSecret] = env.SetValue(mcpTLSCertSecret)
+		}
+
+		mcpTLSEnabled := mcpTLSCertSecret != ""
+
+		mcpCloudsYAML := openstackclient.MCPCloudsYAML(
+			internalAuthURL,
+			keystoneAPI.Spec.AdminProject,
+			keystoneAPI.Spec.AdminUser,
+			keystoneAPI.Spec.Region,
+			instance.Spec.CaBundleSecretName,
+		)
+
+		mcpConfigCM := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name + "-mcp-config",
+				Namespace: instance.Namespace,
+			},
+		}
+		_, err = controllerutil.CreateOrPatch(ctx, r.Client, mcpConfigCM, func() error {
+			mcpConfigCM.Data = map[string]string{
+				"config.yaml": openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled),
+				"clouds.yaml": mcpCloudsYAML,
+			}
+			return controllerutil.SetControllerReference(instance, mcpConfigCM, r.Scheme)
+		})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("error creating MCP config ConfigMap: %w", err)
+		}
+		configVars[instance.Name+"-mcp-config"] = env.SetValue(openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled) + mcpCloudsYAML)
+
+	}
+
 	configVarsHash, err := util.HashOfInputHashes(configVars)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	// Reconcile MCP Service after configVarsHash so the hash annotation captures all config changes
+	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
+		mcpService := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name + "-mcp",
+				Namespace: instance.Namespace,
+			},
+		}
+		mcpServiceHash, err := util.ObjectHash(map[string]interface{}{
+			"containerImage":    instance.Spec.ContainerImage,
+			"mcpContainerImage": instance.Spec.MCPContainerImage,
+			"configVarsHash":    configVarsHash,
+		})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("error calculating MCP Service hash: %w", err)
+		}
+		_, err = controllerutil.CreateOrPatch(ctx, r.Client, mcpService, func() error {
+			if mcpService.Annotations == nil {
+				mcpService.Annotations = map[string]string{}
+			}
+			mcpService.Annotations["client.openstack.org/config-hash"] = mcpServiceHash
+			mcpService.Spec.Selector = clientLabels
+			mcpService.Spec.Ports = []corev1.ServicePort{
+				{
+					Name:     "mcp",
+					Port:     8080,
+					Protocol: corev1.ProtocolTCP,
+				},
+			}
+			return controllerutil.SetControllerReference(instance, mcpService, r.Scheme)
+		})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("error creating MCP Service: %w", err)
+		}
+
 	}
 
 	osclient := &corev1.Pod{
@@ -318,7 +448,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		},
 	}
 
-	spec := openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash)
+	spec := openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash, mcpTLSCertSecret)
 
 	podSpecHash, err := util.ObjectHash(spec)
 	if err != nil {
@@ -510,6 +640,8 @@ func (r *OpenStackClientReconciler) SetupWithManager(
 		For(&clientv1.OpenStackClient{}).
 		Owns(&corev1.Pod{}).
 		Owns(&corev1.ServiceAccount{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Service{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
 		Watches(
