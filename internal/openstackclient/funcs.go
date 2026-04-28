@@ -19,7 +19,9 @@ import (
 
 	env "github.com/openstack-k8s-operators/lib-common/modules/common/env"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/pod"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	"github.com/openstack-k8s-operators/lib-common/modules/users"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 
@@ -34,6 +36,7 @@ func ClientPodSpec(
 	instance *clientv1.OpenStackClient,
 	helper *helper.Helper,
 	configHash string,
+	mcpTLSSvc *tls.Service,
 ) corev1.PodSpec {
 	envVars := map[string]env.Setter{}
 	envVars["OS_CLOUD"] = env.SetValue("default")
@@ -74,6 +77,7 @@ func ClientPodSpec(
 	podSpec := corev1.PodSpec{
 		TerminationGracePeriodSeconds: ptr.To[int64](0),
 		ServiceAccountName:            instance.RbacResourceName(),
+		SecurityContext:               pod.RestrictivePodSecurityContext(users.CloudAdminUID, users.CloudAdminGID),
 		Volumes:                       volumes,
 		Containers: []corev1.Container{
 			{
@@ -82,19 +86,9 @@ func ClientPodSpec(
 				ImagePullPolicy: corev1.PullIfNotPresent,
 				Command:         []string{"/bin/sleep"},
 				Args:            []string{"infinity"},
-				SecurityContext: &corev1.SecurityContext{
-					RunAsUser:                ptr.To[int64](42401),
-					RunAsGroup:               ptr.To[int64](42401),
-					RunAsNonRoot:             ptr.To(true),
-					AllowPrivilegeEscalation: ptr.To(false),
-					Capabilities: &corev1.Capabilities{
-						Drop: []corev1.Capability{
-							"ALL",
-						},
-					},
-				},
-				Env:          env.MergeEnvs([]corev1.EnvVar{}, envVars),
-				VolumeMounts: volumeMounts,
+				SecurityContext: pod.RestrictiveSecurityContext(users.CloudAdminUID, users.CloudAdminGID),
+				Env:             env.MergeEnvs([]corev1.EnvVar{}, envVars),
+				VolumeMounts:    volumeMounts,
 			},
 		},
 		Tolerations: []corev1.Toleration{
@@ -113,11 +107,139 @@ func ClientPodSpec(
 		},
 	}
 
+	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
+		mcpVolumeMounts := []corev1.VolumeMount{
+			{
+				Name:      "mcp-config",
+				MountPath: "/home/cloud-admin/.config/openstack/clouds.yaml",
+				SubPath:   "clouds.yaml",
+				ReadOnly:  true,
+			},
+			{
+				Name:      "openstack-config-secret",
+				MountPath: "/home/cloud-admin/.config/openstack/secure.yaml",
+				SubPath:   "secure.yaml",
+				ReadOnly:  true,
+			},
+			{
+				Name:      "mcp-config",
+				MountPath: "/tmp/mcp-config/config.yaml",
+				SubPath:   "config.yaml",
+				ReadOnly:  true,
+			},
+		}
+
+		if instance.Spec.CaBundleSecretName != "" {
+			mcpVolumeMounts = append(mcpVolumeMounts, instance.Spec.CreateVolumeMounts(nil)...)
+		}
+
+		if mcpTLSSvc != nil {
+			mcpVolumeMounts = append(mcpVolumeMounts, mcpTLSSvc.CreateVolumeMounts("mcp")...)
+		}
+
+		podSpec.Volumes = append(podSpec.Volumes, corev1.Volume{
+			Name: "mcp-config",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: instance.Name + "-mcp-config",
+					},
+				},
+			},
+		})
+
+		if mcpTLSSvc != nil {
+			podSpec.Volumes = append(podSpec.Volumes, mcpTLSSvc.CreateVolume("mcp"))
+		}
+
+		mcpEnvVars := []corev1.EnvVar{
+			{Name: "HOME", Value: "/home/cloud-admin"},
+			{Name: "RHOS_MCPS_CONFIG", Value: "/tmp/mcp-config/config.yaml"},
+			{Name: "OS_CLOUD", Value: "default"},
+			{Name: "OS_CLIENT_CONFIG_FILE", Value: "/home/cloud-admin/.config/openstack/clouds.yaml"},
+		}
+		if instance.Spec.CaBundleSecretName != "" {
+			mcpEnvVars = append(mcpEnvVars,
+				corev1.EnvVar{Name: "OS_CACERT", Value: tls.DownstreamTLSCABundlePath},
+				corev1.EnvVar{Name: "REQUESTS_CA_BUNDLE", Value: tls.DownstreamTLSCABundlePath},
+			)
+		}
+
+		podSpec.Containers = append(podSpec.Containers, corev1.Container{
+			Name:    "mcp-server",
+			Image:   instance.Spec.MCPContainerImage,
+			Command: []string{"rhos-ls-mcps"},
+			Env:     mcpEnvVars,
+			Ports: []corev1.ContainerPort{
+				{Name: "mcp", ContainerPort: 8080, Protocol: corev1.ProtocolTCP},
+			},
+			SecurityContext: pod.RestrictiveSecurityContext(users.CloudAdminUID, users.CloudAdminGID),
+			VolumeMounts:    mcpVolumeMounts,
+		})
+	}
+
 	if instance.Spec.NodeSelector != nil {
 		podSpec.NodeSelector = *instance.Spec.NodeSelector
 	}
 
 	return podSpec
+}
+
+// MCPConfigYAML returns the rhos-mcps config.yaml content for the MCP sidecar.
+// name and namespace identify the owning OpenStackClient and are used to scope
+// mcp_transport_security to the MCP Service's own hostname (<name>-mcp.<namespace>.svc:8080),
+// matching the URL OpenStackAssistant uses to reach it, instead of allowing any host/origin.
+func MCPConfigYAML(name, namespace, caBundleSecretName string, mcpTLSEnabled bool) string {
+	caCert := ""
+	if caBundleSecretName != "" {
+		caCert = fmt.Sprintf("\n  ca_cert: %s", tls.DownstreamTLSCABundlePath)
+	}
+	mcpTLS := ""
+	if mcpTLSEnabled {
+		mcpTLS = `
+tls:
+  ssl_certfile: /etc/pki/tls/mcp/tls.crt
+  ssl_keyfile: /etc/pki/tls/mcp/tls.key`
+	}
+	mcpHost := fmt.Sprintf("%s-mcp.%s.svc:8080", name, namespace)
+	allowedOrigins := fmt.Sprintf(`    - "http://%s"`, mcpHost)
+	if mcpTLSEnabled {
+		allowedOrigins = fmt.Sprintf(`    - "http://%s"
+    - "https://%s"`, mcpHost, mcpHost)
+	}
+	return fmt.Sprintf(`ip: "0.0.0.0"
+port: 8080
+openstack:
+  enabled: true
+  allow_write: false%s
+openshift:
+  enabled: false
+mcp_transport_security:
+  enable_dns_rebinding_protection: true
+  allowed_hosts:
+    - "%s"
+  allowed_origins:
+%s%s
+`, caCert, mcpHost, allowedOrigins, mcpTLS)
+}
+
+// MCPCloudsYAML returns a clouds.yaml using the given auth URL for the MCP sidecar.
+// When caBundleSecretName is set, a cacert path is included for TLS verification.
+func MCPCloudsYAML(authURL, projectName, userName, region, caBundleSecretName string) string {
+	caCert := ""
+	if caBundleSecretName != "" {
+		caCert = fmt.Sprintf("\n    cacert: %s", tls.DownstreamTLSCABundlePath)
+	}
+	return fmt.Sprintf(`clouds:
+  default:
+    auth:
+      auth_url: %s
+      project_name: %s
+      username: %s
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: %s%s
+`, authURL, projectName, userName, region, caCert)
 }
 
 func clientPodVolumeMounts() []corev1.VolumeMount {

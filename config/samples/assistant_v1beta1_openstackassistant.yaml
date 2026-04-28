@@ -6,4 +6,20 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: openstackassistant-sample
 spec:
-  # TODO(user): Add fields here
+  # Agent/harness image whose baked-in entrypoint renders its own config from
+  # the env vars and mounts the operator provides.
+  containerImage: quay.io/openstack-k8s-operators/openstack-goose:current-podified
+  # AI backend: base URL + model. The API key is derived from the pod
+  # service-account token by the image entrypoint, not set in the CR.
+  lightspeedStack:
+    baseURL: https://lightspeed-stack.openstack.svc:8443
+    model: default
+  # ConfigMaps projected into the pod at chosen paths for the image entrypoint
+  # to consume (recipes, skills, hints, system prompts, etc.).
+  extraConfig:
+    - name: openstackassistant-upgrade-recipes
+      mountPath: /etc/openstack-goose/recipes
+  # MCP servers exposed to the assistant as MCP_SERVER_<name> env vars.
+  mcpServers:
+    - name: openstack
+      openstackClientRef: openstackclient

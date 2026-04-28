@@ -14,6 +14,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -35,6 +37,23 @@ type OpenStackClientSpec struct {
 	// +kubebuilder:validation:Required
 	// ContainerImage for the OpenstackClient container (will be set to environmental default if empty)
 	ContainerImage string `json:"containerImage"`
+
+	// +kubebuilder:validation:Optional
+	// MCPContainerImage for the MCP server sidecar container (set via OpenStackVersion)
+	MCPContainerImage string `json:"mcpContainerImage,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// MCPCertSecretName is the name of the TLS certificate Secret for the MCP
+	// server sidecar. It is populated by the OpenStackControlPlane, which owns
+	// the cert lifecycle; the OpenStackClient controller only consumes it.
+	MCPCertSecretName string `json:"mcpCertSecretName,omitempty"`
+}
+
+// MCPConfig defines optional MCP server sidecar configuration
+type MCPConfig struct {
+	// Enabled controls whether the MCP server sidecar is added to the pod.
+	// +kubebuilder:default=false
+	Enabled bool `json:"enabled,omitempty"`
 }
 
 // OpenStackClientSpecCore defines the desired state of OpenStackClient
@@ -67,6 +86,12 @@ type OpenStackClientSpecCore struct {
 	// +optional
 	// List of environment variables to set in the container.
 	Env []corev1.EnvVar `json:"env,omitempty" patchMergeKey:"name" patchStrategy:"merge"`
+
+	// MCP is the optional MCP server sidecar configuration.
+	// When enabled, the rhos-mcps server runs alongside the openstackclient
+	// container and is exposed via a k8s Service. Typically used by OpenStackAssistant.
+	// +kubebuilder:validation:Optional
+	MCP *MCPConfig `json:"mcp,omitempty"`
 }
 
 // OpenStackClientStatus defines the observed state of OpenStackClient
@@ -82,6 +107,9 @@ type OpenStackClientStatus struct {
 
 	// Map of hashes to track e.g. pod spec
 	Hash map[string]string `json:"hash,omitempty"`
+
+	// MCPEndpoint is the URL of the MCP server when the sidecar is enabled.
+	MCPEndpoint string `json:"mcpEndpoint,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -118,8 +146,16 @@ func (instance OpenStackClient) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(OpenStackClientReadyCondition)
 }
 
+// GetMCPEndpoint returns the MCP server URL.
+func (instance OpenStackClient) GetMCPEndpoint() (string, error) {
+	if instance.Status.MCPEndpoint == "" {
+		return "", fmt.Errorf("MCP endpoint not found")
+	}
+	return instance.Status.MCPEndpoint, nil
+}
+
 // RbacConditionsSet - set the conditions for the rbac object
-func (instance OpenStackClient) RbacConditionsSet(c *condition.Condition) {
+func (instance *OpenStackClient) RbacConditionsSet(c *condition.Condition) {
 	instance.Status.Conditions.Set(c)
 }
 

@@ -4,6 +4,10 @@ kind: ClusterRole
 metadata:
   name: manager-role
 rules:
+- nonResourceURLs:
+  - /ls-access
+  verbs:
+  - get
 - apiGroups:
   - ""
   resources:
@@ -23,12 +27,18 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - endpoints
+  - events
   - imagestreamimages
   - imagestreammappings
   - imagestreams
   - imagestreams/layers
   - imagestreamtags
   - imagetags
+  - nodes
+  - persistentvolumeclaims
+  - persistentvolumes
+  - pods/log
   verbs:
   - get
   - list
@@ -40,7 +50,9 @@ rules:
   verbs:
   - create
   - get
+  - list
   - update
+  - watch
 - apiGroups:
   - ""
   - project.openshift.io
@@ -75,6 +87,16 @@ rules:
 - apiGroups:
   - apps
   resources:
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
   - deployments
   verbs:
   - create
@@ -83,6 +105,44 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - assistant.openstack.org
+  - backup.openstack.org
+  - cyborg.openstack.org
+  - operator.openstack.org
+  - test.openstack.org
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - backup.openstack.org
@@ -187,6 +247,14 @@ rules:
 - apiGroups:
   - batch
   resources:
+  - cronjobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
   - jobs
   verbs:
   - create
@@ -251,6 +319,8 @@ rules:
   - config.openshift.io
   resources:
   - clusterimagepolicies
+  - clusteroperators
+  - clusterversions
   - imagedigestmirrorsets
   - images
   - networks
@@ -452,6 +522,15 @@ rules:
   - patch
   - update
 - apiGroups:
+  - machine.openshift.io
+  resources:
+  - machines
+  - machinesets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - machineconfiguration.openshift.io
   resources:
   - machineconfigs
@@ -553,7 +632,9 @@ rules:
   - delete
   - get
   - list
+  - patch
   - update
+  - watch
 - apiGroups:
   - neutron.openstack.org
   resources:
@@ -565,6 +646,14 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - nmstate.io
+  resources:
+  - nodenetworkconfigurationpolicies
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - nova.openstack.org
@@ -688,6 +777,8 @@ rules:
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
+  - clusterrolebindings
+  - clusterroles
   - rolebindings
   - roles
   verbs:
@@ -738,6 +829,22 @@ rules:
   - securitycontextconstraints
   verbs:
   - use
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - nonroot-v2
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - swift.openstack.org
   resources:
