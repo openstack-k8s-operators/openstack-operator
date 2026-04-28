@@ -10,6 +10,26 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-assistant-openstack-org-v1beta1-openstackassistant
+  failurePolicy: Fail
+  name: mopenstackassistant-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - assistant.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackassistants
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-client-openstack-org-v1beta1-openstackclient
   failurePolicy: Fail
   name: mopenstackclient-v1beta1.kb.io
@@ -202,13 +222,23 @@ webhooks:
   rules:
   - apiGroups:
     - backup.openstack.org
+      path: /validate-assistant-openstack-org-v1beta1-openstackassistant
+  failurePolicy: Fail
+  name: vopenstackassistant-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - assistant.openstack.org
     apiVersions:
     - v1beta1
     operations:
     - CREATE
     - UPDATE
     resources:
+<<<<<<< HEAD
     - openstackbackupconfigs
+=======
+    - openstackassistants
+>>>>>>> 9492f621 (Add OpenStackAssistant CRD, controller, and webhook)
   sideEffects: None
 - admissionReviewVersions:
   - v1
