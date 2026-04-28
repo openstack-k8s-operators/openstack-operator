@@ -51,6 +51,9 @@ import (
 	backupcontroller "github.com/openstack-k8s-operators/openstack-operator/internal/controller/backup"
 
 	webhookbackupv1beta1 "github.com/openstack-k8s-operators/openstack-operator/internal/webhook/backup/v1beta1"
+	assistantv1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/assistant/v1beta1"
+	assistantcontroller "github.com/openstack-k8s-operators/openstack-operator/internal/controller/assistant"
+
 	// +kubebuilder:scaffold:imports
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	k8s_networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
@@ -136,6 +139,7 @@ func init() {
 	utilruntime.Must(topologyv1.AddToScheme(scheme))
 	utilruntime.Must(watcherv1.AddToScheme(scheme))
 	utilruntime.Must(backupv1beta1.AddToScheme(scheme))
+	utilruntime.Must(assistantv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -430,6 +434,13 @@ func main() {
 			os.Exit(1)
 		}
 		checker = mgr.GetWebhookServer().StartedChecker()
+	}
+	if err := (&assistantcontroller.OpenStackAssistantReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackAssistant")
+		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 
