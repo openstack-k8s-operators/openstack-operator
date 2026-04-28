@@ -687,6 +687,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.OpenstackMcpImage != nil {
+		in, out := &in.OpenstackMcpImage, &out.OpenstackMcpImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.OsContainerImage != nil {
 		in, out := &in.OsContainerImage, &out.OsContainerImage
 		*out = new(string)
