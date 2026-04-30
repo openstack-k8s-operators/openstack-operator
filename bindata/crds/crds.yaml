@@ -187,6 +187,11 @@ spec:
                       The ConfigMap must have a key "hints" with the content that
                       will be written to ~/.goosehints in the pod.
                     type: string
+                  model:
+                    description: |-
+                      Model is the model identifier for the Goose AI agent
+                      (e.g., "gemini/models/gemini-2.5-flash"). Sets the GOOSE_MODEL env var.
+                    type: string
                   recipes:
                     description: |-
                       Recipes is a ConfigMap name containing Goose recipe YAML files.

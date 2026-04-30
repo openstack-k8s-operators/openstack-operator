@@ -54,6 +54,11 @@ type LightspeedStackSpec struct {
 
 // GooseConfig defines Goose-specific provider configuration
 type GooseConfig struct {
+	// Model is the model identifier for the Goose AI agent
+	// (e.g., "gemini/models/gemini-2.5-flash"). Sets the GOOSE_MODEL env var.
+	// +kubebuilder:validation:Optional
+	Model string `json:"model,omitempty"`
+
 	// Recipes is a ConfigMap name containing Goose recipe YAML files.
 	// Each key in the ConfigMap becomes a recipe file registered as a
 	// Goose slash command (e.g., /cluster-health).

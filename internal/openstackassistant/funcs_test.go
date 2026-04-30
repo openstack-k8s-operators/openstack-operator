@@ -46,7 +46,7 @@ func TestEntrypointScript(t *testing.T) {
 	script := EntrypointScript()
 
 	g.Expect(script).To(ContainSubstring("#!/bin/sh"))
-	g.Expect(script).To(ContainSubstring("mkdir -p ~/.goose/config/profiles/default/custom_providers"))
+	g.Expect(script).To(ContainSubstring("mkdir -p $HOME/.config/goose/custom_providers"))
 	g.Expect(script).To(ContainSubstring("config.yaml"))
 	g.Expect(script).To(ContainSubstring("developer:"))
 	g.Expect(script).To(ContainSubstring("enabled: true"))
@@ -103,12 +103,11 @@ func TestAssistantPodSpec_DefaultEnvVars(t *testing.T) {
 	g.Expect(envMap).To(HaveKeyWithValue("GOOSE_DISABLE_KEYRING", "1"))
 }
 
-func TestAssistantPodSpec_CustomEnvVars(t *testing.T) {
+func TestAssistantPodSpec_GooseModel(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
-	instance.Spec.Env = []corev1.EnvVar{
-		{Name: "GOOSE_MODEL", Value: "gemini/models/gemini-2.5-flash"},
-		{Name: "LIGHTSPEED_API_KEY", Value: "dummy"},
+	instance.Spec.Goose = &assistantv1.GooseConfig{
+		Model: "gemini/models/gemini-2.5-flash",
 	}
 
 	spec := AssistantPodSpec(instance, "hash")
@@ -120,6 +119,24 @@ func TestAssistantPodSpec_CustomEnvVars(t *testing.T) {
 	}
 
 	g.Expect(envMap).To(HaveKeyWithValue("GOOSE_MODEL", "gemini/models/gemini-2.5-flash"))
+	g.Expect(envMap).To(HaveKeyWithValue("GOOSE_PROVIDER", "lightspeed"))
+}
+
+func TestAssistantPodSpec_CustomEnvVars(t *testing.T) {
+	g := NewWithT(t)
+	instance := newTestInstance()
+	instance.Spec.Env = []corev1.EnvVar{
+		{Name: "LIGHTSPEED_API_KEY", Value: "dummy"},
+	}
+
+	spec := AssistantPodSpec(instance, "hash")
+	envVars := spec.Containers[0].Env
+
+	envMap := make(map[string]string)
+	for _, e := range envVars {
+		envMap[e.Name] = e.Value
+	}
+
 	g.Expect(envMap).To(HaveKeyWithValue("LIGHTSPEED_API_KEY", "dummy"))
 	g.Expect(envMap).To(HaveKeyWithValue("GOOSE_PROVIDER", "lightspeed"))
 }

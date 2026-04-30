@@ -27,10 +27,10 @@ func EntrypointScript() string {
 set -eu
 
 # Create goose config directory
-mkdir -p ~/.goose/config/profiles/default/custom_providers
+mkdir -p $HOME/.config/goose/custom_providers
 
 # Write goose config.yaml
-cat > ~/.goose/config/profiles/default/config.yaml <<'GOOSE_CONFIG'
+cat > $HOME/.config/goose/config.yaml <<'GOOSE_CONFIG'
 extensions:
   developer:
     enabled: true
@@ -68,10 +68,10 @@ if [ -d /tmp/recipes ]; then
     basename=$(basename "$recipe")
     # Strip extension to get the command name
     cmdname="${basename%.*}"
-    echo "  ${cmdname}:" >> ~/.goose/config/profiles/default/config.yaml
-    echo "    type: recipe" >> ~/.goose/config/profiles/default/config.yaml
-    echo "    enabled: true" >> ~/.goose/config/profiles/default/config.yaml
-    echo "    recipe_source: ${recipe}" >> ~/.goose/config/profiles/default/config.yaml
+    echo "  ${cmdname}:" >> $HOME/.config/goose/config.yaml
+    echo "    type: recipe" >> $HOME/.config/goose/config.yaml
+    echo "    enabled: true" >> $HOME/.config/goose/config.yaml
+    echo "    recipe_source: ${recipe}" >> $HOME/.config/goose/config.yaml
   done
 fi
 
@@ -82,7 +82,7 @@ fi
 
 # Copy lightspeed provider config
 if [ -f /tmp/lightspeed-provider/lightspeed.json ]; then
-  cp /tmp/lightspeed-provider/lightspeed.json ~/.goose/config/profiles/default/custom_providers/lightspeed.json
+  cp /tmp/lightspeed-provider/lightspeed.json $HOME/.config/goose/custom_providers/lightspeed.json
 fi
 
 exec sleep infinity
@@ -99,6 +99,10 @@ func AssistantPodSpec(
 	envVars["GOOSE_PROVIDER"] = env.SetValue("lightspeed")
 	envVars["GOOSE_TELEMETRY_ENABLED"] = env.SetValue("false")
 	envVars["GOOSE_DISABLE_KEYRING"] = env.SetValue("1")
+
+	if instance.Spec.Goose != nil && instance.Spec.Goose.Model != "" {
+		envVars["GOOSE_MODEL"] = env.SetValue(instance.Spec.Goose.Model)
+	}
 
 	if instance.Spec.Env != nil {
 		for idx := range instance.Spec.Env {
