@@ -73,7 +73,6 @@ const (
 	// rootCAIssuerOvnRbacLabel labels the OVN RBAC CA issuer.
 	// TODO: upstream this to lib-common certmanager module alongside the other RootCAIssuer*Label constants.
 	rootCAIssuerOvnRbacLabel = "osp-rootca-issuer-ovn-rbac"
-
 )
 
 // GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
