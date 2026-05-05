@@ -34,7 +34,127 @@ const (
 	MinorUpdateControlPlane string = "Minor Update Controlplane In Progress"
 	// MinorUpdateComplete -
 	MinorUpdateComplete string = "Complete"
+
+	// MinorUpdateTargetStageAnnotation - specifies the update stage after which the minor update
+	// should pause. All stages up to and including the named stage will be completed; subsequent
+	// stages will be blocked until the annotation is removed or updated to a later stage.
+	// During an update, the webhook rejects moving this annotation to an earlier stage, and
+	// rejects adding it behind stages already completed when it was absent at update start.
+	// Valid values: "ovn-controlplane", "ovn-dataplane", "rabbitmq", "mariadb", "memcached",
+	// "keystone", "controlplane". Remove the annotation to let the update proceed to completion.
+	MinorUpdateTargetStageAnnotation string = "core.openstack.org/update-target-stage"
+
+	// MinorUpdateStageOVNControlplane - stage name for OVN controlplane update
+	MinorUpdateStageOVNControlplane string = "ovn-controlplane"
+	// MinorUpdateStageOVNDataplane - stage name for OVN dataplane update
+	MinorUpdateStageOVNDataplane string = "ovn-dataplane"
+	// MinorUpdateStageRabbitMQ - stage name for RabbitMQ update
+	MinorUpdateStageRabbitMQ string = "rabbitmq"
+	// MinorUpdateStageMariaDB - stage name for MariaDB update
+	MinorUpdateStageMariaDB string = "mariadb"
+	// MinorUpdateStageMemcached - stage name for Memcached update
+	MinorUpdateStageMemcached string = "memcached"
+	// MinorUpdateStageKeystone - stage name for Keystone update
+	MinorUpdateStageKeystone string = "keystone"
+	// MinorUpdateStageControlplane - stage name for full controlplane update
+	MinorUpdateStageControlplane string = "controlplane"
 )
+
+// validMinorUpdateTargetStagesOrdered is the single source of truth for allowed
+// MinorUpdateTargetStageAnnotation values, listed in rollout order.
+var validMinorUpdateTargetStagesOrdered = []string{
+	MinorUpdateStageOVNControlplane,
+	MinorUpdateStageOVNDataplane,
+	MinorUpdateStageRabbitMQ,
+	MinorUpdateStageMariaDB,
+	MinorUpdateStageMemcached,
+	MinorUpdateStageKeystone,
+	MinorUpdateStageControlplane,
+}
+
+// minorUpdateTargetStageConditionTypes maps each validMinorUpdateTargetStagesOrdered entry to its status condition.
+var minorUpdateTargetStageConditionTypes = map[string]condition.Type{
+	MinorUpdateStageOVNControlplane: OpenStackVersionMinorUpdateOVNControlplane,
+	MinorUpdateStageOVNDataplane:    OpenStackVersionMinorUpdateOVNDataplane,
+	MinorUpdateStageRabbitMQ:        OpenStackVersionMinorUpdateRabbitMQ,
+	MinorUpdateStageMariaDB:         OpenStackVersionMinorUpdateMariaDB,
+	MinorUpdateStageMemcached:       OpenStackVersionMinorUpdateMemcached,
+	MinorUpdateStageKeystone:        OpenStackVersionMinorUpdateKeystone,
+	MinorUpdateStageControlplane:    OpenStackVersionMinorUpdateControlplane,
+}
+
+// validMinorUpdateTargetStages is a set derived from validMinorUpdateTargetStagesOrdered for O(1) lookup.
+var validMinorUpdateTargetStages = func() map[string]struct{} {
+	m := make(map[string]struct{}, len(validMinorUpdateTargetStagesOrdered))
+	for _, s := range validMinorUpdateTargetStagesOrdered {
+		m[s] = struct{}{}
+	}
+	return m
+}()
+
+// IsValidMinorUpdateTargetStage reports whether v is a supported minor-update target stage name.
+func IsValidMinorUpdateTargetStage(v string) bool {
+	if v == "" {
+		return false
+	}
+	_, ok := validMinorUpdateTargetStages[v]
+	return ok
+}
+
+// ValidMinorUpdateTargetStages returns allowed annotation values in rollout order.
+func ValidMinorUpdateTargetStages() []string {
+	return validMinorUpdateTargetStagesOrdered
+}
+
+// MinorUpdateTargetStageIndex returns the rollout order index for stage.
+func MinorUpdateTargetStageIndex(stage string) (int, bool) {
+	for i, s := range validMinorUpdateTargetStagesOrdered {
+		if s == stage {
+			return i, true
+		}
+	}
+	return -1, false
+}
+
+// MinorUpdateTargetStageFromAnnotations returns the target-stage annotation value when set and valid.
+func MinorUpdateTargetStageFromAnnotations(annotations map[string]string) (string, bool) {
+	if annotations == nil {
+		return "", false
+	}
+	stage, ok := annotations[MinorUpdateTargetStageAnnotation]
+	if !ok || !IsValidMinorUpdateTargetStage(stage) {
+		return "", false
+	}
+	return stage, true
+}
+
+// MinorUpdateStageAllowedForReconcile reports whether the control plane may patch resources
+// for rollout stage during a minor update. When the target-stage annotation is absent, all
+// stages are allowed. When set, only stages up to and including the target may be reconciled.
+func MinorUpdateStageAllowedForReconcile(annotations map[string]string, stage string) bool {
+	target, ok := MinorUpdateTargetStageFromAnnotations(annotations)
+	if !ok {
+		return true
+	}
+	stageIdx, okStage := MinorUpdateTargetStageIndex(stage)
+	targetIdx, okTarget := MinorUpdateTargetStageIndex(target)
+	if !okStage || !okTarget {
+		return true
+	}
+	return stageIdx <= targetIdx
+}
+
+// LatestCompletedMinorUpdateTargetStageIndex returns the rollout index of the furthest
+// minor-update stage marked True in status, or -1 when no annotated rollout stage has completed.
+func LatestCompletedMinorUpdateTargetStageIndex(status OpenStackVersionStatus) int {
+	latest := -1
+	for i, stage := range validMinorUpdateTargetStagesOrdered {
+		if status.Conditions.IsTrue(minorUpdateTargetStageConditionTypes[stage]) {
+			latest = i
+		}
+	}
+	return latest
+}
 
 // OpenStackVersionSpec - defines the desired state of OpenStackVersion
 type OpenStackVersionSpec struct {

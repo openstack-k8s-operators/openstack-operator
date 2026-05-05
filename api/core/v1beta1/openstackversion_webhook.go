@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -74,6 +75,10 @@ func (r *OpenStackVersion) ValidateCreate(ctx context.Context, c goClient.Client
 		)
 	}
 
+	if err := validateMinorUpdateTargetStageAnnotation(r.Annotations, r.GetName()); err != nil {
+		return nil, err
+	}
+
 	versionList, err := GetOpenStackVersions(r.Namespace, c)
 
 	if err != nil {
@@ -114,6 +119,10 @@ func (r *OpenStackVersion) ValidateCreate(ctx context.Context, c goClient.Client
 func (r *OpenStackVersion) ValidateUpdate(ctx context.Context, old runtime.Object, c goClient.Client) (admission.Warnings, error) {
 	openstackversionlog.Info("validate update", "name", r.Name)
 
+	if err := validateMinorUpdateTargetStageAnnotation(r.Annotations, r.GetName()); err != nil {
+		return nil, err
+	}
+
 	_, ok := r.Status.ContainerImageVersionDefaults[r.Spec.TargetVersion]
 	if r.Spec.TargetVersion != openstackVersionDefaults.AvailableVersion && !ok {
 		return nil, apierrors.NewForbidden(
@@ -133,6 +142,11 @@ func (r *OpenStackVersion) ValidateUpdate(ctx context.Context, old runtime.Objec
 	oldVersion, ok := old.(*OpenStackVersion)
 	if !ok {
 		return nil, apierrors.NewInternalError(fmt.Errorf("failed to convert old object to OpenStackVersion"))
+	}
+
+	// Validate that the target stage annotation is not from earlier stage while a minor update is in progress
+	if err := validateMinorUpdateTargetStageAnnotationProgress(oldVersion, r); err != nil {
+		return nil, err
 	}
 
 	// Check if targetVersion is changing and this is a minor update
@@ -172,6 +186,113 @@ func (r *OpenStackVersion) ValidateUpdate(ctx context.Context, old runtime.Objec
 	}
 
 	return nil, nil
+}
+
+func validateMinorUpdateTargetStageAnnotation(annotations map[string]string, resourceName string) error {
+	if annotations == nil {
+		return nil
+	}
+	stage, ok := annotations[MinorUpdateTargetStageAnnotation]
+	if !ok {
+		return nil
+	}
+	annotationField := "metadata.annotations[" + MinorUpdateTargetStageAnnotation + "]"
+	if stage == "" {
+		return apierrors.NewForbidden(
+			schema.GroupResource{
+				Group:    GroupVersion.WithKind("OpenStackVersion").Group,
+				Resource: GroupVersion.WithKind("OpenStackVersion").Kind,
+			}, resourceName, &field.Error{
+				Type:     field.ErrorTypeForbidden,
+				Field:    annotationField,
+				BadValue: stage,
+				Detail:   "Annotation value must not be empty. Remove the annotation or set a valid stage name",
+			},
+		)
+	}
+	if !IsValidMinorUpdateTargetStage(stage) {
+		return apierrors.NewForbidden(
+			schema.GroupResource{
+				Group:    GroupVersion.WithKind("OpenStackVersion").Group,
+				Resource: GroupVersion.WithKind("OpenStackVersion").Kind,
+			}, resourceName, &field.Error{
+				Type:     field.ErrorTypeForbidden,
+				Field:    annotationField,
+				BadValue: stage,
+				Detail: fmt.Sprintf(
+					"Invalid target stage %q. Must be one of: %s",
+					stage,
+					strings.Join(ValidMinorUpdateTargetStages(), ", "),
+				),
+			},
+		)
+	}
+	return nil
+}
+
+func minorUpdateInProgress(v *OpenStackVersion) bool {
+	if v.Status.DeployedVersion == nil {
+		return false
+	}
+	return v.Spec.TargetVersion != *v.Status.DeployedVersion
+}
+
+// validateMinorUpdateTargetStageAnnotationProgress rejects moving the target-stage
+// annotation to an earlier rollout stage while a minor update is in progress, and rejects
+// adding the annotation behind stages already completed when it was absent at update start.
+func validateMinorUpdateTargetStageAnnotationProgress(old, new *OpenStackVersion) error {
+	if !minorUpdateInProgress(new) {
+		return nil
+	}
+	oldStage, oldOK := MinorUpdateTargetStageFromAnnotations(old.Annotations)
+	newStage, newOK := MinorUpdateTargetStageFromAnnotations(new.Annotations)
+	if !newOK {
+		return nil
+	}
+	newIdx, okNew := MinorUpdateTargetStageIndex(newStage)
+	if !okNew {
+		return nil
+	}
+	annotationField := "metadata.annotations[" + MinorUpdateTargetStageAnnotation + "]"
+	gr := schema.GroupResource{
+		Group:    GroupVersion.WithKind("OpenStackVersion").Group,
+		Resource: GroupVersion.WithKind("OpenStackVersion").Kind,
+	}
+
+	if !oldOK {
+		latest := LatestCompletedMinorUpdateTargetStageIndex(old.Status)
+		if latest >= 0 && newIdx < latest {
+			completedStage := validMinorUpdateTargetStagesOrdered[latest]
+			return apierrors.NewForbidden(
+				gr, new.GetName(), &field.Error{
+					Type:     field.ErrorTypeForbidden,
+					Field:    annotationField,
+					BadValue: newStage,
+					Detail: fmt.Sprintf(
+						"Cannot set update target stage to %q while minor update is in progress: update has already completed stage %q (targetVersion %q, deployedVersion %q); choose a further stage",
+						newStage, completedStage, new.Spec.TargetVersion, *new.Status.DeployedVersion,
+					),
+				},
+			)
+		}
+		return nil
+	}
+
+	oldIdx, _ := MinorUpdateTargetStageIndex(oldStage)
+	if newIdx >= oldIdx {
+		return nil
+	}
+	return apierrors.NewForbidden(
+		gr, new.GetName(), &field.Error{
+			Type:     field.ErrorTypeForbidden,
+			Field:    annotationField,
+			BadValue: newStage,
+			Detail: fmt.Sprintf(
+				"Cannot move update target stage from %q to earlier stage %q while minor update is in progress (targetVersion %q, deployedVersion %q); remove the annotation or set a further stage",
+				oldStage, newStage, new.Spec.TargetVersion, *new.Status.DeployedVersion,
+			),
+		},
+	)
 }
 
 // hasAnyCustomImage checks if any image field in CustomContainerImages is set
