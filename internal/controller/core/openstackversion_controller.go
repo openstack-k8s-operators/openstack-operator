@@ -262,6 +262,34 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	// minor update in progress
 	if instance.Status.DeployedVersion != nil && instance.Spec.TargetVersion != *instance.Status.DeployedVersion {
 
+		// targetStage is the value of the target-stage annotation. When set, the update
+		// completes all stages up to and including the named stage, then pauses. An empty
+		// string (annotation absent or invalid) means run to completion without pausing.
+		targetStage := ""
+		if stage, ok := corev1beta1.MinorUpdateTargetStageFromAnnotations(instance.Annotations); ok {
+			targetStage = stage
+		}
+
+		// gateNextStage marks the next condition as blocked and returns whether
+		// the gate was applied. Callers should only exit reconcile when gated == true.
+		gateNextStage := func(completedStage string, nextCondition condition.Type) (ctrl.Result, bool) {
+			if !instance.Status.Conditions.IsTrue(nextCondition) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					nextCondition,
+					corev1beta1.OpenStackVersionMinorUpdateGatedReason,
+					condition.SeverityInfo,
+					corev1beta1.OpenStackVersionMinorUpdateReadyGatedMessage,
+					completedStage, completedStage))
+				Log.Info("Minor update paused at target stage", "stage", completedStage,
+					"annotation", corev1beta1.MinorUpdateTargetStageAnnotation)
+				return ctrl.Result{}, true
+			}
+			Log.Info("Skipping gate for stage already completed", "completedStage", completedStage,
+				"nextCondition", nextCondition,
+				"annotation", corev1beta1.MinorUpdateTargetStageAnnotation)
+			return ctrl.Result{}, false
+		}
+
 		// Only check OVN when enabled to avoid hanging on a removed condition
 		if controlPlane.Spec.Ovn.Enabled {
 			if !openstack.OVNControllerImageMatch(ctx, controlPlane, instance) ||
@@ -278,6 +306,13 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateOVNControlplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
+		if targetStage == corev1beta1.MinorUpdateStageOVNControlplane {
+			if result, gated := gateNextStage(corev1beta1.MinorUpdateStageOVNControlplane,
+				corev1beta1.OpenStackVersionMinorUpdateOVNDataplane); gated {
+				return result, nil
+			}
+		}
 
 		// minor update for Dataplane OVN
 		// Only check OVN when enabled to avoid hanging on a removed condition
@@ -307,8 +342,10 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			// - If no running OVN deployment AND the previous condition was
 			//   False/RequestedReason: the deployment we saw previously has
 			//   completed → proceed (fall through to set True)
+			// - If the previous reason was Gated (target-stage pause), treat
+			//   like Init — not evidence that a deployment completed
 			// - If no running OVN deployment AND the previous condition was
-			//   NOT False/RequestedReason (e.g. still Unknown from Init):
+			//   NOT False/RequestedReason (e.g. still Unknown from Init or Gated):
 			//   we haven't seen a deployment yet → keep waiting
 			//
 			// When the image differs between versions, the image match alone
@@ -365,6 +402,13 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateOVNDataplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
+		if targetStage == corev1beta1.MinorUpdateStageOVNDataplane {
+			if result, gated := gateNextStage(corev1beta1.MinorUpdateStageOVNDataplane,
+				corev1beta1.OpenStackVersionMinorUpdateRabbitMQ); gated {
+				return result, nil
+			}
+		}
+
 		// minor update for RabbitMQ
 		if !openstack.RabbitmqImageMatch(ctx, controlPlane, instance) ||
 			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneRabbitMQReadyCondition) {
@@ -379,6 +423,13 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateRabbitMQ,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
+		if targetStage == corev1beta1.MinorUpdateStageRabbitMQ {
+			if result, gated := gateNextStage(corev1beta1.MinorUpdateStageRabbitMQ,
+				corev1beta1.OpenStackVersionMinorUpdateMariaDB); gated {
+				return result, nil
+			}
+		}
 
 		// minor update for MariaDB
 		if !openstack.GaleraImageMatch(ctx, controlPlane, instance) ||
@@ -395,6 +446,13 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateMariaDB,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
+		if targetStage == corev1beta1.MinorUpdateStageMariaDB {
+			if result, gated := gateNextStage(corev1beta1.MinorUpdateStageMariaDB,
+				corev1beta1.OpenStackVersionMinorUpdateMemcached); gated {
+				return result, nil
+			}
+		}
+
 		// minor update for Memcached
 		if !openstack.MemcachedImageMatch(ctx, controlPlane, instance) ||
 			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneMemcachedReadyCondition) {
@@ -410,6 +468,13 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateMemcached,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 
+		if targetStage == corev1beta1.MinorUpdateStageMemcached {
+			if result, gated := gateNextStage(corev1beta1.MinorUpdateStageMemcached,
+				corev1beta1.OpenStackVersionMinorUpdateKeystone); gated {
+				return result, nil
+			}
+		}
+
 		// minor update for Keystone API
 		if !openstack.KeystoneImageMatch(ctx, controlPlane, instance) ||
 			!controlPlane.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneKeystoneAPIReadyCondition) {
@@ -424,6 +489,13 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackVersionMinorUpdateKeystone,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
+
+		if targetStage == corev1beta1.MinorUpdateStageKeystone {
+			if result, gated := gateNextStage(corev1beta1.MinorUpdateStageKeystone,
+				corev1beta1.OpenStackVersionMinorUpdateControlplane); gated {
+				return result, nil
+			}
+		}
 
 		// minor update for Controlplane in progress
 		if !controlPlane.IsReady() {
@@ -455,6 +527,13 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			corev1beta1.OpenStackVersionMinorUpdateControlplane,
 			corev1beta1.OpenStackVersionMinorUpdateReadyMessage)
 		Log.Info("Minor update for ControlPlane completed")
+
+		if targetStage == corev1beta1.MinorUpdateStageControlplane {
+			if result, gated := gateNextStage(corev1beta1.MinorUpdateStageControlplane,
+				corev1beta1.OpenStackVersionMinorUpdateDataplane); gated {
+				return result, nil
+			}
+		}
 
 		if !openstack.DataplaneNodesetsDeployed(instance, dataplaneNodesets) {
 			instance.Status.Conditions.Set(condition.FalseCondition(

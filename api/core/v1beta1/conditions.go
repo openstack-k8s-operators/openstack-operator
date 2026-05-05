@@ -605,4 +605,12 @@ const (
 
 	// OpenStackVersionMinorUpdateAvailableMessage
 	OpenStackVersionMinorUpdateAvailableMessage = "update available"
+
+	// OpenStackVersionMinorUpdateReadyGatedMessage - format string; arg is the target stage name
+	OpenStackVersionMinorUpdateReadyGatedMessage = "Minor update progression stopped after stage: %s. Set annotation to any stage after %s to resume OpenStack update or remove the annotation to run to completion."
 )
+
+// OpenStackVersionMinorUpdateGatedReason is set on the next stage condition when the
+// target-stage annotation pauses minor update progression. It must not be reused for
+// in-progress work (see condition.RequestedReason).
+const OpenStackVersionMinorUpdateGatedReason condition.Reason = "Gated"

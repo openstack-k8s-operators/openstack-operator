@@ -2,6 +2,7 @@ package v1beta1
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -179,6 +180,299 @@ var _ = Describe("OpenStackVersion Webhook", func() {
 			_, err := newVersion.ValidateUpdate(context.Background(), invalidOld, nil)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("failed to convert old object to OpenStackVersion"))
+		})
+	})
+
+	Context("MinorUpdateTargetStageAnnotation validation", func() {
+
+		BeforeEach(func() {
+			SetupOpenStackVersionDefaults(OpenStackVersionDefaults{
+				AvailableVersion: "1.1.0",
+			})
+		})
+
+		It("should reject update when annotation value is invalid", func() {
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.1.0": {},
+					},
+				},
+			}
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations = map[string]string{
+				MinorUpdateTargetStageAnnotation: "tyop",
+			}
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(`Invalid target stage "tyop"`))
+			Expect(err.Error()).To(ContainSubstring("Must be one of: " + MinorUpdateStageOVNControlplane))
+		})
+
+		It("should reject update when annotation is present but empty", func() {
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.1.0": {},
+					},
+				},
+			}
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations = map[string]string{
+				MinorUpdateTargetStageAnnotation: "",
+			}
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Annotation value must not be empty"))
+		})
+
+		It("should allow update when annotation is a valid stage", func() {
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.1.0": {},
+					},
+				},
+			}
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations = map[string]string{
+				MinorUpdateTargetStageAnnotation: MinorUpdateStageRabbitMQ,
+			}
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("should reject moving target stage backward during minor update", func() {
+			deployed := "1.0.0"
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+					Annotations: map[string]string{
+						MinorUpdateTargetStageAnnotation: MinorUpdateStageRabbitMQ,
+					},
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					DeployedVersion: &deployed,
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.0.0": {},
+						"1.1.0": {},
+					},
+				},
+			}
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations[MinorUpdateTargetStageAnnotation] = MinorUpdateStageOVNDataplane
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Cannot move update target stage"))
+			Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(`from %q to earlier stage %q while minor update is in progress`, MinorUpdateStageRabbitMQ, MinorUpdateStageOVNDataplane)))
+		})
+
+		It("should allow advancing target stage during minor update", func() {
+			deployed := "1.0.0"
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+					Annotations: map[string]string{
+						MinorUpdateTargetStageAnnotation: MinorUpdateStageOVNControlplane,
+					},
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					DeployedVersion: &deployed,
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.0.0": {},
+						"1.1.0": {},
+					},
+				},
+			}
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations[MinorUpdateTargetStageAnnotation] = MinorUpdateStageOVNDataplane
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("should allow removing target stage annotation during minor update", func() {
+			deployed := "1.0.0"
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+					Annotations: map[string]string{
+						MinorUpdateTargetStageAnnotation: MinorUpdateStageKeystone,
+					},
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					DeployedVersion: &deployed,
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.0.0": {},
+						"1.1.0": {},
+					},
+				},
+			}
+			newVersion := oldVersion.DeepCopy()
+			delete(newVersion.Annotations, MinorUpdateTargetStageAnnotation)
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("should allow moving target stage backward when minor update is not in progress for preparation to update", func() {
+			deployed := "1.1.0"
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+					Annotations: map[string]string{
+						MinorUpdateTargetStageAnnotation: MinorUpdateStageRabbitMQ,
+					},
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					DeployedVersion: &deployed,
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.1.0": {},
+					},
+				},
+			}
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations[MinorUpdateTargetStageAnnotation] = MinorUpdateStageOVNControlplane
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("should reject adding target stage behind completed progress during minor update", func() {
+			deployed := "1.0.0"
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					DeployedVersion: &deployed,
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.0.0": {},
+						"1.1.0": {},
+					},
+				},
+			}
+			oldVersion.Status.Conditions.MarkTrue(
+				OpenStackVersionMinorUpdateOVNControlplane,
+				OpenStackVersionMinorUpdateReadyMessage,
+			)
+			oldVersion.Status.Conditions.MarkTrue(
+				OpenStackVersionMinorUpdateOVNDataplane,
+				OpenStackVersionMinorUpdateReadyMessage,
+			)
+
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations = map[string]string{
+				MinorUpdateTargetStageAnnotation: MinorUpdateStageOVNControlplane,
+			}
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Cannot set update target stage"))
+			Expect(err.Error()).To(ContainSubstring(MinorUpdateStageOVNControlplane))
+			Expect(err.Error()).To(ContainSubstring(MinorUpdateStageOVNDataplane))
+		})
+
+		It("should allow adding target stage at current progress during minor update", func() {
+			deployed := "1.0.0"
+			oldVersion := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+				Status: OpenStackVersionStatus{
+					DeployedVersion: &deployed,
+					ContainerImageVersionDefaults: map[string]*ContainerDefaults{
+						"1.0.0": {},
+						"1.1.0": {},
+					},
+				},
+			}
+			oldVersion.Status.Conditions.MarkTrue(
+				OpenStackVersionMinorUpdateOVNControlplane,
+				OpenStackVersionMinorUpdateReadyMessage,
+			)
+
+			newVersion := oldVersion.DeepCopy()
+			newVersion.Annotations = map[string]string{
+				MinorUpdateTargetStageAnnotation: MinorUpdateStageOVNControlplane,
+			}
+
+			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
+
+	Context("ValidateCreate MinorUpdateTargetStageAnnotation validation", func() {
+
+		BeforeEach(func() {
+			SetupOpenStackVersionDefaults(OpenStackVersionDefaults{
+				AvailableVersion: "1.1.0",
+			})
+		})
+
+		It("should reject create when annotation value is invalid", func() {
+			version := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+					Annotations: map[string]string{
+						MinorUpdateTargetStageAnnotation: "tyop",
+					},
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+			}
+
+			_, err := version.ValidateCreate(context.Background(), nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(`Invalid target stage "tyop"`))
+		})
+
+		It("should reject create when annotation is present but empty", func() {
+			version := &OpenStackVersion{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-version",
+					Namespace: "test-namespace",
+					Annotations: map[string]string{
+						MinorUpdateTargetStageAnnotation: "",
+					},
+				},
+				Spec: OpenStackVersionSpec{TargetVersion: "1.1.0"},
+			}
+
+			_, err := version.ValidateCreate(context.Background(), nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("Annotation value must not be empty"))
 		})
 	})
 })
