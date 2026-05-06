@@ -37,6 +37,18 @@ type OpenStackClientSpec struct {
 	ContainerImage string `json:"containerImage"`
 }
 
+// MCPConfig defines optional MCP server sidecar configuration
+type MCPConfig struct {
+	// Enabled controls whether the MCP server sidecar is added to the pod.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	Enabled bool `json:"enabled"`
+
+	// ContainerImage for the rhos-mcps MCP server container.
+	// +kubebuilder:validation:Required
+	ContainerImage string `json:"containerImage"`
+}
+
 // OpenStackClientSpecCore defines the desired state of OpenStackClient
 type OpenStackClientSpecCore struct {
 	// +kubebuilder:validation:Required
@@ -67,6 +79,12 @@ type OpenStackClientSpecCore struct {
 	// +optional
 	// List of environment variables to set in the container.
 	Env []corev1.EnvVar `json:"env,omitempty" patchMergeKey:"name" patchStrategy:"merge"`
+
+	// MCP is the optional MCP server sidecar configuration.
+	// When enabled, the rhos-mcps server runs alongside the openstackclient
+	// container and is exposed via a k8s Service.
+	// +kubebuilder:validation:Optional
+	MCP *MCPConfig `json:"mcp,omitempty"`
 }
 
 // OpenStackClientStatus defines the observed state of OpenStackClient

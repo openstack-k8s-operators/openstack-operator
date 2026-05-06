@@ -308,6 +308,35 @@ func TestAssistantPodSpec_RecipesOnlyNoHints(t *testing.T) {
 	g.Expect(volumeNames).NotTo(ContainElement("hints"))
 }
 
+func TestAssistantPodSpec_MCPServers(t *testing.T) {
+	g := NewWithT(t)
+	instance := newTestInstance()
+	instance.Spec.Goose = &assistantv1.GooseConfig{
+		MCPServers: []assistantv1.MCPServerRef{
+			{Name: "openstack", URL: "http://openstackclient-mcp.openstack.svc:8080/openstack/"},
+		},
+	}
+
+	spec := AssistantPodSpec(instance, "hash")
+	envVars := spec.Containers[0].Env
+
+	envMap := make(map[string]string)
+	for _, e := range envVars {
+		envMap[e.Name] = e.Value
+	}
+
+	g.Expect(envMap).To(HaveKeyWithValue("MCP_SERVER_openstack", "http://openstackclient-mcp.openstack.svc:8080/openstack/"))
+}
+
+func TestEntrypointScript_MCPServerDiscovery(t *testing.T) {
+	g := NewWithT(t)
+
+	script := EntrypointScript()
+
+	g.Expect(script).To(ContainSubstring("MCP_SERVER_"))
+	g.Expect(script).To(ContainSubstring("streamable_http"))
+}
+
 func TestEntrypointScript_DisabledExtensions(t *testing.T) {
 	g := NewWithT(t)
 

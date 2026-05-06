@@ -52,6 +52,18 @@ type LightspeedStackSpec struct {
 	CaBundleSecretName string `json:"caBundleSecretName,omitempty"`
 }
 
+// MCPServerRef references an MCP server endpoint to configure as a Goose extension
+type MCPServerRef struct {
+	// Name is the extension name in Goose config
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// URL is the MCP server's Streamable HTTP endpoint
+	// (e.g. http://openstackclient-mcp.openstack.svc:8080/openstack/)
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+}
+
 // GooseConfig defines Goose-specific provider configuration
 type GooseConfig struct {
 	// Model is the model identifier for the Goose AI agent
@@ -70,6 +82,10 @@ type GooseConfig struct {
 	// will be written to ~/.goosehints in the pod.
 	// +kubebuilder:validation:Optional
 	Hints *string `json:"hints,omitempty"`
+
+	// MCPServers lists MCP server endpoints to configure as Goose extensions.
+	// +kubebuilder:validation:Optional
+	MCPServers []MCPServerRef `json:"mcpServers,omitempty"`
 }
 
 // OpenStackAssistantSpec defines the desired state of OpenStackAssistant

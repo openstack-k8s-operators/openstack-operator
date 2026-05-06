@@ -12982,6 +12982,16 @@ spec:
                         x-kubernetes-list-map-keys:
                         - name
                         x-kubernetes-list-type: map
+                      mcp:
+                        properties:
+                          containerImage:
+                            type: string
+                          enabled:
+                            default: false
+                            type: boolean
+                        required:
+                        - containerImage
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string

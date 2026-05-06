@@ -75,6 +75,23 @@ if [ -d /tmp/recipes ]; then
   done
 fi
 
+# Discover and register MCP servers from environment variables
+# MCP_SERVER_<name>=<url> entries are set by the controller
+env | grep '^MCP_SERVER_' | while IFS='=' read -r varname url; do
+  name="${varname#MCP_SERVER_}"
+  # Convert to lowercase for the extension key
+  name=$(echo "$name" | tr '[:upper:]' '[:lower:]')
+  cat >> $HOME/.config/goose/config.yaml <<MCPEOF
+  ${name}:
+    type: streamable_http
+    name: ${name}
+    uri: ${url}
+    description: "${name} MCP server"
+    enabled: true
+    timeout: 300
+MCPEOF
+done
+
 # Copy hints if present
 if [ -f /tmp/hints/hints ]; then
   cp /tmp/hints/hints ~/.goosehints
@@ -102,6 +119,12 @@ func AssistantPodSpec(
 
 	if instance.Spec.Goose != nil && instance.Spec.Goose.Model != "" {
 		envVars["GOOSE_MODEL"] = env.SetValue(instance.Spec.Goose.Model)
+	}
+
+	if instance.Spec.Goose != nil {
+		for _, mcp := range instance.Spec.Goose.MCPServers {
+			envVars["MCP_SERVER_"+mcp.Name] = env.SetValue(mcp.URL)
+		}
 	}
 
 	if instance.Spec.Env != nil {

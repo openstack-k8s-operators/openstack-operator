@@ -73,7 +73,7 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 // +kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients/finalizers,verbs=update
 // +kubebuilder:rbac:groups=keystone.openstack.org,resources=keystoneapis,verbs=get;list;watch
 // +kubebuilder:rbac:groups=telemetry.openstack.org,resources=metricstorages,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;
 // service account, role, rolebinding
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
@@ -82,6 +82,7 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 // service account permissions that are needed to grant permission to the above
 // +kubebuilder:rbac:groups="security.openshift.io",resourceNames=anyuid,resources=securitycontextconstraints,verbs=use
 // +kubebuilder:rbac:groups="",resources=pods,verbs=create;delete;get;list;patch;update;watch;patch
+// +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch
 
 // Reconcile -
 func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
@@ -306,9 +307,67 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// all cert input checks out so report InputReady
 	instance.Status.Conditions.MarkTrue(condition.TLSInputReadyCondition, condition.InputReadyMessage)
 
+	// Reconcile MCP sidecar resources when enabled
+	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
+		mcpConfigCM := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name + "-mcp-config",
+				Namespace: instance.Namespace,
+			},
+		}
+		_, err = controllerutil.CreateOrPatch(ctx, r.Client, mcpConfigCM, func() error {
+			mcpConfigCM.Data = map[string]string{
+				"config.yaml": openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName),
+			}
+			return controllerutil.SetControllerReference(instance, mcpConfigCM, r.Scheme)
+		})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("error creating MCP config ConfigMap: %w", err)
+		}
+		configVars[instance.Name+"-mcp-config"] = env.SetValue(openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName))
+
+	}
+
 	configVarsHash, err := util.HashOfInputHashes(configVars)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	// Reconcile MCP Service after configVarsHash so the hash annotation captures all config changes
+	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
+		mcpService := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name + "-mcp",
+				Namespace: instance.Namespace,
+			},
+		}
+		mcpServiceHash, err := util.ObjectHash(map[string]interface{}{
+			"containerImage":    instance.Spec.ContainerImage,
+			"mcpContainerImage": instance.Spec.MCP.ContainerImage,
+			"mcpConfig":         openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName),
+			"configVarsHash":    configVarsHash,
+		})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("error calculating MCP Service hash: %w", err)
+		}
+		_, err = controllerutil.CreateOrPatch(ctx, r.Client, mcpService, func() error {
+			if mcpService.Annotations == nil {
+				mcpService.Annotations = map[string]string{}
+			}
+			mcpService.Annotations["client.openstack.org/config-hash"] = mcpServiceHash
+			mcpService.Spec.Selector = clientLabels
+			mcpService.Spec.Ports = []corev1.ServicePort{
+				{
+					Name:     "mcp",
+					Port:     8080,
+					Protocol: corev1.ProtocolTCP,
+				},
+			}
+			return controllerutil.SetControllerReference(instance, mcpService, r.Scheme)
+		})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("error creating MCP Service: %w", err)
+		}
 	}
 
 	osclient := &corev1.Pod{
@@ -510,6 +569,8 @@ func (r *OpenStackClientReconciler) SetupWithManager(
 		For(&clientv1.OpenStackClient{}).
 		Owns(&corev1.Pod{}).
 		Owns(&corev1.ServiceAccount{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Service{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
 		Watches(

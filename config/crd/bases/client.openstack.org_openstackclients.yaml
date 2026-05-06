@@ -180,6 +180,23 @@ spec:
                 x-kubernetes-list-map-keys:
                 - name
                 x-kubernetes-list-type: map
+              mcp:
+                description: |-
+                  MCP is the optional MCP server sidecar configuration.
+                  When enabled, the rhos-mcps server runs alongside the openstackclient
+                  container and is exposed via a k8s Service.
+                properties:
+                  containerImage:
+                    description: ContainerImage for the rhos-mcps MCP server container.
+                    type: string
+                  enabled:
+                    default: false
+                    description: Enabled controls whether the MCP server sidecar is
+                      added to the pod.
+                    type: boolean
+                required:
+                - containerImage
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string

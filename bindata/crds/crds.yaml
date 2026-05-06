@@ -187,6 +187,26 @@ spec:
                       The ConfigMap must have a key "hints" with the content that
                       will be written to ~/.goosehints in the pod.
                     type: string
+                  mcpServers:
+                    description: MCPServers lists MCP server endpoints to configure
+                      as Goose extensions.
+                    items:
+                      description: MCPServerRef references an MCP server endpoint
+                        to configure as a Goose extension
+                      properties:
+                        name:
+                          description: Name is the extension name in Goose config
+                          type: string
+                        url:
+                          description: |-
+                            URL is the MCP server's Streamable HTTP endpoint
+                            (e.g. http://openstackclient-mcp.openstack.svc:8080/openstack/)
+                          type: string
+                      required:
+                      - name
+                      - url
+                      type: object
+                    type: array
                   model:
                     description: |-
                       Model is the model identifier for the Goose AI agent
@@ -748,6 +768,23 @@ spec:
                 x-kubernetes-list-map-keys:
                 - name
                 x-kubernetes-list-type: map
+              mcp:
+                description: |-
+                  MCP is the optional MCP server sidecar configuration.
+                  When enabled, the rhos-mcps server runs alongside the openstackclient
+                  container and is exposed via a k8s Service.
+                properties:
+                  containerImage:
+                    description: ContainerImage for the rhos-mcps MCP server container.
+                    type: string
+                  enabled:
+                    default: false
+                    description: Enabled controls whether the MCP server sidecar is
+                      added to the pod.
+                    type: boolean
+                required:
+                - containerImage
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -13816,6 +13853,16 @@ spec:
                         x-kubernetes-list-map-keys:
                         - name
                         x-kubernetes-list-type: map
+                      mcp:
+                        properties:
+                          containerImage:
+                            type: string
+                          enabled:
+                            default: false
+                            type: boolean
+                        required:
+                        - containerImage
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
