@@ -41,7 +41,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/env"
@@ -83,6 +85,8 @@ func (r *OpenStackClientReconciler) GetLogger(ctx context.Context) logr.Logger {
 // +kubebuilder:rbac:groups="security.openshift.io",resourceNames=anyuid,resources=securitycontextconstraints,verbs=use
 // +kubebuilder:rbac:groups="",resources=pods,verbs=create;delete;get;list;patch;update;watch;patch
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch
+// +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile -
 func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
@@ -308,7 +312,53 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	instance.Status.Conditions.MarkTrue(condition.TLSInputReadyCondition, condition.InputReadyMessage)
 
 	// Reconcile MCP sidecar resources when enabled
+	mcpTLSSecretName := ""
 	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
+		mcpTLSEnabled := instance.Spec.CaBundleSecretName != ""
+
+		if mcpTLSEnabled {
+			issuer, err := certmanager.GetIssuerByLabels(
+				ctx, helper,
+				instance.Namespace,
+				map[string]string{certmanager.RootCAIssuerInternalLabel: ""},
+			)
+			if err != nil {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					clientv1.OpenStackClientReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					clientv1.OpenStackClientReadyErrorMessage,
+					err.Error()))
+				return ctrl.Result{}, err
+			}
+
+			clusterDomain := clusterdns.GetDNSClusterDomain()
+			mcpSvcName := instance.Name + "-mcp"
+			certRequest := certmanager.CertificateRequest{
+				IssuerName: issuer.Name,
+				CertName:   mcpSvcName + "-tls",
+				Hostnames: []string{
+					fmt.Sprintf("%s.%s.svc", mcpSvcName, instance.Namespace),
+					fmt.Sprintf("%s.%s.svc.%s", mcpSvcName, instance.Namespace, clusterDomain),
+				},
+				Labels: map[string]string{},
+			}
+			certSecret, ctrlResult, err := certmanager.EnsureCert(ctx, helper, certRequest, instance)
+			if err != nil {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					clientv1.OpenStackClientReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					clientv1.OpenStackClientReadyErrorMessage,
+					err.Error()))
+				return ctrlResult, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
+			mcpTLSSecretName = certSecret.Name
+			configVars[mcpTLSSecretName] = env.SetValue(certSecret.ResourceVersion)
+		}
+
 		mcpConfigCM := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      instance.Name + "-mcp-config",
@@ -317,14 +367,14 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 		_, err = controllerutil.CreateOrPatch(ctx, r.Client, mcpConfigCM, func() error {
 			mcpConfigCM.Data = map[string]string{
-				"config.yaml": openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName),
+				"config.yaml": openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled),
 			}
 			return controllerutil.SetControllerReference(instance, mcpConfigCM, r.Scheme)
 		})
 		if err != nil {
 			return ctrl.Result{}, fmt.Errorf("error creating MCP config ConfigMap: %w", err)
 		}
-		configVars[instance.Name+"-mcp-config"] = env.SetValue(openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName))
+		configVars[instance.Name+"-mcp-config"] = env.SetValue(openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled))
 
 	}
 
@@ -335,6 +385,12 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	// Reconcile MCP Service after configVarsHash so the hash annotation captures all config changes
 	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
+		mcpTLSEnabled := instance.Spec.CaBundleSecretName != ""
+		mcpPort := int32(8080)
+		if mcpTLSEnabled {
+			mcpPort = 8443
+		}
+
 		mcpService := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      instance.Name + "-mcp",
@@ -344,7 +400,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		mcpServiceHash, err := util.ObjectHash(map[string]interface{}{
 			"containerImage":    instance.Spec.ContainerImage,
 			"mcpContainerImage": instance.Spec.MCP.ContainerImage,
-			"mcpConfig":         openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName),
+			"mcpConfig":         openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled),
 			"configVarsHash":    configVarsHash,
 		})
 		if err != nil {
@@ -359,7 +415,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			mcpService.Spec.Ports = []corev1.ServicePort{
 				{
 					Name:     "mcp",
-					Port:     8080,
+					Port:     mcpPort,
 					Protocol: corev1.ProtocolTCP,
 				},
 			}
@@ -368,6 +424,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		if err != nil {
 			return ctrl.Result{}, fmt.Errorf("error creating MCP Service: %w", err)
 		}
+
 	}
 
 	osclient := &corev1.Pod{
@@ -377,7 +434,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		},
 	}
 
-	spec := openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash)
+	spec := openstackclient.ClientPodSpec(ctx, instance, helper, configVarsHash, mcpTLSSecretName)
 
 	podSpecHash, err := util.ObjectHash(spec)
 	if err != nil {

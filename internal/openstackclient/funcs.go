@@ -34,6 +34,7 @@ func ClientPodSpec(
 	instance *clientv1.OpenStackClient,
 	helper *helper.Helper,
 	configHash string,
+	mcpTLSSecretName string,
 ) corev1.PodSpec {
 	envVars := map[string]env.Setter{}
 	envVars["OS_CLOUD"] = env.SetValue("default")
@@ -135,6 +136,24 @@ func ClientPodSpec(
 			mcpVolumeMounts = append(mcpVolumeMounts, instance.Spec.CreateVolumeMounts(nil)...)
 		}
 
+		mcpPort := int32(8080)
+		if mcpTLSSecretName != "" {
+			mcpPort = 8443
+			mcpVolumeMounts = append(mcpVolumeMounts, corev1.VolumeMount{
+				Name:      "mcp-tls",
+				MountPath: "/etc/pki/tls/mcp",
+				ReadOnly:  true,
+			})
+			podSpec.Volumes = append(podSpec.Volumes, corev1.Volume{
+				Name: "mcp-tls",
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: mcpTLSSecretName,
+					},
+				},
+			})
+		}
+
 		podSpec.Volumes = append(podSpec.Volumes, corev1.Volume{
 			Name: "mcp-config",
 			VolumeSource: corev1.VolumeSource{
@@ -146,17 +165,26 @@ func ClientPodSpec(
 			},
 		})
 
+		mcpEnvVars := []corev1.EnvVar{
+			{Name: "HOME", Value: "/home/cloud-admin"},
+			{Name: "RHOS_MCPS_CONFIG", Value: "/tmp/mcp-config/config.yaml"},
+			{Name: "OS_CLOUD", Value: "default"},
+			{Name: "OS_CLIENT_CONFIG_FILE", Value: "/home/cloud-admin/.config/openstack/clouds.yaml"},
+		}
+		if instance.Spec.CaBundleSecretName != "" {
+			mcpEnvVars = append(mcpEnvVars,
+				corev1.EnvVar{Name: "OS_CACERT", Value: tls.DownstreamTLSCABundlePath},
+				corev1.EnvVar{Name: "REQUESTS_CA_BUNDLE", Value: tls.DownstreamTLSCABundlePath},
+			)
+		}
+
 		podSpec.Containers = append(podSpec.Containers, corev1.Container{
 			Name:    "mcp-server",
 			Image:   instance.Spec.MCP.ContainerImage,
 			Command: []string{"rhos-ls-mcps"},
-			Env: []corev1.EnvVar{
-				{Name: "RHOS_MCPS_CONFIG", Value: "/tmp/mcp-config/config.yaml"},
-				{Name: "OS_CLOUD", Value: "default"},
-				{Name: "OS_CLIENT_CONFIG_FILE", Value: "/home/cloud-admin/.config/openstack/clouds.yaml"},
-			},
+			Env:     mcpEnvVars,
 			Ports: []corev1.ContainerPort{
-				{Name: "mcp", ContainerPort: 8080, Protocol: corev1.ProtocolTCP},
+				{Name: "mcp", ContainerPort: mcpPort, Protocol: corev1.ProtocolTCP},
 			},
 			SecurityContext: &corev1.SecurityContext{
 				RunAsUser:                ptr.To[int64](42401),
@@ -179,24 +207,35 @@ func ClientPodSpec(
 }
 
 // MCPConfigYAML returns the rhos-mcps config.yaml content for the MCP sidecar
-func MCPConfigYAML(caBundleSecretName string) string {
+func MCPConfigYAML(caBundleSecretName string, tlsEnabled bool) string {
 	caCert := ""
 	if caBundleSecretName != "" {
 		caCert = fmt.Sprintf("\n  ca_cert: %s", tls.DownstreamTLSCABundlePath)
 	}
-	return fmt.Sprintf(`port: 8080
+	port := "8080"
+	tlsConfig := ""
+	allowedOriginScheme := "http"
+	if tlsEnabled {
+		port = "8443"
+		tlsConfig = `
+tls:
+  cert_file: /etc/pki/tls/mcp/tls.crt
+  key_file: /etc/pki/tls/mcp/tls.key`
+		allowedOriginScheme = "https"
+	}
+	return fmt.Sprintf(`port: %s
 openstack:
   enabled: true
   allow_write: false%s
 openshift:
-  enabled: false
+  enabled: false%s
 mcp_transport_security:
   enable_dns_rebinding_protection: false
   allowed_hosts:
     - "*:*"
   allowed_origins:
-    - "http://*:*"
-`, caCert)
+    - "%s://*:*"
+`, port, caCert, tlsConfig, allowedOriginScheme)
 }
 
 func clientPodVolumeMounts() []corev1.VolumeMount {
