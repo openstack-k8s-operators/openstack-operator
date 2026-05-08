@@ -69,6 +69,7 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - configmaps
     - pods
     - secrets
     - services
@@ -94,6 +95,7 @@ rules:
 - apiGroups:
     - apps
   resources:
+    - deployments
     - statefulsets
   verbs:
     - create
@@ -227,6 +229,33 @@ rules:
     - novametadata/status
     - novanovncproxies/status
     - novaschedulers/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
+    - placement.openstack.org
+  resources:
+    - placementapis
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - placement.openstack.org
+  resources:
+    - placementapis/finalizers
+  verbs:
+    - patch
+    - update
+- apiGroups:
+    - placement.openstack.org
+  resources:
+    - placementapis/status
   verbs:
     - get
     - patch

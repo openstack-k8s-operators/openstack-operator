@@ -29,7 +29,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
-	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
 	"golang.org/x/exp/maps"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

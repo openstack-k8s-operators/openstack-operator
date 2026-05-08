@@ -47,6 +47,7 @@ import (
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	backupv1 "github.com/openstack-k8s-operators/openstack-operator/api/backup/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
@@ -54,7 +55,6 @@ import (
 	dataplanev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/internal/openstack"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
-	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
@@ -166,7 +166,7 @@ var _ = BeforeSuite(func() {
 		"github.com/openstack-k8s-operators/ovn-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	placementv1CRDs, err := test.GetCRDDirFromModule(
-		"github.com/openstack-k8s-operators/placement-operator/api", gomod, "bases")
+		"github.com/openstack-k8s-operators/nova-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
 	swiftv1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/swift-operator/api", gomod, "bases")

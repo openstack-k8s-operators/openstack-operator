@@ -43,7 +43,6 @@ const (
 	OctaviaOperatorName            = "octavia"
 	OpenStackBaremetalOperatorName = "openstack-baremetal"
 	OvnOperatorName                = "ovn"
-	PlacementOperatorName          = "placement"
 	SwiftOperatorName              = "swift"
 	TelemetryOperatorName          = "telemetry"
 	TestOperatorName               = "test"
@@ -158,9 +157,6 @@ var (
 			Name: OvnOperatorName,
 		},
 		{
-			Name: PlacementOperatorName,
-		},
-		{
 			Name: SwiftOperatorName,
 		},
 		{
@@ -188,7 +184,7 @@ type OpenStackSpec struct {
 type OperatorSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:validation:Enum:=openstack;barbican;cinder;designate;glance;heat;horizon;infra;ironic;keystone;manila;mariadb;neutron;nova;octavia;openstack-baremetal;ovn;placement;swift;telemetry;test;watcher
+	// +kubebuilder:validation:Enum:=openstack;barbican;cinder;designate;glance;heat;horizon;infra;ironic;keystone;manila;mariadb;neutron;nova;octavia;openstack-baremetal;ovn;swift;telemetry;test;watcher
 	// Name of the service operators.
 	Name string `json:"name"`
 
