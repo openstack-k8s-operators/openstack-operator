@@ -117,6 +117,10 @@ func AssistantPodSpec(
 	envVars["GOOSE_TELEMETRY_ENABLED"] = env.SetValue("false")
 	envVars["GOOSE_DISABLE_KEYRING"] = env.SetValue("1")
 
+	if instance.Spec.LightspeedStack.CaBundleSecretName != "" {
+		envVars["SSL_CERT_FILE"] = env.SetValue("/etc/ssl/certs/ca-certificates.crt")
+	}
+
 	if instance.Spec.Goose != nil && instance.Spec.Goose.Model != "" {
 		envVars["GOOSE_MODEL"] = env.SetValue(instance.Spec.Goose.Model)
 	}

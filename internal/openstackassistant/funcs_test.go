@@ -216,6 +216,12 @@ func TestAssistantPodSpec_WithCaBundle(t *testing.T) {
 	g.Expect(caBundleMount.MountPath).To(Equal("/etc/ssl/certs/ca-certificates.crt"))
 	g.Expect(caBundleMount.SubPath).To(Equal("ca-bundle.crt"))
 	g.Expect(caBundleMount.ReadOnly).To(BeTrue())
+
+	envMap := map[string]string{}
+	for _, e := range spec.Containers[0].Env {
+		envMap[e.Name] = e.Value
+	}
+	g.Expect(envMap).To(HaveKeyWithValue("SSL_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"))
 }
 
 func TestAssistantPodSpec_WithNodeSelector(t *testing.T) {
