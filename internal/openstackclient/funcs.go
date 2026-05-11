@@ -136,9 +136,7 @@ func ClientPodSpec(
 			mcpVolumeMounts = append(mcpVolumeMounts, instance.Spec.CreateVolumeMounts(nil)...)
 		}
 
-		mcpPort := int32(8080)
 		if mcpTLSSecretName != "" {
-			mcpPort = 8443
 			mcpVolumeMounts = append(mcpVolumeMounts, corev1.VolumeMount{
 				Name:      "mcp-tls",
 				MountPath: "/etc/pki/tls/mcp",
@@ -184,7 +182,7 @@ func ClientPodSpec(
 			Command: []string{"rhos-ls-mcps"},
 			Env:     mcpEnvVars,
 			Ports: []corev1.ContainerPort{
-				{Name: "mcp", ContainerPort: mcpPort, Protocol: corev1.ProtocolTCP},
+				{Name: "mcp", ContainerPort: 8080, Protocol: corev1.ProtocolTCP},
 			},
 			SecurityContext: &corev1.SecurityContext{
 				RunAsUser:                ptr.To[int64](42401),
@@ -212,18 +210,16 @@ func MCPConfigYAML(caBundleSecretName string, tlsEnabled bool) string {
 	if caBundleSecretName != "" {
 		caCert = fmt.Sprintf("\n  ca_cert: %s", tls.DownstreamTLSCABundlePath)
 	}
-	port := "8080"
 	tlsConfig := ""
 	allowedOriginScheme := "http"
 	if tlsEnabled {
-		port = "8443"
 		tlsConfig = `
 tls:
   cert_file: /etc/pki/tls/mcp/tls.crt
   key_file: /etc/pki/tls/mcp/tls.key`
 		allowedOriginScheme = "https"
 	}
-	return fmt.Sprintf(`port: %s
+	return fmt.Sprintf(`port: 8080
 openstack:
   enabled: true
   allow_write: false%s
@@ -235,7 +231,7 @@ mcp_transport_security:
     - "*:*"
   allowed_origins:
     - "%s://*:*"
-`, port, caCert, tlsConfig, allowedOriginScheme)
+`, caCert, tlsConfig, allowedOriginScheme)
 }
 
 func clientPodVolumeMounts() []corev1.VolumeMount {

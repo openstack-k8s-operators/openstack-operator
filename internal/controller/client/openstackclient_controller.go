@@ -385,12 +385,6 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	// Reconcile MCP Service after configVarsHash so the hash annotation captures all config changes
 	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
-		mcpTLSEnabled := instance.Spec.CaBundleSecretName != ""
-		mcpPort := int32(8080)
-		if mcpTLSEnabled {
-			mcpPort = 8443
-		}
-
 		mcpService := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      instance.Name + "-mcp",
@@ -400,7 +394,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		mcpServiceHash, err := util.ObjectHash(map[string]interface{}{
 			"containerImage":    instance.Spec.ContainerImage,
 			"mcpContainerImage": instance.Spec.MCP.ContainerImage,
-			"mcpConfig":         openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled),
+			"mcpConfig":         openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, instance.Spec.CaBundleSecretName != ""),
 			"configVarsHash":    configVarsHash,
 		})
 		if err != nil {
@@ -415,7 +409,7 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			mcpService.Spec.Ports = []corev1.ServicePort{
 				{
 					Name:     "mcp",
-					Port:     mcpPort,
+					Port:     8080,
 					Protocol: corev1.ProtocolTCP,
 				},
 			}
