@@ -4,6 +4,8 @@ metadata:
   name: neutron-ovn
 spec:
   playbook: osp.edpm.neutron_ovn
+  dependsOn:
+    - ovn
   dataSources:
     - secretRef:
         name: neutron-ovn-agent-neutron-config
