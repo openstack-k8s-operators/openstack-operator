@@ -116,9 +116,10 @@ func ClientPodSpec(
 	if instance.Spec.MCP != nil && instance.Spec.MCP.Enabled {
 		mcpVolumeMounts := []corev1.VolumeMount{
 			{
-				Name:      "openstack-config",
+				Name:      "mcp-config",
 				MountPath: "/home/cloud-admin/.config/openstack/clouds.yaml",
 				SubPath:   "clouds.yaml",
+				ReadOnly:  true,
 			},
 			{
 				Name:      "openstack-config-secret",
@@ -127,7 +128,8 @@ func ClientPodSpec(
 			},
 			{
 				Name:      "mcp-config",
-				MountPath: "/tmp/mcp-config",
+				MountPath: "/tmp/mcp-config/config.yaml",
+				SubPath:   "config.yaml",
 				ReadOnly:  true,
 			},
 		}
@@ -232,6 +234,25 @@ mcp_transport_security:
   allowed_origins:
     - "%s://*:*"
 `, caCert, tlsConfig, allowedOriginScheme)
+}
+
+// MCPCloudsYAML returns a clouds.yaml using the given auth URL for the MCP sidecar.
+// When caBundleSecretName is set, a cacert path is included for TLS verification.
+func MCPCloudsYAML(authURL, projectName, userName, region, caBundleSecretName string) string {
+	caCert := ""
+	if caBundleSecretName != "" {
+		caCert = fmt.Sprintf("\n    cacert: %s", tls.DownstreamTLSCABundlePath)
+	}
+	return fmt.Sprintf(`clouds:
+  default:
+    auth:
+      auth_url: %s
+      project_name: %s
+      username: %s
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: %s%s
+`, authURL, projectName, userName, region, caCert)
 }
 
 func clientPodVolumeMounts() []corev1.VolumeMount {

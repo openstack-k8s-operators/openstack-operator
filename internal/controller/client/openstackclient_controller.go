@@ -43,6 +43,7 @@ import (
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/endpoint"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
@@ -359,6 +360,27 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			configVars[mcpTLSSecretName] = env.SetValue(certSecret.ResourceVersion)
 		}
 
+		// Use the internal Keystone endpoint for the MCP sidecar's clouds.yaml
+		// so it connects directly to the in-cluster service and avoids
+		// TLS issues with the public OCP route.
+		internalAuthURL, err := keystoneAPI.GetEndpoint(endpoint.EndpointInternal)
+		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				clientv1.OpenStackClientReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				"waiting for internal Keystone endpoint"))
+			return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+		}
+
+		mcpCloudsYAML := openstackclient.MCPCloudsYAML(
+			internalAuthURL,
+			keystoneAPI.Spec.AdminProject,
+			keystoneAPI.Spec.AdminUser,
+			keystoneAPI.Spec.Region,
+			instance.Spec.CaBundleSecretName,
+		)
+
 		mcpConfigCM := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      instance.Name + "-mcp-config",
@@ -368,13 +390,14 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		_, err = controllerutil.CreateOrPatch(ctx, r.Client, mcpConfigCM, func() error {
 			mcpConfigCM.Data = map[string]string{
 				"config.yaml": openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled),
+				"clouds.yaml": mcpCloudsYAML,
 			}
 			return controllerutil.SetControllerReference(instance, mcpConfigCM, r.Scheme)
 		})
 		if err != nil {
 			return ctrl.Result{}, fmt.Errorf("error creating MCP config ConfigMap: %w", err)
 		}
-		configVars[instance.Name+"-mcp-config"] = env.SetValue(openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled))
+		configVars[instance.Name+"-mcp-config"] = env.SetValue(openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, mcpTLSEnabled) + mcpCloudsYAML)
 
 	}
 
@@ -394,7 +417,6 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		mcpServiceHash, err := util.ObjectHash(map[string]interface{}{
 			"containerImage":    instance.Spec.ContainerImage,
 			"mcpContainerImage": instance.Spec.MCP.ContainerImage,
-			"mcpConfig":         openstackclient.MCPConfigYAML(instance.Spec.CaBundleSecretName, instance.Spec.CaBundleSecretName != ""),
 			"configVarsHash":    configVarsHash,
 		})
 		if err != nil {
