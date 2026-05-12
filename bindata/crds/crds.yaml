@@ -191,20 +191,27 @@ spec:
                     description: MCPServers lists MCP server endpoints to configure
                       as Goose extensions.
                     items:
-                      description: MCPServerRef references an MCP server endpoint
-                        to configure as a Goose extension
+                      description: |-
+                        MCPServerRef references an MCP server endpoint to configure as a Goose extension.
+                        Either URL or OpenStackClientRef must be specified, but not both.
                       properties:
                         name:
                           description: Name is the extension name in Goose config
                           type: string
+                        openstackClientRef:
+                          description: |-
+                            OpenStackClientRef is the name of an OpenStackClient CR in the same
+                            namespace that has MCP enabled. The controller auto-computes the
+                            correct service URL and TLS CA configuration.
+                            Mutually exclusive with URL.
+                          type: string
                         url:
                           description: |-
-                            URL is the MCP server's Streamable HTTP endpoint
-                            (e.g. http://openstackclient-mcp.openstack.svc:8080/openstack/)
+                            URL is the MCP server's Streamable HTTP endpoint.
+                            Mutually exclusive with OpenStackClientRef.
                           type: string
                       required:
                       - name
-                      - url
                       type: object
                     type: array
                   model:

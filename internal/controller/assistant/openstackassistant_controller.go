@@ -53,6 +53,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 
 	assistantv1 "github.com/openstack-k8s-operators/openstack-operator/api/assistant/v1beta1"
+	clientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/internal/openstackassistant"
 )
 
@@ -81,6 +82,7 @@ func (r *OpenStackAssistantReconciler) GetLogger(ctx context.Context) logr.Logge
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=client.openstack.org,resources=openstackclients,verbs=get;list;watch
 
 // Reconcile -
 func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
@@ -223,7 +225,7 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 					condition.ErrorReason,
 					condition.SeverityWarning,
 					assistantv1.OpenStackAssistantReadyErrorMessage,
-					fmt.Sprintf("CA bundle secret %s not found", instance.Spec.LightspeedStack.CaBundleSecretName)))
+					"CA bundle secret "+instance.Spec.LightspeedStack.CaBundleSecretName))
 				return ctrl.Result{}, nil
 			}
 			return ctrl.Result{}, err
@@ -288,8 +290,74 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
+	// Resolve MCP servers (auto-discover from OpenStackClientRef or use manual URL)
+	resolvedMCPServers := make(map[string]string)
+	mcpCaBundleSecretName := ""
+	if instance.Spec.Goose != nil {
+		for _, mcp := range instance.Spec.Goose.MCPServers {
+			if mcp.OpenStackClientRef != "" {
+				osclient := &clientv1.OpenStackClient{}
+				err := r.Get(ctx, types.NamespacedName{
+					Name:      mcp.OpenStackClientRef,
+					Namespace: instance.Namespace,
+				}, osclient)
+				if err != nil {
+					if k8s_errors.IsNotFound(err) {
+						instance.Status.Conditions.Set(condition.FalseCondition(
+							assistantv1.OpenStackAssistantReadyCondition,
+							condition.RequestedReason,
+							condition.SeverityInfo,
+							"Waiting for OpenStackClient %s", mcp.OpenStackClientRef))
+						return ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
+					}
+					return ctrl.Result{}, fmt.Errorf("error looking up OpenStackClient %s: %w", mcp.OpenStackClientRef, err)
+				}
+
+				if osclient.Spec.MCP == nil || !osclient.Spec.MCP.Enabled {
+					instance.Status.Conditions.Set(condition.FalseCondition(
+						assistantv1.OpenStackAssistantReadyCondition,
+						condition.ErrorReason,
+						condition.SeverityWarning,
+						assistantv1.OpenStackAssistantReadyErrorMessage,
+						"OpenStackClient "+mcp.OpenStackClientRef+" does not have MCP enabled"))
+					return ctrl.Result{}, nil
+				}
+
+				mcpSvcName := mcp.OpenStackClientRef + "-mcp"
+				scheme := "http"
+				if osclient.Spec.CaBundleSecretName != "" {
+					scheme = "https"
+					mcpCaBundleSecretName = osclient.Spec.CaBundleSecretName
+				}
+				mcpURL := fmt.Sprintf("%s://%s.%s.svc:8080/openstack/", scheme, mcpSvcName, instance.Namespace)
+				resolvedMCPServers[mcp.Name] = mcpURL
+				Log.Info("Auto-resolved MCP server", "name", mcp.Name, "url", mcpURL, "openstackClientRef", mcp.OpenStackClientRef)
+			} else if mcp.URL != "" {
+				resolvedMCPServers[mcp.Name] = mcp.URL
+			}
+		}
+	}
+
+	// Validate MCP CA bundle secret if auto-discovered
+	if mcpCaBundleSecretName != "" && mcpCaBundleSecretName != instance.Spec.LightspeedStack.CaBundleSecretName {
+		_, mcpCaHash, err := secret.GetSecret(ctx, helper, mcpCaBundleSecretName, instance.Namespace)
+		if err != nil {
+			if k8s_errors.IsNotFound(err) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					assistantv1.OpenStackAssistantReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					assistantv1.OpenStackAssistantReadyErrorMessage,
+					"MCP CA bundle secret "+mcpCaBundleSecretName+" not found"))
+				return ctrl.Result{}, nil
+			}
+			return ctrl.Result{}, err
+		}
+		configVars["mcp-ca-bundle"] = env.SetValue(mcpCaHash)
+	}
+
 	// Build PodSpec
-	spec := openstackassistant.AssistantPodSpec(instance, configVarsHash)
+	spec := openstackassistant.AssistantPodSpec(instance, configVarsHash, resolvedMCPServers, mcpCaBundleSecretName)
 
 	podSpecHash, err := util.ObjectHash(spec)
 	if err != nil {
@@ -623,7 +691,45 @@ func (r *OpenStackAssistantReconciler) SetupWithManager(
 			handler.EnqueueRequestsFromMapFunc(r.findObjectsForSrc),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
 		).
+		Watches(
+			&clientv1.OpenStackClient{},
+			handler.EnqueueRequestsFromMapFunc(r.findAssistantsForOpenStackClient),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
 		Complete(r)
+}
+
+func (r *OpenStackAssistantReconciler) findAssistantsForOpenStackClient(ctx context.Context, src client.Object) []reconcile.Request {
+	Log := r.GetLogger(ctx)
+	requests := []reconcile.Request{}
+
+	crList := &assistantv1.OpenStackAssistantList{}
+	if err := r.List(ctx, crList, client.InNamespace(src.GetNamespace())); err != nil {
+		Log.Error(err, "listing OpenStackAssistants for OpenStackClient change")
+		return requests
+	}
+
+	for _, item := range crList.Items {
+		if item.Spec.Goose == nil {
+			continue
+		}
+		for _, mcp := range item.Spec.Goose.MCPServers {
+			if mcp.OpenStackClientRef == src.GetName() {
+				Log.Info("OpenStackClient changed, reconciling assistant",
+					"openstackClient", src.GetName(),
+					"assistant", item.GetName())
+				requests = append(requests, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Name:      item.GetName(),
+						Namespace: item.GetNamespace(),
+					},
+				})
+				break
+			}
+		}
+	}
+
+	return requests
 }
 
 func (r *OpenStackAssistantReconciler) findObjectsForSrc(ctx context.Context, src client.Object) []reconcile.Request {

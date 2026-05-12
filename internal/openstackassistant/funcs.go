@@ -102,14 +102,31 @@ if [ -f /tmp/lightspeed-provider/lightspeed.json ]; then
   cp /tmp/lightspeed-provider/lightspeed.json $HOME/.config/goose/custom_providers/lightspeed.json
 fi
 
+# Combine CA bundles if MCP CA is present alongside Lightspeed CA
+if [ -f /etc/ssl/certs/mcp-ca-bundle.crt ]; then
+  if [ -f /etc/ssl/certs/ca-certificates.crt ]; then
+    cp /etc/ssl/certs/ca-certificates.crt /tmp/combined-ca.crt
+    cat /etc/ssl/certs/mcp-ca-bundle.crt >> /tmp/combined-ca.crt
+    export SSL_CERT_FILE=/tmp/combined-ca.crt
+  else
+    export SSL_CERT_FILE=/etc/ssl/certs/mcp-ca-bundle.crt
+  fi
+fi
+
 exec sleep infinity
 `
 }
 
-// AssistantPodSpec returns the PodSpec for the assistant pod
+// AssistantPodSpec returns the PodSpec for the assistant pod.
+// resolvedMCPServers maps extension name to URL for all MCP servers
+// (both manually specified and auto-resolved from OpenStackClientRef).
+// mcpCaBundleSecretName is the CA bundle secret for MCP TLS connections,
+// auto-discovered from the referenced OpenStackClient.
 func AssistantPodSpec(
 	instance *assistantv1.OpenStackAssistant,
 	configHash string,
+	resolvedMCPServers map[string]string,
+	mcpCaBundleSecretName string,
 ) corev1.PodSpec {
 	envVars := map[string]env.Setter{}
 	envVars["CONFIG_HASH"] = env.SetValue(configHash)
@@ -125,10 +142,8 @@ func AssistantPodSpec(
 		envVars["GOOSE_MODEL"] = env.SetValue(instance.Spec.Goose.Model)
 	}
 
-	if instance.Spec.Goose != nil {
-		for _, mcp := range instance.Spec.Goose.MCPServers {
-			envVars["MCP_SERVER_"+mcp.Name] = env.SetValue(mcp.URL)
-		}
+	for name, url := range resolvedMCPServers {
+		envVars["MCP_SERVER_"+name] = env.SetValue(url)
 	}
 
 	if instance.Spec.Env != nil {
@@ -141,8 +156,8 @@ func AssistantPodSpec(
 		}
 	}
 
-	volumes := assistantPodVolumes(instance)
-	volumeMounts := assistantPodVolumeMounts(instance)
+	volumes := assistantPodVolumes(instance, mcpCaBundleSecretName)
+	volumeMounts := assistantPodVolumeMounts(instance, mcpCaBundleSecretName)
 
 	containerName := "goose"
 	if instance.Spec.Provider != "" {
@@ -181,7 +196,7 @@ func AssistantPodSpec(
 	return podSpec
 }
 
-func assistantPodVolumeMounts(instance *assistantv1.OpenStackAssistant) []corev1.VolumeMount {
+func assistantPodVolumeMounts(instance *assistantv1.OpenStackAssistant, mcpCaBundleSecretName string) []corev1.VolumeMount {
 	mounts := []corev1.VolumeMount{
 		{
 			Name:      "entrypoint",
@@ -221,10 +236,19 @@ func assistantPodVolumeMounts(instance *assistantv1.OpenStackAssistant) []corev1
 		})
 	}
 
+	if mcpCaBundleSecretName != "" && mcpCaBundleSecretName != instance.Spec.LightspeedStack.CaBundleSecretName {
+		mounts = append(mounts, corev1.VolumeMount{
+			Name:      "mcp-ca-bundle",
+			MountPath: "/etc/ssl/certs/mcp-ca-bundle.crt",
+			SubPath:   "ca-bundle.crt",
+			ReadOnly:  true,
+		})
+	}
+
 	return mounts
 }
 
-func assistantPodVolumes(instance *assistantv1.OpenStackAssistant) []corev1.Volume {
+func assistantPodVolumes(instance *assistantv1.OpenStackAssistant, mcpCaBundleSecretName string) []corev1.Volume {
 	volumes := []corev1.Volume{
 		{
 			Name: "entrypoint",
@@ -280,6 +304,17 @@ func assistantPodVolumes(instance *assistantv1.OpenStackAssistant) []corev1.Volu
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: instance.Spec.LightspeedStack.CaBundleSecretName,
+				},
+			},
+		})
+	}
+
+	if mcpCaBundleSecretName != "" && mcpCaBundleSecretName != instance.Spec.LightspeedStack.CaBundleSecretName {
+		volumes = append(volumes, corev1.Volume{
+			Name: "mcp-ca-bundle",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: mcpCaBundleSecretName,
 				},
 			},
 		})

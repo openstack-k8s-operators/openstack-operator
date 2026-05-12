@@ -60,7 +60,7 @@ func TestAssistantPodSpec_BasicFields(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
 
-	spec := AssistantPodSpec(instance, "testhash123")
+	spec := AssistantPodSpec(instance, "testhash123", nil, "")
 
 	g.Expect(spec.ServiceAccountName).To(Equal("openstackassistant-test-assistant"))
 	g.Expect(*spec.TerminationGracePeriodSeconds).To(Equal(int64(0)))
@@ -77,7 +77,7 @@ func TestAssistantPodSpec_SecurityContext(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 	sc := spec.Containers[0].SecurityContext
 
 	g.Expect(*sc.RunAsNonRoot).To(BeTrue())
@@ -89,7 +89,7 @@ func TestAssistantPodSpec_DefaultEnvVars(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
 
-	spec := AssistantPodSpec(instance, "somehash")
+	spec := AssistantPodSpec(instance, "somehash", nil, "")
 	envVars := spec.Containers[0].Env
 
 	envMap := make(map[string]string)
@@ -110,7 +110,7 @@ func TestAssistantPodSpec_GooseModel(t *testing.T) {
 		Model: "gemini/models/gemini-2.5-flash",
 	}
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 	envVars := spec.Containers[0].Env
 
 	envMap := make(map[string]string)
@@ -129,7 +129,7 @@ func TestAssistantPodSpec_CustomEnvVars(t *testing.T) {
 		{Name: "LIGHTSPEED_API_KEY", Value: "dummy"},
 	}
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 	envVars := spec.Containers[0].Env
 
 	envMap := make(map[string]string)
@@ -145,7 +145,7 @@ func TestAssistantPodSpec_MinimalVolumes(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	g.Expect(spec.Volumes).To(HaveLen(2))
 
@@ -170,7 +170,7 @@ func TestAssistantPodSpec_WithRecipesAndHints(t *testing.T) {
 		Hints:   ptr.To("assistant-hints"),
 	}
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	g.Expect(spec.Volumes).To(HaveLen(4))
 	volumeNames := make([]string, len(spec.Volumes))
@@ -191,7 +191,7 @@ func TestAssistantPodSpec_WithCaBundle(t *testing.T) {
 	instance := newTestInstance()
 	instance.Spec.LightspeedStack.CaBundleSecretName = "lightspeed-ca-bundle"
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	g.Expect(spec.Volumes).To(HaveLen(3))
 
@@ -231,7 +231,7 @@ func TestAssistantPodSpec_WithNodeSelector(t *testing.T) {
 		"node-role.kubernetes.io/worker": "",
 	}
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	g.Expect(spec.NodeSelector).To(HaveKeyWithValue("node-role.kubernetes.io/worker", ""))
 }
@@ -240,7 +240,7 @@ func TestAssistantPodSpec_WithoutNodeSelector(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	g.Expect(spec.NodeSelector).To(BeNil())
 }
@@ -249,7 +249,7 @@ func TestAssistantPodSpec_EntrypointConfigMapName(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	var entrypointVolume *corev1.Volume
 	for i := range spec.Volumes {
@@ -267,7 +267,7 @@ func TestAssistantPodSpec_LightspeedProviderSecretName(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	var providerVolume *corev1.Volume
 	for i := range spec.Volumes {
@@ -289,7 +289,7 @@ func TestAssistantPodSpec_AllVolumeMountsReadOnly(t *testing.T) {
 	}
 	instance.Spec.LightspeedStack.CaBundleSecretName = "ca-secret"
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	for _, mount := range spec.Containers[0].VolumeMounts {
 		g.Expect(mount.ReadOnly).To(BeTrue(), "VolumeMount %s should be read-only", mount.Name)
@@ -303,7 +303,7 @@ func TestAssistantPodSpec_RecipesOnlyNoHints(t *testing.T) {
 		Recipes: ptr.To("recipes-cm"),
 	}
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", nil, "")
 
 	g.Expect(spec.Volumes).To(HaveLen(3))
 	volumeNames := make([]string, len(spec.Volumes))
@@ -317,13 +317,12 @@ func TestAssistantPodSpec_RecipesOnlyNoHints(t *testing.T) {
 func TestAssistantPodSpec_MCPServers(t *testing.T) {
 	g := NewWithT(t)
 	instance := newTestInstance()
-	instance.Spec.Goose = &assistantv1.GooseConfig{
-		MCPServers: []assistantv1.MCPServerRef{
-			{Name: "openstack", URL: "http://openstackclient-mcp.openstack.svc:8080/openstack/"},
-		},
+
+	resolvedMCPServers := map[string]string{
+		"openstack": "http://openstackclient-mcp.openstack.svc:8080/openstack/",
 	}
 
-	spec := AssistantPodSpec(instance, "hash")
+	spec := AssistantPodSpec(instance, "hash", resolvedMCPServers, "")
 	envVars := spec.Containers[0].Env
 
 	envMap := make(map[string]string)
@@ -332,6 +331,47 @@ func TestAssistantPodSpec_MCPServers(t *testing.T) {
 	}
 
 	g.Expect(envMap).To(HaveKeyWithValue("MCP_SERVER_openstack", "http://openstackclient-mcp.openstack.svc:8080/openstack/"))
+}
+
+func TestAssistantPodSpec_MCPCaBundle(t *testing.T) {
+	g := NewWithT(t)
+	instance := newTestInstance()
+
+	spec := AssistantPodSpec(instance, "hash", nil, "mcp-ca-secret")
+
+	var mcpCaVolume *corev1.Volume
+	for i := range spec.Volumes {
+		if spec.Volumes[i].Name == "mcp-ca-bundle" {
+			mcpCaVolume = &spec.Volumes[i]
+			break
+		}
+	}
+	g.Expect(mcpCaVolume).NotTo(BeNil())
+	g.Expect(mcpCaVolume.Secret.SecretName).To(Equal("mcp-ca-secret"))
+
+	var mcpCaMount *corev1.VolumeMount
+	for i := range spec.Containers[0].VolumeMounts {
+		if spec.Containers[0].VolumeMounts[i].Name == "mcp-ca-bundle" {
+			mcpCaMount = &spec.Containers[0].VolumeMounts[i]
+			break
+		}
+	}
+	g.Expect(mcpCaMount).NotTo(BeNil())
+	g.Expect(mcpCaMount.MountPath).To(Equal("/etc/ssl/certs/mcp-ca-bundle.crt"))
+	g.Expect(mcpCaMount.SubPath).To(Equal("ca-bundle.crt"))
+	g.Expect(mcpCaMount.ReadOnly).To(BeTrue())
+}
+
+func TestAssistantPodSpec_MCPCaBundleSameAsLightspeed(t *testing.T) {
+	g := NewWithT(t)
+	instance := newTestInstance()
+	instance.Spec.LightspeedStack.CaBundleSecretName = "combined-ca-bundle"
+
+	spec := AssistantPodSpec(instance, "hash", nil, "combined-ca-bundle")
+
+	for _, v := range spec.Volumes {
+		g.Expect(v.Name).NotTo(Equal("mcp-ca-bundle"), "should not add separate MCP CA volume when same as Lightspeed CA")
+	}
 }
 
 func TestEntrypointScript_MCPServerDiscovery(t *testing.T) {

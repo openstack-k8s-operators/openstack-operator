@@ -52,16 +52,24 @@ type LightspeedStackSpec struct {
 	CaBundleSecretName string `json:"caBundleSecretName,omitempty"`
 }
 
-// MCPServerRef references an MCP server endpoint to configure as a Goose extension
+// MCPServerRef references an MCP server endpoint to configure as a Goose extension.
+// Either URL or OpenStackClientRef must be specified, but not both.
 type MCPServerRef struct {
 	// Name is the extension name in Goose config
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
-	// URL is the MCP server's Streamable HTTP endpoint
-	// (e.g. http://openstackclient-mcp.openstack.svc:8080/openstack/)
-	// +kubebuilder:validation:Required
-	URL string `json:"url"`
+	// URL is the MCP server's Streamable HTTP endpoint.
+	// Mutually exclusive with OpenStackClientRef.
+	// +kubebuilder:validation:Optional
+	URL string `json:"url,omitempty"`
+
+	// OpenStackClientRef is the name of an OpenStackClient CR in the same
+	// namespace that has MCP enabled. The controller auto-computes the
+	// correct service URL and TLS CA configuration.
+	// Mutually exclusive with URL.
+	// +kubebuilder:validation:Optional
+	OpenStackClientRef string `json:"openstackClientRef,omitempty"`
 }
 
 // GooseConfig defines Goose-specific provider configuration
