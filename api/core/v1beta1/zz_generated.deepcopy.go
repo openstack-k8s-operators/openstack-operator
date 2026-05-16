@@ -41,9 +41,9 @@ import (
 	mariadb_operatorapiv1beta1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutron_operatorapiv1beta1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
+	placementv1beta1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	octavia_operatorapiv1beta1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	ovn_operatorapiv1beta1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
-	placement_operatorapiv1beta1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swift_operatorapiv1beta1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetry_operatorapiv1beta1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	watcher_operatorapiv1beta1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
@@ -1642,7 +1642,7 @@ func (in *PlacementSection) DeepCopyInto(out *PlacementSection) {
 	*out = *in
 	if in.Template != nil {
 		in, out := &in.Template, &out.Template
-		*out = new(placement_operatorapiv1beta1.PlacementAPISpecCore)
+		*out = new(placementv1beta1.PlacementAPISpecCore)
 		(*in).DeepCopyInto(*out)
 	}
 	in.APIOverride.DeepCopyInto(&out.APIOverride)

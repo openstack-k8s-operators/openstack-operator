@@ -140,7 +140,6 @@ spec:
                       - octavia
                       - openstack-baremetal
                       - ovn
-                      - placement
                       - swift
                       - telemetry
                       - test
