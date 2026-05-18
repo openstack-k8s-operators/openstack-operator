@@ -93,6 +93,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Manila.Template.PasswordSelectors.Service,
 			instance.Spec.Manila.Template.ServiceUser,
 			instance.Spec.Manila.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

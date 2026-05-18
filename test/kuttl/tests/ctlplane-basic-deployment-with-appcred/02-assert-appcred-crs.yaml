@@ -44,6 +44,16 @@ commands:
         echo "✓ ac-$name.roles = [${expected_roles[*]}]"
       }
 
+      check_edpm_annotation() {
+        local name=$1 expected=$2
+        local actual=$(oc get appcred ac-$name -n "$NS" -o jsonpath="{.metadata.annotations.keystone\.openstack\.org/edpm-service}" 2>/dev/null || echo "")
+        if [ "$actual" != "$expected" ]; then
+          echo "ERROR: ac-$name edpm-service annotation: expected '$expected', got '$actual'"
+          exit 1
+        fi
+        echo "✓ ac-$name edpm-service = $expected"
+      }
+
       echo "========================================="
       echo "Testing Application Credential CRs"
       echo "========================================="
@@ -66,6 +76,7 @@ commands:
       check_field barbican gracePeriodDays 364
       check_roles barbican "admin" "service"
       check_field barbican unrestricted "false"
+      check_edpm_annotation barbican "false"
       echo
 
       # ---- ac-cinder ----
@@ -76,6 +87,7 @@ commands:
       check_field cinder gracePeriodDays 5
       check_roles cinder "admin" "service"
       check_field cinder unrestricted "true"
+      check_edpm_annotation cinder "false"
       echo
 
       # ---- ac-glance ----
@@ -86,6 +98,7 @@ commands:
       check_field glance gracePeriodDays 60
       check_roles glance "admin" "service"
       check_field glance unrestricted "false"
+      check_edpm_annotation glance "false"
       echo
 
       # ---- ac-swift ----
@@ -96,6 +109,7 @@ commands:
       check_field swift gracePeriodDays 364
       check_roles swift "service"
       check_field swift unrestricted "false"
+      check_edpm_annotation swift "false"
       echo
 
       # ---- ac-neutron ----
@@ -106,6 +120,7 @@ commands:
       check_field neutron gracePeriodDays 364
       check_roles neutron "admin" "service"
       check_field neutron unrestricted "false"
+      check_edpm_annotation neutron "false"
       echo
 
       # ---- ac-placement ----
@@ -116,26 +131,29 @@ commands:
       check_field placement gracePeriodDays 30
       check_roles placement "admin" "service"
       check_field placement unrestricted "false"
+      check_edpm_annotation placement "false"
       echo
 
       # ---- ac-nova ----
-      # Multiple roles
-      echo "=== Testing ac-nova (multiple roles) ==="
+      # Multiple roles, EDPM service
+      echo "=== Testing ac-nova (multiple roles, EDPM service) ==="
       wait_ready nova
       check_field nova expirationDays 730
       check_field nova gracePeriodDays 364
       check_roles nova "admin" "service" "member"
       check_field nova unrestricted "false"
+      check_edpm_annotation nova "true"
       echo
 
       # ---- ac-ceilometer ----
-      # Telemetry/Ceilometer component (enabled by default in base sample)
-      echo "=== Testing ac-ceilometer (telemetry/ceilometer) ==="
+      # Telemetry/Ceilometer component, EDPM service
+      echo "=== Testing ac-ceilometer (telemetry/ceilometer, EDPM service) ==="
       wait_ready ceilometer
       check_field ceilometer expirationDays 45
       check_field ceilometer gracePeriodDays 20
       check_roles ceilometer "service"
       check_field ceilometer unrestricted "false"
+      check_edpm_annotation ceilometer "true"
       echo
 
       echo "All ApplicationCredential CRs validated successfully"

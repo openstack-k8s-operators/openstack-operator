@@ -209,6 +209,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Nova.Template.PasswordSelectors.Service,
 			instance.Spec.Nova.Template.ServiceUser,
 			instance.Spec.Nova.ApplicationCredential,
+			true,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

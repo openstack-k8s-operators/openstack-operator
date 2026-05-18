@@ -185,6 +185,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Octavia.Template.PasswordSelectors.Service,
 			instance.Spec.Octavia.Template.ServiceUser,
 			instance.Spec.Octavia.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

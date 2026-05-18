@@ -134,6 +134,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.Template.PasswordSelectors.Service,
 			instance.Spec.Heat.Template.ServiceUser,
 			instance.Spec.Heat.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

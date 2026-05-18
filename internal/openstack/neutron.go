@@ -137,6 +137,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Neutron.Template.PasswordSelectors.Service,
 			instance.Spec.Neutron.Template.ServiceUser,
 			instance.Spec.Neutron.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err
