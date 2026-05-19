@@ -64,6 +64,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.CeilometerComputeImage = version.Status.ContainerImages.CeilometerComputeImage
 		containerImages.CeilometerIpmiImage = version.Status.ContainerImages.CeilometerIpmiImage
 		containerImages.EdpmFrrImage = version.Status.ContainerImages.EdpmFrrImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmIscsidImage = version.Status.ContainerImages.EdpmIscsidImage
 		containerImages.EdpmLogrotateCrondImage = version.Status.ContainerImages.EdpmLogrotateCrondImage
 		containerImages.EdpmMultipathdImage = version.Status.ContainerImages.EdpmMultipathdImage
@@ -90,6 +91,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.CeilometerComputeImage = dataplanev1.ContainerImages.CeilometerComputeImage
 		containerImages.CeilometerIpmiImage = dataplanev1.ContainerImages.CeilometerIpmiImage
 		containerImages.EdpmFrrImage = dataplanev1.ContainerImages.EdpmFrrImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmIscsidImage = dataplanev1.ContainerImages.EdpmIscsidImage
 		containerImages.EdpmLogrotateCrondImage = dataplanev1.ContainerImages.EdpmLogrotateCrondImage
 		containerImages.EdpmMultipathdImage = dataplanev1.ContainerImages.EdpmMultipathdImage
