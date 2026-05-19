@@ -112,6 +112,12 @@ spec:
                   - type
                   type: object
                 type: array
+              nodeSetSynced:
+                description: |-
+                  NodeSetSynced - set to "false" when a credential rotation is detected
+                  and we are waiting for NodeSet deployments to push the new config.
+                  Cleared when the deployment completes and the old user is released.
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this
@@ -120,9 +126,20 @@ spec:
                   the opentack-operator in the top-level CR (e.g. the ContainerImage)
                 format: int64
                 type: integer
+              previousRabbitmqUserRef:
+                description: |-
+                  PreviousRabbitmqUserRef - the name of a previous RabbitMQUser CR whose
+                  finalizer removal was deferred during a credential rotation, pending
+                  deployment verification. Only set while a rotation is in progress.
+                type: string
               queueType:
                 description: QueueType - the queue type from the associated RabbitMq
                   instance
+                type: string
+              rabbitmqClusterName:
+                description: |-
+                  RabbitmqClusterName - the cluster name used to build canonical vhost/user CR names.
+                  Stored in status so that spec changes can be compared against the previously reconciled value.
                 type: string
               rabbitmqUserRef:
                 description: |-
