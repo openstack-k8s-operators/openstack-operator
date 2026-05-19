@@ -1325,6 +1325,12 @@ spec:
                   ProjectNameXpath is the xpath to select project name
                   on the horizon dashboard based on the u/s or d/s theme
                 type: string
+              projectTextXpath:
+                description: |-
+                  ProjectTextXpath is the xpath to element displaying
+                  current project name on the horizon dashboard based
+                  on the u/s or d/s theme
+                type: string
               repoUrl:
                 default: https://review.opendev.org/openstack/horizon
                 description: RepoUrl is the URL of the Horizon repository.

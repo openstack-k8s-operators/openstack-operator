@@ -147,6 +147,12 @@ spec:
                   for this resource
                 format: int64
                 type: integer
+              policyName:
+                description: PolicyName - actual policy name used in RabbitMQ
+                type: string
+              vhost:
+                description: Vhost - actual vhost name where the policy was last applied
+                type: string
             type: object
         type: object
     served: true

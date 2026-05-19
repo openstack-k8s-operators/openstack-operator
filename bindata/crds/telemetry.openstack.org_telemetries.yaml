@@ -1414,6 +1414,14 @@ spec:
                       abandoning
                     format: int32
                     type: integer
+                  rsyslogTemplate:
+                    default: RSYSLOG_TraditionalFileFormat
+                    description: The template format for rsyslog forwarding actions
+                    enum:
+                    - ""
+                    - RSYSLOG_TraditionalFileFormat
+                    - RSYSLOG_SyslogProtocol23Format
+                    type: string
                   targetPort:
                     default: 10514
                     description: TargetPort is the port where the logging syslog receiver

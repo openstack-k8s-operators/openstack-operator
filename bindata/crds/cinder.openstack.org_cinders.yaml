@@ -100,6 +100,94 @@ spec:
                     description: Override, provides the ability to override the generated
                       manifest of several child resources.
                     properties:
+                      probes:
+                        description: Override probes and other common fields in the
+                          StatefulSet
+                        properties:
+                          livenessProbes:
+                            description: |-
+                              Override configuration for the StatefulSet like Probes and other tunable
+                              fields
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                          readinessProbes:
+                            description: |-
+                              ProbeConf - the configuration for liveness and readiness probes
+                              LivenessPath - Endpoint path for the liveness probe
+                              ReadinessPath - Endpoint path for the readiness probe
+                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                              TimeoutSeconds - Number of seconds after which the probe times out
+                              PeriodSeconds - How often (in seconds) to perform the probe
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                          startupProbes:
+                            description: |-
+                              ProbeConf - the configuration for liveness and readiness probes
+                              LivenessPath - Endpoint path for the liveness probe
+                              ReadinessPath - Endpoint path for the readiness probe
+                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                              TimeoutSeconds - Number of seconds after which the probe times out
+                              PeriodSeconds - How often (in seconds) to perform the probe
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                        type: object
                       service:
                         additionalProperties:
                           description: |-
@@ -408,6 +496,99 @@ spec:
                       NodeSelector to target subset of worker nodes running this service. Setting here overrides
                       any global NodeSelector settings within the Cinder CR.
                     type: object
+                  override:
+                    description: Override, provides the ability to override the generated
+                      manifest of several child resources.
+                    properties:
+                      probes:
+                        description: Override probes and other common fields in the
+                          StatefulSet
+                        properties:
+                          livenessProbes:
+                            description: |-
+                              Override configuration for the StatefulSet like Probes and other tunable
+                              fields
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                          readinessProbes:
+                            description: |-
+                              ProbeConf - the configuration for liveness and readiness probes
+                              LivenessPath - Endpoint path for the liveness probe
+                              ReadinessPath - Endpoint path for the readiness probe
+                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                              TimeoutSeconds - Number of seconds after which the probe times out
+                              PeriodSeconds - How often (in seconds) to perform the probe
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                          startupProbes:
+                            description: |-
+                              ProbeConf - the configuration for liveness and readiness probes
+                              LivenessPath - Endpoint path for the liveness probe
+                              ReadinessPath - Endpoint path for the readiness probe
+                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                              TimeoutSeconds - Number of seconds after which the probe times out
+                              PeriodSeconds - How often (in seconds) to perform the probe
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                        type: object
+                    type: object
                   replicas:
                     default: 1
                     description: Replicas - Cinder Backup Replicas
@@ -531,6 +712,99 @@ spec:
                       description: |-
                         NodeSelector to target subset of worker nodes running this service. Setting here overrides
                         any global NodeSelector settings within the Cinder CR.
+                      type: object
+                    override:
+                      description: Override, provides the ability to override the
+                        generated manifest of several child resources.
+                      properties:
+                        probes:
+                          description: Override probes and other common fields in
+                            the StatefulSet
+                          properties:
+                            livenessProbes:
+                              description: |-
+                                Override configuration for the StatefulSet like Probes and other tunable
+                                fields
+                              properties:
+                                failureThreshold:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                initialDelaySeconds:
+                                  format: int32
+                                  minimum: 0
+                                  type: integer
+                                path:
+                                  pattern: ^(/.*)?$
+                                  type: string
+                                periodSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                timeoutSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                            readinessProbes:
+                              description: |-
+                                ProbeConf - the configuration for liveness and readiness probes
+                                LivenessPath - Endpoint path for the liveness probe
+                                ReadinessPath - Endpoint path for the readiness probe
+                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                                TimeoutSeconds - Number of seconds after which the probe times out
+                                PeriodSeconds - How often (in seconds) to perform the probe
+                              properties:
+                                failureThreshold:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                initialDelaySeconds:
+                                  format: int32
+                                  minimum: 0
+                                  type: integer
+                                path:
+                                  pattern: ^(/.*)?$
+                                  type: string
+                                periodSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                timeoutSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                            startupProbes:
+                              description: |-
+                                ProbeConf - the configuration for liveness and readiness probes
+                                LivenessPath - Endpoint path for the liveness probe
+                                ReadinessPath - Endpoint path for the readiness probe
+                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                                TimeoutSeconds - Number of seconds after which the probe times out
+                                PeriodSeconds - How often (in seconds) to perform the probe
+                              properties:
+                                failureThreshold:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                initialDelaySeconds:
+                                  format: int32
+                                  minimum: 0
+                                  type: integer
+                                path:
+                                  pattern: ^(/.*)?$
+                                  type: string
+                                periodSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                timeoutSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                          type: object
                       type: object
                     replicas:
                       default: 1
@@ -658,6 +932,99 @@ spec:
                       NodeSelector to target subset of worker nodes running this service. Setting here overrides
                       any global NodeSelector settings within the Cinder CR.
                     type: object
+                  override:
+                    description: Override, provides the ability to override the generated
+                      manifest of several child resources.
+                    properties:
+                      probes:
+                        description: Override probes and other common fields in the
+                          StatefulSet
+                        properties:
+                          livenessProbes:
+                            description: |-
+                              Override configuration for the StatefulSet like Probes and other tunable
+                              fields
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                          readinessProbes:
+                            description: |-
+                              ProbeConf - the configuration for liveness and readiness probes
+                              LivenessPath - Endpoint path for the liveness probe
+                              ReadinessPath - Endpoint path for the readiness probe
+                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                              TimeoutSeconds - Number of seconds after which the probe times out
+                              PeriodSeconds - How often (in seconds) to perform the probe
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                          startupProbes:
+                            description: |-
+                              ProbeConf - the configuration for liveness and readiness probes
+                              LivenessPath - Endpoint path for the liveness probe
+                              ReadinessPath - Endpoint path for the readiness probe
+                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                              TimeoutSeconds - Number of seconds after which the probe times out
+                              PeriodSeconds - How often (in seconds) to perform the probe
+                            properties:
+                              failureThreshold:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              initialDelaySeconds:
+                                format: int32
+                                minimum: 0
+                                type: integer
+                              path:
+                                pattern: ^(/.*)?$
+                                type: string
+                              periodSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                format: int32
+                                minimum: 1
+                                type: integer
+                            type: object
+                        type: object
+                    type: object
                   replicas:
                     default: 1
                     description: Replicas - Cinder Scheduler Replicas
@@ -781,6 +1148,99 @@ spec:
                       description: |-
                         NodeSelector to target subset of worker nodes running this service. Setting here overrides
                         any global NodeSelector settings within the Cinder CR.
+                      type: object
+                    override:
+                      description: Override, provides the ability to override the
+                        generated manifest of several child resources.
+                      properties:
+                        probes:
+                          description: Override probes and other common fields in
+                            the StatefulSet
+                          properties:
+                            livenessProbes:
+                              description: |-
+                                Override configuration for the StatefulSet like Probes and other tunable
+                                fields
+                              properties:
+                                failureThreshold:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                initialDelaySeconds:
+                                  format: int32
+                                  minimum: 0
+                                  type: integer
+                                path:
+                                  pattern: ^(/.*)?$
+                                  type: string
+                                periodSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                timeoutSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                            readinessProbes:
+                              description: |-
+                                ProbeConf - the configuration for liveness and readiness probes
+                                LivenessPath - Endpoint path for the liveness probe
+                                ReadinessPath - Endpoint path for the readiness probe
+                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                                TimeoutSeconds - Number of seconds after which the probe times out
+                                PeriodSeconds - How often (in seconds) to perform the probe
+                              properties:
+                                failureThreshold:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                initialDelaySeconds:
+                                  format: int32
+                                  minimum: 0
+                                  type: integer
+                                path:
+                                  pattern: ^(/.*)?$
+                                  type: string
+                                periodSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                timeoutSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                            startupProbes:
+                              description: |-
+                                ProbeConf - the configuration for liveness and readiness probes
+                                LivenessPath - Endpoint path for the liveness probe
+                                ReadinessPath - Endpoint path for the readiness probe
+                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
+                                TimeoutSeconds - Number of seconds after which the probe times out
+                                PeriodSeconds - How often (in seconds) to perform the probe
+                              properties:
+                                failureThreshold:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                initialDelaySeconds:
+                                  format: int32
+                                  minimum: 0
+                                  type: integer
+                                path:
+                                  pattern: ^(/.*)?$
+                                  type: string
+                                periodSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                timeoutSeconds:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                          type: object
                       type: object
                     replicas:
                       default: 1

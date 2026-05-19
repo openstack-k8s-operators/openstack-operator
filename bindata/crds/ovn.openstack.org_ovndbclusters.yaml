@@ -78,7 +78,15 @@ spec:
                 type: integer
               logLevel:
                 default: info
-                description: LogLevel - Set log level info, dbg, emer etc
+                description: LogLevel - Set log level off, emer, err, warn, info or
+                  dbg. Default is info.
+                enum:
+                - "off"
+                - emer
+                - err
+                - warn
+                - info
+                - dbg
                 type: string
               metricsEnabled:
                 default: true
