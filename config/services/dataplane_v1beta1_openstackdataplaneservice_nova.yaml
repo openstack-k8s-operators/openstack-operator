@@ -16,4 +16,3 @@ spec:
   edpmServiceType: nova
   containerImageFields:
   - NovaComputeImage
-  - EdpmIscsidImage
