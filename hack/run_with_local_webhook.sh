@@ -5,6 +5,13 @@ set -ex
 cleanup() {
     echo "Caught signal, cleaning up local webhooks..."
     ./hack/clean_local_webhook.sh
+    # Remind the user how to restore the CSV since the earlier message
+    # may have scrolled off the terminal.
+    if [ -n "${CSV_FILE}" ]; then
+        printf \
+        "\n\tThe original OLM version of the operator's CSV has been copied to %s. To restore it, use:
+        oc patch -n openstack-operators %s --type=merge --patch-file=%s\n\n" "${CSV_FILE}" "${CSV_NAME}" "${CSV_FILE}"
+    fi
     exit 0
 }
 
