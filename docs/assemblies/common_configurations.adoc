@@ -79,7 +79,6 @@ customized locations. The ansible variables used to set the locations and their
 default values are:
 
 ifeval::["{build}" != "downstream"]
-        edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid
         edpm_logrotate_crond_image: "quay.io/podified-antelope-centos9/openstack-cron
         edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller
         edpm_frr_image: "quay.io/podified-antelope-centos9/openstack-frr
@@ -104,7 +103,6 @@ ifeval::["{build}" != "downstream"]
         edpm_swift_object_image: "quay.io/podified-antelope-centos9/openstack-swift-object
 endif::[]
 ifeval::["{build}" == "downstream"]
-        edpm_iscsid_image: "redhat.registry.io/rhoso-beta/openstack-iscsid-rhel9:18.0.0
         edpm_logrotate_crond_image: "redhat.registry.io/rhoso-beta/openstack-cron-rhel9:18.0.0
         edpm_ovn_controller_agent_image: "redhat.registry.io/rhoso-beta/openstack-ovn-controller-rhel9:18.0.0
         edpm_frr_image: "redhat.registry.io/rhoso-beta/openstack-frr-rhel9:18.0.0

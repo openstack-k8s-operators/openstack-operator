@@ -130,7 +130,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.DesignateUnboundImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.DesignateWorkerImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmFrrImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmIscsidImage).ShouldNot(BeNil())
+				// EdpmIscsidImage is deprecated - iscsid now runs on the host instead of in a container
 				g.Expect(version.Status.ContainerImages.EdpmLogrotateCrondImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmMultipathdImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNeutronMetadataAgentImage).ShouldNot(BeNil())

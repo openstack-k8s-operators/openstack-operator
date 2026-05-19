@@ -280,7 +280,6 @@ spec:
       ...
       ansibleVars:
 ifeval::["{build}" != "downstream"]
-        edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
         edpm_logrotate_crond_image: "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
         edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
         edpm_ovn_metadata_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
@@ -294,7 +293,6 @@ ifeval::["{build}" != "downstream"]
         edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
 endif::[]
 ifeval::["{build}" == "downstream"]
-        edpm_iscsid_image: "registry.redhat.io/rhosp-dev-preview/openstack-iscsid:18.0"
         edpm_logrotate_crond_image: "registry.redhat.io/rhosp-dev-preview/openstack-cron:18.0"
         edpm_ovn_controller_agent_image: "registry.redhat.io/rhosp-dev-preview/openstack-frr:18.0"
         edpm_ovn_metadata_agent_image: "registry.redhat.io/rhosp-dev-preview/openstack-neutron-metadata-agent-ovn:18.0"
