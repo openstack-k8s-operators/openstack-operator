@@ -40,7 +40,7 @@ spec:
         - name: RELATED_IMAGE_CEILOMETER_NOTIFICATION_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ceilometer-notification:current-podified
         - name: RELATED_IMAGE_CEILOMETER_MYSQLD_EXPORTER_IMAGE_URL_DEFAULT
-          value: quay.io/prometheus/mysqld-exporter:v0.15.1
+          value: quay.io/openstack-k8s-operators/mysqld_exporter:latest
         - name: RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT
           value: quay.io/openstack-k8s-operators/sg-core:latest
         - name: RELATED_IMAGE_KSM_IMAGE_URL_DEFAULT
@@ -96,7 +96,7 @@ spec:
         - name: RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified
         - name: RELATED_IMAGE_EDPM_PODMAN_EXPORTER_IMAGE_URL_DEFAULT
-          value: quay.io/navidys/prometheus-podman-exporter:v1.10.1
+          value: quay.io/openstack-k8s-operators/prometheus-podman-exporter:latest
         - name: RELATED_IMAGE_GLANCE_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-glance-api:current-podified
         - name: RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT
