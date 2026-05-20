@@ -13,30 +13,30 @@ require (
 	github.com/onsi/gomega v1.41.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260518072248-46e2c2ecc47b
-	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260518062040-d9ef3532a1f9
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260518062609-5d2a64977e38
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260518062040-d54e6b24020a
-	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260518125623-fa1654783ae5
-	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260518071951-e2b79f21a9ac
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260518074542-0176ffea8853
-	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260518062324-1e9bf32fdd10
-	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260513130126-175a0958de92
+	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260518164900-424463f8b5d6
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260519055835-b70eb514ecfa
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260518162544-ee3217cda014
+	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260519053349-eca794178bb5
+	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260519055836-98aca178b9cd
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260518151731-513cdc50e41c
+	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260519055835-3fc462342d6c
+	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260518173352-69a47a6187d5
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20260518125357-72bdd580c587
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20260518125357-72bdd580c587
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260518125357-72bdd580c587
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260518125357-72bdd580c587
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20260518125357-72bdd580c587
-	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260518062324-26bd8f434a9c
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260518062040-f70bb2ebbdc2
-	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260515091252-0ae9eaaa8a06
-	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260518092617-bd9003f0b781
-	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260516121504-2c2a5d8085c7
+	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260519055834-18a3bfb29f4a
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260519115402-2afa9d70b392
+	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260518234655-1360ec8dcd87
+	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260519060411-4d3753993e6a
+	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260518215600-7865580770c0
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260516121218-84aa9fe07970
 	github.com/openstack-k8s-operators/openstack-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260509203137-d009c70c8d50
-	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260518062609-95543ca3c63c
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260518132424-2519807f5aa2
-	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20260518062608-a759fbf01d62
+	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260518174744-e888706b122a
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260519055546-65fc23d610a0
+	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20260519081821-395fa3151fc3
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260514065925-82c6f3ed34b9
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
