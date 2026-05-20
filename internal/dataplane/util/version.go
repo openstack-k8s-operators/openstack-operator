@@ -66,6 +66,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmFrrImage = version.Status.ContainerImages.EdpmFrrImage
 		containerImages.EdpmIscsidImage = version.Status.ContainerImages.EdpmIscsidImage
 		containerImages.EdpmLogrotateCrondImage = version.Status.ContainerImages.EdpmLogrotateCrondImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmMultipathdImage = version.Status.ContainerImages.EdpmMultipathdImage
 		containerImages.EdpmNeutronDhcpAgentImage = version.Status.ContainerImages.EdpmNeutronDhcpAgentImage
 		containerImages.EdpmNeutronMetadataAgentImage = version.Status.ContainerImages.EdpmNeutronMetadataAgentImage
@@ -92,6 +93,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmFrrImage = dataplanev1.ContainerImages.EdpmFrrImage
 		containerImages.EdpmIscsidImage = dataplanev1.ContainerImages.EdpmIscsidImage
 		containerImages.EdpmLogrotateCrondImage = dataplanev1.ContainerImages.EdpmLogrotateCrondImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmMultipathdImage = dataplanev1.ContainerImages.EdpmMultipathdImage
 		containerImages.EdpmNeutronDhcpAgentImage = dataplanev1.ContainerImages.EdpmNeutronDhcpAgentImage
 		containerImages.EdpmNeutronMetadataAgentImage = dataplanev1.ContainerImages.EdpmNeutronMetadataAgentImage

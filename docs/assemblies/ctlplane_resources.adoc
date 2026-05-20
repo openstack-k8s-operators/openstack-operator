@@ -2043,11 +2043,6 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | *string
 | false
 
-| edpmMultipathdImage
-|
-| *string
-| false
-
 | edpmNeutronDhcpAgentImage
 |
 | *string

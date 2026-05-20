@@ -233,9 +233,10 @@ var ContainerImageDefaults = openstackv1.ContainerImages{
 		EdpmNeutronDhcpAgentImage:     getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified"),
 		EdpmNeutronMetadataAgentImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"),
 		EdpmNeutronOvnAgentImage:      getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified"),
-		EdpmNeutronSriovAgentImage:    getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"),
-		EdpmMultipathdImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"),
-		NovaComputeImage:              getStrPtr("quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"),
+		EdpmNeutronSriovAgentImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"),
+		// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
+		EdpmMultipathdImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"),
+		NovaComputeImage:    getStrPtr("quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"),
 		OvnControllerImage:            getStrPtr("quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"),
 		EdpmOvnBgpAgentImage:          getStrPtr("quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"),
 		CeilometerComputeImage:        getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-compute:current-podified"),
@@ -265,7 +266,8 @@ func SetupDefaults() {
 			ApacheImage:                   getImageDefault("RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT", ContainerImageDefaults.ApacheImage),
 			EdpmFrrImage:                  getImageDefault("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmFrrImage),
 			EdpmIscsidImage:               getImageDefault("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmIscsidImage),
-			EdpmLogrotateCrondImage:       getImageDefault("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmLogrotateCrondImage),
+			EdpmLogrotateCrondImage: getImageDefault("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmLogrotateCrondImage),
+			// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
 			EdpmMultipathdImage:           getImageDefault("RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmMultipathdImage),
 			EdpmNeutronDhcpAgentImage:     getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_DHCP_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronDhcpAgentImage),
 			EdpmNeutronMetadataAgentImage: getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronMetadataAgentImage),
