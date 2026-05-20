@@ -335,9 +335,7 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_logrotate_crond_image"] == nil {
 		group.Vars["edpm_logrotate_crond_image"] = containerImages.EdpmLogrotateCrondImage
 	}
-	if template.Ansible.AnsibleVars["edpm_multipathd_image"] == nil {
-		group.Vars["edpm_multipathd_image"] = containerImages.EdpmMultipathdImage
-	}
+	// edpm_multipathd_image is no longer used - multipathd now runs on the host instead of in a container
 	if template.Ansible.AnsibleVars["edpm_neutron_dhcp_image"] == nil {
 		group.Vars["edpm_neutron_dhcp_image"] = containerImages.EdpmNeutronDhcpAgentImage
 	}
