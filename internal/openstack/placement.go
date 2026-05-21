@@ -97,6 +97,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 			instance.Spec.Placement.Template.PasswordSelectors.Service,
 			instance.Spec.Placement.Template.ServiceUser,
 			instance.Spec.Placement.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

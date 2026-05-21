@@ -103,6 +103,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Designate.Template.PasswordSelectors.Service,
 			instance.Spec.Designate.Template.ServiceUser,
 			instance.Spec.Designate.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

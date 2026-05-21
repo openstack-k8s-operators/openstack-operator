@@ -106,6 +106,7 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 			getWatcherPasswordSelector(),
 			getWatcherServiceUser(),
 			instance.Spec.Watcher.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

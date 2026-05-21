@@ -115,6 +115,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Cinder.Template.PasswordSelectors.Service,
 			instance.Spec.Cinder.Template.ServiceUser,
 			instance.Spec.Cinder.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

@@ -147,6 +147,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.Template.PasswordSelectors.Service,
 			instance.Spec.Ironic.Template.ServiceUser,
 			instance.Spec.Ironic.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -173,6 +174,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.Template.IronicInspector.PasswordSelectors.Service,
 			instance.Spec.Ironic.Template.IronicInspector.ServiceUser,
 			instance.Spec.Ironic.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

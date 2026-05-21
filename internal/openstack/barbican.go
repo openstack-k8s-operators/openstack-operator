@@ -91,6 +91,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			instance.Spec.Barbican.Template.PasswordSelectors.Service,
 			instance.Spec.Barbican.Template.ServiceUser,
 			instance.Spec.Barbican.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

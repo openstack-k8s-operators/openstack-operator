@@ -68,14 +68,15 @@ func CleanupApplicationCredentialForService(
 	instance *corev1beta1.OpenStackControlPlane,
 	serviceName string,
 ) error {
+	Log := GetLogger(ctx)
 	acName := keystonev1.GetACCRName(serviceName)
+
 	acCR := &keystonev1.KeystoneApplicationCredential{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      acName,
 			Namespace: instance.Namespace,
 		},
 	}
-	Log := GetLogger(ctx)
 	err := helper.GetClient().Delete(ctx, acCR)
 	if k8s_errors.IsNotFound(err) {
 		return nil
@@ -106,6 +107,7 @@ func EnsureApplicationCredentialForService(
 	passwordSelector string,
 	serviceUser string,
 	acConfig *corev1beta1.ServiceAppCredSection,
+	edpmService bool,
 ) (acSecretName string, result ctrl.Result, err error) {
 	Log := GetLogger(ctx)
 
@@ -154,7 +156,7 @@ func EnsureApplicationCredentialForService(
 	// Check if AC CR exists and is ready
 	if acExists {
 		// We want to run reconcileApplicationCredential to update the AC CR if it exists and is ready and AC config fields changed
-		err = reconcileApplicationCredential(ctx, helper, instance, acName, serviceUser, secretName, passwordSelector, merged)
+		err = reconcileApplicationCredential(ctx, helper, instance, acName, serviceUser, secretName, passwordSelector, merged, edpmService)
 		if err != nil {
 			return "", ctrl.Result{}, err
 		}
@@ -177,7 +179,7 @@ func EnsureApplicationCredentialForService(
 	// Service is ready, create Application Credential CR
 	Log.Info("Service is ready, creating Application Credential", "service", serviceName, "acName", acName)
 
-	err = reconcileApplicationCredential(ctx, helper, instance, acName, serviceUser, secretName, passwordSelector, merged)
+	err = reconcileApplicationCredential(ctx, helper, instance, acName, serviceUser, secretName, passwordSelector, merged, edpmService)
 	if err != nil {
 		return "", ctrl.Result{}, err
 	}
@@ -196,6 +198,7 @@ func reconcileApplicationCredential(
 	secretName string,
 	passwordSelector string,
 	effective corev1beta1.ApplicationCredentialSection,
+	edpmService bool,
 ) error {
 	log := GetLogger(ctx)
 
@@ -214,6 +217,17 @@ func reconcileApplicationCredential(
 		acObj.Spec.PasswordSelector = passwordSelector
 		acObj.Spec.Roles = effective.Roles
 		acObj.Spec.Unrestricted = *effective.Unrestricted
+
+		annotations := acObj.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+		if edpmService {
+			annotations[keystonev1.EDPMServiceAnnotation] = "true"
+		} else {
+			annotations[keystonev1.EDPMServiceAnnotation] = "false"
+		}
+		acObj.SetAnnotations(annotations)
 
 		if len(effective.AccessRules) > 0 {
 			kr := make([]keystonev1.ACRule, 0, len(effective.AccessRules))

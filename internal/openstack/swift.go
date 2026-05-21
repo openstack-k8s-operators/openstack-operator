@@ -127,6 +127,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			instance.Spec.Swift.Template.SwiftProxy.PasswordSelectors.Service,
 			instance.Spec.Swift.Template.SwiftProxy.ServiceUser,
 			instance.Spec.Swift.ApplicationCredential,
+			false,
 		)
 		if err != nil {
 			return ctrl.Result{}, err

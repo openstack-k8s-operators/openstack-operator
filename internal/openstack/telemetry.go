@@ -153,6 +153,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 				instance.Spec.Telemetry.Template.Autoscaling.Aodh.PasswordSelectors.AodhService,
 				instance.Spec.Telemetry.Template.Autoscaling.Aodh.ServiceUser,
 				instance.Spec.Telemetry.ApplicationCredentialAodh,
+				false,
 			)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -198,6 +199,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 				instance.Spec.Telemetry.Template.Ceilometer.PasswordSelectors.CeilometerService,
 				instance.Spec.Telemetry.Template.Ceilometer.ServiceUser,
 				instance.Spec.Telemetry.ApplicationCredentialCeilometer,
+				true,
 			)
 			if err != nil {
 				return ctrl.Result{}, err
@@ -242,6 +244,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 				instance.Spec.Telemetry.Template.CloudKitty.PasswordSelectors.CloudKittyService,
 				instance.Spec.Telemetry.Template.CloudKitty.ServiceUser,
 				instance.Spec.Telemetry.ApplicationCredentialCloudKitty,
+				false,
 			)
 			if err != nil {
 				return ctrl.Result{}, err
