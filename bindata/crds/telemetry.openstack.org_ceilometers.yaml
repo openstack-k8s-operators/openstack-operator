@@ -306,6 +306,10 @@ spec:
           status:
             description: CeilometerStatus defines the observed state of Ceilometer
             properties:
+              applicationCredentialSecret:
+                description: ApplicationCredentialSecret - the AC secret ceilometer
+                  is currently consuming
+                type: string
               conditions:
                 description: Conditions
                 items:

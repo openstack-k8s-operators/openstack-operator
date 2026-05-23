@@ -456,6 +456,10 @@ spec:
                   type: string
                 description: API endpoint
                 type: object
+              applicationCredentialSecret:
+                description: ApplicationCredentialSecret - the AC secret aodh is currently
+                  consuming
+                type: string
               conditions:
                 description: Conditions
                 items:
