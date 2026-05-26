@@ -760,6 +760,10 @@ spec:
                   type: object
                 description: API endpoints
                 type: object
+              applicationCredentialSecret:
+                description: ApplicationCredentialSecret - the AC secret cloudkitty
+                  is currently consuming
+                type: string
               cloudKittyAPIReadyCount:
                 default: 0
                 description: ReadyCount of CloudKitty API instance
