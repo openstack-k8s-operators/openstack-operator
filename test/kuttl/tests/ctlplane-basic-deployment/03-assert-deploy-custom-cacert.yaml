@@ -75,6 +75,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneInstanceHaCMReadyCondition
+  - message: OpenStackControlPlane InstanceHa TLS cert is available
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneInstanceHaTLSReadyCondition
   - message: OpenStackControlPlane KeystoneAPI completed
     reason: Ready
     status: "True"

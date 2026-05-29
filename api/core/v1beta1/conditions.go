@@ -150,6 +150,9 @@ const (
 	// OpenStackControlPlaneInstanceHaCMReadyCondition Status=True condition which indicates if InstanceHa CM is ready
 	OpenStackControlPlaneInstanceHaCMReadyCondition condition.Type = "OpenStackControlPlaneInstanceHaCMReadyCondition"
 
+	// OpenStackControlPlaneInstanceHaTLSReadyCondition Status=True condition which indicates if InstanceHa TLS certificate is ready
+	OpenStackControlPlaneInstanceHaTLSReadyCondition condition.Type = "OpenStackControlPlaneInstanceHaTLSReadyCondition"
+
 	// OpenStackControlPlaneCertCleanupReadyCondition Status=True condition which indicates global certification cleanup is Ready
 	OpenStackControlPlaneCertCleanupReadyCondition condition.Type = "OpenStackControlPlaneCertCleanupReadyCondition"
 
@@ -491,6 +494,12 @@ const (
 
 	// OpenStackControlPlaneInstanceHaCMReadyMessage
 	OpenStackControlPlaneInstanceHaCMReadyMessage = "OpenStackControlPlane InstanceHa CM is available"
+
+	// OpenStackControlPlaneInstanceHaTLSReadyErrorMessage
+	OpenStackControlPlaneInstanceHaTLSReadyErrorMessage = "OpenStackControlPlane InstanceHa TLS cert error occured %s"
+
+	// OpenStackControlPlaneInstanceHaTLSReadyMessage
+	OpenStackControlPlaneInstanceHaTLSReadyMessage = "OpenStackControlPlane InstanceHa TLS cert is available"
 
 	// OpenStackControlPlaneOpenStackVersionInitializationReadyInitMessage
 	OpenStackControlPlaneOpenStackVersionInitializationReadyInitMessage = "OpenStackControlPlane OpenStackVersion initialization not started"
