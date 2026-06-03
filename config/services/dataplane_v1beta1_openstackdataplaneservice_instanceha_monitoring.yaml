@@ -1,0 +1,10 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: instanceha-monitoring
+spec:
+  dataSources:
+    - secretRef:
+        name: instanceha-heartbeat-hmac
+  playbook: osp.edpm.instanceha_monitoring
+  edpmServiceType: instanceha-monitoring
