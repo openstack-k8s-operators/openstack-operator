@@ -412,6 +412,13 @@ spec:
           status:
             description: PlacementAPIStatus defines the observed state of PlacementAPI
             properties:
+              applicationCredentialSecret:
+                description: |-
+                  ApplicationCredentialSecret - the AC secret placement is currently
+                  consuming and protecting with the openstack.org/placementapi-ac-consumer
+                  finalizer. Tracked so the controller can remove its finalizer from the
+                  old secret when the openstack-operator rotates the reference.
+                type: string
               conditions:
                 description: Conditions
                 items:

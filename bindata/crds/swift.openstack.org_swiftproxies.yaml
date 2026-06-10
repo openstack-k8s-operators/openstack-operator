@@ -436,6 +436,10 @@ spec:
           status:
             description: SwiftProxyStatus defines the observed state of SwiftProxy
             properties:
+              applicationCredentialSecret:
+                description: ApplicationCredentialSecret - Secret that SwiftProxy
+                  is actively consuming (AC consumer finalizer present)
+                type: string
               conditions:
                 description: Conditions
                 items:

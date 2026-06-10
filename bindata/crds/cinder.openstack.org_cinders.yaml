@@ -109,6 +109,11 @@ spec:
                               Override configuration for the StatefulSet like Probes and other tunable
                               fields
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -124,20 +129,37 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                           readinessProbes:
-                            description: |-
-                              ProbeConf - the configuration for liveness and readiness probes
-                              LivenessPath - Endpoint path for the liveness probe
-                              ReadinessPath - Endpoint path for the readiness probe
-                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                              TimeoutSeconds - Number of seconds after which the probe times out
-                              PeriodSeconds - How often (in seconds) to perform the probe
+                            description: ProbeConf - the configuration for liveness
+                              and readiness probes
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -153,20 +175,37 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                           startupProbes:
-                            description: |-
-                              ProbeConf - the configuration for liveness and readiness probes
-                              LivenessPath - Endpoint path for the liveness probe
-                              ReadinessPath - Endpoint path for the readiness probe
-                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                              TimeoutSeconds - Number of seconds after which the probe times out
-                              PeriodSeconds - How often (in seconds) to perform the probe
+                            description: ProbeConf - the configuration for liveness
+                              and readiness probes
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -182,10 +221,27 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                         type: object
                       service:
@@ -509,6 +565,11 @@ spec:
                               Override configuration for the StatefulSet like Probes and other tunable
                               fields
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -524,20 +585,37 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                           readinessProbes:
-                            description: |-
-                              ProbeConf - the configuration for liveness and readiness probes
-                              LivenessPath - Endpoint path for the liveness probe
-                              ReadinessPath - Endpoint path for the readiness probe
-                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                              TimeoutSeconds - Number of seconds after which the probe times out
-                              PeriodSeconds - How often (in seconds) to perform the probe
+                            description: ProbeConf - the configuration for liveness
+                              and readiness probes
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -553,20 +631,37 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                           startupProbes:
-                            description: |-
-                              ProbeConf - the configuration for liveness and readiness probes
-                              LivenessPath - Endpoint path for the liveness probe
-                              ReadinessPath - Endpoint path for the readiness probe
-                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                              TimeoutSeconds - Number of seconds after which the probe times out
-                              PeriodSeconds - How often (in seconds) to perform the probe
+                            description: ProbeConf - the configuration for liveness
+                              and readiness probes
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -582,10 +677,27 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                         type: object
                     type: object
@@ -726,6 +838,11 @@ spec:
                                 Override configuration for the StatefulSet like Probes and other tunable
                                 fields
                               properties:
+                                command:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
                                 failureThreshold:
                                   format: int32
                                   minimum: 1
@@ -741,20 +858,37 @@ spec:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                port:
+                                  format: int32
+                                  maximum: 65535
+                                  minimum: 1
+                                  type: integer
+                                scheme:
+                                  description: URIScheme identifies the scheme used
+                                    for connection to a host for Get actions
+                                  type: string
                                 timeoutSeconds:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                type:
+                                  description: ProbeHandlerType defines the type of
+                                    probe handler
+                                  enum:
+                                  - HTTP
+                                  - Exec
+                                  - ""
+                                  type: string
                               type: object
                             readinessProbes:
-                              description: |-
-                                ProbeConf - the configuration for liveness and readiness probes
-                                LivenessPath - Endpoint path for the liveness probe
-                                ReadinessPath - Endpoint path for the readiness probe
-                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                                TimeoutSeconds - Number of seconds after which the probe times out
-                                PeriodSeconds - How often (in seconds) to perform the probe
+                              description: ProbeConf - the configuration for liveness
+                                and readiness probes
                               properties:
+                                command:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
                                 failureThreshold:
                                   format: int32
                                   minimum: 1
@@ -770,20 +904,37 @@ spec:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                port:
+                                  format: int32
+                                  maximum: 65535
+                                  minimum: 1
+                                  type: integer
+                                scheme:
+                                  description: URIScheme identifies the scheme used
+                                    for connection to a host for Get actions
+                                  type: string
                                 timeoutSeconds:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                type:
+                                  description: ProbeHandlerType defines the type of
+                                    probe handler
+                                  enum:
+                                  - HTTP
+                                  - Exec
+                                  - ""
+                                  type: string
                               type: object
                             startupProbes:
-                              description: |-
-                                ProbeConf - the configuration for liveness and readiness probes
-                                LivenessPath - Endpoint path for the liveness probe
-                                ReadinessPath - Endpoint path for the readiness probe
-                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                                TimeoutSeconds - Number of seconds after which the probe times out
-                                PeriodSeconds - How often (in seconds) to perform the probe
+                              description: ProbeConf - the configuration for liveness
+                                and readiness probes
                               properties:
+                                command:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
                                 failureThreshold:
                                   format: int32
                                   minimum: 1
@@ -799,10 +950,27 @@ spec:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                port:
+                                  format: int32
+                                  maximum: 65535
+                                  minimum: 1
+                                  type: integer
+                                scheme:
+                                  description: URIScheme identifies the scheme used
+                                    for connection to a host for Get actions
+                                  type: string
                                 timeoutSeconds:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                type:
+                                  description: ProbeHandlerType defines the type of
+                                    probe handler
+                                  enum:
+                                  - HTTP
+                                  - Exec
+                                  - ""
+                                  type: string
                               type: object
                           type: object
                       type: object
@@ -945,6 +1113,11 @@ spec:
                               Override configuration for the StatefulSet like Probes and other tunable
                               fields
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -960,20 +1133,37 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                           readinessProbes:
-                            description: |-
-                              ProbeConf - the configuration for liveness and readiness probes
-                              LivenessPath - Endpoint path for the liveness probe
-                              ReadinessPath - Endpoint path for the readiness probe
-                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                              TimeoutSeconds - Number of seconds after which the probe times out
-                              PeriodSeconds - How often (in seconds) to perform the probe
+                            description: ProbeConf - the configuration for liveness
+                              and readiness probes
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -989,20 +1179,37 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                           startupProbes:
-                            description: |-
-                              ProbeConf - the configuration for liveness and readiness probes
-                              LivenessPath - Endpoint path for the liveness probe
-                              ReadinessPath - Endpoint path for the readiness probe
-                              InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                              TimeoutSeconds - Number of seconds after which the probe times out
-                              PeriodSeconds - How often (in seconds) to perform the probe
+                            description: ProbeConf - the configuration for liveness
+                              and readiness probes
                             properties:
+                              command:
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
                               failureThreshold:
                                 format: int32
                                 minimum: 1
@@ -1018,10 +1225,27 @@ spec:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              port:
+                                format: int32
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              scheme:
+                                description: URIScheme identifies the scheme used
+                                  for connection to a host for Get actions
+                                type: string
                               timeoutSeconds:
                                 format: int32
                                 minimum: 1
                                 type: integer
+                              type:
+                                description: ProbeHandlerType defines the type of
+                                  probe handler
+                                enum:
+                                - HTTP
+                                - Exec
+                                - ""
+                                type: string
                             type: object
                         type: object
                     type: object
@@ -1162,6 +1386,11 @@ spec:
                                 Override configuration for the StatefulSet like Probes and other tunable
                                 fields
                               properties:
+                                command:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
                                 failureThreshold:
                                   format: int32
                                   minimum: 1
@@ -1177,20 +1406,37 @@ spec:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                port:
+                                  format: int32
+                                  maximum: 65535
+                                  minimum: 1
+                                  type: integer
+                                scheme:
+                                  description: URIScheme identifies the scheme used
+                                    for connection to a host for Get actions
+                                  type: string
                                 timeoutSeconds:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                type:
+                                  description: ProbeHandlerType defines the type of
+                                    probe handler
+                                  enum:
+                                  - HTTP
+                                  - Exec
+                                  - ""
+                                  type: string
                               type: object
                             readinessProbes:
-                              description: |-
-                                ProbeConf - the configuration for liveness and readiness probes
-                                LivenessPath - Endpoint path for the liveness probe
-                                ReadinessPath - Endpoint path for the readiness probe
-                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                                TimeoutSeconds - Number of seconds after which the probe times out
-                                PeriodSeconds - How often (in seconds) to perform the probe
+                              description: ProbeConf - the configuration for liveness
+                                and readiness probes
                               properties:
+                                command:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
                                 failureThreshold:
                                   format: int32
                                   minimum: 1
@@ -1206,20 +1452,37 @@ spec:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                port:
+                                  format: int32
+                                  maximum: 65535
+                                  minimum: 1
+                                  type: integer
+                                scheme:
+                                  description: URIScheme identifies the scheme used
+                                    for connection to a host for Get actions
+                                  type: string
                                 timeoutSeconds:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                type:
+                                  description: ProbeHandlerType defines the type of
+                                    probe handler
+                                  enum:
+                                  - HTTP
+                                  - Exec
+                                  - ""
+                                  type: string
                               type: object
                             startupProbes:
-                              description: |-
-                                ProbeConf - the configuration for liveness and readiness probes
-                                LivenessPath - Endpoint path for the liveness probe
-                                ReadinessPath - Endpoint path for the readiness probe
-                                InitialDelaySeconds - Number of seconds after the container starts before liveness/readiness probes are initiated
-                                TimeoutSeconds - Number of seconds after which the probe times out
-                                PeriodSeconds - How often (in seconds) to perform the probe
+                              description: ProbeConf - the configuration for liveness
+                                and readiness probes
                               properties:
+                                command:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
                                 failureThreshold:
                                   format: int32
                                   minimum: 1
@@ -1235,10 +1498,27 @@ spec:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                port:
+                                  format: int32
+                                  maximum: 65535
+                                  minimum: 1
+                                  type: integer
+                                scheme:
+                                  description: URIScheme identifies the scheme used
+                                    for connection to a host for Get actions
+                                  type: string
                                 timeoutSeconds:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                type:
+                                  description: ProbeHandlerType defines the type of
+                                    probe handler
+                                  enum:
+                                  - HTTP
+                                  - Exec
+                                  - ""
+                                  type: string
                               type: object
                           type: object
                       type: object
@@ -2604,6 +2884,10 @@ spec:
                   type: object
                 description: API endpoints
                 type: object
+              applicationCredentialSecret:
+                description: ApplicationCredentialSecret - the AC secret cinder is
+                  currently consuming
+                type: string
               cinderAPIReadyCount:
                 default: 0
                 description: ReadyCount of Cinder API instance

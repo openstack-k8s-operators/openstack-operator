@@ -89,7 +89,7 @@ spec:
                 additionalProperties:
                   type: string
                 description: DefaultConfigOverwrite - interface to overwrite default
-                  config files like e.g. api-paste.ini or policy.yaml.
+                  config files like e.g. api-paste.ini, policy.yaml or nova_api_audit_map.conf.
                 type: object
               keystoneAuthURL:
                 description: |-

@@ -75,7 +75,7 @@ spec:
                     additionalProperties:
                       type: string
                     description: DefaultConfigOverwrite - interface to overwrite default
-                      config files like e.g. api-paste.ini or policy.yaml.
+                      config files like e.g. api-paste.ini, policy.yaml or nova_api_audit_map.conf.
                     type: object
                   networkAttachments:
                     description: NetworkAttachments is a list of NetworkAttachment
@@ -1914,6 +1914,13 @@ spec:
                   from nova-api
                 format: int32
                 type: integer
+              applicationCredentialSecret:
+                description: |-
+                  ApplicationCredentialSecret - the AC secret nova is currently
+                  consuming and protecting with the openstack.org/nova-ac-consumer
+                  finalizer. Tracked so the controller can remove its finalizer from the
+                  old secret when the openstack-operator rotates the reference.
+                type: string
               conditions:
                 description: Conditions
                 items:
