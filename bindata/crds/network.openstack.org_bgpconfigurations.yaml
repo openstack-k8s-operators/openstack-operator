@@ -44,9 +44,9 @@ spec:
             description: BGPConfigurationSpec defines the desired state of BGPConfiguration
             properties:
               frrConfigurationNamespace:
-                default: metallb-system
+                default: openshift-frr-k8s
                 description: FRRConfigurationNamespace - namespace where to create
-                  the FRRConfiguration. Defaults to metallb-system.
+                  the FRRConfiguration. Defaults to openshift-frr-k8s.
                 type: string
               frrNodeConfigurationSelector:
                 description: |-

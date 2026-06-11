@@ -1292,6 +1292,13 @@ spec:
                   type: object
                 description: API endpoint
                 type: object
+              applicationCredentialSecret:
+                description: |-
+                  ApplicationCredentialSecret - the AC secret ironic is currently
+                  consuming and protecting with the openstack.org/ironic-ac-consumer
+                  finalizer. Tracked so the controller can remove its finalizer from the
+                  old secret when the openstack-operator rotates the reference.
+                type: string
               conditions:
                 description: Conditions
                 items:
@@ -1342,6 +1349,12 @@ spec:
                   type: string
                 description: Map of hashes to track e.g. job status
                 type: object
+              inspectorApplicationCredentialSecret:
+                description: |-
+                  InspectorApplicationCredentialSecret - the AC secret ironic-inspector is
+                  currently consuming and protecting with the
+                  openstack.org/ironic-inspector-ac-consumer finalizer.
+                type: string
               ironicAPIReadyCount:
                 description: ReadyCount of Ironic API instance
                 format: int32

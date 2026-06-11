@@ -52,6 +52,17 @@ spec:
           spec:
             description: InstanceHaSpec defines the desired state of InstanceHa
             properties:
+              auth:
+                description: Auth - Parameters related to authentication
+                properties:
+                  applicationCredentialSecret:
+                    description: |-
+                      ApplicationCredentialSecret - name of an existing Secret containing
+                      Application Credential ID and Secret (AC_ID, AC_SECRET keys).
+                      When set, the controller mounts this secret and enables AC-based
+                      authentication instead of password-based clouds.yaml/secure.yaml.
+                    type: string
+                type: object
               caBundleSecretName:
                 description: CaBundleSecretName - holding the CA certs in a pre-created
                   bundle file
@@ -79,10 +90,46 @@ spec:
                 description: InstanceHaConfigMap is the name of the ConfigMap containing
                   the InstanceHa config file
                 type: string
+              instanceHaHeartbeatPort:
+                default: 7411
+                description: InstanceHaHeartbeatPort is the UDP port for compute node
+                  heartbeat packets
+                format: int32
+                maximum: 65535
+                minimum: 1
+                type: integer
               instanceHaKdumpPort:
                 default: 7410
                 format: int32
+                maximum: 65535
+                minimum: 1
                 type: integer
+              metricsTLS:
+                description: MetricsTLS - Parameters related to TLS for the metrics
+                  endpoint
+                properties:
+                  caBundleSecretName:
+                    description: CaBundleSecretName - holding the CA certs in a pre-created
+                      bundle file
+                    type: string
+                  cipherSuites:
+                    default: HIGH:!aNULL:!MD5:!RC4:!3DES:!kRSA
+                    description: CipherSuites - Allowed TLS cipher suites (OpenSSL
+                      format)
+                    minLength: 1
+                    type: string
+                  minTLSVersion:
+                    default: "1.2"
+                    description: MinTLSVersion - Minimum TLS version for the metrics
+                      endpoint
+                    enum:
+                    - "1.2"
+                    - "1.3"
+                    type: string
+                  secretName:
+                    description: SecretName - holding the cert, key for the service
+                    type: string
+                type: object
               networkAttachments:
                 description: |-
                   NetworkAttachments is a list of NetworkAttachment resource names to expose
@@ -98,7 +145,7 @@ spec:
                 type: object
               openStackCloud:
                 default: default
-                description: OpenStackClould is the name of the Cloud to use as per
+                description: OpenStackCloud is the name of the Cloud to use as per
                   clouds.yaml (will be set to "default" if empty)
                 type: string
               openStackConfigMap:
@@ -181,6 +228,19 @@ spec:
                   - type
                   type: object
                 type: array
+              heartbeatHMACSecret:
+                description: |-
+                  HeartbeatHMACSecret is the name of the auto-generated Secret
+                  containing the HMAC key for heartbeat authentication
+                type: string
+              hmacKeyRotationSynced:
+                description: |-
+                  HMACKeyRotationSynced tracks EDPM deployment progress during HMAC
+                  key rotation. See HMACRotationSyncState constants.
+                enum:
+                - ""
+                - WaitingForDeployment
+                type: string
               lastAppliedTopology:
                 description: LastAppliedTopology - the last applied Topology
                 properties:
@@ -209,7 +269,9 @@ spec:
                 format: int64
                 type: integer
               podName:
-                description: PodName
+                description: |-
+                  PodName
+                  Deprecated: this field is no longer used
                 type: string
             type: object
         type: object

@@ -2093,6 +2093,13 @@ spec:
           status:
             description: HeatStatus defines the observed state of Heat
             properties:
+              applicationCredentialSecret:
+                description: |-
+                  ApplicationCredentialSecret - the AC secret Heat is currently
+                  consuming and protecting with the openstack.org/heat-ac-consumer
+                  finalizer. Tracked so the controller can remove its finalizer from the
+                  old secret when the openstack-operator rotates the reference.
+                type: string
               conditions:
                 description: Conditions
                 items:

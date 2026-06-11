@@ -456,6 +456,13 @@ spec:
           status:
             description: OctaviaAPIStatus defines the observed state of OctaviaAPI
             properties:
+              applicationCredentialSecret:
+                description: |-
+                  ApplicationCredentialSecret - the AC secret OctaviaAPI is currently
+                  consuming and protecting with the openstack.org/octaviaapi-ac-consumer
+                  finalizer. Tracked so the controller can remove its finalizer from the
+                  old secret when the openstack-operator rotates the reference.
+                type: string
               conditions:
                 description: Conditions
                 items:
