@@ -616,13 +616,9 @@ func (ed *EndpointDetail) CreateRoute(
 				return ctrl.Result{}, err
 			}
 
-			// check if secret has the expected entries tls.crt, tls.key and ca.crt
-			if certSecret != nil {
-				for _, key := range []string{"tls.crt", "tls.key", "ca.crt"} {
-					if _, exist := certSecret.Data[key]; !exist {
-						return ctrl.Result{}, fmt.Errorf("certificate secret %s does not provide %s", *ed.Route.TLS.SecretName, key)
-					}
-				}
+			// check the secret has the required tls.crt and tls.key entries
+			if err := validateRouteCertSecret(certSecret, *ed.Route.TLS.SecretName); err != nil {
+				return ctrl.Result{}, err
 			}
 		}
 
@@ -659,8 +655,12 @@ func (ed *EndpointDetail) CreateRoute(
 			Termination:                   routev1.TLSTerminationEdge,
 			Certificate:                   string(certSecret.Data[tls.CertKey]),
 			Key:                           string(certSecret.Data[tls.PrivateKey]),
-			CACertificate:                 string(certSecret.Data[tls.CAKey]),
 			InsecureEdgeTerminationPolicy: routev1.InsecureEdgeTerminationPolicyRedirect,
+		}
+		// ca.crt is optional (absent for ACME-issued certs); only set the
+		// route CACertificate when the secret actually provides it.
+		if caCert, ok := certSecret.Data[tls.CAKey]; ok {
+			tlsConfig.CACertificate = string(caCert)
 		}
 
 		// for internal TLS (TLSE) use routev1.TLSTerminationReencrypt
@@ -870,6 +870,23 @@ func hasCertInOverrideSpec(overrideSpec route.OverrideSpec) bool {
 	return overrideSpec.Spec.TLS.CACertificate != "" &&
 		overrideSpec.Spec.TLS.Certificate != "" &&
 		overrideSpec.Spec.TLS.Key != ""
+}
+
+// validateRouteCertSecret ensures a user-provided route TLS secret contains the
+// required tls.crt and tls.key entries. ca.crt is intentionally not required:
+// certificates issued by an ACME issuer (e.g. Let's Encrypt) do not populate
+// ca.crt, and the issuing chain is delivered via tls.crt instead. ca.crt is only
+// needed to advertise a custom CA on the route, which is optional.
+func validateRouteCertSecret(certSecret *k8s_corev1.Secret, secretName string) error {
+	if certSecret == nil {
+		return nil
+	}
+	for _, key := range []string{tls.CertKey, tls.PrivateKey} {
+		if _, exist := certSecret.Data[key]; !exist {
+			return fmt.Errorf("certificate secret %s does not provide %s", secretName, key)
+		}
+	}
+	return nil
 }
 
 func serviceExists(route string, services *k8s_corev1.ServiceList) bool {

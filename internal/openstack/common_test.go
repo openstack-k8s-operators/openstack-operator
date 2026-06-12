@@ -572,3 +572,72 @@ func TestCheckRouteAdmissionStatus_UpdatedStatus(t *testing.T) {
 	err = checkRouteAdmissionStatus(ctx, h, "test-route", "test-namespace")
 	g.Expect(err).ToNot(HaveOccurred())
 }
+
+func TestValidateRouteCertSecret(t *testing.T) {
+	tests := []struct {
+		name      string
+		data      map[string][]byte
+		wantErr   bool
+		errSubstr string
+	}{
+		{
+			name: "cert, key and ca.crt present",
+			data: map[string][]byte{
+				"tls.crt": []byte("cert"),
+				"tls.key": []byte("key"),
+				"ca.crt":  []byte("ca"),
+			},
+			wantErr: false,
+		},
+		{
+			// ACME issuers (e.g. Let's Encrypt) do not populate ca.crt; the
+			// secret must still be accepted.
+			name: "cert and key present, ca.crt absent (ACME)",
+			data: map[string][]byte{
+				"tls.crt": []byte("cert"),
+				"tls.key": []byte("key"),
+			},
+			wantErr: false,
+		},
+		{
+			name: "tls.key missing",
+			data: map[string][]byte{
+				"tls.crt": []byte("cert"),
+			},
+			wantErr:   true,
+			errSubstr: "does not provide tls.key",
+		},
+		{
+			name: "tls.crt missing",
+			data: map[string][]byte{
+				"tls.key": []byte("key"),
+			},
+			wantErr:   true,
+			errSubstr: "does not provide tls.crt",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWithT(t)
+			secret := &k8s_corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Name: "custom-route-cert", Namespace: "test-namespace"},
+				Data:       tt.data,
+			}
+
+			err := validateRouteCertSecret(secret, secret.Name)
+			if tt.wantErr {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring(tt.errSubstr))
+			} else {
+				g.Expect(err).ToNot(HaveOccurred())
+			}
+		})
+	}
+}
+
+func TestValidateRouteCertSecret_NilSecret(t *testing.T) {
+	g := NewWithT(t)
+	// A nil secret is tolerated (the caller may not have fetched one).
+	g.Expect(validateRouteCertSecret(nil, "custom-route-cert")).ToNot(HaveOccurred())
+}
