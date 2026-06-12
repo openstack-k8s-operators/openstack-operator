@@ -11,4 +11,9 @@ spec:
         name: swift-storage-config-data
     - configMapRef:
         name: swift-ring-files
+  containerImageFields:
+  - SwiftAccountImage
+  - SwiftContainerImage
+  - SwiftObjectImage
+  - SwiftProxyImage
   edpmServiceType: swift
