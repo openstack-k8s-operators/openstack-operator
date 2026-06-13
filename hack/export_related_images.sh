@@ -78,7 +78,8 @@ export RELATED_IMAGE_BARBICAN_KEYSTONE_LISTENER_IMAGE_URL_DEFAULT=quay.io/podifi
 export RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-frr:current-podified
 export RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
 export RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-cron:current-podified
-export RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-multipathd:current-podified
+# Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
+# export RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-multipathd:current-podified
 export RELATED_IMAGE_EDPM_NEUTRON_DHCP_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified
 export RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
 export RELATED_IMAGE_EDPM_NEUTRON_OVN_AGENT_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified

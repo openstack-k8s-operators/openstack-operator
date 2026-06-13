@@ -291,7 +291,6 @@ ifeval::["{build}" != "downstream"]
         edpm_libvirt_image: "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
         edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
         edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
-        edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
 endif::[]
 ifeval::["{build}" == "downstream"]
         edpm_iscsid_image: "registry.redhat.io/rhosp-dev-preview/openstack-iscsid:18.0"
@@ -305,7 +304,6 @@ ifeval::["{build}" == "downstream"]
         edpm_libvirt_image: "registry.redhat.io/rhosp-dev-preview/openstack-nova-libvirt:18.0"
         edpm_nova_compute_image: "registry.redhat.io/rhosp-dev-preview/openstack-nova-compute:18.0"
         edpm_neutron_sriov_image: "registry.redhat.io/rhosp-dev-preview/openstack-neutron-sriov-agent:18.0"
-        edpm_multipathd_image: "registry.redhat.io/rhosp-dev-preview/openstack-multipathd:18.0"
 endif::[]
 ----
 

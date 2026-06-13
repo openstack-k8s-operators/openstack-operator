@@ -21,7 +21,7 @@ edpm_podman_registries_conf
 `edpm_podman_disconnected_ocp` is a boolean variable that is used to conditionally render `registries.conf` on the dataplane nodes during the deployment. While `edpm_podman_registries_conf` contains the contents of the `registries.conf` that were acquired from the `MachineConfig` in the cluster. The contents of this file will be written to  `/etc/containers/registries.conf` on each of the dataplane nodes. This ensures that our dataplane nodes are configured in a consistent manner with the OpenShift nodes.
 
 Since this configuration file is lifted directly from OpenShift, the dataplane nodes also have the same requirements as OpenShift for images - such as using image digests rather than image tags.
-This can be seen in the Ansible inventory secret for each of the `OpenStackDataPlaneNodeSet` objects in the cluster. Using `multipathd` as an example:
+This can be seen in the Ansible inventory secret for each of the `OpenStackDataPlaneNodeSet` objects in the cluster. Using `frr` as an example:
 
 [,yaml]
 ----
@@ -29,22 +29,22 @@ This can be seen in the Ansible inventory secret for each of the `OpenStackDataP
           [...]
             [[registry]]
               prefix = ""
-              location = "registry.redhat.io/rhoso/openstack-multipathd-rhel9"
+              location = "registry.redhat.io/rhoso/openstack-frr-rhel9"
 
               [[registry.mirror]]
-                location = "quay-mirror-registry.example.net:8443/olm/rhoso-openstack-multipathd-rhel9"
+                location = "quay-mirror-registry.example.net:8443/olm/rhoso-openstack-frr-rhel9"
                 pull-from-mirror = "digest-only"
           [...]
 ----
 
 Note that the `pull-from-mirror` parameter is set to `digest-only`. This means that any attempt by podman to pull an image by a digest will result in the image being pulled from the specified mirror.
 
-Accordingly, image references in the `OpenStackVersion` CR are provided in the digest format, for example the multipathd image:
+Accordingly, image references in the `OpenStackVersion` CR are provided in the digest format, for example the FRR image:
 
 [,bash]
 ----
-$ oc get openstackversion -o jsonpath='{.items[].status.containerImages.edpmMultipathdImage}'
-"registry.redhat.io/rhoso/openstack-multipathd-rhel9@sha256:7df2e1ebe4ec6815173e49157848a63d28a64ffb0db8de6562c4633c0fbcdf3f"
+$ oc get openstackversion -o jsonpath='{.items[].status.containerImages.edpmFrrImage}'
+"registry.redhat.io/rhoso/openstack-frr-rhel9@sha256:7df2e1ebe4ec6815173e49157848a63d28a64ffb0db8de6562c4633c0fbcdf3f"
 ----
 
 Since all images are in the digest format for the `OpenStackVersion` resource, there is no additional action required by users to work in a disconnected environment.
