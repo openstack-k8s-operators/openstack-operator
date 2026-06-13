@@ -71,7 +71,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	// notificationsBus.cluster (Aodh, Ceilometer) is handled by the webhook via annotation-based triggers.
 	// No direct spec mutation here to avoid GitOps conflicts.
 
-	if instance.Spec.Telemetry.Template.NodeSelector == nil {
+	if instance.Spec.Telemetry.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Telemetry.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
