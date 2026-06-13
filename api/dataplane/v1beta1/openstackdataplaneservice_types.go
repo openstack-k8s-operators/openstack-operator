@@ -28,10 +28,10 @@ import (
 // a dataplane service
 type OpenstackDataPlaneServiceCert struct {
 	// Contents of the certificate
-	// This is a list of strings for properties that are needed in the cert
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems:=1
-	Contents []string `json:"contents"`
+	// This is a list of strings for properties that are needed in the cert.
+	// May be empty for client-only certificates that require no SANs.
+	// +kubebuilder:validation:Optional
+	Contents []string `json:"contents,omitempty"`
 
 	// Networks to include in SNI for the cert
 	// +kubebuilder:validation:Optional
@@ -45,6 +45,14 @@ type OpenstackDataPlaneServiceCert struct {
 	// KeyUsages to be added to the issued cert
 	// +kubebuilder:validation:Optional
 	KeyUsages []certmgrv1.KeyUsage `json:"keyUsages,omitempty" yaml:"keyUsages,omitempty"`
+
+	// CommonName overrides how the certificate Common Name is derived.
+	// When set to "system-id", the CN is a UUID5 derived from the node's
+	// ctlplane FQDN, matching the OVN chassis system-id convention.
+	// When empty, CN defaults to the short hostname.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=system-id
+	CommonName string `json:"commonName,omitempty" yaml:"commonName,omitempty"`
 
 	// EDPMRoleServiceName is the value of the <role>_service_name variable from
 	// the edpm-ansible role where this certificate is used. For example if the

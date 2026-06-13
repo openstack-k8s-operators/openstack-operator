@@ -151,13 +151,22 @@ spec:
                     OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for
                     a dataplane service
                   properties:
+                    commonName:
+                      description: |-
+                        CommonName overrides how the certificate Common Name is derived.
+                        When set to "system-id", the CN is a UUID5 derived from the node's
+                        ctlplane FQDN, matching the OVN chassis system-id convention.
+                        When empty, CN defaults to the short hostname.
+                      enum:
+                      - system-id
+                      type: string
                     contents:
                       description: |-
                         Contents of the certificate
-                        This is a list of strings for properties that are needed in the cert
+                        This is a list of strings for properties that are needed in the cert.
+                        May be empty for client-only certificates that require no SANs.
                       items:
                         type: string
-                      minItems: 1
                       type: array
                     edpmRoleServiceName:
                       description: |-
@@ -241,8 +250,6 @@ spec:
                         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
                         type: string
                       type: array
-                  required:
-                  - contents
                   type: object
                 description: TLSCerts tls certs to be generated
                 type: object
