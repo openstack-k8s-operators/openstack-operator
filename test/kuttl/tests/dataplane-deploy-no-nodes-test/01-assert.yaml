@@ -641,16 +641,16 @@ spec:
           name: bootstrap-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/ovn
           name: ovn-combined-ca-bundle
-        - mountPath: /var/lib/openstack/cacerts/neutron-metadata
-          name: neutron-metadata-combined-ca-bundle
-        - mountPath: /var/lib/openstack/cacerts/neutron-ovn
-          name: neutron-ovn-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/neutron-sriov
           name: neutron-sriov-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/neutron-dhcp
           name: neutron-dhcp-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/libvirt
           name: libvirt-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/neutron-metadata
+          name: neutron-metadata-combined-ca-bundle
+        - mountPath: /var/lib/openstack/cacerts/neutron-ovn
+          name: neutron-ovn-combined-ca-bundle
         - mountPath: /var/lib/openstack/cacerts/nova
           name: nova-combined-ca-bundle
         - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-no-nodes
@@ -674,14 +674,6 @@ spec:
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle
-      - name: neutron-metadata-combined-ca-bundle
-        secret:
-          defaultMode: 420
-          secretName: combined-ca-bundle
-      - name: neutron-ovn-combined-ca-bundle
-        secret:
-          defaultMode: 420
-          secretName: combined-ca-bundle
       - name: neutron-sriov-combined-ca-bundle
         secret:
           defaultMode: 420
@@ -691,6 +683,14 @@ spec:
           defaultMode: 420
           secretName: combined-ca-bundle
       - name: libvirt-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: neutron-metadata-combined-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: combined-ca-bundle
+      - name: neutron-ovn-combined-ca-bundle
         secret:
           defaultMode: 420
           secretName: combined-ca-bundle

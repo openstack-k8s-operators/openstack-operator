@@ -20832,6 +20832,12 @@ spec:
                 description: Time before the deployment is requeued in seconds
                 minimum: 1
                 type: integer
+              fallbackToListOrder:
+                default: true
+                description: |-
+                  FallbackToListOrder preserves service list order for services
+                  without explicit dependsOn. Defaults to true.
+                type: boolean
               nodeSets:
                 description: NodeSets is the list of NodeSets deployed
                 items:
@@ -23195,6 +23201,14 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                   type: object
+                type: array
+              dependsOn:
+                description: |-
+                  DependsOn is a list of EDPMServiceType or CR name values that must
+                  complete before this service runs. If empty, the service depends on
+                  the preceding entry in the NodeSet service list.
+                items:
+                  type: string
                 type: array
               deployOnAllNodeSets:
                 description: |-

@@ -8,3 +8,5 @@ spec:
   - EdpmLogrotateCrondImage
   - EdpmIscsidImage
   edpmServiceType: run-os
+  dependsOn:
+    - configure-os

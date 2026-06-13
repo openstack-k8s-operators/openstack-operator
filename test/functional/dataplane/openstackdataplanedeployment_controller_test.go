@@ -165,6 +165,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -362,6 +363,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -573,6 +575,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -688,6 +691,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -841,6 +845,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1005,6 +1010,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          []string{dataplaneServiceName.Name, "duplicate-service"},
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1168,6 +1174,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          []string{"global-service"},
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1377,6 +1384,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          []string{"foo-service", "global-service", "foo-update-service"},
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1541,6 +1549,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				DeploymentRequeueTime:     15,
 				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1644,6 +1653,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              ptr.To(int32(6)),
 				PreserveJobs:              true,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -1746,6 +1756,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              ptr.To(int32(6)),
 				PreserveJobs:              true,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
+				FallbackToListOrder:       ptr.To(true),
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
