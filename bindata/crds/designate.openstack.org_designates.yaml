@@ -2098,6 +2098,10 @@ spec:
                 required:
                 - containerImage
                 type: object
+              externalBindsSecret:
+                description: ExternalBindsSecret is the name of the secret containing
+                  external BIND9 configurations
+                type: string
               messagingBus:
                 description: MessagingBus configuration (cluster, username, and vhost)
                 properties:

@@ -4102,6 +4102,8 @@ spec:
                           transportURLSecret:
                             type: string
                         type: object
+                      externalBindsSecret:
+                        type: string
                       messagingBus:
                         properties:
                           cluster:
