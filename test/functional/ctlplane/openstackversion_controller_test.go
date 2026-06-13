@@ -35,7 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var _ = Describe("OpenStackOperator controller", func() {
+var _ = Describe("OpenStackVersion controller", func() {
 	BeforeEach(func() {
 		// lib-common uses OPERATOR_TEMPLATES env var to locate the "templates"
 		// directory of the operator. We need to set them othervise lib-common
@@ -1582,6 +1582,369 @@ var _ = Describe("OpenStackOperator controller", func() {
 					g.Expect(err.Error()).Should(ContainSubstring("prevents proper version tracking and validation"))
 				}, timeout, interval).Should(Succeed())
 			})
+		})
+	})
+
+	// Test target-stage annotation gates minor update at the specified stage
+	When("Minor update with target-stage annotation", func() {
+		var (
+			initialVersion       = "old"
+			updatedVersion       = "0.0.1"
+			testRabbitMQImage    = "foo/rabbit:0.0.2"
+			testMariaDBImage     = "foo/maria:0.0.2"
+			testMemcachedImage   = "foo/memcached:0.0.2"
+			testKeystoneAPIImage = "foo/keystone:0.0.2"
+		)
+
+		BeforeEach(func() {
+			// Lightweight controlplane spec with OVN DISABLED so that the OVN stages
+			// auto-complete, making it straightforward to gate at "ovn-controlplane"
+			// without needing to simulate OVN readiness in these tests.
+			spec := GetDefaultOpenStackControlPlaneSpec()
+
+			galeraTemplate := map[string]interface{}{
+				names.DBName.Name: map[string]interface{}{
+					"storageRequest": "500M",
+				},
+			}
+			spec["galera"] = map[string]interface{}{
+				"enabled":   true,
+				"templates": galeraTemplate,
+			}
+
+			spec["horizon"] = map[string]interface{}{"enabled": false}
+			spec["glance"] = map[string]interface{}{"enabled": false}
+			spec["cinder"] = map[string]interface{}{"enabled": false}
+			spec["neutron"] = map[string]interface{}{"enabled": false}
+			spec["manila"] = map[string]interface{}{"enabled": false}
+			spec["heat"] = map[string]interface{}{"enabled": false}
+			spec["telemetry"] = map[string]interface{}{"enabled": false}
+			spec["tls"] = GetTLSPublicSpec()
+
+			// OVN disabled — stages auto-complete during minor update
+			spec["ovn"] = map[string]interface{}{
+				"enabled": false,
+			}
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackVersion(names.OpenStackVersionName, GetDefaultOpenStackVersionSpec()),
+			)
+
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+
+			DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAPublicName))
+			DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAInternalName))
+			DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCAOvnName))
+			DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.RootCALibvirtName))
+
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.DBCell1CertName))
+
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				g.Expect(version).Should(Not(BeNil()))
+
+				g.Expect(*version.Status.AvailableVersion).Should(ContainSubstring("0.0.1"))
+				g.Expect(version.Spec.TargetVersion).Should(ContainSubstring("0.0.1"))
+				updatedVersion = *version.Status.AvailableVersion
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				version.Status.ContainerImageVersionDefaults[initialVersion] = version.Status.ContainerImageVersionDefaults[updatedVersion]
+				version.Status.ContainerImageVersionDefaults[initialVersion].RabbitmqImage = &testRabbitMQImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].MariadbImage = &testMariaDBImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].InfraMemcachedImage = &testMemcachedImage
+				version.Status.ContainerImageVersionDefaults[initialVersion].KeystoneAPIImage = &testKeystoneAPIImage
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				version.Spec.TargetVersion = initialVersion
+				g.Expect(th.K8sClient.Update(th.Ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.Generation).Should(Equal(osversion.Status.ObservedGeneration))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+
+				g.Expect(*osversion.Status.AvailableVersion).Should(Equal(updatedVersion))
+				g.Expect(osversion.Spec.TargetVersion).Should(Equal(initialVersion))
+				g.Expect(osversion.Status.DeployedVersion).Should(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateDataplaneNodeSet(names.OpenStackVersionName, DefaultDataPlaneNoNodeSetSpec(false)),
+			)
+
+			dataplanenodeset := GetDataplaneNodeset(names.OpenStackVersionName)
+			dataplanenodeset.Status.DeployedVersion = initialVersion
+			Expect(th.K8sClient.Status().Update(th.Ctx, dataplanenodeset)).To(Succeed())
+
+			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Ovn.Enabled).Should(BeFalse())
+
+			SimulateControlplaneReady()
+
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					condition.ReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(OSCtlplane.Status.DeployedVersion).Should(Equal(&initialVersion))
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.Generation).Should(Equal(osversion.Status.ObservedGeneration))
+				g.Expect(osversion.Status.DeployedVersion).Should(Equal(&initialVersion))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should complete the named stage then block the next stage", Serial, func() {
+			// Set target-stage to "ovn-controlplane". With OVN disabled the OVN
+			// controlplane stage auto-completes (MarkTrue); the controller then
+			// detects the gate and blocks the OVN dataplane stage.
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				if version.Annotations == nil {
+					version.Annotations = make(map[string]string)
+				}
+				version.Annotations[corev1.MinorUpdateTargetStageAnnotation] = corev1.MinorUpdateStageOVNControlplane
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Trigger minor update
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				version.Spec.TargetVersion = updatedVersion
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Wait for initialization
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				g.Expect(osversion).Should(Not(BeNil()))
+				g.Expect(osversion.Generation).Should(Equal(osversion.Status.ObservedGeneration))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+			// OVN controlplane stage must have completed (True)
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateOVNControlplane,
+					k8s_corev1.ConditionTrue,
+				)
+
+				// OVN dataplane stage must be gated (False with target-stage message)
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				cond := osversion.Status.Conditions.Get(corev1.OpenStackVersionMinorUpdateOVNDataplane)
+				g.Expect(cond).ShouldNot(BeNil())
+				g.Expect(cond.Status).Should(Equal(k8s_corev1.ConditionFalse))
+				g.Expect(cond.Reason).Should(Equal(condition.Reason(condition.RequestedReason)))
+				g.Expect(cond.Message).Should(ContainSubstring(corev1.MinorUpdateStageOVNControlplane))
+			}, timeout, interval).Should(Succeed())
+
+			// DeployedVersion must not advance while gated
+			osversion := GetOpenStackVersion(names.OpenStackVersionName)
+			Expect(osversion.Status.DeployedVersion).Should(Equal(&initialVersion))
+		})
+
+		It("should resume update when the annotation is removed", Serial, func() {
+			// Gate at "ovn-controlplane"
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				if version.Annotations == nil {
+					version.Annotations = make(map[string]string)
+				}
+				version.Annotations[corev1.MinorUpdateTargetStageAnnotation] = corev1.MinorUpdateStageOVNControlplane
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Trigger minor update
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				version.Spec.TargetVersion = updatedVersion
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Wait for gated state: OVNDataplane blocked
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				cond := osversion.Status.Conditions.Get(corev1.OpenStackVersionMinorUpdateOVNDataplane)
+				g.Expect(cond).ShouldNot(BeNil())
+				g.Expect(cond.Message).Should(ContainSubstring(corev1.MinorUpdateStageOVNControlplane))
+			}, timeout, interval).Should(Succeed())
+
+			// Remove the annotation to let the update proceed
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				delete(version.Annotations, corev1.MinorUpdateTargetStageAnnotation)
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// OVN dataplane should no longer be gated; with OVN disabled it
+			// auto-completes so the condition becomes True.
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateOVNDataplane,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should advance gate to a later stage when annotation value is updated", Serial, func() {
+			// Start gated at "ovn-controlplane"
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				if version.Annotations == nil {
+					version.Annotations = make(map[string]string)
+				}
+				version.Annotations[corev1.MinorUpdateTargetStageAnnotation] = corev1.MinorUpdateStageOVNControlplane
+				version.Spec.TargetVersion = updatedVersion
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// Wait for OVNDataplane to be gated
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				cond := osversion.Status.Conditions.Get(corev1.OpenStackVersionMinorUpdateOVNDataplane)
+				g.Expect(cond).ShouldNot(BeNil())
+				g.Expect(cond.Message).Should(ContainSubstring(corev1.MinorUpdateStageOVNControlplane))
+			}, timeout, interval).Should(Succeed())
+
+			// Advance gate to "ovn-dataplane" to let OVN dataplane auto-complete
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				version.Annotations[corev1.MinorUpdateTargetStageAnnotation] = corev1.MinorUpdateStageOVNDataplane
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			// OVN dataplane auto-completes (OVN disabled); RabbitMQ becomes gated
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateOVNDataplane,
+					k8s_corev1.ConditionTrue,
+				)
+
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				cond := osversion.Status.Conditions.Get(corev1.OpenStackVersionMinorUpdateRabbitMQ)
+				g.Expect(cond).ShouldNot(BeNil())
+				g.Expect(cond.Status).Should(Equal(k8s_corev1.ConditionFalse))
+				g.Expect(cond.Reason).Should(Equal(condition.Reason(condition.RequestedReason)))
+				g.Expect(cond.Message).Should(ContainSubstring(corev1.MinorUpdateStageOVNDataplane))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should not let gate to a previous stage when annotation value is not set from beginning of the update", Serial, func() {
+			// Start minor update without target-stage annotation
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				if version.Annotations != nil {
+					delete(version.Annotations, corev1.MinorUpdateTargetStageAnnotation)
+				}
+				version.Spec.TargetVersion = updatedVersion
+				g.Expect(k8sClient.Update(ctx, version)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateOVNDataplane,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+			SimulateRabbitmqReady()
+
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateRabbitMQ,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout*4, interval).Should(Succeed())
+
+			// Retroactively adding an earlier pause point must be rejected by the webhook
+			Eventually(func(g Gomega) {
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				if version.Annotations == nil {
+					version.Annotations = make(map[string]string)
+				}
+				version.Annotations[corev1.MinorUpdateTargetStageAnnotation] = corev1.MinorUpdateStageOVNControlplane
+				err := k8sClient.Update(ctx, version)
+				g.Expect(err).Should(HaveOccurred())
+				g.Expect(err.Error()).Should(ContainSubstring("Cannot set update target stage"))
+				g.Expect(err.Error()).Should(ContainSubstring(corev1.MinorUpdateStageOVNControlplane))
+			}, timeout, interval).Should(Succeed())
+
+			// Controller must not re-gate stages that already completed
+			Eventually(func(g Gomega) {
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateOVNDataplane,
+					k8s_corev1.ConditionTrue,
+				)
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionMinorUpdateRabbitMQ,
+					k8s_corev1.ConditionTrue,
+				)
+
+				osversion := GetOpenStackVersion(names.OpenStackVersionName)
+				cond := osversion.Status.Conditions.Get(corev1.OpenStackVersionMinorUpdateOVNDataplane)
+				g.Expect(cond).ShouldNot(BeNil())
+				g.Expect(cond.Message).ShouldNot(ContainSubstring(corev1.MinorUpdateStageOVNControlplane))
+			}, timeout, interval).Should(Succeed())
 		})
 	})
 

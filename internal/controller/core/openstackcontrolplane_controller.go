@@ -314,88 +314,91 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, nil
 	}
 
-	// OVN
-	Log.Info("Minor update OVN on the ControlPlane")
-	ctrlResult, err = r.reconcileOVNControllers(ctx, instance, version, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
+	// OVN control-plane stage (respect update-target-stage on OpenStackVersion)
+	if corev1beta1.MinorUpdateStageAllowedForReconcile(version.Annotations, corev1beta1.MinorUpdateStageOVNControlplane) {
+		Log.Info("Minor update OVN on the ControlPlane")
+		ctrlResult, err = r.reconcileOVNControllers(ctx, instance, version, helper)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
 	}
-	instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
 	if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
-		return ctrlResult, nil
+		return ctrl.Result{}, nil
 	}
 
+	if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane) {
+		return ctrl.Result{}, nil
+	}
 	// only if OVN dataplane is updated
-	if version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNDataplane) {
-		Log.Info("Minor update in progress")
-
-		// RabbitMQ
-		ctrlResult, err = openstack.ReconcileRabbitMQs(ctx, instance, version, helper)
+	Log.Info("Minor update OVN dataplane completed.")
+	// RabbitMQ
+	if corev1beta1.MinorUpdateStageAllowedForReconcile(version.Annotations, corev1beta1.MinorUpdateStageRabbitMQ) {
+		ctrlResult, err := openstack.ReconcileRabbitMQs(ctx, instance, version, helper)
 		if err != nil {
 			return ctrl.Result{}, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
-		} else {
-			if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateRabbitMQ) {
-				Log.Info("Returning for RabbitMQ minor update reconcile")
-				return ctrlResult, nil
-			}
 		}
-
-		// Galara
-		ctrlResult, err = openstack.ReconcileGaleras(ctx, instance, version, helper)
-		if err != nil {
-			return ctrl.Result{}, err
-		} else if (ctrlResult != ctrl.Result{}) {
-			return ctrlResult, nil
-		} else {
-			if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateMariaDB) {
-				Log.Info("Returning for Galara minor update reconcile")
-				return ctrlResult, nil
-			}
+		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateRabbitMQ) {
+			Log.Info("Returning for RabbitMQ minor update reconcile")
+			return ctrl.Result{}, nil
 		}
-
-		// Memcached
-		ctrlResult, err = openstack.ReconcileMemcacheds(ctx, instance, version, helper)
+	}
+	// Galara
+	if corev1beta1.MinorUpdateStageAllowedForReconcile(version.Annotations, corev1beta1.MinorUpdateStageMariaDB) {
+		ctrlResult, err := openstack.ReconcileGaleras(ctx, instance, version, helper)
 		if err != nil {
 			return ctrl.Result{}, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
-		} else {
-			if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateMemcached) {
-				Log.Info("Returning for Memcached minor update reconcile")
-				return ctrlResult, nil
-			}
 		}
-
-		// Keystone API
-		ctrlResult, err = openstack.ReconcileKeystoneAPI(ctx, instance, version, helper)
-		if err != nil {
-			return ctrl.Result{}, err
-		} else if (ctrlResult != ctrl.Result{}) {
-			return ctrlResult, nil
-		} else {
-			if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateKeystone) {
-				Log.Info("Returning for KeystoneAPI minor update reconcile")
-				return ctrlResult, nil
-			}
+		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateMariaDB) {
+			Log.Info("Returning for Galara minor update reconcile")
+			return ctrl.Result{}, nil
 		}
-
-		// the rest of the controlplane
-		ctrlResult, err = r.reconcileNormal(ctx, instance, version, helper)
+	}
+	// Memcached
+	if corev1beta1.MinorUpdateStageAllowedForReconcile(version.Annotations, corev1beta1.MinorUpdateStageMemcached) {
+		ctrlResult, err := openstack.ReconcileMemcacheds(ctx, instance, version, helper)
 		if err != nil {
 			return ctrl.Result{}, err
 		} else if (ctrlResult != ctrl.Result{}) {
 			return ctrlResult, nil
-		} else {
-			// this will allow reconcileNormal to proceed in subsequent reconciles
-			instance.Status.DeployedVersion = &version.Spec.TargetVersion
-			if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
-				Log.Info("Returning for ControlPlane minor update reconcile")
-				return ctrlResult, nil
-			}
+		}
+		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateMemcached) {
+			Log.Info("Returning for Memcached minor update reconcile")
+			return ctrl.Result{}, nil
+		}
+	}
+	// Keystone API
+	if corev1beta1.MinorUpdateStageAllowedForReconcile(version.Annotations, corev1beta1.MinorUpdateStageKeystone) {
+		ctrlResult, err := openstack.ReconcileKeystoneAPI(ctx, instance, version, helper)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrl.Result{}, nil
+		}
+		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateKeystone) {
+			Log.Info("Returning for KeystoneAPI minor update reconcile")
+			return ctrl.Result{}, nil
+		}
+	}
+	// the rest of the controlplane
+	if corev1beta1.MinorUpdateStageAllowedForReconcile(version.Annotations, corev1beta1.MinorUpdateStageControlplane) {
+		ctrlResult, err := r.reconcileNormal(ctx, instance, version, helper)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrl.Result{}, nil
+		}
+		// this will allow reconcileNormal to proceed in subsequent reconciles
+		instance.Status.DeployedVersion = &version.Spec.TargetVersion
+		if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateControlplane) {
+			Log.Info("Returning for ControlPlane minor update reconcile")
+			return ctrl.Result{}, nil
 		}
 	}
 	return ctrl.Result{}, nil
