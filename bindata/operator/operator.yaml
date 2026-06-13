@@ -200,6 +200,26 @@ webhooks:
     service:
       name: openstack-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-assistant-openstack-org-v1beta1-openstackassistant
+  failurePolicy: Fail
+  name: mopenstackassistant-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - assistant.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackassistants
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
       path: /mutate-client-openstack-org-v1beta1-openstackclient
   failurePolicy: Fail
   name: mopenstackclient-v1beta1.kb.io
@@ -382,6 +402,26 @@ metadata:
     cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
   name: openstack-operator-validating-webhook-configuration
 webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-assistant-openstack-org-v1beta1-openstackassistant
+  failurePolicy: Fail
+  name: vopenstackassistant-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - assistant.openstack.org
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackassistants
+  sideEffects: None
 - admissionReviewVersions:
   - v1
   clientConfig:

@@ -152,6 +152,7 @@ type ContainerTemplate struct {
 	OctaviaWorkerImage                *string `json:"octaviaWorkerImage,omitempty"`
 	OctaviaRsyslogImage               *string `json:"octaviaRsyslogImage,omitempty"`
 	OpenstackClientImage              *string `json:"openstackClientImage,omitempty"`
+	OpenstackMcpImage                 *string `json:"openstackMcpImage,omitempty"`
 	OsContainerImage                  *string `json:"osContainerImage,omitempty"` //fixme wire this in?
 	OvnControllerImage                *string `json:"ovnControllerImage,omitempty"`
 	OvnControllerOvsImage             *string `json:"ovnControllerOvsImage,omitempty"`

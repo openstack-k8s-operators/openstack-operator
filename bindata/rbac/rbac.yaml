@@ -51,6 +51,77 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: openstack-operator
+  name: openstack-operator-assistant-openstackassistant-admin-role
+rules:
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants
+  verbs:
+  - '*'
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: openstack-operator
+  name: openstack-operator-assistant-openstackassistant-editor-role
+rules:
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: openstack-operator
+  name: openstack-operator-assistant-openstackassistant-viewer-role
+rules:
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
   name: openstack-operator-manager-role
 rules:
 - apiGroups:
@@ -138,6 +209,32 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - assistant.openstack.org
+  resources:
+  - openstackassistants/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - backup.openstack.org
   resources:

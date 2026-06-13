@@ -50,7 +50,11 @@ import (
 	backupv1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/backup/v1beta1"
 	backupcontroller "github.com/openstack-k8s-operators/openstack-operator/internal/controller/backup"
 
+	assistantv1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/assistant/v1beta1"
+	assistantcontroller "github.com/openstack-k8s-operators/openstack-operator/internal/controller/assistant"
+	webhookassistantv1beta1 "github.com/openstack-k8s-operators/openstack-operator/internal/webhook/assistant/v1beta1"
 	webhookbackupv1beta1 "github.com/openstack-k8s-operators/openstack-operator/internal/webhook/backup/v1beta1"
+
 	// +kubebuilder:scaffold:imports
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	k8s_networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
@@ -136,6 +140,7 @@ func init() {
 	utilruntime.Must(topologyv1.AddToScheme(scheme))
 	utilruntime.Must(watcherv1.AddToScheme(scheme))
 	utilruntime.Must(backupv1beta1.AddToScheme(scheme))
+	utilruntime.Must(assistantv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -377,6 +382,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := (&assistantcontroller.OpenStackAssistantReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Kclient: kclient,
+	}).SetupWithManager(ctx, mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackAssistant")
+		os.Exit(1)
+	}
+
 	corecontroller.SetupVersionDefaults()
 
 	// Defaults for service operators
@@ -384,6 +398,9 @@ func main() {
 
 	// Defaults for OpenStackClient
 	clientv1.SetupDefaults()
+
+	// Defaults for OpenStackAssistant
+	assistantv1beta1.SetupDefaults()
 
 	// Defaults for Dataplane
 	dataplanev1.SetupDefaults()
@@ -427,6 +444,11 @@ func main() {
 		// nolint:goconst
 		if err := webhookbackupv1beta1.SetupOpenStackBackupConfigWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackBackupConfig")
+			os.Exit(1)
+		}
+
+		if err := webhookassistantv1beta1.SetupOpenStackAssistantWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackAssistant")
 			os.Exit(1)
 		}
 		checker = mgr.GetWebhookServer().StartedChecker()
