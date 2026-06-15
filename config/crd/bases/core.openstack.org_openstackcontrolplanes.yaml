@@ -3150,6 +3150,12 @@ spec:
                       apiTimeout:
                         default: 120
                         type: integer
+                      azAwareMode:
+                        enum:
+                        - ""
+                        - Enabled
+                        - Disabled
+                        type: string
                       backendMdnsServerProtocol:
                         type: string
                       backendType:
@@ -13746,6 +13752,12 @@ spec:
                           applicationCredentialSecret:
                             type: string
                         type: object
+                      createFlavors:
+                        enum:
+                        - enabled
+                        - disabled
+                        - ""
+                        type: string
                       customServiceConfig:
                         default: '# add your customization here'
                         type: string
@@ -14032,6 +14044,12 @@ spec:
                               applicationCredentialSecret:
                                 type: string
                             type: object
+                          createFlavors:
+                            enum:
+                            - enabled
+                            - disabled
+                            - ""
+                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -14191,6 +14209,12 @@ spec:
                               applicationCredentialSecret:
                                 type: string
                             type: object
+                          createFlavors:
+                            enum:
+                            - enabled
+                            - disabled
+                            - ""
+                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
@@ -14456,6 +14480,12 @@ spec:
                               applicationCredentialSecret:
                                 type: string
                             type: object
+                          createFlavors:
+                            enum:
+                            - enabled
+                            - disabled
+                            - ""
+                            type: string
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string

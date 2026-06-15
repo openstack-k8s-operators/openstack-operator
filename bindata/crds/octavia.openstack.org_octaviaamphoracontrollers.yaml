@@ -93,6 +93,16 @@ spec:
               containerImage:
                 description: ContainerImage - Amphora Controller Container Image URL
                 type: string
+              createFlavors:
+                description: |-
+                  CreateFlavors - when enabled or empty (default), octavia-operator creates Octavia
+                  flavors and flavor profiles. Set to disabled to manage Octavia flavors externally.
+                  Note: Nova compute flavors for amphorae are always created regardless of this setting.
+                enum:
+                - enabled
+                - disabled
+                - ""
+                type: string
               customServiceConfig:
                 default: '# add your customization here'
                 description: |-
