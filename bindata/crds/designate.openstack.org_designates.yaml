@@ -52,6 +52,16 @@ spec:
                 default: 120
                 description: Designate API timeout
                 type: integer
+              azAwareMode:
+                description: |-
+                  AZAwareMode - when set to "Enabled", activates AZ-aware multipool mode with
+                  BIND views, per-pool TSIG keys, and per-AZ Unbound instances. Requires a valid
+                  multipool ConfigMap with view fields defined for each pool.
+                enum:
+                - ""
+                - Enabled
+                - Disabled
+                type: string
               backendMdnsServerProtocol:
                 description: |-
                   BackendTypeProtocol - Defines the backend protocol to be used between the designate-worker &
