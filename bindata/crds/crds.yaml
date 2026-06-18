@@ -4420,6 +4420,8 @@ spec:
                             additionalProperties:
                               type: string
                             type: object
+                          netUtilsImage:
+                            type: string
                           networkAttachments:
                             items:
                               type: string
