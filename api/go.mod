@@ -27,7 +27,7 @@ require (
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260621105414-da97a35a2fed
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260620124412-719ab0600c40
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260621105415-8863ed73c35e
-	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260619080136-21ca33015cd3
+	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260622090505-66c9c9781b5d
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.77.1-rhobs1 // indirect
 	github.com/rhobs/observability-operator v1.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
