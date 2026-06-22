@@ -3,8 +3,7 @@ on:
   push:
     branches:
       - '*'
-  workflow_dispatch:  # This allows manual triggering from the Actions tab if needed
-
+  workflow_dispatch: # This allows manual triggering from the Actions tab if needed
 env:
   imageregistry: 'quay.io'
   imagenamespace: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
@@ -17,7 +16,7 @@ jobs:
       go_version: 1.24.x
       operator_sdk_version: 1.41.1
       bundle_dockerfile: ./bundle.Dockerfile
-      operator_version: 0.6.0
+      operator_version: 0.7.0
     secrets:
       IMAGENAMESPACE: ${{ secrets.IMAGENAMESPACE }}
       QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
