@@ -37,7 +37,7 @@ require (
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260620124412-719ab0600c40
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260621105415-8863ed73c35e
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20260618175018-5ad5fb731abc
-	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260619080136-21ca33015cd3
+	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260622090505-66c9c9781b5d
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0

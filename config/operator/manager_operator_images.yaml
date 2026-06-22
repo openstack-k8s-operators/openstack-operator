@@ -52,4 +52,4 @@ spec:
         - name: RELATED_IMAGE_TEST_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/test-operator@sha256:b7b713567a084ad73d4bb7b54aec13cbcb2dc6b07b848d713854ed93206676b9
         - name: RELATED_IMAGE_WATCHER_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/watcher-operator@sha256:0efcefed901c5fa18e43ec14e80265429f983c2236fcf848bd02fdf0ccaaa386
+          value: quay.io/openstack-k8s-operators/watcher-operator@sha256:a50366844daa15b047cb7fde95fd4df6744237665b71975bb3a6525d617b307f
