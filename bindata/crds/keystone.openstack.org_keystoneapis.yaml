@@ -1611,6 +1611,7 @@ spec:
                 default: ""
                 description: TrustFlushArgs - Arguments added to keystone-manage trust_flush
                   command
+                pattern: ^[A-Za-z0-9 =._/-]*$
                 type: string
               trustFlushSchedule:
                 default: 1 * * * *
