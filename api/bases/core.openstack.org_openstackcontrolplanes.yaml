@@ -9941,6 +9941,7 @@ spec:
                         type: object
                       trustFlushArgs:
                         default: ""
+                        pattern: ^[A-Za-z0-9 =._/-]*$
                         type: string
                       trustFlushSchedule:
                         default: 1 * * * *
