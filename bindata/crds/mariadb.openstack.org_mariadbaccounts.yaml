@@ -63,6 +63,8 @@ spec:
                 type: string
               userName:
                 description: UserName for new account
+                maxLength: 64
+                pattern: ^[a-zA-Z0-9_]+$
                 type: string
             required:
             - requireTLS

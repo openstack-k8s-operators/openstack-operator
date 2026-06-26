@@ -51,13 +51,19 @@ spec:
               defaultCharacterSet:
                 default: utf8
                 description: Default character set for this database
+                maxLength: 64
+                pattern: ^[a-zA-Z0-9_]+$
                 type: string
               defaultCollation:
                 default: utf8_general_ci
                 description: Default collation for this database
+                maxLength: 64
+                pattern: ^[a-zA-Z0-9_]+$
                 type: string
               name:
                 description: Name of the database in MariaDB
+                maxLength: 64
+                pattern: ^[a-zA-Z0-9_]+$
                 type: string
               secret:
                 description: Name of secret which contains DatabasePassword (deprecated)
