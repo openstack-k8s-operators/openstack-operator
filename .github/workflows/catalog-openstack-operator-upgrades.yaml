@@ -29,34 +29,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@7b8cf10d4e4a01d4992d18a89f4d7dc5a3e6d6f4 # v4
         with:
           go-version: ${{ inputs.go_version }}
           cache: false
       - name: Checkout openstack-operator repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: ./openstack-operator
       - name: Get branch name
         id: branch-name
-        uses: tj-actions/branch-names@v9
+        uses: tj-actions/branch-names@5250492686b253f06fa55861556d1027b067aeb5 # v9
       - name: Set latest tag for non main branch
         if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
         run: |
           echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
       - name: Install opm
-        uses: redhat-actions/openshift-tools-installer@v1
+        uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82 # v1
         with:
           source: github
           opm: 'latest'
       - name: Log in to Quay Registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1
         with:
           registry: ${{ env.imageregistry }}
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - name: Log in to Red Hat Registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1
         with:
           registry: registry.redhat.io
           username: ${{ secrets.REDHATIO_USERNAME }}
@@ -72,14 +72,14 @@ jobs:
           BUNDLE: ${{ env.imageregistry }}/${{ env.imagenamespace }}/openstack-operator-bundle:${{ github.sha }}
       - name: Buildah Action
         id: build-operator-index-upgrade
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
         with:
           image: openstack-operator-index-upgrade
           tags: ${{ env.latesttag }} ${{ github.sha }}
           containerfiles: |
             ./catalog.Dockerfile
       - name: Push openstack-operator-index-upgrade To ${{ env.imageregistry }}
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
         with:
           image: ${{ steps.build-operator-index-upgrade.outputs.image }}
           tags: ${{ steps.build-operator-index-upgrade.outputs.tags }}
