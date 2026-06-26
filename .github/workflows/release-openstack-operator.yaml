@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
 
     - name: Tag image
-      uses: tinact/docker.image-retag@1.0.2
+      uses: tinact/docker.image-retag@684702232e2a3c29b4e5ca25d7d80f927d255c64 # 1.0.3
       with:
         image_name: ${{ env.imagenamespace }}/
         image_old_tag: ${{ github.sha }}
@@ -28,7 +28,7 @@ jobs:
         registry_password: ${{ secrets.QUAY_PASSWORD }}
 
     - name: Tag -bundle image
-      uses: tinact/docker.image-retag@1.0.2
+      uses: tinact/docker.image-retag@684702232e2a3c29b4e5ca25d7d80f927d255c64 # 1.0.3
       with:
         image_name: ${{ env.imagenamespace }}/-bundle
         image_old_tag: ${{ github.sha }}
@@ -38,7 +38,7 @@ jobs:
         registry_password: ${{ secrets.QUAY_PASSWORD }}
 
     - name: Tag -index image
-      uses: tinact/docker.image-retag@1.0.2
+      uses: tinact/docker.image-retag@684702232e2a3c29b4e5ca25d7d80f927d255c64 # 1.0.3
       with:
         image_name: ${{ env.imagenamespace }}/-index
         image_old_tag: ${{ github.sha }}
