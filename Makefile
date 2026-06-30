@@ -406,11 +406,14 @@ bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metada
 	$(KUSTOMIZE) edit set image controller=$(IMG) && \
 	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-init --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
 	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-init --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/1\", \"value\": {\"name\": \"OPERATOR_IMAGE_URL\", \"value\": \"$(IMG)\"}}]"
+	rm -rf bundle/manifests bundle/metadata
 	$(KUSTOMIZE) build config/operator --load-restrictor='LoadRestrictionsNone' | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 ifneq ($(REPLACES),)
 	@echo "Adding replaces: $(REPLACES) to CSV"
 	sed -i "/^  name: openstack-operator.v$(VERSION)/a\  replaces: $(REPLACES)" bundle/manifests/openstack-operator.clusterserviceversion.yaml
 endif
+	@echo "Staging service operator RBAC into bundle manifests"
+	cp config/operator/bundle-rbac/*.yaml bundle/manifests/
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: bundle-build
