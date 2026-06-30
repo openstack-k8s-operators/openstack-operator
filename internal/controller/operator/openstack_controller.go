@@ -111,7 +111,7 @@ func SetupEnv() {
 //+kubebuilder:rbac:groups=operator.openstack.org,resources=openstacks/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=operator.openstack.org,resources=openstacks/finalizers,verbs=update
 // +kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=mutatingwebhookconfigurations;validatingwebhookconfigurations,verbs="*"
-// +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles;clusterrolebindings;rolebindings;roles,verbs="*"
+// +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles;rolebindings,verbs=get;list;delete
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources="*",verbs="*"
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups="",resources=serviceaccounts;configmaps;namespaces,verbs="*"
@@ -573,15 +573,15 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 
 func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
 	Log := r.GetLogger(ctx)
-	// only apply CRDs and RBAC once per each containerImage change
+	// only apply CRDs and services once per each containerImage change
 	if !containerImageMatch(instance) {
 		if err := r.applyCRDs(ctx, instance); err != nil {
 			Log.Error(err, "failed applying CRD manifests")
 			return err
 		}
 
-		if err := r.applyRBAC(ctx, instance); err != nil {
-			Log.Error(err, "failed applying RBAC manifests")
+		if err := r.applyServices(ctx, instance); err != nil {
+			Log.Error(err, "failed applying Services manifests")
 			return err
 		}
 	}
@@ -600,10 +600,10 @@ func (r *OpenStackReconciler) applyCRDs(ctx context.Context, instance *operatorv
 	return r.renderAndApply(ctx, instance, data, "crds", false)
 }
 
-func (r *OpenStackReconciler) applyRBAC(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+func (r *OpenStackReconciler) applyServices(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
 	data := bindata.MakeRenderData()
 	data.Data["OperatorNamespace"] = instance.Namespace
-	return r.renderAndApply(ctx, instance, data, "rbac", true)
+	return r.renderAndApply(ctx, instance, data, "services", true)
 }
 
 func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {

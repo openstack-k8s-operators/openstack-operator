@@ -5,6 +5,7 @@ resources:
 bases:
 - manifests
 - rbac
+- ../rbac
 - deployment
 
 patches:

@@ -161,7 +161,7 @@ generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and
 .PHONY: bindata
 bindata: export LOCAL_BINARIES=$(LOCALBIN)
 bindata: kustomize yq ## Call sync bindata script
-	mkdir -p bindata/crds bindata/rbac bindata/operator
+	mkdir -p bindata/crds bindata/operator
 	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
 	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
 	sed -i bindata/operator/operator.yaml -e "s|replicas:.*|replicas: {{ .OpenStackOperator.Deployment.Replicas }}|"
@@ -170,7 +170,6 @@ bindata: kustomize yq ## Call sync bindata script
 	sed -i bindata/operator/operator.yaml -e "/customRequests/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Requests.Memory }}"
 	sed -i bindata/operator/operator.yaml -e "/customTolerations/c\\      tolerations:\n{{- range .OpenStackOperator.Deployment.Tolerations }}\n      - key: \"{{ .Key }}\"\n{{- if .Operator }}\n        operator: \"{{ .Operator }}\"\n{{- end }}\n{{- if .Value }}\n        value: \"{{ .Value }}\"\n{{- end }}\n{{- if .Effect }}\n        effect: \"{{ .Effect }}\"\n{{- end }}\n{{- if .TolerationSeconds }}\n        tolerationSeconds: {{ .TolerationSeconds }}\n{{- end }}\n{{- end }}"
 	cp config/operator/managers.yaml bindata/operator/
-	$(KUSTOMIZE) build config/rbac > bindata/rbac/rbac.yaml
 	/bin/bash hack/sync-bindata.sh
 
 .PHONY: fmt
@@ -406,11 +405,14 @@ bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metada
 	$(KUSTOMIZE) edit set image controller=$(IMG) && \
 	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-init --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/0\", \"value\": {\"name\": \"OPENSTACK_RELEASE_VERSION\", \"value\": \"$(OPENSTACK_RELEASE_VERSION)\"}}]" && \
 	$(KUSTOMIZE) edit add patch --kind Deployment --name openstack-operator-controller-init --namespace system --patch "[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/env/1\", \"value\": {\"name\": \"OPERATOR_IMAGE_URL\", \"value\": \"$(IMG)\"}}]"
+	rm -rf bundle/manifests bundle/metadata
 	$(KUSTOMIZE) build config/operator --load-restrictor='LoadRestrictionsNone' | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 ifneq ($(REPLACES),)
 	@echo "Adding replaces: $(REPLACES) to CSV"
 	sed -i "/^  name: openstack-operator.v$(VERSION)/a\  replaces: $(REPLACES)" bundle/manifests/openstack-operator.clusterserviceversion.yaml
 endif
+	@echo "Staging service operator RBAC into bundle manifests"
+	cp config/operator/bundle-rbac/*.yaml bundle/manifests/
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: bundle-build
