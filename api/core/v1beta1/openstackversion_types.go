@@ -107,7 +107,8 @@ type ContainerTemplate struct {
 	DesignateWorkerImage          *string `json:"designateWorkerImage,omitempty"`
 	EdpmFrrImage                  *string `json:"edpmFrrImage,omitempty"`
 	EdpmIscsidImage               *string `json:"edpmIscsidImage,omitempty"`
-	EdpmLogrotateCrondImage       *string `json:"edpmLogrotateCrondImage,omitempty"`
+	EdpmLogrotateCrondImage *string `json:"edpmLogrotateCrondImage,omitempty"`
+	// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
 	EdpmMultipathdImage           *string `json:"edpmMultipathdImage,omitempty"`
 	EdpmNeutronDhcpAgentImage     *string `json:"edpmNeutronDhcpAgentImage,omitempty"`
 	EdpmNeutronMetadataAgentImage *string `json:"edpmNeutronMetadataAgentImage,omitempty"`
