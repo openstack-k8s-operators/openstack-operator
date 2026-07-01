@@ -19,6 +19,34 @@ metadata:
 spec:
   duration: 500h0m0s
 ---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: neutron-internal-svc
+spec:
+  duration: 500h0m0s
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: glance-default-internal-svc
+spec:
+  duration: 500h0m0s
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cinder-internal-svc
+spec:
+  duration: 500h0m0s
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: placement-internal-svc
+spec:
+  duration: 500h0m0s
+---
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
 metadata:
@@ -196,25 +224,17 @@ spec:
   tls:
     ingress:
       enabled: true
-      ca:
-        duration: 1000h0m0s
       cert:
         duration: 500h0m0s
     podLevel:
       enabled: true
       internal:
-        ca:
-          duration: 1000h0m0s
         cert:
           duration:  500h0m0s
       libvirt:
-        ca:
-          duration: 1000h0m0s
         cert:
           duration:  500h0m0s
       ovn:
-        ca:
-          duration: 1000h0m0s
         cert:
           duration:  500h0m0s
 status:
