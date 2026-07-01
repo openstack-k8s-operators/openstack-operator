@@ -190,7 +190,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Neutron.Template.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if instance.Spec.Neutron.Template.NodeSelector == nil {
+	if instance.Spec.Neutron.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Neutron.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
