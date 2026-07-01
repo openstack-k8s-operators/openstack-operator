@@ -4,6 +4,9 @@ metadata:
   name: swift
 spec:
   playbook: osp.edpm.swift
+  dependsOn:
+    - run-os
+    - validate-network
   dataSources:
     - secretRef:
         name: swift-conf

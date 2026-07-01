@@ -55,127 +55,112 @@ type Deployer struct {
 	AeeSpec                     *dataplanev1.AnsibleEESpec
 	InventorySecrets            map[string]string
 	AnsibleSSHPrivateKeySecrets map[string]string
+	ServiceCache                *ServiceCache
 	Version                     *openstackv1.OpenStackVersion
 }
 
-// Deploy function encapsulating primary deloyment handling
-func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
+// Deploy function encapsulating primary deployment handling.
+// It accepts a leveled execution plan: each level is a group of services
+// whose dependencies are all satisfied by earlier levels.
+func (d *Deployer) Deploy(serviceLevels [][]string) (*ctrl.Result, error) {
 	log := d.Helper.GetLogger()
+	if d.ServiceCache == nil {
+		d.ServiceCache = NewServiceCache()
+	}
 
-	var readyCondition condition.Type
-	var readyMessage string
-	var readyWaitingMessage string
-	var readyErrorMessage string
-	var deployName string
+	// Flatten levels into a single list for cert-mount lookups.
+	var allServices []string
+	for _, level := range serviceLevels {
+		allServices = append(allServices, level...)
+	}
 
-	// Save a copy of the original ExtraMounts so it can be reset after each
-	// service deployment
-	aeeSpecMounts := make([]storage.VolMounts, len(d.AeeSpec.ExtraMounts))
-	copy(aeeSpecMounts, d.AeeSpec.ExtraMounts)
-	// Deploy the composable services
-	for _, service := range services {
-		deployName = service
-		readyCondition = condition.Type(fmt.Sprintf("Service%sDeploymentReady", strcase.ToCamel(service)))
-		readyWaitingMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, deployName)
-		readyMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, deployName)
-		readyErrorMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, deployName) + " error %s"
+	for levelIdx, level := range serviceLevels {
+		log.Info("Deploying service level", "level", levelIdx, "services", level)
+		levelServices := make(map[string]dataplanev1.OpenStackDataPlaneService, len(level))
 
-		nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
-		log.Info("Deploying service", "service", service)
-		foundService, err := GetService(d.Ctx, d.Helper, service)
-		if err != nil {
-			nsConditions.Set(condition.FalseCondition(
-				readyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				readyErrorMessage,
-				err.Error()))
-			d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
-			return &ctrl.Result{}, err
-		}
+		// Dispatch all services in this level
+		for _, service := range level {
+			deployName := service
+			readyCondition := condition.Type(fmt.Sprintf("Service%sDeploymentReady", strcase.ToCamel(service)))
+			readyWaitingMessage := fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, deployName)
+			readyMessage := fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, deployName)
+			readyErrorMessage := fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, deployName) + " error %s"
 
-		containerImages := dataplaneutil.GetContainerImages(d.Version)
-		if containerImages.AnsibleeeImage != nil {
-			d.AeeSpec.OpenStackAnsibleEERunnerImage = *containerImages.AnsibleeeImage
-		}
-		if len(foundService.Spec.OpenStackAnsibleEERunnerImage) > 0 {
-			d.AeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
-		}
-
-		// Reset ExtraMounts to its original value, and then add in service
-		// specific mounts.
-		d.AeeSpec.ExtraMounts = make([]storage.VolMounts, len(aeeSpecMounts))
-		copy(d.AeeSpec.ExtraMounts, aeeSpecMounts)
-		d.AeeSpec, err = d.addServiceExtraMounts(foundService)
-		if err != nil {
-			nsConditions.Set(condition.FalseCondition(
-				readyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				readyErrorMessage,
-				err.Error()))
-			d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
-			return &ctrl.Result{}, err
-		}
-
-		// Add certMounts
-		if foundService.Spec.AddCertMounts {
-			d.AeeSpec, err = d.addCertMounts(services)
+			log.Info("Deploying service", "service", service, "level", levelIdx)
+			foundService, err := d.ServiceCache.Get(d.Ctx, d.Helper, service)
 			if err != nil {
-				nsConditions.Set(condition.FalseCondition(
-					readyCondition,
-					condition.ErrorReason,
-					condition.SeverityError,
-					readyErrorMessage,
-					err.Error()))
-				d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
+				d.setServiceError(readyCondition, readyErrorMessage, err)
 				return &ctrl.Result{}, err
 			}
-		} else if len(foundService.Spec.CACerts) > 0 {
-			// In general, we use the install-certs service (which has AddCertMounts=true
-			// to copy the cacerts over.  This may not be early enough for some services
-			// though.  In particular, we want the bootstrap service to copy the cacerts
-			// to the default location on the compute node.
-			d.AeeSpec, err = d.addCACertMount(foundService)
+			levelServices[service] = foundService
+
+			serviceAeeSpec := d.AeeSpec.DeepCopy()
+			containerImages := dataplaneutil.GetContainerImages(d.Version)
+			if containerImages.AnsibleeeImage != nil {
+				serviceAeeSpec.OpenStackAnsibleEERunnerImage = *containerImages.AnsibleeeImage
+			}
+			if len(foundService.Spec.OpenStackAnsibleEERunnerImage) > 0 {
+				serviceAeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
+			}
+
+			err = d.addServiceExtraMounts(serviceAeeSpec, foundService)
 			if err != nil {
-				nsConditions.Set(condition.FalseCondition(
-					readyCondition,
-					condition.ErrorReason,
-					condition.SeverityError,
-					readyErrorMessage,
-					err.Error()))
-				d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
+				d.setServiceError(readyCondition, readyErrorMessage, err)
+				return &ctrl.Result{}, err
+			}
+
+			// Add certMounts
+			if foundService.Spec.AddCertMounts {
+				err = d.addCertMounts(serviceAeeSpec, allServices)
+				if err != nil {
+					d.setServiceError(readyCondition, readyErrorMessage, err)
+					return &ctrl.Result{}, err
+				}
+			} else if len(foundService.Spec.CACerts) > 0 {
+				err = d.addCACertMount(serviceAeeSpec, foundService)
+				if err != nil {
+					d.setServiceError(readyCondition, readyErrorMessage, err)
+					return &ctrl.Result{}, err
+				}
+			}
+
+			err = d.ConditionalDeploy(
+				readyCondition,
+				readyMessage,
+				readyWaitingMessage,
+				readyErrorMessage,
+				deployName,
+				foundService,
+				serviceAeeSpec,
+			)
+
+			if err != nil {
+				log.Info("Condition error in service level", "condition", readyCondition, "level", levelIdx)
 				return &ctrl.Result{}, err
 			}
 		}
 
-		err = d.ConditionalDeploy(
-			readyCondition,
-			readyMessage,
-			readyWaitingMessage,
-			readyErrorMessage,
-			deployName,
-			foundService,
-		)
+		// After dispatching all services in this level, check that every
+		// service in the level is ready before advancing to the next level.
+		for _, service := range level {
+			readyCondition := condition.Type(fmt.Sprintf("Service%sDeploymentReady", strcase.ToCamel(service)))
+			nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
+			if !nsConditions.IsTrue(readyCondition) {
+				log.Info("Condition not ready in service level, waiting", "condition", readyCondition, "level", levelIdx)
+				return &ctrl.Result{}, nil
+			}
+			log.Info("Condition ready", "condition", readyCondition)
 
-		nsConditions = d.Status.NodeSetConditions[d.NodeSet.Name]
-		if err != nil || !nsConditions.IsTrue(readyCondition) {
-			log.Info(fmt.Sprintf("Condition %s not ready", readyCondition))
-			return &ctrl.Result{}, err
-		}
-
-		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
-
-		// (TODO) Only considers the container image values from the Version
-		// for the time being. Can be expanded later to look at the actual
-		// values used from the inventory, etc.
-		if d.Version != nil {
-			vContainerImages := reflect.ValueOf(d.Version.Status.ContainerImages)
-			for _, cif := range foundService.Spec.ContainerImageFields {
-				d.Deployment.Status.ContainerImages[cif] = reflect.Indirect(vContainerImages.FieldByName(cif)).String()
+			foundService := levelServices[service]
+			// (TODO) Only considers the container image values from the Version
+			// for the time being.
+			if d.Version != nil {
+				vContainerImages := reflect.ValueOf(d.Version.Status.ContainerImages)
+				for _, cif := range foundService.Spec.ContainerImageFields {
+					d.Deployment.Status.ContainerImages[cif] = reflect.Indirect(vContainerImages.FieldByName(cif)).String()
+				}
 			}
 		}
-
 	}
 
 	return nil, nil
@@ -190,15 +175,16 @@ func (d *Deployer) ConditionalDeploy(
 	readyErrorMessage string,
 	deployName string,
 	foundService dataplanev1.OpenStackDataPlaneService,
+	aeeSpec *dataplanev1.AnsibleEESpec,
 ) error {
 	var err error
 	log := d.Helper.GetLogger()
 
 	nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
 	if nsConditions.IsUnknown(readyCondition) {
-		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
+		log.Info("Condition unknown, starting deploy", "condition", readyCondition, "service", deployName)
 		err = d.DeployService(
-			foundService)
+			foundService, aeeSpec)
 		if err != nil {
 			util.LogErrorForObject(d.Helper, err, fmt.Sprintf("Unable to %s for %s", deployName, d.NodeSet.Name), d.NodeSet)
 			return err
@@ -219,10 +205,10 @@ func (d *Deployer) ConditionalDeploy(
 		if err != nil {
 			// Return nil if we don't have AnsibleEE available yet
 			if k8s_errors.IsNotFound(err) {
-				log.Info(fmt.Sprintf("%s AnsibleEE job is not yet found", readyCondition))
+				log.Info("AnsibleEE job not yet found", "condition", readyCondition)
 				return nil
 			}
-			log.Error(err, fmt.Sprintf("Error getting ansibleJob job for %s", deployName))
+			log.Error(err, "Error getting ansibleJob job", "service", deployName)
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
@@ -232,7 +218,7 @@ func (d *Deployer) ConditionalDeploy(
 		}
 		if ansibleJob.Status.Succeeded > 0 {
 			d.storeExecutionSummary(ansibleJob)
-			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
+			log.Info("Condition ready", "condition", readyCondition)
 			nsConditions.Set(condition.TrueCondition(
 				readyCondition,
 				"%s", readyMessage))
@@ -247,7 +233,7 @@ func (d *Deployer) ConditionalDeploy(
 				errorMsg = fmt.Sprintf("backoff limit reached for execution.name %s execution.namespace %s execution.condition.message: %s", ansibleJob.Name, ansibleJob.Namespace, ansibleCondition.Message)
 			}
 			d.storeExecutionSummary(ansibleJob)
-			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
+			log.Info("Condition error", "condition", readyCondition)
 			err = fmt.Errorf("%s", errorMsg)
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
@@ -256,7 +242,10 @@ func (d *Deployer) ConditionalDeploy(
 				readyErrorMessage,
 				err.Error()))
 		} else {
-			log.Info(fmt.Sprintf("AnsibleEE job is not yet completed: Execution: %s, Active pods: %d, Failed pods: %d", ansibleJob.Name, ansibleJob.Status.Active, ansibleJob.Status.Failed))
+			log.Info("AnsibleEE job not yet completed",
+				"execution", ansibleJob.Name,
+				"activePods", ansibleJob.Status.Active,
+				"failedPods", ansibleJob.Status.Failed)
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.RequestedReason,
@@ -287,25 +276,41 @@ func (d *Deployer) storeExecutionSummary(ansibleJob *batchv1.Job) {
 	d.Status.AnsibleExecutionSummaries[ansibleJob.Name] = *summary
 }
 
+func (d *Deployer) setServiceError(
+	readyCondition condition.Type,
+	readyErrorMessage string,
+	err error,
+) {
+	nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
+	nsConditions.Set(condition.FalseCondition(
+		readyCondition,
+		condition.ErrorReason,
+		condition.SeverityError,
+		readyErrorMessage,
+		err.Error()))
+	d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
+}
+
 // addCertMounts adds the cert mounts to the aeeSpec for the install-certs service
 func (d *Deployer) addCertMounts(
+	aeeSpec *dataplanev1.AnsibleEESpec,
 	services []string,
-) (*dataplanev1.AnsibleEESpec, error) {
+) error {
 	log := d.Helper.GetLogger()
 	client := d.Helper.GetClient()
 	for _, svc := range services {
-		service, err := GetService(d.Ctx, d.Helper, svc)
+		service, err := d.ServiceCache.Get(d.Ctx, d.Helper, svc)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if service.Spec.CertsFrom != "" && service.Spec.TLSCerts == nil && service.Spec.CACerts == "" {
 			if slices.Contains(services, service.Spec.CertsFrom) {
 				continue
 			}
-			service, err = GetService(d.Ctx, d.Helper, service.Spec.CertsFrom)
+			service, err = d.ServiceCache.Get(d.Ctx, d.Helper, service.Spec.CertsFrom)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 
@@ -313,9 +318,9 @@ func (d *Deployer) addCertMounts(
 			if slices.Contains(services, service.Spec.EDPMServiceType) {
 				continue
 			}
-			service, err = GetService(d.Ctx, d.Helper, service.Spec.EDPMServiceType)
+			service, err = d.ServiceCache.Get(d.Ctx, d.Helper, service.Spec.EDPMServiceType)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 
@@ -336,7 +341,7 @@ func (d *Deployer) addCertMounts(
 				certSecret := &corev1.Secret{}
 				err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
 				if err != nil {
-					return d.AeeSpec, err
+					return err
 				}
 				numberOfSecrets, _ := strconv.Atoi(certSecret.Labels["numberOfSecrets"])
 				projectedVolumeSource := corev1.ProjectedVolumeSource{
@@ -347,7 +352,7 @@ func (d *Deployer) addCertMounts(
 					certSecret := &corev1.Secret{}
 					err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
 					if err != nil {
-						return d.AeeSpec, err
+						return err
 					}
 					volumeProjection := corev1.VolumeProjection{
 						Secret: &corev1.SecretProjection{
@@ -381,25 +386,26 @@ func (d *Deployer) addCertMounts(
 				}
 				volMounts.Volumes = append(volMounts.Volumes, certVolume)
 				volMounts.Mounts = append(volMounts.Mounts, certVolumeMount)
-				d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
+				aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
 			}
 		}
 
 		// add mount for cacert bundle, even if TLS-E is not enabled
 		if len(service.Spec.CACerts) > 0 {
-			d.AeeSpec, err = d.addCACertMount(service)
+			err = d.addCACertMount(aeeSpec, service)
 			if err != nil {
-				return d.AeeSpec, err
+				return err
 			}
 		}
 	}
 
-	return d.AeeSpec, nil
+	return nil
 }
 
 func (d *Deployer) addCACertMount(
+	aeeSpec *dataplanev1.AnsibleEESpec,
 	service dataplanev1.OpenStackDataPlaneService,
-) (*dataplanev1.AnsibleEESpec, error) {
+) error {
 	log := d.Helper.GetLogger()
 	client := d.Helper.GetClient()
 
@@ -408,7 +414,7 @@ func (d *Deployer) addCACertMount(
 	cacertSecret := &corev1.Secret{}
 	err := client.Get(d.Ctx, types.NamespacedName{Name: service.Spec.CACerts, Namespace: service.Namespace}, cacertSecret)
 	if err != nil {
-		return d.AeeSpec, err
+		return err
 	}
 	volumeName := fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts)
 	if len(volumeName) > apimachineryvalidation.DNS1123LabelMaxLength {
@@ -431,14 +437,15 @@ func (d *Deployer) addCACertMount(
 
 	volMounts.Volumes = append(volMounts.Volumes, cacertVolume)
 	volMounts.Mounts = append(volMounts.Mounts, cacertVolumeMount)
-	d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
-	return d.AeeSpec, nil
+	aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
+	return nil
 }
 
 // addServiceExtraMounts adds the service configs as ExtraMounts to aeeSpec
 func (d *Deployer) addServiceExtraMounts(
+	aeeSpec *dataplanev1.AnsibleEESpec,
 	service dataplanev1.OpenStackDataPlaneService,
-) (*dataplanev1.AnsibleEESpec, error) {
+) error {
 	baseMountPath := path.Join(ConfigPaths, service.Spec.EDPMServiceType)
 
 	var configMaps []*corev1.ConfigMap
@@ -447,7 +454,7 @@ func (d *Deployer) addServiceExtraMounts(
 	for _, dataSource := range service.Spec.DataSources {
 		_cm, _secret, err := dataplaneutil.GetDataSourceCmSecret(d.Ctx, d.Helper, service.Namespace, dataSource)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if _cm != nil {
@@ -505,7 +512,7 @@ func (d *Deployer) addServiceExtraMounts(
 
 		}
 
-		d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
+		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
 	}
 
 	for _, sec := range secrets {
@@ -549,8 +556,8 @@ func (d *Deployer) addServiceExtraMounts(
 
 		}
 
-		d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
+		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
 	}
 
-	return d.AeeSpec, nil
+	return nil
 }
