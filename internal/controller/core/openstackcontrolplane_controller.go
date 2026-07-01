@@ -315,16 +315,23 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	}
 
 	// OVN
-	Log.Info("Minor update OVN on the ControlPlane")
-	ctrlResult, err = r.reconcileOVNControllers(ctx, instance, version, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
-		return ctrlResult, nil
-	}
-	instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
+	// Once the OVN controlplane phase is complete, skip reconcileOVNControllers to prevent
+	// transient OVN readiness changes from flapping OVNReadyCondition during
+	// later phases. We still need to mark OVNReadyCondition True because
+	// InitConditions() resets all conditions to Unknown on each reconcile.
 	if !version.Status.Conditions.IsTrue(corev1beta1.OpenStackVersionMinorUpdateOVNControlplane) {
+		Log.Info("Minor update OVN on the ControlPlane")
+		ctrlResult, err = r.reconcileOVNControllers(ctx, instance, version, helper)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		instance.Status.DeployedOVNVersion = &version.Spec.TargetVersion
+		// Wait for the OpenStackVersion controller to acknowledge OVN controlplane update
 		return ctrlResult, nil
+	} else {
+		instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneOVNReadyCondition, corev1beta1.OpenStackControlPlaneOVNReadyMessage)
 	}
 
 	// only if OVN dataplane is updated
@@ -402,7 +409,15 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 }
 
 func (r *OpenStackControlPlaneReconciler) reconcileOVNControllers(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *common_helper.Helper) (ctrl.Result, error) {
-	OVNControllerReady, OVNControllerConditions, err := openstack.ReconcileOVNController(ctx, instance, version, helper, "")
+	var ovnMetricsCertName string
+	if instance.Spec.TLS.PodLevel.Enabled {
+		var err error
+		ovnMetricsCertName, err = openstack.EnsureOVNMetricsCert(ctx, instance, helper)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+	OVNControllerReady, OVNControllerConditions, err := openstack.ReconcileOVNController(ctx, instance, version, helper, ovnMetricsCertName)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if !OVNControllerReady {
