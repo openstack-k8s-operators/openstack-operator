@@ -41,8 +41,27 @@ spec:
         - /manager
         env:
 {{- range .Deployment.Manager.Env }}
-        - name: {{ .Name }}
+        - name: '{{ .Name }}'
+{{- if .Value }}
           value: '{{ .Value }}'
+{{- end }}
+{{- if .ValueFrom }}
+          valueFrom:
+{{- if .ValueFrom.FieldRef }}
+            fieldRef:
+              fieldPath: '{{ .ValueFrom.FieldRef.FieldPath }}'
+{{- end }}
+{{- if .ValueFrom.ConfigMapKeyRef }}
+            configMapKeyRef:
+              name: '{{ .ValueFrom.ConfigMapKeyRef.Name }}'
+              key: '{{ .ValueFrom.ConfigMapKeyRef.Key }}'
+{{- end }}
+{{- if .ValueFrom.SecretKeyRef }}
+            secretKeyRef:
+              name: '{{ .ValueFrom.SecretKeyRef.Name }}'
+              key: '{{ .ValueFrom.SecretKeyRef.Key }}'
+{{- end }}
+{{- end }}
 {{- end }}
         image: {{ .Deployment.Manager.Image }}
         livenessProbe:
