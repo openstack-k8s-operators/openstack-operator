@@ -14,16 +14,11 @@ spec:
         name: neutron-ovn-extra-config
         optional: true
   tlsCerts:
-    default:
-      contents:
-      - dnsnames
-      - ips
-      networks:
-      - ctlplane
+    rbac:
+      commonName: system-id
       issuer: osp-rootca-issuer-ovn
       keyUsages:
         - digital signature
-        - key encipherment
         - client auth
   caCerts: combined-ca-bundle
   containerImageFields:
