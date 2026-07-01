@@ -693,17 +693,15 @@ rules:
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
-  - clusterrolebindings
-  - clusterroles
-  verbs:
-  - '*'
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
   - rolebindings
   - roles
   verbs:
-  - '*'
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - redis.openstack.org
   resources:

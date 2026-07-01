@@ -35,7 +35,7 @@ RUN if [ -f $CACHITO_ENV_FILE ] ; then source $CACHITO_ENV_FILE ; fi ; env ${GO_
 RUN if [ -f $CACHITO_ENV_FILE ] ; then source $CACHITO_ENV_FILE ; fi ; env ${GO_BUILD_EXTRA_ENV_ARGS} go build ${GO_BUILD_EXTRA_ARGS} -a -o ${DEST_ROOT}/operator cmd/operator/main.go
 
 RUN cp -r config/services ${DEST_ROOT}/services
-RUN cp -r bindata ${DEST_ROOT}/bindata
+RUN cp -r bindata ${DEST_ROOT}/bindata && rm -rf ${DEST_ROOT}/bindata/rbac
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
