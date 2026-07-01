@@ -159,6 +159,8 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-rsyslog:current-podified
         - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_MCP_IMAGE_URL_DEFAULT
+          value: quay.io/dprince/rhos-mcps:latest
         - name: RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified
         - name: RELATED_IMAGE_OVN_CONTROLLER_IMAGE_URL_DEFAULT
