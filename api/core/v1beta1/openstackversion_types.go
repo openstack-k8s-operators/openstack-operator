@@ -105,8 +105,9 @@ type ContainerTemplate struct {
 	DesignateProducerImage        *string `json:"designateProducerImage,omitempty"`
 	DesignateUnboundImage         *string `json:"designateUnboundImage,omitempty"`
 	DesignateWorkerImage          *string `json:"designateWorkerImage,omitempty"`
-	EdpmFrrImage                  *string `json:"edpmFrrImage,omitempty"`
-	EdpmIscsidImage               *string `json:"edpmIscsidImage,omitempty"`
+	EdpmFrrImage    *string `json:"edpmFrrImage,omitempty"`
+	// Deprecated: EdpmIscsidImage is no longer used. iscsid now runs on the host instead of in a container.
+	EdpmIscsidImage *string `json:"edpmIscsidImage,omitempty"`
 	EdpmLogrotateCrondImage       *string `json:"edpmLogrotateCrondImage,omitempty"`
 	EdpmMultipathdImage           *string `json:"edpmMultipathdImage,omitempty"`
 	EdpmNeutronDhcpAgentImage     *string `json:"edpmNeutronDhcpAgentImage,omitempty"`

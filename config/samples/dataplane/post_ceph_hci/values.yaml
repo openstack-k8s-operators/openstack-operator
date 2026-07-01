@@ -12,7 +12,6 @@ data:
         vars:
           timesync_ntp_servers:
             - hostname: clock.redhat.com
-          edpm_iscsid_image: '{{ registry_url }}/openstack-iscsid:{{ image_tag }}'
           edpm_logrotate_crond_image: '{{ registry_url }}/openstack-cron:{{ image_tag }}'
           edpm_network_config_hide_sensitive_logs: false
           edpm_network_config_os_net_config_mappings:
