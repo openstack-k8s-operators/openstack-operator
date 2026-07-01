@@ -3,7 +3,20 @@ kind: TestAssert
 timeout: 900
 commands:
   - script: |
+      echo "Waiting for OpenStack control plane to be ready after cert re-issuance..."
+      oc wait openstackcontrolplane -n $NAMESPACE --for=condition=Ready --timeout=600s -l core.openstack.org/openstackcontrolplane
+
+  - script: |
       echo "Checking rotation of non API service certificates..."
+      for i in $(seq 1 15); do
+        if NAMESPACE=$NAMESPACE bash ../../common/osp_check_noapi_service_certs.sh 2>/dev/null; then
+          echo "Non-API service certificates verified successfully."
+          exit 0
+        fi
+        echo "Attempt $i/15: Non-API service certs not yet consistent, waiting 20s..."
+        sleep 20
+      done
+      echo "Final non-API service cert check..."
       NAMESPACE=$NAMESPACE bash ../../common/osp_check_noapi_service_certs.sh
 
   - script: |
