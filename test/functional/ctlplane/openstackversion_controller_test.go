@@ -132,7 +132,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.EdpmFrrImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmIscsidImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmLogrotateCrondImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmMultipathdImage).ShouldNot(BeNil())
+				// EdpmMultipathdImage is no longer used - multipathd now runs on the host instead of in a container
 				g.Expect(version.Status.ContainerImages.EdpmNeutronMetadataAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNeutronSriovAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())

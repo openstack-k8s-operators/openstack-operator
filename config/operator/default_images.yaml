@@ -77,8 +77,6 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
         - name: RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-cron:current-podified
-        - name: RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-multipathd:current-podified
         - name: RELATED_IMAGE_EDPM_NEUTRON_DHCP_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified
         - name: RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT

@@ -94,7 +94,6 @@ ifeval::["{build}" != "downstream"]
         edpm_telemetry_ceilometer_ipmi_image: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi
         edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute
         edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent
-        edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd
         edpm_neutron_dhcp_image: "quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent
         edpm_neutron_metadata_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn
         edpm_neutron_ovn_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent
@@ -119,7 +118,6 @@ ifeval::["{build}" == "downstream"]
         edpm_telemetry_ceilometer_ipmi_image: redhat.registry.io/rhoso-beta/openstack-ceilometer-ipmi-rhel9:18.0.0
         edpm_nova_compute_image: "redhat.registry.io/rhoso-beta/openstack-nova-compute-rhel9:18.0.0
         edpm_neutron_sriov_image: "redhat.registry.io/rhoso-beta/openstack-neutron-sriov-agent-rhel9:18.0.0
-        edpm_multipathd_image: "redhat.registry.io/rhoso-beta/openstack-multipathd-rhel9:18.0.0
         edpm_neutron_dhcp_image: "redhat.registry.io/rhoso-beta/openstack-neutron-dhcp-agent-rhel9:18.0.0
         edpm_neutron_metadata_agent_image: "redhat.registry.io/rhoso-beta/openstack-neutron-metadata-agent-ovn-rhel9:18.0.0
         edpm_neutron_ovn_agent_image: "redhat.registry.io/rhoso-beta/openstack-neutron-ovn-agent-rhel9:18.0.0
