@@ -5,23 +5,15 @@ metadata:
 spec:
   tls:
     ingress:
-      ca:
-        duration: 1000h0m0s
       cert:
         duration: 500h0m0s
     podLevel:
       internal:
-        ca:
-          duration: 1000h0m0s
         cert:
           duration:  500h0m0s
       libvirt:
-        ca:
-          duration: 1000h0m0s
         cert:
           duration:  500h0m0s
       ovn:
-        ca:
-          duration: 1000h0m0s
         cert:
           duration:  500h0m0s
