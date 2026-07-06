@@ -7,26 +7,26 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/onsi/ginkgo/v2 v2.28.2
 	github.com/onsi/gomega v1.42.0
-	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260627114641-2b624415a135
-	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260627093022-c8fb2008a3b1
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260629154114-ee6be6604baa
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260630072723-867f2f4455de
-	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260627114112-3e9048232877
-	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260630073025-9c20eb38c195
+	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260704190152-6b295beb5ce4
+	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260704135856-3b88a0ad861f
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260704190153-a40ae79abbfc
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260704135610-7501f5425bbe
+	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260704172930-9247f70ccb62
+	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260704173219-88ce2ba592cd
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260629124631-33e3b7eda748
-	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260627114111-db4eff2ea442
-	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260630073023-c9c3dbc3a240
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260626101608-0959e9d46047
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260626101608-0959e9d46047
-	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260629071945-e6e918f4ee72
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260627114113-20244e88257d
-	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260629071945-846b517a0716
-	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260627114112-2085b0cfd94a
-	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260629072249-9fda8db67427
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260629072250-f898de5dca43
-	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260629072249-0d0d224f6f33
-	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260630073024-5fb73fa8d93b
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260626080002-0155f702afbd
+	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260704172346-bb3be95f703a
+	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260704172638-11c7839adc3f
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260704173810-7bc44d3d79e5
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260704173810-7bc44d3d79e5
+	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260704135857-89777fd676e5
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260704190447-559fe7c4cb59
+	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260705180142-05d7d7b69a2b
+	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260705180431-36da18bebf8d
+	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260705180431-1c139dfe4361
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260705181549-158148abeab1
+	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260705200009-76c9743192e6
+	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260704135858-ce8953706cf9
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260704180619-c16d548aed27
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260630073629-8ca0f0619234
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.77.1-rhobs1 // indirect
 	github.com/rhobs/observability-operator v1.0.0 // indirect
