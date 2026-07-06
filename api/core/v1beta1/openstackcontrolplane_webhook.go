@@ -339,9 +339,8 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 	case "Octavia":
 		// TODO(beagles): So far we haven't declared Redis as dependency for Octavia, but we might.
 		if !((r.Spec.Galera.Enabled) && r.Spec.Memcached.Enabled && r.Spec.Rabbitmq.Enabled &&
-			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled &&
-			r.Spec.Ovn.Enabled) {
-			reqs = "Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova, OVN"
+			r.Spec.Keystone.Enabled && r.Spec.Neutron.Enabled && r.Spec.Glance.Enabled && r.Spec.Nova.Enabled) {
+			reqs = "Galera, Memcached, RabbitMQ, Keystone, Glance, Neutron, Nova"
 		}
 	case "Telemetry.Autoscaling":
 		if !(r.Spec.Galera.Enabled && r.Spec.Heat.Enabled && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled) {
