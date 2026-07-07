@@ -778,10 +778,9 @@ func TestGetSigstoreImagePolicy_WithRemapIdentity(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 	g.Expect(result.RegistryMappings).To(Equal([]RegistryMapping{
-		{Mirror: "local-registry.example.com:5000", Source: "registry.example.com/vendor"},
+		{Mirror: "local-registry.example.com:5000", Source: "registry.example.com/vendor", SignedPrefix: "registry.example.com/vendor"},
 	}))
 	g.Expect(result.CosignKeyData).To(Equal(base64.StdEncoding.EncodeToString([]byte("test-public-key"))))
-	g.Expect(result.SignedPrefix).To(Equal("registry.example.com/vendor"))
 }
 
 func TestGetSigstoreImagePolicy(t *testing.T) {
@@ -806,7 +805,6 @@ func TestGetSigstoreImagePolicy(t *testing.T) {
 		{Mirror: "local-registry.example.com:5000"},
 	}))
 	g.Expect(result.CosignKeyData).To(Equal(base64.StdEncoding.EncodeToString([]byte("test-public-key"))))
-	g.Expect(result.SignedPrefix).To(BeEmpty())
 }
 
 func TestGetSigstoreImagePolicy_ReturnsAllMatchingMirrorScopes(t *testing.T) {
@@ -886,7 +884,83 @@ func TestGetSigstoreImagePolicy_ReturnsErrorForAmbiguousPolicies(t *testing.T) {
 
 	result, err := GetSigstoreImagePolicy(ctx, h, []string{"mirror.example.com:5000/openstack-k8s-operators"}, nil)
 	g.Expect(err).To(HaveOccurred())
-	g.Expect(err.Error()).To(ContainSubstring("expected exactly one ClusterImagePolicy matching mirror registries"))
+	g.Expect(err.Error()).To(ContainSubstring("mirror scope mirror.example.com:5000/openstack-k8s-operators matched multiple ClusterImagePolicies"))
+	g.Expect(result).To(BeNil())
+}
+
+func TestGetSigstoreImagePolicy_AllowsDifferentPoliciesPerMirrorScope(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+
+	policy1 := newSigstorePolicy(
+		"v1alpha1",
+		"policy-rhoso",
+		[]string{"mirror.example.com:5000/rhoso"},
+		"shared-key",
+		"RemapIdentity",
+		"registry.redhat.io/rhoso",
+	)
+	policy2 := newSigstorePolicy(
+		"v1alpha1",
+		"policy-rhoso-operators",
+		[]string{"mirror.example.com:5000/rhoso-operators"},
+		"shared-key",
+		"RemapIdentity",
+		"registry.redhat.io/rhoso-operators",
+	)
+
+	h := setupTestHelper(true, newClusterImagePolicyCRD("v1alpha1"), policy1, policy2)
+
+	sourceByMirror := map[string]string{
+		"mirror.example.com:5000/rhoso":           "registry.redhat.io/rhoso",
+		"mirror.example.com:5000/rhoso-operators": "registry.redhat.io/rhoso-operators",
+	}
+	result, err := GetSigstoreImagePolicy(ctx, h, []string{
+		"mirror.example.com:5000/rhoso",
+		"mirror.example.com:5000/rhoso-operators",
+	}, sourceByMirror)
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(result).ToNot(BeNil())
+	g.Expect(result.RegistryMappings).To(Equal([]RegistryMapping{
+		{Mirror: "mirror.example.com:5000/rhoso", Source: "registry.redhat.io/rhoso", SignedPrefix: "registry.redhat.io/rhoso"},
+		{Mirror: "mirror.example.com:5000/rhoso-operators", Source: "registry.redhat.io/rhoso-operators", SignedPrefix: "registry.redhat.io/rhoso-operators"},
+	}))
+	g.Expect(result.CosignKeyData).To(Equal(base64.StdEncoding.EncodeToString([]byte("shared-key"))))
+}
+
+func TestGetSigstoreImagePolicy_ReturnsErrorForDifferentKeysAcrossPolicies(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+
+	policy1 := newSigstorePolicy(
+		"v1alpha1",
+		"policy-rhoso",
+		[]string{"mirror.example.com:5000/rhoso"},
+		"key-one",
+		"RemapIdentity",
+		"registry.redhat.io/rhoso",
+	)
+	policy2 := newSigstorePolicy(
+		"v1alpha1",
+		"policy-ubi9",
+		[]string{"mirror.example.com:5000/ubi9"},
+		"key-two",
+		"RemapIdentity",
+		"registry.redhat.io/ubi9",
+	)
+
+	h := setupTestHelper(true, newClusterImagePolicyCRD("v1alpha1"), policy1, policy2)
+
+	sourceByMirror := map[string]string{
+		"mirror.example.com:5000/rhoso": "registry.redhat.io/rhoso",
+		"mirror.example.com:5000/ubi9":  "registry.redhat.io/ubi9",
+	}
+	result, err := GetSigstoreImagePolicy(ctx, h, []string{
+		"mirror.example.com:5000/rhoso",
+		"mirror.example.com:5000/ubi9",
+	}, sourceByMirror)
+	g.Expect(err).To(HaveOccurred())
+	g.Expect(err.Error()).To(ContainSubstring("different cosign key data"))
 	g.Expect(result).To(BeNil())
 }
 
