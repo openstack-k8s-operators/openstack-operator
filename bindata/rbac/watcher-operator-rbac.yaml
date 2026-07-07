@@ -387,4 +387,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: watcher-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: watcher-operator-metrics-server-cert

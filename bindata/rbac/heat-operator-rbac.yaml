@@ -361,4 +361,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: heat-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: heat-operator-metrics-server-cert

@@ -417,4 +417,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: swift-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: swift-operator-metrics-server-cert

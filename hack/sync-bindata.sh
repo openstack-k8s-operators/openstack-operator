@@ -87,6 +87,9 @@ spec:
   issuerRef:
     kind: Issuer
     name: $OPERATOR_NAME-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: $OPERATOR_NAME-webhook-server-cert
 ---
 apiVersion: admissionregistration.k8s.io/v1
@@ -341,6 +344,9 @@ spec:
   issuerRef:
     kind: Issuer
     name: $OPERATOR_NAME-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: $OPERATOR_NAME-metrics-server-cert
 EOF_CAT
 

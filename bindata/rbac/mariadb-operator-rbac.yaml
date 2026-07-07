@@ -333,4 +333,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: mariadb-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: mariadb-operator-metrics-server-cert

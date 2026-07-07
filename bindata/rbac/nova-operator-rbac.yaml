@@ -431,4 +431,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: nova-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: nova-operator-metrics-server-cert

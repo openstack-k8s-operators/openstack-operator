@@ -372,4 +372,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: cinder-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: cinder-operator-metrics-server-cert

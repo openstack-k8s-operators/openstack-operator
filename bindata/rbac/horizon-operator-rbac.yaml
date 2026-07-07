@@ -312,4 +312,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: horizon-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: horizon-operator-metrics-server-cert
