@@ -171,9 +171,6 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 			nodeSetGroup.Vars["edpm_container_signature_verification"] = true
 			nodeSetGroup.Vars["edpm_container_signature_registry_mappings"] = sigstorePolicy.RegistryMappings
 			nodeSetGroup.Vars["edpm_container_signature_cosign_key_data"] = sigstorePolicy.CosignKeyData
-			if sigstorePolicy.SignedPrefix != "" {
-				nodeSetGroup.Vars["edpm_container_signature_signed_prefix"] = sigstorePolicy.SignedPrefix
-			}
 		} else {
 			helper.GetLogger().Info("No matching ClusterImagePolicy found; skipping sigstore verification")
 		}
