@@ -152,8 +152,8 @@ Example configuration with bonding:
          - eno2
        bondMode: "802.3ad"
        bondOptions:
-         bond-miimon: "100"
-         bond-xmit-hash-policy: "layer3+4"
+         bond_miimon: "100"
+         bond_xmit_hash_policy: "layer3+4"
      cloudUserName: cloud-admin
    nodes:
      edpm-compute-0:
