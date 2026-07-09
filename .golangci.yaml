@@ -8,6 +8,11 @@ linters:
     - revive
     - ginkgolinter
     - govet
+  settings:
+    govet:
+      disable:
+        # TODO: re-enable once golangci-lint supports Go 1.26 inlining of generics
+        - inline
 
 formatters:
   enable:
