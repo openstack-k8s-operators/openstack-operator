@@ -56,7 +56,9 @@ spec:
                 description: |-
                   Customize config using this parameter to change service defaults,
                   or overwrite rendered information using raw MariaDB config format.
-                  The content gets added to /etc/my.cnf.d/galera_custom.cnf
+                  The content gets added to /etc/my.cnf.d/zzz_galera_custom.cnf. The zzz_
+                  prefix is to ensure that this file is loaded last so that any
+                  customizations occur after all other configuration is applied.
                 type: string
               disableNonTLSListeners:
                 description: When TLS is configured, only allow connections to the
@@ -345,8 +347,12 @@ spec:
             properties:
               attributes:
                 additionalProperties:
-                  description: GaleraAttributes holds startup information for a Galera
-                    host
+                  description: |-
+                    GaleraAttributes holds startup information for a Galera host.
+                    This struct is read-only from the operator's perspective — all fields
+                    are pushed by the galera pods via the report_local_galera_state script.
+                    The operator must not write to these fields to avoid a concurrency
+                    race with the deferred status merge patch.
                   properties:
                     containerID:
                       description: Identifier of the container at the time the gcomm
