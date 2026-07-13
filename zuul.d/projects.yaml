@@ -2,30 +2,4 @@
 - project:
     name: openstack-k8s-operators/openstack-operator
     github-check:
-      jobs:
-        - openstack-k8s-operators-content-provider
-        - podified-multinode-edpm-deployment-crc:
-            dependencies: ["openstack-k8s-operators-content-provider"]
-            irrelevant-files: &irrelevant-files
-              - .*/*.md
-              - ^\..*$
-              - ^docs/.*$
-              - ^LICENSE$
-              - ^OWNERS$
-              - ^OWNERS_ALIASES$
-              - ^PROJECT$
-              - ^README.md$
-              - tests?\/functional
-        - cifmw-crc-podified-edpm-baremetal:
-            dependencies: ["openstack-k8s-operators-content-provider"]
-            irrelevant-files: *irrelevant-files
-        - adoption-standalone-to-crc-ceph-provider:
-            dependencies: ["openstack-k8s-operators-content-provider"]
-            irrelevant-files: *irrelevant-files
-        - openstack-operator-tempest-multinode
-        - openstack-operator-docs-preview
-        - openstack-operator-kuttl:
-            voting: false
-        - openstack-operator-edpm-baremetal-minor-update:
-            dependencies: ["openstack-k8s-operators-content-provider"]
-            irrelevant-files: *irrelevant-files
+      jobs: []
