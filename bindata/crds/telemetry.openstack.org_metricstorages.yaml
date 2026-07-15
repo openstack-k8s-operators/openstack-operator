@@ -1919,6 +1919,10 @@ spec:
                 format: int64
                 type: integer
               prometheusTLSPatched:
+                description: |-
+                  Deprecated: used only for upgrade migration from the old direct Prometheus CR
+                  TLS patching to the new MonitoringStack WebTLSConfig API. Can be removed once
+                  all deployments have upgraded past this version.
                 type: boolean
             type: object
         type: object

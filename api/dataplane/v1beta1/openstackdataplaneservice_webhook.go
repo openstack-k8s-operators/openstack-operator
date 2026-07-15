@@ -21,26 +21,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 var openstackdataplaneservicelog = logf.Log.WithName("openstackdataplaneservice-resource")
 
-// SetupWebhookWithManager sets up the webhook with the Manager
-func (r *OpenStackDataPlaneService) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).For(r).Complete()
-}
-
-// TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-
-// +kubebuilder:webhook:path=/mutate-dataplane-openstack-org-v1beta1-openstackdataplaneservice,mutating=true,failurePolicy=fail,sideEffects=None,groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=create;update,versions=v1beta1,name=mopenstackdataplaneservice.kb.io,admissionReviewVersions=v1
-
-var _ webhook.Defaulter = &OpenStackDataPlaneService{}
-
-// Default implements webhook.Defaulter so a webhook will be registered for the type
+// Default sets default values for the OpenStackDataPlaneService
 func (r *OpenStackDataPlaneService) Default() {
 
 	openstackdataplaneservicelog.Info("default", "name", r.Name)
@@ -55,12 +42,7 @@ func (spec *OpenStackDataPlaneServiceSpec) Default(name string) {
 	}
 }
 
-// TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:path=/validate-dataplane-openstack-org-v1beta1-openstackdataplaneservice,mutating=false,failurePolicy=fail,sideEffects=None,groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=create;update,versions=v1beta1,name=vopenstackdataplaneservice.kb.io,admissionReviewVersions=v1
-
-var _ webhook.Validator = &OpenStackDataPlaneService{}
-
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+// ValidateCreate validates the OpenStackDataPlaneService on creation
 func (r *OpenStackDataPlaneService) ValidateCreate() (admission.Warnings, error) {
 
 	openstackdataplaneservicelog.Info("validate create", "name", r.Name)

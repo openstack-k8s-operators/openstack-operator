@@ -60,7 +60,7 @@ OPERATOR_SDK_VERSION ?= v1.42.3
 DEFAULT_IMG ?= quay.io/openstack-k8s-operators/openstack-operator:latest
 IMG ?= $(DEFAULT_IMG)
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.31
+ENVTEST_K8S_VERSION = 1.33
 
 SETUP_ENVTEST_VERSION ?= release-0.22
 
@@ -332,7 +332,7 @@ CONTROLLER_TOOLS_VERSION ?= v0.18.0
 CRD_MARKDOWN_VERSION ?= v0.0.3
 KUTTL_VERSION ?= 0.17.0
 GOTOOLCHAIN_VERSION ?= go1.26.0
-OC_VERSION ?= 4.16.0
+OC_VERSION ?= 4.20.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
@@ -568,7 +568,7 @@ run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 webhook-cleanup:
 	/bin/bash hack/clean_local_webhook.sh
 
-CRD_SCHEMA_CHECKER_VERSION ?= release-4.16
+CRD_SCHEMA_CHECKER_VERSION ?= release-4.18
 
 PHONY: crd-schema-check
 crd-schema-check: manifests

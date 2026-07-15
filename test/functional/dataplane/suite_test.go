@@ -214,10 +214,10 @@ var _ = BeforeSuite(func() {
 	err = dataplanewebhook.SetupOpenStackDataPlaneNodeSetWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&dataplanev1.OpenStackDataPlaneDeployment{}).SetupWebhookWithManager(k8sManager)
+	err = dataplanewebhook.SetupOpenStackDataPlaneDeploymentWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&dataplanev1.OpenStackDataPlaneService{}).SetupWebhookWithManager(k8sManager)
+	err = dataplanewebhook.SetupOpenStackDataPlaneServiceWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
 	err = corewebhook.SetupOpenStackVersionWebhookWithManager(k8sManager)
