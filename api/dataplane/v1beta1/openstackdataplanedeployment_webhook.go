@@ -17,6 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+	"reflect"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -49,7 +52,9 @@ func (r *OpenStackDataPlaneDeployment) Default() {
 
 // Default - set defaults for this OpenStackDataPlaneDeployment
 func (spec *OpenStackDataPlaneDeploymentSpec) Default() {
-
+	if spec.ServicesOverride == nil {
+		spec.ServicesOverride = []string{}
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -86,7 +91,14 @@ func (spec *OpenStackDataPlaneDeploymentSpec) ValidateCreate() field.ErrorList {
 func (r *OpenStackDataPlaneDeployment) ValidateUpdate(original runtime.Object) (admission.Warnings, error) {
 	openstackdataplanedeploymentlog.Info("validate update", "name", r.Name)
 
-	errors := r.Spec.ValidateUpdate()
+	oldDeployment, ok := original.(*OpenStackDataPlaneDeployment)
+	if !ok {
+		return nil, apierrors.NewInternalError(field.InternalError(
+			field.NewPath("spec"),
+			fmt.Errorf("expected OpenStackDataPlaneDeployment, got %T", original)))
+	}
+
+	errors := r.Spec.ValidateUpdate(oldDeployment.Spec)
 
 	if len(errors) != 0 {
 		openstackdataplanedeploymentlog.Info("validation failed", "name", r.Name)
@@ -101,8 +113,20 @@ func (r *OpenStackDataPlaneDeployment) ValidateUpdate(original runtime.Object) (
 }
 
 // ValidateUpdate validates the OpenStackDataPlaneDeploymentSpec on update
-func (spec *OpenStackDataPlaneDeploymentSpec) ValidateUpdate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object update.
+func (spec *OpenStackDataPlaneDeploymentSpec) ValidateUpdate(old OpenStackDataPlaneDeploymentSpec) field.ErrorList {
+	newCopy := *spec
+	newCopy.Default()
+	old.Default()
+
+	if !reflect.DeepEqual(newCopy, old) {
+		return field.ErrorList{
+			field.Invalid(
+				field.NewPath("spec"),
+				"object",
+				"OpenStackDataPlaneDeployment Spec is immutable",
+			),
+		}
+	}
 
 	return field.ErrorList{}
 }
