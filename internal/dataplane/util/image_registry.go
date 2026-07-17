@@ -227,19 +227,17 @@ func getMachineConfig(ctx context.Context, helper *helper.Helper) (mc.MachineCon
 	return masterMachineConfig, nil
 }
 
-// RegistryMapping pairs a mirror registry with its upstream source from IDMS/ICSP.
+// RegistryMapping pairs a mirror with its upstream source.
 type RegistryMapping struct {
-	Mirror string `json:"mirror"`
-	Source string `json:"source"`
+	Mirror       string `json:"mirror"`
+	Source       string `json:"source"`
+	SignedPrefix string `json:"signedPrefix,omitempty"`
 }
 
-// SigstorePolicyInfo contains the EDPM-relevant parts of a ClusterImagePolicy.
-// A single RemapIdentity signedPrefix covers all mirrors under the same registry
-// root — the container runtime replaces only the prefix, preserving namespace paths.
+// SigstorePolicyInfo contains the EDPM sigstore settings.
 type SigstorePolicyInfo struct {
 	RegistryMappings []RegistryMapping
 	CosignKeyData    string
-	SignedPrefix     string
 }
 
 const (
@@ -319,6 +317,24 @@ func listClusterImagePolicies(
 	return policyList, nil
 }
 
+func collectMatchedMirrorScopes(policyScopes []string, mirrorScopes []string) []string {
+	matchedMirrorScopes := map[string]struct{}{}
+	for _, scope := range policyScopes {
+		policyScope := normalizeImageScope(scope)
+		if policyScope == "" {
+			continue
+		}
+
+		for _, mirrorScope := range mirrorScopes {
+			if clusterImagePolicyScopeMatchesMirror(policyScope, mirrorScope) {
+				matchedMirrorScopes[mirrorScope] = struct{}{}
+			}
+		}
+	}
+
+	return sortedSetKeys(matchedMirrorScopes)
+}
+
 // GetSigstoreImagePolicy checks if OCP has a ClusterImagePolicy configured
 // with sigstore signature verification for one of the mirror registries in use.
 // sourceByMirror maps each mirror scope to its upstream source registry (from IDMS/ICSP).
@@ -345,8 +361,25 @@ func GetSigstoreImagePolicy(ctx context.Context, helper *helper.Helper, mirrorSc
 		return nil, nil
 	}
 
-	var matches []string
-	var match *SigstorePolicyInfo
+	type policyMatch struct {
+		name         string
+		keyData      string
+		signedPrefix string
+	}
+
+	normalizedMirrors := make([]string, 0, len(mirrorScopes))
+	sourceByNormalizedMirror := make(map[string]string, len(sourceByMirror))
+	for _, mirrorScope := range mirrorScopes {
+		normalizedMirror := normalizeImageScope(mirrorScope)
+		if normalizedMirror == "" {
+			continue
+		}
+		normalizedMirrors = append(normalizedMirrors, normalizedMirror)
+		sourceByNormalizedMirror[normalizedMirror] = sourceByMirror[mirrorScope]
+	}
+	sort.Strings(normalizedMirrors)
+
+	matchByMirror := map[string]policyMatch{}
 
 	for _, policy := range policyList.Items {
 		if policy.GetName() == "openshift" {
@@ -392,47 +425,57 @@ func GetSigstoreImagePolicy(ctx context.Context, helper *helper.Helper, mirrorSc
 			}
 		}
 
-		matchedMirrorScopes := map[string]struct{}{}
-		for _, scope := range scopes {
-			policyScope := normalizeImageScope(scope)
-			if policyScope == "" {
-				continue
-			}
-
-			for _, mirrorScope := range mirrorScopes {
-				if clusterImagePolicyScopeMatchesMirror(policyScope, mirrorScope) {
-					matchedMirrorScopes[normalizeImageScope(mirrorScope)] = struct{}{}
-				}
-			}
-		}
-		if len(matchedMirrorScopes) == 0 {
+		matchedMirrors := collectMatchedMirrorScopes(scopes, normalizedMirrors)
+		if len(matchedMirrors) == 0 {
 			continue
 		}
 
-		sortedMirrors := sortedSetKeys(matchedMirrorScopes)
-
-		mappings := make([]RegistryMapping, 0, len(sortedMirrors))
-		for _, m := range sortedMirrors {
-			mappings = append(mappings, RegistryMapping{
-				Mirror: m,
-				Source: sourceByMirror[m],
-			})
+		match := policyMatch{
+			name:         policy.GetName(),
+			keyData:      keyData,
+			signedPrefix: signedPrefix,
 		}
-
-		matches = append(matches, fmt.Sprintf("%s (%s)", policy.GetName(), strings.Join(sortedMirrors, ", ")))
-		match = &SigstorePolicyInfo{
-			RegistryMappings: mappings,
-			CosignKeyData:    keyData,
-			SignedPrefix:     signedPrefix,
+		for _, mirror := range matchedMirrors {
+			if existing, found := matchByMirror[mirror]; found {
+				return nil, fmt.Errorf(
+					"mirror scope %s matched multiple ClusterImagePolicies: %s, %s",
+					mirror, existing.name, policy.GetName(),
+				)
+			}
+			matchByMirror[mirror] = match
 		}
 	}
 
-	if len(matches) > 1 {
-		sort.Strings(matches)
-		return nil, fmt.Errorf(
-			"expected exactly one ClusterImagePolicy matching mirror registries, found %d: %s",
-			len(matches), strings.Join(matches, ", "),
-		)
+	if len(matchByMirror) == 0 {
+		return nil, nil
+	}
+
+	sortedMirrors := make([]string, 0, len(matchByMirror))
+	for mirror := range matchByMirror {
+		sortedMirrors = append(sortedMirrors, mirror)
+	}
+	sort.Strings(sortedMirrors)
+
+	firstMatch := matchByMirror[sortedMirrors[0]]
+	match := &SigstorePolicyInfo{
+		RegistryMappings: make([]RegistryMapping, 0, len(sortedMirrors)),
+		CosignKeyData:    firstMatch.keyData,
+	}
+
+	for _, mirror := range sortedMirrors {
+		mirrorMatch := matchByMirror[mirror]
+		if match.CosignKeyData != mirrorMatch.keyData {
+			return nil, fmt.Errorf(
+				"matched ClusterImagePolicies use different cosign key data and cannot be combined: %s, %s",
+				firstMatch.name, mirrorMatch.name,
+			)
+		}
+
+		match.RegistryMappings = append(match.RegistryMappings, RegistryMapping{
+			Mirror:       mirror,
+			Source:       sourceByNormalizedMirror[mirror],
+			SignedPrefix: mirrorMatch.signedPrefix,
+		})
 	}
 
 	return match, nil
