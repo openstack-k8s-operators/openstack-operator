@@ -123,19 +123,16 @@ It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controlle
 which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster
 
 ### Test It Out
-1. Install the CRDs into the cluster:
+
+Install the CRDs into the cluster and run your controller (this will
+run in the foreground, so switch to a new terminal if you want to leave
+it running):
 
 ```sh
-make install
+make install run ARGS="--zap-devel"
 ```
 
-2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
-
-```sh
-make run
-```
-
-**NOTE:** You can also run this in one step by running: `make install run`
+**NOTE:** `--zap-devel` enable verbose (development) logging locally.
 
 ### Modifying the API definitions
 If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
