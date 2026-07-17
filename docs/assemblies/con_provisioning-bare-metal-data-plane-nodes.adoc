@@ -369,20 +369,3 @@ spec:
     edpm-compute-0:
       hostName: edpm-compute-0
 ----
-
-=== Relevant Status Condition
-
-`NodeSetBaremetalProvisionReady` condition in status condtions reflects the status of
-baremetal provisioning as shown below.
-
-[,console]
-----
-$ oc get openstackdataplanenodeset openstack-edpm-ipam -o json | jq '.status.conditions[] | select(.type=="NodeSetBaremetalProvisionReady")'
-{
-  "lastTransitionTime": "2024-02-01T04:41:58Z",
-  "message": "NodeSetBaremetalProvisionReady ready",
-  "reason": "Ready",
-  "status": "True",
-  "type": "NodeSetBaremetalProvisionReady"
-}
-----
