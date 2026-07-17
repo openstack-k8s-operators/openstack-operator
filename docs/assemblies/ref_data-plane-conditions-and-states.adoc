@@ -28,9 +28,71 @@ For an `OpenStackDataPlaneNodeSet`, until an `OpenStackDataPlaneDeployment` has 
 |`Deployed` |
 * "True": The `OpenStackDataPlaneNodeSet` CR is successfully deployed.
 * "False": The deployment is not yet requested or has failed, or there are other failed conditions.
+|`DeploymentExecutionSummaries` |Stores ansible execution summaries for all completed and failed deployments for the NodeSet, keyed by deployment name and then by ansible job name. For details, see xref:ref_deployment-execution-summaries_{context}[Deployment execution summaries].
 |`DNSClusterAddresses` |
 |`CtlplaneSearchDomain` |
 |===
+
+[id="ref_deployment-execution-summaries_{context}"]
+== Deployment execution summaries
+
+The `OpenStackDataPlaneNodeSet` status includes a
+`deploymentExecutionSummaries` field that stores ansible execution summaries
+for all completed and failed deployments for the NodeSet.
+
+The field is keyed first by deployment name and then by ansible job name. Each
+job entry contains:
+
+* `totalHosts`
+* `failedHosts`
+* `unreachableHosts`
+* `failurePercent`
+* `failedHostList`
+* `unreachableHostList`
+
+The following example shows how to view the execution summary recorded in the
+NodeSet status:
+
+[,console]
+----
+$ oc get openstackdataplanenodeset openstack-edpm-ipam -o json | jq '.status.deploymentExecutionSummaries'
+{
+  "openstack-edpm-deployment": {
+    "bootstrap-openstack-edpm-deployment-openstack-edpm-ipam": {
+      "totalHosts": 3,
+      "failedHosts": 1,
+      "unreachableHosts": 1,
+      "failurePercent": 67,
+      "failedHostList": [
+        "host-b"
+      ],
+      "unreachableHostList": [
+        "host-c"
+      ]
+    }
+  },
+  "openstack-edpm-deployment-2": {
+    "bootstrap-openstack-edpm-deployment-2-openstack-edpm-ipam": {
+      "totalHosts": 2,
+      "failedHosts": 0,
+      "unreachableHosts": 0,
+      "failurePercent": 0,
+      "failedHostList": [],
+      "unreachableHostList": []
+    },
+    "configure-network-openstack-edpm-deployment-2-openstack-edpm-ipam": {
+      "totalHosts": 2,
+      "failedHosts": 0,
+      "unreachableHosts": 1,
+      "failurePercent": 50,
+      "failedHostList": [],
+      "unreachableHostList": [
+        "host-a"
+      ]
+    }
+  }
+}
+----
 
 .`OpenStackDataPlaneDeployment` CR conditions
 [cols="40%a,60%a",options="header",]
