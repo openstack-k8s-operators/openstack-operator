@@ -12726,6 +12726,129 @@ spec:
                             type: object
                           override:
                             properties:
+                              probes:
+                                properties:
+                                  livenessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  readinessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  startupProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                type: object
                               service:
                                 additionalProperties:
                                   properties:
@@ -12872,6 +12995,132 @@ spec:
                                   additionalProperties:
                                     type: string
                                   type: object
+                                override:
+                                  properties:
+                                    probes:
+                                      properties:
+                                        livenessProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                        readinessProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                        startupProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                      type: object
+                                  type: object
                                 replicas:
                                   default: 1
                                   format: int32
@@ -12969,6 +13218,129 @@ spec:
                                   type: object
                                 override:
                                   properties:
+                                    probes:
+                                      properties:
+                                        livenessProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                        readinessProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                        startupProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                      type: object
                                     service:
                                       properties:
                                         metadata:
@@ -13085,6 +13457,129 @@ spec:
                                   type: object
                                 override:
                                   properties:
+                                    probes:
+                                      properties:
+                                        livenessProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                        readinessProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                        startupProbes:
+                                          properties:
+                                            command:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            failureThreshold:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            initialDelaySeconds:
+                                              format: int32
+                                              minimum: 0
+                                              type: integer
+                                            path:
+                                              pattern: ^(/.*)?$
+                                              type: string
+                                            periodSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                            scheme:
+                                              type: string
+                                            timeoutSeconds:
+                                              format: int32
+                                              minimum: 1
+                                              type: integer
+                                            type:
+                                              enum:
+                                              - HTTP
+                                              - Exec
+                                              - ""
+                                              type: string
+                                          type: object
+                                      type: object
                                     service:
                                       properties:
                                         endpointURL:
@@ -13221,6 +13716,132 @@ spec:
                                     additionalProperties:
                                       type: string
                                     type: object
+                                  override:
+                                    properties:
+                                      probes:
+                                        properties:
+                                          livenessProbes:
+                                            properties:
+                                              command:
+                                                items:
+                                                  type: string
+                                                type: array
+                                                x-kubernetes-list-type: atomic
+                                              failureThreshold:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              initialDelaySeconds:
+                                                format: int32
+                                                minimum: 0
+                                                type: integer
+                                              path:
+                                                pattern: ^(/.*)?$
+                                                type: string
+                                              periodSeconds:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                              scheme:
+                                                type: string
+                                              timeoutSeconds:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              type:
+                                                enum:
+                                                - HTTP
+                                                - Exec
+                                                - ""
+                                                type: string
+                                            type: object
+                                          readinessProbes:
+                                            properties:
+                                              command:
+                                                items:
+                                                  type: string
+                                                type: array
+                                                x-kubernetes-list-type: atomic
+                                              failureThreshold:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              initialDelaySeconds:
+                                                format: int32
+                                                minimum: 0
+                                                type: integer
+                                              path:
+                                                pattern: ^(/.*)?$
+                                                type: string
+                                              periodSeconds:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                              scheme:
+                                                type: string
+                                              timeoutSeconds:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              type:
+                                                enum:
+                                                - HTTP
+                                                - Exec
+                                                - ""
+                                                type: string
+                                            type: object
+                                          startupProbes:
+                                            properties:
+                                              command:
+                                                items:
+                                                  type: string
+                                                type: array
+                                                x-kubernetes-list-type: atomic
+                                              failureThreshold:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              initialDelaySeconds:
+                                                format: int32
+                                                minimum: 0
+                                                type: integer
+                                              path:
+                                                pattern: ^(/.*)?$
+                                                type: string
+                                              periodSeconds:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                              scheme:
+                                                type: string
+                                              timeoutSeconds:
+                                                format: int32
+                                                minimum: 1
+                                                type: integer
+                                              type:
+                                                enum:
+                                                - HTTP
+                                                - Exec
+                                                - ""
+                                                type: string
+                                            type: object
+                                        type: object
+                                    type: object
                                   replicas:
                                     default: 1
                                     format: int32
@@ -13333,6 +13954,129 @@ spec:
                             type: object
                           override:
                             properties:
+                              probes:
+                                properties:
+                                  livenessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  readinessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  startupProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                type: object
                               service:
                                 properties:
                                   metadata:
@@ -13481,6 +14225,132 @@ spec:
                           nodeSelector:
                             additionalProperties:
                               type: string
+                            type: object
+                          override:
+                            properties:
+                              probes:
+                                properties:
+                                  livenessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  readinessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  startupProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                type: object
                             type: object
                           replicas:
                             default: 1
@@ -15386,6 +16256,129 @@ spec:
                         type: object
                       override:
                         properties:
+                          probes:
+                            properties:
+                              livenessProbes:
+                                properties:
+                                  command:
+                                    items:
+                                      type: string
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                  failureThreshold:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  initialDelaySeconds:
+                                    format: int32
+                                    minimum: 0
+                                    type: integer
+                                  path:
+                                    pattern: ^(/.*)?$
+                                    type: string
+                                  periodSeconds:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  port:
+                                    format: int32
+                                    maximum: 65535
+                                    minimum: 1
+                                    type: integer
+                                  scheme:
+                                    type: string
+                                  timeoutSeconds:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  type:
+                                    enum:
+                                    - HTTP
+                                    - Exec
+                                    - ""
+                                    type: string
+                                type: object
+                              readinessProbes:
+                                properties:
+                                  command:
+                                    items:
+                                      type: string
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                  failureThreshold:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  initialDelaySeconds:
+                                    format: int32
+                                    minimum: 0
+                                    type: integer
+                                  path:
+                                    pattern: ^(/.*)?$
+                                    type: string
+                                  periodSeconds:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  port:
+                                    format: int32
+                                    maximum: 65535
+                                    minimum: 1
+                                    type: integer
+                                  scheme:
+                                    type: string
+                                  timeoutSeconds:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  type:
+                                    enum:
+                                    - HTTP
+                                    - Exec
+                                    - ""
+                                    type: string
+                                type: object
+                              startupProbes:
+                                properties:
+                                  command:
+                                    items:
+                                      type: string
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                  failureThreshold:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  initialDelaySeconds:
+                                    format: int32
+                                    minimum: 0
+                                    type: integer
+                                  path:
+                                    pattern: ^(/.*)?$
+                                    type: string
+                                  periodSeconds:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  port:
+                                    format: int32
+                                    maximum: 65535
+                                    minimum: 1
+                                    type: integer
+                                  scheme:
+                                    type: string
+                                  timeoutSeconds:
+                                    format: int32
+                                    minimum: 1
+                                    type: integer
+                                  type:
+                                    enum:
+                                    - HTTP
+                                    - Exec
+                                    - ""
+                                    type: string
+                                type: object
+                            type: object
                           service:
                             additionalProperties:
                               properties:
