@@ -163,7 +163,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              &DefaultBackoffLimit,
 				PreserveJobs:              true,
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
+				ServicesOverride:          []string{},
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
@@ -360,7 +360,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              &DefaultBackoffLimit,
 				PreserveJobs:              true,
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
@@ -571,7 +570,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              &DefaultBackoffLimit,
 				PreserveJobs:              true,
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
@@ -686,7 +684,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              &DefaultBackoffLimit,
 				PreserveJobs:              true,
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
+				ServicesOverride:          []string{},
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
@@ -839,7 +837,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              &DefaultBackoffLimit,
 				PreserveJobs:              true,
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
@@ -1539,7 +1536,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				BackoffLimit:              &DefaultBackoffLimit,
 				PreserveJobs:              true,
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
+				ServicesOverride:          []string{},
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
@@ -1640,7 +1637,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:              "",
 				AnsibleSkipTags:           "",
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
+				ServicesOverride:          []string{},
 				BackoffLimit:              ptr.To(int32(6)),
 				PreserveJobs:              true,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",
@@ -1742,7 +1739,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:              "",
 				AnsibleSkipTags:           "",
 				DeploymentRequeueTime:     15,
-				ServicesOverride:          nil,
+				ServicesOverride:          []string{},
 				BackoffLimit:              ptr.To(int32(6)),
 				PreserveJobs:              true,
 				AnsibleEEEnvConfigMapName: "openstack-aee-default-env",

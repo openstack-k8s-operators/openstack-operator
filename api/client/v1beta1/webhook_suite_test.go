@@ -111,7 +111,9 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&OpenStackClient{}).SetupWebhookWithManager(mgr)
+	err = ctrl.NewWebhookManagedBy(mgr).
+		For(&OpenStackClient{}).
+		Complete()
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:webhook

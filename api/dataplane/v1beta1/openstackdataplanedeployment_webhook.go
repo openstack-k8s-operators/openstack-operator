@@ -17,30 +17,20 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+	"reflect"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 var openstackdataplanedeploymentlog = logf.Log.WithName("openstackdataplanedeployment-resource")
 
-// SetupWebhookWithManager sets up the webhook with the Manager
-func (r *OpenStackDataPlaneDeployment) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).For(r).Complete()
-}
-
-// TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-
-// +kubebuilder:webhook:path=/mutate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment,mutating=true,failurePolicy=fail,sideEffects=None,groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=create;update,versions=v1beta1,name=mopenstackdataplanedeployment.kb.io,admissionReviewVersions=v1
-
-var _ webhook.Defaulter = &OpenStackDataPlaneDeployment{}
-
-// Default implements webhook.Defaulter so a webhook will be registered for the type
+// Default sets default values for the OpenStackDataPlaneDeployment
 func (r *OpenStackDataPlaneDeployment) Default() {
 
 	openstackdataplanedeploymentlog.Info("default", "name", r.Name)
@@ -49,15 +39,12 @@ func (r *OpenStackDataPlaneDeployment) Default() {
 
 // Default - set defaults for this OpenStackDataPlaneDeployment
 func (spec *OpenStackDataPlaneDeploymentSpec) Default() {
-
+	if spec.ServicesOverride == nil {
+		spec.ServicesOverride = []string{}
+	}
 }
 
-// TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:path=/validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment,mutating=false,failurePolicy=fail,sideEffects=None,groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=create;update,versions=v1beta1,name=vopenstackdataplanedeployment.kb.io,admissionReviewVersions=v1
-
-var _ webhook.Validator = &OpenStackDataPlaneDeployment{}
-
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+// ValidateCreate validates the OpenStackDataPlaneDeployment on creation
 func (r *OpenStackDataPlaneDeployment) ValidateCreate() (admission.Warnings, error) {
 
 	openstackdataplanedeploymentlog.Info("validate create", "name", r.Name)
@@ -86,7 +73,14 @@ func (spec *OpenStackDataPlaneDeploymentSpec) ValidateCreate() field.ErrorList {
 func (r *OpenStackDataPlaneDeployment) ValidateUpdate(original runtime.Object) (admission.Warnings, error) {
 	openstackdataplanedeploymentlog.Info("validate update", "name", r.Name)
 
-	errors := r.Spec.ValidateUpdate()
+	oldDeployment, ok := original.(*OpenStackDataPlaneDeployment)
+	if !ok {
+		return nil, apierrors.NewInternalError(field.InternalError(
+			field.NewPath("spec"),
+			fmt.Errorf("expected OpenStackDataPlaneDeployment, got %T", original)))
+	}
+
+	errors := r.Spec.ValidateUpdate(oldDeployment.Spec)
 
 	if len(errors) != 0 {
 		openstackdataplanedeploymentlog.Info("validation failed", "name", r.Name)
@@ -101,8 +95,20 @@ func (r *OpenStackDataPlaneDeployment) ValidateUpdate(original runtime.Object) (
 }
 
 // ValidateUpdate validates the OpenStackDataPlaneDeploymentSpec on update
-func (spec *OpenStackDataPlaneDeploymentSpec) ValidateUpdate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object update.
+func (spec *OpenStackDataPlaneDeploymentSpec) ValidateUpdate(old OpenStackDataPlaneDeploymentSpec) field.ErrorList {
+	newCopy := *spec
+	newCopy.Default()
+	old.Default()
+
+	if !reflect.DeepEqual(newCopy, old) {
+		return field.ErrorList{
+			field.Invalid(
+				field.NewPath("spec"),
+				"object",
+				"OpenStackDataPlaneDeployment Spec is immutable",
+			),
+		}
+	}
 
 	return field.ErrorList{}
 }

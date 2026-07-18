@@ -152,7 +152,6 @@ type OpenStackDataPlaneDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="OpenStackDataPlaneDeployment Spec is immutable"
 	Spec   OpenStackDataPlaneDeploymentSpec   `json:"spec,omitempty"`
 	Status OpenStackDataPlaneDeploymentStatus `json:"status,omitempty"`
 }
