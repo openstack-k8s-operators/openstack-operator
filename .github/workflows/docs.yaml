@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.9'
+          ruby-version: '3.4.10'
 
       - name: Install Asciidoc
         run: make docs-dependencies
