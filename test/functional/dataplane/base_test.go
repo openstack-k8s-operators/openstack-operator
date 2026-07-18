@@ -84,6 +84,17 @@ func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface
 // Create OpenStackDataPlaneDeployment in k8s and test that no errors occur
 func CreateDataplaneDeployment(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
 	instance := DefaultDataplaneDeploymentTemplate(name, spec)
+	metadata := instance["metadata"].(map[string]interface{})
+	metadata["annotations"] = map[string]interface{}{
+		dataplanev1.ConfirmDeleteAnnotation: "true",
+	}
+	return th.CreateUnstructured(instance)
+}
+
+// Create OpenStackDataPlaneDeployment in k8s without the confirm-delete annotation.
+// Use this only in tests that need to verify delete rejection behavior.
+func CreateDataplaneDeploymentWithoutConfirm(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+	instance := DefaultDataplaneDeploymentTemplate(name, spec)
 	return th.CreateUnstructured(instance)
 }
 

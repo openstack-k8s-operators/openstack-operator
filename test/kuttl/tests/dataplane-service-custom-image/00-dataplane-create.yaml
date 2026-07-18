@@ -25,6 +25,8 @@ apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
   name: edpm-compute-no-nodes
+  annotations:
+    dataplane.openstack.org/confirm-delete: "true"
 spec:
   nodeSets:
     - edpm-no-nodes-custom-svc

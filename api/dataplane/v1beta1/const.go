@@ -19,4 +19,8 @@ package v1beta1
 const (
 	// CtlPlaneNetwork - default ctlplane Network Name in NetConfig
 	CtlPlaneNetwork = "ctlplane"
+
+	// ConfirmDeleteAnnotation is the annotation key required to allow
+	// deletion of an OpenStackDataPlaneDeployment. The value must be "true".
+	ConfirmDeleteAnnotation = "dataplane.openstack.org/confirm-delete"
 )
