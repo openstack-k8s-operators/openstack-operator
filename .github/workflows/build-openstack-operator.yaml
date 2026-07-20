@@ -16,7 +16,7 @@ jobs:
       go_version: 1.26.x
       operator_sdk_version: 1.42.3
       bundle_dockerfile: ./bundle.Dockerfile
-      operator_version: 0.7.0
+      operator_version: 19.0.0
     secrets:
       IMAGENAMESPACE: ${{ secrets.IMAGENAMESPACE }}
       QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
