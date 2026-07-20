@@ -31,6 +31,7 @@ import (
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 )
@@ -1802,6 +1803,104 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
 					g.Expect(instance.Status.SecretHashes).ShouldNot(BeEmpty())
 					g.Expect(instance.Status.SecretHashes).ShouldNot(Equal(savedSecretHashes))
+				}, th.Timeout, th.Interval).Should(Succeed())
+			})
+		})
+
+		When("Cert secret changes are detected after deployment", func() {
+			var certSecretName types.NamespacedName
+			var certTestServiceName types.NamespacedName
+
+			BeforeEach(func() {
+				certSecretName = types.NamespacedName{
+					Name:      "cert-cert-test-service-default-edpm-compute-node-1",
+					Namespace: namespace,
+				}
+				certTestServiceName = types.NamespacedName{
+					Name:      "cert-test-service",
+					Namespace: namespace,
+				}
+
+				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+				nodeSetSpec["preProvisioned"] = true
+				nodeSetSpec["tlsEnabled"] = false
+				nodeSetSpec["services"] = []string{"cert-test-service"}
+
+				DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(certTestServiceName, map[string]interface{}{
+					"playbook": "test",
+					"tlsCerts": map[string]interface{}{
+						"default": map[string]interface{}{
+							"contents": []string{"dnsnames"},
+						},
+					},
+				}))
+
+				// Create a cert secret with the labels that EnsureTLSCerts sets.
+				// Labels must match the service name and certKey so that
+				// GetDeploymentHashesForService picks them up.
+				certSecret := &corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      certSecretName.Name,
+						Namespace: certSecretName.Namespace,
+						Labels: map[string]string{
+							"osdpns":                dataplaneNodeSetName.Name,
+							"osdp-service":          certTestServiceName.Name,
+							"osdp-service-cert-key": "default",
+							"hostname":              "edpm-compute-node-1",
+						},
+					},
+					Data: map[string][]byte{
+						"tls.crt": []byte("original-cert-data"),
+						"tls.key": []byte("original-key-data"),
+						"ca.crt":  []byte("original-ca-data"),
+					},
+				}
+				Expect(th.K8sClient.Create(th.Ctx, certSecret)).To(Succeed())
+				DeferCleanup(th.K8sClient.Delete, th.Ctx, certSecret)
+
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+			})
+
+			It("Should detect cert renewal and mark NodeSet as needing redeployment", func() {
+				// Complete the deployment
+				Eventually(func(g Gomega) {
+					ansibleeeName := types.NamespacedName{
+						Name:      "cert-test-service-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name,
+						Namespace: namespace,
+					}
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					ansibleEE.Status.Succeeded = 1
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Wait for deployment to be ready and cert secret hash to be tracked
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					g.Expect(instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)).To(BeTrue())
+					g.Expect(instance.Status.SecretHashes).Should(HaveKey(certSecretName.Name))
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Simulate cert-manager renewal: update the cert secret data
+				Eventually(func(g Gomega) {
+					secret := &corev1.Secret{}
+					g.Expect(th.K8sClient.Get(th.Ctx, certSecretName, secret)).To(Succeed())
+					secret.Data["tls.crt"] = []byte("renewed-cert-data")
+					secret.Data["tls.key"] = []byte("renewed-key-data")
+					g.Expect(th.K8sClient.Update(th.Ctx, secret)).To(Succeed())
+				}, th.Timeout, th.Interval).Should(Succeed())
+
+				// Verify DeploymentReadyCondition becomes False
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					g.Expect(instance.Status.Conditions.IsFalse(condition.DeploymentReadyCondition)).To(BeTrue())
 				}, th.Timeout, th.Interval).Should(Succeed())
 			})
 		})
