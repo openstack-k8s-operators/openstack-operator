@@ -1,9 +1,9 @@
 {
   "extends": [
-    "github>openstack-k8s-operators/renovate-config:default.json5"
+    "github>openstack-k8s-operators/renovate-config:18-stable.json5"
   ],
   "baseBranchPatterns": [
-    "main"
+    "18-stable"
   ],
   "useBaseBranchConfig": "merge",
   "packageRules": [
