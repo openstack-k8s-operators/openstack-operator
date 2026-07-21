@@ -106,8 +106,9 @@ type ContainerTemplate struct {
 	DesignateUnboundImage         *string `json:"designateUnboundImage,omitempty"`
 	DesignateWorkerImage          *string `json:"designateWorkerImage,omitempty"`
 	EdpmFrrImage                  *string `json:"edpmFrrImage,omitempty"`
+	// Deprecated: EdpmIscsidImage is no longer used. iscsid now runs on the host instead of in a container.
 	EdpmIscsidImage               *string `json:"edpmIscsidImage,omitempty"`
-	EdpmLogrotateCrondImage *string `json:"edpmLogrotateCrondImage,omitempty"`
+	EdpmLogrotateCrondImage       *string `json:"edpmLogrotateCrondImage,omitempty"`
 	// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
 	EdpmMultipathdImage           *string `json:"edpmMultipathdImage,omitempty"`
 	EdpmNeutronDhcpAgentImage     *string `json:"edpmNeutronDhcpAgentImage,omitempty"`
