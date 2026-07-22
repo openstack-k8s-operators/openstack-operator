@@ -35,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/google/uuid"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -42,6 +43,17 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
 )
+
+// CommonNameSystemID is the sentinel value for OpenstackDataPlaneServiceCert.CommonName
+// that triggers UUID5-based CN derivation matching the OVN chassis system-id convention.
+const CommonNameSystemID = "system-id"
+
+// computeSystemID derives a deterministic UUID5 from a name using the DNS
+// namespace, matching ovn-operator's ComputeSystemID() and edpm-ansible's
+// {{ name | to_uuid(namespace='6ba7b810-...') }}.
+func computeSystemID(name string) string {
+	return uuid.NewSHA1(uuid.NameSpaceDNS, []byte(name)).String()
+}
 
 // Generates an organized data structure that is leveraged to create the secrets.
 func createSecretsDataStructure(secretMaxSize int,
@@ -180,7 +192,12 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 				nodeName)
 		}
 
-		commonName := strings.Split(baseName, ".")[0]
+		var commonName string
+		if service.Spec.TLSCerts[certKey].CommonName == CommonNameSystemID {
+			commonName = computeSystemID(baseName)
+		} else {
+			commonName = strings.Split(baseName, ".")[0]
+		}
 
 		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
 			issuer, labels, commonName, hosts, ips, service.Spec.TLSCerts[certKey].KeyUsages)

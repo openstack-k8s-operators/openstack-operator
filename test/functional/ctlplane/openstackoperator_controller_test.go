@@ -1016,7 +1016,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			//Expect(OSCtlplane.Spec.Placement.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.placement.openstack.org/timeout", "60s"))
 		})
 
-		It("should create selfsigned issuer and public, internal, libvirt and ovn CA and issuer", func() {
+		It("should create selfsigned issuer and public, internal, libvirt, ovn and ovn-rbac CA and issuer", func() {
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 
 			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
@@ -1837,6 +1837,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 		})
 
+		It("should not set OvnIssuerName when TLS pod-level is disabled", func() {
+			Eventually(func(g Gomega) {
+				ovnController := ovn.GetOVNController(names.OVNControllerName)
+				g.Expect(ovnController.Spec.OvnIssuerName).Should(BeEmpty())
+			}, timeout, interval).Should(Succeed())
+		})
+
 		It("should remove ovn-controller if nicMappings are removed", func() {
 			// Update spec
 			Eventually(func(g Gomega) {
@@ -1905,6 +1912,56 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Eventually(func(g Gomega) {
 				conditions := OpenStackControlPlaneConditionGetter(names.OpenStackControlplaneName)
 				g.Expect(conditions.Has(corev1.OpenStackControlPlaneOVNReadyCondition)).To(BeFalse())
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A OVN OpenStackControlplane instance with TLS pod-level enabled is created", func() {
+		BeforeEach(func() {
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+			// create cert secrets for ovn db clusters (needed for TLS pod-level)
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNDbServerNBCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNDbServerSBCertName))
+
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["ovn"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"ovnDBCluster": map[string]interface{}{
+						"ovndbcluster-nb": map[string]interface{}{
+							"dbType": "NB",
+						},
+						"ovndbcluster-sb": map[string]interface{}{
+							"dbType": "SB",
+						},
+					},
+					"ovnController": map[string]interface{}{
+						"nicMappings": map[string]interface{}{
+							"datacentre": "ospbr",
+						},
+					},
+				},
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should set OvnIssuerName on OVNController", func() {
+			Eventually(func(g Gomega) {
+				ovnController := ovn.GetOVNController(names.OVNControllerName)
+				g.Expect(ovnController.Spec.OvnIssuerName).Should(Equal(corev1.OvnDbCaName))
 			}, timeout, interval).Should(Succeed())
 		})
 	})

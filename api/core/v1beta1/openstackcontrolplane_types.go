@@ -61,7 +61,6 @@ const (
 	OvnDbCaName = tls.DefaultCAPrefix + "ovn"
 	// LibvirtCaName -
 	LibvirtCaName = tls.DefaultCAPrefix + "libvirt"
-
 	// GlanceName - Default Glance name
 	GlanceName = "glance"
 	// CinderName - Default Cinder name
