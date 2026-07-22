@@ -422,4 +422,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: designate-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: designate-operator-metrics-server-cert

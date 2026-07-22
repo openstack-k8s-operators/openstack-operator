@@ -157,6 +157,9 @@ spec:
   issuerRef:
     kind: Issuer
     name: openstack-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: metrics-server-cert
 ---
 apiVersion: cert-manager.io/v1
@@ -174,6 +177,9 @@ spec:
   issuerRef:
     kind: Issuer
     name: openstack-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: webhook-server-cert
 ---
 apiVersion: cert-manager.io/v1

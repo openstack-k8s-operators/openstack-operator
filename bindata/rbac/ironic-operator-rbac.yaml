@@ -385,4 +385,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: ironic-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: ironic-operator-metrics-server-cert

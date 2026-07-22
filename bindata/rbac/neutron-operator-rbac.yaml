@@ -366,4 +366,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: neutron-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: neutron-operator-metrics-server-cert

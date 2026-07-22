@@ -355,4 +355,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: ovn-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: ovn-operator-metrics-server-cert

@@ -395,4 +395,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: keystone-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: keystone-operator-metrics-server-cert

@@ -388,4 +388,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: glance-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: glance-operator-metrics-server-cert

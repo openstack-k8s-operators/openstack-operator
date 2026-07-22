@@ -555,4 +555,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: telemetry-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: telemetry-operator-metrics-server-cert

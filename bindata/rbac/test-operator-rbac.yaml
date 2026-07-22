@@ -261,4 +261,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: test-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: test-operator-metrics-server-cert

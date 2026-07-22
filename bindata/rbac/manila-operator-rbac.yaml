@@ -370,4 +370,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: manila-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: manila-operator-metrics-server-cert

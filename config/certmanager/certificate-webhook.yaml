@@ -17,4 +17,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: webhook-server-cert

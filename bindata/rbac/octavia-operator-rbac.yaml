@@ -416,4 +416,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: octavia-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: octavia-operator-metrics-server-cert

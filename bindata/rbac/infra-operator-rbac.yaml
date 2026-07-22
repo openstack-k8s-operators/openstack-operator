@@ -539,4 +539,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: infra-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: infra-operator-metrics-server-cert

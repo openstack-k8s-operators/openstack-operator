@@ -359,4 +359,7 @@ spec:
   issuerRef:
     kind: Issuer
     name: barbican-operator-selfsigned-issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
   secretName: barbican-operator-metrics-server-cert
