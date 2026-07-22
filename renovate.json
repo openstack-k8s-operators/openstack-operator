@@ -3,7 +3,8 @@
     "github>openstack-k8s-operators/renovate-config:default.json5"
   ],
   "baseBranchPatterns": [
-    "main"
+    "main",
+    "18-stable"
   ],
   "useBaseBranchConfig": "merge",
   "packageRules": [
