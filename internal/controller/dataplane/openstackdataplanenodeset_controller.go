@@ -596,6 +596,16 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				continue
 			}
 
+			hasCertSecretsChanged, err := checkCertSecretsChanged(ctx, helper, instance, deployment.Status.SecretHashes)
+
+			if err != nil {
+				return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+			}
+
+			if hasCertSecretsChanged {
+				continue
+			}
+
 			isNodeSetDeploymentReady = true
 			for k, v := range deployment.Status.ConfigMapHashes {
 				instance.Status.ConfigMapHashes[k] = v
@@ -853,6 +863,26 @@ func (r *OpenStackDataPlaneNodeSetReconciler) secretWatcherFn(
 	ctx context.Context, obj client.Object,
 ) []reconcile.Request {
 	Log := r.GetLogger(ctx)
+
+	// Check if this is a cert secret (has NodeSet, Service, and ServiceKey labels).
+	// Cert secrets created by EnsureTLSCerts carry these labels but are not
+	// listed in AnsibleVarsFrom, so the field-index lookup below would miss them.
+	labels := obj.GetLabels()
+	if nodeSetName, ok := labels[deployment.NodeSetLabel]; ok {
+		_, hasSvcLabel := labels[deployment.ServiceLabel]
+		_, hasSvcKeyLabel := labels[deployment.ServiceKeyLabel]
+		if hasSvcLabel && hasSvcKeyLabel {
+			Log.Info(fmt.Sprintf("reconcile loop for openstackdataplanenodeset %s triggered by cert secret %s",
+				nodeSetName, obj.GetName()))
+			return []reconcile.Request{{
+				NamespacedName: types.NamespacedName{
+					Namespace: obj.GetNamespace(),
+					Name:      nodeSetName,
+				},
+			}}
+		}
+	}
+
 	nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
 	kind := strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)
 	selector := "spec.ansibleVarsFrom.ansible.configMaps"
@@ -980,6 +1010,34 @@ func checkAnsibleVarsFromChanged(
 	for name, currentHash := range currentSecretHashes {
 		if deployedHash, exists := deployedSecretHashes[name]; !exists || deployedHash != currentHash {
 			helper.GetLogger().Info("Secret content changed", "secret", name)
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+// checkCertSecretsChanged computes current hashes for TLS cert secrets
+// belonging to the NodeSet and compares them with deployed hashes.
+// Returns true if any cert secret content has changed, false otherwise.
+func checkCertSecretsChanged(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	deployedSecretHashes map[string]string,
+) (bool, error) {
+	currentCertHashes, err := deployment.GetCertSecretHashes(ctx, helper, instance.Namespace, instance.Name)
+	if err != nil {
+		return false, err
+	}
+
+	// Only flag secrets that were previously deployed and have changed content.
+	// New cert secrets (not yet in deployedSecretHashes) are not flagged here
+	// because adding a new TLS service changes instance.Spec, which is already
+	// detected by the ConfigHash comparison earlier in checkDeployment.
+	for name, currentHash := range currentCertHashes {
+		if deployedHash, exists := deployedSecretHashes[name]; exists && deployedHash != currentHash {
+			helper.GetLogger().Info("Cert secret content changed", "secret", name)
 			return true, nil
 		}
 	}
