@@ -10,6 +10,7 @@ resources:
 - bases/dataplane.openstack.org_openstackdataplanedeployments.yaml
 #- bases/operator.openstack.org_openstacks.yaml
 - bases/backup.openstack.org_openstackbackupconfigs.yaml
+- bases/assistant.openstack.org_openstackassistants.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:
