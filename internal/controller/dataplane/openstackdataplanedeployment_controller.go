@@ -19,16 +19,19 @@ package dataplane
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/iancoleman/strcase"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -146,7 +149,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	defer func() { // update the Ready condition based on the sub conditions
 		// Don't update the status, if reconciler Panics
 		if r := recover(); r != nil {
-			Log.Info(fmt.Sprintf("panic during reconcile %v\n", r))
+			Log.Info("panic during reconcile", "panic", r)
 			panic(r)
 		}
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
@@ -250,12 +253,45 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	shouldRequeue := false
 	haveError := false
 	deploymentErrMsg := ""
-	var nodesetServiceMap map[string][]string
+	var nodesetServiceMap map[string][][]string
+	var serviceCache *deployment.ServiceCache
 	backoffLimitReached := false
 
-	if nodesetServiceMap, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
-		instance.Spec.ServicesOverride); err != nil {
+	fallbackToListOrder := ptr.Deref(instance.Spec.FallbackToListOrder, true)
+
+	if nodesetServiceMap, serviceCache, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
+		instance.Spec.ServicesOverride, fallbackToListOrder); err != nil {
 		util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
+		var missingServiceErr *deployment.MissingServiceError
+		if errors.As(err, &missingServiceErr) {
+			nsConditions := instance.Status.NodeSetConditions[missingServiceErr.NodeSet]
+			nodeSetServiceErrorMessage := fmt.Sprintf(
+				dataplanev1.NodeSetServiceDeploymentErrorMessage,
+				missingServiceErr.Service) + " error %s"
+			nsConditions.MarkFalse(
+				dataplanev1.NodeSetDeploymentReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				nodeSetServiceErrorMessage,
+				err.Error())
+			serviceCondition := condition.Type(fmt.Sprintf(
+				"Service%sDeploymentReady",
+				strcase.ToCamel(missingServiceErr.Service)))
+			nsConditions.MarkFalse(
+				serviceCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				nodeSetServiceErrorMessage,
+				err.Error())
+			instance.Status.NodeSetConditions[missingServiceErr.NodeSet] = nsConditions
+			instance.Status.Conditions.MarkFalse(
+				condition.DeploymentReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				condition.DeploymentReadyErrorMessage,
+				fmt.Sprintf("nodeSet: %s error: %s", missingServiceErr.NodeSet, err.Error()))
+			return ctrl.Result{}, err
+		}
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
 			condition.ErrorReason,
@@ -276,7 +312,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	// for the first started NodeSet to finish before starting the next.
 	for _, nodeSet := range nodeSets.Items {
 
-		Log.Info(fmt.Sprintf("Deploying NodeSet: %s", nodeSet.Name))
+		Log.Info("Deploying NodeSet", "nodeSet", nodeSet.Name)
 		Log.Info("Set Status.Deployed to false", "instance", instance)
 		instance.Status.Deployed = false
 		Log.Info("Set DeploymentReadyCondition false")
@@ -306,14 +342,13 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			AeeSpec:                     &ansibleEESpec,
 			InventorySecrets:            globalInventorySecrets,
 			AnsibleSSHPrivateKeySecrets: globalSSHKeySecrets,
+			ServiceCache:                serviceCache,
 			Version:                     version,
 		}
 
-		// When ServicesOverride is set on the OpenStackDataPlaneDeployment,
-		// deploy those services for each OpenStackDataPlaneNodeSet. Otherwise,
-		// deploy with the OpenStackDataPlaneNodeSet's Services.
 		var deployResult *ctrl.Result
-		deployResult, err = deployer.Deploy(nodesetServiceMap[nodeSet.Name])
+		deployResult, err = deployer.Deploy(
+			nodesetServiceMap[nodeSet.Name])
 
 		nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
 		nsConditions.Set(nsConditions.Mirror(dataplanev1.NodeSetDeploymentReadyCondition))
@@ -494,7 +529,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manag
 					Namespace: dep.GetNamespace(),
 					Name:      dep.GetName(),
 				}
-				Log.Info(fmt.Sprintf("Cert %s is used by deployment %s", obj.GetName(), dep.GetName()))
+				Log.Info("Cert is used by deployment", "cert", obj.GetName(), "deployment", dep.GetName())
 				result = append(result, reconcile.Request{NamespacedName: name})
 			}
 		}

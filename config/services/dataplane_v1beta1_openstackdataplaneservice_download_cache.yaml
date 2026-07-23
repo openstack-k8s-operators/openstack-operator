@@ -5,3 +5,5 @@ metadata:
 spec:
   playbook: osp.edpm.download_cache
   edpmServiceType: download-cache
+  dependsOn:
+    - redhat

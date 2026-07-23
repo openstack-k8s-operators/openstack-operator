@@ -44,8 +44,50 @@ type ServiceYAML struct {
 	Spec     yaml.Node
 }
 
+// MissingServiceError indicates that a requested service does not exist.
+type MissingServiceError struct {
+	NodeSet string
+	Service string
+	Err     error
+}
+
+func (e *MissingServiceError) Error() string {
+	return e.Err.Error()
+}
+
+func (e *MissingServiceError) Unwrap() error {
+	return e.Err
+}
+
+// ServiceCache stores reconcile-local service objects to avoid repeated API lookups.
+type ServiceCache struct {
+	services map[string]dataplanev1.OpenStackDataPlaneService
+}
+
+// NewServiceCache returns an empty reconcile-local service cache.
+func NewServiceCache() *ServiceCache {
+	return &ServiceCache{
+		services: map[string]dataplanev1.OpenStackDataPlaneService{},
+	}
+}
+
+// Get returns a cached service or fetches it once from the API.
+func (c *ServiceCache) Get(ctx context.Context, helper *helper.Helper, service string) (dataplanev1.OpenStackDataPlaneService, error) {
+	if cached, ok := c.services[service]; ok {
+		return cached, nil
+	}
+
+	foundService, err := GetService(ctx, helper, service)
+	if err != nil {
+		return dataplanev1.OpenStackDataPlaneService{}, err
+	}
+
+	c.services[service] = foundService
+	return foundService, nil
+}
+
 // DeployService service deployment
-func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneService) error {
+func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneService, aeeSpec *dataplanev1.AnsibleEESpec) error {
 	err := dataplaneutil.AnsibleExecution(
 		d.Ctx,
 		d.Helper,
@@ -53,10 +95,10 @@ func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneServ
 		&foundService,
 		d.AnsibleSSHPrivateKeySecrets,
 		d.InventorySecrets,
-		d.AeeSpec,
+		aeeSpec,
 		d.NodeSet)
 	if err != nil {
-		d.Helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
+		d.Helper.GetLogger().Error(err, "Unable to execute Ansible", "service", foundService.Name)
 		return err
 	}
 
@@ -152,51 +194,61 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	return nil
 }
 
-// DedupeServices deduplicates services to deploy.
-// Multiple Services of same ServiceType/ServiceName in a nodeset
-// Global Services in multiple NodeSets for a deployment
+// DedupeServices deduplicates services to deploy and builds execution
+// levels based on service dependencies. The returned map contains a
+// leveled execution plan for each nodeset: each level is a list of
+// services whose dependencies are all in earlier levels.
 func DedupeServices(ctx context.Context, helper *helper.Helper,
 	nodesets []dataplanev1.OpenStackDataPlaneNodeSet,
-	serviceOverride []string) (map[string][]string, error) {
-	var nodeSetServiceMap = make(map[string][]string, 0)
+	serviceOverride []string,
+	fallbackToListOrder bool,
+) (map[string][][]string, *ServiceCache, error) {
+	nodeSetServiceMap := make(map[string][][]string)
 	var globalServices []string
 	var services []string
 	var err error
+	serviceCache := NewServiceCache()
 
-	for _, nodeset := range nodesets {
+	for i := range nodesets {
+		nodeset := &nodesets[i]
 		var nodeSetServices []string
 		if len(serviceOverride) != 0 {
 			nodeSetServices = serviceOverride
 		} else {
 			nodeSetServices = nodeset.Spec.Services
 		}
-		services, globalServices, err = dedupe(ctx, helper, nodeSetServices, globalServices)
+		services, globalServices, err = dedupe(ctx, helper, serviceCache, nodeset.Name, nodeSetServices, globalServices)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		nodeSetServiceMap[nodeset.Name] = services
+		levels, err := BuildServiceLevels(ctx, helper, serviceCache, services, fallbackToListOrder)
+		if err != nil {
+			return nil, nil, fmt.Errorf("error building service dependency graph for nodeset %s: %w", nodeset.Name, err)
+		}
+		nodeSetServiceMap[nodeset.Name] = levels
 	}
-	helper.GetLogger().Info(fmt.Sprintf("Current Global Services %v", globalServices))
-	return nodeSetServiceMap, nil
+	helper.GetLogger().Info("Current global services", "services", globalServices)
+	return nodeSetServiceMap, serviceCache, nil
 }
 
 func dedupe(ctx context.Context, helper *helper.Helper,
+	serviceCache *ServiceCache,
+	nodeSetName string,
 	services []string, globalServices []string) ([]string, []string, error) {
 	var dedupedServices []string
 	var nodeSetServiceTypes []string
 	updatedglobalServices := globalServices
 	for _, svc := range services {
-		service, err := GetService(ctx, helper, svc)
+		service, err := serviceCache.Get(ctx, helper, svc)
 		if err != nil {
-			if k8s_errors.IsNotFound(err) && !slices.Contains(dedupedServices, svc) {
-				helper.GetLogger().Error(err, fmt.Sprintf("Configured service %s does not exist", svc))
-				// Add the service to the service list as it would fail later when deploying and
-				// Update the statuses accordingly.
-				dedupedServices = append(dedupedServices, svc)
-				continue
+			if !k8s_errors.IsNotFound(err) {
+				return dedupedServices, updatedglobalServices, err
 			}
-			return dedupedServices, updatedglobalServices, err
-
+			return dedupedServices, updatedglobalServices, &MissingServiceError{
+				NodeSet: nodeSetName,
+				Service: svc,
+				Err:     err,
+			}
 		}
 
 		serviceType := service.Spec.EDPMServiceType

@@ -7,3 +7,5 @@ spec:
   containerImageFields:
   - EdpmLogrotateCrondImage
   edpmServiceType: run-os
+  dependsOn:
+    - configure-os
