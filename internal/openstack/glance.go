@@ -95,7 +95,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Glance.Template.NotificationBusInstance = nil
 	}
 
-	if instance.Spec.Glance.Template.NodeSelector == nil {
+	if instance.Spec.Glance.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Glance.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

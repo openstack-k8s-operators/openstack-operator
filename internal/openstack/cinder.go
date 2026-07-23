@@ -174,7 +174,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.CinderAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if instance.Spec.Cinder.Template.NodeSelector == nil {
+	if instance.Spec.Cinder.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Cinder.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

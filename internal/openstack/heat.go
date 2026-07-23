@@ -54,7 +54,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	// Note: Migration from rabbitMqClusterName to messagingBus.cluster is handled by the webhook
 	// via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
 
-	if instance.Spec.Heat.Template.NodeSelector == nil {
+	if instance.Spec.Heat.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Heat.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
