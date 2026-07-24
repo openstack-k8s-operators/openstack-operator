@@ -567,6 +567,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.InstanceHaImage != nil {
+		in, out := &in.InstanceHaImage, &out.InstanceHaImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.IronicAPIImage != nil {
 		in, out := &in.IronicAPIImage, &out.IronicAPIImage
 		*out = new(string)

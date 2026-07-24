@@ -147,6 +147,8 @@ spec:
                     type: string
                   infraRedisImage:
                     type: string
+                  instanceHaImage:
+                    type: string
                   ironicAPIImage:
                     type: string
                   ironicConductorImage:
@@ -389,6 +391,8 @@ spec:
                       type: string
                     infraRedisImage:
                       type: string
+                    instanceHaImage:
+                      type: string
                     ironicAPIImage:
                       type: string
                     ironicConductorImage:
@@ -588,6 +592,8 @@ spec:
                   infraMemcachedImage:
                     type: string
                   infraRedisImage:
+                    type: string
+                  instanceHaImage:
                     type: string
                   ironicAPIImage:
                     type: string
@@ -806,6 +812,8 @@ spec:
                     infraMemcachedImage:
                       type: string
                     infraRedisImage:
+                      type: string
+                    instanceHaImage:
                       type: string
                     ironicAPIImage:
                       type: string

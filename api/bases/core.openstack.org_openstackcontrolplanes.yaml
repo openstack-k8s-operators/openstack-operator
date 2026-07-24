@@ -21099,6 +21099,8 @@ spec:
                     type: string
                   infraRedisImage:
                     type: string
+                  instanceHaImage:
+                    type: string
                   ironicAPIImage:
                     type: string
                   ironicConductorImage:

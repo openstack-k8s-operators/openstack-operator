@@ -46,7 +46,7 @@ func ReconcileInstanceHa(ctx context.Context, instance *corev1beta1.OpenStackCon
 	}
 
 	customData := map[string]string{
-		InstanceHaImageKey: *getImg(version.Status.ContainerImages.OpenstackClientImage, &missingImageDefault),
+		InstanceHaImageKey: *getImg(version.Status.ContainerImages.InstanceHaImage, &missingImageDefault),
 	}
 
 	cms := []util.Template{

@@ -18,6 +18,7 @@ export RELATED_IMAGE_MANILA_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-cent
 export RELATED_IMAGE_MANILA_SCHEDULER_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-manila-scheduler:current-podified
 export RELATED_IMAGE_MANILA_SHARE_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-manila-share:current-podified
 export RELATED_IMAGE_GLANCE_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-glance-api:current-podified
+export RELATED_IMAGE_INSTANCE_HA_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified
 export RELATED_IMAGE_IRONIC_API_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ironic-api:current-podified
 export RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ironic-conductor:current-podified
 export RELATED_IMAGE_IRONIC_INSPECTOR_IMAGE_URL_DEFAULT=quay.io/podified-antelope-centos9/openstack-ironic-inspector:current-podified
