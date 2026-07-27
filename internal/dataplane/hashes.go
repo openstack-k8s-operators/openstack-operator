@@ -139,3 +139,36 @@ func ProcessAnsibleVarsFrom(
 	}
 	return nil
 }
+
+// GetCertSecretHashes returns a map of secret-name to hash for all TLS cert
+// secrets belonging to the given NodeSet. Cert secrets are identified by having
+// both the NodeSetLabel and ServiceLabel labels set by EnsureTLSCerts.
+func GetCertSecretHashes(
+	ctx context.Context,
+	helper *helper.Helper,
+	namespace string,
+	nodeSetName string,
+) (map[string]string, error) {
+	labelSelector := map[string]string{
+		NodeSetLabel: nodeSetName,
+	}
+	secrets, err := secret.GetSecrets(ctx, helper, namespace, labelSelector)
+	if err != nil {
+		return nil, err
+	}
+
+	certHashes := make(map[string]string)
+	for i := range secrets.Items {
+		sec := &secrets.Items[i]
+		if _, hasSvcLabel := sec.Labels[ServiceLabel]; !hasSvcLabel {
+			continue
+		}
+		hash, err := secret.Hash(sec)
+		if err != nil {
+			helper.GetLogger().Error(err, "Unable to hash cert Secret", "secret", sec.Name)
+			return nil, err
+		}
+		certHashes[sec.Name] = hash
+	}
+	return certHashes, nil
+}
