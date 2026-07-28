@@ -19291,6 +19291,13 @@ spec:
                         type: object
                       metricStorage:
                         properties:
+                          alertmanagerTls:
+                            properties:
+                              caBundleSecretName:
+                                type: string
+                              secretName:
+                                type: string
+                            type: object
                           customMonitoringStack:
                             nullable: true
                             properties:
@@ -20250,6 +20257,9 @@ spec:
                               type: string
                             type: array
                             x-kubernetes-list-type: atomic
+                          openStackLightspeedNamespace:
+                            default: openstack-lightspeed
+                            type: string
                           prometheusTls:
                             properties:
                               caBundleSecretName:

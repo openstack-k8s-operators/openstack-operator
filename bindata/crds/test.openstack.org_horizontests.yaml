@@ -54,18 +54,22 @@ spec:
                   operator.
                 type: string
               adminPassword:
-                default: admin
-                description: AdminPassword is the password for the OpenStack admin
-                  user.
+                default: ""
+                description: |-
+                  WARNING: This parameter will be deprecated!
+                  Please set the password in the OpenStackConfigSecret (secure.yaml) instead.
+                  When this parameter is empty the value is read from the secure.yaml.
+                  AdminPassword is the password for the OpenStack admin user.
                 maxLength: 253
-                minLength: 1
                 type: string
               adminUsername:
-                default: admin
-                description: AdminUsername is the username for the OpenStack admin
-                  user.
+                default: ""
+                description: |-
+                  WARNING: This parameter will be deprecated!
+                  Please set the username in the OpenStackConfigMap (clouds.yaml) instead.
+                  When this parameter is empty the value is read from the clouds.yaml.
+                  AdminUsername is the username for the OpenStack admin user.
                 maxLength: 253
-                minLength: 1
                 type: string
               authUrl:
                 description: AuthUrl is the authentication URL for OpenStack.
@@ -1457,8 +1461,6 @@ spec:
                 maxLength: 253
                 type: string
             required:
-            - adminPassword
-            - adminUsername
             - authUrl
             - dashboardUrl
             - horizonRepoBranch

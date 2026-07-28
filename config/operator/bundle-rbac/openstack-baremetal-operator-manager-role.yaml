@@ -9,7 +9,6 @@ rules:
   resources:
     - configmaps
     - configmaps/finalizers
-    - pods
     - secrets
     - secrets/finalizers
     - volumes
@@ -25,6 +24,7 @@ rules:
     - ""
   resources:
     - nodes
+    - pods
   verbs:
     - get
     - list

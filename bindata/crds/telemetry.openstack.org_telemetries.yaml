@@ -1433,6 +1433,19 @@ spec:
               metricStorage:
                 description: MetricStorage - Parameters related to the metricStorage
                 properties:
+                  alertmanagerTls:
+                    description: |-
+                      TLS - Parameters related to the Alertmanager TLS.
+                      The value of caBundleSecretName is currently ignored.
+                    properties:
+                      caBundleSecretName:
+                        description: CaBundleSecretName - holding the CA certs in
+                          a pre-created bundle file
+                        type: string
+                      secretName:
+                        description: SecretName - holding the cert, key for the service
+                        type: string
+                    type: object
                   customMonitoringStack:
                     description: |-
                       CustomMonitoringStack allows to deploy a custom monitoring
@@ -3248,8 +3261,14 @@ spec:
                       type: string
                     type: array
                     x-kubernetes-list-type: atomic
+                  openStackLightspeedNamespace:
+                    default: openstack-lightspeed
+                    description: |-
+                      OpenStackLightspeedNamespace defines the namespace where OpenStack Lightspeed
+                      is deployed. Used for discovering Lightspeed metrics services.
+                    type: string
                   prometheusTls:
-                    description: TLS - Parameters related to the TLS
+                    description: TLS - Parameters related to the Prometheus TLS
                     properties:
                       caBundleSecretName:
                         description: CaBundleSecretName - holding the CA certs in
