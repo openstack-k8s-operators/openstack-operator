@@ -68,8 +68,9 @@ spec:
                   bundle file
                 type: string
               containerImage:
-                description: ContainerImage for the InstanceHa container (will be
-                  set to environmental default if empty)
+                description: |-
+                  ContainerImage for the InstanceHa container. If empty, resolved from
+                  the infra-instanceha-config ConfigMap or the RELATED_IMAGE env var.
                 type: string
               disabled:
                 default: "False"
