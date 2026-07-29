@@ -70,7 +70,6 @@ rules:
     - ""
   resources:
     - configmaps
-    - pods
     - secrets
     - services
   verbs:
@@ -80,6 +79,14 @@ rules:
     - list
     - patch
     - update
+    - watch
+- apiGroups:
+    - ""
+  resources:
+    - pods
+  verbs:
+    - get
+    - list
     - watch
 - apiGroups:
     - ""
