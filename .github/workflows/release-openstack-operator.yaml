@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
     - name: Tag image
       uses: tinact/docker.image-retag@684702232e2a3c29b4e5ca25d7d80f927d255c64 # 1.0.3
