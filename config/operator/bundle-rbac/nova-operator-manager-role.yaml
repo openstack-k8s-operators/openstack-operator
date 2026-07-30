@@ -8,7 +8,6 @@ rules:
     - ""
   resources:
     - configmaps
-    - pods
     - secrets
     - services
   verbs:
@@ -56,6 +55,38 @@ rules:
     - patch
     - update
     - watch
+- apiGroups:
+    - cyborg.openstack.org
+  resources:
+    - cyborgapis
+    - cyborgconductors
+    - cyborgs
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - cyborg.openstack.org
+  resources:
+    - cyborgapis/finalizers
+    - cyborgconductors/finalizers
+    - cyborgs/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - cyborg.openstack.org
+  resources:
+    - cyborgapis/status
+    - cyborgconductors/status
+    - cyborgs/status
+  verbs:
+    - get
+    - patch
+    - update
 - apiGroups:
     - k8s.cni.cncf.io
   resources:

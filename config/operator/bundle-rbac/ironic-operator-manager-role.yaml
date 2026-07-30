@@ -9,7 +9,6 @@ rules:
   resources:
     - configmaps
     - persistentvolumeclaims
-    - pods
     - secrets
     - services
   verbs:
@@ -20,6 +19,13 @@ rules:
     - patch
     - update
     - watch
+- apiGroups:
+    - ""
+  resources:
+    - pods
+  verbs:
+    - get
+    - list
 - apiGroups:
     - ""
   resources:
