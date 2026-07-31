@@ -67,7 +67,13 @@ spec:
             memory: {{ .Deployment.Manager.Resources.Requests.Memory }}
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - "ALL"
+          readOnlyRootFilesystem: true
         volumeMounts:
+        - mountPath: /tmp
+          name: tmp
 {{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
@@ -99,6 +105,8 @@ spec:
 {{- end }}
 {{- end }}
       volumes:
+      - emptyDir: {}
+        name: tmp
 {{- if isEnvVarTrue .Deployment.Manager.Env "ENABLE_WEBHOOKS" }}
       - name: cert
         secret:
