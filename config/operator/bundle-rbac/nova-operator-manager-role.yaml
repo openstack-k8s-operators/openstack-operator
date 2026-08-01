@@ -21,6 +21,13 @@ rules:
 - apiGroups:
     - ""
   resources:
+    - pods
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - ""
+  resources:
     - serviceaccounts
   verbs:
     - create
