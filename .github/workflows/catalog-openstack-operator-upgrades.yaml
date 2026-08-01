@@ -69,14 +69,14 @@ jobs:
           BUNDLE: ${{ env.imageregistry }}/${{ env.imagenamespace }}/openstack-operator-bundle:${{ github.sha }}
       - name: Buildah Action
         id: build-operator-index-upgrade
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
+        uses: redhat-actions/buildah-build@9dc2ade9b5db229966b5025ae266311e12f349c4 # v2
         with:
           image: openstack-operator-index-upgrade
           tags: ${{ env.latesttag }} ${{ github.sha }}
           containerfiles: |
             ./catalog.Dockerfile
       - name: Push openstack-operator-index-upgrade To ${{ env.imageregistry }}
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+        uses: redhat-actions/push-to-registry@5860fc963bf8f2b3221773a023141612f010c469 # v2
         with:
           image: ${{ steps.build-operator-index-upgrade.outputs.image }}
           tags: ${{ steps.build-operator-index-upgrade.outputs.tags }}
