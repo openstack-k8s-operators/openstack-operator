@@ -42,18 +42,18 @@ jobs:
         run: |
           echo "latesttag=${{ github.ref_name }}-latest" >> $GITHUB_ENV
       - name: Install opm
-        uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82 # v1
+        uses: redhat-actions/openshift-tools-installer@ebd96c3fc72fc10a62663eac5e1421192152e6aa # v2
         with:
           source: github
           opm: 'latest'
       - name: Log in to Quay Registry
-        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1
+        uses: redhat-actions/podman-login@50c2d9a331bb67c8fdab99b86455fad05e2e3252 # v2
         with:
           registry: ${{ env.imageregistry }}
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - name: Log in to Red Hat Registry
-        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1
+        uses: redhat-actions/podman-login@50c2d9a331bb67c8fdab99b86455fad05e2e3252 # v2
         with:
           registry: registry.redhat.io
           username: ${{ secrets.REDHATIO_USERNAME }}
@@ -69,14 +69,14 @@ jobs:
           BUNDLE: ${{ env.imageregistry }}/${{ env.imagenamespace }}/openstack-operator-bundle:${{ github.sha }}
       - name: Buildah Action
         id: build-operator-index-upgrade
-        uses: redhat-actions/buildah-build@9dc2ade9b5db229966b5025ae266311e12f349c4 # v2
+        uses: redhat-actions/buildah-build@3a51aade9afa17e5c78256bcbe2e1ee08c7b995b # v3
         with:
           image: openstack-operator-index-upgrade
           tags: ${{ env.latesttag }} ${{ github.sha }}
           containerfiles: |
             ./catalog.Dockerfile
       - name: Push openstack-operator-index-upgrade To ${{ env.imageregistry }}
-        uses: redhat-actions/push-to-registry@5860fc963bf8f2b3221773a023141612f010c469 # v2
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3
         with:
           image: ${{ steps.build-operator-index-upgrade.outputs.image }}
           tags: ${{ steps.build-operator-index-upgrade.outputs.tags }}
