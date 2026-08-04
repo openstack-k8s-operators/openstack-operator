@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -29,6 +32,7 @@ const (
 
 // ReconcileTelemetry puts telemetry resources to required state
 func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+	Log := helper.GetLogger()
 	telemetry := &telemetryv1.Telemetry{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      telemetryName,
@@ -273,6 +277,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
 		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS = telemetry.Spec.MetricStorage.PrometheusTLS
 		instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS = telemetry.Spec.MetricStorage.AlertmanagerTLS
+		instance.Spec.Telemetry.Template.MetricStorage.PrometheusClientCertSecret = telemetry.Spec.MetricStorage.PrometheusClientCertSecret
 		instance.Spec.Telemetry.Template.Ceilometer.TLS = telemetry.Spec.Ceilometer.TLS
 		instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS = telemetry.Spec.Ceilometer.MysqldExporterTLS
 		instance.Spec.Telemetry.Template.Ceilometer.KSMTLS = telemetry.Spec.Ceilometer.KSMTLS
@@ -442,6 +447,47 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		// update TLS settings with cert secret
 		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName = prometheusEndpointDetails.GetEndptCertSecret(service.EndpointInternal)
 
+		// Generate Prometheus client certificate for scraping metrics from TLS-enabled endpoints
+		if instance.Spec.TLS.PodLevel.Enabled {
+			if promSvc, ok := prometheusEndpointDetails.EndpointDetails[service.EndpointInternal]; ok {
+				Log.Info("Reconciling Prometheus client certificate", telemetryNamespaceLabel, instance.Namespace)
+				clusterDomain := clusterdns.GetDNSClusterDomain()
+				certRequest := certmanager.CertificateRequest{
+					IssuerName: instance.GetInternalIssuer(),
+					CertName:   fmt.Sprintf("%s-client", promSvc.Name),
+					Hostnames: []string{
+						fmt.Sprintf("*.%s.svc", instance.Namespace),
+						fmt.Sprintf("*.%s.svc.%s", instance.Namespace, clusterDomain),
+					},
+					Usages: []certmgrv1.KeyUsage{
+						certmgrv1.UsageKeyEncipherment,
+						certmgrv1.UsageDigitalSignature,
+						certmgrv1.UsageClientAuth,
+					},
+					Labels: map[string]string{ServiceCertSelector: ""},
+				}
+				if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
+					certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
+				}
+				if instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore != nil {
+					certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore.Duration
+				}
+				certSecret, ctrlResult, err := certmanager.EnsureCert(
+					ctx,
+					helper,
+					certRequest,
+					nil)
+				if err != nil {
+					return ctrlResult, err
+				} else if (ctrlResult != ctrl.Result{}) {
+					return ctrlResult, nil
+				}
+				instance.Spec.Telemetry.Template.MetricStorage.PrometheusClientCertSecret.SecretName = &certSecret.Name
+			} else {
+				Log.Info("Prometheus internal endpoint not found, skipping client certificate generation", telemetryNamespaceLabel, instance.Namespace)
+			}
+		}
+
 		// EnsureEndpoint for alertmanager
 		// NOTE: We don't manage the alertmanager service, it's managed by COO, we just annotate it
 		alertmanagerEndpointDetails, ctrlResult, err := EnsureEndpointConfig(
@@ -539,7 +585,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Ceilometer.KSMTLS.SecretName = ksmEpDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	helper.GetLogger().Info("Reconciling Telemetry", telemetryNamespaceLabel, instance.Namespace, telemetryNameLabel, telemetryName)
+	Log.Info("Reconciling Telemetry", telemetryNamespaceLabel, instance.Namespace, telemetryNameLabel, telemetryName)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), telemetry, func() error {
 		instance.Spec.Telemetry.Template.TelemetrySpecBase.DeepCopyInto(&telemetry.Spec.TelemetrySpecBase)
 		instance.Spec.Telemetry.Template.Autoscaling.AutoscalingSpecBase.DeepCopyInto(&telemetry.Spec.Autoscaling.AutoscalingSpecBase)
@@ -639,11 +685,11 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		return ctrl.Result{}, err
 	}
 	if op != controllerutil.OperationResultNone {
-		helper.GetLogger().Info(fmt.Sprintf("%s %s - %s", telemetryName, telemetry.Name, op))
+		Log.Info(fmt.Sprintf("%s %s - %s", telemetryName, telemetry.Name, op))
 	}
 
 	if telemetry.Status.ObservedGeneration == telemetry.Generation && telemetry.IsReady() {
-		helper.GetLogger().Info("Telemetry ready condition is true")
+		Log.Info("Telemetry ready condition is true")
 		instance.Status.ContainerImages.CeilometerCentralImage = version.Status.ContainerImages.CeilometerCentralImage
 		instance.Status.ContainerImages.CeilometerComputeImage = version.Status.ContainerImages.CeilometerComputeImage
 		instance.Status.ContainerImages.CeilometerIpmiImage = version.Status.ContainerImages.CeilometerIpmiImage
