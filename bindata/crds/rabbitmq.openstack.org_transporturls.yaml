@@ -112,12 +112,6 @@ spec:
                   - type
                   type: object
                 type: array
-              nodeSetSynced:
-                description: |-
-                  NodeSetSynced - set to "false" when a credential rotation is detected
-                  and we are waiting for NodeSet deployments to push the new config.
-                  Cleared when the deployment completes and the old user is released.
-                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration - the most recent generation observed for this
@@ -131,6 +125,12 @@ spec:
                   PreviousRabbitmqUserRef - the name of a previous RabbitMQUser CR whose
                   finalizer removal was deferred during a credential rotation, pending
                   deployment verification. Only set while a rotation is in progress.
+                type: string
+              previousSecretName:
+                description: |-
+                  PreviousSecretName - name of the previous TransportURL secret retained
+                  during credential rotation, pending consumer finalization.
+                  Cleared when the old secret is cleaned up after all consumers release it.
                 type: string
               queueType:
                 description: QueueType - the queue type from the associated RabbitMq
@@ -152,6 +152,12 @@ spec:
                 type: string
               rabbitmqVhost:
                 description: RabbitmqVhost - the actual vhost name used
+                type: string
+              secretHash:
+                description: |-
+                  SecretHash - hash of the current TransportURL secret content.
+                  Consuming services compare this with the hash they computed to
+                  confirm credential rotation is complete.
                 type: string
               secretName:
                 description: SecretName - name of the secret containing the rabbitmq
