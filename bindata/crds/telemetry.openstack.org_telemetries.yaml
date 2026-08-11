@@ -3267,6 +3267,16 @@ spec:
                       OpenStackLightspeedNamespace defines the namespace where OpenStack Lightspeed
                       is deployed. Used for discovering Lightspeed metrics services.
                     type: string
+                  prometheusClientCertSecret:
+                    description: |-
+                      PrometheusClientCertSecret - Secret containing client cert and key
+                      (tls.crt, tls.key) for Prometheus to present when scraping targets
+                      that require mTLS.
+                    properties:
+                      secretName:
+                        description: SecretName - holding the cert, key for the service
+                        type: string
+                    type: object
                   prometheusTls:
                     description: TLS - Parameters related to the Prometheus TLS
                     properties:
