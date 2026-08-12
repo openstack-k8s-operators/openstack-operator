@@ -272,6 +272,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
 		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS = telemetry.Spec.MetricStorage.PrometheusTLS
+		instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS = telemetry.Spec.MetricStorage.AlertmanagerTLS
 		instance.Spec.Telemetry.Template.Ceilometer.TLS = telemetry.Spec.Ceilometer.TLS
 		instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS = telemetry.Spec.Ceilometer.MysqldExporterTLS
 		instance.Spec.Telemetry.Template.Ceilometer.KSMTLS = telemetry.Spec.Ceilometer.KSMTLS
@@ -285,6 +286,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.Ceilometer.KSMTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	// TODO
@@ -414,7 +416,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	if telemetry.Status.Conditions.IsTrue(telemetryv1.MetricStorageReadyCondition) {
 		// EnsureEndpoint for prometheus
 		// NOTE: We don't manage the prometheus service, it's managed by COO, we just annotate it
-		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
+		prometheusEndpointDetails, ctrlResult, err := EnsureEndpointConfig(
 			ctx,
 			instance,
 			helper,
@@ -438,37 +440,35 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			return ctrlResult, nil
 		}
 		// update TLS settings with cert secret
-		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
+		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName = prometheusEndpointDetails.GetEndptCertSecret(service.EndpointInternal)
 
-		// TODO: rewrite this once we have TLS on alertmanager
-		for _, alertmanagerSvc := range alertmanagerSvcs.Items {
-			ed := EndpointDetail{
-				Name:      alertmanagerSvc.Name,
-				Namespace: alertmanagerSvc.Namespace,
-				Type:      service.Endpoint(alertmanagerSvc.Annotations[service.AnnotationEndpointKey]),
-				Service: ServiceDetails{
-					Spec: &alertmanagerSvc,
+		// EnsureEndpoint for alertmanager
+		// NOTE: We don't manage the alertmanager service, it's managed by COO, we just annotate it
+		alertmanagerEndpointDetails, ctrlResult, err := EnsureEndpointConfig(
+			ctx,
+			instance,
+			helper,
+			telemetry,
+			alertmanagerSvcs,
+			nil,
+			instance.Spec.Telemetry.AlertmanagerOverride,
+			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+			false, // TODO (mschuppert) could be removed when all integrated service support TLS
+			tls.API{
+				API: tls.APIService{
+					Public: tls.GenericService{
+						SecretName: instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS.SecretName,
+					},
 				},
-			}
-			ed.Route.Create = alertmanagerSvc.Annotations[service.AnnotationIngressCreateKey] == "true"
-			ed.Route.TLS.Enabled = false
-			if instance.Spec.Telemetry.AlertmanagerOverride.Route != nil {
-				ed.Route.OverrideSpec = *instance.Spec.Telemetry.AlertmanagerOverride.Route
-			}
-			ctrlResult, err := ed.ensureRoute(
-				ctx,
-				instance,
-				helper,
-				&alertmanagerSvc,
-				telemetry,
-				corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
-			)
-			if err != nil {
-				return ctrlResult, err
-			} else if (ctrlResult != ctrl.Result{}) {
-				return ctrlResult, nil
-			}
+			},
+		)
+		if err != nil {
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
 		}
+		// update TLS settings with cert secret
+		instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS.SecretName = alertmanagerEndpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
 	if telemetry.Status.Conditions.IsTrue(telemetryv1.CeilometerReadyCondition) {
