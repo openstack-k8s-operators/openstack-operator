@@ -2068,11 +2068,6 @@ ContainerTemplate - struct that contains container image URLs for each service i
 | *string
 | false
 
-| edpmKeplerImage
-|
-| *string
-| false
-
 | edpmPodmanExporterImage
 |
 | *string
