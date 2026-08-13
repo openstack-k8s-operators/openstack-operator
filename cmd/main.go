@@ -172,6 +172,10 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
+	tlsOpts = append(tlsOpts, func(c *tls.Config) {
+		c.MinVersion = tls.VersionTLS13
+	})
+
 	// if the enable-http2 flag is false (the default), http/2 should be disabled
 	// due to its vulnerabilities. More specifically, disabling http/2 will
 	// prevent from being vulnerable to the HTTP/2 Stream Cancellation and
