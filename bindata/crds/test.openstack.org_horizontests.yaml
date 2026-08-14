@@ -855,34 +855,15 @@ spec:
                   - extraVol
                   type: object
                 type: array
-              flavorName:
-                default: m1.tiny
-                description: FlavorName is the name of the OpenStack flavor to create
-                  for Horizon tests.
-                type: string
               horizonRepoBranch:
                 default: master
                 description: HorizonRepoBranch is the branch of the Horizon repository
                   to checkout.
                 type: string
-              horizonTestDir:
-                default: /var/lib/horizontest
-                description: HorizonTestDir is the directory path for Horizon tests.
-                type: string
-              imageUrl:
-                default: http://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img
-                description: ImageUrl is the URL to download the Cirros image.
-                format: uri
-                type: string
               kubeconfigSecretName:
                 description: |-
                   Name of a secret that contains a kubeconfig. The kubeconfig is mounted under /var/lib/horizontest/.kube/config
                   in the test pod.
-                type: string
-              logsDirectoryName:
-                default: horizon
-                description: LogsDirectoryName is the name of the directory to store
-                  test logs.
                 type: string
               nodeSelector:
                 additionalProperties:
@@ -905,12 +886,6 @@ spec:
                 default: false
                 description: Parallel
                 type: boolean
-              password:
-                default: horizontest
-                description: Password is the password for the user running the Horizon
-                  tests.
-                maxLength: 253
-                type: string
               privileged:
                 default: false
                 description: |-
@@ -922,11 +897,6 @@ spec:
                   needed for certain test-operator functionalities to work properly (e.g.:
                   extraRPMs in Tempest CR, or a certain set of tobiko tests).
                 type: boolean
-              projectName:
-                default: horizontest
-                description: ProjectName is the name of the OpenStack project for
-                  Horizon tests.
-                type: string
               projectNameXpath:
                 description: |-
                   ProjectNameXpath is the xpath to select project name
@@ -1057,12 +1027,6 @@ spec:
                       type: string
                   type: object
                 type: array
-              user:
-                default: horizontest
-                description: User is the username under which the Horizon tests will
-                  run.
-                maxLength: 253
-                type: string
             required:
             - authUrl
             - dashboardUrl
