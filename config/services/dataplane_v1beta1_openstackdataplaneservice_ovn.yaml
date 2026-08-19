@@ -7,6 +7,9 @@ spec:
   dataSources:
     - configMapRef:
         name: ovncontroller-config
+    - secretRef:
+        name: ovn-rbac-pki-ca
+        optional: true
   tlsCerts:
     default:
       contents:
