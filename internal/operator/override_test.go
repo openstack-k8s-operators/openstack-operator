@@ -619,6 +619,286 @@ func TestMergeTolerations(t *testing.T) {
 	}
 }
 
+// --- Test for mergeEnvVars function ---
+
+func TestMergeEnvVars(t *testing.T) {
+	defaultEnvVars := []corev1.EnvVar{
+		{
+			Name:  "OPERATOR_NAMESPACE",
+			Value: "default-namespace",
+		},
+		{
+			Name:  "LOG_LEVEL",
+			Value: "info",
+		},
+	}
+
+	testCases := []struct {
+		name     string
+		defaults []corev1.EnvVar
+		custom   []corev1.EnvVar
+		expected []corev1.EnvVar
+	}{
+		{
+			name:     "Empty custom env vars should return defaults",
+			defaults: defaultEnvVars,
+			custom:   []corev1.EnvVar{},
+			expected: defaultEnvVars,
+		},
+		{
+			name:     "Nil custom env vars should return defaults",
+			defaults: defaultEnvVars,
+			custom:   nil,
+			expected: defaultEnvVars,
+		},
+		{
+			name:     "Add new env var to defaults",
+			defaults: defaultEnvVars,
+			custom: []corev1.EnvVar{
+				{
+					Name:  "OPERATOR_SCOPE_NAMESPACE",
+					Value: "namespace1,namespace2",
+				},
+			},
+			expected: []corev1.EnvVar{
+				{
+					Name:  "OPERATOR_NAMESPACE",
+					Value: "default-namespace",
+				},
+				{
+					Name:  "LOG_LEVEL",
+					Value: "info",
+				},
+				{
+					Name:  "OPERATOR_SCOPE_NAMESPACE",
+					Value: "namespace1,namespace2",
+				},
+			},
+		},
+		{
+			name:     "Override existing env var",
+			defaults: defaultEnvVars,
+			custom: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "debug",
+				},
+			},
+			expected: []corev1.EnvVar{
+				{
+					Name:  "OPERATOR_NAMESPACE",
+					Value: "default-namespace",
+				},
+				{
+					Name:  "LOG_LEVEL",
+					Value: "debug", // Overridden
+				},
+			},
+		},
+		{
+			name:     "Mixed: override one, add one",
+			defaults: defaultEnvVars,
+			custom: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "debug",
+				},
+				{
+					Name:  "OPERATOR_SCOPE_NAMESPACE",
+					Value: "namespace1,namespace2,namespace3",
+				},
+			},
+			expected: []corev1.EnvVar{
+				{
+					Name:  "OPERATOR_NAMESPACE",
+					Value: "default-namespace",
+				},
+				{
+					Name:  "LOG_LEVEL",
+					Value: "debug", // Overridden
+				},
+				{
+					Name:  "OPERATOR_SCOPE_NAMESPACE",
+					Value: "namespace1,namespace2,namespace3", // Added
+				},
+			},
+		},
+		{
+			name:     "Custom env var with valueFrom",
+			defaults: defaultEnvVars,
+			custom: []corev1.EnvVar{
+				{
+					Name: "SECRET_KEY",
+					ValueFrom: &corev1.EnvVarSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "my-secret",
+							},
+							Key: "key",
+						},
+					},
+				},
+			},
+			expected: []corev1.EnvVar{
+				{
+					Name:  "OPERATOR_NAMESPACE",
+					Value: "default-namespace",
+				},
+				{
+					Name:  "LOG_LEVEL",
+					Value: "info",
+				},
+				{
+					Name: "SECRET_KEY",
+					ValueFrom: &corev1.EnvVarSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "my-secret",
+							},
+							Key: "key",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := mergeEnvVars(tc.defaults, tc.custom)
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("mergeEnvVars() failed:\n got: %+v\nwant: %+v", result, tc.expected)
+			}
+		})
+	}
+}
+
+// --- Test for environment variables in SetOverrides ---
+
+func TestEnvVarsOverride(t *testing.T) {
+	testCases := []struct {
+		name            string
+		operatorSpec    operatorv1beta1.OperatorSpec
+		initialEnvVars  []corev1.EnvVar
+		expectedEnvVars []corev1.EnvVar
+	}{
+		{
+			name: "Add env vars to empty list",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "rabbitmq-cluster",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					Env: []corev1.EnvVar{
+						{
+							Name:  "OPERATOR_SCOPE_NAMESPACE",
+							Value: "namespace1,namespace2",
+						},
+					},
+				},
+			},
+			initialEnvVars: nil,
+			expectedEnvVars: []corev1.EnvVar{
+				{
+					Name:  "OPERATOR_SCOPE_NAMESPACE",
+					Value: "namespace1,namespace2",
+				},
+			},
+		},
+		{
+			name: "No custom env vars, keep defaults unchanged",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "rabbitmq-cluster",
+			},
+			initialEnvVars: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "info",
+				},
+			},
+			expectedEnvVars: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "info",
+				},
+			},
+		},
+		{
+			name: "Merge custom env vars with defaults",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "rabbitmq-cluster",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					Env: []corev1.EnvVar{
+						{
+							Name:  "OPERATOR_SCOPE_NAMESPACE",
+							Value: "namespace1,namespace2",
+						},
+					},
+				},
+			},
+			initialEnvVars: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "info",
+				},
+			},
+			expectedEnvVars: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "info",
+				},
+				{
+					Name:  "OPERATOR_SCOPE_NAMESPACE",
+					Value: "namespace1,namespace2",
+				},
+			},
+		},
+		{
+			name: "Override default env var",
+			operatorSpec: operatorv1beta1.OperatorSpec{
+				Name: "rabbitmq-cluster",
+				ControllerManager: operatorv1beta1.ContainerSpec{
+					Env: []corev1.EnvVar{
+						{
+							Name:  "LOG_LEVEL",
+							Value: "debug",
+						},
+					},
+				},
+			},
+			initialEnvVars: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "info",
+				},
+			},
+			expectedEnvVars: []corev1.EnvVar{
+				{
+					Name:  "LOG_LEVEL",
+					Value: "debug",
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			op := &Operator{
+				Name: tc.operatorSpec.Name,
+				Deployment: Deployment{
+					Manager: Container{
+						Env: tc.initialEnvVars,
+					},
+				},
+			}
+
+			SetOverrides(tc.operatorSpec, op)
+
+			if !reflect.DeepEqual(op.Deployment.Manager.Env, tc.expectedEnvVars) {
+				t.Errorf("wrong env vars after override:\n got: %+v\nwant: %+v", op.Deployment.Manager.Env, tc.expectedEnvVars)
+			}
+		})
+	}
+}
+
 // --- Test for global defaults initialization ---
 
 func TestGlobalTolerationsDefaults(t *testing.T) {
