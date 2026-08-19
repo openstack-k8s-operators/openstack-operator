@@ -1,0 +1,11 @@
+name: CRD change check
+
+on:
+  pull_request:
+    branches:
+      - '18.0-fr[0-9]*'
+      - '19.[0-9]*'
+
+jobs:
+  crd-change-check:
+    uses: openstack-k8s-operators/openstack-k8s-operators-ci/.github/workflows/reusable-crd-change-check.yaml@main
