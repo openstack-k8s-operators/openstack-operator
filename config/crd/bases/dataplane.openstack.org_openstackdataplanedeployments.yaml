@@ -96,6 +96,12 @@ spec:
                 description: Time before the deployment is requeued in seconds
                 minimum: 1
                 type: integer
+              fallbackToListOrder:
+                default: true
+                description: |-
+                  FallbackToListOrder preserves service list order for services
+                  without explicit dependsOn. Defaults to true.
+                type: boolean
               nodeSets:
                 description: NodeSets is the list of NodeSets deployed
                 items:

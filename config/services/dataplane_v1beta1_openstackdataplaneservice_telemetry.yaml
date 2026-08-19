@@ -3,6 +3,8 @@ kind: OpenStackDataPlaneService
 metadata:
   name: telemetry
 spec:
+  dependsOn:
+    - nova
   dataSources:
     - secretRef:
         name: ceilometer-compute-config-data

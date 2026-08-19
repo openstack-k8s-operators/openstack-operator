@@ -4,6 +4,9 @@ metadata:
   name: frr
 spec:
   playbook: osp.edpm.frr
+  dependsOn:
+    - run-os
+    - validate-network
   containerImageFields:
   - EdpmFrrImage
   edpmServiceType: frr

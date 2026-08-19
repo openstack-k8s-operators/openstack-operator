@@ -78,6 +78,13 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// variables to inject into the Ansible Execution Environment pod.
 	// If not specified, defaults to "openstack-aee-default-env".
 	AnsibleEEEnvConfigMapName string `json:"ansibleEEEnvConfigMapName,omitempty"`
+
+	// FallbackToListOrder preserves service list order for services
+	// without explicit dependsOn. Defaults to true.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	FallbackToListOrder *bool `json:"fallbackToListOrder"`
 }
 
 // AnsibleExecutionSummary captures the final ansible-runner execution result
