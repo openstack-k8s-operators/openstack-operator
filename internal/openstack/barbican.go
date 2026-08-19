@@ -150,7 +150,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		instance.Spec.Barbican.Template.BarbicanAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if instance.Spec.Barbican.Template.NodeSelector == nil {
+	if instance.Spec.Barbican.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Barbican.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
