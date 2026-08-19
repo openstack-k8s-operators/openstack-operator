@@ -46,16 +46,26 @@ for MOD_PATH in ${MOD_PATHS}; do
     if [[ "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ]]; then
         if [[ "$IMAGENAMESPACE" != "openstack-k8s-operators" || "${IMAGEREGISTRY}" != "quay.io" ]]; then
             REPO_URL="${IMAGEREGISTRY}/${IMAGENAMESPACE}"
-            CURL_REGISTRY="${IMAGEREGISTRY}"
-            # Quay registry v2 api does not return all the tags that's why keeping v1 for quay and v2
-            # for local registry
             if [[ ${LOCAL_REGISTRY} -eq 1 ]]; then
-                REPO_CURL_URL="http://${CURL_REGISTRY}/v2/${IMAGENAMESPACE}"
-            elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
-                # replace docker.io by hub.docker.com to read tags
-                REPO_CURL_URL="https://hub.docker.com/v2/repositories/${IMAGENAMESPACE}"
+                # Pullspecs use the local registry. Tag source: local v2 when upstream bundles are mirrored
+                # locally; Quay v1 only for forks (module path not under openstack-k8s-operators), where tags
+                # typically are not on the ephemeral registry.
+                if [[ "$GITHUB_USER" != "openstack-k8s-operators" ]]; then
+                    CURL_REGISTRY="quay.io"
+                    REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${GITHUB_USER}"
+                    # Tags and images live on Quay under the fork; do not emit content-provider pullspecs for skopeo.
+                    REPO_URL="${CURL_REGISTRY}/${GITHUB_USER}"
+                else
+                    CURL_REGISTRY="${IMAGEREGISTRY}"
+                    REPO_CURL_URL="http://${CURL_REGISTRY}/v2/${IMAGENAMESPACE}"
+                fi
             else
-                REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
+                CURL_REGISTRY="${IMAGEREGISTRY}"
+                if [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
+                    REPO_CURL_URL="https://hub.docker.com/v2/repositories/${IMAGENAMESPACE}"
+                else
+                    REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
+                fi
             fi
         else
             REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${GITHUB_USER}"
@@ -63,7 +73,7 @@ for MOD_PATH in ${MOD_PATHS}; do
         fi
     fi
 
-    if [[ ${LOCAL_REGISTRY} -eq 1 && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
+    if [[ ${LOCAL_REGISTRY} -eq 1 && "${CURL_REGISTRY}" != "quay.io" && ( "$GITHUB_USER" != "openstack-k8s-operators" || "$BASE" == "$IMAGEBASE" ) ]]; then
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/list | jq -r '.tags // [] | .[]' | sort -u | { grep $REF || true; })
     elif [[ "${CURL_REGISTRY}" == "docker.io" ]]; then
         SHA=$(curl -s ${REPO_CURL_URL}/$BASE-operator-bundle/tags/?page_size=100 | jq -r '.results // [] | .[].name' | sort -u | { grep $REF || true; })
