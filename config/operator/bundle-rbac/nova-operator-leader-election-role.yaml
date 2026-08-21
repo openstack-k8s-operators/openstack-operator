@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: nova-operator-leader-election-role
+  name: workloads-operator-leader-election-role
 rules:
 - apiGroups:
     - ""

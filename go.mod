@@ -156,6 +156,9 @@ require (
 
 replace github.com/openstack-k8s-operators/openstack-operator/api => ./api //allow-merging
 
+// Temporarily point to fork for testing nova->workloads rename
+replace github.com/openstack-k8s-operators/nova-operator/api => github.com/amartyasinha/nova-operator/api rename_operator
+
 // mschuppert: map to latest commit from release-4.20 tag
 // must consistent within modules and service operators
 replace github.com/openshift/api => github.com/openshift/api v0.0.0-20260710141509-36dec0bfafe4 //allow-merging

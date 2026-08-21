@@ -409,14 +409,14 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), nova, func() error {
 		// 1)
 		// Nova.Spec.APIDatabaseInstance and each NovaCell.CellDatabaseInstance
-		// are defaulted to "openstack" in nova-operator and the MariaDB created
+		// are defaulted to "openstack" in workloads-operator and the MariaDB created
 		// by openstack-operator is also named "openstack". This works but
 		// in production we might want to have separate DB service instances
 		// per cell.
 		//
 		// 2)
 		// Each NovaCell.CellMessageBusInstance in defaulted to "rabbitmq" by
-		// nova-operator and openstack-operator creates RabbitMQCluster named
+		// workloads-operator and openstack-operator creates RabbitMQCluster named
 		// "rabbitmq" as well. This will not work as sharing rabbitmq
 		// between cells will prevent the nova-computes to register itself
 		// for the proper cell. Basically each cell will be merged to one,
