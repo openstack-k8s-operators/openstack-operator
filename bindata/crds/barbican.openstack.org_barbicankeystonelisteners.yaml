@@ -915,12 +915,14 @@ spec:
                 properties:
                   clientDataPath:
                     default: /etc/hsm-client
-                    description: Location to which kolla will copy the data in ClientDataSecret.
+                    description: |-
+                      Location at which ClientDataSecret is mounted, i.e. where the HSM
+                      vendor client library expects to find it.
                     type: string
                   clientDataSecret:
                     description: |-
                       The OpenShift secret that stores the HSM client data.
-                      These will be mounted to /var/lib/config-data/hsm
+                      These will be mounted directly at ClientDataPath.
                     type: string
                   loginSecret:
                     description: OpenShift secret that stores the password to login
