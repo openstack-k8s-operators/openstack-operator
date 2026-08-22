@@ -116,15 +116,7 @@ rules:
 - apiGroups:
     - security.openshift.io
   resourceNames:
-    - anyuid
-  resources:
-    - securitycontextconstraints
-  verbs:
-    - use
-- apiGroups:
-    - security.openshift.io
-  resourceNames:
-    - hostmount-anyuid
+    - nonroot-v2
   resources:
     - securitycontextconstraints
   verbs:

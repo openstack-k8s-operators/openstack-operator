@@ -183,7 +183,7 @@ rules:
 - apiGroups:
     - security.openshift.io
   resourceNames:
-    - anyuid
+    - nonroot-v2
     - privileged
   resources:
     - securitycontextconstraints
