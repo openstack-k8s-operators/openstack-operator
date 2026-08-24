@@ -16,7 +16,7 @@ images:
   newTag: latest
 patches:
 - patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/env/0", "value":
-    {"name": "OPENSTACK_RELEASE_VERSION", "value": "0.7.0-1784642723"}}]'
+    {"name": "OPENSTACK_RELEASE_VERSION", "value": "19.0.0-1787651873"}}]'
   target:
     kind: Deployment
     name: openstack-operator-controller-init

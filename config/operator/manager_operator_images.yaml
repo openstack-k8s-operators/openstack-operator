@@ -37,8 +37,8 @@ spec:
           value: quay.io/openstack-k8s-operators/mariadb-operator@sha256:68c13707abfb5bc4bdac0e3fd20979c59c940ac8aaaab5c7b11a472d7243379e
         - name: RELATED_IMAGE_NEUTRON_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/neutron-operator@sha256:299c0d38979676b5348977d65f0b0244df983d2ddad91e8f8f7939316ed3bc31
-        - name: RELATED_IMAGE_NOVA_OPERATOR_MANAGER_IMAGE_URL
-          value: quay.io/openstack-k8s-operators/nova-operator@sha256:d52b8ade84ba1aaa61a38dc3b72a1a63b1812a095206511b4f5f829bc403b7cc
+        - name: RELATED_IMAGE_WORKLOADS_OPERATOR_MANAGER_IMAGE_URL
+          value: quay.io/amartyasinha/workloads-operator@sha256:b152cc0dc8cc135fb7ce9c7d11a4ac5149275a03d1fe43d2916716595e22c585
         - name: RELATED_IMAGE_OCTAVIA_OPERATOR_MANAGER_IMAGE_URL
           value: quay.io/openstack-k8s-operators/octavia-operator@sha256:286a7a19ed07bef549a5e434460207067095a665e0762b2a3e2ff88345ffe68b
         - name: RELATED_IMAGE_OPENSTACK_BAREMETAL_OPERATOR_MANAGER_IMAGE_URL

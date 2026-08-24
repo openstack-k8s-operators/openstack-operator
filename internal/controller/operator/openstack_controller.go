@@ -263,6 +263,11 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		Log.Error(err, "Failed to cleanup placement-operator resources")
 	}
 
+	// cleanup nova-operator (renamed to workloads-operator)
+	if err := r.cleanupNovaOperator(ctx, instance); err != nil {
+		Log.Error(err, "Failed to cleanup nova-operator resources")
+	}
+
 	// Check if OPENSTACK_RELEASE_VERSION has changed - if so, delete all owned resources
 	// This is a one-time fix to handle incompatible upgrades
 	shouldReinstall := false
@@ -1246,7 +1251,7 @@ func (r *OpenStackReconciler) cleanupRabbitMQClusterOperator(ctx context.Context
 
 // cleanupPlacementOperator removes the old placement-operator
 // resources that are no longer needed since Placement is now managed
-// by the nova-operator.
+// by the workloads-operator.
 func (r *OpenStackReconciler) cleanupPlacementOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
 	Log := r.GetLogger(ctx)
 
@@ -1285,8 +1290,54 @@ func (r *OpenStackReconciler) cleanupPlacementOperator(ctx context.Context, inst
 	// resource names.
 
 	// PlacementAPI CRD is NOT deleted because it is now owned and managed
-	// by the nova-operator. PlacementAPI instances are expected to continue
-	// existing under nova-operator management.
+	// by the workloads-operator. PlacementAPI instances are expected to continue
+	// existing under workloads-operator management.
+
+	return nil
+}
+
+// cleanupNovaOperator removes the old nova-operator
+// resources that are no longer needed since the operator has been renamed
+// to workloads-operator.
+func (r *OpenStackReconciler) cleanupNovaOperator(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	Log := r.GetLogger(ctx)
+
+	// Namespaced resources (scoped to the OpenStack CR namespace only)
+	namespacedResources := []struct {
+		gvk  schema.GroupVersionKind
+		name string
+	}{
+		{schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"}, "nova-operator-controller-manager"},
+		{schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ServiceAccount"}, "nova-operator-controller-manager"},
+		{schema.GroupVersionKind{Group: "", Version: "v1", Kind: "Service"}, "nova-operator-controller-manager-metrics-service"},
+		{schema.GroupVersionKind{Group: "rbac.authorization.k8s.io", Version: "v1", Kind: "Role"}, "nova-operator-leader-election-role"},
+		{schema.GroupVersionKind{Group: "rbac.authorization.k8s.io", Version: "v1", Kind: "RoleBinding"}, "nova-operator-leader-election-rolebinding"},
+		{schema.GroupVersionKind{Group: "cert-manager.io", Version: "v1", Kind: "Issuer"}, "nova-operator-selfsigned-issuer"},
+		{schema.GroupVersionKind{Group: "cert-manager.io", Version: "v1", Kind: "Certificate"}, "nova-operator-metrics-certs"},
+	}
+
+	for _, res := range namespacedResources {
+		obj := &uns.Unstructured{}
+		obj.SetGroupVersionKind(res.gvk)
+		obj.SetName(res.name)
+		obj.SetNamespace(instance.Namespace)
+		if err := r.Delete(ctx, obj); err != nil {
+			if !apierrors.IsNotFound(err) {
+				return fmt.Errorf("failed to delete %s %s: %w", res.gvk.Kind, res.name, err)
+			}
+		} else {
+			Log.Info("Deleted nova-operator resource", "kind", res.gvk.Kind, "name", res.name)
+		}
+	}
+
+	// Cluster-scoped RBAC (ClusterRoles, ClusterRoleBindings) is left in
+	// place intentionally. Without a running operator and ServiceAccount
+	// they are inert, and deleting them could break a user-installed
+	// nova-operator in another namespace that shares the same resource names.
+
+	// Nova/Placement/Cyborg CRDs are NOT deleted because they are now owned
+	// and managed by the workloads-operator. Instances are expected to continue
+	// existing under workloads-operator management.
 
 	return nil
 }

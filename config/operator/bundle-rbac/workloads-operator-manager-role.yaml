@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: nova-operator-manager-role
+  name: workloads-operator-manager-role
 rules:
 - apiGroups:
     - ""
@@ -276,6 +276,14 @@ rules:
     - security.openshift.io
   resourceNames:
     - anyuid
+  resources:
+    - securitycontextconstraints
+  verbs:
+    - use
+- apiGroups:
+    - security.openshift.io
+  resourceNames:
+    - nonroot-v2
   resources:
     - securitycontextconstraints
   verbs:
