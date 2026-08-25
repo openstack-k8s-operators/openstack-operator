@@ -26,6 +26,11 @@ for MOD_PATH in ${MOD_PATHS}; do
 
     BASE=$(echo $MOD_PATH | sed -e 's|github.com/.*/\(.*\)-operator/.*|\1|')
 
+    # HACK: nova-operator renamed to workloads-operator, but repo path still nova-operator during testing
+    if [[ "$BASE" == "nova" && "$MOD_PATH" == *"amartyasinha/nova-operator"* ]]; then
+        BASE="workloads"
+    fi
+
     GIT_REPO=${MOD_PATH%"/apis"}
     GIT_REPO=${GIT_REPO%"/api"}
 
