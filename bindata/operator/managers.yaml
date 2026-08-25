@@ -86,6 +86,8 @@ spec:
 {{- end }}
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: {{ .Name }}-operator-controller-manager
       terminationGracePeriodSeconds: 10
       tolerations:
