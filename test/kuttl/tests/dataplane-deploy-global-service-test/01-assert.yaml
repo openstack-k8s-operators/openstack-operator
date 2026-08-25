@@ -205,7 +205,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: download-cache-edpm-compute-global-edpm-compute-global
@@ -303,7 +302,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: bootstrap-edpm-compute-global-edpm-compute-global
@@ -407,7 +405,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: configure-network-edpm-compute-global-edpm-compute-global
@@ -505,7 +502,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: validate-network-edpm-compute-global-edpm-compute-global
@@ -603,7 +599,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: configure-os-edpm-compute-global-edpm-compute-global
@@ -701,7 +696,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: install-certs-edpm-compute-global-edpm-compute-global
@@ -848,7 +842,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: ovn-edpm-compute-global-edpm-compute-global
@@ -957,7 +950,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-metadata-edpm-compute-global-edpm-compute-global
@@ -1096,7 +1088,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-ovn-edpm-compute-global-edpm-compute-global
@@ -1235,7 +1226,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-sriov-edpm-compute-global-edpm-compute-global
@@ -1344,7 +1334,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: neutron-dhcp-edpm-compute-global-edpm-compute-global
@@ -1453,7 +1442,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: libvirt-edpm-compute-global-edpm-compute-global
@@ -1562,7 +1550,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: nova-edpm-compute-global-edpm-compute-global
