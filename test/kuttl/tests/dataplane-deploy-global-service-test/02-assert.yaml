@@ -98,7 +98,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: download-cache-edpm-multinodeset-edpm-compute-beta-nodeset
@@ -195,7 +194,6 @@ spec:
   suspend: false
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: bootstrap-edpm-multinodeset-edpm-compute-beta-nodeset
