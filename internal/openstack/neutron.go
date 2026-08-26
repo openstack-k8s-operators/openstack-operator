@@ -229,6 +229,15 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			neutronAPI.Spec.DatabaseInstance = "openstack"
 		}
 
+		if neutronAPI.GetAnnotations() == nil {
+			neutronAPI.SetAnnotations(make(map[string]string))
+		}
+		if version.Status.ServiceDefaults.NeutronWsgi != nil && *version.Status.ServiceDefaults.NeutronWsgi == "true" {
+			neutronAPI.GetAnnotations()[neutronv1.NeutronWSGILabel] = "true"
+		} else {
+			neutronAPI.GetAnnotations()[neutronv1.NeutronWSGILabel] = "false"
+		}
+
 		// Append globally defined extraMounts to the service's own list.
 		for _, ev := range instance.Spec.ExtraMounts {
 			neutronAPI.Spec.ExtraMounts = append(neutronAPI.Spec.ExtraMounts, neutronv1.NeutronExtraVolMounts{
