@@ -102,6 +102,8 @@ github.com/joshdk/go-junit v1.0.0 h1:S86cUKIdwBHWwA6xCmFlf3RTLfVXYQfvanM5Uh+K6GE
 github.com/joshdk/go-junit v1.0.0/go.mod h1:TiiV0PqkaNfFXjEiyjWM3XXrhVyCa1K4Zfga6W52ung=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
+github.com/karelyatin/neutron-operator/api v0.0.0-20260901085927-3b23ea6cb2d1 h1:9oGE/osuhWd7SN4n1t4GMJSAKmBdcVD7kqg80XUvsiE=
+github.com/karelyatin/neutron-operator/api v0.0.0-20260901085927-3b23ea6cb2d1/go.mod h1:fayH8kSHQUhv4oQY/hONoFVG6pgYihLQBHJPoyELrt4=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
@@ -162,8 +164,6 @@ github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260819143353-5
 github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260819143353-54e418a4e480/go.mod h1:1GxA01Q63gvnZH+vljX/+Xz7wQmZxtYpTHO/JTAbCbE=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260822071633-1e127e728e62 h1:kPodlXj+hrF6Q3m0VpEz9gBU8QcQXXuRkQbTcDwI00E=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260822071633-1e127e728e62/go.mod h1:A1yXU4F8Qs+F29KcgaI3zBvPJjY3OUzlCt7QCY73wAI=
-github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260822072640-756f4ac745b5 h1:mvhxTeMhH/U5hlkTjKUg07FFJpklss37MA5UFD2XIJQ=
-github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260822072640-756f4ac745b5/go.mod h1:fayH8kSHQUhv4oQY/hONoFVG6pgYihLQBHJPoyELrt4=
 github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260825130502-98c7a40e3312 h1:FYjSHGNAchiYk8mPXZKvHh5EZ2x66Ge3pKGowSzo8pg=
 github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260825130502-98c7a40e3312/go.mod h1:6Kk+XtByMkeQj7cKrRQxHsWFCHCyq1o0i4ls/niFBW4=
 github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260822215725-f4a66af57796 h1:Vce2BPD48OnknETN2hEStXdZMyzY3i7/X/p4cvZZTMg=

@@ -142,3 +142,6 @@ replace k8s.io/component-base => k8s.io/component-base v0.33.13 //allow-merging
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20250627150254-e9823e99808e //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.3.0 //allow-merging
+
+// TEMPORARY dev pin for OSPRH-33113-default-master (neutron WSGI support)
+replace github.com/openstack-k8s-operators/neutron-operator/api => github.com/karelyatin/neutron-operator/api v0.0.0-20260901085927-3b23ea6cb2d1
