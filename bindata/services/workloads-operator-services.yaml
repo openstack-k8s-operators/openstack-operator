@@ -10,8 +10,8 @@ metadata:
     app.kubernetes.io/instance: selfsigned-issuer
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: issuer
-    app.kubernetes.io/part-of: nova-operator
-  name: nova-operator-selfsigned-issuer
+    app.kubernetes.io/part-of: workloads-operator
+  name: workloads-operator-selfsigned-issuer
   namespace: '{{ .OperatorNamespace }}'
 spec:
   selfSigned: {}
@@ -20,9 +20,9 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app.kubernetes.io/name: nova-operator
+    app.kubernetes.io/name: workloads-operator
     control-plane: controller-manager
-  name: nova-operator-controller-manager-metrics-service
+  name: workloads-operator-controller-manager-metrics-service
   namespace: '{{ .OperatorNamespace }}'
 spec:
   ports:
@@ -31,7 +31,7 @@ spec:
     protocol: TCP
     targetPort: 8443
   selector:
-    app.kubernetes.io/name: nova-operator
+    app.kubernetes.io/name: workloads-operator
     control-plane: controller-manager
 ---
 apiVersion: cert-manager.io/v1
@@ -42,17 +42,17 @@ metadata:
     app.kubernetes.io/created-by: openstack-operator
     app.kubernetes.io/instance: metrics-certs
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: nova-operator
-  name: nova-operator-metrics-certs
+    app.kubernetes.io/name: workloads-operator
+  name: workloads-operator-metrics-certs
   namespace: '{{ .OperatorNamespace }}'
 spec:
   dnsNames:
-  - nova-operator-metrics-service.{{ .OperatorNamespace }}.svc
-  - nova-operator-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  - workloads-operator-metrics-service.{{ .OperatorNamespace }}.svc
+  - workloads-operator-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
   issuerRef:
     kind: Issuer
-    name: nova-operator-selfsigned-issuer
+    name: workloads-operator-selfsigned-issuer
   privateKey:
     algorithm: ECDSA
     size: 256
-  secretName: nova-operator-metrics-server-cert
+  secretName: workloads-operator-metrics-server-cert

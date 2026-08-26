@@ -136,7 +136,7 @@ spec:
                       - manila
                       - mariadb
                       - neutron
-                      - nova
+                      - workloads
                       - octavia
                       - openstack-baremetal
                       - ovn
