@@ -7606,6 +7606,50 @@ spec:
                                 namespace:
                                   type: string
                               type: object
+                            traitBasedNetworking:
+                              properties:
+                                config:
+                                  items:
+                                    properties:
+                                      actions:
+                                        items:
+                                          properties:
+                                            action:
+                                              type: string
+                                            filter:
+                                              type: string
+                                            max_count:
+                                              type: integer
+                                            min_count:
+                                              type: integer
+                                          type: object
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      name:
+                                        pattern: ^CUSTOM_
+                                        type: string
+                                      order:
+                                        type: integer
+                                    required:
+                                    - name
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-map-keys:
+                                  - name
+                                  x-kubernetes-list-type: map
+                                state:
+                                  default: Disabled
+                                  enum:
+                                  - Enabled
+                                  - Disabled
+                                  - ""
+                                  type: string
+                              type: object
+                              x-kubernetes-validations:
+                              - message: config must be provided when traitBasedNetworking
+                                  is enabled
+                                rule: self.state != 'Enabled' || size(self.config)
+                                  > 0
                           required:
                           - storageClass
                           - storageRequest
