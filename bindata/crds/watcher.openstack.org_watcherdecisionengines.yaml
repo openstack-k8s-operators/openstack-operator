@@ -206,6 +206,11 @@ spec:
             description: WatcherDecisionEngineStatus defines the observed state of
               WatcherDecisionEngine
             properties:
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash is the hash of the input Secret consumed by the
+                  currently ready workload.
+                type: string
               conditions:
                 description: |-
                   INSERT ADDITIONAL STATUS FIELD - define observed state of cluster

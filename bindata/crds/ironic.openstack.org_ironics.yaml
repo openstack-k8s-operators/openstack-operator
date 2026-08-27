@@ -621,6 +621,75 @@ spec:
                             current project
                           type: string
                       type: object
+                    traitBasedNetworking:
+                      description: TraitBasedNetworking - Configuration for Trait
+                        Based Networking
+                      properties:
+                        config:
+                          description: Config - Named traits and their port-scheduling
+                            actions for trait_based_networking.yaml
+                          items:
+                            description: TraitBasedNetworkingEntry defines a single
+                              named trait and its port-scheduling actions
+                            properties:
+                              actions:
+                                description: Actions - List of port-scheduling actions
+                                  to apply for this trait
+                                items:
+                                  description: TraitBasedNetworkingAction defines
+                                    a single port-scheduling action within a trait
+                                  properties:
+                                    action:
+                                      description: Action - The action to take, e.g.
+                                        attach_port, attach_portgroup, group_and_attach_ports
+                                      type: string
+                                    filter:
+                                      description: Filter - The filter expression
+                                        used to select ports/portgroups for this action
+                                      type: string
+                                    max_count:
+                                      description: MaxCount - Maximum number of objects
+                                        that can match this action
+                                      type: integer
+                                    min_count:
+                                      description: MinCount - Minimum number of objects
+                                        that must match before this action applies
+                                      type: integer
+                                  type: object
+                                type: array
+                                x-kubernetes-list-type: atomic
+                              name:
+                                description: Name - Trait name, must start with CUSTOM
+                                  (e.g. CUSTOM_HIGH_SPEED_BOND)
+                                pattern: ^CUSTOM_
+                                type: string
+                              order:
+                                description: Order - Resolution order for this trait
+                                  relative to others. Lower orders apply first.
+                                type: integer
+                            required:
+                            - name
+                            type: object
+                          type: array
+                          x-kubernetes-list-map-keys:
+                          - name
+                          x-kubernetes-list-type: map
+                        state:
+                          default: Disabled
+                          description: |-
+                            State - Whether to enable Trait Based Networking. Set to "Enabled" to activate TBN;
+                            "Disabled" (the default) leaves TBN inactive. When set to "Enabled", the config
+                            field must also be provided.
+                          enum:
+                          - Enabled
+                          - Disabled
+                          - ""
+                          type: string
+                      type: object
+                      x-kubernetes-validations:
+                      - message: config must be provided when traitBasedNetworking
+                          is enabled
+                        rule: self.state != 'Enabled' || size(self.config) > 0
                   required:
                   - storageClass
                   - storageRequest

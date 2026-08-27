@@ -8140,6 +8140,50 @@ spec:
                                 namespace:
                                   type: string
                               type: object
+                            traitBasedNetworking:
+                              properties:
+                                config:
+                                  items:
+                                    properties:
+                                      actions:
+                                        items:
+                                          properties:
+                                            action:
+                                              type: string
+                                            filter:
+                                              type: string
+                                            max_count:
+                                              type: integer
+                                            min_count:
+                                              type: integer
+                                          type: object
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      name:
+                                        pattern: ^CUSTOM_
+                                        type: string
+                                      order:
+                                        type: integer
+                                    required:
+                                    - name
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-map-keys:
+                                  - name
+                                  x-kubernetes-list-type: map
+                                state:
+                                  default: Disabled
+                                  enum:
+                                  - Enabled
+                                  - Disabled
+                                  - ""
+                                  type: string
+                              type: object
+                              x-kubernetes-validations:
+                              - message: config must be provided when traitBasedNetworking
+                                  is enabled
+                                rule: self.state != 'Enabled' || size(self.config)
+                                  > 0
                           required:
                           - storageClass
                           - storageRequest
@@ -20495,8 +20539,10 @@ spec:
                       nodes to use for ctlplane network
                     type: string
                   deploymentSSHSecret:
-                    description: DeploymentSSHSecret - Name of secret holding the
-                      cloud-admin ssh keys
+                    description: |-
+                      DeploymentSSHSecret - Name of a secret with an "authorized_keys" data entry holding the SSH
+                      public key(s) authorized for the provisioned user (see CloudUserName). A single key or
+                      multiple newline-separated keys are both supported.
                     type: string
                   domainName:
                     description: 'DomainName is the domain name that will be set on
