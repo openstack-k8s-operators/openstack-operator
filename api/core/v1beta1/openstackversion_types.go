@@ -308,6 +308,7 @@ type ServiceDefaults struct {
 	ManilaSharev1          *string `json:"manilaSharev1,omitempty"`
 	NeutronWsgi            *string `json:"neutronWsgi,omitempty"`
 	IronicInspectInterface *string `json:"ironicInspectInterface,omitempty"`
+	OVNHardenedOVSSecurityContext *string `json:"ovnHardenedOVSSecurityContext,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
