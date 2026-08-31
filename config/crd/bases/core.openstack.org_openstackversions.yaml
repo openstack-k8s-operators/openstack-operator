@@ -258,6 +258,8 @@ spec:
                       type: string
                     manilaSharev1:
                       type: string
+                    ovnHardenedOVSSecurityContext:
+                      type: string
                     rabbitmqVersion:
                       type: string
                   type: object
@@ -698,6 +700,8 @@ spec:
                   glanceWsgi:
                     type: string
                   manilaSharev1:
+                    type: string
+                  ovnHardenedOVSSecurityContext:
                     type: string
                   rabbitmqVersion:
                     type: string
