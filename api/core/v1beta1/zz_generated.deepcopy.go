@@ -1793,6 +1793,11 @@ func (in *ServiceDefaults) DeepCopyInto(out *ServiceDefaults) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.OVNHardenedOVSSecurityContext != nil {
+		in, out := &in.OVNHardenedOVSSecurityContext, &out.OVNHardenedOVSSecurityContext
+		*out = new(string)
+		**out = **in
+	}
 	if in.IronicInspectInterface != nil {
 		in, out := &in.IronicInspectInterface, &out.IronicInspectInterface
 		*out = new(string)
