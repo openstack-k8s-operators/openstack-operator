@@ -241,6 +241,8 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 	versionString := "4.2"
 	defaults.RabbitmqVersion = &versionString // all new rabbitmq deployments will have rabbitmq-server 4.2 (FR5)
 
+	defaults.NeutronWsgi = &trueString // enable WSGI (httpd/mod_wsgi + split neutron-rpc/neutron-worker Deployments) for neutron
+
 	return defaults
 }
 

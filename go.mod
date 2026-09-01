@@ -156,6 +156,9 @@ require (
 
 replace github.com/openstack-k8s-operators/openstack-operator/api => ./api //allow-merging
 
+// TEMPORARY dev pin for OSPRH-33113-default-master (neutron WSGI support)
+replace github.com/openstack-k8s-operators/neutron-operator/api => github.com/karelyatin/neutron-operator/api v0.0.0-20260901085927-3b23ea6cb2d1
+
 // mschuppert: map to latest commit from release-4.20 tag
 // must consistent within modules and service operators
 replace github.com/openshift/api => github.com/openshift/api v0.0.0-20260710141509-36dec0bfafe4 //allow-merging

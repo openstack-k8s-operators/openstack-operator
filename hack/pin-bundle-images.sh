@@ -58,6 +58,9 @@ for MOD_PATH in ${MOD_PATHS}; do
                 REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${IMAGENAMESPACE}"
             fi
         else
+            if [[ "$GITHUB_USER" == "karelyatin" ]]; then
+                GITHUB_USER=ykarel
+            fi
             REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/${GITHUB_USER}"
             REPO_URL="${CURL_REGISTRY}/${GITHUB_USER}"
         fi

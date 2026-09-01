@@ -76,13 +76,13 @@ spec:
         - name: RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-cron:current-podified
         - name: RELATED_IMAGE_EDPM_NEUTRON_DHCP_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified
+          value: quay.io/openstack-s2i-containers/openstack-neutron-dhcp-agent:master-latest
         - name: RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
+          value: quay.io/openstack-s2i-containers/openstack-neutron-server:master-latest
         - name: RELATED_IMAGE_EDPM_NEUTRON_OVN_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified
+          value: quay.io/openstack-s2i-containers/openstack-neutron-ovn-agent:master-latest
         - name: RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified
+          value: quay.io/openstack-s2i-containers/openstack-neutron-sriov-agent:master-latest
         - name: RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT
           value: quay.io/prometheus/node-exporter:v1.5.0
         - name: RELATED_IMAGE_EDPM_KEPLER_IMAGE_URL_DEFAULT
@@ -114,7 +114,7 @@ spec:
         - name: RELATED_IMAGE_IRONIC_INSPECTOR_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ironic-inspector:current-podified
         - name: RELATED_IMAGE_IRONIC_NEUTRON_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-ironic-neutron-agent:current-podified
+          value: quay.io/openstack-s2i-containers/openstack-ironic-neutron-agent:master-latest
         - name: RELATED_IMAGE_IRONIC_PXE_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ironic-pxe:current-podified
         - name: RELATED_IMAGE_IRONIC_PYTHON_AGENT_IMAGE_URL_DEFAULT
@@ -132,7 +132,7 @@ spec:
         - name: RELATED_IMAGE_NET_UTILS_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-netutils:current-podified
         - name: RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-neutron-server:current-podified
+          value: quay.io/openstack-s2i-containers/openstack-neutron-server:master-latest
         - name: RELATED_IMAGE_NOVA_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-nova-api:current-podified
         - name: RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT

@@ -183,6 +183,7 @@ type ServiceDefaults struct {
 	RabbitmqVersion *string `json:"rabbitmqVersion,omitempty"`
 	GlanceLocationAPI *string `json:"glanceLocationAPI,omitempty"`
 	ManilaSharev1   *string `json:"manilaSharev1,omitempty"`
+	NeutronWsgi     *string `json:"neutronWsgi,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
