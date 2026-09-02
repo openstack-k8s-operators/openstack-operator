@@ -636,7 +636,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				services = instance.Spec.Services
 			}
 
-			// For each service, check if EDPMServiceType is "update" or "update-services", and
+			// For each service, check if EDPMServiceType is "update-services", and
 			// if so, copy Deployment.Status.DeployedVersion to
 			// NodeSet.Status.DeployedVersion
 			for _, serviceName := range services {
@@ -651,11 +651,11 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 					return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
 				}
 
-				if service.Spec.EDPMServiceType != "update" && service.Spec.EDPMServiceType != "update-services" {
+				if service.Spec.EDPMServiceType != "update-services" {
 					continue
 				}
 
-				// An "update" or "update-services" service Deployment has been completed, so
+				// An "update-services" service Deployment has been completed, so
 				// set the NodeSet's DeployedVersion to the Deployment's
 				// DeployedVersion.
 				instance.Status.DeployedVersion = deployment.Status.DeployedVersion

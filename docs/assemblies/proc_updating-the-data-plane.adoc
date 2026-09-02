@@ -35,13 +35,13 @@ spec:
     - ...
     - <nodeSet_name>
   servicesOverride:
-    - update
+    - update-services
 ----
 +
 * Replace `<nodeSet_name>` with the names of the `OpenStackDataPlaneNodeSet` CRs that you want to include in your data plane minor update.
 +
 [NOTE]
-The `servicesOverride` field is set to include only `update`. The `update` service applies only the tasks needed to update the packages and containers on the EDPM nodes. When using custom services, include those here as well, or their equivalent custom services that apply the needed update tasks.
+The `servicesOverride` field is set to include only `update-services`. The `update-services` service applies only the tasks needed to update the containers and a limited set of packages on the EDPM nodes. When using custom services, include those here as well, or their equivalent custom services that apply the needed update tasks.
 
 . Save the `openstack-edpm-update-services.yaml` deployment file.
 
