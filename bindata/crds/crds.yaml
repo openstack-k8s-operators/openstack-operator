@@ -6112,7 +6112,7 @@ spec:
                     - message: gracePeriodDays must be smaller than expirationDays
                       rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
                         || self.gracePeriodDays < self.expirationDays'
-                  cnfAPIOverride:
+                  cfnAPIOverride:
                     properties:
                       route:
                         properties:
