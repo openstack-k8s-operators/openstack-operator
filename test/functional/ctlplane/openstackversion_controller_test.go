@@ -136,7 +136,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(version.Status.ContainerImages.EdpmNeutronMetadataAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNeutronSriovAgentImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmNodeExporterImage).ShouldNot(BeNil())
-				g.Expect(version.Status.ContainerImages.EdpmKeplerImage).ShouldNot(BeNil())
+				// EdpmKeplerImage is deprecated - Kepler has been removed from the telemetry stack
 				g.Expect(version.Status.ContainerImages.EdpmPodmanExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.OpenstackNetworkExporterImage).ShouldNot(BeNil())
 				g.Expect(version.Status.ContainerImages.EdpmOvnBgpAgentImage).ShouldNot(BeNil())

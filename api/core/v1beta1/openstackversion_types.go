@@ -117,6 +117,7 @@ type ContainerTemplate struct {
 	EdpmNeutronSriovAgentImage    *string `json:"edpmNeutronSriovAgentImage,omitempty"`
 	EdpmOvnBgpAgentImage          *string `json:"edpmOvnBgpAgentImage,omitempty"`
 	EdpmNodeExporterImage         *string `json:"edpmNodeExporterImage,omitempty"`
+	// Deprecated: EdpmKeplerImage is no longer used. Kepler has been removed from the telemetry stack.
 	EdpmKeplerImage               *string `json:"edpmKeplerImage,omitempty"`
 	EdpmPodmanExporterImage       *string `json:"edpmPodmanExporterImage,omitempty"`
 	// Deprecated: Use OpenstackNetworkExporterImage instead

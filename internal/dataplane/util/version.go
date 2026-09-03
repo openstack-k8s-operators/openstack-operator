@@ -74,6 +74,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmNeutronOvnAgentImage = version.Status.ContainerImages.EdpmNeutronOvnAgentImage
 		containerImages.EdpmNeutronSriovAgentImage = version.Status.ContainerImages.EdpmNeutronSriovAgentImage
 		containerImages.EdpmNodeExporterImage = version.Status.ContainerImages.EdpmNodeExporterImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmKeplerImage = version.Status.ContainerImages.EdpmKeplerImage
 		containerImages.EdpmPodmanExporterImage = version.Status.ContainerImages.EdpmPodmanExporterImage
 		containerImages.OpenstackNetworkExporterImage = version.Status.ContainerImages.OpenstackNetworkExporterImage
@@ -102,6 +103,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmNeutronOvnAgentImage = dataplanev1.ContainerImages.EdpmNeutronOvnAgentImage
 		containerImages.EdpmNeutronSriovAgentImage = dataplanev1.ContainerImages.EdpmNeutronSriovAgentImage
 		containerImages.EdpmNodeExporterImage = dataplanev1.ContainerImages.EdpmNodeExporterImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmKeplerImage = dataplanev1.ContainerImages.EdpmKeplerImage
 		containerImages.EdpmPodmanExporterImage = dataplanev1.ContainerImages.EdpmPodmanExporterImage
 		containerImages.OpenstackNetworkExporterImage = dataplanev1.ContainerImages.OpenstackNetworkExporterImage
