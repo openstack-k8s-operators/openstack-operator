@@ -241,6 +241,14 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 	versionString := "4.2"
 	defaults.RabbitmqVersion = &versionString // all new rabbitmq deployments will have rabbitmq-server 4.2 (FR5)
 
+	// NOTE: MariadbVersion is deliberately left unset for now, which leaves
+	// Galera's TargetVersion empty (see reconcileGalera()).  The mariadb image
+	// this build ships is still MariaDB 10.5, so declaring "10.11" here would
+	// stop every existing cluster once and then leave it permanently reporting
+	// MariaDBServerUpgradeReady=False/UpgradeVersionMismatch.  Set this to
+	// "10.11" in the same change that moves
+	// RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT to a 10.11 image.
+
 	return defaults
 }
 

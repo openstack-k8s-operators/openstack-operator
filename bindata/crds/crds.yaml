@@ -22620,6 +22620,8 @@ spec:
                       type: string
                     manilaSharev1:
                       type: string
+                    mariadbVersion:
+                      type: string
                     rabbitmqVersion:
                       type: string
                   type: object
@@ -23060,6 +23062,8 @@ spec:
                   glanceWsgi:
                     type: string
                   manilaSharev1:
+                    type: string
+                  mariadbVersion:
                     type: string
                   rabbitmqVersion:
                     type: string

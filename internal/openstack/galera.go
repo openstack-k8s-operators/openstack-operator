@@ -282,6 +282,18 @@ func reconcileGalera(
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), galera, func() error {
 		spec.DeepCopyInto(&galera.Spec.GaleraSpecCore)
 		galera.Spec.ContainerImage = *version.Status.ContainerImages.MariadbImage
+
+		// set the target mariadb major.minor version in spec.  when the deployed
+		// OpenStack version predates this field, leave TargetVersion empty rather
+		// than asserting the version currently running: the mariadb-operator folds
+		// TargetVersion into the ClusterProperties hash, so writing it where it was
+		// previously absent would trip StopRequired and stop a healthy cluster that
+		// is not being upgraded at all.
+		if version.Status.ServiceDefaults.MariadbVersion != nil {
+			galera.Spec.TargetVersion = *version.Status.ServiceDefaults.MariadbVersion
+		} else {
+			galera.Spec.TargetVersion = ""
+		}
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), galera, helper.GetScheme())
 		if err != nil {
 			return err
