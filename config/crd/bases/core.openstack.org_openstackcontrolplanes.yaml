@@ -13981,6 +13981,12 @@ spec:
                         x-kubernetes-list-map-keys:
                         - name
                         x-kubernetes-list-type: map
+                      mcp:
+                        properties:
+                          enabled:
+                            default: false
+                            type: boolean
+                        type: object
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -19501,6 +19507,8 @@ spec:
                   octaviaWorkerImage:
                     type: string
                   openstackClientImage:
+                    type: string
+                  openstackMcpImage:
                     type: string
                   openstackNetworkExporterImage:
                     type: string
