@@ -30,6 +30,7 @@ import (
 
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
+	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	k8s_corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -212,6 +213,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 		testMariaDBImage := "foo/maria:0.0.2"
 		testMemcachedImage := "foo/memcached:0.0.2"
 		testKeystoneAPIImage := "foo/keystone:0.0.2"
+		legacyOVSHardenedSecurityContext := "false"
 
 		// a lightweight controlplane spec we'll use for minor update testing
 		// we are missing some test helpers to simulate ready state so once we have
@@ -330,6 +332,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 				version.Status.ContainerImageVersionDefaults[initialVersion].MariadbImage = &testMariaDBImage
 				version.Status.ContainerImageVersionDefaults[initialVersion].InfraMemcachedImage = &testMemcachedImage
 				version.Status.ContainerImageVersionDefaults[initialVersion].KeystoneAPIImage = &testKeystoneAPIImage
+				version.Status.AvailableServiceDefaults[initialVersion] = &corev1.ServiceDefaults{
+					OVNHardenedOVSSecurityContext: &legacyOVSHardenedSecurityContext,
+				}
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, version)).To(Succeed())
 
 				th.Logger.Info("Version injected", "on", names.OpenStackVersionName)
@@ -363,6 +368,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(*osversion.Status.ContainerImages.MariadbImage).Should(Equal(testMariaDBImage))
 				g.Expect(*osversion.Status.ContainerImages.InfraMemcachedImage).Should(Equal(testMemcachedImage))
 				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(testKeystoneAPIImage))
+				g.Expect(*osversion.Status.ServiceDefaults.OVNHardenedOVSSecurityContext).Should(Equal("false"))
 
 			}, timeout, interval).Should(Succeed())
 
@@ -388,6 +394,13 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(OSCtlplane.Spec.Ovn.Enabled).Should(BeTrue())
 
 			SimulateControlplaneReady()
+
+			Eventually(func(g Gomega) {
+				ovnController := &ovnv1.OVNController{}
+				g.Expect(k8sClient.Get(ctx, names.OVNControllerName, ovnController)).To(Succeed())
+				g.Expect(ovnController.GetAnnotations()).To(HaveKeyWithValue(
+					ovnv1.OVNHardenedOVSSecurityContextLabel, "false"))
+			}, timeout, interval).Should(Succeed())
 
 			// verify that DeployedVersion is set on the OpenStackControlplane to the initialversion
 			Eventually(func(g Gomega) {
@@ -468,6 +481,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 				g.Expect(*osversion.Status.ContainerImages.MariadbImage).Should(Equal(targetMariaDBVersion))
 				g.Expect(*osversion.Status.ContainerImages.InfraMemcachedImage).Should(Equal(targetMemcachedVersion))
 				g.Expect(*osversion.Status.ContainerImages.KeystoneAPIImage).Should(Equal(targetKeystoneAPIVersion))
+				g.Expect(*osversion.Status.ServiceDefaults.OVNHardenedOVSSecurityContext).Should(Equal("true"))
+
+				ovnController := &ovnv1.OVNController{}
+				g.Expect(k8sClient.Get(ctx, names.OVNControllerName, ovnController)).To(Succeed())
+				g.Expect(ovnController.GetAnnotations()).To(HaveKeyWithValue(
+					ovnv1.OVNHardenedOVSSecurityContextLabel, "true"))
 
 			}, timeout, interval).Should(Succeed())
 
