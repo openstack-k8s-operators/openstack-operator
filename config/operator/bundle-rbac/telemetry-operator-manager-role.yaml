@@ -324,8 +324,7 @@ rules:
 - apiGroups:
     - security.openshift.io
   resourceNames:
-    - anyuid
-    - privileged
+    - nonroot-v2
   resources:
     - securitycontextconstraints
   verbs:
