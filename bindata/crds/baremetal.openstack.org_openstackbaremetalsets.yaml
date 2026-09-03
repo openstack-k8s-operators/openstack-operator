@@ -186,8 +186,10 @@ spec:
                 description: CtlplaneVlan - Vlan for ctlplane network
                 type: integer
               deploymentSSHSecret:
-                description: DeploymentSSHSecret - Name of secret holding the cloud-admin
-                  ssh keys
+                description: |-
+                  DeploymentSSHSecret - Name of a secret with an "authorized_keys" data entry holding the SSH
+                  public key(s) authorized for the provisioned user (see CloudUserName). A single key or
+                  multiple newline-separated keys are both supported.
                 type: string
               dnsSearchDomains:
                 description: |-

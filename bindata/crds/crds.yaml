@@ -22190,8 +22190,10 @@ spec:
                       nodes to use for ctlplane network
                     type: string
                   deploymentSSHSecret:
-                    description: DeploymentSSHSecret - Name of secret holding the
-                      cloud-admin ssh keys
+                    description: |-
+                      DeploymentSSHSecret - Name of a secret with an "authorized_keys" data entry holding the SSH
+                      public key(s) authorized for the provisioned user (see CloudUserName). A single key or
+                      multiple newline-separated keys are both supported.
                     type: string
                   domainName:
                     description: 'DomainName is the domain name that will be set on
