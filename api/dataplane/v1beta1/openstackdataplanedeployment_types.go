@@ -23,6 +23,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// DefaultDeploymentRequeueTime is the default requeue interval in seconds
+// for spec.deploymentRequeueTime (+kubebuilder:default:=15)
+const DefaultDeploymentRequeueTime = 15
+
 // OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlaneDeployment
 type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Required

@@ -404,8 +404,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.BmhRefHash = provResult.BmhRefHash
 	}
 
-	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, failedDeployment, err := checkDeployment(
-		ctx, helper, instance)
+	deploymentStatus, err := checkDeployment(ctx, helper, instance)
+	isDeploymentReady := deploymentStatus.ready
+	isDeploymentRunning := deploymentStatus.running
+	isDeploymentFailed := deploymentStatus.failed
+	failedDeployment := deploymentStatus.failedName
 	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -486,23 +489,35 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			"%s", deployErrorMsg)
 	}
 
+	// Watch events can be coalesced; requeue so a stale "running" verdict self-heals.
+	if isDeploymentRunning {
+		return ctrl.Result{RequeueAfter: time.Second * time.Duration(deploymentStatus.requeueTime)}, nil
+	}
+
 	return ctrl.Result{}, err
 }
 
+type deploymentCheckStatus struct {
+	ready       bool
+	running     bool
+	failed      bool
+	failedName  string
+	requeueTime int
+}
+
 func checkDeployment(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneNodeSet) (
-	isNodeSetDeploymentReady bool, isNodeSetDeploymentRunning bool,
-	isNodeSetDeploymentFailed bool, failedDeploymentName string, err error) {
+	instance *dataplanev1.OpenStackDataPlaneNodeSet) (deploymentCheckStatus, error) {
+	status := deploymentCheckStatus{requeueTime: dataplanev1.DefaultDeploymentRequeueTime}
 
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
 	}
-	err = helper.GetClient().List(ctx, deployments, opts...)
+	err := helper.GetClient().List(ctx, deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+		return status, err
 	}
 
 	// Collect deployments that target this nodeset (excluding deleted ones)
@@ -517,18 +532,27 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		}
 	}
 
-	// Sort relevant deployments from oldest to newest, then take the last one
+	// Sort relevant deployments from oldest to newest, then take the last one.
+	// The latest transitioned deployment is what last acted on the node;
+	// a missing Ready condition counts as never transitioned. Keys must
+	// stay in a fixed sequence to preserve strict weak ordering.
 	var latestRelevantDeployment *dataplanev1.OpenStackDataPlaneDeployment
 	if len(relevantDeployments) > 0 {
 		slices.SortFunc(relevantDeployments, func(a, b *dataplanev1.OpenStackDataPlaneDeployment) int {
-			aReady := a.Status.Conditions.Get(condition.DeploymentReadyCondition)
-			bReady := b.Status.Conditions.Get(condition.DeploymentReadyCondition)
-			if aReady != nil && bReady != nil {
-				if aReady.LastTransitionTime.Before(&bReady.LastTransitionTime) {
-					return -1
-				}
+			var aLTT, bLTT time.Time
+			if c := a.Status.Conditions.Get(condition.DeploymentReadyCondition); c != nil {
+				aLTT = c.LastTransitionTime.Time
 			}
-			return 1
+			if c := b.Status.Conditions.Get(condition.DeploymentReadyCondition); c != nil {
+				bLTT = c.LastTransitionTime.Time
+			}
+			if c := aLTT.Compare(bLTT); c != 0 {
+				return c
+			}
+			if c := a.CreationTimestamp.Compare(b.CreationTimestamp.Time); c != 0 {
+				return c
+			}
+			return strings.Compare(a.Name, b.Name)
 		})
 		latestRelevantDeployment = relevantDeployments[len(relevantDeployments)-1]
 	}
@@ -563,33 +587,40 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		isCurrentDeploymentReady := deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition)
 
 		// Reset the vars for every deployment that affects overall state
-		isNodeSetDeploymentReady = false
-		isNodeSetDeploymentRunning = false
-		isNodeSetDeploymentFailed = false
+		status.ready = false
+		status.running = false
+		status.failed = false
 
 		if isCurrentDeploymentFailed {
 			err = fmt.Errorf("%s", deploymentCondition.Message)
-			failedDeploymentName = deployment.Name
-			isNodeSetDeploymentFailed = true
+			status.failedName = deployment.Name
+			status.failed = true
 			break
 		}
 		if isCurrentDeploymentRunning {
-			isNodeSetDeploymentRunning = true
+			status.running = true
+			if deployment.Spec.DeploymentRequeueTime > 0 {
+				status.requeueTime = deployment.Spec.DeploymentRequeueTime
+			}
 		}
 
 		if isCurrentDeploymentReady {
-			// If the nodeset configHash does not match with what's in the deployment or
-			// deployedBmhHash is different from current bmhRefHash.
 			if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
 				(!instance.Spec.PreProvisioned &&
 					deployment.Status.BmhRefHashes[instance.Name] != instance.Status.BmhRefHash) {
+				helper.GetLogger().Info("Nodeset config or BMH refs changed since deployment completed",
+					"deployment", deployment.Name,
+					"storedConfigHash", deployment.Status.NodeSetHashes[instance.Name],
+					"currentConfigHash", instance.Status.ConfigHash,
+					"storedBmhRefHash", deployment.Status.BmhRefHashes[instance.Name],
+					"currentBmhRefHash", instance.Status.BmhRefHash)
 				continue
 			}
 
 			hasAnsibleVarsFromChanged, err := checkAnsibleVarsFromChanged(ctx, helper, instance, deployment.Status.ConfigMapHashes, deployment.Status.SecretHashes)
 
 			if err != nil {
-				return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+				return status, err
 			}
 
 			if hasAnsibleVarsFromChanged {
@@ -599,14 +630,14 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 			hasCertSecretsChanged, err := checkCertSecretsChanged(ctx, helper, instance, deployment.Status.SecretHashes)
 
 			if err != nil {
-				return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+				return status, err
 			}
 
 			if hasCertSecretsChanged {
 				continue
 			}
 
-			isNodeSetDeploymentReady = true
+			status.ready = true
 			for k, v := range deployment.Status.ConfigMapHashes {
 				instance.Status.ConfigMapHashes[k] = v
 			}
@@ -648,7 +679,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 				err := helper.GetClient().Get(ctx, name, service)
 				if err != nil {
 					helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
-					return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+					return status, err
 				}
 
 				if service.Spec.EDPMServiceType != "update" && service.Spec.EDPMServiceType != "update-services" {
@@ -663,7 +694,7 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		}
 	}
 
-	return isNodeSetDeploymentReady, isNodeSetDeploymentRunning, isNodeSetDeploymentFailed, failedDeploymentName, err
+	return status, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
