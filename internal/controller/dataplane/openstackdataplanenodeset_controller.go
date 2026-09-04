@@ -486,6 +486,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			"%s", deployErrorMsg)
 	}
 
+	// Watch events can be coalesced; requeue so a stale "running" verdict self-heals.
+	if isDeploymentRunning {
+		return ctrl.Result{RequeueAfter: time.Second * time.Duration(dataplanev1.DefaultDeploymentRequeueTime)}, nil
+	}
+
 	return ctrl.Result{}, err
 }
 
@@ -517,18 +522,23 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		}
 	}
 
-	// Sort relevant deployments from oldest to newest, then take the last one
+	// Sort relevant deployments from oldest to newest, then take the last one.
+	// The latest transitioned deployment is what last acted on the node;
+	// tie-break on creationTimestamp then name for determinism.
 	var latestRelevantDeployment *dataplanev1.OpenStackDataPlaneDeployment
 	if len(relevantDeployments) > 0 {
 		slices.SortFunc(relevantDeployments, func(a, b *dataplanev1.OpenStackDataPlaneDeployment) int {
 			aReady := a.Status.Conditions.Get(condition.DeploymentReadyCondition)
 			bReady := b.Status.Conditions.Get(condition.DeploymentReadyCondition)
 			if aReady != nil && bReady != nil {
-				if aReady.LastTransitionTime.Before(&bReady.LastTransitionTime) {
-					return -1
+				if c := aReady.LastTransitionTime.Compare(bReady.LastTransitionTime.Time); c != 0 {
+					return c
 				}
 			}
-			return 1
+			if c := a.CreationTimestamp.Compare(b.CreationTimestamp.Time); c != 0 {
+				return c
+			}
+			return strings.Compare(a.Name, b.Name)
 		})
 		latestRelevantDeployment = relevantDeployments[len(relevantDeployments)-1]
 	}
@@ -578,11 +588,15 @@ func checkDeployment(ctx context.Context, helper *helper.Helper,
 		}
 
 		if isCurrentDeploymentReady {
-			// If the nodeset configHash does not match with what's in the deployment or
-			// deployedBmhHash is different from current bmhRefHash.
 			if (deployment.Status.NodeSetHashes[instance.Name] != instance.Status.ConfigHash) ||
 				(!instance.Spec.PreProvisioned &&
 					deployment.Status.BmhRefHashes[instance.Name] != instance.Status.BmhRefHash) {
+				helper.GetLogger().Info("Nodeset config or BMH refs changed since deployment completed",
+					"deployment", deployment.Name,
+					"storedConfigHash", deployment.Status.NodeSetHashes[instance.Name],
+					"currentConfigHash", instance.Status.ConfigHash,
+					"storedBmhRefHash", deployment.Status.BmhRefHashes[instance.Name],
+					"currentBmhRefHash", instance.Status.BmhRefHash)
 				continue
 			}
 
