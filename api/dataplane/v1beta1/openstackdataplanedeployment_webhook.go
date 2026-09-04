@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -117,6 +118,23 @@ func (spec *OpenStackDataPlaneDeploymentSpec) ValidateUpdate(old OpenStackDataPl
 func (r *OpenStackDataPlaneDeployment) ValidateDelete() (admission.Warnings, error) {
 	openstackdataplanedeploymentlog.Info("validate delete", "name", r.Name)
 
+	deploymentCondition := r.Status.Conditions.Get(condition.DeploymentReadyCondition)
+	isDeploymentRunning := deploymentCondition != nil &&
+		deploymentCondition.Reason == condition.RequestedReason
+
+	if isDeploymentRunning &&
+		(r.Annotations == nil || r.Annotations[ConfirmDeleteAnnotation] != "true") {
+		warnings := admission.Warnings{
+			"Deleting a running OpenStackDataPlaneDeployment may leave nodes in an inconsistent or " +
+				"unrecoverable state. To confirm deletion, set the annotation " +
+				ConfirmDeleteAnnotation + "=true and retry.",
+		}
+		return warnings, apierrors.NewForbidden(
+			schema.GroupResource{Group: "dataplane.openstack.org", Resource: "openstackdataplanedeployments"},
+			r.Name,
+			fmt.Errorf("deletion of a running deployment not allowed: set annotation %s=true to confirm", ConfirmDeleteAnnotation))
+	}
+
 	errors := r.Spec.ValidateDelete()
 
 	if len(errors) != 0 {
@@ -132,7 +150,5 @@ func (r *OpenStackDataPlaneDeployment) ValidateDelete() (admission.Warnings, err
 
 // ValidateDelete validates the OpenStackDataPlaneDeploymentSpec on delete
 func (spec *OpenStackDataPlaneDeploymentSpec) ValidateDelete() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object creation.
-
 	return field.ErrorList{}
 }

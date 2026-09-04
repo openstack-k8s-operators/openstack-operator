@@ -72,10 +72,7 @@ func (d *OpenStackDataPlaneDeploymentCustomDefaulter) Default(_ context.Context,
 	return nil
 }
 
-// TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// NOTE: The 'path' attribute must follow a specific pattern and should not be modified directly here.
-// Modifying the path for an invalid path can cause API server errors; failing to locate the webhook.
-// +kubebuilder:webhook:path=/validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment,mutating=false,failurePolicy=fail,sideEffects=None,groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=create;update,versions=v1beta1,name=vopenstackdataplanedeployment-v1beta1.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate-dataplane-openstack-org-v1beta1-openstackdataplanedeployment,mutating=false,failurePolicy=fail,sideEffects=None,groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=create;update;delete,versions=v1beta1,name=vopenstackdataplanedeployment-v1beta1.kb.io,admissionReviewVersions=v1
 
 // OpenStackDataPlaneDeploymentCustomValidator struct is responsible for validating the OpenStackDataPlaneDeployment resource
 // when it is created, updated, or deleted.

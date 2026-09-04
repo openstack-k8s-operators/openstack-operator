@@ -32,6 +32,8 @@ apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
   name: edpm-extramounts
+  annotations:
+    dataplane.openstack.org/confirm-delete: "true"
 spec:
   nodeSets:
     - edpm-extramounts
