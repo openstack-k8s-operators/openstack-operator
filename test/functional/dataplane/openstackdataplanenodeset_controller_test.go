@@ -67,7 +67,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneDeploymentName types.NamespacedName
 	var dataplaneConfigHash string
 	var dataplaneGlobalServiceName types.NamespacedName
-	var newDataplaneUpdateServiceName types.NamespacedName
+	var dataplaneUpdateServiceName types.NamespacedName
 
 	defaultEdpmServiceList := []string{
 		"edpm_frr_image",
@@ -119,7 +119,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			Name:      "global-service",
 			Namespace: namespace,
 		}
-		newDataplaneUpdateServiceName = types.NamespacedName{
+		dataplaneUpdateServiceName = types.NamespacedName{
 			Name:      "update-services",
 			Namespace: namespace,
 		}
@@ -1281,8 +1281,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			updateServiceSpec := map[string]interface{}{
 				"playbook": "osp.edpm.update_services",
 			}
-			CreateDataPlaneServiceFromSpec(newDataplaneUpdateServiceName, updateServiceSpec)
-			DeferCleanup(th.DeleteService, newDataplaneUpdateServiceName)
+			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, updateServiceSpec)
+			DeferCleanup(th.DeleteService, dataplaneUpdateServiceName)
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(false)))
