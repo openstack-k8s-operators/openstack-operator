@@ -5,3 +5,5 @@ metadata:
 spec:
   playbook: osp.edpm.configure_os
   edpmServiceType: configure-os
+  dependsOn:
+    - install-os

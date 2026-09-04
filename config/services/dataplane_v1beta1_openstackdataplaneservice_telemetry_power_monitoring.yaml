@@ -3,6 +3,8 @@ kind: OpenStackDataPlaneService
 metadata:
   name: telemetry-power-monitoring
 spec:
+  dependsOn:
+    - nova
   dataSources:
     - secretRef:
         name: ceilometer-ipmi-config-data

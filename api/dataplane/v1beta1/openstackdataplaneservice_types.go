@@ -117,6 +117,11 @@ type OpenStackDataPlaneServiceSpec struct {
 	// to manage the service. If not set, will default to the
 	// OpenStackDataPlaneService name.
 	EDPMServiceType string `json:"edpmServiceType,omitempty" yaml:"edpmServiceType,omitempty"`
+
+	// DependsOn lists EDPMServiceType or CR names that must complete before
+	// this service runs; if empty, the list predecessor is used instead.
+	// +kubebuilder:validation:Optional
+	DependsOn []string `json:"dependsOn,omitempty" yaml:"dependsOn,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
