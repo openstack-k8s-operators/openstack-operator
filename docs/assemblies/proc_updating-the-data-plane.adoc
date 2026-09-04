@@ -55,10 +55,10 @@ $ oc create -f openstack-edpm-update-services.yaml
 +
 ----
 $ oc get openstackdataplanedeployment
-NAME             						STATUS   MESSAGE
-edpm-deployment-ipam   					True     Setup Complete
-edpm-deployment-ipam-update 			True     Setup Complete
-edpm-deployment-ipam-update-services 	True     Setup Complete
+NAME                                   STATUS   MESSAGE
+edpm-deployment-ipam                   True     Setup Complete
+edpm-deployment-ipam-update-ovn        True     Setup Complete
+edpm-deployment-ipam-update-services   True     Setup Complete
 ----
 
 .Troubleshooting
