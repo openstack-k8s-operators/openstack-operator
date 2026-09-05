@@ -308,6 +308,14 @@ spec:
               storageRequest:
                 description: Storage size allocated for the mariadb databases
                 type: string
+              targetVersion:
+                description: |-
+                  TargetVersion is the MariaDB major.minor version that the cluster should
+                  run after an upgrade (e.g. "10.11"). When set and different from the
+                  version recorded in the existing data files, the operator performs a full
+                  cluster stop and runs mariadb-upgrade on each node before restarting.
+                  Leave empty when no version upgrade is in progress.
+                type: string
               tls:
                 description: TLS settings for MySQL service and internal Galera replication
                 properties:
