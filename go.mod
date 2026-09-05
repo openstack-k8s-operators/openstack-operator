@@ -10,7 +10,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.7.7
 	github.com/onsi/ginkgo/v2 v2.32.1
-	github.com/onsi/gomega v1.42.1
+	github.com/onsi/gomega v1.43.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260905071940-7d0e8b82ab70
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260831082702-ee572e0fa368
