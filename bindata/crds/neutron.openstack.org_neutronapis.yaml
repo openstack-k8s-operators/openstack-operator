@@ -1306,9 +1306,22 @@ spec:
                 description: ReadyCount of neutron API instances
                 format: int32
                 type: integer
+              rpcReadyCount:
+                description: |-
+                  RPCReadyCount of neutron-rpc-server instances. Only populated when the
+                  WSGI deployment strategy is enabled and the RPC worker is not disabled
+                  via rpc_workers=0 in customServiceConfig.
+                format: int32
+                type: integer
               transportURLSecret:
                 description: TransportURLSecret - Secret containing RabbitMQ transportURL
                 type: string
+              workerReadyCount:
+                description: |-
+                  WorkerReadyCount of neutron background worker (periodic/OVN maintenance)
+                  instances. Only populated when the WSGI deployment strategy is enabled.
+                format: int32
+                type: integer
             type: object
         type: object
     served: true
