@@ -12,11 +12,17 @@ with a minor update of the control plane. OVN containers on the data plane
 nodes should not be updated until OVN containers on the control plane have been
 updated.
 
+To pause the control-plane minor update after each stage—for validation use the
+`core.openstack.org/update-target-stage` annotation on the `OpenStackVersion` CR.
+See <<proc_minor-update-staged-rollout_{context}>>.
+
 See
 https://github.com/openstack-k8s-operators/dev-docs/blob/main/version_updates.md[OpenStackVersion]
 and
 https://github.com/openstack-k8s-operators/dev-docs/blob/main/ovs-update.md[Open
 vSwitch update] for more information.
+
+include::proc_minor-update-staged-rollout.adoc[leveloffset=+1]
 
 include::proc_updating-the-data-plane-ovn.adoc[leveloffset=+1]
 
