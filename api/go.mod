@@ -6,7 +6,7 @@ require (
 	github.com/cert-manager/cert-manager v1.18.6
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/onsi/ginkgo/v2 v2.32.1
-	github.com/onsi/gomega v1.42.1
+	github.com/onsi/gomega v1.43.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260822070011-9997d23ba011
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260819143714-114b7c23d91d
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260822070327-bc820e193cf5
