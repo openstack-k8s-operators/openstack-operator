@@ -10,8 +10,6 @@ rules:
     - configmaps
     - configmaps/finalizers
     - secrets
-    - secrets/finalizers
-    - volumes
   verbs:
     - create
     - delete

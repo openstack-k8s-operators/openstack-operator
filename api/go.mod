@@ -16,17 +16,17 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260904142804-c0b05689f0e8
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260904215621-62d91519afd1
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260905072629-36e05507b30a
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260905094227-bddb5880512c
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260905094227-bddb5880512c
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260905135931-526eb6f05187
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260905135931-526eb6f05187
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20260905072629-4f11bb174359
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260904174747-412381d8a7c4
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260907100554-0ff6a7cbefd8
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260904195320-fdfc16085397
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260904191025-bba0bb23fc07
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260905072954-b9553218b0fc
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260904174746-3f333163215b
-	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260904165109-bcbdd5299fac
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260907033207-84b22cca06d9
+	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260907120852-1867236f3314
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260831082702-d4edac33702c
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260904124041-05adec0d235e
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260907183344-f672700a8f25
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260825125812-d29ca608df85
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.77.1-rhobs1 // indirect
 	github.com/rhobs/observability-operator v1.0.0 // indirect
