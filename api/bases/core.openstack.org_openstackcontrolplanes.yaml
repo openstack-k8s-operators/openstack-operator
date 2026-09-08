@@ -4465,6 +4465,8 @@ spec:
                           type: string
                         storageRequest:
                           type: string
+                        targetVersion:
+                          type: string
                         tls:
                           properties:
                             caBundleSecretName:
