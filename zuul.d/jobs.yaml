@@ -63,6 +63,7 @@
         # NOTE(gibi): there are no cinder backend enabled so test needing a
         # volumes needs to be skipped
         tempest.scenario.test_minimum_basic.TestMinimumBasicScenario
+        test_volume_upload_image_hash_verification
         test_shelve_volume_backed_instance
         tempest.scenario.test_stamp_pattern.TestStampPattern
         tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern

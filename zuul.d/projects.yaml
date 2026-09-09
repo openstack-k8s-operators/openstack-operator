@@ -5,6 +5,11 @@
       jobs:
         - openstack-k8s-operators-content-provider
         - podified-multinode-edpm-deployment-crc:
+            vars: &vars
+              cifmw_update_containers_openstack: false
+              cifmw_update_containers_watcher: false
+              cifmw_test_operator_tempest_image: quay.io/openstack-s2i-containers/openstack-tempest
+              cifmw_test_operator_tempest_image_tag: master-latest
             dependencies: ["openstack-k8s-operators-content-provider"]
             irrelevant-files: &irrelevant-files
               - .*/*.md
@@ -17,15 +22,19 @@
               - ^README.md$
               - tests?\/functional
         - cifmw-crc-podified-edpm-baremetal:
+            vars: *vars
             dependencies: ["openstack-k8s-operators-content-provider"]
             irrelevant-files: *irrelevant-files
         - adoption-standalone-to-crc-ceph-provider:
+            vars: *vars
             dependencies: ["openstack-k8s-operators-content-provider"]
             irrelevant-files: *irrelevant-files
-        - openstack-operator-tempest-multinode
+        - openstack-operator-tempest-multinode:
+            vars: *vars
         - openstack-operator-docs-preview
         - openstack-operator-kuttl:
             voting: false
         - openstack-operator-edpm-baremetal-minor-update:
+            vars: *vars
             dependencies: ["openstack-k8s-operators-content-provider"]
             irrelevant-files: *irrelevant-files
