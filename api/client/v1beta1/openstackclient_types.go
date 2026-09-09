@@ -25,7 +25,7 @@ const (
 	// Container image fall-back defaults
 
 	// OpenStackClientContainerImage is the fall-back container image for OpenStackClient
-	OpenStackClientContainerImage = "quay.io/podified-antelope-centos9/openstack-openstackclient:current-podified"
+	OpenStackClientContainerImage = "quay.io/openstack-s2i-containers/openstack-openstackclient:master-latest"
 )
 
 // OpenStackClientSpec defines the desired state of OpenStackClient
