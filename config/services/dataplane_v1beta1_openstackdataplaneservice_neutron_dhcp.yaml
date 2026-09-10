@@ -4,6 +4,9 @@ metadata:
   name: neutron-dhcp
 spec:
   playbook: osp.edpm.neutron_dhcp
+  dependsOn:
+    - run-os
+    - validate-network
   dataSources:
     - secretRef:
         name: neutron-dhcp-agent-neutron-config

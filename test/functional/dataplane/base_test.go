@@ -394,6 +394,44 @@ func SingleGlobalServiceDeploymentSpec() map[string]interface{} {
 	}
 }
 
+// Build OpenStackDataPlaneNodeSetSpec with the given services
+func ParallelExecutionNodeSetSpec(nodeSetName string, services []string) map[string]interface{} {
+	return map[string]interface{}{
+		"services": services,
+		"nodeTemplate": map[string]interface{}{
+			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+			"ansible": map[string]interface{}{
+				"ansibleUser": "cloud-user",
+			},
+		},
+		"nodes": map[string]interface{}{
+			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
+				"hostName": "edpm-compute-node-1",
+				"networks": []infrav1.IPSetNetwork{
+					{Name: "networkinternal", SubnetName: "subnet1"},
+					{Name: "ctlplane", SubnetName: "subnet1"},
+				},
+				"ansible": map[string]interface{}{
+					"ansibleHost": "192.168.122.100",
+				},
+			},
+		},
+		"secretMaxSize":  1048576,
+		"tlsEnabled":     true,
+		"preProvisioned": true,
+	}
+}
+
+// Build OpenStackDataPlaneDeploymentSpec with useParallelExecution enabled
+func ParallelExecutionDeploymentSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"nodeSets": []string{
+			"edpm-compute-nodeset",
+		},
+		"useParallelExecution": true,
+	}
+}
+
 func DefaultNetConfigSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"networks": []map[string]interface{}{{
