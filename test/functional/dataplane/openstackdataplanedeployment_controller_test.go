@@ -13,7 +13,9 @@ import (
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -1926,6 +1928,142 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				condition.DeploymentReadyCondition,
 				corev1.ConditionFalse,
 			)
+		})
+	})
+
+	When("A dataplaneDeployment is created with useParallelExecution true and services with dependsOn", func() {
+		var svcAName types.NamespacedName
+		var svcBName types.NamespacedName
+		var svcCName types.NamespacedName
+
+		BeforeEach(func() {
+			svcAName = types.NamespacedName{Name: "svc-a", Namespace: namespace}
+			svcBName = types.NamespacedName{Name: "svc-b", Namespace: namespace}
+			svcCName = types.NamespacedName{Name: "svc-c", Namespace: namespace}
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			// svc-b and svc-c both depend on svc-a, so they form one parallel level
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(svcAName, map[string]interface{}{
+				"edpmServiceType": "svc-a",
+			}))
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(svcBName, map[string]interface{}{
+				"edpmServiceType": "svc-b",
+				"dependsOn":       []string{"svc-a"},
+			}))
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(svcCName, map[string]interface{}{
+				"edpmServiceType": "svc-c",
+				"dependsOn":       []string{"svc-a"},
+			}))
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName,
+				ParallelExecutionNodeSetSpec(dataplaneNodeSetName.Name, []string{"svc-a", "svc-b", "svc-c"})))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, ParallelExecutionDeploymentSpec()))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+
+		It("should run independent services in parallel after their dependency completes", func() {
+			jobName := func(service string) types.NamespacedName {
+				return types.NamespacedName{
+					Name:      fmt.Sprintf("%s-%s-%s", service, dataplaneDeploymentName.Name, dataplaneNodeSetName.Name),
+					Namespace: namespace,
+				}
+			}
+			getJob := func(name types.NamespacedName) *batchv1.Job {
+				job := &batchv1.Job{}
+				err := k8sClient.Get(ctx, name, job)
+				if k8s_errors.IsNotFound(err) {
+					return nil
+				}
+				Expect(err).NotTo(HaveOccurred())
+				return job
+			}
+			completeJob := func(name types.NamespacedName) {
+				Eventually(func(g Gomega) {
+					job := GetAnsibleee(name)
+					job.Status.Succeeded = 1
+					g.Expect(k8sClient.Status().Update(ctx, job)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+			}
+
+			// Level 0: only svc-a starts; svc-b and svc-c must wait for it
+			Eventually(func() *batchv1.Job {
+				return getJob(jobName("svc-a"))
+			}, timeout, interval).ShouldNot(BeNil())
+			Consistently(func(g Gomega) {
+				g.Expect(getJob(jobName("svc-b"))).To(BeNil())
+				g.Expect(getJob(jobName("svc-c"))).To(BeNil())
+			}, "5s", interval).Should(Succeed())
+
+			// Complete svc-a; svc-b and svc-c share the next level and start together
+			completeJob(jobName("svc-a"))
+			var jobB, jobC *batchv1.Job
+			Eventually(func(g Gomega) {
+				jobB = getJob(jobName("svc-b"))
+				jobC = getJob(jobName("svc-c"))
+				g.Expect(jobB).ToNot(BeNil())
+				g.Expect(jobC).ToNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			// Both jobs of the parallel level exist once the dependency
+			// completed; the next level would not start before both do
+
+			// Complete the parallel level; deployment becomes ready
+			completeJob(jobName("svc-b"))
+			completeJob(jobName("svc-c"))
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionTrue,
+			)
+		})
+	})
+
+	When("A dataplaneDeployment with useParallelExecution true has circular service dependencies", func() {
+		var svcPName types.NamespacedName
+		var svcQName types.NamespacedName
+
+		BeforeEach(func() {
+			svcPName = types.NamespacedName{Name: "svc-p", Namespace: namespace}
+			svcQName = types.NamespacedName{Name: "svc-q", Namespace: namespace}
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(svcPName, map[string]interface{}{
+				"edpmServiceType": "svc-p",
+				"dependsOn":       []string{"svc-q"},
+			}))
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(svcQName, map[string]interface{}{
+				"edpmServiceType": "svc-q",
+				"dependsOn":       []string{"svc-p"},
+			}))
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName,
+				ParallelExecutionNodeSetSpec(dataplaneNodeSetName.Name, []string{"svc-p", "svc-q"})))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, ParallelExecutionDeploymentSpec()))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+
+		It("should mark deployment and nodeset conditions false", func() {
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionFalse,
+			)
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				nsConditions := deployment.Status.NodeSetConditions[dataplaneNodeSetName.Name]
+				c := nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+				g.Expect(c).ToNot(BeNil())
+				g.Expect(c.Status).To(Equal(corev1.ConditionFalse))
+				g.Expect(c.Reason).To(Equal(condition.Reason(condition.ErrorReason)))
+			}, timeout, interval).Should(Succeed())
 		})
 	})
 

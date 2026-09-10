@@ -3,6 +3,9 @@ kind: OpenStackDataPlaneService
 metadata:
   name: logging
 spec:
+  dependsOn:
+    - run-os
+    - validate-network
   dataSources:
     - secretRef:
         name: logging-compute-config-data

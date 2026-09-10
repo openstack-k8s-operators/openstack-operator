@@ -5,3 +5,5 @@ metadata:
 spec:
   playbook: osp.edpm.reboot
   edpmServiceType: reboot-os
+  dependsOn:
+    - run-os

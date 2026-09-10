@@ -3,6 +3,13 @@ kind: OpenStackDataPlaneService
 metadata:
   name: nova
 spec:
+  dependsOn:
+    - libvirt
+    - ssh-known-hosts
+    - neutron-ovn
+    - neutron-sriov
+    - neutron-dhcp
+    - neutron-metadata
   dataSources:
     - secretRef:
         name: nova-cell1-compute-config
