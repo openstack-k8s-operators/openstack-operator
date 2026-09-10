@@ -11,6 +11,7 @@ on:
       - '[0-9]+.[0-9]+-fr[0-9]+'
 
 permissions:
+  contents: read
   pull-requests: write
 
 jobs:
@@ -20,17 +21,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          allow-unsafe-pr-checkout: true
+          # Never check out the untrusted PR head in this privileged workflow.
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Install yq
         uses: mikefarah/yq@1b9b4ac5187171d2e5e3129be0cfa827c7f9d53d # v4
 
       - name: Compute CRD JSON size
         id: size
+        env:
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
+          set -euo pipefail
           CRD_FILE="config/crd/bases/core.openstack.org_openstackcontrolplanes.yaml"
-          SIZE=$(yq eval -o=json "$CRD_FILE" | jq -c . | wc -c)
+          if [ "$GITHUB_EVENT_NAME" = "pull_request_target" ]; then
+            PR_CRD_JSON=$(gh api \
+              -H "Accept: application/vnd.github.raw+json" \
+              "repos/$PR_HEAD_REPO/contents/$CRD_FILE?ref=$PR_HEAD_SHA" \
+              | yq eval -o=json - | jq -c .)
+            SIZE=$(printf '%s\n' "$PR_CRD_JSON" | wc -c)
+          else
+            SIZE=$(yq eval -o=json "$CRD_FILE" | jq -c . | wc -c)
+          fi
           echo "bytes=$SIZE" >> "$GITHUB_OUTPUT"
 
           if [ "$SIZE" -lt 307200 ]; then
