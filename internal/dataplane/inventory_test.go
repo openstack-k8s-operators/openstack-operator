@@ -86,6 +86,48 @@ func TestProcessConfigMapData_NumbersAsInts(t *testing.T) {
 	}
 }
 
+func TestSetDefaultPodmanRegistryConfigVars(t *testing.T) {
+	tests := []struct {
+		name           string
+		vars           map[string]interface{}
+		expectedConfig string
+		expectedOCP    bool
+	}{
+		{
+			name:           "sets registry configuration defaults",
+			vars:           map[string]interface{}{},
+			expectedConfig: "ocp registry config",
+			expectedOCP:    true,
+		},
+		{
+			name: "preserves user registry configuration vars",
+			vars: map[string]interface{}{
+				"edpm_podman_registries_conf":  "director local mirror config",
+				"edpm_podman_disconnected_ocp": false,
+			},
+			expectedConfig: "director local mirror config",
+			expectedOCP:    false,
+		},
+		{
+			name: "preserves independently overridden registry configuration vars",
+			vars: map[string]interface{}{
+				"edpm_podman_disconnected_ocp": false,
+			},
+			expectedConfig: "ocp registry config",
+			expectedOCP:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setDefaultPodmanRegistryConfigVars(tt.vars, true, "ocp registry config")
+
+			assert.Equal(t, tt.expectedConfig, tt.vars["edpm_podman_registries_conf"])
+			assert.Equal(t, tt.expectedOCP, tt.vars["edpm_podman_disconnected_ocp"])
+		})
+	}
+}
+
 func TestProcessSecretData_NumbersAsInts(t *testing.T) {
 	tests := []struct {
 		name         string

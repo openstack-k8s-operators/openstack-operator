@@ -153,9 +153,8 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 				return "", fmt.Errorf("failed to get MachineConfig registry configuration: %w", err)
 			}
 		} else {
-			helper.GetLogger().Info("Mirror registries detected via IDMS/ICSP. Using OCP registry configuration.")
-			nodeSetGroup.Vars["edpm_podman_registries_conf"] = registryConfig
-			nodeSetGroup.Vars["edpm_podman_disconnected_ocp"] = hasMirrorRegistries
+			helper.GetLogger().Info("Mirror registries detected via IDMS/ICSP. Using OCP registry configuration defaults.")
+			setDefaultPodmanRegistryConfigVars(nodeSetGroup.Vars, hasMirrorRegistries, registryConfig)
 		}
 
 		mirrorScopes, sourceByMirror, err := util.GetMirrorRegistryScopes(ctx, helper)
@@ -304,6 +303,15 @@ func populateInventoryFromIPAM(
 		dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 	}
 	host.Vars["dns_search_domains"] = dnsSearchDomains
+}
+
+func setDefaultPodmanRegistryConfigVars(vars map[string]interface{}, hasMirrorRegistries bool, registryConfig string) {
+	if _, ok := vars["edpm_podman_registries_conf"]; !ok {
+		vars["edpm_podman_registries_conf"] = registryConfig
+	}
+	if _, ok := vars["edpm_podman_disconnected_ocp"]; !ok {
+		vars["edpm_podman_disconnected_ocp"] = hasMirrorRegistries
+	}
 }
 
 // set group ansible vars from NodeTemplate
