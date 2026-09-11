@@ -1,0 +1,10 @@
+apiVersion: assistant.openstack.org/v1beta1
+kind: OpenStackAssistant
+metadata:
+  labels:
+    app.kubernetes.io/name: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: openstackassistant-sample
+spec:
+  lightspeedStack:
+    providerSecret: openstackassistant-sample-lightspeed-provider
