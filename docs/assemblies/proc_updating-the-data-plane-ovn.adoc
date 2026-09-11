@@ -22,13 +22,13 @@ The following example output shows the condition has been met:
 openstackversion.core.openstack.org/openstack-galera-network-isolation condition met
 ----
 
-. Create an `OpenStackDataPlaneDeployment` CR and save it to a file named `openstack-edpm-update.yaml` on your workstation.
+. Create an `OpenStackDataPlaneDeployment` CR and save it to a file named `openstack-edpm-update-ovn.yaml` on your workstation.
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: edpm-deployment-ipam-update
+  name: edpm-deployment-ipam-update-ovn
 spec:
   nodeSets:
     - openstack-edpm-ipam
@@ -44,21 +44,21 @@ spec:
 [NOTE]
 The `servicesOverride` field is set to include only `ovn` as the `ovn` service must be updated first in isolation. If using a custom service to manage `ovn`, then use that custom service name instead of `ovn` in `servicesOverride`. Additionally if other custom services must be updated at the same time as `ovn`, then they can be included in `servicesOverride` as well.
 
-. Save the `openstack-edpm-update.yaml` deployment file.
+. Save the `openstack-edpm-update-ovn.yaml` deployment file.
 
 . Update the data plane:
 +
 ----
-$ oc create -f openstack-edpm-update.yaml
+$ oc create -f openstack-edpm-update-ovn.yaml
 ----
 
 . Verify that the data plane update deployment succeeded:
 +
 ----
 $ oc get openstackdataplanedeployment
-NAME             			STATUS   MESSAGE
-edpm-deployment-ipam   		True     Setup Complete
-edpm-deployment-ipam-update True     Setup Complete
+NAME                              STATUS   MESSAGE
+edpm-deployment-ipam              True     Setup Complete
+edpm-deployment-ipam-update-ovn   True     Setup Complete
 ----
 
 Once OVN has been updated on the data plane, the rest of the control plane minor update will automatically proceed. Once the control plane minor update is finished, the rest of the data plane can be updated.
