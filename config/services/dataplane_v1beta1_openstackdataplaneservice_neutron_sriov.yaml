@@ -4,6 +4,9 @@ metadata:
   name: neutron-sriov
 spec:
   playbook: osp.edpm.neutron_sriov
+  dependsOn:
+    - run-os
+    - validate-network
   dataSources:
     - secretRef:
         name: neutron-sriov-agent-neutron-config

@@ -5,3 +5,5 @@ metadata:
 spec:
   playbook: osp.edpm.configure_network
   edpmServiceType: configure-network
+  dependsOn:
+    - bootstrap
