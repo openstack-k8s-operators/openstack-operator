@@ -154,6 +154,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			EdpmNeutronSriovAgentImage:    getImg(instance.Spec.CustomContainerImages.EdpmNeutronSriovAgentImage, defaults.EdpmNeutronSriovAgentImage),
 			EdpmOvnBgpAgentImage:          getImg(instance.Spec.CustomContainerImages.EdpmOvnBgpAgentImage, defaults.EdpmOvnBgpAgentImage),
 			EdpmNodeExporterImage:         getImg(instance.Spec.CustomContainerImages.EdpmNodeExporterImage, defaults.EdpmNodeExporterImage),
+			//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 			EdpmKeplerImage:               getImg(instance.Spec.CustomContainerImages.EdpmKeplerImage, defaults.EdpmKeplerImage),
 			EdpmPodmanExporterImage:       getImg(instance.Spec.CustomContainerImages.EdpmPodmanExporterImage, defaults.EdpmPodmanExporterImage),
 			OpenstackNetworkExporterImage: getOpenstackNetworkExporterImg(instance.Spec.CustomContainerImages, defaults),

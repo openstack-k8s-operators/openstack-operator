@@ -243,6 +243,7 @@ var ContainerImageDefaults = openstackv1.ContainerImages{
 		CeilometerComputeImage:        getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-compute:current-podified"),
 		CeilometerIpmiImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-ipmi:current-podified"),
 		EdpmNodeExporterImage:         getStrPtr("quay.io/prometheus/node-exporter:v1.5.0"),
+		// Deprecated: EdpmKeplerImage is no longer used. Kepler has been removed from the telemetry stack.
 		EdpmKeplerImage:               getStrPtr("quay.io/sustainable_computing_io/kepler:release-0.7.12"),
 		EdpmPodmanExporterImage:       getStrPtr("quay.io/openstack-k8s-operators/prometheus-podman-exporter:latest"),
 		OpenstackNetworkExporterImage: getStrPtr("quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified"),
@@ -276,6 +277,7 @@ func SetupDefaults() {
 			EdpmNeutronOvnAgentImage:      getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_OVN_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronOvnAgentImage),
 			EdpmNeutronSriovAgentImage:    getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronSriovAgentImage),
 			EdpmNodeExporterImage:         getImageDefault("RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNodeExporterImage),
+			//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 			EdpmKeplerImage:               getImageDefault("RELATED_IMAGE_EDPM_KEPLER_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmKeplerImage),
 			EdpmPodmanExporterImage:       getImageDefault("RELATED_IMAGE_EDPM_PODMAN_EXPORTER_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmPodmanExporterImage),
 			OpenstackNetworkExporterImage: getImageDefault("RELATED_IMAGE_OPENSTACK_NETWORK_EXPORTER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OpenstackNetworkExporterImage),
