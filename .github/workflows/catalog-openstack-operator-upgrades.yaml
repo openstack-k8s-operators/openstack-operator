@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "latesttag=${{ github.ref_name }}-latest" >> $GITHUB_ENV
       - name: Install opm
-        uses: redhat-actions/openshift-tools-installer@e3b32c2ab7b064b2ce189121c4a49f509a99a7b4 # v3
+        uses: redhat-actions/openshift-tools-installer@37eb3cfb20ac2df6f0511ffa71cd917e4d49cabf # v3
         with:
           source: github
           opm: 'latest'
@@ -69,7 +69,7 @@ jobs:
           BUNDLE: ${{ env.imageregistry }}/${{ env.imagenamespace }}/openstack-operator-bundle:${{ github.sha }}
       - name: Buildah Action
         id: build-operator-index-upgrade
-        uses: redhat-actions/buildah-build@3a51aade9afa17e5c78256bcbe2e1ee08c7b995b # v3
+        uses: redhat-actions/buildah-build@719e3c40d8af9790c23eca13f7daa339f2867034 # v3
         with:
           image: openstack-operator-index-upgrade
           tags: ${{ env.latesttag }} ${{ github.sha }}
