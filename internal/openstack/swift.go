@@ -66,7 +66,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		instance.Spec.Swift.Template.SwiftProxy.RabbitMqClusterName = ""
 	}
 
-	if instance.Spec.Swift.Template.NodeSelector == nil {
+	if instance.Spec.Swift.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Swift.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

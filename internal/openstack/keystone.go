@@ -106,7 +106,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		instance.Spec.Keystone.Template.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if instance.Spec.Keystone.Template.NodeSelector == nil {
+	if instance.Spec.Keystone.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Keystone.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

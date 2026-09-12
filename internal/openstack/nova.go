@@ -75,7 +75,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 	// Note: Migration from apiMessageBusInstance and cellMessageBusInstance to messagingBus.cluster
 	// is handled by the webhook via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
 
-	if instance.Spec.Nova.Template.NodeSelector == nil {
+	if instance.Spec.Nova.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Nova.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
