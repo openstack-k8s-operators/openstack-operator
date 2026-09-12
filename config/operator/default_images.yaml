@@ -98,7 +98,7 @@ spec:
         - name: RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-heat-api:current-podified
         - name: RELATED_IMAGE_HEAT_CFNAPI_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-heat-api-cfn:current-podified
+          value: quay.io/podified-antelope-centos9/openstack-heat-api:current-podified
         - name: RELATED_IMAGE_HEAT_ENGINE_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-heat-engine:current-podified
         - name: RELATED_IMAGE_HORIZON_IMAGE_URL_DEFAULT
