@@ -239,7 +239,7 @@ run: export ENABLE_WEBHOOKS?=false
 run: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/clean_local_webhook.sh
 	source hack/export_related_images.sh && \
-		go run ./cmd/main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)" -pprof-bind-address ":$(PPROF_PORT)"
+		go run ./cmd/main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)" -pprof-bind-address ":$(PPROF_PORT)" $(ARGS)
 
 .PHONY: run-operator
 run-operator: export METRICS_PORT?=8080
@@ -251,7 +251,7 @@ run-operator: export OPERATOR_IMAGE_URL=${IMG}
 run-operator: manifests generate fmt vet ## Run a controller from your host.
 	source hack/export_related_images.sh && \
 	source hack/export_operator_related_images.sh && \
-	go run ./cmd/operator/main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)" -pprof-bind-address ":$(PPROF_PORT)"
+	go run ./cmd/operator/main.go -metrics-bind-address ":$(METRICS_PORT)" -health-probe-bind-address ":$(HEALTH_PORT)" -pprof-bind-address ":$(PPROF_PORT)" $(ARGS)
 
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
