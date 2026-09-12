@@ -2125,7 +2125,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			Expect(watcher.Spec.APIContainerImageURL).Should(Not(BeNil()))
 			Expect(watcher.Spec.ApplierContainerImageURL).Should(Not(BeNil()))
 			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Not(BeNil()))
-			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Equal("quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified"))
+			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Equal("quay.io/openstack-k8s-operators/openstack-watcher-base:master-latest"))
 
 			Expect(watcher.Spec.APIServiceTemplate.TLS.Ca.CaBundleSecretName).Should(Equal("combined-ca-bundle"))
 
@@ -2232,9 +2232,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 			}, timeout, interval).Should(Succeed())
 
 			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
-			Expect(OSCtlplane.Status.ContainerImages.WatcherAPIImage).Should(Equal(ptr.To("quay.io/podified-master-centos9/openstack-watcher-api:current-podified")))
-			Expect(OSCtlplane.Status.ContainerImages.WatcherApplierImage).Should(Equal(ptr.To("quay.io/podified-master-centos9/openstack-watcher-applier:current-podified")))
-			Expect(OSCtlplane.Status.ContainerImages.WatcherDecisionEngineImage).Should(Equal(ptr.To("quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified")))
+			Expect(OSCtlplane.Status.ContainerImages.WatcherAPIImage).Should(Equal(ptr.To("quay.io/openstack-k8s-operators/openstack-watcher-base:master-latest")))
+			Expect(OSCtlplane.Status.ContainerImages.WatcherApplierImage).Should(Equal(ptr.To("quay.io/openstack-k8s-operators/openstack-watcher-base:master-latest")))
+			Expect(OSCtlplane.Status.ContainerImages.WatcherDecisionEngineImage).Should(Equal(ptr.To("quay.io/openstack-k8s-operators/openstack-watcher-base:master-latest")))
 		})
 	})
 
@@ -2311,7 +2311,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			// default Watche container images are set
 			Expect(watcher.Spec.APIContainerImageURL).Should(Not(BeNil()))
 			Expect(watcher.Spec.ApplierContainerImageURL).Should(Not(BeNil()))
-			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Equal("quay.io/podified-master-centos9/openstack-watcher-decision-engine:current-podified"))
+			Expect(watcher.Spec.DecisionEngineContainerImageURL).Should(Equal("quay.io/openstack-k8s-operators/openstack-watcher-base:master-latest"))
 
 		})
 

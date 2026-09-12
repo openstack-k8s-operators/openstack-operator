@@ -77,6 +77,12 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 	if envImages["TEST_HORIZONTEST_IMAGE_URL_DEFAULT"] != nil {
 		defaults.TestHorizontestImage = envImages["TEST_HORIZONTEST_IMAGE_URL_DEFAULT"]
 	}
+	// s2i base image: a single watcher base image populates all three service images
+	if envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"] != nil {
+		defaults.WatcherAPIImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
+		defaults.WatcherApplierImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
+		defaults.WatcherDecisionEngineImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
+	}
 
 	Log.Info("Initialize OpenStackVersion return defaults")
 	return defaults
