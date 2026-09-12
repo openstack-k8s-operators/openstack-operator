@@ -965,8 +965,8 @@ HeatSection defines the desired state of Heat services
 | <<override,Override>>
 | false
 
-| cnfAPIOverride
-| CnfAPIOverride, provides the ability to override the generated manifest of several child resources.
+| cfnAPIOverride
+| CfnAPIOverride, provides the ability to override the generated manifest of several child resources.
 | <<override,Override>>
 | false
 |===

@@ -188,13 +188,13 @@ spec:
           global AC configuration.
         displayName: Application Credential
         path: heat.applicationCredential
-      - description: CnfAPIOverride, provides the ability to override the generated
+      - description: CfnAPIOverride, provides the ability to override the generated
           manifest of several child resources.
-        displayName: Cnf APIOverride
-        path: heat.cnfAPIOverride
+        displayName: Cfn APIOverride
+        path: heat.cfnAPIOverride
       - description: TLS - overrides tls parameters for public endpoint
         displayName: TLS
-        path: heat.cnfAPIOverride.tls
+        path: heat.cfnAPIOverride.tls
       - description: Enabled - Whether Heat services should be deployed and managed
         displayName: Enabled
         path: heat.enabled

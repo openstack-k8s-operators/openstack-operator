@@ -960,7 +960,7 @@ func (in *HeatSection) DeepCopyInto(out *HeatSection) {
 		(*in).DeepCopyInto(*out)
 	}
 	in.APIOverride.DeepCopyInto(&out.APIOverride)
-	in.CnfAPIOverride.DeepCopyInto(&out.CnfAPIOverride)
+	in.CfnAPIOverride.DeepCopyInto(&out.CfnAPIOverride)
 	if in.ApplicationCredential != nil {
 		in, out := &in.ApplicationCredential, &out.ApplicationCredential
 		*out = new(ServiceAppCredSection)
