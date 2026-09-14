@@ -1,5 +1,7 @@
 # openstack-operator
 
+# [DNM] Testing labels
+
 [![CodeQL](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/codeql.yml)
 [![CRD sync check main](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml)
 [![CRD sync check 18-stable](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-18-stable.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-18-stable.yaml)
