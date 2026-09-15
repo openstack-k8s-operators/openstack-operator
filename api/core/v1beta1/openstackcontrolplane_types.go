@@ -721,11 +721,6 @@ type IronicSection struct {
 	// APIOverride, provides the ability to override the generated manifest of several child resources.
 	APIOverride Override `json:"apiOverride,omitempty"`
 
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// InspectorOverride, provides the ability to override the generated manifest of several child resources.
-	InspectorOverride Override `json:"inspectorOverride,omitempty"`
-
 	// ApplicationCredential allows service-specific overrides of the global AC configuration.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// +kubebuilder:validation:Optional

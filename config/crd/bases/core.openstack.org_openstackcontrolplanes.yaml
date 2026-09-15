@@ -7219,130 +7219,6 @@ spec:
                   enabled:
                     default: false
                     type: boolean
-                  inspectorOverride:
-                    properties:
-                      route:
-                        properties:
-                          metadata:
-                            properties:
-                              annotations:
-                                additionalProperties:
-                                  type: string
-                                type: object
-                              labels:
-                                additionalProperties:
-                                  type: string
-                                type: object
-                            type: object
-                          spec:
-                            properties:
-                              alternateBackends:
-                                items:
-                                  properties:
-                                    kind:
-                                      enum:
-                                      - Service
-                                      - ""
-                                      type: string
-                                    name:
-                                      type: string
-                                    weight:
-                                      format: int32
-                                      maximum: 256
-                                      minimum: 0
-                                      type: integer
-                                  type: object
-                                maxItems: 3
-                                type: array
-                              host:
-                                maxLength: 253
-                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
-                                type: string
-                              path:
-                                pattern: ^/
-                                type: string
-                              port:
-                                properties:
-                                  targetPort:
-                                    anyOf:
-                                    - type: integer
-                                    - type: string
-                                    x-kubernetes-int-or-string: true
-                                required:
-                                - targetPort
-                                type: object
-                              subdomain:
-                                maxLength: 253
-                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
-                                type: string
-                              tls:
-                                properties:
-                                  caCertificate:
-                                    type: string
-                                  certificate:
-                                    type: string
-                                  destinationCACertificate:
-                                    type: string
-                                  externalCertificate:
-                                    properties:
-                                      name:
-                                        type: string
-                                    type: object
-                                    x-kubernetes-map-type: atomic
-                                  insecureEdgeTerminationPolicy:
-                                    enum:
-                                    - Allow
-                                    - None
-                                    - Redirect
-                                    - ""
-                                    type: string
-                                  key:
-                                    type: string
-                                  termination:
-                                    enum:
-                                    - edge
-                                    - reencrypt
-                                    - passthrough
-                                    type: string
-                                required:
-                                - termination
-                                type: object
-                                x-kubernetes-validations:
-                                - message: 'cannot have both spec.tls.termination:
-                                    passthrough and spec.tls.insecureEdgeTerminationPolicy:
-                                    Allow'
-                                  rule: 'has(self.termination) && has(self.insecureEdgeTerminationPolicy)
-                                    ? !((self.termination==''passthrough'') && (self.insecureEdgeTerminationPolicy==''Allow''))
-                                    : true'
-                              to:
-                                properties:
-                                  kind:
-                                    enum:
-                                    - Service
-                                    - ""
-                                    type: string
-                                  name:
-                                    type: string
-                                  weight:
-                                    format: int32
-                                    maximum: 256
-                                    minimum: 0
-                                    type: integer
-                                type: object
-                              wildcardPolicy:
-                                enum:
-                                - None
-                                - Subdomain
-                                - ""
-                                type: string
-                            type: object
-                        type: object
-                      tls:
-                        properties:
-                          secretName:
-                            type: string
-                        type: object
-                    type: object
                   template:
                     properties:
                       apiTimeout:
@@ -19453,8 +19329,6 @@ spec:
                   ironicAPIImage:
                     type: string
                   ironicConductorImage:
-                    type: string
-                  ironicInspectorImage:
                     type: string
                   ironicNeutronAgentImage:
                     type: string

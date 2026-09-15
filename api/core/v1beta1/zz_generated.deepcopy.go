@@ -577,11 +577,6 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.IronicInspectorImage != nil {
-		in, out := &in.IronicInspectorImage, &out.IronicInspectorImage
-		*out = new(string)
-		**out = **in
-	}
 	if in.IronicNeutronAgentImage != nil {
 		in, out := &in.IronicNeutronAgentImage, &out.IronicNeutronAgentImage
 		*out = new(string)
@@ -1008,7 +1003,6 @@ func (in *IronicSection) DeepCopyInto(out *IronicSection) {
 		(*in).DeepCopyInto(*out)
 	}
 	in.APIOverride.DeepCopyInto(&out.APIOverride)
-	in.InspectorOverride.DeepCopyInto(&out.InspectorOverride)
 	if in.ApplicationCredential != nil {
 		in, out := &in.ApplicationCredential, &out.ApplicationCredential
 		*out = new(ServiceAppCredSection)

@@ -252,7 +252,6 @@ type ContainerTemplate struct {
 	InfraRedisImage                   *string `json:"infraRedisImage,omitempty"`
 	IronicAPIImage                    *string `json:"ironicAPIImage,omitempty"`
 	IronicConductorImage              *string `json:"ironicConductorImage,omitempty"`
-	IronicInspectorImage              *string `json:"ironicInspectorImage,omitempty"`
 	IronicNeutronAgentImage           *string `json:"ironicNeutronAgentImage,omitempty"`
 	IronicPxeImage                    *string `json:"ironicPxeImage,omitempty"`
 	IronicPythonAgentImage            *string `json:"ironicPythonAgentImage,omitempty"`

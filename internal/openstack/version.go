@@ -167,7 +167,6 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			InfraRedisImage:               getImg(instance.Spec.CustomContainerImages.InfraRedisImage, defaults.InfraRedisImage),
 			IronicAPIImage:                getImg(instance.Spec.CustomContainerImages.IronicAPIImage, defaults.IronicAPIImage),
 			IronicConductorImage:          getImg(instance.Spec.CustomContainerImages.IronicConductorImage, defaults.IronicConductorImage),
-			IronicInspectorImage:          getImg(instance.Spec.CustomContainerImages.IronicInspectorImage, defaults.IronicInspectorImage),
 			IronicNeutronAgentImage:       getImg(instance.Spec.CustomContainerImages.IronicNeutronAgentImage, defaults.IronicNeutronAgentImage),
 			IronicPxeImage:                getImg(instance.Spec.CustomContainerImages.IronicPxeImage, defaults.IronicPxeImage),
 			IronicPythonAgentImage:        getImg(instance.Spec.CustomContainerImages.IronicPythonAgentImage, defaults.IronicPythonAgentImage),

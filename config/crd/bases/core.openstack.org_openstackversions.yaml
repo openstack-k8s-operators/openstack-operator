@@ -151,8 +151,6 @@ spec:
                     type: string
                   ironicConductorImage:
                     type: string
-                  ironicInspectorImage:
-                    type: string
                   ironicNeutronAgentImage:
                     type: string
                   ironicPxeImage:
@@ -395,8 +393,6 @@ spec:
                       type: string
                     ironicConductorImage:
                       type: string
-                    ironicInspectorImage:
-                      type: string
                     ironicNeutronAgentImage:
                       type: string
                     ironicPxeImage:
@@ -594,8 +590,6 @@ spec:
                   ironicAPIImage:
                     type: string
                   ironicConductorImage:
-                    type: string
-                  ironicInspectorImage:
                     type: string
                   ironicNeutronAgentImage:
                     type: string
@@ -814,8 +808,6 @@ spec:
                     ironicAPIImage:
                       type: string
                     ironicConductorImage:
-                      type: string
-                    ironicInspectorImage:
                       type: string
                     ironicNeutronAgentImage:
                       type: string

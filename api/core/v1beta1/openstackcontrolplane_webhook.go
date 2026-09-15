@@ -1050,9 +1050,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Ironic.Template.Default()
 
 		initializeOverrideSpec(&r.Spec.Ironic.APIOverride.Route, true)
-		initializeOverrideSpec(&r.Spec.Ironic.InspectorOverride.Route, true)
 		r.Spec.Ironic.Template.SetDefaultRouteAnnotations(r.Spec.Ironic.APIOverride.Route.Annotations)
-		r.Spec.Ironic.Template.SetDefaultInspectorRouteAnnotations(r.Spec.Ironic.InspectorOverride.Route.Annotations)
 	}
 
 	// Keystone

@@ -36,15 +36,11 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition)
 		instance.Status.ContainerImages.IronicAPIImage = nil
 		instance.Status.ContainerImages.IronicConductorImage = nil
-		instance.Status.ContainerImages.IronicInspectorImage = nil
 		instance.Status.ContainerImages.IronicNeutronAgentImage = nil
 		instance.Status.ContainerImages.IronicPxeImage = nil
 		instance.Status.ContainerImages.IronicPythonAgentImage = nil
-		// Clean up AC CRs when service is disabled (ironic has two: ironic and ironic-inspector)
+		// Clean up AC CRs when service is disabled
 		if err := CleanupApplicationCredentialForService(ctx, helper, instance, ironic.Name); err != nil {
-			return ctrl.Result{}, err
-		}
-		if err := CleanupApplicationCredentialForService(ctx, helper, instance, "ironic-inspector"); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
@@ -95,14 +91,6 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Ironic.Template.IronicAPI.Override.Service[endpointType],
 				ironic.Name+"-api")
-
-		if instance.Spec.Ironic.Template.IronicInspector.Override.Service == nil {
-			instance.Spec.Ironic.Template.IronicInspector.Override.Service = map[service.Endpoint]service.RoutedOverrideSpec{}
-		}
-		instance.Spec.Ironic.Template.IronicInspector.Override.Service[endpointType] =
-			AddServiceOpenStackOperatorLabel(
-				instance.Spec.Ironic.Template.IronicInspector.Override.Service[endpointType],
-				ironic.Name+"-inspector")
 	}
 
 	// When component services got created check if there is the need to create a route
@@ -115,17 +103,13 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Ironic.Template.IronicAPI.TLS = ironic.Spec.IronicAPI.TLS
-		instance.Spec.Ironic.Template.IronicInspector.TLS = ironic.Spec.IronicInspector.TLS
 	}
 	instance.Spec.Ironic.Template.IronicAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
-	instance.Spec.Ironic.Template.IronicInspector.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 
 	// Application Credential Management (Day-2 operation)
-	// Ironic has 2 users: ironic (main service) and ironic-inspector
 	ironicReady := ironic.Status.Conditions != nil && ironic.Status.ObservedGeneration == ironic.Generation && ironic.IsReady()
 
 	// Apply same fallback logic as in CreateOrPatch to avoid passing empty values to AC
-	// Both ironic and ironic-inspector share the same secret
 	ironicSecret := instance.Spec.Ironic.Template.Secret
 	if ironicSecret == "" {
 		ironicSecret = instance.Spec.Secret
@@ -133,8 +117,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 
 	// Always reconcile AC - EnsureApplicationCredentialForService checks cluster state and handles the full AC lifecycle.
 	if instance.Spec.Ironic.ApplicationCredential != nil ||
-		instance.Spec.Ironic.Template.Auth.ApplicationCredentialSecret != "" ||
-		instance.Spec.Ironic.Template.IronicInspector.Auth.ApplicationCredentialSecret != "" {
+		instance.Spec.Ironic.Template.Auth.ApplicationCredentialSecret != "" {
 
 		// AC for main ironic service
 		ironicACSecretName, acResult, err := EnsureApplicationCredentialForService(
@@ -162,33 +145,6 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		// - If AC disabled: returns ""
 		// - If AC enabled and ready: returns the AC secret name
 		instance.Spec.Ironic.Template.Auth.ApplicationCredentialSecret = ironicACSecretName
-
-		// AC for ironic-inspector (separate user, separate AC, but shares the same secret as ironic)
-		inspectorACSecretName, inspectorACResult, err := EnsureApplicationCredentialForService(
-			ctx,
-			helper,
-			instance,
-			"ironic-inspector",
-			ironicReady,
-			ironicSecret, // Inspector shares the same secret as ironic
-			instance.Spec.Ironic.Template.IronicInspector.PasswordSelectors.Service,
-			instance.Spec.Ironic.Template.IronicInspector.ServiceUser,
-			instance.Spec.Ironic.ApplicationCredential,
-			false,
-		)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		// If AC is not ready, return immediately without updating the service CR
-		if (inspectorACResult != ctrl.Result{}) {
-			return inspectorACResult, nil
-		}
-
-		// Set ApplicationCredentialSecret for ironic-inspector based on what the helper returned:
-		// - If AC disabled: returns ""
-		// - If AC enabled and ready: returns the AC secret name
-		instance.Spec.Ironic.Template.IronicInspector.Auth.ApplicationCredentialSecret = inspectorACSecretName
 	}
 
 	// Ironic API
@@ -228,50 +184,12 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Ironic.Template.IronicAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	// Ironic Inspector
-	svcs, err = service.GetServicesListWithLabel(
-		ctx,
-		helper,
-		instance.Namespace,
-		GetServiceOpenStackOperatorLabel(ironic.Name+"-inspector"),
-	)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	// make sure to get to EndpointConfig when all service got created
-	if len(svcs.Items) == len(instance.Spec.Ironic.Template.IronicInspector.Override.Service) {
-		endpointDetails, ctrlResult, err := EnsureEndpointConfig(
-			ctx,
-			instance,
-			helper,
-			ironic,
-			svcs,
-			instance.Spec.Ironic.Template.IronicInspector.Override.Service,
-			instance.Spec.Ironic.InspectorOverride,
-			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
-			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Ironic.Template.IronicInspector.TLS,
-		)
-		if err != nil {
-			return ctrlResult, err
-		} else if (ctrlResult != ctrl.Result{}) {
-			return ctrlResult, nil
-		}
-		// set service overrides
-		instance.Spec.Ironic.Template.IronicInspector.Override.Service = endpointDetails.GetEndpointServiceOverrides()
-		// update TLS settings with cert secret
-		instance.Spec.Ironic.Template.IronicInspector.TLS.API.Public.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointPublic)
-		instance.Spec.Ironic.Template.IronicInspector.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
-	}
-
 	Log.Info("Reconciling Ironic", "Ironic.Namespace", instance.Namespace, "Ironic.Name", "ironic")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ironic, func() error {
 		instance.Spec.Ironic.Template.DeepCopyInto(&ironic.Spec.IronicSpecCore)
 
 		ironic.Spec.Images.API = *version.Status.ContainerImages.IronicAPIImage
 		ironic.Spec.Images.Conductor = *version.Status.ContainerImages.IronicConductorImage
-		ironic.Spec.Images.Inspector = *version.Status.ContainerImages.IronicInspectorImage
 		ironic.Spec.Images.NeutronAgent = *version.Status.ContainerImages.IronicNeutronAgentImage
 		ironic.Spec.Images.Pxe = *version.Status.ContainerImages.IronicPxeImage
 		ironic.Spec.Images.IronicPythonAgent = *version.Status.ContainerImages.IronicPythonAgentImage
@@ -304,7 +222,6 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		Log.Info("Ironic ready condition is true")
 		instance.Status.ContainerImages.IronicAPIImage = version.Status.ContainerImages.IronicAPIImage
 		instance.Status.ContainerImages.IronicConductorImage = version.Status.ContainerImages.IronicConductorImage
-		instance.Status.ContainerImages.IronicInspectorImage = version.Status.ContainerImages.IronicInspectorImage
 		instance.Status.ContainerImages.IronicNeutronAgentImage = version.Status.ContainerImages.IronicNeutronAgentImage
 		instance.Status.ContainerImages.IronicPxeImage = version.Status.ContainerImages.IronicPxeImage
 		instance.Status.ContainerImages.IronicPythonAgentImage = version.Status.ContainerImages.IronicPythonAgentImage
@@ -339,7 +256,6 @@ func IronicImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackCo
 	if controlPlane.Spec.Ironic.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.IronicAPIImage, version.Status.ContainerImages.IronicAPIImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicConductorImage, version.Status.ContainerImages.IronicConductorImage) ||
-			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicInspectorImage, version.Status.ContainerImages.IronicInspectorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicNeutronAgentImage, version.Status.ContainerImages.IronicNeutronAgentImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPxeImage, version.Status.ContainerImages.IronicPxeImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.IronicPythonAgentImage, version.Status.ContainerImages.IronicPythonAgentImage) {
