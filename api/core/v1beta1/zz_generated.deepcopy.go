@@ -47,7 +47,7 @@ import (
 	swift_operatorapiv1beta1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetry_operatorapiv1beta1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	watcher_operatorapiv1beta1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -1780,6 +1780,11 @@ func (in *ServiceDefaults) DeepCopyInto(out *ServiceDefaults) {
 	}
 	if in.NeutronWsgi != nil {
 		in, out := &in.NeutronWsgi, &out.NeutronWsgi
+		*out = new(string)
+		**out = **in
+	}
+	if in.OVNHardenedOVSSecurityContext != nil {
+		in, out := &in.OVNHardenedOVSSecurityContext, &out.OVNHardenedOVSSecurityContext
 		*out = new(string)
 		**out = **in
 	}

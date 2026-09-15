@@ -260,6 +260,8 @@ spec:
                       type: string
                     neutronWsgi:
                       type: string
+                    ovnHardenedOVSSecurityContext:
+                      type: string
                     rabbitmqVersion:
                       type: string
                   type: object
@@ -702,6 +704,8 @@ spec:
                   manilaSharev1:
                     type: string
                   neutronWsgi:
+                    type: string
+                  ovnHardenedOVSSecurityContext:
                     type: string
                   rabbitmqVersion:
                     type: string

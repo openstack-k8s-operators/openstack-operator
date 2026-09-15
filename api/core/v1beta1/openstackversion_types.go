@@ -304,6 +304,7 @@ type ServiceDefaults struct {
 	GlanceLocationAPI *string `json:"glanceLocationAPI,omitempty"`
 	ManilaSharev1   *string `json:"manilaSharev1,omitempty"`
 	NeutronWsgi     *string `json:"neutronWsgi,omitempty"`
+	OVNHardenedOVSSecurityContext *string `json:"ovnHardenedOVSSecurityContext,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
