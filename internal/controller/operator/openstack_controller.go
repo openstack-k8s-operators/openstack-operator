@@ -732,6 +732,7 @@ func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *oper
 
 func (r *OpenStackReconciler) applyCRDs(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
 	data := bindata.MakeRenderData()
+	data.Data["OperatorNamespace"] = instance.Namespace
 	return r.renderAndApply(ctx, instance, data, "crds", false)
 }
 
