@@ -1,0 +1,78 @@
+name: Check CRD Webhook Coverage
+
+on:
+  pull_request:
+    paths:
+      - 'config/crd/bases/**'
+      - 'config/crd/patches/**'
+      - 'config/crd/kustomization.yaml'
+
+jobs:
+  check-webhook-patches:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check all CRDs have conversion webhook patches
+        run: |
+          set -e
+
+          echo "Checking that all openstack-operator CRDs have webhook + CA-injection patches..."
+
+          MISSING_PATCHES=0
+
+          # Check each CRD in config/crd/bases/
+          for crd_file in config/crd/bases/*.yaml; do
+            # Skip if not a file or if it's the commented-out openstacks.yaml
+            [[ ! -f "$crd_file" ]] && continue
+            basename=$(basename "$crd_file")
+            [[ "$basename" == "operator.openstack.org_openstacks.yaml" ]] && continue
+
+            # Extract CRD name (e.g., "core.openstack.org_openstackcontrolplanes")
+            crd_name="${basename%.yaml}"
+
+            # Check for webhook patch
+            webhook_patch="config/crd/patches/webhook_in_${crd_name}.yaml"
+            if [[ ! -f "$webhook_patch" ]]; then
+              echo "ERROR: Missing webhook patch for $basename"
+              echo "       Expected: $webhook_patch"
+              MISSING_PATCHES=1
+            fi
+
+            # Check for CA injection patch
+            cainjection_patch="config/crd/patches/cainjection_in_${crd_name}.yaml"
+            if [[ ! -f "$cainjection_patch" ]]; then
+              echo "ERROR: Missing CA injection patch for $basename"
+              echo "       Expected: $cainjection_patch"
+              MISSING_PATCHES=1
+            fi
+
+            # Check that patches are referenced in kustomization.yaml (and not commented out)
+            if ! grep -q "^- path: patches/webhook_in_${crd_name}.yaml" config/crd/kustomization.yaml; then
+              echo "ERROR: Webhook patch for $basename not referenced (or commented out) in kustomization.yaml"
+              MISSING_PATCHES=1
+            fi
+
+            if ! grep -q "^- path: patches/cainjection_in_${crd_name}.yaml" config/crd/kustomization.yaml; then
+              echo "ERROR: CA injection patch for $basename not referenced (or commented out) in kustomization.yaml"
+              MISSING_PATCHES=1
+            fi
+          done
+
+          if [[ $MISSING_PATCHES -eq 1 ]]; then
+            echo ""
+            echo "One or more CRDs are missing conversion webhook patches."
+            echo "For each CRD in config/crd/bases/, you must create:"
+            echo "  1. config/crd/patches/webhook_in_<crd>.yaml"
+            echo "  2. config/crd/patches/cainjection_in_<crd>.yaml"
+            echo "  3. Reference both in config/crd/kustomization.yaml"
+            echo ""
+            echo "See existing patches for examples."
+            exit 1
+          fi
+
+          echo "✓ All CRDs have conversion webhook patches"
