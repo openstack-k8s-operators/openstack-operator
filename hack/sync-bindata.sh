@@ -44,12 +44,8 @@ cat $CSV_FILENAME | $LOCAL_BINARIES/yq -r ".spec.webhookdefinitions.[] | select(
 }
 
 
-function write_webhooks {
-local CSV_FILENAME=$1
-local OPERATOR_NAME=$2
-
-MUTATING_WEBHOOKS=$(extract_webhooks "$CSV_FILENAME" "$OPERATOR_NAME" "MutatingAdmissionWebhook")
-VALIDATING_WEBHOOKS=$(extract_webhooks "$CSV_FILENAME" "$OPERATOR_NAME" "ValidatingAdmissionWebhook")
+function write_webhook_serving_resources {
+local OPERATOR_NAME=$1
 
 cat > operator/$OPERATOR_NAME-webhooks.yaml <<EOF_CAT
 apiVersion: v1
@@ -95,6 +91,21 @@ spec:
     algorithm: ECDSA
     size: 256
   secretName: $OPERATOR_NAME-webhook-server-cert
+EOF_CAT
+
+}
+
+
+function write_webhooks {
+local CSV_FILENAME=$1
+local OPERATOR_NAME=$2
+
+MUTATING_WEBHOOKS=$(extract_webhooks "$CSV_FILENAME" "$OPERATOR_NAME" "MutatingAdmissionWebhook")
+VALIDATING_WEBHOOKS=$(extract_webhooks "$CSV_FILENAME" "$OPERATOR_NAME" "ValidatingAdmissionWebhook")
+
+write_webhook_serving_resources "$OPERATOR_NAME"
+
+cat >> operator/$OPERATOR_NAME-webhooks.yaml <<EOF_CAT
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
@@ -133,6 +144,34 @@ EOF_CAT
 
 }
 
+
+# Returns 0 if any CRD owned by the CSV has spec.conversion.strategy: Webhook
+function csv_has_conversion_crd {
+local CSV_FILE="$1"
+local CRD_LIST
+if ! CRD_LIST=$($LOCAL_BINARIES/yq -r '.spec.customresourcedefinitions.owned[]?.name' "$CSV_FILE"); then
+    echo "ERROR: csv_has_conversion_crd: failed to parse CRD list from $CSV_FILE" >&2
+    return 2
+fi
+while IFS= read -r CRD_FULLNAME; do
+    [[ -z "$CRD_FULLNAME" ]] && continue
+    local RESOURCE="${CRD_FULLNAME%%.*}"
+    local GROUP="${CRD_FULLNAME#*.}"
+    local CRD_FILE="manifests/${GROUP}_${RESOURCE}.yaml"
+    if [[ -f "$CRD_FILE" ]]; then
+        local STRATEGY
+        if ! STRATEGY=$(cat "$CRD_FILE" | $LOCAL_BINARIES/yq -r '.spec.conversion.strategy // ""'); then
+            echo "ERROR: csv_has_conversion_crd: failed to parse conversion strategy from $CRD_FILE" >&2
+            return 2
+        fi
+        [[ "$STRATEGY" == "Webhook" ]] && return 0
+    else
+        echo "WARNING: csv_has_conversion_crd: CRD file not found: $CRD_FILE (owned by $CSV_FILE)" >&2
+    fi
+done <<< "$CRD_LIST"
+return 1
+}
+
 if ! BUNDLES="$(hack/pin-bundle-images.sh)"; then
     exit 1
 fi
@@ -168,6 +207,17 @@ for X in $(ls manifests/*clusterserviceversion.yaml); do
 
 if [[ "$OPERATOR_NAME" == "infra-operator" || "$OPERATOR_NAME" == "openstack-baremetal-operator" ]]; then
     write_webhooks "$X" "$OPERATOR_NAME"
+else
+    HAS_CONVERSION=0
+    csv_has_conversion_crd "$X" || HAS_CONVERSION=$?
+    if [[ $HAS_CONVERSION -eq 2 ]]; then
+        echo "FATAL: parse error checking conversion webhook for $OPERATOR_NAME" >&2
+        exit 1
+    elif [[ $HAS_CONVERSION -eq 0 ]]; then
+        # Conversion operator: stage only the serving Service + Certificate.
+        # Admission webhook configs are not registered (CRs managed by OSCP upstream webhook, not direct users).
+        write_webhook_serving_resources "$OPERATOR_NAME"
+    fi
 fi
 
 # cert-manager and Service resources go into bindata/services/ for runtime
