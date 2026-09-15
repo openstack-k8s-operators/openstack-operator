@@ -57,8 +57,9 @@ import (
 // OpenStackReconciler reconciles a OpenStack object
 type OpenStackReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Kclient kubernetes.Interface
+	Scheme             *runtime.Scheme
+	Kclient            kubernetes.Interface
+	webhookOperatorSet map[string]bool // short op names with a bindata webhook manifest; populated once at startup
 }
 
 // GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
@@ -550,20 +551,82 @@ func containerImageMatch(instance *operatorv1beta1.OpenStack) bool {
 	return false
 }
 
-func isWebhookEndpoint(name string) bool {
-	// NOTE: this is a static list for all operators with webhooks enabled
-	endpointNames := []string{"openstack-operator-webhook-service", "infra-operator-webhook-service", "openstack-baremetal-operator-webhook-service"}
-	for _, prefix := range endpointNames {
-		if strings.HasPrefix(name, prefix) {
-			return true
+// loadWebhookOperatorSet globs bindata/operator/*-webhooks.yaml once at startup and returns
+// a set of short operator names (e.g. "keystone", "infra") that have a webhook manifest.
+// Returns empty set on errors (safe fallback: no dynamic webhook operators configured).
+func loadWebhookOperatorSet(ctx context.Context, bindir string) map[string]bool {
+	log := ctrl.LoggerFrom(ctx)
+	result := map[string]bool{}
+	operatorDir := filepath.Join(bindir, "operator")
+
+	// Validate bindata directory exists
+	if _, err := os.Stat(operatorDir); os.IsNotExist(err) {
+		log.Info("bindata operator directory not found, no dynamic webhook operators will be configured", "dir", operatorDir)
+		return result
+	} else if err != nil {
+		log.Error(err, "failed to check bindata operator directory", "dir", operatorDir)
+		return result
+	}
+
+	// Glob webhook manifests
+	files, err := filepath.Glob(filepath.Join(operatorDir, "*-webhooks.yaml"))
+	if err != nil {
+		log.Error(err, "failed to glob webhook manifests", "dir", operatorDir)
+		return result
+	}
+
+	if len(files) == 0 {
+		log.Info("no webhook manifests found in bindata", "dir", operatorDir)
+		return result
+	}
+
+	for _, f := range files {
+		base := filepath.Base(f)
+		opName := strings.TrimSuffix(base, "-webhooks.yaml") // e.g. "keystone-operator"
+		shortName := strings.TrimSuffix(opName, "-operator") // e.g. "keystone"
+		result[shortName] = true
+	}
+	log.Info("loaded webhook operator set", "count", len(result), "operators", result)
+	return result
+}
+
+// webhookServiceNames returns the expected webhook endpoint service names derived from
+// the operator's cached webhook set, plus the openstack-operator itself.
+func (r *OpenStackReconciler) webhookServiceNames() []string {
+	names := []string{"openstack-operator-webhook-service"}
+	for shortName := range r.webhookOperatorSet {
+		names = append(names, shortName+"-operator-webhook-service")
+	}
+	return names
+}
+
+func matchWebhookService(endpointName string, serviceNames []string) (string, bool) {
+	for _, svc := range serviceNames {
+		if strings.HasPrefix(endpointName, svc) {
+			return svc, true
 		}
 	}
-	return false
+	return "", false
 }
 
 // checkServiceEndpoints -
 func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instance *operatorv1beta1.OpenStack) (ctrl.Result, error) {
 	Log := r.GetLogger(ctx)
+
+	expectedWebhookSvcs := r.webhookServiceNames()
+	validatedSvcs := map[string]bool{}
+
+	// Pre-filter disabled services to avoid requeuing when they have no EndpointSlice
+	for _, svc := range expectedWebhookSvcs {
+		for _, op := range instance.Spec.OperatorOverrides {
+			if svc == op.Name+"-operator-webhook-service" &&
+				op.Replicas != nil && *op.Replicas == 0 {
+				Log.Info("Webhook service disabled, skipping endpoint check", "service", svc)
+				validatedSvcs[svc] = true
+				break
+			}
+		}
+	}
 
 	endpointSliceList := &discoveryv1.EndpointSliceList{}
 	err := r.List(ctx, endpointSliceList, &client.ListOptions{Namespace: instance.Namespace})
@@ -578,37 +641,65 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 	for _, endpointSlice := range endpointSliceList.Items {
 		endpointSliceName := endpointSlice.GetName()
 
-		if isWebhookEndpoint(endpointSliceName) {
-			// is deployment disabled ?
-			disabled := false
-			for _, op := range instance.Spec.OperatorOverrides {
-				if strings.HasPrefix(endpointSliceName, op.Name+"-operator") &&
-					op.Replicas != nil && *op.Replicas == 0 {
-
-					disabled = true
-					Log.Info(fmt.Sprintf("Webhook %s disabled, skipping endpoint slice check", endpointSliceName), "name", endpointSlice.GetName())
-					break
-				}
-			}
-			if disabled {
+		if matchedSvc, ok := matchWebhookService(endpointSliceName, expectedWebhookSvcs); ok {
+			// Skip if already validated (e.g., disabled)
+			if validatedSvcs[matchedSvc] {
 				continue
 			}
 
+			isOwnWebhook := matchedSvc == "openstack-operator-webhook-service"
+
 			if len(endpointSlice.Endpoints) == 0 {
-				Log.Info("Webhook endpoint not configured. Requeuing...", "name", endpointSlice.GetName())
-				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+				if isOwnWebhook {
+					Log.Info("Webhook endpoint not configured. Requeuing...", "name", endpointSlice.GetName())
+					return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+				}
+				Log.Info("Service operator webhook endpoint not configured (non-blocking)", "name", endpointSlice.GetName())
+				continue
 			}
 			for _, endpoint := range endpointSlice.Endpoints {
 				if len(endpoint.Addresses) == 0 {
-					Log.Info("Webhook endpoint addresses aren't healthy. Requeuing...", "name", endpointSlice.GetName())
-					return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+					if isOwnWebhook {
+						Log.Info("Webhook endpoint addresses aren't healthy. Requeuing...", "name", endpointSlice.GetName())
+						return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+					}
+					Log.Info("Service operator webhook endpoint addresses aren't healthy (non-blocking)", "name", endpointSlice.GetName())
+					continue
 				}
-				bFalse := false
-				if endpoint.Conditions.Ready == &bFalse || endpoint.Conditions.Serving == &bFalse {
-					Log.Info("Webhook endpoint addresses aren't serving. Requeuing...", "name", endpointSlice.GetName())
-					return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+				if endpoint.Conditions.Ready != nil && !*endpoint.Conditions.Ready {
+					if isOwnWebhook {
+						Log.Info("Webhook endpoint not ready. Requeuing...", "name", endpointSlice.GetName())
+						return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+					}
+					Log.Info("Service operator webhook endpoint not ready (non-blocking)", "name", endpointSlice.GetName())
+					continue
+				}
+				if endpoint.Conditions.Serving != nil && !*endpoint.Conditions.Serving {
+					if isOwnWebhook {
+						Log.Info("Webhook endpoint not serving. Requeuing...", "name", endpointSlice.GetName())
+						return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+					}
+					Log.Info("Service operator webhook endpoint not serving (non-blocking)", "name", endpointSlice.GetName())
+					continue
 				}
 			}
+			validatedSvcs[matchedSvc] = true
+		}
+	}
+
+	// Ensure openstack-operator's own webhook endpoint is validated (hard requirement)
+	// Service operator webhooks are optional - they're dormant until v1beta2 is added,
+	// and a misconfigured service operator webhook shouldn't block the entire OpenStack deployment.
+	ownWebhookSvc := "openstack-operator-webhook-service"
+	if !validatedSvcs[ownWebhookSvc] {
+		Log.Info("OpenStack operator webhook endpoint not found. Requeuing...", "service", ownWebhookSvc)
+		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+	}
+
+	// Warn about missing service operator webhooks but don't block
+	for _, svc := range expectedWebhookSvcs {
+		if svc != ownWebhookSvc && !validatedSvcs[svc] {
+			Log.Info("Service operator webhook endpoint not found (non-blocking - dormant until v1beta2)", "service", svc)
 		}
 	}
 
@@ -726,7 +817,7 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
 					relatedImagesEnv...)
 			case operatorv1beta1.OpenStackBaremetalOperatorName:
-				// enable webhooks on the openstack-operator
+				// enable webhooks on the openstack-baremetal-operator
 				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
 					corev1.EnvVar{
 						Name:  "ENABLE_WEBHOOKS",
@@ -743,11 +834,15 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 						Value: "true",
 					})
 			default:
-				// disable webhooks per default
+				// Enable webhooks for operators whose manifest was found at startup; others default false.
+				enableWebhooks := "false"
+				if r.webhookOperatorSet[op.Name] {
+					enableWebhooks = "true"
+				}
 				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
 					corev1.EnvVar{
 						Name:  "ENABLE_WEBHOOKS",
-						Value: "false",
+						Value: enableWebhooks,
 					})
 			}
 
@@ -1178,6 +1273,8 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	bindir := util.GetEnvVar("BASE_BINDATA", "/bindata")
+	r.webhookOperatorSet = loadWebhookOperatorSet(context.TODO(), bindir)
 	return ctrl.NewControllerManagedBy(mgr).
 		Owns(&appsv1.Deployment{}).
 		For(&operatorv1beta1.OpenStack{}).
