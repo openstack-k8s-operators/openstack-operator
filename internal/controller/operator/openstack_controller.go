@@ -733,7 +733,60 @@ func (r *OpenStackReconciler) applyManifests(ctx context.Context, instance *oper
 func (r *OpenStackReconciler) applyCRDs(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
 	data := bindata.MakeRenderData()
 	data.Data["OperatorNamespace"] = instance.Namespace
-	return r.renderAndApply(ctx, instance, data, "crds", false)
+
+	bindir := util.GetEnvVar("BASE_BINDATA", "/bindata")
+	objs, err := bindata.RenderDir(filepath.Join(bindir, "crds"), &data)
+	if err != nil {
+		return errors.Wrapf(err, "failed to render openstack-operator - crds")
+	}
+	if len(objs) == 0 {
+		return fmt.Errorf("no manifests rendered from %s/crds", bindir)
+	}
+	for _, obj := range objs {
+		if obj.GetName() == "" {
+			continue
+		}
+		if err := rewriteCRDNamespaces(obj, instance.Namespace); err != nil {
+			return err
+		}
+		if err := bindata.ApplyObject(ctx, r.Client, obj); err != nil {
+			return errors.Wrapf(err, "failed to apply object %v", obj)
+		}
+	}
+	return nil
+}
+
+// rewriteCRDNamespaces rewrites namespace-sensitive fields on CRDs at install time:
+//   - cert-manager.io/inject-ca-from annotation ("<source-ns>/<cert-name>" → "<ns>/<cert-name>")
+//   - spec.conversion.webhook.clientConfig.service.namespace
+//
+// CRDs shipped in operator bundles encode the operator's own install namespace;
+// openstack-operator installs into a different namespace, so both must be rewritten.
+func rewriteCRDNamespaces(obj *uns.Unstructured, ns string) error {
+	gvk := obj.GroupVersionKind()
+	if gvk.Group != "apiextensions.k8s.io" || gvk.Kind != "CustomResourceDefinition" {
+		return nil
+	}
+	const caInjectAnno = "cert-manager.io/inject-ca-from"
+	annotations := obj.GetAnnotations()
+	if v, ok := annotations[caInjectAnno]; ok {
+		if idx := strings.LastIndex(v, "/"); idx >= 0 {
+			annotations[caInjectAnno] = ns + v[idx:]
+			obj.SetAnnotations(annotations)
+		}
+	}
+	svcNs, found, err := uns.NestedString(obj.Object,
+		"spec", "conversion", "webhook", "clientConfig", "service", "namespace")
+	if err != nil {
+		return fmt.Errorf("failed to read service namespace on CRD %s: %w", obj.GetName(), err)
+	}
+	if found && svcNs != "" {
+		if err := uns.SetNestedField(obj.Object, ns,
+			"spec", "conversion", "webhook", "clientConfig", "service", "namespace"); err != nil {
+			return fmt.Errorf("failed to rewrite service namespace on CRD %s: %w", obj.GetName(), err)
+		}
+	}
+	return nil
 }
 
 func (r *OpenStackReconciler) applyServices(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
