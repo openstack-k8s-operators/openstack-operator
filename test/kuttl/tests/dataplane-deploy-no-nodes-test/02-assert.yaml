@@ -35,7 +35,6 @@ spec:
     metadata:
       annotations:
         k8s.v1.cni.cncf.io/networks: '[]'
-      creationTimestamp: null
       labels:
         app: openstackansibleee
         batch.kubernetes.io/job-name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
