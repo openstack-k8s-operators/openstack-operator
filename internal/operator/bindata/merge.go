@@ -29,6 +29,10 @@ func MergeMetadataForUpdate(current, updated *uns.Unstructured) error {
 // Some objects, such as Deployments and Services require
 // some semantic-aware updates
 func MergeObjectForUpdate(current, updated *uns.Unstructured) error {
+	if err := MergeCRDForUpdate(current, updated); err != nil {
+		return err
+	}
+
 	if err := MergeWebhookConfigurationForUpdate(current, updated); err != nil {
 		return err
 	}
@@ -53,6 +57,24 @@ func MergeObjectForUpdate(current, updated *uns.Unstructured) error {
 	}
 
 	return nil
+}
+
+// MergeCRDForUpdate preserves the cert-manager-injected caBundle in the CRD's
+// conversion webhook clientConfig on re-apply. Without this, each reconcile
+// would clear the caBundle that cert-manager wrote, breaking conversion TLS.
+func MergeCRDForUpdate(current, updated *uns.Unstructured) error {
+	gvk := updated.GroupVersionKind()
+	if gvk.Group != "apiextensions.k8s.io" || gvk.Kind != "CustomResourceDefinition" {
+		return nil
+	}
+	caBundle, found, err := uns.NestedString(current.Object, "spec", "conversion", "webhook", "clientConfig", "caBundle")
+	if err != nil {
+		return errors.Wrapf(err, "failed to read caBundle from CRD %s", updated.GetName())
+	}
+	if !found || caBundle == "" {
+		return nil
+	}
+	return uns.SetNestedField(updated.Object, caBundle, "spec", "conversion", "webhook", "clientConfig", "caBundle")
 }
 
 // MergeWebhookConfigurationForUpdate merges the caBundle from the current
