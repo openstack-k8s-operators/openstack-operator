@@ -76,6 +76,12 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// AnsibleJobNodeSelector to target subset of worker nodes running the ansible jobs
 	AnsibleJobNodeSelector map[string]string `json:"ansibleJobNodeSelector,omitempty"`
 
+	// UseParallelExecution enables parallel execution of services based on
+	// their dependsOn dependencies. When not set (default), services run
+	// sequentially in list order and service dependencies are ignored.
+	// +kubebuilder:default:=false
+	UseParallelExecution bool `json:"useParallelExecution,omitempty"`
+
 	// +kubebuilder:validation:MaxLength:=253
 	// +kubebuilder:default="openstack-aee-default-env"
 	// AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment
