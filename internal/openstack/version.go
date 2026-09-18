@@ -223,7 +223,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 }
 
 // InitializeOpenStackVersionServiceDefaults initializes OpenStackVersion CR with default container images
-func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1.ServiceDefaults {
+func InitializeOpenStackVersionServiceDefaults(ctx context.Context, containerDefaults *corev1beta1.ContainerDefaults) *corev1beta1.ServiceDefaults {
 	Log := GetLogger(ctx)
 	Log.Info("Initialize OpenStackVersion Service Defaults")
 
@@ -251,6 +251,8 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 	// MariaDBServerUpgradeReady=False/UpgradeVersionMismatch.  Set this to
 	// "10.11" in the same change that moves
 	// RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT to a 10.11 image.
+
+	defaults.IronicInspectInterface = ptr.To("inspector") // TODO: Override to agent for RHOSO 19+ in OpenStackVersion
 
 	return defaults
 }

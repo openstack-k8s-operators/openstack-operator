@@ -280,6 +280,17 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			ironic.Spec.Secret = instance.Spec.Secret
 		}
 
+		// Propagate inspect interface from ServiceDefaults if set.
+		// "inspector" for deployments with ironic < v32.0 and
+		// "agent" for deployments for ironic v32.0+.
+		if version.Status.ServiceDefaults.IronicInspectInterface != nil &&
+			*version.Status.ServiceDefaults.IronicInspectInterface != "" {
+			if ironic.Annotations == nil {
+				ironic.Annotations = map[string]string{}
+			}
+			ironic.Annotations[ironicv1.IronicInspectInterfaceAnnotation] = *version.Status.ServiceDefaults.IronicInspectInterface
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), ironic, helper.GetScheme())
 		if err != nil {
 			return err
