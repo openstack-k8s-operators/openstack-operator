@@ -24,7 +24,7 @@ spec:
         - name: RELATED_IMAGE_AODH_NOTIFIER_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-aodh-notifier:current-podified
         - name: RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT
-          value: registry.redhat.io/ubi9/httpd-24:latest
+          value: registry.redhat.io/ubi10/httpd-24:latest
         - name: RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-barbican-api:current-podified
         - name: RELATED_IMAGE_BARBICAN_KEYSTONE_LISTENER_IMAGE_URL_DEFAULT
