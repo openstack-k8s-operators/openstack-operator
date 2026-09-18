@@ -1768,6 +1768,11 @@ func (in *ServiceDefaults) DeepCopyInto(out *ServiceDefaults) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.MariadbVersion != nil {
+		in, out := &in.MariadbVersion, &out.MariadbVersion
+		*out = new(string)
+		**out = **in
+	}
 	if in.GlanceLocationAPI != nil {
 		in, out := &in.GlanceLocationAPI, &out.GlanceLocationAPI
 		*out = new(string)

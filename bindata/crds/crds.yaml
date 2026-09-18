@@ -22620,6 +22620,8 @@ spec:
                       type: string
                     manilaSharev1:
                       type: string
+                    mariadbVersion:
+                      type: string
                     neutronWsgi:
                       type: string
                     rabbitmqVersion:
@@ -23062,6 +23064,8 @@ spec:
                   glanceWsgi:
                     type: string
                   manilaSharev1:
+                    type: string
+                  mariadbVersion:
                     type: string
                   neutronWsgi:
                     type: string

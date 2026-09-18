@@ -299,11 +299,12 @@ type ContainerTemplate struct {
 // ServiceDefaults - struct that contains defaults for OSP services that can change over time
 // but are associated with a specific OpenStack release version
 type ServiceDefaults struct {
-	GlanceWsgi      *string `json:"glanceWsgi,omitempty"`
-	RabbitmqVersion *string `json:"rabbitmqVersion,omitempty"`
+	GlanceWsgi        *string `json:"glanceWsgi,omitempty"`
+	RabbitmqVersion   *string `json:"rabbitmqVersion,omitempty"`
+	MariadbVersion    *string `json:"mariadbVersion,omitempty"`
 	GlanceLocationAPI *string `json:"glanceLocationAPI,omitempty"`
-	ManilaSharev1   *string `json:"manilaSharev1,omitempty"`
-	NeutronWsgi     *string `json:"neutronWsgi,omitempty"`
+	ManilaSharev1     *string `json:"manilaSharev1,omitempty"`
+	NeutronWsgi       *string `json:"neutronWsgi,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
