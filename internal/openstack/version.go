@@ -67,6 +67,44 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 	if envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"] != nil {
 		defaults.InfraDnsmasqImage = envImages["RELATED_IMAGE_NEUTRON_API_IMAGE_URL_DEFAULT"]
 	}
+	// the following services share a single container image across multiple roles;
+	// reusing one RELATED_IMAGE per group avoids "Found conflicts when setting
+	// relatedImages" errors from operator-sdk generate bundle --use-image-digests
+	if envImages["RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT"] != nil {
+		defaults.AodhEvaluatorImage = envImages["RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT"]
+		defaults.AodhListenerImage = envImages["RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT"]
+		defaults.AodhNotifierImage = envImages["RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT"] != nil {
+		defaults.BarbicanKeystoneListenerImage = envImages["RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT"]
+		defaults.BarbicanWorkerImage = envImages["RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT"] != nil {
+		defaults.CeilometerNotificationImage = envImages["RELATED_IMAGE_CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT"] != nil {
+		defaults.CeilometerIpmiImage = envImages["RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_CLOUDKITTY_API_IMAGE_URL_DEFAULT"] != nil {
+		defaults.CloudKittyProcImage = envImages["RELATED_IMAGE_CLOUDKITTY_API_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_DESIGNATE_CENTRAL_IMAGE_URL_DEFAULT"] != nil {
+		defaults.DesignateMdnsImage = envImages["RELATED_IMAGE_DESIGNATE_CENTRAL_IMAGE_URL_DEFAULT"]
+		defaults.DesignateProducerImage = envImages["RELATED_IMAGE_DESIGNATE_CENTRAL_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT"] != nil {
+		defaults.HeatCfnapiImage = envImages["RELATED_IMAGE_HEAT_API_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT"] != nil {
+		defaults.OctaviaHealthmanagerImage = envImages["RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT"]
+		defaults.OctaviaHousekeepingImage = envImages["RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT"]
+	}
+	// s2i base image: a single watcher base image populates all three service images
+	if envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"] != nil {
+		defaults.WatcherAPIImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
+		defaults.WatcherApplierImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
+		defaults.WatcherDecisionEngineImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
+	}
 	// custom TEST_ images which aren't released downstream
 	if envImages["TEST_TOBIKO_IMAGE_URL_DEFAULT"] != nil {
 		defaults.TestTobikoImage = envImages["TEST_TOBIKO_IMAGE_URL_DEFAULT"]
