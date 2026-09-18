@@ -30,6 +30,7 @@ import (
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 
 	k8s_corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -49,6 +50,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	"github.com/openstack-k8s-operators/lib-common/modules/users"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
@@ -888,10 +890,30 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			// client pod exists
 			Eventually(func(g Gomega) {
+				osclient := GetOpenStackClient(names.OpenStackClientName)
+				role := &rbacv1.Role{}
+				err := th.K8sClient.Get(ctx, types.NamespacedName{
+					Name:      osclient.RbacResourceName() + "-role",
+					Namespace: names.OpenStackClientName.Namespace,
+				}, role)
+				g.Expect(err).ToNot(HaveOccurred())
+				g.Expect(role.Rules).To(ContainElement(rbacv1.PolicyRule{
+					APIGroups:     []string{"security.openshift.io"},
+					ResourceNames: []string{"nonroot-v2"},
+					Resources:     []string{"securitycontextconstraints"},
+					Verbs:         []string{"use"},
+				}))
+
 				pod := &k8s_corev1.Pod{}
-				err := th.K8sClient.Get(ctx, names.OpenStackClientName, pod)
+				err = th.K8sClient.Get(ctx, names.OpenStackClientName, pod)
 				g.Expect(pod).Should(Not(BeNil()))
 				g.Expect(err).ToNot(HaveOccurred())
+				g.Expect(pod.Spec.SecurityContext.RunAsUser).To(Equal(ptr.To(users.CloudAdminUID)))
+				g.Expect(pod.Spec.SecurityContext.RunAsGroup).To(Equal(ptr.To(users.CloudAdminGID)))
+				g.Expect(pod.Spec.SecurityContext.FSGroup).To(Equal(ptr.To(users.CloudAdminGID)))
+				g.Expect(pod.Spec.SecurityContext.SeccompProfile).To(Equal(&k8s_corev1.SeccompProfile{
+					Type: k8s_corev1.SeccompProfileTypeRuntimeDefault,
+				}))
 				vols := []string{}
 				for _, x := range pod.Spec.Volumes {
 					vols = append(vols, x.Name)
