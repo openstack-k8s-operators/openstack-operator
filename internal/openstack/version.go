@@ -243,6 +243,9 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 
 	defaults.NeutronWsgi = &trueString // enable WSGI (httpd/mod_wsgi + split neutron-rpc/neutron-worker Deployments) for neutron
 
+	agentString := "agent"
+	defaults.IronicInspectInterface = &agentString // inspector interface removed in ironic 32.0
+
 	return defaults
 }
 
