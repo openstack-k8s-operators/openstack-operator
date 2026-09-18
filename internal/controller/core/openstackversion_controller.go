@@ -217,7 +217,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if instance.Status.AvailableServiceDefaults == nil {
 		instance.Status.AvailableServiceDefaults = make(map[string]*corev1beta1.ServiceDefaults)
 	}
-	// store the service defaults for the currently available version
+	// store the service defaults for each available version
 	instance.Status.AvailableServiceDefaults[envAvailableVersion] = serviceDefaults
 
 	serviceDefVal, ok := instance.Status.AvailableServiceDefaults[instance.Spec.TargetVersion]

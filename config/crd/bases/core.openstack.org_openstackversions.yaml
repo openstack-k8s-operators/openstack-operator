@@ -256,6 +256,8 @@ spec:
                       type: string
                     glanceWsgi:
                       type: string
+                    ironicInspectInterface:
+                      type: string
                     manilaSharev1:
                       type: string
                     mariadbVersion:
@@ -700,6 +702,8 @@ spec:
                   glanceLocationAPI:
                     type: string
                   glanceWsgi:
+                    type: string
+                  ironicInspectInterface:
                     type: string
                   manilaSharev1:
                     type: string
