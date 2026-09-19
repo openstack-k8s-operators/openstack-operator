@@ -6,7 +6,7 @@ require (
 	github.com/cert-manager/cert-manager v1.18.6
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/onsi/ginkgo/v2 v2.32.1
-	github.com/onsi/gomega v1.43.0
+	github.com/onsi/gomega v1.43.1
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20260905071940-6e8b283bf1bf
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260912071816-e77e136f674d
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260905072300-48dbbdaefe30
@@ -95,7 +95,7 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.54.0 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
