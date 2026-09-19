@@ -20250,6 +20250,11 @@ spec:
                               type: string
                             type: array
                             x-kubernetes-list-type: atomic
+                          prometheusClientCertSecret:
+                            properties:
+                              secretName:
+                                type: string
+                            type: object
                           prometheusTls:
                             properties:
                               caBundleSecretName:
