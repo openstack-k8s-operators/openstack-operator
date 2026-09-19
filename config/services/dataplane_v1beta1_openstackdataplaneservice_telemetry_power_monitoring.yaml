@@ -15,5 +15,4 @@ spec:
   caCerts: combined-ca-bundle
   containerImageFields:
   - CeilometerIpmiImage
-  - EdpmKeplerImage
   edpmServiceType: telemetry-power-monitoring
