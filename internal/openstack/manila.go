@@ -153,7 +153,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.ManilaAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if instance.Spec.Manila.Template.NodeSelector == nil {
+	if instance.Spec.Manila.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Manila.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

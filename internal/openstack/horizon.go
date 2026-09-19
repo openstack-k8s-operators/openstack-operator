@@ -50,7 +50,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Horizon.Template = &horizonv1.HorizonSpecCore{}
 	}
 
-	if instance.Spec.Horizon.Template.NodeSelector == nil {
+	if instance.Spec.Horizon.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Horizon.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

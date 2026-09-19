@@ -2687,6 +2687,82 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("An OpenStackControlplane instance is created without nodeSelector", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+			// Intentionally do NOT set spec["nodeSelector"]
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+			Eventually(func(g Gomega) {
+				osversion := GetOpenStackVersion(names.OpenStackControlplaneName)
+				g.Expect(osversion).Should(Not(BeNil()))
+
+				th.ExpectCondition(
+					names.OpenStackVersionName,
+					ConditionGetterFunc(OpenStackVersionConditionGetter),
+					corev1.OpenStackVersionInitialized,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+			th.CreateSecret(types.NamespacedName{Name: "openstack-config-secret", Namespace: namespace}, map[string][]byte{"secure.yaml": []byte("foo")})
+			th.CreateConfigMap(types.NamespacedName{Name: "openstack-config", Namespace: namespace}, map[string]interface{}{"clouds.yaml": string("foo"), "OS_CLOUD": "default"})
+		})
+
+		It("does not set nodeSelector on sub-CRs", func() {
+			Eventually(func(g Gomega) {
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db.Spec.NodeSelector).To(BeNil())
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Spec.NodeSelector).To(BeNil())
+			}, timeout, interval).Should(Succeed())
+			Eventually(func(g Gomega) {
+				mc := infra.GetMemcached(names.MemcachedName)
+				g.Expect(mc.Spec.NodeSelector).To(BeNil())
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("does not cause spurious updates on sub-CRs when nodeSelector is unset", func() {
+			// Wait for initial reconciliation to settle
+			Eventually(func(g Gomega) {
+				mc := infra.GetMemcached(names.MemcachedName)
+				g.Expect(mc).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			// Record the current generation of each sub-CR
+			mcGen := infra.GetMemcached(names.MemcachedName).Generation
+			dbGen := mariadb.GetGalera(names.DBName).Generation
+			rmqGen := GetRabbitMQCluster(names.RabbitMQName).Generation
+
+			// Verify generation stays stable over multiple reconcile cycles.
+			// Before the fix, the nil-vs-pointer-to-nil-map mismatch in
+			// NodeSelector caused CreateOrPatch to detect a spurious diff and
+			// bump the generation on every reconcile (~1/second).
+			Consistently(func(g Gomega) {
+				mc := infra.GetMemcached(names.MemcachedName)
+				g.Expect(mc.Generation).To(Equal(mcGen))
+
+				db := mariadb.GetGalera(names.DBName)
+				g.Expect(db.Generation).To(Equal(dbGen))
+
+				rmq := GetRabbitMQCluster(names.RabbitMQName)
+				g.Expect(rmq.Generation).To(Equal(rmqGen))
+			}, time.Second*5, interval).Should(Succeed())
+		})
+	})
+
 	When("An OpenStackControlplane instance references a wrong topology", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
