@@ -206,7 +206,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			heat,
 			svcs,
 			instance.Spec.Heat.Template.HeatCfnAPI.Override.Service,
-			instance.Spec.Heat.CnfAPIOverride,
+			instance.Spec.Heat.CfnAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 			instance.Spec.Heat.Template.HeatCfnAPI.TLS,

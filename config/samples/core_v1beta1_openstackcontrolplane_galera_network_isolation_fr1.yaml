@@ -282,7 +282,7 @@ spec:
   heat:
     apiOverride:
       route: {}
-    cnfAPIOverride:
+    cfnAPIOverride:
       route: {}
     enabled: false
     template:
