@@ -1617,6 +1617,15 @@ spec:
           status:
             description: NovaCellStatus defines the observed state of NovaCell
             properties:
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash is the hash of the per-cell input Secret that
+                  all of this cell's child services (Conductor, Metadata, NoVNCProxy,
+                  Compute) have confirmed applied and rolled out with. It is only
+                  updated once all of them report readiness for this input, so the
+                  top-level Nova CR can correlate this cell's readiness with a specific
+                  applied input instead of relying on a possibly stale ReadyCondition.
+                type: string
               conditions:
                 description: Conditions
                 items:

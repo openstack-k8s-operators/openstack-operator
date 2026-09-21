@@ -387,6 +387,14 @@ spec:
           status:
             description: NovaSchedulerStatus defines the observed state of NovaScheduler
             properties:
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash is the hash of the input Secret consumed by the
+                  last StatefulSet rollout that has been confirmed ready. It is only
+                  updated once the StatefulSet is observed to be running with this
+                  input, so a parent CR can correlate readiness with a specific applied
+                  input instead of relying on a possibly stale ReadyCondition.
+                type: string
               conditions:
                 description: Conditions
                 items:
