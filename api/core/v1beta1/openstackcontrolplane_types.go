@@ -268,6 +268,16 @@ type TLSSection struct {
 
 	// +kubebuilder:validation:optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// InheritClusterProfile - Whether the OpenStack services should
+	// inherit the cluster-wide TLS security profile from the OpenShift
+	// APIServer. When false (the default), no profile is resolved or
+	// published and the services keep the built-in defaults shipped
+	// with lib-common.
+	// +kubebuilder:default=false
+	InheritClusterProfile bool `json:"inheritClusterProfile,omitempty"`
+
+	// +kubebuilder:validation:optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Secret containing any additional CA certificates, which should be added to deployment pods.
 	// If services get configured to use a custom cert/key, add the CA cert to validate those in this
 	// CA secret.
@@ -1242,6 +1252,16 @@ func (instance *OpenStackControlPlane) InitConditions() {
 	}
 	if instance.Spec.Watcher.Enabled {
 		cl.Set(condition.UnknownCondition(OpenStackControlPlaneWatcherReadyCondition, condition.InitReason, OpenStackControlPlaneWatcherReadyInitMessage))
+	}
+
+	// Init the TLS profile condition only when the control plane inherits the
+	// cluster profile. With inheritance off ReconcileTLSProfile removes it
+	// again, but it only gets that far on a full reconcile: an early return
+	// (minor update staging, CA requeue, first-pass finalizer) would otherwise
+	// persist an Unknown for a feature that is switched off, and drag the
+	// overall Ready condition down with it.
+	if instance.Spec.TLS.InheritClusterProfile {
+		cl.Set(condition.UnknownCondition(OpenStackControlPlaneTLSProfileReadyCondition, condition.InitReason, OpenStackControlPlaneTLSProfileReadyInitMessage))
 	}
 
 	// Init Topology condition if there's a reference

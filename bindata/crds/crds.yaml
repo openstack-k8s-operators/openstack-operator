@@ -19218,6 +19218,9 @@ spec:
                         default: true
                         type: boolean
                     type: object
+                  inheritClusterProfile:
+                    default: false
+                    type: boolean
                   podLevel:
                     default:
                       enabled: true
