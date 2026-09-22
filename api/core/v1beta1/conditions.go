@@ -108,6 +108,9 @@ const (
 	// OpenStackControlPlaneCustomTLSReadyCondition Status=True condition which indicates if custom TLS certificate secrets are configured and operational
 	OpenStackControlPlaneCustomTLSReadyCondition condition.Type = "OpenStackControlPlaneCustomTLSReadyCondition"
 
+	// OpenStackControlPlaneTLSProfileReadyCondition Status=True condition which indicates if the APIServer TLS profile has been resolved and the SSL profile ConfigMap created
+	OpenStackControlPlaneTLSProfileReadyCondition condition.Type = "OpenStackControlPlaneTLSProfileReady"
+
 	// OpenStackControlPlaneTelemetryReadyCondition Status=True condition which indicates if OpenStack Telemetry service is configured and operational
 	OpenStackControlPlaneTelemetryReadyCondition condition.Type = "OpenStackControlPlaneTelemetryReady"
 
@@ -488,6 +491,25 @@ const (
 
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCustomTLSReadyErrorMessage = "OpenStackControlPlane custom TLS cert secret %s error occured %s"
+
+	// OpenStackControlPlaneTLSProfileReadyInitMessage
+	OpenStackControlPlaneTLSProfileReadyInitMessage = "OpenStackControlPlane TLS profile not started"
+
+	// OpenStackControlPlaneTLSProfileReadyMessage
+	OpenStackControlPlaneTLSProfileReadyMessage = "OpenStackControlPlane TLS profile ConfigMap created"
+
+	// OpenStackControlPlaneTLSProfileReadyNoProfileMessage
+	OpenStackControlPlaneTLSProfileReadyNoProfileMessage = "OpenStackControlPlane TLS profile not declared by the cluster, using built-in defaults"
+
+	// OpenStackControlPlaneTLSProfileReadyErrorMessage
+	OpenStackControlPlaneTLSProfileReadyErrorMessage = "OpenStackControlPlane TLS profile error occurred %s"
+
+	// OpenStackControlPlaneTLSProfileReadyInvalidMessage - names both remedies,
+	// since only a human editing one of the two CRs can resolve it, and says the
+	// published profile stays, so an unresolvable one cannot widen TLS silently
+	OpenStackControlPlaneTLSProfileReadyInvalidMessage = "OpenStackControlPlane TLS profile cannot be resolved: %s. " +
+		"The last resolved profile, if any, stays in effect. " +
+		"Set spec.tls.profile to None, Inherit, Intermediate or Modern, or correct the TLS security profile on the cluster APIServer CR"
 
 	// OpenStackControlPlaneTestCMReadyErrorMessage
 	OpenStackControlPlaneTestCMReadyErrorMessage = "OpenStackControlPlane Test Operator CM error occured %s"
