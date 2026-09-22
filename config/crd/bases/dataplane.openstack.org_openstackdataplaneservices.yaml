@@ -116,6 +116,17 @@ spec:
                       x-kubernetes-map-type: atomic
                   type: object
                 type: array
+              dependsOn:
+                description: |-
+                  DependsOn lists EDPMServiceType or CR names that must complete before
+                  this service runs; if empty, the list predecessor is used instead.
+                  Entries referencing a service that is not part of the deployment's
+                  service list are ignored, so a service can be deployed on its own
+                  (e.g. via OpenStackDataPlaneDeployment spec.servicesOverride) without
+                  its prerequisites.
+                items:
+                  type: string
+                type: array
               deployOnAllNodeSets:
                 description: |-
                   DeployOnAllNodeSets - should the service be deploy across all nodesets

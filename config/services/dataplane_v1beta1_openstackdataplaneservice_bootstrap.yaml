@@ -6,3 +6,6 @@ spec:
   playbook: osp.edpm.bootstrap
   edpmServiceType: bootstrap
   caCerts: combined-ca-bundle
+  dependsOn:
+    - redhat
+    - download-cache
