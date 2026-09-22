@@ -11,10 +11,10 @@ require (
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20260921090038-2da0faa51b86
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20260921091538-7f28b424b2a7
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20260921090036-1be75de9368a
-	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260921091151-a3d9e0e099ee
+	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20260921100702-39c7e63256f2
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20260921085553-59c8be4e6c5e
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20260921093008-99efbdcf9d2e
-	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260921094051-877f45824c8e
+	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20260922074234-732c01da98d0
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20260921095541-9df26f06c330
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20260920095155-a193dedd4c06
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20260920095155-a193dedd4c06
@@ -22,7 +22,7 @@ require (
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20260921092302-77b4e6de3fa2
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20260921085552-005767eaac52
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20260921090811-4fca19db4c8c
-	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260921091918-81441e20cc4d
+	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20260922140051-5f8232376795
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260921091151-d35cadc3d360
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260921085553-a587d7c46860
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260921085205-321ec13ce39e
