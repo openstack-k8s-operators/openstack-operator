@@ -1370,6 +1370,13 @@ spec:
                           current project
                         type: string
                     type: object
+                  useStructuredMetadata:
+                    default: false
+                    description: |-
+                      UseStructuredMetadata enables Loki structured metadata filters for CloudKitty
+                      storage queries (Loki 3.0+). Only enable after all data stored without
+                      structured metadata has expired.
+                    type: boolean
                 type: object
               logging:
                 description: Logging - Parameters related to the logging

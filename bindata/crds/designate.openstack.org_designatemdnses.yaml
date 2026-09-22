@@ -407,6 +407,11 @@ spec:
           status:
             description: DesignateMdnsStatus defines the observed state of DesignateMdns
             properties:
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash - hash of the input secret names last confirmed
+                  as fully rolled out to the workload pods.
+                type: string
               conditions:
                 description: Conditions
                 items:

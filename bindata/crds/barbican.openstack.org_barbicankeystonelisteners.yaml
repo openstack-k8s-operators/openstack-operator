@@ -1061,6 +1061,10 @@ spec:
             description: BarbicanKeystoneListenerStatus defines the observed state
               of BarbicanKeystoneListener
             properties:
+              appliedInputSecretHash:
+                description: AppliedInputSecretHash - hash of input secret names last
+                  applied
+                type: string
               conditions:
                 description: Conditions
                 items:
@@ -1133,6 +1137,14 @@ spec:
                   type: array
                 description: NetworkAttachments status of the deployment pods
                 type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this service.
+                  If the observed generation is different than the spec generation, then the
+                  controller has not started processing the latest changes, and the status
+                  and its conditions are likely stale.
+                format: int64
+                type: integer
               readyCount:
                 description: |-
                   INSERT ADDITIONAL STATUS FIELD - define observed state of cluster

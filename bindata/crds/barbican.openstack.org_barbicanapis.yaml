@@ -1255,6 +1255,10 @@ spec:
                   type: string
                 description: API endpoint
                 type: object
+              appliedInputSecretHash:
+                description: AppliedInputSecretHash - hash of input secret names last
+                  applied
+                type: string
               conditions:
                 description: Conditions
                 items:
@@ -1327,6 +1331,14 @@ spec:
                   type: array
                 description: NetworkAttachments status of the deployment pods
                 type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration - the most recent generation observed for this service.
+                  If the observed generation is different than the spec generation, then the
+                  controller has not started processing the latest changes, and the status
+                  and its conditions are likely stale.
+                format: int64
+                type: integer
               readyCount:
                 description: ReadyCount of barbican API instances
                 format: int32

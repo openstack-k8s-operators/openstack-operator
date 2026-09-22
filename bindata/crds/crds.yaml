@@ -18114,6 +18114,9 @@ spec:
                               namespace:
                                 type: string
                             type: object
+                          useStructuredMetadata:
+                            default: false
+                            type: boolean
                         type: object
                       logging:
                         properties:
