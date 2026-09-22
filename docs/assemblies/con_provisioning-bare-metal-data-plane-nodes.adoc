@@ -347,7 +347,7 @@ spec:
   port: 6190
   osImage: my-custom-image.qcow2  # qcow2 file inside the container
   osContainerImageUrl: <your-registry>/my-custom-os-image:latest
-  apacheImageUrl: registry.redhat.io/ubi9/httpd-24:latest
+  apacheImageUrl: registry.redhat.io/ubi10/httpd-24:latest
   agentImageUrl: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
 ----
 
