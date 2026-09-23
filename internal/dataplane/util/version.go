@@ -66,6 +66,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmFrrImage = version.Status.ContainerImages.EdpmFrrImage
 		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmIscsidImage = version.Status.ContainerImages.EdpmIscsidImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmLogrotateCrondImage = version.Status.ContainerImages.EdpmLogrotateCrondImage
 		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmMultipathdImage = version.Status.ContainerImages.EdpmMultipathdImage
@@ -94,6 +95,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmFrrImage = dataplanev1.ContainerImages.EdpmFrrImage
 		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmIscsidImage = dataplanev1.ContainerImages.EdpmIscsidImage
+		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmLogrotateCrondImage = dataplanev1.ContainerImages.EdpmLogrotateCrondImage
 		//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 		containerImages.EdpmMultipathdImage = dataplanev1.ContainerImages.EdpmMultipathdImage

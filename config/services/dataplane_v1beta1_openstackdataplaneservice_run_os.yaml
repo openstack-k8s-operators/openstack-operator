@@ -4,8 +4,6 @@ metadata:
   name: run-os
 spec:
   playbook: osp.edpm.run_os
-  containerImageFields:
-  - EdpmLogrotateCrondImage
   edpmServiceType: run-os
   dependsOn:
     - configure-os
