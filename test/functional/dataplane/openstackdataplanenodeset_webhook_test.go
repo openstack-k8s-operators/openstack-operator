@@ -140,23 +140,21 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		})
 
 		It("Should block duplicate node declaration", func() {
-			Eventually(func(_ Gomega) string {
-				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
-				newNodeSetSpec["preProvisioned"] = true
-				newNodeSetSpec["nodes"] = map[string]interface{}{
-					"compute-0": map[string]interface{}{
-						"hostName": "compute-0",
-						"ansible": map[string]interface{}{
-							"ansibleHost": "192.168.122.100",
-						},
+			newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
+			newNodeSetSpec["preProvisioned"] = true
+			newNodeSetSpec["nodes"] = map[string]interface{}{
+				"compute-0": map[string]interface{}{
+					"hostName": "compute-0",
+					"ansible": map[string]interface{}{
+						"ansibleHost": "192.168.122.100",
 					},
-				}
-				newInstance := DefaultDataplaneNodeSetTemplate(types.NamespacedName{Name: "test-duplicate-node", Namespace: namespace}, newNodeSetSpec)
-				unstructuredObj := &unstructured.Unstructured{Object: newInstance}
-				_, err := controllerutil.CreateOrPatch(
-					th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
-				return fmt.Sprintf("%s", err)
-			}).Should(ContainSubstring("already exists in another cluster"))
+				},
+			}
+			newInstance := DefaultDataplaneNodeSetTemplate(types.NamespacedName{Name: "test-duplicate-node", Namespace: namespace}, newNodeSetSpec)
+			unstructuredObj := &unstructured.Unstructured{Object: newInstance}
+			err := th.K8sClient.Create(th.Ctx, unstructuredObj)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("already exists in another cluster"))
 		})
 
 		It("Should block NodeSets if they contain a duplicate ansibleHost", func() {
