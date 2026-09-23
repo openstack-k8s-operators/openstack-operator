@@ -26,7 +26,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20260921091151-d35cadc3d360
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20260921085553-a587d7c46860
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20260921085205-321ec13ce39e
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260921073055-0e9ed4c542f0
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260923074746-9b3285f764fb
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20260921070611-7b191e3a77c3
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.77.1-rhobs1 // indirect
 	github.com/rhobs/observability-operator v1.0.0 // indirect
