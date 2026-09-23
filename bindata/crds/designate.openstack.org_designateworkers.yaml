@@ -238,6 +238,11 @@ spec:
           status:
             description: DesignateWorkerStatus defines the observed state of DesignateWorker
             properties:
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash - hash of the input secret names last confirmed
+                  as fully rolled out to the workload pods.
+                type: string
               conditions:
                 description: Conditions
                 items:

@@ -1280,6 +1280,10 @@ spec:
           status:
             description: ManilaAPIStatus defines the observed state of ManilaAPI
             properties:
+              appliedInputSecretHash:
+                description: AppliedInputSecretHash - hash of input secret names last
+                  applied
+                type: string
               conditions:
                 description: Conditions
                 items:

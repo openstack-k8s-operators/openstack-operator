@@ -3008,6 +3008,12 @@ spec:
                   nova-metadata service
                 format: int32
                 type: integer
+              notificationsTransportURLSecret:
+                description: |-
+                  NotificationsTransportURLSecret is the name of the notifications
+                  transport URL secret nova is currently consuming and protecting
+                  with a consumer finalizer during credential rotation.
+                type: string
               observedGeneration:
                 description: ObservedGeneration - the most recent generation observed
                   for this service. If the observed generation is less than the spec
@@ -3027,6 +3033,12 @@ spec:
                   ready from nova-scheduler
                 format: int32
                 type: integer
+              transportURLSecret:
+                description: |-
+                  TransportURLSecret is the name of the transport URL secret nova is
+                  currently consuming and protecting with a consumer finalizer during
+                  credential rotation.
+                type: string
             type: object
         type: object
     served: true

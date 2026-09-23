@@ -251,6 +251,11 @@ spec:
           status:
             description: DesignateCentralStatus defines the observed state of DesignateCentral
             properties:
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash - hash of the input secret names last confirmed
+                  as fully rolled out to the workload pods.
+                type: string
               conditions:
                 description: Conditions
                 items:
