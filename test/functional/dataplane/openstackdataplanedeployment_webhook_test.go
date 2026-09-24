@@ -32,12 +32,23 @@ var _ = Describe("DataplaneDeployment Webhook", func() {
 			Expect(th.K8sClient.Update(th.Ctx, instance)).To(Succeed())
 			Expect(th.K8sClient.Delete(th.Ctx, instance)).To(Succeed())
 		})
+
+		// Let the deployment controller finish its initial reconcile before the
+		// tests set a synthetic status. The initial reconcile initializes the
+		// deployment conditions and would otherwise race with delete validation.
+		Eventually(func(g Gomega) {
+			instance := &dataplanev1.OpenStackDataPlaneDeployment{}
+			g.Expect(th.K8sClient.Get(th.Ctx, name, instance)).To(Succeed())
+			g.Expect(instance.Status.ObservedGeneration).To(Equal(instance.Generation))
+		}, timeout, interval).Should(Succeed())
 	}
 
 	setDeploymentRunning := func(name types.NamespacedName) {
 		Eventually(func(g Gomega) error {
 			instance := &dataplanev1.OpenStackDataPlaneDeployment{}
 			g.Expect(th.K8sClient.Get(th.Ctx, name, instance)).To(Succeed())
+			// Prevent the controller's delayed retry from overwriting this synthetic condition.
+			instance.Status.Deployed = true
 			instance.Status.Conditions = condition.Conditions{}
 			instance.Status.Conditions.MarkFalse(
 				condition.DeploymentReadyCondition,
@@ -53,6 +64,7 @@ var _ = Describe("DataplaneDeployment Webhook", func() {
 		Eventually(func(g Gomega) error {
 			instance := &dataplanev1.OpenStackDataPlaneDeployment{}
 			g.Expect(th.K8sClient.Get(th.Ctx, name, instance)).To(Succeed())
+			instance.Status.Deployed = true
 			instance.Status.Conditions = condition.Conditions{}
 			instance.Status.Conditions.MarkTrue(
 				condition.DeploymentReadyCondition,
