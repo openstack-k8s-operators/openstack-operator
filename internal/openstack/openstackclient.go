@@ -16,6 +16,9 @@ import (
 	"context"
 	"fmt"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
@@ -51,11 +54,61 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 		instance.Spec.OpenStackClient.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
+	// When the MCP sidecar is enabled and pod-level TLS is on, the control
+	// plane owns the MCP server's TLS certificate lifecycle (like every other
+	// ctlplane-managed cert) and passes the resulting secret name down to the
+	// OpenStackClient CR. The OpenStackClient controller only consumes it.
+	mcpCertSecretName := ""
+	mcpTemplate := instance.Spec.OpenStackClient.Template.MCP
+	if mcpTemplate != nil && mcpTemplate.Enabled && instance.Spec.TLS.PodLevel.Enabled {
+		clusterDomain := clusterdns.GetDNSClusterDomain()
+		mcpSvcName := openstackclient.Name + "-mcp"
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: instance.GetInternalIssuer(),
+			CertName:   mcpSvcName + "-tls",
+			Hostnames: []string{
+				fmt.Sprintf("%s.%s.svc", mcpSvcName, instance.Namespace),
+				fmt.Sprintf("%s.%s.svc.%s", mcpSvcName, instance.Namespace, clusterDomain),
+			},
+			Usages: []certmgrv1.KeyUsage{
+				certmgrv1.UsageKeyEncipherment,
+				certmgrv1.UsageDigitalSignature,
+				certmgrv1.UsageServerAuth,
+			},
+			Labels: map[string]string{ServiceCertSelector: ""},
+		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Internal.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore.Duration
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(ctx, helper, certRequest, nil)
+		if err != nil {
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1.OpenStackControlPlaneClientReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				corev1.OpenStackControlPlaneClientReadyErrorMessage,
+				err.Error()))
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
+		}
+		mcpCertSecretName = certSecret.Name
+	}
+
 	Log.Info("Reconciling OpenStackClient", "OpenStackClient.Namespace", instance.Namespace, "OpenStackClient.Name", openstackclient.Name)
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), openstackclient, func() error {
 		instance.Spec.OpenStackClient.Template.DeepCopyInto(&openstackclient.Spec.OpenStackClientSpecCore)
 
 		openstackclient.Spec.ContainerImage = *version.Status.ContainerImages.OpenstackClientImage
+		if version.Status.ContainerImages.OpenstackMcpImage != nil {
+			openstackclient.Spec.MCPContainerImage = *version.Status.ContainerImages.OpenstackMcpImage
+		} else {
+			openstackclient.Spec.MCPContainerImage = ""
+		}
+		openstackclient.Spec.MCPCertSecretName = mcpCertSecretName
 
 		if instance.Spec.TLS.Ingress.Enabled || instance.Spec.TLS.PodLevel.Enabled {
 			openstackclient.Spec.CaBundleSecretName = tls.CABundleSecret
@@ -85,6 +138,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 	if openstackclient.Status.ObservedGeneration == openstackclient.Generation && openstackclient.IsReady() {
 		Log.Info("OpenStackClient ready condition is true")
 		instance.Status.ContainerImages.OpenstackClientImage = version.Status.ContainerImages.OpenstackClientImage
+		instance.Status.ContainerImages.OpenstackMcpImage = version.Status.ContainerImages.OpenstackMcpImage
 		instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneClientReadyCondition, corev1.OpenStackControlPlaneClientReadyMessage)
 	} else {
 		// We want to mirror the condition of the highest priority from the OpenStackClient resource into the instance
@@ -115,6 +169,10 @@ func ClientImageMatch(ctx context.Context, controlPlane *corev1.OpenStackControl
 	//FIXME: (dprince) - OpenStackClientSection should have Enabled?
 	if !stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackClientImage, version.Status.ContainerImages.OpenstackClientImage) {
 		Log.Info("OpenStackClient images do not match", "controlPlane.Status.ContainerImages.OpenstackClientImage", controlPlane.Status.ContainerImages.OpenstackClientImage, "version.Status.ContainerImages.OpenstackClientImage", version.Status.ContainerImages.OpenstackClientImage)
+		return false
+	}
+	if !stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackMcpImage, version.Status.ContainerImages.OpenstackMcpImage) {
+		Log.Info("OpenStackClient MCP images do not match", "controlPlane.Status.ContainerImages.OpenstackMcpImage", controlPlane.Status.ContainerImages.OpenstackMcpImage, "version.Status.ContainerImages.OpenstackMcpImage", version.Status.ContainerImages.OpenstackMcpImage)
 		return false
 	}
 	return true
