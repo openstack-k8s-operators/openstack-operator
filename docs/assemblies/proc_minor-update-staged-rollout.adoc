@@ -61,13 +61,13 @@ starts.
 | No
 
 | _(completion)_
-| Data-plane services on compute nodes
-| *Yes* — create a full `OpenStackDataPlaneDeployment`
+| data plane services on compute nodes
+| *Yes* — create an `update-services` `OpenStackDataPlaneDeployment`
 |===
 
 [NOTE]
 Two stages require you to create an `OpenStackDataPlaneDeployment` manually.
-The `ovn-dataplane` stage and the final data-plane completion step do not self-drive —
+The `ovn-dataplane` stage and the final data plane completion step do not self-drive —
 the controller waits for the corresponding deployment to finish before advancing.
 See <<required-manual-deployments>>.
 
@@ -197,8 +197,8 @@ Continue advancing through the remaining stages as needed:
 
 === Step 5 — Complete the update
 
-When you are ready to run the final data-plane update on compute nodes, first create the
-full dataplane deployment (see <<required-manual-deployments>>),
+When you are ready to update the remaining data plane services on compute nodes, first
+create the data plane services update deployment (see <<required-manual-deployments>>),
 then remove the annotation to let the update finish:
 
 [source,bash]
@@ -230,7 +230,7 @@ The output should show `<new-version>`.
 Two stages in the process do not self-start. You must create an
 `OpenStackDataPlaneDeployment` before (or at the same time as) advancing past each of them.
 
-=== OVN data-plane deployment
+=== OVN data plane deployment
 
 Required before the `ovn-dataplane` stage can complete. This deployment updates only the
 OVN-related services on compute nodes.
@@ -254,28 +254,29 @@ spec:
 $ oc apply -f edpm-deployment-ovn-update.yaml
 ----
 
-=== Full data-plane update deployment
+=== Data plane services update deployment
 
-Required before the final completion step can finish. This deployment updates all remaining
-services on compute nodes.
+Required before the final completion step can finish. This deployment updates service
+containers and the limited set of packages handled by the `update-services` service on
+compute nodes.
 
 [source,yaml]
 ----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: edpm-deployment-update
+  name: edpm-deployment-update-services
   namespace: openstack
 spec:
   nodeSets:
     - openstack-edpm-ipam
   servicesOverride:
-    - update
+    - update-services
 ----
 
 [source,bash]
 ----
-$ oc apply -f edpm-deployment-update.yaml
+$ oc apply -f edpm-deployment-update-services.yaml
 ----
 
 == Pausing a running update
@@ -307,7 +308,7 @@ all stages automatically. You still need to create both dataplane deployments at
 time:
 
 . Create the OVN dataplane deployment before or immediately after starting the update.
-. Create the dataplane update deployment before the final completion step.
+. Create the data plane services update deployment before the final completion step.
 
 [source,bash,subs="+quotes"]
 ----
