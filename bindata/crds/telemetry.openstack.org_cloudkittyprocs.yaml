@@ -246,6 +246,11 @@ spec:
             description: CloudKittyProcStatus defines the observed state of CloudKitty
               Processor
             properties:
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash - hash of the input secrets that the child has
+                  fully rolled out, used by the parent to track credential rotation convergence
+                type: string
               conditions:
                 description: Conditions
                 items:

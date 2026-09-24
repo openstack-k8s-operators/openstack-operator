@@ -463,6 +463,12 @@ spec:
                   finalizer. Tracked so the controller can remove its finalizer from the
                   old secret when the openstack-operator rotates the reference.
                 type: string
+              appliedInputSecretHash:
+                description: |-
+                  AppliedInputSecretHash - hash of the input secret names that have been
+                  fully rolled out. The parent controller uses this to gate condition
+                  mirroring and secret rotation finalization.
+                type: string
               conditions:
                 description: Conditions
                 items:
