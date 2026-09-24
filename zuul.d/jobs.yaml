@@ -85,3 +85,45 @@
     parent: cifmw-crc-podified-edpm-baremetal-minor-update
     dependencies: ["openstack-k8s-operators-content-provider"]
     irrelevant-files: *irrelevant-files
+    vars:
+      cifmw_edpm_deploy_baremetal_nova_compute_extra_config: |
+        [workarounds]
+        disable_compute_service_check_for_ffu=true
+      cifmw_edpm_prepare_kustomizations:
+        - apiVersion: kustomize.config.k8s.io/v1beta1
+          kind: Kustomization
+          namespace: openstack
+          patches:
+          - patch: |-
+              apiVersion: core.openstack.org/v1beta1
+              kind: OpenStackControlPlane
+              metadata:
+                name: unused
+              spec:
+                nova:
+                  template:
+                    apiServiceTemplate:
+                      customServiceConfig: |
+                        [workarounds]
+                        disable_compute_service_check_for_ffu=true
+                    metadataServiceTemplate:
+                      customServiceConfig: |
+                        [workarounds]
+                        disable_compute_service_check_for_ffu=true
+                    schedulerServiceTemplate:
+                      customServiceConfig: |
+                        [workarounds]
+                        disable_compute_service_check_for_ffu=true
+                    cellTemplates:
+                      cell0:
+                        conductorServiceTemplate:
+                          customServiceConfig: |
+                            [workarounds]
+                            disable_compute_service_check_for_ffu=true
+                      cell1:
+                        conductorServiceTemplate:
+                          customServiceConfig: |
+                            [workarounds]
+                            disable_compute_service_check_for_ffu=true
+            target:
+              kind: OpenStackControlPlane
