@@ -229,7 +229,8 @@ var ContainerImageDefaults = openstackv1.ContainerImages{
 		ApacheImage:            getStrPtr("registry.redhat.io/ubi10/httpd-24:latest"),
 		EdpmFrrImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-frr:current-podified"),
 		// Deprecated: EdpmIscsidImage is no longer used. iscsid now runs on the host instead of in a container.
-		EdpmIscsidImage:         getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
+		EdpmIscsidImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
+		// Deprecated: EdpmLogrotateCrondImage is no longer used. logrotate-crond has been removed.
 		EdpmLogrotateCrondImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-cron:current-podified"),
 		EdpmNeutronDhcpAgentImage:     getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified"),
 		EdpmNeutronMetadataAgentImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"),
@@ -267,7 +268,8 @@ func SetupDefaults() {
 			ApacheImage:         getImageDefault("RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT", ContainerImageDefaults.ApacheImage),
 			EdpmFrrImage:        getImageDefault("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmFrrImage),
 			// Deprecated: EdpmIscsidImage is no longer used. iscsid now runs on the host instead of in a container.
-			EdpmIscsidImage:         getImageDefault("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmIscsidImage),
+			EdpmIscsidImage: getImageDefault("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmIscsidImage),
+			// Deprecated: EdpmLogrotateCrondImage is no longer used. logrotate-crond has been removed.
 			EdpmLogrotateCrondImage: getImageDefault("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmLogrotateCrondImage),
 			// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
 			EdpmMultipathdImage: getImageDefault("RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmMultipathdImage),

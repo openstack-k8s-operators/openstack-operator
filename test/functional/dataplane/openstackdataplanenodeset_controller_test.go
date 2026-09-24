@@ -72,7 +72,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 	defaultEdpmServiceList := []string{
 		"edpm_frr_image",
-		"edpm_logrotate_crond_image",
 		"edpm_neutron_metadata_agent_image",
 		"edpm_nova_compute_image",
 		"edpm_ovn_controller_agent_image",

@@ -144,7 +144,8 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			DesignateWorkerImage:          getImg(instance.Spec.CustomContainerImages.DesignateWorkerImage, defaults.DesignateWorkerImage),
 			EdpmFrrImage:                  getImg(instance.Spec.CustomContainerImages.EdpmFrrImage, defaults.EdpmFrrImage),
 			//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
-			EdpmIscsidImage:         getImg(instance.Spec.CustomContainerImages.EdpmIscsidImage, defaults.EdpmIscsidImage),
+			EdpmIscsidImage: getImg(instance.Spec.CustomContainerImages.EdpmIscsidImage, defaults.EdpmIscsidImage),
+			//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 			EdpmLogrotateCrondImage: getImg(instance.Spec.CustomContainerImages.EdpmLogrotateCrondImage, defaults.EdpmLogrotateCrondImage),
 			//nolint:staticcheck // SA1019: Intentionally using deprecated field for backward compatibility
 			EdpmMultipathdImage:           getImg(instance.Spec.CustomContainerImages.EdpmMultipathdImage, defaults.EdpmMultipathdImage),
