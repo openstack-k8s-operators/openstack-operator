@@ -80,6 +80,22 @@
         cpu_mode = custom
         cpu_models = Nehalem
 
+# CS10 content provider for this repo, cs10 vars inherited from edpm-ansible
+- job:
+    name: openstack-operator-content-provider-cs10
+    parent: edpm-ansible-content-provider-cs10
+
+# CS10 baremetal job from edpm-ansible, parallel dataplane deployment on
+- job:
+    name: openstack-operator-crc-podified-edpm-baremetal
+    parent: edpm-ansible-crc-podified-edpm-baremetal
+    dependencies:
+      - openstack-operator-content-provider-cs10
+    irrelevant-files: *irrelevant-files
+    vars:
+      cifmw_install_yamls_vars_patch_parallel:
+        dataplane_use_parallel_execution: "true"
+
 - job:
     name: openstack-operator-edpm-baremetal-minor-update
     parent: cifmw-crc-podified-edpm-baremetal-minor-update
