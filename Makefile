@@ -48,6 +48,20 @@ ifeq ($(USE_IMAGE_DIGESTS), true)
 	BUNDLE_GEN_FLAGS += --use-image-digests
 endif
 
+# EXTRA_SERVICE_ACCOUNTS are the sub-operator SAs synced into
+# config/operator/bundle-rbac by hack/sync-bindata.sh. They have no Deployment in
+# the bundle input (the meta operator creates the sub-operator Deployments at
+# runtime), so operator-sdk would otherwise emit their RBAC as standalone bundle
+# objects that OLM does not reconcile on upgrade. Passing them as extra service
+# accounts folds their RBAC into the CSV install strategy so OLM owns and
+# reconciles the SAs on every CSV transition.
+# Use deferred (=) expansion and defer the flag decision to $(if ...) so the list
+# is computed when the bundle recipe runs, not at parse time. This keeps a
+# combined `make bindata bundle` correct: bindata may add/rename SA files, and
+# bundle must see the updated set.
+EXTRA_SERVICE_ACCOUNTS = $(shell grep -h '^  name:' config/operator/bundle-rbac/*-serviceaccount.yaml 2>/dev/null | awk '{print $$2}' | paste -sd,)
+BUNDLE_GEN_FLAGS += $(if $(EXTRA_SERVICE_ACCOUNTS),--extra-service-accounts $(EXTRA_SERVICE_ACCOUNTS))
+
 # REPLACES is the previous version that this version replaces (for OLM upgrades)
 # Example: make bundle REPLACES=openstack-operator.v0.6.0 VERSION=0.6.1
 REPLACES ?=
@@ -411,8 +425,6 @@ ifneq ($(REPLACES),)
 	@echo "Adding replaces: $(REPLACES) to CSV"
 	sed -i "/^  name: openstack-operator.v$(VERSION)/a\  replaces: $(REPLACES)" bundle/manifests/openstack-operator.clusterserviceversion.yaml
 endif
-	@echo "Staging service operator RBAC into bundle manifests"
-	cp config/operator/bundle-rbac/*.yaml bundle/manifests/
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: bundle-build
