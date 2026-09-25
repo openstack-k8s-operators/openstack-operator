@@ -227,7 +227,7 @@ type ContainerTemplate struct {
 	DesignateWorkerImage          *string `json:"designateWorkerImage,omitempty"`
 	EdpmFrrImage                  *string `json:"edpmFrrImage,omitempty"`
 	// Deprecated: EdpmIscsidImage is no longer used. iscsid now runs on the host instead of in a container.
-	EdpmIscsidImage               *string `json:"edpmIscsidImage,omitempty"`
+	EdpmIscsidImage *string `json:"edpmIscsidImage,omitempty"`
 	// Deprecated: EdpmLogrotateCrondImage is no longer used. logrotate-crond has been removed.
 	EdpmLogrotateCrondImage *string `json:"edpmLogrotateCrondImage,omitempty"`
 	// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
@@ -301,12 +301,13 @@ type ContainerTemplate struct {
 // ServiceDefaults - struct that contains defaults for OSP services that can change over time
 // but are associated with a specific OpenStack release version
 type ServiceDefaults struct {
-	GlanceWsgi        *string `json:"glanceWsgi,omitempty"`
-	RabbitmqVersion   *string `json:"rabbitmqVersion,omitempty"`
-	MariadbVersion    *string `json:"mariadbVersion,omitempty"`
-	GlanceLocationAPI *string `json:"glanceLocationAPI,omitempty"`
-	ManilaSharev1     *string `json:"manilaSharev1,omitempty"`
-	NeutronWsgi       *string `json:"neutronWsgi,omitempty"`
+	GlanceWsgi             *string `json:"glanceWsgi,omitempty"`
+	RabbitmqVersion        *string `json:"rabbitmqVersion,omitempty"`
+	MariadbVersion         *string `json:"mariadbVersion,omitempty"`
+	GlanceLocationAPI      *string `json:"glanceLocationAPI,omitempty"`
+	ManilaSharev1          *string `json:"manilaSharev1,omitempty"`
+	NeutronWsgi            *string `json:"neutronWsgi,omitempty"`
+	IronicInspectInterface *string `json:"ironicInspectInterface,omitempty"`
 }
 
 // OpenStackVersionStatus defines the observed state of OpenStackVersion
