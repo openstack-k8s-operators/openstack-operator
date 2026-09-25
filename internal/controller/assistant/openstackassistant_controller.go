@@ -222,11 +222,11 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 	configVars := make(map[string]env.Setter)
 	effectiveCABundleSecretName := ""
 
-	// Validate the user-provided CA bundle, then reconcile an assistant-owned
-	// bundle that also trusts OpenShift service-serving certificates. The
-	// generated bundle is mounted instead of modifying the shared source Secret.
+	// Validate and mount the CA bundle directly. The bundle (by default the
+	// control plane's combined-ca-bundle) already trusts OpenShift
+	// service-serving certificates, so no assistant-owned copy is needed.
 	if instance.Spec.CaBundleSecretName != "" {
-		_, err := tls.ValidateCACertSecret(
+		caBundleHash, err := tls.ValidateCACertSecret(
 			ctx,
 			r.Client,
 			types.NamespacedName{Name: instance.Spec.CaBundleSecretName, Namespace: instance.Namespace},
@@ -244,11 +244,7 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 			return ctrl.Result{}, err
 		}
 
-		var caBundleHash string
-		effectiveCABundleSecretName, caBundleHash, err = r.reconcileCABundle(ctx, instance)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+		effectiveCABundleSecretName = instance.Spec.CaBundleSecretName
 		configVars[effectiveCABundleSecretName] = env.SetValue(caBundleHash)
 	}
 
@@ -849,23 +845,6 @@ func (r *OpenStackAssistantReconciler) findObjectsForSrc(ctx context.Context, sr
 	requests := []reconcile.Request{}
 
 	Log := r.GetLogger(ctx)
-	if _, ok := src.(*corev1.ConfigMap); ok && src.GetName() == openShiftServiceCAConfigMapName {
-		crList := &assistantv1.OpenStackAssistantList{}
-		if err := r.List(ctx, crList, client.InNamespace(src.GetNamespace())); err != nil {
-			Log.Error(err, "listing OpenStackAssistants for service CA change")
-			return requests
-		}
-		for _, item := range crList.Items {
-			requests = append(requests, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      item.GetName(),
-					Namespace: item.GetNamespace(),
-				},
-			})
-		}
-		return requests
-	}
-
 	for _, field := range allWatchFields {
 		crList := &assistantv1.OpenStackAssistantList{}
 		listOps := &client.ListOptions{
