@@ -34,12 +34,13 @@ import (
 // log is for logging in this package.
 var openstackdataplanenodesetlog = logf.Log.WithName("openstackdataplanenodeset-resource")
 
-var webhookClient client.Client
+var webhookReader client.Reader
 
 // SetupOpenStackDataPlaneNodeSetWebhookWithManager registers the webhook for OpenStackDataPlaneNodeSet in the manager.
 func SetupOpenStackDataPlaneNodeSetWebhookWithManager(mgr ctrl.Manager) error {
-	if webhookClient == nil {
-		webhookClient = mgr.GetClient()
+	if webhookReader == nil {
+		// NodeSet validation must read current objects, not potentially stale cache data.
+		webhookReader = mgr.GetAPIReader()
 	}
 
 	return ctrl.NewWebhookManagedBy(mgr).For(&dataplanev1beta1.OpenStackDataPlaneNodeSet{}).
@@ -101,7 +102,7 @@ func (v *OpenStackDataPlaneNodeSetCustomValidator) ValidateCreate(ctx context.Co
 	openstackdataplanenodesetlog.Info("Validation for OpenStackDataPlaneNodeSet upon creation", "name", openstackdataplanenodeset.GetName())
 
 	// Call the ValidateCreate method on the OpenStackDataPlaneNodeSet type
-	return openstackdataplanenodeset.ValidateCreate(ctx, webhookClient)
+	return openstackdataplanenodeset.ValidateCreate(ctx, webhookReader)
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type OpenStackDataPlaneNodeSet.
@@ -113,7 +114,7 @@ func (v *OpenStackDataPlaneNodeSetCustomValidator) ValidateUpdate(ctx context.Co
 	openstackdataplanenodesetlog.Info("Validation for OpenStackDataPlaneNodeSet upon update", "name", openstackdataplanenodeset.GetName())
 
 	// Call the ValidateUpdate method on the OpenStackDataPlaneNodeSet type
-	return openstackdataplanenodeset.ValidateUpdate(ctx, oldObj, webhookClient)
+	return openstackdataplanenodeset.ValidateUpdate(ctx, oldObj, webhookReader)
 }
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type OpenStackDataPlaneNodeSet.
@@ -125,5 +126,5 @@ func (v *OpenStackDataPlaneNodeSetCustomValidator) ValidateDelete(ctx context.Co
 	openstackdataplanenodesetlog.Info("Validation for OpenStackDataPlaneNodeSet upon deletion", "name", openstackdataplanenodeset.GetName())
 
 	// Call the ValidateDelete method on the OpenStackDataPlaneNodeSet type
-	return openstackdataplanenodeset.ValidateDelete(ctx, webhookClient)
+	return openstackdataplanenodeset.ValidateDelete(ctx, webhookReader)
 }
