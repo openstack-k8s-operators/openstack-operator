@@ -3884,6 +3884,8 @@ spec:
                               - local-ttl
                               - dhcp-ttl
                               - max-ttl
+                              - log-queries
+                              - log-debug
                               type: string
                             values:
                               items:
@@ -3891,7 +3893,6 @@ spec:
                               type: array
                           required:
                           - key
-                          - values
                           type: object
                         type: array
                       override:
@@ -9914,6 +9915,13 @@ spec:
                           default: 9932
                           format: int32
                           type: integer
+                        logLevel:
+                          default: debug
+                          enum:
+                          - none
+                          - verbose
+                          - debug
+                          type: string
                         maxConn:
                           default: 8192
                           format: int32
