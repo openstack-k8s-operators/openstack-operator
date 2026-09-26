@@ -50,7 +50,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 		return ctrl.Result{}, nil
 	}
 
-	if instance.Spec.OpenStackClient.Template.NodeSelector == nil {
+	if instance.Spec.OpenStackClient.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.OpenStackClient.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

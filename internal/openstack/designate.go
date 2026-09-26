@@ -157,7 +157,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Designate.Template.DesignateAPI.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if instance.Spec.Designate.Template.NodeSelector == nil {
+	if instance.Spec.Designate.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Designate.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 

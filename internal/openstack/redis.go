@@ -255,7 +255,7 @@ func reconcileRedis(
 		tlsCert = certSecret.Name
 	}
 
-	if spec.NodeSelector == nil {
+	if spec.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		spec.NodeSelector = &instance.Spec.NodeSelector
 	}
 
