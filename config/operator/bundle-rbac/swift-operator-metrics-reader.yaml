@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: swift-operator-operator-metrics-reader
+  name: swift-operator-metrics-reader
 rules:
 - nonResourceURLs:
   - /metrics
