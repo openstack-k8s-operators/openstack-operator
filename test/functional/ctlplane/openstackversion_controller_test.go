@@ -579,6 +579,14 @@ var _ = Describe("OpenStackVersion controller", func() {
 				k8s_corev1.ConditionFalse,
 			)
 
+			// Wait for the control plane to apply the target image to the Galera CR before
+			// simulating readiness. Otherwise the controller may update its generation
+			// after the readiness simulation, leaving the status stale.
+			Eventually(func(g Gomega) {
+				galera := mariadb.GetGalera(names.DBName)
+				g.Expect(galera.Spec.ContainerImage).To(Equal(targetMariaDBVersion))
+			}, timeout, interval).Should(Succeed())
+
 			SimulateGalaraReady()
 			Eventually(func(g Gomega) {
 				th.ExpectCondition(
@@ -950,6 +958,14 @@ var _ = Describe("OpenStackVersion controller", func() {
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				g.Expect(*OSCtlplane.Status.ContainerImages.RabbitmqImage).Should(Equal(targetRabbitMQVersion))
 			}, timeout*4, interval).Should(Succeed())
+
+			// Wait for the control plane to apply the target image to the Galera CR before
+			// simulating readiness. Otherwise the controller may update its generation
+			// after the readiness simulation, leaving the status stale.
+			Eventually(func(g Gomega) {
+				galera := mariadb.GetGalera(names.DBName)
+				g.Expect(galera.Spec.ContainerImage).To(Equal(targetMariaDBVersion))
+			}, timeout, interval).Should(Succeed())
 
 			SimulateGalaraReady()
 			Eventually(func(g Gomega) {
