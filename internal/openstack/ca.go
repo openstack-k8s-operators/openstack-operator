@@ -25,10 +25,20 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	dputil "github.com/openstack-k8s-operators/openstack-operator/internal/dataplane/util"
+	k8scorev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+const (
+	// openShiftServiceCAConfigMapName is the ConfigMap OpenShift injects into
+	// each namespace holding the service-serving signer CA.
+	openShiftServiceCAConfigMapName = "openshift-service-ca.crt"
+	// openShiftServiceCAKey is the data key within that ConfigMap.
+	openShiftServiceCAKey = "service-ca.crt"
 )
 
 // ReconcileCAs -
@@ -443,6 +453,31 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			err = bundle.getCertsFromPEM(caCert)
 			if err != nil {
 				return ctrl.Result{}, err
+			}
+		}
+	}
+
+	// Add the OpenShift service-serving CA so consumers of the combined bundle
+	// trust endpoints secured by service-serving certificates
+	// (service.beta.openshift.io/serving-cert-secret-name), e.g. the assistant
+	// dialing Lightspeed, whose service is signed by the OpenShift service CA.
+	// (The built-in MCP endpoint is signed by the internal cert-manager issuer,
+	// whose CA is already in this bundle.) The ConfigMap is namespace-injected
+	// by OpenShift and absent on plain Kubernetes, so a NotFound is treated as a
+	// no-op. Added to the full bundle only (not caOnlyBundle, which is reserved
+	// for internal issuer CAs).
+	serviceCACM := &k8scorev1.ConfigMap{}
+	err = helper.GetClient().Get(ctx, types.NamespacedName{
+		Name:      openShiftServiceCAConfigMapName,
+		Namespace: instance.Namespace,
+	}, serviceCACM)
+	if err != nil && !k8s_errors.IsNotFound(err) {
+		return ctrl.Result{}, err
+	}
+	if err == nil {
+		if serviceCA := serviceCACM.Data[openShiftServiceCAKey]; serviceCA != "" {
+			if parseErr := bundle.getCertsFromPEM([]byte(serviceCA)); parseErr != nil {
+				return ctrl.Result{}, parseErr
 			}
 		}
 	}
