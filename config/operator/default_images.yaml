@@ -106,15 +106,15 @@ spec:
         - name: RELATED_IMAGE_INFRA_REDIS_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-redis:current-podified
         - name: RELATED_IMAGE_IRONIC_API_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-ironic-api:current-podified
+          value: quay.io/openstack-k8s-operators/openstack-ironic-api:master-latest
         - name: RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-ironic-conductor:current-podified
+          value: quay.io/openstack-k8s-operators/openstack-ironic-conductor:master-latest
         - name: RELATED_IMAGE_IRONIC_INSPECTOR_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ironic-inspector:current-podified
         - name: RELATED_IMAGE_IRONIC_NEUTRON_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ironic-neutron-agent:current-podified
         - name: RELATED_IMAGE_IRONIC_PXE_IMAGE_URL_DEFAULT
-          value: quay.io/podified-antelope-centos9/openstack-ironic-pxe:current-podified
+          value: quay.io/openstack-k8s-operators/openstack-ironic-pxe:master-latest
         - name: RELATED_IMAGE_IRONIC_PYTHON_AGENT_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/ironic-python-agent:current-podified
         - name: RELATED_IMAGE_KEYSTONE_API_IMAGE_URL_DEFAULT
