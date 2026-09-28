@@ -186,6 +186,8 @@ spec:
         env:
         - name: ANSIBLE_FORCE_COLOR
           value: "True"
+        - name: ANSIBLE_FORKS
+          value: "5"
         - name: RUNNER_PLAYBOOK
           value: |2+
 
@@ -300,6 +302,8 @@ spec:
         env:
         - name: ANSIBLE_FORCE_COLOR
           value: "True"
+        - name: ANSIBLE_FORKS
+          value: "5"
         - name: RUNNER_PLAYBOOK
           value: |2+
 

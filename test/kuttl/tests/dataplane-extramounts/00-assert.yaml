@@ -72,6 +72,8 @@ spec:
         - -i
         - test-service-edpm-extramounts-edpm-extramounts
         env:
+        - name: ANSIBLE_FORKS
+          value: "5"
         - name: RUNNER_PLAYBOOK
           value: |2+
 

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuttl-custom-ee-env
+data:
+  ANSIBLE_FORKS: "11"
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-forks-override
+  annotations:
+    dataplane.openstack.org/confirm-delete: "true"
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  ansibleEEEnvConfigMapName: kuttl-custom-ee-env
