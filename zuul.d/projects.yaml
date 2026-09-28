@@ -4,6 +4,7 @@
     github-check:
       jobs:
         - openstack-k8s-operators-content-provider
+        - openstack-operator-content-provider-cs10
         - podified-multinode-edpm-deployment-crc:
             dependencies: ["openstack-k8s-operators-content-provider"]
             irrelevant-files: &irrelevant-files
@@ -16,8 +17,9 @@
               - ^PROJECT$
               - ^README.md$
               - tests?\/functional
-        - cifmw-crc-podified-edpm-baremetal:
-            dependencies: ["openstack-k8s-operators-content-provider"]
+        - openstack-operator-crc-podified-edpm-baremetal:
+            dependencies:
+              - openstack-operator-content-provider-cs10
             irrelevant-files: *irrelevant-files
         - adoption-standalone-to-crc-ceph-provider:
             dependencies: ["openstack-k8s-operators-content-provider"]
