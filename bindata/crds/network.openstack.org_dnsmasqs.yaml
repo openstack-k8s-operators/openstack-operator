@@ -89,6 +89,8 @@ spec:
                       - local-ttl
                       - dhcp-ttl
                       - max-ttl
+                      - log-queries
+                      - log-debug
                       type: string
                     values:
                       items:
@@ -96,7 +98,6 @@ spec:
                       type: array
                   required:
                   - key
-                  - values
                   type: object
                 type: array
               override:

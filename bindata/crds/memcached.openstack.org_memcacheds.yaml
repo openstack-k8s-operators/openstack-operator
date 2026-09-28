@@ -57,6 +57,16 @@ spec:
                 description: Name of the memcached container image to run (will be
                   set to environmental default if empty)
                 type: string
+              logLevel:
+                default: debug
+                description: |-
+                  LogLevel controls memcached logging verbosity: "none" (quiet),
+                  "verbose" (-v), or "debug" (-vv).
+                enum:
+                - none
+                - verbose
+                - debug
+                type: string
               maxConn:
                 default: 8192
                 description: Maximum number of connections accepted by Memcached
