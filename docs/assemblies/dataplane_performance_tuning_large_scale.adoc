@@ -217,7 +217,12 @@ simultaneously.
 *Default behavior* (from edpm-ansible playbooks):
 
 * *Strategy*: `linear` (waits for all hosts to complete a task before moving to next task)
-* *Forks*: Defaults to 5 (can be overridden with `ANSIBLE_FORKS`)
+* *Forks*: The operator sets `ANSIBLE_FORKS` from the EE container CPU request,
+  capped by a lower CPU limit. With only one CPU setting it uses that setting;
+  with neither it sets 8. Fractional CPUs round up (250m -> 1, 1500m -> 2).
+  Memory settings do not affect fork count. This does not create implicit
+  requests or limits. Kubernetes still requires the CPU request to be no
+  greater than the CPU limit for a schedulable Job.
 
 == Ansible Performance Tuning
 
@@ -239,7 +244,7 @@ spec:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
 
-    # Increase parallel execution (default: 5)
+    # Override CPU-derived parallelism when needed (fallback without CPU: 8)
     # Set based on your control plane resources
     - name: ANSIBLE_FORKS
       value: "50"
@@ -290,7 +295,7 @@ The `ANSIBLE_FORKS` setting is the most impactful tuning parameter.
 
 *Considerations:*
 
-* *Control plane resources*: More forks require more CPU/memory in the ansible-runner pod
+* *EE Job resources*: More forks require more CPU/memory in the ansible-runner pod
 * *Network capacity*: More simultaneous SSH connections
 * *Target node capacity*: Nodes must handle concurrent configuration tasks
 
@@ -300,6 +305,29 @@ The `ANSIBLE_FORKS` setting is the most impactful tuning parameter.
 * Medium deployments (10-50 nodes): `ANSIBLE_FORKS=20-30`
 * Large deployments (50-100 nodes): `ANSIBLE_FORKS=50-75`
 * Very large (100+ nodes): Consider multiple NodeSets instead of very high fork count
+
+[source,yaml]
+----
+ansibleEEResources:
+  requests:
+    cpu: 1500m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+# Without an explicit override this produces ANSIBLE_FORKS=2.
+# Set resources under OpenStackDataPlaneNodeSet.spec.
+----
+
+An explicit `ANSIBLE_FORKS` in NodeSet `spec.env` takes precedence over the
+Deployment-selected `spec.ansibleEEEnvConfigMapName` value, which takes
+precedence over the computed default. Explicit `-f` / `--forks` supplied to
+Ansible by the runner command line takes precedence over the environment.
+Even an empty or invalid explicit `ANSIBLE_FORKS` is passed through unchanged;
+Ansible determines how to handle it. A missing selected ConfigMap is optional
+and does not prevent using the computed default. ConfigMap changes do not
+update existing Jobs. Deployments are immutable and completed Jobs are not
+rerun; create a new Deployment to apply changed resources or fork settings.
 
 [source,yaml]
 ----

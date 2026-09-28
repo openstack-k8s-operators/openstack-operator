@@ -5,6 +5,9 @@ collectors:
 - type: command
   command: oc logs -n openstack-operators -l openstack.org/operator-name=openstack
   name: operator-logs
+commands:
+- script: |
+    oc exec -n openstack-kuttl-tests job/kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes -- printenv ANSIBLE_FORKS | grep -qx '2'
 ---
 apiVersion: batch/v1
 kind: Job
@@ -54,6 +57,8 @@ spec:
         env:
         - name: ANSIBLE_FORCE_COLOR
           value: "True"
+        - name: ANSIBLE_FORKS
+          value: "2"
         - name: RUNNER_PLAYBOOK
           value: |2+
 
@@ -75,7 +80,13 @@ spec:
 
         imagePullPolicy: IfNotPresent
         name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
-        resources: {}
+        resources:
+          requests:
+            cpu: 1500m
+            memory: 512Mi
+          limits:
+            cpu: "3"
+            memory: 2Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
