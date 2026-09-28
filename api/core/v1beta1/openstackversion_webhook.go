@@ -143,7 +143,6 @@ func (r *OpenStackVersion) ValidateUpdate(ctx context.Context, old runtime.Objec
 	if !ok {
 		return nil, apierrors.NewInternalError(fmt.Errorf("failed to convert old object to OpenStackVersion"))
 	}
-
 	// Validate that the target stage annotation is not from earlier stage while a minor update is in progress
 	if err := validateMinorUpdateTargetStageAnnotationProgress(oldVersion, r); err != nil {
 		return nil, err
@@ -163,9 +162,10 @@ func (r *OpenStackVersion) ValidateUpdate(ctx context.Context, old runtime.Objec
 		// unless skip annotation is present
 		if !skipValidation && hasAnyCustomImage(r.Spec.CustomContainerImages) {
 
-			// Get the tracked custom images for the previous version
-			if r.Status.TrackedCustomImages != nil {
-				if trackedImages, exists := r.Status.TrackedCustomImages[oldVersion.Spec.TargetVersion]; exists {
+			// Compare against the tracked custom images persisted for the old version.
+			// The incoming object's status can be stale while the controller is updating it.
+			if oldVersion.Status.TrackedCustomImages != nil {
+				if trackedImages, exists := oldVersion.Status.TrackedCustomImages[oldVersion.Spec.TargetVersion]; exists {
 					// Compare current CustomContainerImages with tracked ones
 					if !customContainerImagesAllModified(r.Spec.CustomContainerImages, trackedImages) {
 						return nil, apierrors.NewForbidden(

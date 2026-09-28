@@ -161,14 +161,15 @@ var _ = Describe("OpenStackVersion Webhook", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("should handle edge case where TrackedCustomImages is nil", func() {
+		It("should use the old version's tracked images when the incoming status is nil", func() {
 			newVersion.Status.TrackedCustomImages = nil
 			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)
-			Expect(err).ToNot(HaveOccurred())
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("CustomContainerImages must be updated when changing targetVersion"))
 		})
 
 		It("should handle edge case where previous version not found in TrackedCustomImages", func() {
-			newVersion.Status.TrackedCustomImages = map[string]CustomContainerImages{
+			oldVersion.Status.TrackedCustomImages = map[string]CustomContainerImages{
 				"0.9.0": {}, // Different version than oldVersion.Spec.TargetVersion
 			}
 			_, err := newVersion.ValidateUpdate(context.Background(), oldVersion, nil)

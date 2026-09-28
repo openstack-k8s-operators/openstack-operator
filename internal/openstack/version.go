@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"maps"
 	"reflect"
 	"regexp"
 	"strings"
@@ -109,8 +110,8 @@ func getOpenstackNetworkExporterImg(customImages corev1beta1.CustomContainerImag
 func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1beta1.OpenStackVersion) corev1beta1.ContainerImages {
 
 	containerImages := corev1beta1.ContainerImages{
-		CinderVolumeImages:   instance.Spec.CustomContainerImages.CinderVolumeImages,
-		ManilaShareImages:    instance.Spec.CustomContainerImages.ManilaShareImages,
+		CinderVolumeImages:   maps.Clone(instance.Spec.CustomContainerImages.CinderVolumeImages),
+		ManilaShareImages:    maps.Clone(instance.Spec.CustomContainerImages.ManilaShareImages),
 		CeilometerProxyImage: getImg(instance.Spec.CustomContainerImages.ApacheImage, defaults.ApacheImage),
 		OctaviaApacheImage:   getImg(instance.Spec.CustomContainerImages.ApacheImage, defaults.ApacheImage),
 		ContainerTemplate: corev1beta1.ContainerTemplate{
