@@ -75,7 +75,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 }
 
 // ValidateCreate validates the OpenStackDataPlaneNodeSet on creation
-func (r *OpenStackDataPlaneNodeSet) ValidateCreate(ctx context.Context, c client.Client) (admission.Warnings, error) {
+func (r *OpenStackDataPlaneNodeSet) ValidateCreate(ctx context.Context, c client.Reader) (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate create", "name", r.Name)
 	var errors field.ErrorList
 	errors, err := r.validateNodes(ctx, c)
@@ -114,7 +114,7 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate(ctx context.Context, c client
 	return nil, nil
 }
 
-func (r *OpenStackDataPlaneNodeSet) validateNodes(ctx context.Context, c client.Client) (field.ErrorList, error) {
+func (r *OpenStackDataPlaneNodeSet) validateNodes(ctx context.Context, c client.Reader) (field.ErrorList, error) {
 	var errors field.ErrorList
 	nodeSetList := &OpenStackDataPlaneNodeSetList{}
 	opts := &client.ListOptions{
@@ -143,7 +143,7 @@ func (r *OpenStackDataPlaneNodeSet) validateNodes(ctx context.Context, c client.
 }
 
 // ValidateUpdate validates the OpenStackDataPlaneNodeSet on update
-func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(ctx context.Context, old runtime.Object, c client.Client) (admission.Warnings, error) {
+func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(ctx context.Context, old runtime.Object, c client.Reader) (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate update", "name", r.Name)
 	oldNodeSet, ok := old.(*OpenStackDataPlaneNodeSet)
 	if !ok {
@@ -209,7 +209,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) ValidateUpdate(oldSpec *OpenStackData
 }
 
 // ValidateDelete validates the OpenStackDataPlaneNodeSet on deletion
-func (r *OpenStackDataPlaneNodeSet) ValidateDelete(ctx context.Context, c client.Client) (admission.Warnings, error) {
+func (r *OpenStackDataPlaneNodeSet) ValidateDelete(ctx context.Context, c client.Reader) (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate delete", "name", r.Name)
 	errors := r.Spec.ValidateDelete()
 
