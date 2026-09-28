@@ -99,6 +99,8 @@ spec:
         - -i
         - custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
         env:
+        - name: ANSIBLE_FORKS
+          value: "8"
         - name: RUNNER_ROLE
           value: |2+
 
