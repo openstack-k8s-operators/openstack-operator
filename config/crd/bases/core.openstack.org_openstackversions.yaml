@@ -266,6 +266,8 @@ spec:
                       type: string
                     neutronWsgi:
                       type: string
+                    ovnHardenedOVSSecurityContext:
+                      type: string
                     rabbitmqVersion:
                       type: string
                   type: object
@@ -716,6 +718,8 @@ spec:
                   mariadbVersion:
                     type: string
                   neutronWsgi:
+                    type: string
+                  ovnHardenedOVSSecurityContext:
                     type: string
                   rabbitmqVersion:
                     type: string

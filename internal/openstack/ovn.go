@@ -514,6 +514,15 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		OVNController.Spec.OvsContainerImage = *version.Status.ContainerImages.OvnControllerOvsImage
 		OVNController.Spec.ExporterImage = *getImg(version.Status.ContainerImages.OpenstackNetworkExporterImage, &missingImageDefault)
 
+		if OVNController.GetAnnotations() == nil {
+			OVNController.SetAnnotations(make(map[string]string))
+		}
+		if version.Status.ServiceDefaults.OVNHardenedOVSSecurityContext != nil && *version.Status.ServiceDefaults.OVNHardenedOVSSecurityContext == "true" {
+			OVNController.GetAnnotations()[ovnv1.OVNHardenedOVSSecurityContextLabel] = "true"
+		} else {
+			OVNController.GetAnnotations()[ovnv1.OVNHardenedOVSSecurityContextLabel] = "false"
+		}
+
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), OVNController, helper.GetScheme())
 		if err != nil {
 			return err
