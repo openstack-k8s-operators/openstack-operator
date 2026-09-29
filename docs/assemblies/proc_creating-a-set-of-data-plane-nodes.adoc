@@ -280,14 +280,14 @@ spec:
       ...
       ansibleVars:
 ifeval::["{build}" != "downstream"]
-        edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
-        edpm_ovn_metadata_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
-        edpm_frr_image: "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
+        edpm_ovn_controller_agent_image: "quay.io/openstack-s2i-containers/openstack-frr:master-latest"
+        edpm_ovn_metadata_agent_image: "quay.io/openstack-s2i-containers/openstack-neutron-metadata-agent-ovn:master-latest"
+        edpm_frr_image: "quay.io/openstack-s2i-containers/openstack-frr:master-latest"
         edpm_ovn_bgp_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
         telemetry_node_exporter_image: "quay.io/prometheus/node-exporter:v1.5.0"
         edpm_libvirt_image: "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
-        edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
-        edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
+        edpm_nova_compute_image: "quay.io/openstack-s2i-containers/openstack-nova-compute:master-latest"
+        edpm_neutron_sriov_image: "quay.io/openstack-s2i-containers/openstack-neutron-sriov-agent:master-latest"
 endif::[]
 ifeval::["{build}" == "downstream"]
         edpm_ovn_controller_agent_image: "registry.redhat.io/rhosp-dev-preview/openstack-frr:18.0"

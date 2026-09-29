@@ -55,7 +55,7 @@ data:
           edpm_nodes_validation_validate_controllers_icmp: false
           edpm_nodes_validation_validate_gateway_icmp: false
           edpm_nova_compute_container_image: '{{ registry_url }}/openstack-nova-compute:{{ image_tag }}'
-          edpm_nova_libvirt_container_image: '{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}'
+          edpm_nova_libvirt_container_image: 'quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified'
           edpm_ovn_controller_agent_image: '{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}'
           edpm_selinux_mode: enforcing
           edpm_sshd_allowed_ranges:
@@ -63,10 +63,10 @@ data:
           edpm_sshd_configure_firewall: true
           enable_debug: false
           gather_facts: false
-          image_tag: current-podified
+          image_tag: master-latest
           neutron_physical_bridge_name: br-ex
           neutron_public_interface_name: eth0
-          registry_url: quay.io/podified-antelope-centos9
+          registry_url: quay.io/openstack-s2i-containers
           edpm_ceph_hci_pre_enabled_services:
             - ceph_mon
             - ceph_mgr
