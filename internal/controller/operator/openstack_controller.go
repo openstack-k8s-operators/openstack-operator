@@ -114,7 +114,7 @@ func SetupEnv() {
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles;rolebindings,verbs=get;list;delete
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete;
-// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;delete
+// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;update;delete
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch;create;update
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=discovery.k8s.io,resources=endpointslices,verbs=get;list;watch;
@@ -406,8 +406,21 @@ func (r *OpenStackReconciler) deleteAllOwnedResources(ctx context.Context, insta
 		return err
 	}
 
-	err = deleteOwnedResources(ctx, r, instance, &corev1.ServiceAccountList{}, func(l *corev1.ServiceAccountList) []corev1.ServiceAccount { return l.Items })
-	if err != nil {
+	// ServiceAccounts are intentionally NOT deleted here. They used to be recreated
+	// every reconcile from bindata, but sub-operator ServiceAccounts are now owned
+	// and reconciled by OLM via the CSV install strategy (see openstack-operator#2109).
+	// This controller no longer has create RBAC on serviceaccounts, so deleting one
+	// controlled by this instance (e.g. one that pre-dates that change, carried over
+	// from an OLM upgrade) would leave it permanently missing: OLM only lays down
+	// install-strategy RBAC during InstallPlan execution, it does not keep
+	// recreating a ServiceAccount that disappears afterward.
+	//
+	// This instance is also no longer the correct controller for those
+	// ServiceAccounts, so drop the stale controller reference instead (a one-time,
+	// in-place adoption, not a delete): leaves the object and any running Pods using
+	// it untouched, and is a no-op on every reconcile after the first, since the
+	// condition it looks for no longer matches once the reference is removed.
+	if err := r.adoptAwayServiceAccounts(ctx, instance); err != nil {
 		return err
 	}
 
@@ -430,6 +443,36 @@ func (r *OpenStackReconciler) deleteAllOwnedResources(ctx context.Context, insta
 	}
 
 	Log.Info("All owned resources deleted successfully")
+	return nil
+}
+
+// adoptAwayServiceAccounts drops this instance's controller reference from any
+// ServiceAccount it still controls. Sub-operator ServiceAccounts are now owned and
+// reconciled by OLM via the CSV install strategy (see openstack-operator#2109), so
+// this instance being their controller is stale leftover ownership from before that
+// change (e.g. carried over from an OLM upgrade). It is a no-op once the reference
+// has been removed, so safe to call on every release-version-upgrade reconcile.
+func (r *OpenStackReconciler) adoptAwayServiceAccounts(ctx context.Context, instance *operatorv1beta1.OpenStack) error {
+	log := r.GetLogger(ctx)
+
+	saList := &corev1.ServiceAccountList{}
+	if err := r.List(ctx, saList, &client.ListOptions{Namespace: instance.GetNamespace()}); err != nil {
+		return errors.Wrap(err, "failed to list serviceaccounts")
+	}
+
+	for i := range saList.Items {
+		sa := &saList.Items[i]
+		if !metav1.IsControlledBy(sa, instance) {
+			continue
+		}
+		log.Info("Removing stale controller reference from ServiceAccount now owned by OLM", "name", sa.Name)
+		if err := controllerutil.RemoveControllerReference(instance, sa, r.Scheme); err != nil {
+			return errors.Wrapf(err, "failed to remove controller reference from serviceaccount %s", sa.Name)
+		}
+		if err := r.Update(ctx, sa); err != nil && !apierrors.IsNotFound(err) {
+			return errors.Wrapf(err, "failed to update serviceaccount %s", sa.Name)
+		}
+	}
 	return nil
 }
 
