@@ -219,10 +219,13 @@ func reconcileRedis(
 			IssuerName: instance.GetInternalIssuer(),
 			CertName:   fmt.Sprintf("%s-svc", redis.Name),
 			Hostnames: []string{
-				fmt.Sprintf("redis-%s.%s.svc", name, instance.Namespace),
-				fmt.Sprintf("*.redis-%s.%s.svc", name, instance.Namespace),
-				fmt.Sprintf("redis-%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
-				fmt.Sprintf("*.redis-%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
+				name,
+				fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
+				fmt.Sprintf("%s.%s.svc.%s", name, instance.Namespace, clusterDomain),
+				fmt.Sprintf("%s-redis.%s.svc", name, instance.Namespace),
+				fmt.Sprintf("*.%s-redis.%s.svc", name, instance.Namespace),
+				fmt.Sprintf("%s-redis.%s.svc.%s", name, instance.Namespace, clusterDomain),
+				fmt.Sprintf("*.%s-redis.%s.svc.%s", name, instance.Namespace, clusterDomain),
 			},
 			Subject: &certmgrv1.X509Subject{
 				Organizations: []string{fmt.Sprintf("%s.%s", instance.Namespace, clusterDomain)},
