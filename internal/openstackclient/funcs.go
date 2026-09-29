@@ -239,7 +239,6 @@ func MCPCloudsYAML(authURL, projectName, userName, region, caBundleSecretName st
       user_domain_name: Default
       project_domain_name: Default
     region_name: %s%s
-    identity_api_version: 3
 `, authURL, projectName, userName, region, caCert)
 }
 
