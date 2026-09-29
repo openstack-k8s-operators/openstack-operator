@@ -631,6 +631,14 @@ var _ = Describe("OpenStackVersion controller", func() {
 				k8s_corev1.ConditionFalse,
 			)
 
+			// Wait for the control plane to apply the target image to the KeystoneAPI CR before
+			// simulating readiness. Otherwise the controller may update its generation after
+			// the readiness simulation, leaving the status stale.
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI.Spec.ContainerImage).To(Equal(targetKeystoneAPIVersion))
+			}, timeout, interval).Should(Succeed())
+
 			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
 			Eventually(func(g Gomega) {
 				th.ExpectCondition(
@@ -989,6 +997,14 @@ var _ = Describe("OpenStackVersion controller", func() {
 				)
 				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
 				g.Expect(*OSCtlplane.Status.ContainerImages.InfraMemcachedImage).Should(Equal(targetMemcachedVersion))
+			}, timeout, interval).Should(Succeed())
+
+			// Wait for the control plane to apply the target image to the KeystoneAPI CR before
+			// simulating readiness. Otherwise the controller may update its generation after
+			// the readiness simulation, leaving the status stale.
+			Eventually(func(g Gomega) {
+				keystoneAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(keystoneAPI.Spec.ContainerImage).To(Equal(targetKeystoneAPIVersion))
 			}, timeout, interval).Should(Succeed())
 
 			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
