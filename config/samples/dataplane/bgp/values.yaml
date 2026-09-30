@@ -93,7 +93,7 @@ data:
     - reboot-os
     - install-certs
     - ovn
-    - neutron-metadata
+    - neutron-ovn
     - ovn-bgp-agent
     - libvirt
     - nova

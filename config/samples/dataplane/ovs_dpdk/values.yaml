@@ -120,7 +120,6 @@ data:
     - install-certs
     - ovn
     - neutron-ovn
-    - neutron-metadata
     - libvirt
     - nova
     - telemetry
