@@ -27,6 +27,8 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 
+	memcachedv1 "github.com/openstack-k8s-operators/infra-operator/apis/memcached/v1beta1"
+	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/api/dataplane/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
@@ -52,6 +54,41 @@ func expectCurrentTargetCustomImagesTracked(name types.NamespacedName) {
 		g.Expect(*version.Status.DeployedVersion).Should(Equal(version.Spec.TargetVersion))
 		g.Expect(version.Status.TrackedCustomImages).Should(HaveKey(version.Spec.TargetVersion))
 		g.Expect(version.Status.TrackedCustomImages[version.Spec.TargetVersion]).Should(Equal(version.Spec.CustomContainerImages))
+	}, timeout, interval).Should(Succeed())
+}
+
+func waitForRabbitMQImages(expectedImage string) {
+	Eventually(func(g Gomega) {
+		controlPlane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+		g.Expect(controlPlane.Spec.Rabbitmq.Enabled).To(BeTrue())
+		g.Expect(controlPlane.Spec.Rabbitmq.Templates).NotTo(BeNil())
+		if controlPlane.Spec.Rabbitmq.Templates == nil {
+			return
+		}
+		g.Expect(*controlPlane.Spec.Rabbitmq.Templates).NotTo(BeEmpty())
+		for rabbitMQName := range *controlPlane.Spec.Rabbitmq.Templates {
+			rabbitMQ := &rabbitmqv1.RabbitMq{}
+			name := types.NamespacedName{Namespace: names.Namespace, Name: rabbitMQName}
+			g.Expect(k8sClient.Get(ctx, name, rabbitMQ)).To(Succeed())
+			g.Expect(rabbitMQ.Spec.ContainerImage).To(Equal(expectedImage))
+		}
+	}, timeout, interval).Should(Succeed())
+}
+
+func waitForMemcachedImage(expectedImage string) {
+	Eventually(func(g Gomega) {
+		memcached := &memcachedv1.Memcached{}
+		g.Expect(k8sClient.Get(ctx, names.MemcachedName, memcached)).To(Succeed())
+		g.Expect(memcached.Spec.ContainerImage).To(Equal(expectedImage))
+	}, timeout, interval).Should(Succeed())
+}
+
+func waitForOVNControllerImages(name types.NamespacedName, ovnImage string, ovsImage string) {
+	Eventually(func(g Gomega) {
+		ovnController := &ovnv1.OVNController{}
+		g.Expect(k8sClient.Get(ctx, name, ovnController)).To(Succeed())
+		g.Expect(ovnController.Spec.OvnContainerImage).To(Equal(ovnImage))
+		g.Expect(ovnController.Spec.OvsContainerImage).To(Equal(ovsImage))
 	}, timeout, interval).Should(Succeed())
 }
 
@@ -223,6 +260,7 @@ var _ = Describe("OpenStackVersion controller", func() {
 		initialVersion := "old"
 		updatedVersion := "0.0.1"
 		targetOvnControllerVersion := ""
+		targetOvnControllerOvsVersion := ""
 		targetRabbitMQVersion := ""
 		targetMariaDBVersion := ""
 		targetMemcachedVersion := ""
@@ -331,6 +369,7 @@ var _ = Describe("OpenStackVersion controller", func() {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				// capture this here as we'll need it below (this one comes from RELATED_IMAGES in hack/export_related_images.sh)
 				targetOvnControllerVersion = *version.Status.ContainerImages.OvnControllerImage
+				targetOvnControllerOvsVersion = *version.Status.ContainerImages.OvnControllerOvsImage
 				targetRabbitMQVersion = *version.Status.ContainerImages.RabbitmqImage
 				targetMariaDBVersion = *version.Status.ContainerImages.MariadbImage
 				targetMemcachedVersion = *version.Status.ContainerImages.InfraMemcachedImage
@@ -518,6 +557,11 @@ var _ = Describe("OpenStackVersion controller", func() {
 				k8s_corev1.ConditionFalse,
 			)
 
+			waitForOVNControllerImages(
+				names.OVNControllerName,
+				targetOvnControllerVersion,
+				targetOvnControllerOvsVersion,
+			)
 			ovn.SimulateOVNControllerReady(names.OVNControllerName)
 
 			Eventually(func(g Gomega) {
@@ -592,6 +636,7 @@ var _ = Describe("OpenStackVersion controller", func() {
 				k8s_corev1.ConditionFalse,
 			)
 
+			waitForRabbitMQImages(targetRabbitMQVersion)
 			SimulateRabbitmqReady()
 
 			Eventually(func(g Gomega) {
@@ -646,6 +691,7 @@ var _ = Describe("OpenStackVersion controller", func() {
 				k8s_corev1.ConditionFalse,
 			)
 
+			waitForMemcachedImage(targetMemcachedVersion)
 			SimulateMemcachedReady()
 
 			Eventually(func(g Gomega) {
@@ -992,6 +1038,7 @@ var _ = Describe("OpenStackVersion controller", func() {
 				k8s_corev1.ConditionFalse,
 			)
 
+			waitForRabbitMQImages(targetRabbitMQVersion)
 			SimulateRabbitmqReady()
 			Eventually(func(g Gomega) {
 				th.ExpectCondition(
@@ -1025,6 +1072,7 @@ var _ = Describe("OpenStackVersion controller", func() {
 				g.Expect(*OSCtlplane.Status.ContainerImages.MariadbImage).Should(Equal(targetMariaDBVersion))
 			}, timeout, interval).Should(Succeed())
 
+			waitForMemcachedImage(targetMemcachedVersion)
 			SimulateMemcachedReady()
 			Eventually(func(g Gomega) {
 				th.ExpectCondition(
@@ -1914,6 +1962,9 @@ var _ = Describe("OpenStackVersion controller", func() {
 				)
 			}, timeout, interval).Should(Succeed())
 
+			version := GetOpenStackVersion(names.OpenStackVersionName)
+			Expect(version.Status.ContainerImages.RabbitmqImage).NotTo(BeNil())
+			waitForRabbitMQImages(*version.Status.ContainerImages.RabbitmqImage)
 			SimulateRabbitmqReady()
 
 			Eventually(func(_ Gomega) {
