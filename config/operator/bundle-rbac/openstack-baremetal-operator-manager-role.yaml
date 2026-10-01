@@ -139,7 +139,7 @@ rules:
 - apiGroups:
     - security.openshift.io
   resourceNames:
-    - hostnetwork
+    - hostnetwork-v2
   resources:
     - securitycontextconstraints
   verbs:
