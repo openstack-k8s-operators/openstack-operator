@@ -135,6 +135,8 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 				instance.Spec.Nova.Template.APIServiceTemplate.Override.Service[endpointType],
 				nova.Name+"-api")
 	}
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	novaAPIUserTLS := instance.Spec.Nova.Template.APIServiceTemplate.TLS
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Nova.Template.APIServiceTemplate.TLS = nova.Spec.APIServiceTemplate.TLS
@@ -154,6 +156,10 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 		instance.Spec.Nova.Template.MetadataServiceTemplate.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	}
+	// snapshot pre-restore BYO novncproxy cert secret per cell (pure user input, captured
+	// before the restore below overwrites it; used in the later cell loop; see resolveServiceCert)
+	novncUserSecret := map[string]*string{}
+
 	// Cells
 	for cellName, cellTemplate := range instance.Spec.Nova.Template.CellTemplates {
 		// add override where novncproxy enabled is not specified or explicitely set to true
@@ -163,6 +169,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			}
 			cellTemplate.NoVNCProxyServiceTemplate.Override.Service.AddLabel(getNoVNCProxyLabelMap(nova.Name, cellName))
 
+			novncUserSecret[cellName] = cellTemplate.NoVNCProxyServiceTemplate.TLS.Service.SecretName
 			// preserve any previously set TLS certs,set CA cert
 			if instance.Spec.TLS.PodLevel.Enabled {
 				cellTemplate.NoVNCProxyServiceTemplate.TLS = nova.Spec.CellTemplates[cellName].NoVNCProxyServiceTemplate.TLS
@@ -249,7 +256,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Nova.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeNovaReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Nova.Template.APIServiceTemplate.TLS,
+			novaAPIUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -340,7 +347,7 @@ func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 					tls.API{
 						API: tls.APIService{
 							Public: tls.GenericService{
-								SecretName: cellTemplate.NoVNCProxyServiceTemplate.TLS.Service.SecretName,
+								SecretName: novncUserSecret[cellName],
 							},
 						},
 					},

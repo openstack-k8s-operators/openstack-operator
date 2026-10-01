@@ -112,6 +112,10 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 				octavia.Name)
 	}
 
+	// snapshot the user's TLS before the restore below: it is the bring-your-own
+	// service cert signal for EnsureEndpointConfig
+	octaviaUserTLS := tls.API{API: instance.Spec.Octavia.Template.OctaviaAPI.TLS.API}
+
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		clusterDomain := clusterdns.GetDNSClusterDomain()
@@ -224,7 +228,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Octavia.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeOctaviaReadyCondition,
 			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
-			tls.API{},
+			octaviaUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

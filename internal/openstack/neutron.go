@@ -71,6 +71,8 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	neutronUserTLS := instance.Spec.Neutron.Template.TLS
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Neutron.Template.TLS = neutronAPI.Spec.TLS
@@ -176,7 +178,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Neutron.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeNeutronReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			tls.API{API: instance.Spec.Neutron.Template.TLS.API},
+			tls.API{API: neutronUserTLS.API},
 		)
 		if err != nil {
 			return ctrlResult, err

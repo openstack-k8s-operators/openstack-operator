@@ -125,7 +125,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=redis.openstack.org,resources=redises,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes/custom-host,verbs=create;update;patch
-// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;
+// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
@@ -228,6 +228,17 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	instance.Status.ObservedGeneration = instance.Generation
 
 	// If we're not deleting this and the service object doesn't have our finalizer, add it.
+	//
+	// This must stay the only metadata write that is followed by more spec mutation, and
+	// it returns before any is made. The reconcilers mutate instance.Spec in memory (issued
+	// cert secret names, overrides, CA bundle names), and the deferred PatchInstance builds
+	// its MergeFrom patch on the main resource whenever the metadata changed - that patch
+	// would then persist those spec changes. The persisted spec is the user input the
+	// reconcilers snapshot as the bring-your-own cert signal and the secret field indexes read;
+	// persisted operator-issued names would be mistaken for BYO secrets (see resolveServiceCert).
+	// The finalizer removal in reconcileDelete is safe for the same reason: no spec mutation
+	// has happened on that path. Do not add annotation/label/finalizer writes after the spec
+	// mutations without going through a separate patch.
 	if instance.DeletionTimestamp.IsZero() && controllerutil.AddFinalizer(instance, helper.GetFinalizer()) || isNewInstance {
 		return ctrl.Result{}, nil
 	}
@@ -899,6 +910,13 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 			&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(r.findControlPlaneForSrc),
 			builder.WithPredicates(backup.AnnotationChangedPredicate(openstack.ServiceCertSelector)),
+		).
+		// the service operators rename the Service ports and set its type; the
+		// endpointURL front port is injected only after that, see EnsureEndpointConfig
+		Watches(
+			&corev1.Service{},
+			handler.EnqueueRequestsFromMapFunc(r.findControlPlaneForSrc),
+			builder.WithPredicates(openstack.ServicePortOrTypeChangedPredicate()),
 		).
 		Complete(r)
 }

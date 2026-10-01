@@ -110,6 +110,8 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Manila.Template.Auth.ApplicationCredentialSecret = acSecretName
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	manilaUserTLS := instance.Spec.Manila.Template.ManilaAPI.TLS
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Manila.Template.ManilaAPI.TLS = manila.Spec.ManilaAPI.TLS
@@ -139,7 +141,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Manila.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeManilaReadyCondition,
 			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Manila.Template.ManilaAPI.TLS,
+			manilaUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

@@ -123,6 +123,8 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template.Auth.ApplicationCredentialSecret = acSecretName
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	watcherUserTLS := instance.Spec.Watcher.Template.APIServiceTemplate.TLS
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Watcher.Template.APIServiceTemplate.TLS = watcher.Spec.APIServiceTemplate.TLS
@@ -151,7 +153,7 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 			instance.Spec.Watcher.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeWatcherReadyCondition,
 			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Watcher.Template.APIServiceTemplate.TLS,
+			watcherUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

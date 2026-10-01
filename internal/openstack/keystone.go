@@ -64,6 +64,8 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		}
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	keystoneUserTLS := instance.Spec.Keystone.Template.TLS
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Keystone.Template.TLS = keystoneAPI.Spec.TLS
@@ -92,7 +94,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 			instance.Spec.Keystone.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeKeystoneAPIReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Keystone.Template.TLS,
+			keystoneUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

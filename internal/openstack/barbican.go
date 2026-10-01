@@ -108,6 +108,8 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 		instance.Spec.Barbican.Template.Auth.ApplicationCredentialSecret = acSecretName
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	barbicanUserTLS := instance.Spec.Barbican.Template.BarbicanAPI.TLS
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Barbican.Template.BarbicanAPI.TLS = barbican.Spec.BarbicanAPI.TLS
@@ -136,7 +138,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 			instance.Spec.Barbican.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeBarbicanReadyCondition,
 			false, // TODO: (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Barbican.Template.BarbicanAPI.TLS,
+			barbicanUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

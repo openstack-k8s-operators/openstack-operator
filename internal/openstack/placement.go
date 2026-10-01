@@ -114,6 +114,8 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 		instance.Spec.Placement.Template.Auth.ApplicationCredentialSecret = acSecretName
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	placementUserTLS := instance.Spec.Placement.Template.TLS
 	// set CA cert and preserve any previously set TLS certs
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Placement.Template.TLS = placementAPI.Spec.TLS
@@ -142,7 +144,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 			instance.Spec.Placement.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposePlacementAPIReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Placement.Template.TLS,
+			placementUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err
