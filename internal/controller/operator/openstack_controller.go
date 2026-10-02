@@ -57,8 +57,9 @@ import (
 // OpenStackReconciler reconciles a OpenStack object
 type OpenStackReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Kclient kubernetes.Interface
+	Scheme                 *runtime.Scheme
+	Kclient                kubernetes.Interface
+	webhookCertSecretNames []string // cached list of webhook certificate secret names, populated once at startup
 }
 
 // GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
@@ -116,6 +117,7 @@ func SetupEnv() {
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;update;delete
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch;create;update
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=discovery.k8s.io,resources=endpointslices,verbs=get;list;watch;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
@@ -333,6 +335,24 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			err))
 		return ctrl.Result{}, err
 	}
+
+	// Check if webhook certificate secrets exist before checking deployment status
+	// Operators with webhooks enabled will fail to start if these secrets don't exist yet,
+	// causing deployments to not run. Check for missing secrets first so we can requeue
+	// with the appropriate delay instead of waiting indefinitely.
+	ctrlResult, err := r.checkWebhookCertificates(ctx, instance)
+	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			operatorv1beta1.OpenStackOperatorReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			operatorv1beta1.OpenStackOperatorErrorMessage,
+			err))
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	if deploymentsRunning < *instance.Status.EnabledOperatorCount {
 		Log.Info("Waiting for all deployments to be running", "current", deploymentsRunning, "expected", *instance.Status.EnabledOperatorCount, "pending", deploymentsPending)
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -349,7 +369,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		operatorv1beta1.OpenStackOperatorDeploymentsReadyMessage)
 
 	// Check if Services are running and have an endpoint
-	ctrlResult, err := r.checkServiceEndpoints(ctx, instance)
+	ctrlResult, err = r.checkServiceEndpoints(ctx, instance)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -559,6 +579,85 @@ func isWebhookEndpoint(name string) bool {
 		}
 	}
 	return false
+}
+
+// loadWebhookCertSecretNames inspects bindata/operator/*-webhooks.yaml and returns the expected
+// webhook certificate secret names. Called once at startup in SetupWithManager.
+func loadWebhookCertSecretNames(bindir string) []string {
+	secrets := []string{"webhook-server-cert"} // openstack-operator
+
+	pattern := filepath.Join(bindir, "operator", "*-webhooks.yaml")
+	matches, _ := filepath.Glob(pattern)
+	for _, path := range matches {
+		base := filepath.Base(path)
+		// Extract operator name: "infra-operator-webhooks.yaml" -> "infra-operator"
+		opName := strings.TrimSuffix(base, "-webhooks.yaml")
+		if opName != "openstack-operator" { // already added above
+			secrets = append(secrets, opName+"-webhook-server-cert")
+		}
+	}
+	return secrets
+}
+
+// checkWebhookCertificates checks if webhook certificate secrets exist for operators with webhooks enabled.
+// Operator pods with ENABLE_WEBHOOKS=true mount these secrets and fail to start if they don't exist yet.
+// This prevents the controller from crash-looping while waiting for cert-manager to create the certificates.
+func (r *OpenStackReconciler) checkWebhookCertificates(ctx context.Context, instance *operatorv1beta1.OpenStack) (ctrl.Result, error) {
+	Log := r.GetLogger(ctx)
+
+	// Filter webhook cert secrets to only include enabled operators
+	// An operator is disabled if OperatorOverrides sets replicas to 0
+	enabledSecrets := make([]string, 0, len(r.webhookCertSecretNames))
+	for _, secretName := range r.webhookCertSecretNames {
+		// Extract operator name from secret name
+		// "webhook-server-cert" -> "openstack"
+		// "infra-operator-webhook-server-cert" -> "infra"
+		var operatorName string
+		if secretName == "webhook-server-cert" {
+			operatorName = "openstack"
+		} else {
+			operatorName = strings.TrimSuffix(secretName, "-operator-webhook-server-cert")
+		}
+
+		// Check if this operator is explicitly disabled
+		disabled := false
+		for _, op := range instance.Spec.OperatorOverrides {
+			if op.Name == operatorName && op.Replicas != nil && *op.Replicas == 0 {
+				disabled = true
+				Log.Info("Skipping webhook certificate check for disabled operator", "operator", operatorName, "secret", secretName)
+				break
+			}
+		}
+
+		if !disabled {
+			enabledSecrets = append(enabledSecrets, secretName)
+		}
+	}
+
+	secretList := &corev1.SecretList{}
+	err := r.List(ctx, secretList, &client.ListOptions{Namespace: instance.Namespace})
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	existingSecrets := make(map[string]bool)
+	for _, secret := range secretList.Items {
+		existingSecrets[secret.Name] = true
+	}
+
+	var missingSecrets []string
+	for _, secretName := range enabledSecrets {
+		if !existingSecrets[secretName] {
+			missingSecrets = append(missingSecrets, secretName)
+		}
+	}
+
+	if len(missingSecrets) > 0 {
+		Log.Info("Waiting for webhook certificate secrets to be created by cert-manager", "missing", missingSecrets)
+		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+	}
+
+	return ctrl.Result{}, nil
 }
 
 // checkServiceEndpoints -
@@ -1178,6 +1277,8 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	bindir := util.GetEnvVar("BASE_BINDATA", "/bindata")
+	r.webhookCertSecretNames = loadWebhookCertSecretNames(bindir)
 	return ctrl.NewControllerManagedBy(mgr).
 		Owns(&appsv1.Deployment{}).
 		For(&operatorv1beta1.OpenStack{}).

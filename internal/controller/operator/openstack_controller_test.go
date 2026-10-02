@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
+	"k8s.io/utils/ptr"
 
 	operatorv1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/operator/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -84,4 +85,139 @@ func TestAdoptAwayServiceAccounts(t *testing.T) {
 
 	// Idempotent: calling it again with the reference already gone must not error.
 	g.Expect(r.adoptAwayServiceAccounts(context.Background(), instance)).To(Succeed())
+}
+
+func TestCheckWebhookCertificates(t *testing.T) {
+	s := newTestScheme(t)
+	ctx := context.Background()
+
+	instance := &operatorv1beta1.OpenStack{
+		ObjectMeta: metav1.ObjectMeta{Name: "openstack", Namespace: "openstack-operators"},
+		Spec:       operatorv1beta1.OpenStackSpec{},
+	}
+
+	t.Run("returns requeue when certificate secret is missing", func(t *testing.T) {
+		g := NewWithT(t)
+
+		fakeClient := fakeclient.NewClientBuilder().
+			WithScheme(s).
+			WithObjects(instance).
+			Build()
+
+		r := &OpenStackReconciler{
+			Client:                 fakeClient,
+			Scheme:                 s,
+			webhookCertSecretNames: []string{"webhook-server-cert"},
+		}
+
+		result, err := r.checkWebhookCertificates(ctx, instance)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(result.RequeueAfter).NotTo(BeZero(), "should requeue when cert is missing")
+	})
+
+	t.Run("proceeds when all certificate secrets exist", func(t *testing.T) {
+		g := NewWithT(t)
+
+		cert := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "webhook-server-cert",
+				Namespace: "openstack-operators",
+			},
+		}
+
+		fakeClient := fakeclient.NewClientBuilder().
+			WithScheme(s).
+			WithObjects(instance, cert).
+			Build()
+
+		r := &OpenStackReconciler{
+			Client:                 fakeClient,
+			Scheme:                 s,
+			webhookCertSecretNames: []string{"webhook-server-cert"},
+		}
+
+		result, err := r.checkWebhookCertificates(ctx, instance)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(result.RequeueAfter).To(BeZero(), "should not requeue when all certs exist")
+	})
+
+	t.Run("skips disabled operators", func(t *testing.T) {
+		g := NewWithT(t)
+
+		instanceWithDisabled := &operatorv1beta1.OpenStack{
+			ObjectMeta: metav1.ObjectMeta{Name: "openstack", Namespace: "openstack-operators"},
+			Spec: operatorv1beta1.OpenStackSpec{
+				OperatorOverrides: []operatorv1beta1.OperatorSpec{
+					{
+						Name:     "infra",
+						Replicas: ptr.To(int32(0)),
+					},
+				},
+			},
+		}
+
+		// Only create openstack-operator cert, not infra-operator cert
+		cert := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "webhook-server-cert",
+				Namespace: "openstack-operators",
+			},
+		}
+
+		fakeClient := fakeclient.NewClientBuilder().
+			WithScheme(s).
+			WithObjects(instanceWithDisabled, cert).
+			Build()
+
+		r := &OpenStackReconciler{
+			Client: fakeClient,
+			Scheme: s,
+			// Both certs are in the discovered list
+			webhookCertSecretNames: []string{
+				"webhook-server-cert",
+				"infra-operator-webhook-server-cert",
+			},
+		}
+
+		result, err := r.checkWebhookCertificates(ctx, instanceWithDisabled)
+		g.Expect(err).NotTo(HaveOccurred())
+		// Should not requeue - infra cert is not required because infra is disabled
+		g.Expect(result.RequeueAfter).To(BeZero(), "should not wait for disabled operator's cert")
+	})
+
+	t.Run("waits for enabled operators even when others disabled", func(t *testing.T) {
+		g := NewWithT(t)
+
+		instanceWithDisabled := &operatorv1beta1.OpenStack{
+			ObjectMeta: metav1.ObjectMeta{Name: "openstack", Namespace: "openstack-operators"},
+			Spec: operatorv1beta1.OpenStackSpec{
+				OperatorOverrides: []operatorv1beta1.OperatorSpec{
+					{
+						Name:     "infra",
+						Replicas: ptr.To(int32(0)),
+					},
+				},
+			},
+		}
+
+		// No certs exist
+		fakeClient := fakeclient.NewClientBuilder().
+			WithScheme(s).
+			WithObjects(instanceWithDisabled).
+			Build()
+
+		r := &OpenStackReconciler{
+			Client: fakeClient,
+			Scheme: s,
+			webhookCertSecretNames: []string{
+				"webhook-server-cert",                // needed (openstack operator)
+				"infra-operator-webhook-server-cert", // not needed (disabled)
+			},
+		}
+
+		result, err := r.checkWebhookCertificates(ctx, instanceWithDisabled)
+		g.Expect(err).NotTo(HaveOccurred())
+		// Should requeue - still need openstack-operator cert even though infra is disabled
+		g.Expect(result.RequeueAfter).NotTo(BeZero(), "should wait for enabled operator's cert")
+	})
 }
