@@ -162,7 +162,7 @@ service to execute for the `edpm-compute` `NodeSet`.
      - configure-os
      - run-os
      - ovn
-     - neutron-metadata
+     - neutron-ovn
      - libvirt
      - nova
    nodes:
