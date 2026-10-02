@@ -422,6 +422,37 @@ func ParallelExecutionDeploymentSpec() map[string]interface{} {
 	}
 }
 
+// BarrierNodeSetSpec builds a pre-provisioned nodeset for barrier tests. Each
+// nodeset needs its own ansibleHost: the nodeset webhook rejects a node address
+// that already exists in another nodeset.
+func BarrierNodeSetSpec(nodeSetName string, services []string, ansibleHost string) map[string]interface{} {
+	nodeName := fmt.Sprintf("%s-node-1", nodeSetName)
+	return map[string]interface{}{
+		"services": services,
+		"nodeTemplate": map[string]interface{}{
+			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+			"ansible": map[string]interface{}{
+				"ansibleUser": "cloud-user",
+			},
+		},
+		"nodes": map[string]interface{}{
+			nodeName: map[string]interface{}{
+				"hostName": nodeName,
+				"networks": []infrav1.IPSetNetwork{
+					{Name: "networkinternal", SubnetName: "subnet1"},
+					{Name: "ctlplane", SubnetName: "subnet1"},
+				},
+				"ansible": map[string]interface{}{
+					"ansibleHost": ansibleHost,
+				},
+			},
+		},
+		"secretMaxSize":  1048576,
+		"tlsEnabled":     true,
+		"preProvisioned": true,
+	}
+}
+
 func DefaultNetConfigSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"networks": []map[string]interface{}{{

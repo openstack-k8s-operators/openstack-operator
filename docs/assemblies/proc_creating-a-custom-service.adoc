@@ -92,7 +92,9 @@ spec:
 +
 A mount is created for each `ConfigMap` and `Secret` in the `OpenStackAnsibleEE` pod with a filename that matches the resource value. The mounts are created under `/var/lib/openstack/configs/<service name>`.
 
-. Optional: It may be necessary to run some services on all nodesets at the same time. These services need to have their `deployOnAllNodeSets` field set to true. If these services are repated in multiple nodeset specs included in a deployment, they would be ignored from subsequent nodeset services and would be run only once.
+. Optional: It may be necessary to run some services on all nodesets at the same time. These services need to have their `deployOnAllNodeSets` field set to true. Such a service produces a single `OpenStackAnsibleEE` job for the whole deployment, targeting the hosts of every nodeset, even nodesets that do not list the service.
++
+A deployment scoped service is an execution barrier for the nodesets that list it: its job starts only once every service ordered before it in each of those nodesets has completed, and none of those nodesets starts a service ordered after it until the job completed. A nodeset that does not list the service neither waits for it nor delays it, so list the service in every nodeset whose deployment ordering depends on it.
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
