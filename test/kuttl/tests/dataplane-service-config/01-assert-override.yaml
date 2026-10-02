@@ -1,0 +1,28 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+commands:
+- script: |
+    oc exec -n openstack-kuttl-tests job/kuttl-service-edpm-compute-forks-override-edpm-compute-no-nodes -- printenv ANSIBLE_FORKS | grep -qx '11'
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kuttl-service-edpm-compute-forks-override-edpm-compute-no-nodes
+  namespace: openstack-kuttl-tests
+spec:
+  template:
+    spec:
+      containers:
+      - name: kuttl-service-edpm-compute-forks-override-edpm-compute-no-nodes
+        envFrom:
+        - configMapRef:
+            name: kuttl-custom-ee-env
+            optional: true
+        resources:
+          requests:
+            cpu: 1500m
+            memory: 512Mi
+          limits:
+            cpu: "3"
+            memory: 2Gi

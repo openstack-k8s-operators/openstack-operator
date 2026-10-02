@@ -48,6 +48,7 @@ func (in *AnsibleEESpec) DeepCopyInto(out *AnsibleEESpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	in.AnsibleEEResources.DeepCopyInto(&out.AnsibleEEResources)
 	if in.ExtraVars != nil {
 		in, out := &in.ExtraVars, &out.ExtraVars
 		*out = make(map[string]json.RawMessage, len(*in))
@@ -601,6 +602,7 @@ func (in *OpenStackDataPlaneNodeSetSpec) DeepCopyInto(out *OpenStackDataPlaneNod
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	in.AnsibleEEResources.DeepCopyInto(&out.AnsibleEEResources)
 	if in.NetworkAttachments != nil {
 		in, out := &in.NetworkAttachments, &out.NetworkAttachments
 		*out = make([]string, len(*in))

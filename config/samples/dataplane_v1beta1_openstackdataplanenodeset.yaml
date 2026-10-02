@@ -4,6 +4,15 @@ metadata:
   name: openstack-edpm
 spec:
   tlsEnabled: true
+  # Optional: resources for the main Ansible EE Job container.
+  # 1500m CPU request (below the 2 CPU limit) gives 2 default forks.
+  ansibleEEResources:
+    requests:
+      cpu: 1500m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
