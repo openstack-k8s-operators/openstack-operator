@@ -2,9 +2,20 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   name: openstackassistants.assistant.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: assistant.openstack.org
   names:
     kind: OpenStackAssistant
@@ -471,6 +482,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   labels:
     backup.openstack.org/category: controlplane
@@ -478,6 +490,16 @@ metadata:
     backup.openstack.org/restore-order: "20"
   name: openstackbackupconfigs.backup.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: backup.openstack.org
   names:
     kind: OpenStackBackupConfig
@@ -740,9 +762,20 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   name: openstackclients.client.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: client.openstack.org
   names:
     kind: OpenStackClient
@@ -1032,6 +1065,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   labels:
     backup.openstack.org/category: controlplane
@@ -1039,6 +1073,16 @@ metadata:
     backup.openstack.org/restore-order: "30"
   name: openstackcontrolplanes.core.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: core.openstack.org
   names:
     kind: OpenStackControlPlane
@@ -20630,9 +20674,20 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   name: openstackdataplanedeployments.dataplane.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: dataplane.openstack.org
   names:
     kind: OpenStackDataPlaneDeployment
@@ -20938,6 +20993,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   labels:
     backup.openstack.org/category: dataplane
@@ -20945,6 +21001,16 @@ metadata:
     backup.openstack.org/restore-order: "60"
   name: openstackdataplanenodesets.dataplane.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: dataplane.openstack.org
   names:
     kind: OpenStackDataPlaneNodeSet
@@ -22585,6 +22651,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   labels:
     backup.openstack.org/category: dataplane
@@ -22592,6 +22659,16 @@ metadata:
     backup.openstack.org/restore-order: "40"
   name: openstackdataplaneservices.dataplane.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: dataplane.openstack.org
   names:
     kind: OpenStackDataPlaneService
@@ -22897,6 +22974,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/openstack-operator-serving-cert'
     controller-gen.kubebuilder.io/version: v0.18.0
   labels:
     backup.openstack.org/category: controlplane
@@ -22904,6 +22982,16 @@ metadata:
     backup.openstack.org/restore-order: "20"
   name: openstackversions.core.openstack.org
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: openstack-operator-webhook-service
+          namespace: '{{ .OperatorNamespace }}'
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: core.openstack.org
   names:
     kind: OpenStackVersion

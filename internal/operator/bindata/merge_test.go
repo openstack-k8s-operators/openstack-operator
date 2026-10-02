@@ -212,6 +212,116 @@ func TestMergeWebhookSkipsNonWebhookResources(t *testing.T) {
 	}
 }
 
+func makeCRD(caBundle string) *uns.Unstructured {
+	svc := map[string]interface{}{
+		"name":      "keystone-operator-webhook-service",
+		"namespace": "openstack-operators",
+		"path":      "/convert",
+	}
+	cc := map[string]interface{}{"service": svc}
+	if caBundle != "" {
+		cc["caBundle"] = caBundle
+	}
+	obj := &uns.Unstructured{Object: map[string]interface{}{
+		"apiVersion": "apiextensions.k8s.io/v1",
+		"kind":       "CustomResourceDefinition",
+		"metadata":   map[string]interface{}{"name": "keystoneapis.keystone.openstack.org"},
+		"spec": map[string]interface{}{
+			"conversion": map[string]interface{}{
+				"strategy": "Webhook",
+				"webhook":  map[string]interface{}{"clientConfig": cc},
+			},
+		},
+	}}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{
+		Group: "apiextensions.k8s.io", Version: "v1", Kind: "CustomResourceDefinition",
+	})
+	return obj
+}
+
+func TestMergeCRDPreservesCaBundle(t *testing.T) {
+	current := makeCRD("CERT-MANAGER-INJECTED-CA")
+	updated := makeCRD("")
+
+	if err := MergeCRDForUpdate(current, updated); err != nil {
+		t.Fatalf("MergeCRDForUpdate failed: %v", err)
+	}
+
+	got, found, err := uns.NestedString(updated.Object, "spec", "conversion", "webhook", "clientConfig", "caBundle")
+	if err != nil || !found {
+		t.Fatalf("caBundle not found after merge: err=%v found=%v", err, found)
+	}
+	if got != "CERT-MANAGER-INJECTED-CA" {
+		t.Errorf("expected caBundle CERT-MANAGER-INJECTED-CA, got %q", got)
+	}
+}
+
+func TestMergeCRDNoCaBundleInCurrent(t *testing.T) {
+	current := makeCRD("")
+	updated := makeCRD("")
+
+	if err := MergeCRDForUpdate(current, updated); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	_, found, _ := uns.NestedString(updated.Object, "spec", "conversion", "webhook", "clientConfig", "caBundle")
+	if found {
+		t.Error("expected no caBundle when current has none")
+	}
+}
+
+func TestMergeCRDSkipsNonCRDs(t *testing.T) {
+	current := makeWebhookConfig(makeWebhook("mfoo.kb.io", "/mutate-foo", "CABUNDLE"))
+	updated := makeWebhookConfig(makeWebhook("mfoo.kb.io", "/mutate-foo", nil))
+
+	if err := MergeCRDForUpdate(current, updated); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// caBundle should NOT be copied — wrong object type
+	if bundle := getWebhookCABundle(updated, 0); bundle != nil {
+		t.Errorf("MergeCRDForUpdate should not touch non-CRD objects, but caBundle=%v", bundle)
+	}
+}
+
+func TestMergeCRDInvalidCaBundleType(t *testing.T) {
+	// When caBundle is not a string (e.g., malformed CRD with caBundle as a map),
+	// MergeCRDForUpdate should return an error instead of silently ignoring it.
+	current := &uns.Unstructured{Object: map[string]interface{}{
+		"apiVersion": "apiextensions.k8s.io/v1",
+		"kind":       "CustomResourceDefinition",
+		"metadata":   map[string]interface{}{"name": "keystoneapis.keystone.openstack.org"},
+		"spec": map[string]interface{}{
+			"conversion": map[string]interface{}{
+				"strategy": "Webhook",
+				"webhook": map[string]interface{}{
+					"clientConfig": map[string]interface{}{
+						"service": map[string]interface{}{
+							"name":      "keystone-operator-webhook-service",
+							"namespace": "openstack-operators",
+							"path":      "/convert",
+						},
+						// Invalid: caBundle should be a string, but it's a map
+						"caBundle": map[string]interface{}{"invalid": "structure"},
+					},
+				},
+			},
+		},
+	}}
+	current.SetGroupVersionKind(schema.GroupVersionKind{
+		Group: "apiextensions.k8s.io", Version: "v1", Kind: "CustomResourceDefinition",
+	})
+
+	updated := makeCRD("")
+
+	err := MergeCRDForUpdate(current, updated)
+	if err == nil {
+		t.Fatal("expected error for invalid caBundle type, got nil")
+	}
+	if err.Error() == "" {
+		t.Error("error message should not be empty")
+	}
+}
+
 func TestMergeWebhookValidatingConfig(t *testing.T) {
 	// The fix should also work for ValidatingWebhookConfiguration.
 	current := &uns.Unstructured{Object: map[string]interface{}{
