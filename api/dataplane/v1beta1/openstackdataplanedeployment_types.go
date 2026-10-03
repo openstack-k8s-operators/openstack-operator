@@ -39,7 +39,11 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
 
-	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
+	// PreserveJobs - do not delete jobs after they finished e.g. to check logs.
+	// When false the jobs are deleted after a delay once the deployment is
+	// finished - deployed, or failed with the backoff limit exceeded - and not
+	// when an individual job finishes. While a deployment is in flight its
+	// jobs are what tells the operator which services already ran.
 	// PreserveJobs default: true
 	// +kubebuilder:validation:Enum:=true;false
 	// +kubebuilder:default:=true
@@ -182,6 +186,42 @@ func init() {
 // IsReady - returns true if the OpenStackDataPlaneDeployment is ready
 func (instance OpenStackDataPlaneDeployment) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+}
+
+// IsFinished reports whether the deployment reached a state it will not advance
+// from. The failure verdict is only readable before InitConditions resets the
+// conditions.
+func (instance *OpenStackDataPlaneDeployment) IsFinished() bool {
+	return instance.Status.Deployed || instance.isTerminalFailure()
+}
+
+// FinishedAt reports when the deployment reached that state, or nil while it can
+// still progress. LastTransitionTime only moves when the condition state
+// changes, so the value is stable across reconciles.
+func (instance *OpenStackDataPlaneDeployment) FinishedAt() *metav1.Time {
+	if instance.Status.Conditions == nil {
+		return nil
+	}
+	deploymentCondition := instance.Status.Conditions.Get(condition.DeploymentReadyCondition)
+	if deploymentCondition == nil || deploymentCondition.LastTransitionTime.IsZero() {
+		return nil
+	}
+	if !instance.Status.Deployed && !instance.isTerminalFailure() {
+		return nil
+	}
+
+	finishedAt := deploymentCondition.LastTransitionTime
+	return &finishedAt
+}
+
+func (instance *OpenStackDataPlaneDeployment) isTerminalFailure() bool {
+	if instance.Status.Conditions == nil {
+		return false
+	}
+	deploymentCondition := instance.Status.Conditions.Get(condition.DeploymentReadyCondition)
+	return deploymentCondition != nil &&
+		deploymentCondition.Severity == condition.SeverityError &&
+		deploymentCondition.Reason == condition.JobReasonBackoffLimitExceeded
 }
 
 // InitConditions - Initializes Status Conditons

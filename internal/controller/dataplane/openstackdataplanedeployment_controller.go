@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -28,6 +29,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -106,6 +108,21 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		Log,
 	)
 
+	// Whether Job cleanup may be scheduled: a verdict freshly computed by this
+	// reconcile is only trustworthy once the status patch below persists it.
+	finishedOnEntry := instance.IsFinished()
+	statusPersisted := false
+
+	// Registered ahead of the status patch defer so it runs after the verdict persists.
+	defer func() {
+		if err := r.reconcileJobTTL(ctx, helper, instance, finishedOnEntry || statusPersisted); err != nil {
+			Log.Error(err, "Failed to reconcile AnsibleEE job cleanup", "deployment", instance.Name)
+			if _err == nil {
+				_err = err
+			}
+		}
+	}()
+
 	// If the deploy is already done, return immediately.
 	if instance.Status.Deployed {
 		Log.Info("Already deployed", "instance.Status.Deployed", instance.Status.Deployed)
@@ -113,17 +130,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	// If the deployment has failed with backoff limit exceeded, do not reconcile
-	// even if nodesets or other watched resources change. The deployment is in a
-	// terminal failure state and should not be retried.
-	if instance.Status.Conditions != nil {
-		deploymentCondition := instance.Status.Conditions.Get(condition.DeploymentReadyCondition)
-		if deploymentCondition != nil &&
-			deploymentCondition.Severity == condition.SeverityError &&
-			deploymentCondition.Reason == condition.JobReasonBackoffLimitExceeded {
-			Log.Info("Deployment has failed with backoff limit exceeded, skipping reconciliation",
-				"deployment", instance.Name)
-			return ctrl.Result{}, nil
-		}
+	// even if nodesets or other watched resources change. The deployment has
+	// failed and should not be retried.
+	if instance.IsFinished() {
+		Log.Info("Deployment has failed with backoff limit exceeded, skipping reconciliation",
+			"deployment", instance.Name)
+		return ctrl.Result{}, nil
 	}
 
 	// initialize status if Conditions is nil, but do not reset if it already
@@ -169,6 +181,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			_err = err
 			return
 		}
+		statusPersisted = true
 	}()
 
 	// Ensure NodeSets
@@ -443,6 +456,98 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		Log.Error(err, "Error setting service hashes")
 	}
 	return ctrl.Result{}, nil
+}
+
+// Mirrors the delay lib-common applies to finished Jobs.
+const jobCleanupDelaySeconds int32 = 10 * 60
+
+// reconcileJobTTL defers Job cleanup until the deployment is finished: while it
+// runs the Jobs are the only record of which services already ran. scheduleCleanup
+// is false while the terminal verdict exists only in memory.
+func (r *OpenStackDataPlaneDeploymentReconciler) reconcileJobTTL(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneDeployment,
+	scheduleCleanup bool,
+) error {
+	if instance.Spec.PreserveJobs {
+		return nil
+	}
+
+	jobList := &batchv1.JobList{}
+	err := helper.GetClient().List(
+		ctx,
+		jobList,
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels{dataplaneutil.AnsibleEEDeploymentLabel: instance.Name},
+	)
+	if err != nil {
+		return err
+	}
+
+	finished := scheduleCleanup && instance.IsFinished()
+	finishedAt := instance.FinishedAt()
+
+	for i := range jobList.Items {
+		job := &jobList.Items[i]
+		if finished {
+			// Ageing starts at the Job's own completion time, so one schedule per Job
+			// is enough and the value must not be re-derived afterwards.
+			if job.Spec.TTLSecondsAfterFinished != nil {
+				continue
+			}
+			patch := client.MergeFrom(job.DeepCopy())
+			ttl := jobCleanupDelay(job, finishedAt)
+			job.Spec.TTLSecondsAfterFinished = &ttl
+
+			err := helper.GetClient().Patch(ctx, job, patch)
+			if err != nil && !k8s_errors.IsNotFound(err) {
+				return err
+			}
+			continue
+		}
+
+		// An older operator may have left a deadline on a running deployment.
+		if job.Spec.TTLSecondsAfterFinished == nil {
+			continue
+		}
+		patch := client.MergeFrom(job.DeepCopy())
+		job.Spec.TTLSecondsAfterFinished = nil
+
+		err := helper.GetClient().Patch(ctx, job, patch)
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			return err
+		}
+	}
+	return nil
+}
+
+// jobCleanupDelay returns the TTLSecondsAfterFinished that makes the Job expire
+// jobCleanupDelaySeconds after the deployment finished. Ageing starts at the
+// Job's own completion time, so a Job that finished while the deployment still
+// ran gets that elapsed time added back - a flat delay would delete it at once.
+func jobCleanupDelay(job *batchv1.Job, finishedAt *metav1.Time) int32 {
+	finishTime := jobFinishTime(job)
+	if finishedAt == nil || finishTime == nil || !finishedAt.After(finishTime.Time) {
+		return jobCleanupDelaySeconds
+	}
+
+	delay := int64(jobCleanupDelaySeconds) + int64(math.Floor(finishedAt.Time.Sub(finishTime.Time).Seconds()))
+	return int32(min(delay, math.MaxInt32))
+}
+
+// jobFinishTime mirrors the TTL-after-finished controller, which measures from
+// the Complete/Failed transition rather than CompletionTime.
+func jobFinishTime(job *batchv1.Job) *metav1.Time {
+	for _, jobCondition := range job.Status.Conditions {
+		isFinished := (jobCondition.Type == batchv1.JobComplete || jobCondition.Type == batchv1.JobFailed) &&
+			jobCondition.Status == corev1.ConditionTrue
+		if isFinished && !jobCondition.LastTransitionTime.IsZero() {
+			finishTime := jobCondition.LastTransitionTime
+			return &finishTime
+		}
+	}
+	return job.Status.CompletionTime
 }
 
 // GetService retrieves a service for the OpenStackDataPlaneDeployment
