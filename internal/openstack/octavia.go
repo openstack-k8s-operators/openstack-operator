@@ -73,7 +73,7 @@ func ReconcileOctavia(ctx context.Context, instance *corev1beta1.OpenStackContro
 	// Note: Migration from rabbitMqClusterName to messagingBus.cluster is handled by the webhook
 	// via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
 
-	if instance.Spec.Octavia.Template.NodeSelector == nil {
+	if instance.Spec.Octavia.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Octavia.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
