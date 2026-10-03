@@ -692,8 +692,8 @@ type HeatSection struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
-	// CnfAPIOverride, provides the ability to override the generated manifest of several child resources.
-	CnfAPIOverride Override `json:"cnfAPIOverride,omitempty"`
+	// CfnAPIOverride, provides the ability to override the generated manifest of several child resources.
+	CfnAPIOverride Override `json:"cfnAPIOverride,omitempty"`
 
 	// ApplicationCredential allows service-specific overrides of the global AC configuration.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
