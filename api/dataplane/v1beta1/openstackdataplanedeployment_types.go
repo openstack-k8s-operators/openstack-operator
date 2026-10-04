@@ -112,6 +112,11 @@ type OpenStackDataPlaneDeploymentStatus struct {
 	// NodeSetConditions
 	NodeSetConditions map[string]condition.Conditions `json:"nodeSetConditions,omitempty" optional:"true"`
 
+	// FailedNodeSets maps a nodeSet name to the message of the permanent failure
+	// that terminated it. Terminality cannot live in the conditions because the AEE
+	// job backing the failure is garbage collected once the deployment settles.
+	FailedNodeSets map[string]string `json:"failedNodeSets,omitempty" optional:"true"`
+
 	// AnsibleEEHashes
 	AnsibleEEHashes map[string]string `json:"ansibleEEHashes,omitempty" optional:"true"`
 
