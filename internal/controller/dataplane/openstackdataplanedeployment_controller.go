@@ -112,18 +112,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		return ctrl.Result{}, nil
 	}
 
-	// If the deployment has failed with backoff limit exceeded, do not reconcile
-	// even if nodesets or other watched resources change. The deployment is in a
-	// terminal failure state and should not be retried.
-	if instance.Status.Conditions != nil {
-		deploymentCondition := instance.Status.Conditions.Get(condition.DeploymentReadyCondition)
-		if deploymentCondition != nil &&
-			deploymentCondition.Severity == condition.SeverityError &&
-			deploymentCondition.Reason == condition.JobReasonBackoffLimitExceeded {
-			Log.Info("Deployment has failed with backoff limit exceeded, skipping reconciliation",
-				"deployment", instance.Name)
-			return ctrl.Result{}, nil
-		}
+	if terminalFailure(instance) {
+		Log.Info("Deployment is terminal, skipping reconciliation",
+			"deployment", instance.Name)
+		return ctrl.Result{}, nil
 	}
 
 	// initialize status if Conditions is nil, but do not reset if it already
@@ -255,7 +247,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	deploymentErrMsg := ""
 	var nodesetServiceMap map[string][]string
 	var serviceCache *deployment.ServiceCache
-	backoffLimitReached := false
+	var finishedNodeSets []dataplanev1.OpenStackDataPlaneNodeSet
+	if instance.Status.FailedNodeSets == nil {
+		instance.Status.FailedNodeSets = map[string]string{}
+	}
 
 	if nodesetServiceMap, serviceCache, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
 		instance.Spec.ServicesOverride); err != nil {
@@ -312,6 +307,21 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		Log.Info("useParallelExecution is not set to true, services will run sequentially in list order and service dependencies (dependsOn) are ignored")
 	}
 	for _, nodeSet := range nodeSets.Items {
+
+		if failure, ok := instance.Status.FailedNodeSets[nodeSet.Name]; ok {
+			Log.Info("NodeSet already terminated by a permanent failure", "nodeSet", nodeSet.Name)
+			nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
+			nsConditions.MarkFalse(
+				dataplanev1.NodeSetDeploymentReadyCondition,
+				condition.JobReasonBackoffLimitExceeded,
+				condition.SeverityError,
+				"%s", failure)
+			instance.Status.NodeSetConditions[nodeSet.Name] = nsConditions
+			haveError = true
+			deploymentErrMsg = appendDeploymentErrMsg(deploymentErrMsg,
+				fmt.Sprintf("nodeSet: %s error: %s", nodeSet.Name, failure))
+			continue
+		}
 
 		Log.Info("Deploying NodeSet", "nodeSet", nodeSet.Name)
 		Log.Info("Set Status.Deployed to false", "instance", instance)
@@ -383,14 +393,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
 			Log.Info("Set NodeSetDeploymentReadyCondition false", "nodeSet", nodeSet.Name)
 			haveError = true
-			errMsg := fmt.Sprintf("nodeSet: %s error: %s", nodeSet.Name, err.Error())
-			if len(deploymentErrMsg) == 0 {
-				deploymentErrMsg = errMsg
-			} else {
-				deploymentErrMsg = fmt.Sprintf("%s & %s", deploymentErrMsg, errMsg)
+			deploymentErrMsg = appendDeploymentErrMsg(deploymentErrMsg,
+				fmt.Sprintf("nodeSet: %s error: %s", nodeSet.Name, err.Error()))
+			if nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition) != nil &&
+				nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition).Reason == condition.JobReasonBackoffLimitExceeded {
+				instance.Status.FailedNodeSets[nodeSet.Name] = err.Error()
 			}
-			errorReason := nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition).Reason
-			backoffLimitReached = errorReason == condition.JobReasonBackoffLimitExceeded
 		}
 
 		if deployResult != nil {
@@ -403,14 +411,26 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				condition.DeploymentReadyMessage)
 			instance.Status.NodeSetHashes[nodeSet.Name] = nodeSet.Status.ConfigHash
 			instance.Status.BmhRefHashes[nodeSet.Name] = nodeSet.Status.BmhRefHash
+			finishedNodeSets = append(finishedNodeSets, nodeSet)
+		}
+	}
+
+	// A nodeSet that finished alongside a failure must still get its hashes, or the
+	// NodeSet controller re-deploys it because its inputs look changed.
+	if len(finishedNodeSets) > 0 {
+		err = r.setHashes(ctx, helper, instance,
+			dataplanev1.OpenStackDataPlaneNodeSetList{Items: finishedNodeSets})
+		if err != nil {
+			Log.Error(err, "Error setting service hashes")
 		}
 	}
 
 	if haveError {
+		settled := terminalFailure(instance)
 		var reason condition.Reason
 		reason = condition.ErrorReason
 		severity := condition.SeverityWarning
-		if backoffLimitReached {
+		if settled {
 			reason = condition.JobReasonBackoffLimitExceeded
 			severity = condition.SeverityError
 		}
@@ -420,7 +440,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			severity,
 			condition.DeploymentReadyErrorMessage,
 			deploymentErrMsg)
-		if backoffLimitReached {
+		if settled {
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, fmt.Errorf("%s", deploymentErrMsg)
@@ -437,10 +457,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	instance.Status.Deployed = true
 	if version != nil {
 		instance.Status.DeployedVersion = version.Spec.TargetVersion
-	}
-	err = r.setHashes(ctx, helper, instance, *nodeSets)
-	if err != nil {
-		Log.Error(err, "Error setting service hashes")
 	}
 	return ctrl.Result{}, nil
 }
@@ -613,6 +629,33 @@ func (r *OpenStackDataPlaneDeploymentReconciler) listNodeSets(ctx context.Contex
 		nodeSets.Items = append(nodeSets.Items, *nodeSetInstance)
 	}
 	return &nodeSets, err
+}
+
+// terminalFailure reports whether the deployment has a permanently failed
+// nodeSet and nothing left to wait for. A nodeSet still in flight keeps this
+// false even when another one already failed.
+func terminalFailure(instance *dataplanev1.OpenStackDataPlaneDeployment) bool {
+	if len(instance.Spec.NodeSets) == 0 || len(instance.Status.FailedNodeSets) == 0 {
+		return false
+	}
+	for _, nodeSet := range instance.Spec.NodeSets {
+		if _, failed := instance.Status.FailedNodeSets[nodeSet]; failed {
+			continue
+		}
+		nsConditions := instance.Status.NodeSetConditions[nodeSet]
+		nsCondition := nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+		if nsCondition == nil || nsCondition.Status != corev1.ConditionTrue {
+			return false
+		}
+	}
+	return true
+}
+
+func appendDeploymentErrMsg(current string, errMsg string) string {
+	if len(current) == 0 {
+		return errMsg
+	}
+	return fmt.Sprintf("%s & %s", current, errMsg)
 }
 
 func setNodeSetAnsibleVarsFromHashes(
