@@ -22,7 +22,7 @@ data:
     - ceph-client
     - install-certs
     - ovn
-    - neutron-metadata
+    - neutron-ovn
     - libvirt
     - nova-custom-ceph
   nodetemplate:

@@ -93,7 +93,7 @@ spec:
     - reboot-os
     - install-certs
     - ovn
-    - neutron-metadata
+    - neutron-ovn
     - libvirt
     - nova
     - telemetry
