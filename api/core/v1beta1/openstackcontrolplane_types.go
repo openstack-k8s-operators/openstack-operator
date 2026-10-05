@@ -268,10 +268,51 @@ type TLSSection struct {
 
 	// +kubebuilder:validation:optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Profile - The TLS security profile the OpenStack services are
+	// configured with. "None" (the default) publishes nothing, so the services
+	// keep lib-common's built-in defaults. "Inherit" follows whatever the
+	// cluster declares on the OpenShift APIServer CR. "Intermediate" and
+	// "Modern" pin that profile regardless of what the cluster declares.
+	// +kubebuilder:default=None
+	Profile TLSProfileType `json:"profile,omitempty"`
+
+	// +kubebuilder:validation:optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Secret containing any additional CA certificates, which should be added to deployment pods.
 	// If services get configured to use a custom cert/key, add the CA cert to validate those in this
 	// CA secret.
 	tls.Ca `json:",inline"`
+}
+
+// TLSProfileType - the TLS security profile the OpenStack services are
+// configured with, either sourced from the cluster or named here directly.
+// The named values are spelled out rather than taken from configv1 so this
+// module keeps openshift/api indirect; the functional tests pin the spelling.
+// "Old" is not offered, but stays reachable through "Inherit" when the
+// cluster itself declares it.
+// +kubebuilder:validation:Enum=None;Inherit;Intermediate;Modern
+type TLSProfileType string
+
+const (
+	// TLSProfileNone - publish nothing; the services keep lib-common's defaults.
+	TLSProfileNone TLSProfileType = "None"
+
+	// TLSProfileInherit - follow the profile the cluster declares on the APIServer CR.
+	TLSProfileInherit TLSProfileType = "Inherit"
+
+	// TLSProfileIntermediate - pin the OpenShift Intermediate profile.
+	TLSProfileIntermediate TLSProfileType = "Intermediate"
+
+	// TLSProfileModern - pin the OpenShift Modern profile.
+	TLSProfileModern TLSProfileType = "Modern"
+)
+
+// IsEnabled - whether a profile is requested at all. InitConditions and
+// ReconcileTLSProfile have to agree on this, or an early-returning reconcile
+// leaves an Unknown condition behind for a feature that is off. An unset
+// value counts as None.
+func (p TLSProfileType) IsEnabled() bool {
+	return p != TLSProfileNone && p != ""
 }
 
 // TLSIngressConfig defines the desired state of the TLS configuration for the ingress configuration (route)
@@ -1242,6 +1283,14 @@ func (instance *OpenStackControlPlane) InitConditions() {
 	}
 	if instance.Spec.Watcher.Enabled {
 		cl.Set(condition.UnknownCondition(OpenStackControlPlaneWatcherReadyCondition, condition.InitReason, OpenStackControlPlaneWatcherReadyInitMessage))
+	}
+
+	// Only register the condition when a profile is requested: in None mode
+	// ReconcileTLSProfile removes it again, but an early return (minor update
+	// staging, CA requeue, first-pass finalizer) never gets that far and would
+	// persist an Unknown for a feature that is off.
+	if instance.Spec.TLS.Profile.IsEnabled() {
+		cl.Set(condition.UnknownCondition(OpenStackControlPlaneTLSProfileReadyCondition, condition.InitReason, OpenStackControlPlaneTLSProfileReadyInitMessage))
 	}
 
 	// Init Topology condition if there's a reference
