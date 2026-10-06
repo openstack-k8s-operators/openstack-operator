@@ -87,6 +87,8 @@ spec:
           value: quay.io/openstack-s2i-containers/openstack-ironic-api:master-latest
         - name: RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-ironic-conductor:master-latest
+        - name: RELATED_IMAGE_IRONIC_GRAPHICAL_CONSOLE_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-s2i-containers/openstack-ironic-graphical-console:master-latest
         - name: RELATED_IMAGE_IRONIC_INSPECTOR_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/openstack-ironic-inspector:current-podified
         - name: RELATED_IMAGE_IRONIC_NEUTRON_AGENT_IMAGE_URL_DEFAULT
