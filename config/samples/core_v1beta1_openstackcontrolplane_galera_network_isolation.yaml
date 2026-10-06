@@ -135,8 +135,6 @@ spec:
               type: LoadBalancer
       databaseInstance: openstack
       secret: osp-secret
-      networkAttachments:
-      - internalapi
   barbican:
     apiOverride:
       route: {}
