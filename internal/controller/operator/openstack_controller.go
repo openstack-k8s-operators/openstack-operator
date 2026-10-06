@@ -35,6 +35,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	"github.com/go-logr/logr"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -50,6 +52,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -321,6 +324,23 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, err
 	}
 
+	// Check if webhook certificates are ready before checking deployment status.
+	// Operators with webhooks enabled mount these certificates and fail to start if
+	// cert-manager hasn't finished issuing them yet, so check here first to requeue
+	// with the appropriate delay instead of waiting on deployments that can't come up.
+	ctrlResult, err := r.checkWebhookCertificates(ctx, instance)
+	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			operatorv1beta1.OpenStackOperatorReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			operatorv1beta1.OpenStackOperatorErrorMessage,
+			err))
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	// Check if all deployments are running
 	deploymentsRunning, deploymentsPending, err := r.countDeployments(ctx, instance)
 	instance.Status.DeployedOperatorCount = &deploymentsRunning
@@ -349,7 +369,7 @@ func (r *OpenStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		operatorv1beta1.OpenStackOperatorDeploymentsReadyMessage)
 
 	// Check if Services are running and have an endpoint
-	ctrlResult, err := r.checkServiceEndpoints(ctx, instance)
+	ctrlResult, err = r.checkServiceEndpoints(ctx, instance)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			operatorv1beta1.OpenStackOperatorReadyCondition,
@@ -550,15 +570,70 @@ func containerImageMatch(instance *operatorv1beta1.OpenStack) bool {
 	return false
 }
 
+// webhookOperatorNames is the static list of operators with webhooks enabled. Each backs a
+// "<name>-webhook-service" Service and a "<name>-serving-cert" cert-manager Certificate.
+var webhookOperatorNames = []string{"openstack-operator", "infra-operator", "openstack-baremetal-operator"}
+
 func isWebhookEndpoint(name string) bool {
-	// NOTE: this is a static list for all operators with webhooks enabled
-	endpointNames := []string{"openstack-operator-webhook-service", "infra-operator-webhook-service", "openstack-baremetal-operator-webhook-service"}
-	for _, prefix := range endpointNames {
-		if strings.HasPrefix(name, prefix) {
+	for _, prefix := range webhookOperatorNames {
+		if strings.HasPrefix(name, prefix+"-webhook-service") {
 			return true
 		}
 	}
 	return false
+}
+
+// isWebhookOperatorDisabled reports whether the operator backing a given webhookOperatorNames
+// entry (e.g. "infra-operator") has been scaled to 0 replicas via OperatorOverrides.
+func isWebhookOperatorDisabled(overrides []operatorv1beta1.OperatorSpec, webhookName string) bool {
+	operatorName := strings.TrimSuffix(webhookName, "-operator")
+	if ovr := operator.HasOverrides(overrides, operatorName); ovr != nil {
+		return ovr.Replicas != nil && *ovr.Replicas == 0
+	}
+	return false
+}
+
+// checkWebhookCertificates checks whether the cert-manager Certificate backing each enabled
+// operator's webhook server is Ready. Operator pods with ENABLE_WEBHOOKS=true mount the
+// Certificate's Secret as a volume and crash-loop if it doesn't exist yet, since cert-manager
+// creates it asynchronously. Checking the Certificate's Ready condition rather than the Secret
+// directly needs no Secrets RBAC (Certificates are already readable) and also covers
+// certificate regeneration/rotation, since cert-manager only flips Ready once the Secret holds
+// valid data.
+func (r *OpenStackReconciler) checkWebhookCertificates(ctx context.Context, instance *operatorv1beta1.OpenStack) (ctrl.Result, error) {
+	Log := r.GetLogger(ctx)
+
+	for _, name := range webhookOperatorNames {
+		if isWebhookOperatorDisabled(instance.Spec.OperatorOverrides, name) {
+			continue
+		}
+
+		certName := name + "-serving-cert"
+		cert := &certmgrv1.Certificate{}
+		err := r.Get(ctx, types.NamespacedName{Name: certName, Namespace: instance.Namespace}, cert)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				Log.Info("Waiting for webhook certificate to be created. Requeuing...", "name", certName)
+				return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+			}
+			return ctrl.Result{}, err
+		}
+
+		ready := false
+		for _, cond := range cert.Status.Conditions {
+			if cond.Type == certmgrv1.CertificateConditionReady && cond.Status == cmmeta.ConditionTrue &&
+				cond.ObservedGeneration == cert.Generation {
+				ready = true
+				break
+			}
+		}
+		if !ready {
+			Log.Info("Waiting for webhook certificate to become ready. Requeuing...", "name", certName)
+			return ctrl.Result{RequeueAfter: time.Duration(5) * time.Second}, nil
+		}
+	}
+
+	return ctrl.Result{}, nil
 }
 
 // checkServiceEndpoints -
@@ -581,10 +656,8 @@ func (r *OpenStackReconciler) checkServiceEndpoints(ctx context.Context, instanc
 		if isWebhookEndpoint(endpointSliceName) {
 			// is deployment disabled ?
 			disabled := false
-			for _, op := range instance.Spec.OperatorOverrides {
-				if strings.HasPrefix(endpointSliceName, op.Name+"-operator") &&
-					op.Replicas != nil && *op.Replicas == 0 {
-
+			for _, name := range webhookOperatorNames {
+				if strings.HasPrefix(endpointSliceName, name) && isWebhookOperatorDisabled(instance.Spec.OperatorOverrides, name) {
 					disabled = true
 					Log.Info(fmt.Sprintf("Webhook %s disabled, skipping endpoint slice check", endpointSliceName), "name", endpointSlice.GetName())
 					break
