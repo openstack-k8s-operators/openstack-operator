@@ -189,10 +189,32 @@ func ClientPodSpec(
 // name and namespace identify the owning OpenStackClient and are used to scope
 // mcp_transport_security to the MCP Service's own hostname (<name>-mcp.<namespace>.svc:8080),
 // matching the URL OpenStackAssistant uses to reach it, instead of allowing any host/origin.
-func MCPConfigYAML(name, namespace, caBundleSecretName string, mcpTLSEnabled bool) string {
+// When MetricStorage is present, its Prometheus endpoint is configured explicitly
+// for RHOSO versions where it is not registered in the Keystone catalog.
+func MCPConfigYAML(
+	name, namespace, caBundleSecretName string,
+	mcpTLSEnabled bool,
+	metricStorage *telemetryv1.MetricStorage,
+) string {
 	caCert := ""
 	if caBundleSecretName != "" {
 		caCert = fmt.Sprintf("\n  ca_cert: %s", tls.DownstreamTLSCABundlePath)
+	}
+	prometheusConfig := ""
+	if metricStorage != nil {
+		prometheusCACert := ""
+		if metricStorage.Spec.PrometheusTLS.Enabled() {
+			prometheusCACert = fmt.Sprintf("\n    ca_cert: %s", tls.DownstreamTLSCABundlePath)
+		}
+		prometheusConfig = fmt.Sprintf(`
+  prometheus:
+    host: %s-prometheus.%s.svc
+    port: %d%s`,
+			telemetryv1.DefaultServiceName,
+			namespace,
+			telemetryv1.DefaultPrometheusPort,
+			prometheusCACert,
+		)
 	}
 	mcpTLS := ""
 	if mcpTLSEnabled {
@@ -211,7 +233,7 @@ tls:
 port: 8080
 openstack:
   enabled: true
-  allow_write: false%s
+  allow_write: false%s%s
 openshift:
   enabled: false
 mcp_transport_security:
@@ -220,7 +242,7 @@ mcp_transport_security:
     - "%s"
   allowed_origins:
 %s%s
-`, caCert, mcpHost, allowedOrigins, mcpTLS)
+`, caCert, prometheusConfig, mcpHost, allowedOrigins, mcpTLS)
 }
 
 // MCPCloudsYAML returns a clouds.yaml using the given auth URL for the MCP sidecar.
