@@ -159,8 +159,6 @@ spec:
               type: LoadBalancer
       databaseInstance: openstack
       secret: osp-secret
-      networkAttachments:
-      - internalapi
   horizon:
     apiOverride:
       route: {}
