@@ -76,9 +76,10 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 		defaults.AodhListenerImage = envImages["RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT"]
 		defaults.AodhNotifierImage = envImages["RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT"]
 	}
-	if envImages["RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT"] != nil {
-		defaults.BarbicanKeystoneListenerImage = envImages["RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT"]
-		defaults.BarbicanWorkerImage = envImages["RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT"]
+	if envImages["RELATED_IMAGE_BARBICAN_IMAGE_URL_DEFAULT"] != nil {
+		defaults.BarbicanAPIImage = envImages["RELATED_IMAGE_BARBICAN_IMAGE_URL_DEFAULT"]
+		defaults.BarbicanKeystoneListenerImage = envImages["RELATED_IMAGE_BARBICAN_IMAGE_URL_DEFAULT"]
+		defaults.BarbicanWorkerImage = envImages["RELATED_IMAGE_BARBICAN_IMAGE_URL_DEFAULT"]
 	}
 	if envImages["RELATED_IMAGE_CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT"] != nil {
 		defaults.CeilometerNotificationImage = envImages["RELATED_IMAGE_CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT"]

@@ -19,7 +19,7 @@ spec:
           value: quay.io/openstack-s2i-containers/openstack-aodh-api:master-latest
         - name: RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT
           value: registry.redhat.io/ubi10/httpd-24:latest
-        - name: RELATED_IMAGE_BARBICAN_API_IMAGE_URL_DEFAULT
+        - name: RELATED_IMAGE_BARBICAN_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-barbican-api:master-latest
         - name: RELATED_IMAGE_CEILOMETER_CENTRAL_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-ceilometer-central:master-latest
