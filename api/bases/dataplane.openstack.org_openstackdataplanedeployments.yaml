@@ -105,7 +105,11 @@ spec:
               preserveJobs:
                 default: true
                 description: |-
-                  PreserveJobs - do not delete jobs after they finished e.g. to check logs
+                  PreserveJobs - do not delete jobs after they finished e.g. to check logs.
+                  When false the jobs are deleted after a delay once the deployment is
+                  finished - deployed, or failed with the backoff limit exceeded - and not
+                  when an individual job finishes. While a deployment is in flight its
+                  jobs are what tells the operator which services already ran.
                   PreserveJobs default: true
                 enum:
                 - true

@@ -3,6 +3,7 @@ package functional
 import (
 	"fmt"
 	"os"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
@@ -20,6 +21,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("Dataplane Deployment Test", func() {
@@ -1928,6 +1930,178 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				condition.DeploymentReadyCondition,
 				corev1.ConditionFalse,
 			)
+		})
+	})
+
+	When("A dataplaneDeployment has preserveJobs false", func() {
+		var deploymentJobs func() []batchv1.Job
+
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			CreateDataplaneService(dataplaneServiceName, false)
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName,
+				map[string]interface{}{
+					"nodeSets":         []string{dataplaneNodeSetName.Name},
+					"preserveJobs":     false,
+					"servicesOverride": []string{"foo-service"},
+				}))
+
+			baremetal := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      dataplaneNodeSetName.Name,
+					Namespace: namespace,
+				},
+			}
+			Eventually(func(g Gomega) {
+				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName, &baremetal)).To(Succeed())
+				baremetal.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			deploymentJobs = func() []batchv1.Job {
+				jobList := &batchv1.JobList{}
+				Expect(k8sClient.List(ctx, jobList,
+					client.InNamespace(namespace),
+					client.MatchingLabels{"openstackdataplanedeployment": dataplaneDeploymentName.Name},
+				)).To(Succeed())
+				return jobList.Items
+			}
+		})
+
+		It("starts the cleanup clock when the deployment deployed", func() {
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				g.Expect(jobs[0].Spec.TTLSecondsAfterFinished).To(BeNil())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// a deadline left behind by an older operator is dropped while the
+			// deployment still runs
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				ansibleEE := GetAnsibleee(types.NamespacedName{Name: jobs[0].Name, Namespace: namespace})
+				ansibleEE.Spec.TTLSecondsAfterFinished = ptr.To(int32(600))
+				g.Expect(th.K8sClient.Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				g.Expect(jobs[0].Spec.TTLSecondsAfterFinished).To(BeNil())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				ansibleEE := GetAnsibleee(types.NamespacedName{Name: jobs[0].Name, Namespace: namespace})
+				ansibleEE.Status.Succeeded = 1
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionTrue,
+			)
+
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				g.Expect(jobs[0].Spec.TTLSecondsAfterFinished).ToNot(BeNil())
+				g.Expect(*jobs[0].Spec.TTLSecondsAfterFinished).To(Equal(int32(600)))
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+
+		It("starts the cleanup clock when the deployment failed", func() {
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				g.Expect(jobs[0].Spec.TTLSecondsAfterFinished).To(BeNil())
+
+				ansibleEE := GetAnsibleee(types.NamespacedName{Name: jobs[0].Name, Namespace: namespace})
+				startTime := metav1.Now()
+				ansibleEE.Status.StartTime = &startTime
+				ansibleEE.Status.Failed = *ansibleEE.Spec.BackoffLimit + 1
+				ansibleEE.Status.Conditions = []batchv1.JobCondition{{
+					Type:    batchv1.JobFailureTarget,
+					Status:  corev1.ConditionTrue,
+					Reason:  string(condition.JobReasonBackoffLimitExceeded),
+					Message: "Job has reached the specified backoff limit",
+				}, {
+					Type:    batchv1.JobFailed,
+					Status:  corev1.ConditionTrue,
+					Reason:  string(condition.JobReasonBackoffLimitExceeded),
+					Message: "Simulated backoff limit exceeded for testing",
+				}}
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				deploymentCondition := GetDataplaneDeployment(dataplaneDeploymentName).
+					Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(deploymentCondition.Status).To(Equal(corev1.ConditionFalse))
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityError)))
+				g.Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				g.Expect(jobs[0].Spec.TTLSecondsAfterFinished).ToNot(BeNil())
+				g.Expect(*jobs[0].Spec.TTLSecondsAfterFinished).To(Equal(int32(600)))
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+
+		It("gives a job that finished while the deployment still ran the time it waited", func() {
+			finishedThirtyMinutesAgo := metav1.NewTime(time.Now().Add(-30 * time.Minute))
+			startedBeforeThat := metav1.NewTime(finishedThirtyMinutesAgo.Add(-10 * time.Minute))
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+
+				ansibleEE := GetAnsibleee(types.NamespacedName{Name: jobs[0].Name, Namespace: namespace})
+				ansibleEE.Status.Succeeded = 1
+				ansibleEE.Status.StartTime = &startedBeforeThat
+				ansibleEE.Status.CompletionTime = &finishedThirtyMinutesAgo
+				ansibleEE.Status.Conditions = []batchv1.JobCondition{{
+					Type:               batchv1.JobSuccessCriteriaMet,
+					Status:             corev1.ConditionTrue,
+					LastTransitionTime: finishedThirtyMinutesAgo,
+				}, {
+					Type:               batchv1.JobComplete,
+					Status:             corev1.ConditionTrue,
+					LastTransitionTime: finishedThirtyMinutesAgo,
+				}}
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionTrue,
+			)
+
+			// Ageing starts at the Job's own completion time, so the TTL has to carry
+			// the time the deployment spent waiting for its other services.
+			Eventually(func(g Gomega) {
+				jobs := deploymentJobs()
+				g.Expect(jobs).To(HaveLen(1))
+				g.Expect(jobs[0].Spec.TTLSecondsAfterFinished).ToNot(BeNil())
+				g.Expect(*jobs[0].Spec.TTLSecondsAfterFinished).To(BeNumerically(">=", int32(30*60+600)))
+				g.Expect(*jobs[0].Spec.TTLSecondsAfterFinished).To(BeNumerically("<", int32(30*60+600+10*60)))
+			}, th.Timeout, th.Interval).Should(Succeed())
 		})
 	})
 

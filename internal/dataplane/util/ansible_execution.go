@@ -243,6 +243,13 @@ func ParseAnsibleExecutionSummaryFromPod(
 	return nil, nil
 }
 
+// Labels the AnsibleEE Jobs carry, to build the Job spec and find them again.
+const (
+	AnsibleEEServiceLabel    = "openstackdataplaneservice"
+	AnsibleEEDeploymentLabel = "openstackdataplanedeployment"
+	AnsibleEENodeSetLabel    = "openstackdataplanenodeset"
+)
+
 // GetAnsibleExecutionNameAndLabels Name and Labels of AnsibleEE
 func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneService,
 	deploymentName string,
@@ -263,9 +270,9 @@ func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneSer
 	}
 
 	labels := map[string]string{
-		"openstackdataplaneservice":    service.Name,
-		"openstackdataplanedeployment": deploymentName,
-		"openstackdataplanenodeset":    nodeSetName,
+		AnsibleEEServiceLabel:    service.Name,
+		AnsibleEEDeploymentLabel: deploymentName,
+		AnsibleEENodeSetLabel:    nodeSetName,
 	}
 	return executionName, labels
 }
@@ -295,7 +302,9 @@ func (a *EEJob) BuildAeeJobSpec(
 	}
 
 	a.BackoffLimit = deployment.Spec.BackoffLimit
-	a.PreserveJobs = deployment.Spec.PreserveJobs
+	// Cleanup must not start while the deployment still runs: lib-common never
+	// recreates a Job whose hash is unchanged.
+	a.PreserveJobs = deployment.Spec.PreserveJobs || !deployment.IsFinished()
 	a.FormatAEECmdLineArguments(aeeSpec)
 	a.FormatAEEExtraVars(aeeSpec, service, deployment, nodeSet)
 	a.DetermineAeeImage(aeeSpec)
