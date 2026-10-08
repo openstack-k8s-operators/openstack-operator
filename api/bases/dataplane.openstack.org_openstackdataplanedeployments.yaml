@@ -236,6 +236,14 @@ spec:
               deployedVersion:
                 description: DeployedVersion
                 type: string
+              failedNodeSets:
+                additionalProperties:
+                  type: string
+                description: |-
+                  FailedNodeSets maps a nodeSet name to the message of the permanent failure
+                  that terminated it. Terminality cannot live in the conditions because the AEE
+                  job backing the failure is garbage collected once the deployment settles.
+                type: object
               nodeSetConditions:
                 additionalProperties:
                   description: Conditions provide observations of the operational
