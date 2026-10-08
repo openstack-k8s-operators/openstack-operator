@@ -1,0 +1,48 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 120
+# Joint gate for OSPRH-30208 + OSPRH-30209 + OSPRH-30210:
+# Assert that openstack-operator's CRDs carry the correct install-namespace in both
+# the cert-manager annotation and the conversion webhook service reference, and that
+# cert-manager has populated the caBundle.
+#
+# INSTALL_NS: the namespace the openstack-operator controller runs in (where it installs
+# CRDs and writes the annotation/service.namespace). Derived from the operator deployment,
+# NOT from $NAMESPACE which is the kuttl test namespace (openstack-kuttl-tests).
+commands:
+  - script: |
+      set -e
+      CRD=openstackcontrolplanes.core.openstack.org
+      INSTALL_NS=$(oc get deployment -A -l control-plane=controller-manager,app.kubernetes.io/name=openstack-operator -o jsonpath='{.items[0].metadata.namespace}')
+      if [ -z "$INSTALL_NS" ]; then
+        echo "FAIL: openstack-operator deployment not found — is the operator deployed?"; exit 1
+      fi
+
+      # 1. inject-ca-from annotation namespace == install namespace (OSPRH-30208)
+      ANNO=$(oc get crd "$CRD" -o jsonpath='{.metadata.annotations.cert-manager\.io/inject-ca-from}')
+      if [ -z "$ANNO" ]; then
+        echo "FAIL: cert-manager.io/inject-ca-from annotation is missing on $CRD"
+        exit 1
+      fi
+      ANNO_NS="${ANNO%%/*}"
+      if [ "$ANNO_NS" != "$INSTALL_NS" ]; then
+        echo "FAIL: inject-ca-from annotation namespace '$ANNO_NS' != install namespace '$INSTALL_NS'"
+        exit 1
+      fi
+      echo "OK: inject-ca-from annotation namespace = $ANNO_NS"
+
+      # 2. conversion webhook service namespace == install namespace (OSPRH-30209)
+      SVC_NS=$(oc get crd "$CRD" -o jsonpath='{.spec.conversion.webhook.clientConfig.service.namespace}')
+      if [ "$SVC_NS" != "$INSTALL_NS" ]; then
+        echo "FAIL: conversion service namespace '$SVC_NS' != install namespace '$INSTALL_NS'"
+        exit 1
+      fi
+      echo "OK: conversion service namespace = $SVC_NS"
+
+      # 3. caBundle non-empty — cert-manager injected (OSPRH-30208, async)
+      CA=$(oc get crd "$CRD" -o jsonpath='{.spec.conversion.webhook.clientConfig.caBundle}')
+      if [ -z "$CA" ]; then
+        echo "FAIL: caBundle is empty — cert-manager has not injected yet"
+        exit 1
+      fi
+      echo "OK: caBundle is non-empty (cert-manager injected)"
