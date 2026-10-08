@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -253,11 +254,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	shouldRequeue := false
 	haveError := false
 	deploymentErrMsg := ""
-	var nodesetServiceMap map[string][]string
-	var serviceCache *deployment.ServiceCache
+	var servicePlan *deployment.ServicePlan
 	backoffLimitReached := false
 
-	if nodesetServiceMap, serviceCache, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
+	if servicePlan, err = deployment.DedupeServices(ctx, helper, nodeSets.Items,
 		instance.Spec.ServicesOverride); err != nil {
 		util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
 		var missingServiceErr *deployment.MissingServiceError
@@ -304,22 +304,14 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		return ctrl.Result{}, err
 	}
 
-	// Deploy each nodeSet
-	// The loop starts and checks NodeSet deployments sequentially. However, after they
-	// are started, they are running in parallel, since the loop does not wait
-	// for the first started NodeSet to finish before starting the next.
-	if !instance.Spec.UseParallelExecution {
-		Log.Info("useParallelExecution is not set to true, services will run sequentially in list order and service dependencies (dependsOn) are ignored")
-	}
-	for _, nodeSet := range nodeSets.Items {
+	// Built up front: the deployment starts its deployment scoped services itself,
+	// independent of which nodeset reconciles first.
+	deployers := make(map[string]*deployment.Deployer, len(nodeSets.Items))
+	serviceLevels := make(map[string][][]string, len(nodeSets.Items))
 
-		Log.Info("Deploying NodeSet", "nodeSet", nodeSet.Name)
-		Log.Info("Set Status.Deployed to false", "instance", instance)
-		instance.Status.Deployed = false
-		Log.Info("Set DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(
-			condition.DeploymentReadyCondition, condition.RequestedReason,
-			condition.SeverityInfo, condition.DeploymentReadyRunningMessage)
+	for i := range nodeSets.Items {
+		nodeSet := &nodeSets.Items[i]
+
 		ansibleEESpec := nodeSet.GetAnsibleEESpec()
 		ansibleEESpec.AnsibleTags = instance.Spec.AnsibleTags
 		ansibleEESpec.AnsibleSkipTags = instance.Spec.AnsibleSkipTags
@@ -334,22 +326,22 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			}
 		}
 
-		deployer := deployment.Deployer{
+		deployers[nodeSet.Name] = &deployment.Deployer{
 			Ctx:                         ctx,
 			Helper:                      helper,
-			NodeSet:                     &nodeSet,
+			NodeSet:                     nodeSet,
 			Deployment:                  instance,
 			Status:                      &instance.Status,
 			AeeSpec:                     &ansibleEESpec,
 			InventorySecrets:            globalInventorySecrets,
 			AnsibleSSHPrivateKeySecrets: globalSSHKeySecrets,
-			ServiceCache:                serviceCache,
+			ServiceCache:                servicePlan.Cache,
 			Version:                     version,
 		}
 
-		var serviceLevels [][]string
 		if instance.Spec.UseParallelExecution {
-			serviceLevels, err = deployment.BuildServiceLevels(ctx, helper, serviceCache, nodesetServiceMap[nodeSet.Name])
+			serviceLevels[nodeSet.Name], err = deployment.BuildServiceLevels(
+				ctx, helper, servicePlan.Cache, servicePlan.Services[nodeSet.Name])
 			if err != nil {
 				util.LogErrorForObject(helper, err, fmt.Sprintf("error building service dependency graph for NodeSet %s", nodeSet.Name), instance)
 				graphErrMsg := fmt.Sprintf("nodeSet: %s error: %s", nodeSet.Name, err.Error())
@@ -370,14 +362,52 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				return ctrl.Result{}, fmt.Errorf("error building service dependency graph for nodeset %s: %w", nodeSet.Name, err)
 			}
 		} else {
-			serviceLevels = deployment.SerialServiceLevels(nodesetServiceMap[nodeSet.Name])
+			serviceLevels[nodeSet.Name] = deployment.SerialServiceLevels(servicePlan.Services[nodeSet.Name])
 		}
+		deployers[nodeSet.Name].AllServices = slices.Concat(serviceLevels[nodeSet.Name]...)
+	}
+
+	// Start them only once every listing nodeset reached its barrier, else a
+	// nodeset advances while the shared Job still runs against its hosts.
+	if err := r.deployGlobalServices(ctx, helper, instance, servicePlan, serviceLevels, deployers); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Deploy each nodeSet
+	// The loop starts and checks NodeSet deployments sequentially. However, after they
+	// are started, they are running in parallel, since the loop does not wait
+	// for the first started NodeSet to finish before starting the next.
+	if !instance.Spec.UseParallelExecution {
+		Log.Info("useParallelExecution is not set to true, services will run sequentially in list order and service dependencies (dependsOn) are ignored")
+	}
+	for i := range nodeSets.Items {
+		nodeSet := &nodeSets.Items[i]
+
+		Log.Info("Deploying NodeSet", "nodeSet", nodeSet.Name)
+		Log.Info("Set Status.Deployed to false", "instance", instance)
+		instance.Status.Deployed = false
+		Log.Info("Set DeploymentReadyCondition false")
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition, condition.RequestedReason,
+			condition.SeverityInfo, condition.DeploymentReadyRunningMessage)
 
 		var deployResult *ctrl.Result
-		deployResult, err = deployer.Deploy(serviceLevels)
+		deployResult, err = deployers[nodeSet.Name].Deploy(serviceLevels[nodeSet.Name])
 
 		nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
 		nsConditions.Set(nsConditions.Mirror(dataplanev1.NodeSetDeploymentReadyCondition))
+		// A barrier wait sets no service condition, so surface it on the nodeset.
+		if err == nil {
+			if blockedOn := deployers[nodeSet.Name].BlockedOn; blockedOn != "" {
+				nsConditions.Set(condition.FalseCondition(
+					dataplanev1.NodeSetDeploymentReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					"%s", fmt.Sprintf("%s: it runs once for the whole deployment",
+						fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, blockedOn))))
+			}
+		}
+		instance.Status.NodeSetConditions[nodeSet.Name] = nsConditions
 
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
@@ -443,6 +473,64 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		Log.Error(err, "Error setting service hashes")
 	}
 	return ctrl.Result{}, nil
+}
+
+// deployGlobalServices starts the single AnsibleEE Job of every deployment
+// scoped service whose barrier has cleared.
+func (r *OpenStackDataPlaneDeploymentReconciler) deployGlobalServices(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneDeployment,
+	servicePlan *deployment.ServicePlan,
+	serviceLevels map[string][][]string,
+	deployers map[string]*deployment.Deployer,
+) error {
+	Log := r.GetLogger(ctx)
+	jobState := deployment.JobState{}
+
+	for _, serviceName := range servicePlan.GlobalServices {
+		gateOpen, err := deployment.GlobalServiceGateOpen(
+			ctx, helper, servicePlan, instance, serviceName, serviceLevels, jobState)
+		if err != nil {
+			return err
+		}
+		if !gateOpen {
+			Log.Info("Deployment scoped service is behind a barrier that has not cleared",
+				"service", serviceName, "nodeSets", servicePlan.NodesetsWithGlobalService[serviceName])
+			continue
+		}
+
+		foundService, err := servicePlan.Cache.Get(ctx, helper, serviceName)
+		if err != nil {
+			instance.Status.Conditions.MarkFalse(
+				condition.InputReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				dataplanev1.ServiceErrorMessage,
+				err.Error())
+			return err
+		}
+
+		listingNodeSets := servicePlan.NodesetsWithGlobalService[serviceName]
+		if len(listingNodeSets) == 0 {
+			continue
+		}
+		// Any listing nodeset works; it only supplies the Job labels and mounts.
+		if err := deployers[listingNodeSets[0]].DeployGlobalService(foundService); err != nil {
+			util.LogErrorForObject(helper, err,
+				fmt.Sprintf("Unable to execute deployment scoped service %s", serviceName), instance)
+			instance.Status.Conditions.MarkFalse(
+				condition.DeploymentReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				condition.DeploymentReadyErrorMessage,
+				err.Error())
+			return err
+		}
+		Log.Info("Started deployment scoped service", "service", serviceName, "nodeSets", listingNodeSets)
+	}
+
+	return nil
 }
 
 // GetService retrieves a service for the OpenStackDataPlaneDeployment

@@ -898,8 +898,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 
 			}, th.Timeout, th.Interval).Should(Succeed())
 
-			// Create all services necessary for deployment
-			for _, serviceName := range nodeSetAlpha.Spec.Services {
+			markJobSucceeded := func(serviceName string, nodeSetName string) {
 				dataplaneServiceName := types.NamespacedName{
 					Name:      serviceName,
 					Namespace: namespace,
@@ -907,10 +906,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetAlpha.GetName())
-				//Retrieve service AnsibleEE and set JobStatus to Successful
+					service, deployment.GetName(), nodeSetName)
 				Eventually(func(g Gomega) {
-					// Make an AnsibleEE name for each service
 					ansibleeeName := types.NamespacedName{
 						Name:      aeeName,
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
@@ -921,30 +918,16 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
 
-			servicesExcludingGlobal := []string{"foo-service", "foo-update-service"}
-			// Create all services necessary for deployment
-			for _, serviceName := range servicesExcludingGlobal {
-				dataplaneServiceName := types.NamespacedName{
-					Name:      serviceName,
-					Namespace: namespace,
-				}
-				service := GetService(dataplaneServiceName)
-				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
-				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetBeta.GetName())
-
-				//Retrieve service AnsibleEE and set JobStatus to Successful
-				Eventually(func(g Gomega) {
-					// Make an AnsibleEE name for each service
-					ansibleeeName := types.NamespacedName{
-						Name:      aeeName,
-						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
-					}
-					ansibleEE := GetAnsibleee(ansibleeeName)
-					ansibleEE.Status.Succeeded = 1
-					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
-				}, th.Timeout, th.Interval).Should(Succeed())
+			// The deployment scoped Job starts once every nodeset that lists it
+			// finished the services it ordered before the barrier
+			for _, serviceName := range []string{"foo-service", "foo-update-service"} {
+				markJobSucceeded(serviceName, nodeSetAlpha.GetName())
 			}
+			markJobSucceeded("foo-service", nodeSetBeta.GetName())
+
+			markJobSucceeded("global-service", nodeSetAlpha.GetName())
+
+			markJobSucceeded("foo-update-service", nodeSetBeta.GetName())
 
 			th.ExpectCondition(
 				dataplaneMultiNodesetDeploymentName,
@@ -1434,8 +1417,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 
 			}, th.Timeout, th.Interval).Should(Succeed())
 
-			// Create all services necessary for deployment
-			for _, serviceName := range []string{"foo-service", "global-service", "foo-update-service"} {
+			markJobSucceeded := func(serviceName string, nodeSetName string) {
 				dataplaneServiceName := types.NamespacedName{
 					Name:      serviceName,
 					Namespace: namespace,
@@ -1443,10 +1425,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
 				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetAlpha.GetName())
-				//Retrieve service AnsibleEE and set JobStatus to Successful
+					service, deployment.GetName(), nodeSetName)
 				Eventually(func(g Gomega) {
-					// Make an AnsibleEE name for each service
 					ansibleeeName := types.NamespacedName{
 						Name:      aeeName,
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
@@ -1457,29 +1437,12 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
 
-			servicesExcludingGlobal := []string{"foo-service", "foo-update-service"}
-			// Create all services necessary for deployment
-			for _, serviceName := range servicesExcludingGlobal {
-				dataplaneServiceName := types.NamespacedName{
-					Name:      serviceName,
-					Namespace: namespace,
-				}
-				service := GetService(dataplaneServiceName)
-				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
-				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
-					service, deployment.GetName(), nodeSetBeta.GetName())
-
-				//Retrieve service AnsibleEE and set JobStatus to Successful
-				Eventually(func(g Gomega) {
-					// Make an AnsibleEE name for each service
-					ansibleeeName := types.NamespacedName{
-						Name:      aeeName,
-						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
-					}
-					ansibleEE := GetAnsibleee(ansibleeeName)
-					ansibleEE.Status.Succeeded = 1
-					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
-				}, th.Timeout, th.Interval).Should(Succeed())
+			for _, nodeSetName := range []string{nodeSetAlpha.GetName(), nodeSetBeta.GetName()} {
+				markJobSucceeded("foo-service", nodeSetName)
+			}
+			markJobSucceeded("global-service", nodeSetAlpha.GetName())
+			for _, nodeSetName := range []string{nodeSetAlpha.GetName(), nodeSetBeta.GetName()} {
+				markJobSucceeded("foo-update-service", nodeSetName)
 			}
 
 			th.ExpectCondition(
@@ -2064,6 +2027,231 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				g.Expect(c.Status).To(Equal(corev1.ConditionFalse))
 				g.Expect(c.Reason).To(Equal(condition.Reason(condition.ErrorReason)))
 			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	When("A dataplaneDeployment lists a deployment scoped service in two nodesets", func() {
+		var barrierDeploymentName types.NamespacedName
+		var barrierAlphaName types.NamespacedName
+		var barrierBetaName types.NamespacedName
+
+		barrierServices := []string{"svc-first", "svc-global", "svc-last"}
+
+		BeforeEach(func() {
+			barrierDeploymentName = types.NamespacedName{Name: "barrier-deployment", Namespace: namespace}
+			barrierAlphaName = types.NamespacedName{Name: "barrier-alpha", Namespace: namespace}
+			barrierBetaName = types.NamespacedName{Name: "barrier-beta", Namespace: namespace}
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(
+				types.NamespacedName{Name: "svc-first", Namespace: namespace},
+				map[string]interface{}{"edpmServiceType": "svc-first"}))
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(
+				types.NamespacedName{Name: "svc-global", Namespace: namespace},
+				map[string]interface{}{"edpmServiceType": "svc-global", "deployOnAllNodeSets": true}))
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(
+				types.NamespacedName{Name: "svc-last", Namespace: namespace},
+				map[string]interface{}{"edpmServiceType": "svc-last"}))
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+
+			for idx, nodeSetName := range []types.NamespacedName{barrierAlphaName, barrierBetaName} {
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(
+					nodeSetName, BarrierNodeSetSpec(nodeSetName.Name, barrierServices,
+						fmt.Sprintf("192.168.122.%d", 100+idx))))
+				SimulateIPSetComplete(types.NamespacedName{
+					Name: fmt.Sprintf("%s-node-1", nodeSetName.Name), Namespace: namespace})
+				SimulateDNSDataComplete(nodeSetName)
+			}
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(barrierDeploymentName,
+				map[string]interface{}{
+					"nodeSets": []string{barrierAlphaName.Name, barrierBetaName.Name},
+				}))
+		})
+
+		It("should run the shared Job once after every listing nodeset reached the barrier", func() {
+			nodeSetJobName := func(service, nodeSet string) types.NamespacedName {
+				return types.NamespacedName{
+					Name:      fmt.Sprintf("%s-%s-%s", service, barrierDeploymentName.Name, nodeSet),
+					Namespace: namespace,
+				}
+			}
+			globalJobName := types.NamespacedName{
+				Name:      fmt.Sprintf("svc-global-%s", barrierDeploymentName.Name),
+				Namespace: namespace,
+			}
+			getJob := func(name types.NamespacedName) *batchv1.Job {
+				job := &batchv1.Job{}
+				err := k8sClient.Get(ctx, name, job)
+				if k8s_errors.IsNotFound(err) {
+					return nil
+				}
+				Expect(err).NotTo(HaveOccurred())
+				return job
+			}
+			completeJob := func(name types.NamespacedName) {
+				Eventually(func(g Gomega) {
+					job := GetAnsibleee(name)
+					job.Status.Succeeded = 1
+					g.Expect(k8sClient.Status().Update(ctx, job)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+			}
+
+			// Both nodesets start the service ordered before the barrier
+			Eventually(func(g Gomega) {
+				g.Expect(getJob(nodeSetJobName("svc-first", barrierAlphaName.Name))).ToNot(BeNil())
+				g.Expect(getJob(nodeSetJobName("svc-first", barrierBetaName.Name))).ToNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			// The shared Job must not start while a nodeset still has work
+			// ordered before the barrier
+			Consistently(func() *batchv1.Job {
+				return getJob(globalJobName)
+			}, "5s", interval).Should(BeNil())
+
+			completeJob(nodeSetJobName("svc-first", barrierAlphaName.Name))
+			completeJob(nodeSetJobName("svc-first", barrierBetaName.Name))
+
+			// One Job for the whole deployment, not one per nodeset
+			Eventually(func(g Gomega) {
+				g.Expect(getJob(globalJobName)).ToNot(BeNil())
+				g.Expect(getJob(types.NamespacedName{
+					Name:      fmt.Sprintf("svc-global-%s-%s", barrierDeploymentName.Name, barrierBetaName.Name),
+					Namespace: namespace,
+				})).To(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			// Neither nodeset advances past the barrier before it completed
+			Consistently(func(g Gomega) {
+				g.Expect(getJob(nodeSetJobName("svc-last", barrierAlphaName.Name))).To(BeNil())
+				g.Expect(getJob(nodeSetJobName("svc-last", barrierBetaName.Name))).To(BeNil())
+			}, "5s", interval).Should(Succeed())
+
+			// A blocked nodeset reports what it is waiting on
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(barrierDeploymentName)
+				for _, nodeSetName := range []string{barrierAlphaName.Name, barrierBetaName.Name} {
+					nsConditions := deployment.Status.NodeSetConditions[nodeSetName]
+					c := nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+					g.Expect(c).ToNot(BeNil())
+					g.Expect(c.Message).To(ContainSubstring("svc-global"))
+				}
+			}, timeout, interval).Should(Succeed())
+
+			completeJob(globalJobName)
+
+			Eventually(func(g Gomega) {
+				g.Expect(getJob(nodeSetJobName("svc-last", barrierAlphaName.Name))).ToNot(BeNil())
+				g.Expect(getJob(nodeSetJobName("svc-last", barrierBetaName.Name))).ToNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			completeJob(nodeSetJobName("svc-last", barrierAlphaName.Name))
+			completeJob(nodeSetJobName("svc-last", barrierBetaName.Name))
+
+			th.ExpectCondition(
+				barrierDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionTrue,
+			)
+		})
+	})
+
+	When("A nodeset does not list the deployment scoped service", func() {
+		var freeDeploymentName types.NamespacedName
+		var freeAlphaName types.NamespacedName
+		var freeBetaName types.NamespacedName
+
+		BeforeEach(func() {
+			freeDeploymentName = types.NamespacedName{Name: "free-deployment", Namespace: namespace}
+			freeAlphaName = types.NamespacedName{Name: "free-alpha", Namespace: namespace}
+			freeBetaName = types.NamespacedName{Name: "free-beta", Namespace: namespace}
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(
+				types.NamespacedName{Name: "svc-first", Namespace: namespace},
+				map[string]interface{}{"edpmServiceType": "svc-first"}))
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(
+				types.NamespacedName{Name: "svc-global", Namespace: namespace},
+				map[string]interface{}{"edpmServiceType": "svc-global", "deployOnAllNodeSets": true}))
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(
+				types.NamespacedName{Name: "svc-last", Namespace: namespace},
+				map[string]interface{}{"edpmServiceType": "svc-last"}))
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(freeAlphaName,
+				BarrierNodeSetSpec(freeAlphaName.Name, []string{"svc-first", "svc-global", "svc-last"}, "192.168.122.100")))
+			SimulateIPSetComplete(types.NamespacedName{
+				Name: fmt.Sprintf("%s-node-1", freeAlphaName.Name), Namespace: namespace})
+			SimulateDNSDataComplete(freeAlphaName)
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(freeBetaName,
+				BarrierNodeSetSpec(freeBetaName.Name, []string{"svc-first", "svc-last"}, "192.168.122.101")))
+			SimulateIPSetComplete(types.NamespacedName{
+				Name: fmt.Sprintf("%s-node-1", freeBetaName.Name), Namespace: namespace})
+			SimulateDNSDataComplete(freeBetaName)
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(freeDeploymentName,
+				map[string]interface{}{
+					"nodeSets":             []string{freeAlphaName.Name, freeBetaName.Name},
+					"useParallelExecution": true,
+				}))
+		})
+
+		It("should not hold that nodeset behind the barrier", func() {
+			nodeSetJobName := func(service, nodeSet string) types.NamespacedName {
+				return types.NamespacedName{
+					Name:      fmt.Sprintf("%s-%s-%s", service, freeDeploymentName.Name, nodeSet),
+					Namespace: namespace,
+				}
+			}
+			globalJobName := types.NamespacedName{
+				Name:      fmt.Sprintf("svc-global-%s", freeDeploymentName.Name),
+				Namespace: namespace,
+			}
+			getJob := func(name types.NamespacedName) *batchv1.Job {
+				job := &batchv1.Job{}
+				err := k8sClient.Get(ctx, name, job)
+				if k8s_errors.IsNotFound(err) {
+					return nil
+				}
+				Expect(err).NotTo(HaveOccurred())
+				return job
+			}
+			completeJob := func(name types.NamespacedName) {
+				Eventually(func(g Gomega) {
+					job := GetAnsibleee(name)
+					job.Status.Succeeded = 1
+					g.Expect(k8sClient.Status().Update(ctx, job)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+			}
+
+			Eventually(func(g Gomega) {
+				g.Expect(getJob(nodeSetJobName("svc-first", freeAlphaName.Name))).ToNot(BeNil())
+				g.Expect(getJob(nodeSetJobName("svc-first", freeBetaName.Name))).ToNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			completeJob(nodeSetJobName("svc-first", freeAlphaName.Name))
+			completeJob(nodeSetJobName("svc-first", freeBetaName.Name))
+
+			// free-beta never listed svc-global, so it keeps advancing while the
+			// shared Job for free-alpha has not completed
+			Eventually(func(g Gomega) {
+				g.Expect(getJob(globalJobName)).ToNot(BeNil())
+				g.Expect(getJob(nodeSetJobName("svc-last", freeBetaName.Name))).ToNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			Consistently(func() *batchv1.Job {
+				return getJob(nodeSetJobName("svc-last", freeAlphaName.Name))
+			}, "5s", interval).Should(BeNil())
 		})
 	})
 

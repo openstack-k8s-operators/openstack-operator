@@ -57,7 +57,12 @@ type Deployer struct {
 	AnsibleSSHPrivateKeySecrets map[string]string
 	ServiceCache                *ServiceCache
 	Version                     *openstackv1.OpenStackVersion
-	allServices                 []string
+	// AllServices is the nodeset's flat service plan, used to resolve cert
+	// mounts. Set it before any Job is built, including the deployment scoped
+	// ones the deployment starts outside the nodeset loop.
+	AllServices []string
+	// BlockedOn names the barrier a nodeset is stalled on, for its status.
+	BlockedOn string
 }
 
 // Deploy runs the nodeset's leveled service plan, waiting for each level
@@ -67,9 +72,6 @@ func (d *Deployer) Deploy(serviceLevels [][]string) (*ctrl.Result, error) {
 		d.ServiceCache = NewServiceCache()
 	}
 
-	// Flat list for cert-mount lookups
-	d.allServices = slices.Concat(serviceLevels...)
-
 	for levelIdx, level := range serviceLevels {
 		d.Helper.GetLogger().Info("Deploying service level", "level", levelIdx, "services", level)
 
@@ -78,7 +80,11 @@ func (d *Deployer) Deploy(serviceLevels [][]string) (*ctrl.Result, error) {
 			return &ctrl.Result{}, err
 		}
 
-		if !d.isLevelReady(levelIdx, level) {
+		ready, err := d.isLevelReady(levelIdx, level)
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
+		if !ready {
 			return &ctrl.Result{}, nil
 		}
 	}
@@ -112,6 +118,11 @@ func (d *Deployer) startLevel(levelIdx int, level []string) error {
 			continue
 		}
 
+		// Deployment scoped Jobs are started by the deployment; isLevelReady waits.
+		if foundService.Spec.DeployOnAllNodeSets {
+			continue
+		}
+
 		serviceAeeSpec, err := d.buildServiceAeeSpec(foundService)
 		if err != nil {
 			d.setServiceError(readyCondition, readyErrorMessage, err)
@@ -136,17 +147,107 @@ func (d *Deployer) startLevel(levelIdx int, level []string) error {
 }
 
 // isLevelReady reports whether every service in the level completed.
-func (d *Deployer) isLevelReady(levelIdx int, level []string) bool {
+func (d *Deployer) isLevelReady(levelIdx int, level []string) (bool, error) {
 	log := d.Helper.GetLogger()
 	nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
 	for _, service := range level {
+		foundService, err := d.ServiceCache.Get(d.Ctx, d.Helper, service)
+		if err != nil {
+			return false, err
+		}
+
+		if foundService.Spec.DeployOnAllNodeSets {
+			completed, err := d.globalServiceCompleted(foundService)
+			if err != nil {
+				return false, err
+			}
+			if !completed {
+				d.BlockedOn = service
+				log.Info("Waiting for deployment scoped service",
+					"service", service, "level", levelIdx, "nodeSet", d.NodeSet.Name)
+				return false, nil
+			}
+			continue
+		}
+
 		readyCondition := d.serviceReadyCondition(service)
 		if !nsConditions.IsTrue(readyCondition) {
 			log.Info("Condition not ready in service level, waiting", "condition", readyCondition, "level", levelIdx)
-			return false
+			return false, nil
 		}
 	}
-	return true
+	return true, nil
+}
+
+// globalServiceCompleted reports whether the Job of a deployment scoped service
+// finished successfully. A Job past its backoff limit is recorded on the nodeset
+// conditions, so it fails the same way a nodeset owned Job would.
+func (d *Deployer) globalServiceCompleted(
+	service dataplanev1.OpenStackDataPlaneService,
+) (bool, error) {
+	log := d.Helper.GetLogger()
+
+	ansibleJob, err := dataplaneutil.GetAnsibleExecution(
+		d.Ctx, d.Helper, d.Deployment,
+		dataplaneutil.GetGlobalAnsibleExecutionLabels(service.Name, d.Deployment.Name))
+	if err != nil {
+		if k8s_errors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	if ansibleJob.Status.Succeeded > 0 {
+		d.storeExecutionSummary(ansibleJob)
+		d.recordContainerImages(service)
+		return true, nil
+	}
+
+	if ansibleJob.Status.Failed > *ansibleJob.Spec.BackoffLimit {
+		reason := condition.Reason(condition.ErrorReason)
+		for _, jobCondition := range ansibleJob.Status.Conditions {
+			if jobCondition.Type == batchv1.JobFailed {
+				reason = condition.Reason(jobCondition.Reason)
+			}
+		}
+		d.storeExecutionSummary(ansibleJob)
+		errorMsg := fmt.Sprintf("execution.name %s execution.namespace %s failed pods: %d",
+			ansibleJob.Name, ansibleJob.Namespace, ansibleJob.Status.Failed)
+		if reason == condition.JobReasonBackoffLimitExceeded {
+			errorMsg = fmt.Sprintf("backoff limit reached for execution.name %s execution.namespace %s",
+				ansibleJob.Name, ansibleJob.Namespace)
+		}
+		log.Info("Deployment scoped service failed", "service", service.Name, "execution", ansibleJob.Name)
+
+		nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
+		nsConditions.Set(condition.FalseCondition(
+			dataplanev1.NodeSetDeploymentReadyCondition,
+			reason,
+			condition.SeverityError,
+			"%s", errorMsg))
+		d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
+		return false, fmt.Errorf("%s", errorMsg)
+	}
+
+	return false, nil
+}
+
+// DeployGlobalService creates the single AnsibleEE Job of a deployment scoped
+// service. The bound nodeset only supplies the Job labels and the mounts; the
+// play targets every nodeset's hosts.
+func (d *Deployer) DeployGlobalService(
+	service dataplanev1.OpenStackDataPlaneService,
+) error {
+	if !service.Spec.DeployOnAllNodeSets {
+		return fmt.Errorf("service %s is not deployment scoped", service.Name)
+	}
+
+	serviceAeeSpec, err := d.buildServiceAeeSpec(service)
+	if err != nil {
+		return err
+	}
+
+	return d.DeployService(service, serviceAeeSpec)
 }
 
 // serviceReadyCondition returns the per-service readiness condition type.
@@ -314,7 +415,7 @@ func (d *Deployer) buildServiceAeeSpec(
 	}
 
 	if foundService.Spec.AddCertMounts {
-		if err := d.addCertMounts(serviceAeeSpec, d.allServices); err != nil {
+		if err := d.addCertMounts(serviceAeeSpec, d.AllServices); err != nil {
 			return nil, err
 		}
 	} else if len(foundService.Spec.CACerts) > 0 {

@@ -262,12 +262,19 @@ func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneSer
 		executionName = fmt.Sprintf("%s-%s", prefix, hashSuffix)
 	}
 
-	labels := map[string]string{
-		"openstackdataplaneservice":    service.Name,
-		"openstackdataplanedeployment": deploymentName,
-		"openstackdataplanenodeset":    nodeSetName,
-	}
+	labels := GetGlobalAnsibleExecutionLabels(service.Name, deploymentName)
+	labels["openstackdataplanenodeset"] = nodeSetName
 	return executionName, labels
+}
+
+// GetGlobalAnsibleExecutionLabels returns the labels of the single AnsibleEE Job
+// a deployOnAllNodeSets service produces. It is not nodeset owned, so its
+// selector must not carry the nodeset label.
+func GetGlobalAnsibleExecutionLabels(serviceName string, deploymentName string) map[string]string {
+	return map[string]string{
+		"openstackdataplaneservice":    serviceName,
+		"openstackdataplanedeployment": deploymentName,
+	}
 }
 
 // BuildAeeJobSpec builds the job specification for Ansible Execution Environment

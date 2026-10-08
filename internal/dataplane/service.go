@@ -194,49 +194,65 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	return nil
 }
 
-// DedupeServices dedupes each nodeset's services into an ordered list.
+// ServicePlan is the execution plan of one OpenStackDataPlaneDeployment.
+// Deployment scoped services (deployOnAllNodeSets) stay in every listing
+// nodeset's plan, where their single shared Job acts as a barrier.
+type ServicePlan struct {
+	Nodesets []string
+	Services map[string][]string
+	// GlobalServices is in the order the nodesets list them
+	GlobalServices []string
+	// NodesetsWithGlobalService is keyed by service name, unlike Services
+	NodesetsWithGlobalService map[string][]string
+	Cache                     *ServiceCache
+}
+
+// DedupeServices builds the ServicePlan of a deployment.
 func DedupeServices(ctx context.Context, helper *helper.Helper,
 	nodesets []dataplanev1.OpenStackDataPlaneNodeSet,
 	serviceOverride []string,
-) (map[string][]string, *ServiceCache, error) {
-	nodeSetServiceMap := make(map[string][]string)
-	var globalServices []string
-	var services []string
+) (*ServicePlan, error) {
+	plan := &ServicePlan{
+		Nodesets:                  make([]string, 0, len(nodesets)),
+		Services:                  make(map[string][]string, len(nodesets)),
+		NodesetsWithGlobalService: make(map[string][]string),
+		Cache:                     NewServiceCache(),
+	}
 	var err error
-	serviceCache := NewServiceCache()
 
 	for i := range nodesets {
 		nodeset := &nodesets[i]
+		plan.Nodesets = append(plan.Nodesets, nodeset.Name)
 		var nodeSetServices []string
 		if len(serviceOverride) != 0 {
 			nodeSetServices = serviceOverride
 		} else {
 			nodeSetServices = nodeset.Spec.Services
 		}
-		services, globalServices, err = dedupe(ctx, helper, serviceCache, nodeset.Name, nodeSetServices, globalServices)
+		var services []string
+		services, err = dedupe(ctx, helper, plan, nodeset.Name, nodeSetServices)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
-		nodeSetServiceMap[nodeset.Name] = services
+		plan.Services[nodeset.Name] = services
 	}
-	helper.GetLogger().Info("Current global services", "services", globalServices)
-	return nodeSetServiceMap, serviceCache, nil
+	helper.GetLogger().Info("Current global services", "services", plan.GlobalServices)
+	return plan, nil
 }
 
 func dedupe(ctx context.Context, helper *helper.Helper,
-	serviceCache *ServiceCache,
+	plan *ServicePlan,
 	nodeSetName string,
-	services []string, globalServices []string) ([]string, []string, error) {
+	services []string) ([]string, error) {
 	var dedupedServices []string
 	var nodeSetServiceTypes []string
-	updatedglobalServices := globalServices
 	for _, svc := range services {
-		service, err := serviceCache.Get(ctx, helper, svc)
+		service, err := plan.Cache.Get(ctx, helper, svc)
 		if err != nil {
 			if !k8s_errors.IsNotFound(err) {
-				return dedupedServices, updatedglobalServices, err
+				return dedupedServices, err
 			}
-			return dedupedServices, updatedglobalServices, &MissingServiceError{
+			return dedupedServices, &MissingServiceError{
 				NodeSet: nodeSetName,
 				Service: svc,
 				Err:     err,
@@ -247,17 +263,22 @@ func dedupe(ctx context.Context, helper *helper.Helper,
 		if serviceType == "" {
 			serviceType = service.Name
 		}
-		if !slices.Contains(nodeSetServiceTypes, serviceType) && !slices.Contains(dedupedServices, svc) {
-			if service.Spec.DeployOnAllNodeSets {
-				if !slices.Contains(globalServices, svc) {
-					updatedglobalServices = append(globalServices, svc)
-				} else {
-					continue
-				}
-			}
-			nodeSetServiceTypes = append(nodeSetServiceTypes, serviceType)
-			dedupedServices = append(dedupedServices, svc)
+		if slices.Contains(nodeSetServiceTypes, serviceType) || slices.Contains(dedupedServices, svc) {
+			continue
+		}
+		if service.Spec.DeployOnAllNodeSets && !slices.Contains(plan.GlobalServices, svc) {
+			plan.GlobalServices = append(plan.GlobalServices, svc)
+		}
+		nodeSetServiceTypes = append(nodeSetServiceTypes, serviceType)
+		dedupedServices = append(dedupedServices, svc)
+	}
+
+	for _, svc := range plan.GlobalServices {
+		if slices.Contains(dedupedServices, svc) &&
+			!slices.Contains(plan.NodesetsWithGlobalService[svc], nodeSetName) {
+			plan.NodesetsWithGlobalService[svc] = append(plan.NodesetsWithGlobalService[svc], nodeSetName)
 		}
 	}
-	return dedupedServices, updatedglobalServices, nil
+
+	return dedupedServices, nil
 }
