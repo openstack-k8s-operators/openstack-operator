@@ -30,6 +30,7 @@ import (
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"gopkg.in/yaml.v3"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -2094,8 +2095,71 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef).NotTo(BeNil())
 				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef.LocalObjectReference.Name).To(Equal("openstack-aee-default-env"))
 				g.Expect(*ansibleEE.Spec.Template.Spec.Containers[0].EnvFrom[0].ConfigMapRef.Optional).To(BeTrue())
+				g.Expect(ansibleEE.Spec.Template.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{Name: "ANSIBLE_FORKS", Value: "8"}))
 			}, th.Timeout, th.Interval).Should(Succeed())
 		})
+	})
+
+	When("a NodeSet configures Ansible EE resources and forks", func() {
+		for _, tc := range []struct {
+			name, cmForks, nodeForks string
+			useCM, useNode           bool
+		}{
+			{name: "CPU-derived default"},
+			{name: "selected ConfigMap override", cmForks: "17", useCM: true},
+			{name: "empty selected ConfigMap override", cmForks: "", useCM: true},
+			{name: "NodeSet takes precedence", cmForks: "17", nodeForks: "4", useCM: true, useNode: true},
+		} {
+			It("propagates resources and preserves "+tc.name, func() {
+				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+				nodeSetSpec["preProvisioned"] = true
+				nodeSetSpec["services"] = []string{"bootstrap"}
+				nodeSetSpec["ansibleEEResources"] = map[string]interface{}{
+					"requests": map[string]string{"cpu": "1500m", "memory": "512Mi"},
+					"limits":   map[string]string{"cpu": "3", "memory": "2Gi"},
+				}
+				if tc.useNode {
+					nodeSetSpec["env"] = []map[string]string{{"name": "ANSIBLE_FORKS", "value": tc.nodeForks}, {"name": "OTHER", "value": "intact"}}
+				}
+				deploymentSpec := DefaultDataPlaneDeploymentSpec()
+				deploymentSpec["ansibleEEEnvConfigMapName"] = "custom-forks-env"
+				if tc.useCM {
+					DeferCleanup(th.DeleteInstance, th.CreateConfigMap(types.NamespacedName{Name: "custom-forks-env", Namespace: namespace}, map[string]interface{}{"ANSIBLE_FORKS": tc.cmForks, "OTHER_CM": "intact"}))
+				}
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+				CreateSSHSecret(dataplaneSSHSecretName)
+				CreateCABundleSecret(caBundleSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, deploymentSpec))
+
+				Eventually(func(g Gomega) {
+					job := &batchv1.Job{}
+					g.Expect(th.K8sClient.Get(th.Ctx, types.NamespacedName{Name: "bootstrap-" + dataplaneDeploymentName.Name + "-" + dataplaneNodeSetName.Name, Namespace: namespace}, job)).To(Succeed())
+					container := job.Spec.Template.Spec.Containers[0]
+					g.Expect(container.Resources.Requests.Cpu().String()).To(Equal("1500m"))
+					g.Expect(container.Resources.Requests.Memory().String()).To(Equal("512Mi"))
+					g.Expect(container.Resources.Limits.Cpu().String()).To(Equal("3"))
+					g.Expect(container.Resources.Limits.Memory().String()).To(Equal("2Gi"))
+					g.Expect(container.EnvFrom[0].ConfigMapRef.Name).To(Equal("custom-forks-env"))
+					forks := "2"
+					if tc.useNode {
+						forks = tc.nodeForks
+						g.Expect(container.Env).To(ContainElement(corev1.EnvVar{Name: "OTHER", Value: "intact"}))
+					}
+					if tc.useCM && !tc.useNode {
+						for _, env := range container.Env {
+							g.Expect(env.Name).NotTo(Equal("ANSIBLE_FORKS"))
+						}
+					} else {
+						g.Expect(container.Env).To(ContainElement(corev1.EnvVar{Name: "ANSIBLE_FORKS", Value: forks}))
+					}
+				}, th.Timeout, th.Interval).Should(Succeed())
+			})
+		}
 	})
 
 	When("A Deployment specifies custom ansibleEEEnvConfigMapName", func() {
