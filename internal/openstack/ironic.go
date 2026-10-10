@@ -58,7 +58,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	// via annotation-based triggers. No direct spec mutation here to avoid GitOps conflicts.
 	// This applies to both Ironic main template and IronicNeutronAgent.
 
-	if instance.Spec.Ironic.Template.NodeSelector == nil {
+	if instance.Spec.Ironic.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Ironic.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
