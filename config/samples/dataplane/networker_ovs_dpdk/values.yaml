@@ -1,0 +1,190 @@
+# local-config: referenced, but not emitted by kustomize
+apiVersion: v1
+kind: DataPlaneConfig
+metadata:
+  name: edpm-networker-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  nodeset:
+    nodetemplate:
+      ansible:
+        vars:
+          edpm_network_config_hide_sensitive_logs: false
+          edpm_network_config_os_net_config_mappings:
+          # Need to provide nic mapping based on system uuid or system product name
+          # here used systetm uuid
+            networker-0:  # CHANGEME
+              nic1: 6c:fe:54:3f:8a:01  # CHANGEME
+              nic2: 6c:fe:54:3f:8a:02  # CHANGEME
+              nic3: 6c:fe:54:3f:8a:03  # CHANGEME
+              nic4: 6c:fe:54:3f:8a:04  # CHANGEME
+              nic5: 6c:fe:54:3f:8a:05  # CHANGEME
+              nic6: 6c:fe:54:3f:8a:06  # CHANGEME
+              nic7: 6c:fe:54:3f:8a:07  # CHANGEME
+          edpm_network_config_template: |
+            ---
+            {% set mtu_list = [ctlplane_mtu] %}
+            {% for network in nodeset_networks %}
+            {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+            {%- endfor %}
+            {% set min_viable_mtu = mtu_list | max %}
+            network_config:
+            - type: linux_bond
+              name: bond_api
+              bonding_options: "mode=active-backup"
+              use_dhcp: false
+              dns_servers: {{ ctlplane_dns_nameservers }}
+              members:
+              - type: interface
+                name: nic1
+              addresses:
+              - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+              routes:
+              - default: true
+                next_hop: {{ ctlplane_gateway_ip }}
+
+            {% for network in nodeset_networks if network not in ['external', 'tenant'] %}
+              - type: vlan
+                mtu: {{ lookup('ars', networks_lower[network] ~ '_mtu') }}
+                vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+                addresses:
+                - ip_netmask: {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+            {% endfor %}
+            - type: ovs_user_bridge
+              name: br-link0
+              use_dhcp: false
+              ovs_extra: "set port br-link0 tag={{ lookup('vars', networks_lower['tenant'] ~ '_vlan_id') }}"
+              addresses:
+              - ip_netmask: {{ lookup('vars', networks_lower['tenant'] ~ '_ip') }}/{{ lookup('vars', networks_lower['tenant'] ~ '_cidr')}}
+              members:
+              - type: ovs_dpdk_bond
+                name: dpdkbond0
+                mtu: 9000
+                rx_queue: 6
+                ovs_options: "bond_mode=balance-tcp lacp=active other_config:lacp-time=fast other-config:lacp-fallback-ab=true other_config:lb-output-action=true"
+                members:
+                  - type: ovs_dpdk_port
+                    name: dpdk0
+                    members:
+                      - type: interface
+                        name: nic2
+
+                  - type: ovs_dpdk_port
+                    name: dpdk1
+                    members:
+                      - type: interface
+                        name: nic3
+
+            - type: ovs_user_bridge
+              name: br-link1
+              use_dhcp: false
+              ovs_extra: "set port br-link1 tag={{ lookup('vars', networks_lower['external'] ~ '_vlan_id') }}"
+              addresses:
+              - ip_netmask: {{ lookup('vars', networks_lower['external'] ~ '_ip') }}/{{ lookup('vars', networks_lower['external'] ~ '_cidr')}}
+              members:
+              - type: ovs_dpdk_bond
+                name: dpdkbond2
+                mtu: 9000
+                rx_queue: 6
+                ovs_options: "bond_mode=balance-tcp lacp=active other_config:lacp-time=fast other-config:lacp-fallback-ab=true other_config:lb-output-action=true"
+                members:
+                  - type: ovs_dpdk_port
+                    name: dpdk4
+                    members:
+                      - type: interface
+                        name: nic6
+                  - type: ovs_dpdk_port
+                    name: dpdk5
+                    members:
+                      - type: interface
+                        name: nic7
+
+            - type: ovs_user_bridge
+              name: br-dpdk0
+              use_dhcp: false
+              mtu: 9000
+              members:
+                - type: ovs_dpdk_port
+                  rx_queue: 6
+                  name: dpdk2
+                  members:
+                    - type: interface
+                      name: nic4
+
+            - type: ovs_user_bridge
+              name: br-dpdk1
+              use_dhcp: false
+              mtu: 9000
+              members:
+                - type: ovs_dpdk_port
+                  rx_queue: 6
+                  name: dpdk3
+                  members:
+                    - type: interface
+                      name: nic5
+
+          # edpm_nodes_validation
+          edpm_nodes_validation_validate_controllers_icmp: false
+          edpm_nodes_validation_validate_gateway_icmp: false
+          # edpm nfv ovs dpdk config
+          edpm_kernel_args: "default_hugepagesz=1GB hugepagesz=1G hugepages=64 iommu=pt intel_iommu=on tsx=off isolcpus=2-19,22-39"
+          edpm_tuned_profile: "cpu-partitioning-powersave"
+          edpm_tuned_isolated_cores: "2-19,22-39"
+          edpm_ovs_dpdk_pmd_core_list: "2-19,22-39"
+          edpm_ovs_dpdk_socket_memory: "4096"
+          edpm_ovs_dpdk_memory_channels: "4"
+          edpm_ovs_dpdk_vhost_postcopy_support: "true"
+          edpm_enable_chassis_gw: true
+          edpm_ovn_bridge_mappings:
+            - dpdkexternal:br-link1
+            - dpdkmgmt:br-link0
+            - dpdkdata0:br-dpdk0
+            - dpdkdata1:br-dpdk1
+          gather_facts: false
+          enable_debug: false
+          edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+    nodes:
+      edpm-networker-0:
+        hostName: edpm-networker-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+          - name: ctlplane
+            subnetName: subnet1
+            defaultRoute: true
+            fixedIP: 192.168.122.100
+          - name: internalapi
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
+          - name: external
+            subnetName: subnet1
+      edpm-networker-1:
+        hostName: edpm-networker-1
+        ansible:
+          ansibleHost: 192.168.122.101
+        networks:
+          - name: ctlplane
+            subnetName: subnet1
+            defaultRoute: true
+            fixedIP: 192.168.122.101
+          - name: internalapi
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
+    services:
+    - bootstrap
+    - download-cache
+    - reboot-os
+    - configure-ovs-dpdk
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - install-certs
+    - ovn
+    - neutron-ovn
+    - neutron-metadata
