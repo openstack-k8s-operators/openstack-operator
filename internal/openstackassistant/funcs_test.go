@@ -17,10 +17,12 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	"github.com/openstack-k8s-operators/lib-common/modules/users"
 
 	assistantv1 "github.com/openstack-k8s-operators/openstack-operator/api/assistant/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 func newTestInstance() *assistantv1.OpenStackAssistant {
@@ -111,8 +113,17 @@ func TestAssistantPodSpec_SecurityContext(t *testing.T) {
 	instance := newTestInstance()
 
 	spec := AssistantPodSpec(instance, "hash", nil)
+	podSC := spec.SecurityContext
 	sc := spec.Containers[0].SecurityContext
 
+	g.Expect(podSC.RunAsUser).To(gomega.Equal(ptr.To(users.OpenStackAssistantUID)))
+	g.Expect(podSC.RunAsGroup).To(gomega.Equal(ptr.To(users.OpenStackAssistantGID)))
+	g.Expect(podSC.FSGroup).To(gomega.Equal(ptr.To(users.OpenStackAssistantGID)))
+	g.Expect(podSC.SeccompProfile).To(gomega.Equal(&corev1.SeccompProfile{
+		Type: corev1.SeccompProfileTypeRuntimeDefault,
+	}))
+	g.Expect(sc.RunAsUser).To(gomega.Equal(ptr.To(users.OpenStackAssistantUID)))
+	g.Expect(sc.RunAsGroup).To(gomega.Equal(ptr.To(users.OpenStackAssistantGID)))
 	g.Expect(*sc.RunAsNonRoot).To(gomega.BeTrue())
 	g.Expect(*sc.AllowPrivilegeEscalation).To(gomega.BeFalse())
 	g.Expect(sc.Capabilities.Drop).To(gomega.ContainElement(corev1.Capability("ALL")))
