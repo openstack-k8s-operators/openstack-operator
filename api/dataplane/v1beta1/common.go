@@ -179,6 +179,8 @@ type AnsibleEESpec struct {
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
+	// AnsibleEEResources is applied to the main execution container.
+	AnsibleEEResources corev1.ResourceRequirements `json:"ansibleEEResources,omitempty"`
 	// ExtraVars for ansible execution
 	ExtraVars map[string]json.RawMessage `json:"extraVars,omitempty"`
 	// DNSConfig for setting dnsservers

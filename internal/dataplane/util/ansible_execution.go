@@ -109,7 +109,11 @@ func AnsibleExecution(
 
 	ansibleEE.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 	ansibleEE.Env = aeeSpec.Env
+	ansibleEE.Resources = *aeeSpec.AnsibleEEResources.DeepCopy()
 	ansibleEE.NodeSelector = deployment.Spec.AnsibleJobNodeSelector
+	if err := ansibleEE.addDefaultAnsibleForks(ctx, helper.GetClient()); err != nil {
+		return err
+	}
 
 	currentJobHash := deployment.Status.AnsibleEEHashes[ansibleEE.Name]
 	jobDef, err := ansibleEE.JobForOpenStackAnsibleEE(helper)

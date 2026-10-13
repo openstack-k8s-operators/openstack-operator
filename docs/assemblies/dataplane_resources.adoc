@@ -276,6 +276,11 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | []corev1.EnvVar
 | false
 
+| ansibleEEResources
+| CPU and memory requests and limits for the main Ansible EE Job container; unset by default. The CPU request capped by a lower limit determines default forks (ceil fractional cores; 8 with no CPU).
+| corev1.ResourceRequirements
+| false
+
 | networkAttachments
 | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network
 | []string

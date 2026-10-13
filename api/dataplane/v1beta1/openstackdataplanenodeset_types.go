@@ -55,6 +55,11 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Optional
 	Env []corev1.EnvVar `json:"env,omitempty"`
 
+	// AnsibleEEResources specifies CPU and memory requests and limits for the
+	// main Ansible execution environment Job container. No resources are set by default.
+	// +kubebuilder:validation:Optional
+	AnsibleEEResources corev1.ResourceRequirements `json:"ansibleEEResources,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
@@ -216,6 +221,7 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 		NetworkAttachments: instance.Spec.NetworkAttachments,
 		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
 		Env:                instance.Spec.Env,
+		AnsibleEEResources: instance.Spec.AnsibleEEResources,
 		ServiceAccountName: instance.Name,
 	}
 }

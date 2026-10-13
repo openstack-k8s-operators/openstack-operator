@@ -61,6 +61,13 @@ metadata:
   name: edpm-compute-no-nodes
 spec:
   preProvisioned: true
+  ansibleEEResources:
+    requests:
+      cpu: 1500m
+      memory: 512Mi
+    limits:
+      cpu: "3"
+      memory: 2Gi
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
