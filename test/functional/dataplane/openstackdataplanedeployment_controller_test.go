@@ -20,6 +20,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("Dataplane Deployment Test", func() {
@@ -505,6 +506,195 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				condition.InputReadyCondition,
 				corev1.ConditionTrue,
 			)
+		})
+	})
+
+	When("A dataplaneDeployment has two NodeSets and a service job permanently fails", func() {
+		var alphaNodeSetName types.NamespacedName
+		var betaNodeSetName types.NamespacedName
+		var alphaNodeName types.NamespacedName
+		var betaNodeName types.NamespacedName
+		var dataSourceSecretName types.NamespacedName
+
+		nodeSetSpec := func(nodeName types.NamespacedName, ansibleVarsFrom []interface{}) map[string]interface{} {
+			ansible := map[string]interface{}{"ansibleUser": "cloud-user"}
+			if ansibleVarsFrom != nil {
+				ansible["ansibleVarsFrom"] = ansibleVarsFrom
+			}
+			return map[string]interface{}{
+				"preProvisioned": false,
+				"services":       []string{"foo-service"},
+				"nodeTemplate": map[string]interface{}{
+					"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+					"ansible":                    ansible,
+				},
+				"nodes": map[string]interface{}{
+					nodeName.Name: map[string]interface{}{
+						"hostname": nodeName.Name,
+						"networks": []map[string]interface{}{{
+							"name":       "CtlPlane",
+							"subnetName": "subnet1",
+						},
+						},
+					},
+				},
+				"baremetalSetTemplate": map[string]interface{}{
+					"baremetalHosts":      map[string]interface{}{"ctlPlaneIP": map[string]interface{}{}},
+					"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
+					"ctlplaneInterface":   "172.20.12.1",
+				},
+				"tlsEnabled": true,
+			}
+		}
+
+		jobName := func(nodeSetName types.NamespacedName) types.NamespacedName {
+			name, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
+				GetService(dataplaneServiceName), dataplaneDeploymentName.Name, nodeSetName.Name)
+			return types.NamespacedName{Name: name, Namespace: namespace}
+		}
+
+		failJob := func(nodeSetName types.NamespacedName, withJobFailedCondition bool) {
+			Eventually(func(g Gomega) {
+				job := GetAnsibleee(jobName(nodeSetName))
+				job.Status.StartTime = ptr.To(metav1.Now())
+				job.Status.Failed = DefaultBackoffLimit + 1
+				if withJobFailedCondition {
+					job.Status.Conditions = []batchv1.JobCondition{
+						{
+							Type:    batchv1.JobFailureTarget,
+							Status:  corev1.ConditionTrue,
+							Reason:  "BackoffLimitExceeded",
+							Message: "simulated backoff limit exceeded",
+						},
+						{
+							Type:    batchv1.JobFailed,
+							Status:  corev1.ConditionTrue,
+							Reason:  string(condition.JobReasonBackoffLimitExceeded),
+							Message: "simulated backoff limit exceeded",
+						},
+					}
+				}
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, job)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+		}
+
+		succeedJob := func(nodeSetName types.NamespacedName) {
+			Eventually(func(g Gomega) {
+				job := GetAnsibleee(jobName(nodeSetName))
+				job.Status.Succeeded = 1
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, job)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+		}
+
+		nodeSetCondition := func(deployment *dataplanev1.OpenStackDataPlaneDeployment, name string) *condition.Condition {
+			nsConditions := deployment.Status.NodeSetConditions[name]
+			return nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+		}
+
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+
+			alphaNodeSetName = types.NamespacedName{Name: "alpha-nodeset", Namespace: namespace}
+			betaNodeSetName = types.NamespacedName{Name: "beta-nodeset", Namespace: namespace}
+			alphaNodeName = types.NamespacedName{Name: "alpha-nodeset-node-1", Namespace: namespace}
+			betaNodeName = types.NamespacedName{Name: "beta-nodeset-node-1", Namespace: namespace}
+			dataSourceSecretName = types.NamespacedName{Name: "beta-datasource", Namespace: namespace}
+
+			CreateDataplaneService(dataplaneServiceName, false)
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(dataSourceSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(alphaNodeSetName, nodeSetSpec(alphaNodeName, nil)))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(betaNodeSetName, nodeSetSpec(betaNodeName, []interface{}{
+				map[string]interface{}{"secretRef": map[string]interface{}{"name": dataSourceSecretName.Name}},
+			})))
+
+			SimulateIPSetComplete(alphaNodeName)
+			SimulateIPSetComplete(betaNodeName)
+			SimulateDNSDataComplete(alphaNodeSetName)
+			SimulateDNSDataComplete(betaNodeSetName)
+
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				for _, name := range []types.NamespacedName{alphaNodeSetName, betaNodeSetName} {
+					baremetalSet := baremetalv1.OpenStackBaremetalSet{}
+					g.Expect(th.K8sClient.Get(th.Ctx, name, &baremetalSet)).To(Succeed())
+					baremetalSet.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+					g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetalSet)).To(Succeed())
+				}
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, map[string]interface{}{
+				"nodeSets": []string{alphaNodeSetName.Name, betaNodeSetName.Name},
+			}))
+		})
+
+		It("should complete the healthy nodeSet and terminate only the failed one", func() {
+			failJob(alphaNodeSetName, true)
+
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				g.Expect(deployment.Status.FailedNodeSets).To(HaveKey(alphaNodeSetName.Name))
+				// beta is still in flight, so the deployment is not settled yet
+				deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityWarning)))
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			succeedJob(betaNodeSetName)
+
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(deploymentCondition.Status).To(Equal(corev1.ConditionFalse))
+				g.Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityError)))
+				g.Expect(deployment.Status.Deployed).To(BeFalse())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+			Expect(nodeSetCondition(deployment, alphaNodeSetName.Name)).ToNot(BeNil())
+			Expect(string(nodeSetCondition(deployment, alphaNodeSetName.Name).Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
+			Expect(nodeSetCondition(deployment, betaNodeSetName.Name)).ToNot(BeNil())
+			Expect(nodeSetCondition(deployment, betaNodeSetName.Name).Status).To(Equal(corev1.ConditionTrue))
+
+			Expect(deployment.Status.NodeSetHashes).To(HaveKeyWithValue(betaNodeSetName.Name, GetDataplaneNodeSet(betaNodeSetName).Status.ConfigHash))
+			Expect(deployment.Status.NodeSetHashes).ToNot(HaveKey(alphaNodeSetName.Name))
+			Expect(deployment.Status.SecretHashes).To(HaveKey(dataSourceSecretName.Name))
+		})
+
+		It("should not treat a failure without a JobFailed condition as terminal", func() {
+			failJob(alphaNodeSetName, false)
+			failJob(betaNodeSetName, false)
+
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				g.Expect(deployment.Status.FailedNodeSets).To(BeEmpty())
+				deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.ErrorReason)))
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityWarning)))
+				g.Expect(deployment.Status.Deployed).To(BeFalse())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Consistently(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				g.Expect(deployment.Status.FailedNodeSets).To(BeEmpty())
+				deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.ErrorReason)))
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityWarning)))
+				g.Expect(deployment.Status.Deployed).To(BeFalse())
+			}, "5s", "1s").Should(Succeed())
 		})
 	})
 
@@ -1828,6 +2018,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					condition.DeploymentReadyErrorMessage,
 					"Simulated backoff limit exceeded for testing")
 
+				deployment.Status.FailedNodeSets = map[string]string{
+					dataplaneNodeSetName.Name: "Simulated backoff limit exceeded for testing",
+				}
+
 				deployment.Status.Deployed = false
 
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, deployment)).To(Succeed())
@@ -1891,6 +2085,74 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				condition.DeploymentReadyCondition,
 				corev1.ConditionFalse,
 			)
+		})
+
+		It("should not re-deploy a pre-existing failed deployment that has no FailedNodeSets", func() {
+			// This deployment predates FailedNodeSets, so its terminal status is set manually.
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				g.Expect(deployment.Status.ObservedGeneration).To(Equal(deployment.Generation))
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				if deployment.Status.NodeSetConditions == nil {
+					deployment.Status.NodeSetConditions = make(map[string]condition.Conditions)
+				}
+				deployment.Status.Conditions.MarkFalse(
+					condition.DeploymentReadyCondition,
+					condition.JobReasonBackoffLimitExceeded,
+					condition.SeverityError,
+					condition.DeploymentReadyErrorMessage,
+					"Simulated backoff limit exceeded for testing")
+				deployment.Status.FailedNodeSets = nil
+				deployment.Status.Deployed = false
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, deployment)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+			originalGeneration := deployment.Status.ObservedGeneration
+			deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+			Expect(deploymentCondition).ToNot(BeNil())
+			originalTransitionTime := deploymentCondition.LastTransitionTime
+
+			// Simulate TTL garbage collection of the AEE jobs.
+			Eventually(func(g Gomega) {
+				jobList := &batchv1.JobList{}
+				g.Expect(th.K8sClient.List(th.Ctx, jobList,
+					client.InNamespace(namespace),
+					client.MatchingLabels{"openstackdataplanenodeset": dataplaneNodeSetName.Name})).To(Succeed())
+				for i := range jobList.Items {
+					g.Expect(th.K8sClient.Delete(th.Ctx, &jobList.Items[i])).To(Succeed())
+				}
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				if deployment.Annotations == nil {
+					deployment.Annotations = make(map[string]string)
+				}
+				deployment.Annotations["test-annotation"] = "trigger-reconcile"
+				g.Expect(th.K8sClient.Update(th.Ctx, deployment)).To(Succeed())
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			Consistently(func(g Gomega) {
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
+				g.Expect(deployment.Status.ObservedGeneration).To(Equal(originalGeneration))
+				g.Expect(deployment.Status.FailedNodeSets).To(BeEmpty())
+				g.Expect(deployment.Status.Deployed).To(BeFalse())
+				c := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(c).ToNot(BeNil())
+				g.Expect(string(c.Severity)).To(Equal(string(condition.SeverityError)))
+				g.Expect(string(c.Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
+				g.Expect(c.LastTransitionTime).To(Equal(originalTransitionTime))
+
+				jobList := &batchv1.JobList{}
+				g.Expect(th.K8sClient.List(th.Ctx, jobList,
+					client.InNamespace(namespace),
+					client.MatchingLabels{"openstackdataplanenodeset": dataplaneNodeSetName.Name})).To(Succeed())
+				g.Expect(jobList.Items).To(BeEmpty())
+			}, "5s", "1s").Should(Succeed())
 		})
 	})
 
@@ -2158,6 +2420,89 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				condition.DeploymentReadyCondition,
 				corev1.ConditionTrue,
 			)
+		})
+	})
+
+	When("A deployment scoped service job exceeds its backoff limit", func() {
+		var gfailDeploymentName types.NamespacedName
+		var gfailAlphaName types.NamespacedName
+		var gfailBetaName types.NamespacedName
+
+		BeforeEach(func() {
+			gfailDeploymentName = types.NamespacedName{Name: "global-fail-deployment", Namespace: namespace}
+			gfailAlphaName = types.NamespacedName{Name: "global-fail-alpha", Namespace: namespace}
+			gfailBetaName = types.NamespacedName{Name: "global-fail-beta", Namespace: namespace}
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+
+			DeferCleanup(th.DeleteInstance, CreateDataPlaneServiceFromSpec(
+				types.NamespacedName{Name: "svc-global-fail", Namespace: namespace},
+				map[string]interface{}{"edpmServiceType": "svc-global-fail", "deployOnAllNodeSets": true}))
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
+
+			for idx, nodeSetName := range []types.NamespacedName{gfailAlphaName, gfailBetaName} {
+				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(
+					nodeSetName, BarrierNodeSetSpec(nodeSetName.Name, []string{"svc-global-fail"},
+						fmt.Sprintf("192.168.122.%d", 110+idx))))
+				SimulateIPSetComplete(types.NamespacedName{
+					Name: fmt.Sprintf("%s-node-1", nodeSetName.Name), Namespace: namespace})
+				SimulateDNSDataComplete(nodeSetName)
+			}
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(gfailDeploymentName,
+				map[string]interface{}{
+					"nodeSets": []string{gfailAlphaName.Name, gfailBetaName.Name},
+				}))
+		})
+
+		It("should terminate every nodeset listing the deployment scoped service", func() {
+			globalJobName := types.NamespacedName{
+				Name:      fmt.Sprintf("svc-global-fail-%s", gfailDeploymentName.Name),
+				Namespace: namespace,
+			}
+
+			Eventually(func(g Gomega) {
+				job := GetAnsibleee(globalJobName)
+				job.Status.StartTime = ptr.To(metav1.Now())
+				job.Status.Failed = DefaultBackoffLimit + 1
+				job.Status.Conditions = []batchv1.JobCondition{
+					{
+						Type:    batchv1.JobFailureTarget,
+						Status:  corev1.ConditionTrue,
+						Reason:  "BackoffLimitExceeded",
+						Message: "simulated backoff limit exceeded",
+					},
+					{
+						Type:    batchv1.JobFailed,
+						Status:  corev1.ConditionTrue,
+						Reason:  string(condition.JobReasonBackoffLimitExceeded),
+						Message: "simulated backoff limit exceeded",
+					},
+				}
+				g.Expect(k8sClient.Status().Update(ctx, job)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+
+			Eventually(func(g Gomega) {
+				deployment := GetDataplaneDeployment(gfailDeploymentName)
+				g.Expect(deployment.Status.FailedNodeSets).To(HaveKey(gfailAlphaName.Name))
+				g.Expect(deployment.Status.FailedNodeSets).To(HaveKey(gfailBetaName.Name))
+				g.Expect(deployment.Status.NodeSetHashes).To(BeEmpty())
+				deploymentCondition := deployment.Status.Conditions.Get(condition.DeploymentReadyCondition)
+				g.Expect(deploymentCondition).ToNot(BeNil())
+				g.Expect(deploymentCondition.Status).To(Equal(corev1.ConditionFalse))
+				g.Expect(string(deploymentCondition.Reason)).To(Equal(string(condition.JobReasonBackoffLimitExceeded)))
+				g.Expect(string(deploymentCondition.Severity)).To(Equal(string(condition.SeverityError)))
+				g.Expect(deployment.Status.Deployed).To(BeFalse())
+			}, timeout, interval).Should(Succeed())
+
+			Consistently(func(g Gomega) {
+				deployment := GetDataplaneDeployment(gfailDeploymentName)
+				g.Expect(deployment.Status.FailedNodeSets).To(HaveLen(2))
+				g.Expect(deployment.Status.Deployed).To(BeFalse())
+			}, "5s", interval).Should(Succeed())
 		})
 	})
 
