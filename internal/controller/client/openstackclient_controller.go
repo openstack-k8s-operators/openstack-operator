@@ -324,6 +324,10 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}, metricStorage)
 	if err == nil {
 		configVars["PrometheusTls"] = env.SetValue(fmt.Sprint(metricStorage.Spec.PrometheusTLS.Enabled()))
+	} else {
+		// MetricStorage is optional; clear the object so MCP config does not
+		// point at a Prometheus service that is not present.
+		metricStorage = nil
 	}
 
 	// all cert input checks out so report InputReady
@@ -370,7 +374,13 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			configVars["mcp-tls"] = env.SetValue(certHash)
 		}
 
-		mcpConfigYAML := openstackclient.MCPConfigYAML(instance.Name, instance.Namespace, instance.Spec.CaBundleSecretName, mcpTLSSvc != nil)
+		mcpConfigYAML := openstackclient.MCPConfigYAML(
+			instance.Name,
+			instance.Namespace,
+			instance.Spec.CaBundleSecretName,
+			mcpTLSSvc != nil,
+			metricStorage,
+		)
 
 		mcpCloudsYAML := openstackclient.MCPCloudsYAML(
 			internalAuthURL,
