@@ -20,7 +20,9 @@ import (
 	"unicode"
 
 	env "github.com/openstack-k8s-operators/lib-common/modules/common/env"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/pod"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
+	"github.com/openstack-k8s-operators/lib-common/modules/users"
 	assistantv1 "github.com/openstack-k8s-operators/openstack-operator/api/assistant/v1beta1"
 
 	corev1 "k8s.io/api/core/v1"
@@ -143,23 +145,16 @@ func AssistantPodSpecWithCABundle(
 	podSpec := corev1.PodSpec{
 		TerminationGracePeriodSeconds: ptr.To[int64](0),
 		ServiceAccountName:            instance.RbacResourceName(),
+		SecurityContext:               pod.RestrictivePodSecurityContext(users.OpenStackAssistantUID, users.OpenStackAssistantGID),
 		Volumes:                       volumes,
 		Containers: []corev1.Container{
 			{
-				Name:  "assistant",
-				Image: instance.Spec.ContainerImage,
-				SecurityContext: &corev1.SecurityContext{
-					RunAsNonRoot:             ptr.To(true),
-					AllowPrivilegeEscalation: ptr.To(false),
-					Capabilities: &corev1.Capabilities{
-						Drop: []corev1.Capability{
-							"ALL",
-						},
-					},
-				},
-				Env:          containerEnvs,
-				VolumeMounts: volumeMounts,
-				Resources:    instance.Spec.Resources,
+				Name:            "assistant",
+				Image:           instance.Spec.ContainerImage,
+				SecurityContext: pod.RestrictiveSecurityContext(users.OpenStackAssistantUID, users.OpenStackAssistantGID),
+				Env:             containerEnvs,
+				VolumeMounts:    volumeMounts,
+				Resources:       instance.Spec.Resources,
 			},
 		},
 	}
