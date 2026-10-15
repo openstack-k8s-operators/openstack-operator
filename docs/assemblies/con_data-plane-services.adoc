@@ -87,6 +87,7 @@ spec:
 |`neutron-metadata` |(Deprecated) Include this service to run the standalone Neutron OVN Metadata agent on the data plane nodes. Superseded by the `metadata` extension of the `neutron-ovn` service, which is enabled by default.
 |`neutron-dhcp` |Include this service to run a Neutron DHCP agent on the data plane nodes.
 |`cleanup` |Include this service to clean up containers and configurations for services that have been removed from the nodeset. The cleanup service compares the current services list with previously deployed services, removes containers for services no longer in the list, removes startup_config and configuration files, and runs service-specific cleanup tasks. Use this service via `servicesOverride` for one-time cleanup after removing services from a nodeset, or add to the services list if cleanup should run on every deployment.
+|`upgrade-services` |Include this service explicitly through `servicesOverride` to run the `osp.edpm.upgrade_services` playbook. This service is not enabled by default and should only be used for a major-version upgrade of the data plane.
 |===
 
 For more information about the available default services, see https://github.com/openstack-k8s-operators/openstack-operator/tree/main/config/services.
