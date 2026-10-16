@@ -203,6 +203,8 @@ spec:
                     type: string
                   openstackNetworkExporterImage:
                     type: string
+                  osBootcContainerImage:
+                    type: string
                   osContainerImage:
                     type: string
                   ovnControllerImage:
@@ -453,6 +455,8 @@ spec:
                       type: string
                     openstackNetworkExporterImage:
                       type: string
+                    osBootcContainerImage:
+                      type: string
                     osContainerImage:
                       type: string
                     ovnControllerImage:
@@ -658,6 +662,8 @@ spec:
                   openstackMcpImage:
                     type: string
                   openstackNetworkExporterImage:
+                    type: string
+                  osBootcContainerImage:
                     type: string
                   osContainerImage:
                     type: string
@@ -884,6 +890,8 @@ spec:
                     openstackMcpImage:
                       type: string
                     openstackNetworkExporterImage:
+                      type: string
+                    osBootcContainerImage:
                       type: string
                     osContainerImage:
                       type: string

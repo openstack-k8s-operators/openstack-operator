@@ -19525,6 +19525,8 @@ spec:
                     type: string
                   openstackNetworkExporterImage:
                     type: string
+                  osBootcContainerImage:
+                    type: string
                   osContainerImage:
                     type: string
                   ovnControllerImage:

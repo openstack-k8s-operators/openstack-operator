@@ -42,6 +42,15 @@ type ProvisionResult struct {
 	BmhRefHash    string
 }
 
+func selectOSImage(osImageType dataplanev1.OSImageType, images openstackv1.ContainerImages) *string {
+	switch osImageType {
+	case dataplanev1.OSImageTypeBootc:
+		return images.OsBootcContainerImage
+	default:
+		return images.OsContainerImage
+	}
+}
+
 // DeployBaremetalSet Deploy OpenStackBaremetalSet
 func DeployBaremetalSet(
 	ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet,
@@ -64,8 +73,9 @@ func DeployBaremetalSet(
 		if instance.Spec.BaremetalSetTemplate != nil {
 			instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec.OpenStackBaremetalSetTemplateSpec)
 			// Set Images
-			if containerImages.OsContainerImage != nil && instance.Spec.BaremetalSetTemplate.OSContainerImageURL == "" {
-				baremetalSet.Spec.OSContainerImageURL = *containerImages.OsContainerImage
+			// Only apply the NodeSet default image if the user did not override it.
+			if osImg := selectOSImage(instance.Spec.OSImageType, containerImages); osImg != nil && instance.Spec.BaremetalSetTemplate.OSContainerImageURL == "" {
+				baremetalSet.Spec.OSContainerImageURL = *osImg
 			}
 			if containerImages.AgentImage != nil && instance.Spec.BaremetalSetTemplate.AgentImageURL == "" {
 				baremetalSet.Spec.AgentImageURL = *containerImages.AgentImage

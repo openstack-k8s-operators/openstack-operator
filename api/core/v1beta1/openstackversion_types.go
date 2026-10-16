@@ -239,8 +239,8 @@ type ContainerTemplate struct {
 	EdpmOvnBgpAgentImage          *string `json:"edpmOvnBgpAgentImage,omitempty"`
 	EdpmNodeExporterImage         *string `json:"edpmNodeExporterImage,omitempty"`
 	// Deprecated: EdpmKeplerImage is no longer used. Kepler has been removed from the telemetry stack.
-	EdpmKeplerImage               *string `json:"edpmKeplerImage,omitempty"`
-	EdpmPodmanExporterImage       *string `json:"edpmPodmanExporterImage,omitempty"`
+	EdpmKeplerImage         *string `json:"edpmKeplerImage,omitempty"`
+	EdpmPodmanExporterImage *string `json:"edpmPodmanExporterImage,omitempty"`
 	// Deprecated: Use OpenstackNetworkExporterImage instead
 	EdpmOpenstackNetworkExporterImage *string `json:"edpmOpenstackNetworkExporterImage,omitempty"`
 	OpenstackNetworkExporterImage     *string `json:"openstackNetworkExporterImage,omitempty"`
@@ -278,6 +278,7 @@ type ContainerTemplate struct {
 	OpenstackClientImage              *string `json:"openstackClientImage,omitempty"`
 	OpenstackMcpImage                 *string `json:"openstackMcpImage,omitempty"`
 	OsContainerImage                  *string `json:"osContainerImage,omitempty"` //fixme wire this in?
+	OsBootcContainerImage             *string `json:"osBootcContainerImage,omitempty"`
 	OvnControllerImage                *string `json:"ovnControllerImage,omitempty"`
 	OvnControllerOvsImage             *string `json:"ovnControllerOvsImage,omitempty"`
 	OvnNbDbclusterImage               *string `json:"ovnNbDbclusterImage,omitempty"`
@@ -302,13 +303,13 @@ type ContainerTemplate struct {
 // ServiceDefaults - struct that contains defaults for OSP services that can change over time
 // but are associated with a specific OpenStack release version
 type ServiceDefaults struct {
-	GlanceWsgi             *string `json:"glanceWsgi,omitempty"`
-	RabbitmqVersion        *string `json:"rabbitmqVersion,omitempty"`
-	MariadbVersion         *string `json:"mariadbVersion,omitempty"`
-	GlanceLocationAPI      *string `json:"glanceLocationAPI,omitempty"`
-	ManilaSharev1          *string `json:"manilaSharev1,omitempty"`
-	NeutronWsgi            *string `json:"neutronWsgi,omitempty"`
-	IronicInspectInterface *string `json:"ironicInspectInterface,omitempty"`
+	GlanceWsgi                    *string `json:"glanceWsgi,omitempty"`
+	RabbitmqVersion               *string `json:"rabbitmqVersion,omitempty"`
+	MariadbVersion                *string `json:"mariadbVersion,omitempty"`
+	GlanceLocationAPI             *string `json:"glanceLocationAPI,omitempty"`
+	ManilaSharev1                 *string `json:"manilaSharev1,omitempty"`
+	NeutronWsgi                   *string `json:"neutronWsgi,omitempty"`
+	IronicInspectInterface        *string `json:"ironicInspectInterface,omitempty"`
 	OVNHardenedOVSSecurityContext *string `json:"ovnHardenedOVSSecurityContext,omitempty"`
 }
 
