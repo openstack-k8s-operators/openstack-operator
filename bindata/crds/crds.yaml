@@ -20554,6 +20554,8 @@ spec:
                     type: string
                   openstackNetworkExporterImage:
                     type: string
+                  osBootcContainerImage:
+                    type: string
                   osContainerImage:
                     type: string
                   ovnControllerImage:
@@ -22400,6 +22402,16 @@ spec:
                   Nodes - Map of Node Names and node specific data. Values here override defaults in the
                   upper level section.
                 type: object
+              osImageType:
+                default: uefi
+                description: |-
+                  OSImageType selects the OS image flavor for this NodeSet's baremetal hosts.
+                  "uefi" (default) selects the UEFI self-extracting image, "bootc" selects the
+                  bootc qcow2 self-extracting image.
+                enum:
+                - uefi
+                - bootc
+                type: string
               preProvisioned:
                 description: PreProvisioned - Set to true if the nodes have been Pre
                   Provisioned.
@@ -23170,6 +23182,8 @@ spec:
                     type: string
                   openstackNetworkExporterImage:
                     type: string
+                  osBootcContainerImage:
+                    type: string
                   osContainerImage:
                     type: string
                   ovnControllerImage:
@@ -23420,6 +23434,8 @@ spec:
                       type: string
                     openstackNetworkExporterImage:
                       type: string
+                    osBootcContainerImage:
+                      type: string
                     osContainerImage:
                       type: string
                     ovnControllerImage:
@@ -23625,6 +23641,8 @@ spec:
                   openstackMcpImage:
                     type: string
                   openstackNetworkExporterImage:
+                    type: string
+                  osBootcContainerImage:
                     type: string
                   osContainerImage:
                     type: string
@@ -23851,6 +23869,8 @@ spec:
                     openstackMcpImage:
                       type: string
                     openstackNetworkExporterImage:
+                      type: string
+                    osBootcContainerImage:
                       type: string
                     osContainerImage:
                       type: string

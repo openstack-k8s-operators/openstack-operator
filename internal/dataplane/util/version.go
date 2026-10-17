@@ -83,6 +83,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
 		containerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
 		containerImages.OsContainerImage = version.Status.ContainerImages.OsContainerImage
+		containerImages.OsBootcContainerImage = version.Status.ContainerImages.OsBootcContainerImage
 		containerImages.AgentImage = version.Status.ContainerImages.AgentImage
 		containerImages.ApacheImage = version.Status.ContainerImages.ApacheImage
 		containerImages.SwiftAccountImage = version.Status.ContainerImages.SwiftAccountImage
@@ -113,6 +114,7 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.NovaComputeImage = dataplanev1.ContainerImages.NovaComputeImage
 		containerImages.OvnControllerImage = dataplanev1.ContainerImages.OvnControllerImage
 		containerImages.OsContainerImage = dataplanev1.ContainerImages.OsContainerImage
+		containerImages.OsBootcContainerImage = dataplanev1.ContainerImages.OsBootcContainerImage
 		containerImages.AgentImage = dataplanev1.ContainerImages.AgentImage
 		containerImages.ApacheImage = dataplanev1.ContainerImages.ApacheImage
 		containerImages.SwiftAccountImage = dataplanev1.ContainerImages.SwiftAccountImage
