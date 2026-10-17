@@ -17,9 +17,9 @@ require (
 	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20261010071138-574fb96a64a7
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20261010062307-72626345c071
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20261010071138-61cbb2a65ba0
-	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261003073848-d51f1ef1a47a
+	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261017095806-94b20759c9a1
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20261003073849-a5ea1d9f8445
-	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261010071518-cac9d297fec2
+	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261017100150-7418326efd1c
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20261010071519-e8467272c0fa
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20261001134834-c55d623872db
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20261001134834-c55d623872db
@@ -33,9 +33,9 @@ require (
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20261010071521-fc11142e9017
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20261003111705-68954686c365
 	github.com/openstack-k8s-operators/openstack-operator/api v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261003111703-6346fa5c4c63
-	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261003111705-ce4fcb9fb849
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20260923153810-c265034fb79c
+	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261010114019-68044bf83b21
+	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261010113304-a87bc59ecbc3
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261013072718-7ed9a202d2db
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20261005135126-6ff53ecf93f9
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261006075646-4333e4c937d2
 	github.com/pkg/errors v0.9.1
