@@ -166,6 +166,32 @@ spec:
                     description: ManageLbMgmtNetworks - when True, octavia-operator
                       creates the Neutron resources needed for its Management Network
                     type: boolean
+                  providerNetworkType:
+                    default: flat
+                    description: |-
+                      ProviderNetworkType is the Neutron provider network type for the Octavia
+                      provider network. "flat" (default) preserves the in-cluster behaviour;
+                      "vlan" creates a VLAN provider network, e.g. to route the management
+                      network through dedicated Networker nodes.
+                    enum:
+                    - flat
+                    - vlan
+                    type: string
+                  providerPhysicalNetwork:
+                    default: octavia
+                    description: |-
+                      ProviderPhysicalNetwork is the Neutron physical network name backing the
+                      Octavia provider network. Defaults to "octavia" (the in-cluster NIC
+                      mapping); set it to the datacentre physnet when using a VLAN provider
+                      network extended to Networker nodes.
+                    type: string
+                  providerSegmentationID:
+                    description: |-
+                      ProviderSegmentationID is the VLAN ID for the Octavia provider network.
+                      Required when ProviderNetworkType is "vlan"; ignored when "flat".
+                    maximum: 4094
+                    minimum: 1
+                    type: integer
                 type: object
               messagingBus:
                 description: MessagingBus configuration (cluster, username, and vhost)
