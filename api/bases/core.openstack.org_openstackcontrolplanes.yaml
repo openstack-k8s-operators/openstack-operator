@@ -13008,6 +13008,19 @@ spec:
                           manageLbMgmtNetworks:
                             default: true
                             type: boolean
+                          providerNetworkType:
+                            default: flat
+                            enum:
+                            - flat
+                            - vlan
+                            type: string
+                          providerPhysicalNetwork:
+                            default: octavia
+                            type: string
+                          providerSegmentationID:
+                            maximum: 4094
+                            minimum: 1
+                            type: integer
                         type: object
                       messagingBus:
                         properties:
