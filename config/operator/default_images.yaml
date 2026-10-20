@@ -12,9 +12,9 @@ spec:
       - name: operator
         env:
         - name: RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT
-          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
+          value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:19.0-beta-latest
         - name: RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT
-          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+          value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:19.0-beta-latest
         - name: RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-aodh-api:master-latest
         - name: RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT
@@ -165,4 +165,4 @@ spec:
         - name: TEST_HORIZONTEST_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-horizontest:master-latest
         - name: RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT
-          value: quay.io/openstack-k8s-operators/openstack-must-gather:latest
+          value: quay.io/openstack-k8s-operators/openstack-must-gather:19.0-beta-latest
