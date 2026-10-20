@@ -4,6 +4,7 @@
 [![CRD sync check main](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check.yaml)
 [![CRD sync check 18-stable](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-18-stable.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-18-stable.yaml)
 [![CRD sync check 18.0-fr7](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-18.0-fr7.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-18.0-fr7.yaml)
+[![CRD sync check 19.0-beta](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-19.0-beta.yaml/badge.svg)](https://github.com/openstack-k8s-operators/openstack-operator/actions/workflows/crd-sync-check-19.0-beta.yaml)
 [![CtrlPlane CRD Size](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/openstack-k8s-ci-robot/cb95c1626e1946e428bed7ee50a73348/raw/crd-size-main.json)](https://github.com/openstack-k8s-ci-robot/openstack-operator/actions/workflows/crd-size-badge.yaml)
 
 This is the primary operator for OpenStack. It is a "meta" operator, meaning it
