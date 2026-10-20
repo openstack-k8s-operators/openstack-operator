@@ -93,8 +93,9 @@ spec:
                   enum:
                   - simple_crypto
                   - pkcs11
+                  - kmip
                   type: string
-                maxItems: 2
+                maxItems: 3
                 minItems: 1
                 type: array
                 x-kubernetes-list-type: set
@@ -830,7 +831,27 @@ spec:
                 enum:
                 - simple_crypto
                 - pkcs11
+                - kmip
                 type: string
+              kmip:
+                description: BarbicanKMIPTemplate - Includes the KMIP secret store
+                  properties
+                properties:
+                  clientDataPath:
+                    description: |-
+                      Location at which ClientDataSecret is mounted, i.e. where the backend
+                      client library expects to find it. Defaulted per secret store by the
+                      Barbican webhook (DefaultPKCS11ClientDataPath, DefaultKMIPClientDataPath).
+                    type: string
+                  clientDataSecret:
+                    description: |-
+                      The OpenShift secret that stores the backend client data.
+                      These will be mounted directly at ClientDataPath.
+                      Required when the owning secret store is enabled; this is enforced by
+                      the Barbican webhook rather than by the schema, because the schema
+                      cannot make it conditional on EnabledSecretStores.
+                    type: string
+                type: object
               messagingBus:
                 description: MessagingBus configuration (username, vhost, and cluster)
                 properties:
@@ -912,22 +933,24 @@ spec:
                 description: BarbicanPKCS11Template - Includes common HSM properties
                 properties:
                   clientDataPath:
-                    default: /etc/hsm-client
                     description: |-
-                      Location at which ClientDataSecret is mounted, i.e. where the HSM
-                      vendor client library expects to find it.
+                      Location at which ClientDataSecret is mounted, i.e. where the backend
+                      client library expects to find it. Defaulted per secret store by the
+                      Barbican webhook (DefaultPKCS11ClientDataPath, DefaultKMIPClientDataPath).
                     type: string
                   clientDataSecret:
                     description: |-
-                      The OpenShift secret that stores the HSM client data.
+                      The OpenShift secret that stores the backend client data.
                       These will be mounted directly at ClientDataPath.
+                      Required when the owning secret store is enabled; this is enforced by
+                      the Barbican webhook rather than by the schema, because the schema
+                      cannot make it conditional on EnabledSecretStores.
                     type: string
                   loginSecret:
                     description: OpenShift secret that stores the password to login
                       to the PKCS11 session
                     type: string
                 required:
-                - clientDataSecret
                 - loginSecret
                 type: object
               rabbitMqClusterName:
