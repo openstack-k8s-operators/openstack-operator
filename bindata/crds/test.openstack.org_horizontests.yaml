@@ -98,35 +98,6 @@ spec:
                   (stuck in "Running" phase) or until the corresponding HorizonTest CR is deleted.
                   This allows the user to debug any potential troubles with `oc rsh`.
                 type: boolean
-              extraConfigmapsMounts:
-                description: |-
-                  Extra configmaps for mounting inside the pod
-                  WARNING: This parameter will be deprecated!
-                  Please use ExtraMounts parameter instead!
-                items:
-                  description: |-
-                    WARNING: This parameter will be deprecated!
-                    Please use ExtraMounts parameter instead!
-                  properties:
-                    mountPath:
-                      description: Path within the container at which the volume should
-                        be mounted.
-                      type: string
-                    name:
-                      description: The name of an existing config map for mounting.
-                      maxLength: 253
-                      type: string
-                    subPath:
-                      default: ""
-                      description: Config map subpath for mounting, defaults to configmap
-                        root.
-                      type: string
-                  required:
-                  - mountPath
-                  - name
-                  - subPath
-                  type: object
-                type: array
               extraFlag:
                 description: |-
                   ExtraFlag is an extra flag that can be set to modify pytest command to

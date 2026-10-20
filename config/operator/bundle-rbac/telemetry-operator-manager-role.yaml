@@ -4,6 +4,10 @@ kind: ClusterRole
 metadata:
   name: telemetry-operator-manager-role
 rules:
+- nonResourceURLs:
+    - /ls-access
+  verbs:
+    - get
 - apiGroups:
     - ""
   resources:

@@ -110,35 +110,6 @@ spec:
                 default: false
                 description: Run ansible playbook with -vvvv
                 type: boolean
-              extraConfigmapsMounts:
-                description: |-
-                  Extra configmaps for mounting inside the pod
-                  WARNING: This parameter will be deprecated!
-                  Please use ExtraMounts parameter instead!
-                items:
-                  description: |-
-                    WARNING: This parameter will be deprecated!
-                    Please use ExtraMounts parameter instead!
-                  properties:
-                    mountPath:
-                      description: Path within the container at which the volume should
-                        be mounted.
-                      type: string
-                    name:
-                      description: The name of an existing config map for mounting.
-                      maxLength: 253
-                      type: string
-                    subPath:
-                      default: ""
-                      description: Config map subpath for mounting, defaults to configmap
-                        root.
-                      type: string
-                  required:
-                  - mountPath
-                  - name
-                  - subPath
-                  type: object
-                type: array
               extraMounts:
                 description: ExtraMounts containing conf files, credentials and storage
                   volumes
@@ -1063,35 +1034,6 @@ spec:
                     debug:
                       description: Run ansible playbook with -vvvv
                       type: boolean
-                    extraConfigmapsMounts:
-                      description: |-
-                        Extra configmaps for mounting inside the pod
-                        WARNING: This parameter will be deprecated!
-                        Please use ExtraMounts parameter instead!
-                      items:
-                        description: |-
-                          WARNING: This parameter will be deprecated!
-                          Please use ExtraMounts parameter instead!
-                        properties:
-                          mountPath:
-                            description: Path within the container at which the volume
-                              should be mounted.
-                            type: string
-                          name:
-                            description: The name of an existing config map for mounting.
-                            maxLength: 253
-                            type: string
-                          subPath:
-                            default: ""
-                            description: Config map subpath for mounting, defaults
-                              to configmap root.
-                            type: string
-                        required:
-                        - mountPath
-                        - name
-                        - subPath
-                        type: object
-                      type: array
                     extraMounts:
                       description: ExtraMounts containing conf files, credentials
                         and storage volumes
