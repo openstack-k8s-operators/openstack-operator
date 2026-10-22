@@ -205,6 +205,23 @@ func (spec *OpenStackDataPlaneNodeSetSpec) ValidateUpdate(oldSpec *OpenStackData
 		}
 	}
 
+	// osImageType is immutable once the NodeSet is created (change would make
+	// already-provisioned hosts inconsistent on re-provision). NodeSets created
+	// before the field existed have an empty value, which defaults to uefi.
+	oldOSImageType := oldSpec.OSImageType
+	if oldOSImageType == "" {
+		oldOSImageType = OSImageTypeUEFI
+	}
+	newOSImageType := spec.OSImageType
+	if newOSImageType == "" {
+		newOSImageType = OSImageTypeUEFI
+	}
+	if newOSImageType != oldOSImageType {
+		errors = append(errors, field.Forbidden(
+			field.NewPath("spec", "osImageType"),
+			fmt.Sprintf("osImageType is immutable once set: cannot change from %q to %q. Create a new NodeSet with the desired osImageType instead", oldOSImageType, newOSImageType)))
+	}
+
 	return errors
 }
 

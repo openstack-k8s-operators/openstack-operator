@@ -253,6 +253,40 @@ var _ = Describe("OpenStackVersion controller", func() {
 
 	})
 
+	When("An OpenStackVersion is created with a custom osBootcContainerImage", func() {
+		var customBootcImage = "custom.registry/edpm-bootc-qcow2:custom-tag"
+
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackVersionSpec()
+			spec["customContainerImages"] = map[string]interface{}{
+				"osBootcContainerImage": customBootcImage,
+			}
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackVersion(names.OpenStackVersionName, spec),
+			)
+
+			th.ExpectCondition(
+				names.OpenStackVersionName,
+				ConditionGetterFunc(OpenStackVersionConditionGetter),
+				corev1.OpenStackVersionInitialized,
+				k8s_corev1.ConditionTrue,
+			)
+
+			DeferCleanup(
+				OpenStackVersionRemoveFinalizer,
+				ctx,
+				names.OpenStackVersionName,
+			)
+		})
+
+		It("should expose the custom bootc image in the status", func() {
+			version := GetOpenStackVersion(names.OpenStackVersionName)
+			Expect(version.Status.ContainerImages.OsBootcContainerImage).ShouldNot(BeNil())
+			Expect(*version.Status.ContainerImages.OsBootcContainerImage).Should(Equal(customBootcImage))
+		})
+	})
+
 	// target version is *not* multiple OSVersion objects. Each time there is an update to a container image
 	// a new targetVersion is "discovered". This test is meant to simulate that environment
 	When("Multiple target versions exist", func() {

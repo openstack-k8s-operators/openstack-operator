@@ -127,7 +127,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		nodeSetGroup.Vars[k] = v
 	}
 	err = resolveGroupAnsibleVars(&instance.Spec.NodeTemplate,
-		&nodeSetGroup, containerImages, netServiceNetMap)
+		&nodeSetGroup, instance.Spec.OSImageType, containerImages, netServiceNetMap)
 	if err != nil {
 		utils.LogErrorForObject(helper, err, "Could not resolve ansible group vars", instance)
 		return "", err
@@ -316,6 +316,7 @@ func setDefaultPodmanRegistryConfigVars(vars map[string]interface{}, hasMirrorRe
 
 // set group ansible vars from NodeTemplate
 func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.Group,
+	osImageType dataplanev1.OSImageType,
 	containerImages openstackv1.ContainerImages,
 	netServiceNetMap map[string]string,
 ) error {
@@ -333,6 +334,18 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	// provided by the user in the spec.
 	if template.Ansible.AnsibleVars["edpm_frr_image"] == nil {
 		group.Vars["edpm_frr_image"] = containerImages.EdpmFrrImage
+	}
+	// The NodeSet is provisioned with the qcow2 wrapper image, but the OS update
+	// playbook needs the bootc OCI image for 'bootc switch'. We derive it by
+	// stripping the "-qcow2" tag suffix rather than adding another spec field,
+	// assuming a move to the bootc deploy interface where the same bootc image
+	// is used for provisioning and update.
+	if osImageType == dataplanev1.OSImageTypeBootc &&
+		template.Ansible.AnsibleVars["edpm_update_system_bootc_os_container_image"] == nil &&
+		group.Vars["edpm_update_system_bootc_os_container_image"] == nil &&
+		containerImages.OsBootcContainerImage != nil {
+		bootcImg := strings.TrimSuffix(*containerImages.OsBootcContainerImage, "-qcow2")
+		group.Vars["edpm_update_system_bootc_os_container_image"] = &bootcImg
 	}
 	if template.Ansible.AnsibleVars["edpm_neutron_dhcp_image"] == nil {
 		group.Vars["edpm_neutron_dhcp_image"] = containerImages.EdpmNeutronDhcpAgentImage

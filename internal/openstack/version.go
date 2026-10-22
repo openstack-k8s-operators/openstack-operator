@@ -237,6 +237,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			OpenstackClientImage:          getImg(instance.Spec.CustomContainerImages.OpenstackClientImage, defaults.OpenstackClientImage),
 			OpenstackMcpImage:             getImg(instance.Spec.CustomContainerImages.OpenstackMcpImage, defaults.OpenstackMcpImage),
 			OsContainerImage:              getImg(instance.Spec.CustomContainerImages.OsContainerImage, defaults.OsContainerImage),
+			OsBootcContainerImage:         getImg(instance.Spec.CustomContainerImages.OsBootcContainerImage, defaults.OsBootcContainerImage),
 			OvnControllerImage:            getImg(instance.Spec.CustomContainerImages.OvnControllerImage, defaults.OvnControllerImage),
 			OvnControllerOvsImage:         getImg(instance.Spec.CustomContainerImages.OvnControllerOvsImage, defaults.OvnControllerOvsImage),
 			OvnNbDbclusterImage:           getImg(instance.Spec.CustomContainerImages.OvnNbDbclusterImage, defaults.OvnNbDbclusterImage),

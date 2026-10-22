@@ -33,11 +33,29 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
+// OSImageType selects which OS image flavor is used for a NodeSet's baremetal hosts
+type OSImageType string
+
+const (
+	// OSImageTypeUEFI selects the UEFI self-extracting OS image (default)
+	OSImageTypeUEFI OSImageType = "uefi"
+	// OSImageTypeBootc selects the bootc qcow2 self-extracting OS image
+	OSImageTypeBootc OSImageType = "bootc"
+)
+
 // OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNodeSet
 type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Optional
 	// BaremetalSetTemplate Template for BaremetalSet for the NodeSet
 	BaremetalSetTemplate *baremetalv1.OpenStackBaremetalSetTemplateSpec `json:"baremetalSetTemplate,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=uefi;bootc
+	// +kubebuilder:default=uefi
+	// OSImageType selects the OS image flavor for this NodeSet's baremetal hosts.
+	// "uefi" (default) selects the UEFI self-extracting image, "bootc" selects the
+	// bootc qcow2 self-extracting image.
+	OSImageType OSImageType `json:"osImageType"`
 
 	// +kubebuilder:validation:Required
 	// NodeTemplate - node attributes specific to nodes defined by this resource. These
@@ -230,31 +248,32 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 // if no values are set elsewhere.
 var ContainerImageDefaults = openstackv1.ContainerImages{
 	ContainerTemplate: openstackv1.ContainerTemplate{
-		AgentImage:                    getStrPtr("quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:current-podified"),
-		AnsibleeeImage:                getStrPtr("quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"),
-		ApacheImage:            getStrPtr("registry.redhat.io/ubi10/httpd-24:latest"),
-		EdpmFrrImage:           getStrPtr("quay.io/openstack-s2i-containers/openstack-frr:master-latest"),
+		AgentImage:     getStrPtr("quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:current-podified"),
+		AnsibleeeImage: getStrPtr("quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"),
+		ApacheImage:    getStrPtr("registry.redhat.io/ubi10/httpd-24:latest"),
+		EdpmFrrImage:   getStrPtr("quay.io/openstack-s2i-containers/openstack-frr:master-latest"),
 		// Deprecated: EdpmIscsidImage is no longer used. iscsid now runs on the host instead of in a container.
 		EdpmIscsidImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
 		// Deprecated: EdpmLogrotateCrondImage is no longer used. logrotate-crond has been removed.
-		EdpmLogrotateCrondImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-cron:current-podified"),
+		EdpmLogrotateCrondImage:       getStrPtr("quay.io/podified-antelope-centos9/openstack-cron:current-podified"),
 		EdpmNeutronDhcpAgentImage:     getStrPtr("quay.io/openstack-s2i-containers/openstack-neutron-dhcp-agent:master-latest"),
 		EdpmNeutronMetadataAgentImage: getStrPtr("quay.io/openstack-s2i-containers/openstack-neutron-metadata-agent-ovn:master-latest"),
 		EdpmNeutronOvnAgentImage:      getStrPtr("quay.io/openstack-s2i-containers/openstack-neutron-ovn-agent:master-latest"),
-		EdpmNeutronSriovAgentImage: getStrPtr("quay.io/openstack-s2i-containers/openstack-neutron-sriov-agent:master-latest"),
+		EdpmNeutronSriovAgentImage:    getStrPtr("quay.io/openstack-s2i-containers/openstack-neutron-sriov-agent:master-latest"),
 		// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
-		EdpmMultipathdImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"),
-		NovaComputeImage:    getStrPtr("quay.io/openstack-s2i-containers/openstack-nova-compute:master-latest"),
-		OvnControllerImage:            getStrPtr("quay.io/openstack-s2i-containers/openstack-ovn-controller:master-latest"),
-		EdpmOvnBgpAgentImage:          getStrPtr("quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"),
-		CeilometerComputeImage:        getStrPtr("quay.io/openstack-s2i-containers/openstack-ceilometer-compute:master-latest"),
-		CeilometerIpmiImage:           getStrPtr("quay.io/openstack-s2i-containers/openstack-ceilometer-compute:master-latest"),
-		EdpmNodeExporterImage:         getStrPtr("quay.io/prometheus/node-exporter:v1.5.0"),
+		EdpmMultipathdImage:    getStrPtr("quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"),
+		NovaComputeImage:       getStrPtr("quay.io/openstack-s2i-containers/openstack-nova-compute:master-latest"),
+		OvnControllerImage:     getStrPtr("quay.io/openstack-s2i-containers/openstack-ovn-controller:master-latest"),
+		EdpmOvnBgpAgentImage:   getStrPtr("quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"),
+		CeilometerComputeImage: getStrPtr("quay.io/openstack-s2i-containers/openstack-ceilometer-compute:master-latest"),
+		CeilometerIpmiImage:    getStrPtr("quay.io/openstack-s2i-containers/openstack-ceilometer-compute:master-latest"),
+		EdpmNodeExporterImage:  getStrPtr("quay.io/prometheus/node-exporter:v1.5.0"),
 		// Deprecated: EdpmKeplerImage is no longer used. Kepler has been removed from the telemetry stack.
 		EdpmKeplerImage:               getStrPtr("quay.io/sustainable_computing_io/kepler:release-0.7.12"),
 		EdpmPodmanExporterImage:       getStrPtr("quay.io/openstack-k8s-operators/prometheus-podman-exporter:latest"),
 		OpenstackNetworkExporterImage: getStrPtr("quay.io/openstack-k8s-operators/openstack-network-exporter:current-podified"),
 		OsContainerImage:              getStrPtr("quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified"),
+		OsBootcContainerImage:         getStrPtr("quay.io/openstack-k8s-operators/edpm-bootc:latest-qcow2"),
 		SwiftAccountImage:             getStrPtr("quay.io/openstack-s2i-containers/openstack-swift-account:master-latest"),
 		SwiftContainerImage:           getStrPtr("quay.io/openstack-s2i-containers/openstack-swift-container:master-latest"),
 		SwiftObjectImage:              getStrPtr("quay.io/openstack-s2i-containers/openstack-swift-object:master-latest"),
@@ -270,16 +289,16 @@ func SetupDefaults() {
 	// Acquire environmental defaults and initialize dataplane defaults with them
 	ContainerImages = openstackv1.ContainerImages{
 		ContainerTemplate: openstackv1.ContainerTemplate{
-			AgentImage:                    getImageDefault("RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.AgentImage),
-			AnsibleeeImage:      getImageDefault("RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT", ContainerImageDefaults.AnsibleeeImage),
-			ApacheImage:         getImageDefault("RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT", ContainerImageDefaults.ApacheImage),
-			EdpmFrrImage:        getImageDefault("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmFrrImage),
+			AgentImage:     getImageDefault("RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.AgentImage),
+			AnsibleeeImage: getImageDefault("RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT", ContainerImageDefaults.AnsibleeeImage),
+			ApacheImage:    getImageDefault("RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT", ContainerImageDefaults.ApacheImage),
+			EdpmFrrImage:   getImageDefault("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmFrrImage),
 			// Deprecated: EdpmIscsidImage is no longer used. iscsid now runs on the host instead of in a container.
 			EdpmIscsidImage: getImageDefault("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmIscsidImage),
 			// Deprecated: EdpmLogrotateCrondImage is no longer used. logrotate-crond has been removed.
 			EdpmLogrotateCrondImage: getImageDefault("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmLogrotateCrondImage),
 			// Deprecated: EdpmMultipathdImage is no longer used. multipathd now runs on the host instead of in a container.
-			EdpmMultipathdImage: getImageDefault("RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmMultipathdImage),
+			EdpmMultipathdImage:           getImageDefault("RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmMultipathdImage),
 			EdpmNeutronDhcpAgentImage:     getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_DHCP_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronDhcpAgentImage),
 			EdpmNeutronMetadataAgentImage: getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronMetadataAgentImage),
 			EdpmNeutronOvnAgentImage:      getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_OVN_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronOvnAgentImage),
@@ -295,6 +314,7 @@ func SetupDefaults() {
 			NovaComputeImage:              getImageDefault("RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.NovaComputeImage),
 			OvnControllerImage:            getImageDefault("RELATED_IMAGE_OVN_CONTROLLER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OvnControllerImage),
 			OsContainerImage:              getImageDefault("RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OsContainerImage),
+			OsBootcContainerImage:         getImageDefault("RELATED_IMAGE_OS_BOOTC_CONTAINER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OsBootcContainerImage),
 			SwiftAccountImage:             getImageDefault("RELATED_IMAGE_SWIFT_ACCOUNT_IMAGE_URL_DEFAULT", ContainerImageDefaults.SwiftAccountImage),
 			SwiftContainerImage:           getImageDefault("RELATED_IMAGE_SWIFT_CONTAINER_IMAGE_URL_DEFAULT", ContainerImageDefaults.SwiftContainerImage),
 			SwiftObjectImage:              getImageDefault("RELATED_IMAGE_SWIFT_OBJECT_IMAGE_URL_DEFAULT", ContainerImageDefaults.SwiftObjectImage),
