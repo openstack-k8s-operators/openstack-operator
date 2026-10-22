@@ -1322,6 +1322,52 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 	})
 
+	When("A DataPlaneNodeSet is deployed with the upgrade service override", func() {
+		BeforeEach(func() {
+			dataplanev1.SetupDefaults()
+
+			deploymentSpec := DefaultDataPlaneDeploymentSpec()
+			deploymentSpec["servicesOverride"] = []string{"upgrade-services"}
+
+			DeferCleanup(th.DeleteInstance,
+				CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance,
+				CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance,
+				CreateDataplaneNodeSet(
+					dataplaneNodeSetName,
+					DefaultDataPlaneNoNodeSetSpec(false)))
+			DeferCleanup(th.DeleteInstance,
+				CreateDataplaneDeployment(dataplaneDeploymentName, deploymentSpec))
+
+			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateCABundleSecret(caBundleSecretName)
+			SimulateDNSMasqComplete(dnsMasqName)
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
+		})
+
+		It("creates an Ansible execution for the upgrade playbook", func() {
+			Eventually(func(g Gomega) {
+				ansibleeeName := types.NamespacedName{
+					Name: fmt.Sprintf("%s-%s-%s",
+						"upgrade-services",
+						dataplaneDeploymentName.Name,
+						dataplaneNodeSetName.Name),
+					Namespace: namespace,
+				}
+				ansibleEE := GetAnsibleee(ansibleeeName)
+				container := ansibleEE.Spec.Template.Spec.Containers[0]
+
+				g.Expect(container.Args).To(ContainElement("osp.edpm.upgrade_services"))
+				g.Expect(findEnvVar(container.Env).Value).
+					To(ContainSubstring("edpm_service_type"))
+				g.Expect(findEnvVar(container.Env).Value).
+					To(ContainSubstring("upgrade-services"))
+			}, th.Timeout, th.Interval).Should(Succeed())
+		})
+	})
+
 	When("A NodeSet and Deployment are created", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")

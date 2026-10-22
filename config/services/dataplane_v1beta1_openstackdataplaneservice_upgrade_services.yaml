@@ -1,0 +1,7 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: upgrade-services
+spec:
+  playbook: osp.edpm.upgrade_services
+  edpmServiceType: upgrade-services
