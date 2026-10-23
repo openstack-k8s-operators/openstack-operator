@@ -567,8 +567,9 @@ spec:
                           enum:
                           - simple_crypto
                           - pkcs11
+                          - kmip
                           type: string
-                        maxItems: 2
+                        maxItems: 3
                         minItems: 1
                         type: array
                         x-kubernetes-list-type: set
@@ -1086,7 +1087,15 @@ spec:
                         enum:
                         - simple_crypto
                         - pkcs11
+                        - kmip
                         type: string
+                      kmip:
+                        properties:
+                          clientDataPath:
+                            type: string
+                          clientDataSecret:
+                            type: string
+                        type: object
                       messagingBus:
                         properties:
                           cluster:
@@ -1138,14 +1147,12 @@ spec:
                       pkcs11:
                         properties:
                           clientDataPath:
-                            default: /etc/hsm-client
                             type: string
                           clientDataSecret:
                             type: string
                           loginSecret:
                             type: string
                         required:
-                        - clientDataSecret
                         - loginSecret
                         type: object
                       preserveJobs:
