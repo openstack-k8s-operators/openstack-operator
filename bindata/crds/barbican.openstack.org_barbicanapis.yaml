@@ -103,8 +103,9 @@ spec:
                   enum:
                   - simple_crypto
                   - pkcs11
+                  - kmip
                   type: string
-                maxItems: 2
+                maxItems: 3
                 minItems: 1
                 type: array
                 x-kubernetes-list-type: set
@@ -1237,7 +1238,27 @@ spec:
                 enum:
                 - simple_crypto
                 - pkcs11
+                - kmip
                 type: string
+              kmip:
+                description: BarbicanKMIPTemplate - Includes the KMIP secret store
+                  properties
+                properties:
+                  clientDataPath:
+                    description: |-
+                      Location to which kolla copies ClientDataSecret, i.e. where the backend
+                      client library expects to find it. Defaulted per secret store by the
+                      Barbican webhook (DefaultPKCS11ClientDataPath, DefaultKMIPClientDataPath).
+                    type: string
+                  clientDataSecret:
+                    description: |-
+                      The OpenShift secret that stores the backend client data.
+                      These will be copied by kolla to ClientDataPath.
+                      Required when the owning secret store is enabled; this is enforced by
+                      the Barbican webhook rather than by the schema, because the schema
+                      cannot make it conditional on EnabledSecretStores.
+                    type: string
+                type: object
               messagingBus:
                 description: MessagingBus configuration (username, vhost, and cluster)
                 properties:
@@ -1478,20 +1499,24 @@ spec:
                 description: BarbicanPKCS11Template - Includes common HSM properties
                 properties:
                   clientDataPath:
-                    default: /etc/hsm-client
-                    description: Location to which kolla will copy the data in ClientDataSecret.
+                    description: |-
+                      Location to which kolla copies ClientDataSecret, i.e. where the backend
+                      client library expects to find it. Defaulted per secret store by the
+                      Barbican webhook (DefaultPKCS11ClientDataPath, DefaultKMIPClientDataPath).
                     type: string
                   clientDataSecret:
                     description: |-
-                      The OpenShift secret that stores the HSM client data.
-                      These will be mounted to /var/lib/config-data/hsm
+                      The OpenShift secret that stores the backend client data.
+                      These will be copied by kolla to ClientDataPath.
+                      Required when the owning secret store is enabled; this is enforced by
+                      the Barbican webhook rather than by the schema, because the schema
+                      cannot make it conditional on EnabledSecretStores.
                     type: string
                   loginSecret:
                     description: OpenShift secret that stores the password to login
                       to the PKCS11 session
                     type: string
                 required:
-                - clientDataSecret
                 - loginSecret
                 type: object
               rabbitMqClusterName:
