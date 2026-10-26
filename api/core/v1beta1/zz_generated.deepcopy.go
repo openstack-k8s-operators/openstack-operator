@@ -697,6 +697,11 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.OsBootcContainerImage != nil {
+		in, out := &in.OsBootcContainerImage, &out.OsBootcContainerImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.OvnControllerImage != nil {
 		in, out := &in.OvnControllerImage, &out.OvnControllerImage
 		*out = new(string)

@@ -131,6 +131,8 @@ spec:
           value: quay.io/openstack-lightspeed/lightspeed-mcps:latest
         - name: RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT
           value: quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified
+        - name: RELATED_IMAGE_OS_BOOTC_CONTAINER_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-k8s-operators/edpm-bootc:latest-qcow2
         - name: RELATED_IMAGE_OVN_CONTROLLER_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-ovn-controller:master-latest
         - name: RELATED_IMAGE_OVN_CONTROLLER_OVS_IMAGE_URL_DEFAULT

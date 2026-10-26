@@ -61,27 +61,28 @@ var _ = ginkgo.Describe("OpenStackDataPlaneNodeSet Webhook", func() {
 		// })
 	})
 
-	ginkgo.Context("When creating or updating OpenStackDataPlaneNodeSet under Validating Webhook", func() {
-		// TODO (user): Add logic for validating webhooks
-		// Example:
-		// It("Should deny creation if a required field is missing", func() {
-		//     By("simulating an invalid creation scenario")
-		//     obj.SomeRequiredField = ""
-		//     Expect(validator.ValidateCreate(ctx, obj)).Error().To(HaveOccurred())
-		// })
-		//
-		// It("Should admit creation if all required fields are present", func() {
-		//     By("simulating an invalid creation scenario")
-		//     obj.SomeRequiredField = "valid_value"
-		//     Expect(validator.ValidateCreate(ctx, obj)).To(BeNil())
-		// })
-		//
-		// It("Should validate updates correctly", func() {
-		//     By("simulating a valid update scenario")
-		//     oldObj.SomeRequiredField = "updated_value"
-		//     obj.SomeRequiredField = "updated_value"
-		//     Expect(validator.ValidateUpdate(ctx, oldObj, obj)).To(BeNil())
-		// })
+	ginkgo.Context("When updating OpenStackDataPlaneNodeSet under Validating Webhook", func() {
+		ginkgo.It("Should reject osImageType changes after creation", func() {
+			oldObj.Spec.OSImageType = dataplanev1beta1.OSImageTypeUEFI
+			obj.Spec.OSImageType = dataplanev1beta1.OSImageTypeBootc
+			errors := obj.Spec.ValidateUpdate(&oldObj.Spec)
+			gomega.Expect(errors).NotTo(gomega.BeNil())
+			gomega.Expect(errors[0].Field).To(gomega.Equal("spec.osImageType"))
+		})
+
+		ginkgo.It("Should allow unchanged osImageType", func() {
+			oldObj.Spec.OSImageType = dataplanev1beta1.OSImageTypeUEFI
+			obj.Spec.OSImageType = dataplanev1beta1.OSImageTypeUEFI
+			errors := obj.Spec.ValidateUpdate(&oldObj.Spec)
+			gomega.Expect(errors).To(gomega.BeNil())
+		})
+
+		ginkgo.It("Should treat an empty old osImageType as uefi", func() {
+			oldObj.Spec.OSImageType = ""
+			obj.Spec.OSImageType = dataplanev1beta1.OSImageTypeUEFI
+			errors := obj.Spec.ValidateUpdate(&oldObj.Spec)
+			gomega.Expect(errors).To(gomega.BeNil())
+		})
 	})
 
 })
