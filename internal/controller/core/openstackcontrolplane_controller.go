@@ -20,6 +20,8 @@ package core
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 	"time"
 
@@ -784,77 +786,59 @@ const (
 	tlsIngressCACustomIssuer          = ".spec.tls.ingress.ca.customIssuer"
 	tlsPodLevelInternalCACustomIssuer = ".spec.tls.podLevel.internal.ca.customIssuer"
 	tlsPodLevelOvnCACustomIssuer      = ".spec.tls.podLevel.ovn.ca.customIssuer"
+	apiOverrideTLSSecretField         = ".spec.apiOverride.tls.secretName"
 )
 
-var allWatchFields = []string{
-	passwordSecretField,
-	tlsCABundleSecretNameField,
-	tlsIngressCACustomIssuer,
-	tlsPodLevelInternalCACustomIssuer,
-	tlsPodLevelOvnCACustomIssuer,
-}
-
-// SetupWithManager sets up the controller with the Manager.
-func (r *OpenStackControlPlaneReconciler) SetupWithManager(
-	ctx context.Context, mgr ctrl.Manager) error {
-	// index passwordSecretField
-	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, passwordSecretField, func(rawObj client.Object) []string {
-		// Extract the secret name from the spec, if one is provided
+// fieldIndexers maps each indexed field to the func extracting its value(s)
+// from the OpenStackControlPlane. The fields are used to reconcile when a
+// referenced secret/issuer changes, see findObjectsForSrc.
+var fieldIndexers = map[string]client.IndexerFunc{
+	passwordSecretField: func(rawObj client.Object) []string {
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.Secret == "" {
 			return nil
 		}
 		return []string{cr.Spec.Secret}
-	}); err != nil {
-		return err
-	}
-
-	// index caBundleSecretNameField
-	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsCABundleSecretNameField, func(rawObj client.Object) []string {
-		// Extract the secret name from the spec, if one is provided
+	},
+	tlsCABundleSecretNameField: func(rawObj client.Object) []string {
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.CaBundleSecretName == "" {
 			return nil
 		}
 		return []string{cr.Spec.TLS.CaBundleSecretName}
-	}); err != nil {
-		return err
-	}
-
-	// index tlsIngressCACustomIssuer
-	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsIngressCACustomIssuer, func(rawObj client.Object) []string {
-		// Extract the secret name from the spec, if one is provided
+	},
+	tlsIngressCACustomIssuer: func(rawObj client.Object) []string {
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.Ingress.Ca.CustomIssuer == nil {
 			return nil
 		}
 		return []string{*cr.Spec.TLS.Ingress.Ca.CustomIssuer}
-	}); err != nil {
-		return err
-	}
-
-	// index tlsPodLevelInternalCACustomIssuer
-	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsPodLevelInternalCACustomIssuer, func(rawObj client.Object) []string {
-		// Extract the secret name from the spec, if one is provided
+	},
+	tlsPodLevelInternalCACustomIssuer: func(rawObj client.Object) []string {
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer == nil {
 			return nil
 		}
 		return []string{*cr.Spec.TLS.PodLevel.Internal.Ca.CustomIssuer}
-	}); err != nil {
-		return err
-	}
-
-	// index tlsPodLevelOvnCACustomIssuer
-	if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, tlsPodLevelOvnCACustomIssuer, func(rawObj client.Object) []string {
-		// Extract the secret name from the spec, if one is provided
+	},
+	tlsPodLevelOvnCACustomIssuer: func(rawObj client.Object) []string {
 		cr := rawObj.(*corev1beta1.OpenStackControlPlane)
 		if cr.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer == nil {
 			return nil
 		}
 		return []string{*cr.Spec.TLS.PodLevel.Ovn.Ca.CustomIssuer}
-	}); err != nil {
-		return err
+	},
+	// the custom public endpoint cert secrets of all services
+	apiOverrideTLSSecretField: indexAPIOverrideTLSSecret,
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *OpenStackControlPlaneReconciler) SetupWithManager(
+	ctx context.Context, mgr ctrl.Manager) error {
+	for field, indexer := range fieldIndexers {
+		if err := mgr.GetFieldIndexer().IndexField(ctx, &corev1beta1.OpenStackControlPlane{}, field, indexer); err != nil {
+			return err
+		}
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
@@ -913,12 +897,57 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 		Complete(r)
 }
 
+// indexAPIOverrideTLSSecret is the field index func for apiOverrideTLSSecretField
+func indexAPIOverrideTLSSecret(rawObj client.Object) []string {
+	return apiOverrideTLSSecretNames(&rawObj.(*corev1beta1.OpenStackControlPlane).Spec)
+}
+
+// apiOverrideTLSSecretNames returns the custom cert secret names set via
+// apiOverride.tls.secretName (or the service specific override variants) of
+// all services.
+func apiOverrideTLSSecretNames(spec *corev1beta1.OpenStackControlPlaneSpec) []string {
+	overrides := []corev1beta1.Override{
+		spec.Keystone.APIOverride,
+		spec.Placement.APIOverride,
+		spec.Cinder.APIOverride,
+		spec.Neutron.APIOverride,
+		spec.Nova.APIOverride,
+		spec.Heat.APIOverride,
+		spec.Heat.CnfAPIOverride,
+		spec.Ironic.APIOverride,
+		spec.Ironic.InspectorOverride,
+		spec.Manila.APIOverride,
+		spec.Horizon.APIOverride,
+		spec.Telemetry.AodhAPIOverride,
+		spec.Telemetry.CloudKittyAPIOverride,
+		spec.Telemetry.PrometheusOverride,
+		spec.Telemetry.AlertmanagerOverride,
+		spec.Swift.ProxyOverride,
+		spec.Octavia.APIOverride,
+		spec.Designate.APIOverride,
+		spec.Barbican.APIOverride,
+		spec.Watcher.APIOverride,
+	}
+	overrides = slices.AppendSeq(overrides, maps.Values(spec.Glance.APIOverride))
+	for _, c := range spec.Nova.CellOverride {
+		overrides = append(overrides, c.NoVNCProxy)
+	}
+
+	names := []string{}
+	for _, o := range overrides {
+		if o.TLS != nil && o.TLS.SecretName != "" {
+			names = append(names, o.TLS.SecretName)
+		}
+	}
+	return names
+}
+
 func (r *OpenStackControlPlaneReconciler) findObjectsForSrc(ctx context.Context, src client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
 
 	Log := r.GetLogger(ctx)
 
-	for _, field := range allWatchFields {
+	for field := range fieldIndexers {
 		crList := &corev1beta1.OpenStackControlPlaneList{}
 		listOps := &client.ListOptions{
 			FieldSelector: fields.OneTermEqualSelector(field, src.GetName()),
