@@ -306,7 +306,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		ctx,
 		helper,
 		instance.Namespace,
-		GetServiceOpenStackOperatorLabel(telemetry.Name),
+		map[string]string{common.AppSelector: "aodh"},
 	)
 	if err != nil {
 		return ctrl.Result{}, err
