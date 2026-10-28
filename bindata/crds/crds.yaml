@@ -1364,6 +1364,22 @@ spec:
                                             type: string
                                           type: array
                                           x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -2383,6 +2399,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -3903,6 +3935,22 @@ spec:
                                             type: string
                                           type: array
                                           x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -4073,6 +4121,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -4335,6 +4399,22 @@ spec:
                                             type: string
                                           type: array
                                           x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -4583,6 +4663,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -4961,6 +5057,22 @@ spec:
                                   loadBalancerSourceRanges:
                                     items:
                                       type: string
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                  ports:
+                                    items:
+                                      properties:
+                                        name:
+                                          type: string
+                                        port:
+                                          format: int32
+                                          maximum: 65535
+                                          minimum: 1
+                                          type: integer
+                                      required:
+                                      - name
+                                      - port
+                                      type: object
                                     type: array
                                     x-kubernetes-list-type: atomic
                                   sessionAffinity:
@@ -6245,6 +6357,22 @@ spec:
                                               type: string
                                             type: array
                                             x-kubernetes-list-type: atomic
+                                          ports:
+                                            items:
+                                              properties:
+                                                name:
+                                                  type: string
+                                                port:
+                                                  format: int32
+                                                  maximum: 65535
+                                                  minimum: 1
+                                                  type: integer
+                                              required:
+                                              - name
+                                              - port
+                                              type: object
+                                            type: array
+                                            x-kubernetes-list-type: atomic
                                           sessionAffinity:
                                             type: string
                                           sessionAffinityConfig:
@@ -7151,6 +7279,22 @@ spec:
                                             type: string
                                           type: array
                                           x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -7282,6 +7426,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -8004,6 +8164,22 @@ spec:
                                       type: string
                                     type: array
                                     x-kubernetes-list-type: atomic
+                                  ports:
+                                    items:
+                                      properties:
+                                        name:
+                                          type: string
+                                        port:
+                                          format: int32
+                                          maximum: 65535
+                                          minimum: 1
+                                          type: integer
+                                      required:
+                                      - name
+                                      - port
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-type: atomic
                                   sessionAffinity:
                                     type: string
                                   sessionAffinityConfig:
@@ -8462,6 +8638,22 @@ spec:
                                             type: string
                                           type: array
                                           x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -8777,6 +8969,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -9591,6 +9799,22 @@ spec:
                                     loadBalancerSourceRanges:
                                       items:
                                         type: string
+                                      type: array
+                                      x-kubernetes-list-type: atomic
+                                    ports:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                          port:
+                                            format: int32
+                                            maximum: 65535
+                                            minimum: 1
+                                            type: integer
+                                        required:
+                                        - name
+                                        - port
+                                        type: object
                                       type: array
                                       x-kubernetes-list-type: atomic
                                     sessionAffinity:
@@ -10408,6 +10632,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -11645,6 +11885,22 @@ spec:
                                         type: string
                                       type: array
                                       x-kubernetes-list-type: atomic
+                                    ports:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                          port:
+                                            format: int32
+                                            maximum: 65535
+                                            minimum: 1
+                                            type: integer
+                                        required:
+                                        - name
+                                        - port
+                                        type: object
+                                      type: array
+                                      x-kubernetes-list-type: atomic
                                     sessionAffinity:
                                       type: string
                                     sessionAffinityConfig:
@@ -12262,6 +12518,22 @@ spec:
                                             type: string
                                           type: array
                                           x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -12751,6 +13023,22 @@ spec:
                                                 type: string
                                               type: array
                                               x-kubernetes-list-type: atomic
+                                            ports:
+                                              items:
+                                                properties:
+                                                  name:
+                                                    type: string
+                                                  port:
+                                                    format: int32
+                                                    maximum: 65535
+                                                    minimum: 1
+                                                    type: integer
+                                                required:
+                                                - name
+                                                - port
+                                                type: object
+                                              type: array
+                                              x-kubernetes-list-type: atomic
                                             sessionAffinity:
                                               type: string
                                             sessionAffinityConfig:
@@ -12990,6 +13278,22 @@ spec:
                                             loadBalancerSourceRanges:
                                               items:
                                                 type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            ports:
+                                              items:
+                                                properties:
+                                                  name:
+                                                    type: string
+                                                  port:
+                                                    format: int32
+                                                    maximum: 65535
+                                                    minimum: 1
+                                                    type: integer
+                                                required:
+                                                - name
+                                                - port
+                                                type: object
                                               type: array
                                               x-kubernetes-list-type: atomic
                                             sessionAffinity:
@@ -13485,6 +13789,22 @@ spec:
                                       loadBalancerSourceRanges:
                                         items:
                                           type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      ports:
+                                        items:
+                                          properties:
+                                            name:
+                                              type: string
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                          required:
+                                          - name
+                                          - port
+                                          type: object
                                         type: array
                                         x-kubernetes-list-type: atomic
                                       sessionAffinity:
@@ -14152,6 +14472,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -15282,6 +15618,22 @@ spec:
                                             type: string
                                           type: array
                                           x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         sessionAffinity:
                                           type: string
                                         sessionAffinityConfig:
@@ -15809,6 +16161,22 @@ spec:
                                     loadBalancerSourceRanges:
                                       items:
                                         type: string
+                                      type: array
+                                      x-kubernetes-list-type: atomic
+                                    ports:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                          port:
+                                            format: int32
+                                            maximum: 65535
+                                            minimum: 1
+                                            type: integer
+                                        required:
+                                        - name
+                                        - port
+                                        type: object
                                       type: array
                                       x-kubernetes-list-type: atomic
                                     sessionAffinity:
@@ -16527,6 +16895,22 @@ spec:
                                           type: string
                                         type: array
                                         x-kubernetes-list-type: atomic
+                                      ports:
+                                        items:
+                                          properties:
+                                            name:
+                                              type: string
+                                            port:
+                                              format: int32
+                                              maximum: 65535
+                                              minimum: 1
+                                              type: integer
+                                          required:
+                                          - name
+                                          - port
+                                          type: object
+                                        type: array
+                                        x-kubernetes-list-type: atomic
                                       sessionAffinity:
                                         type: string
                                       sessionAffinityConfig:
@@ -17100,6 +17484,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
@@ -18080,6 +18480,22 @@ spec:
                                                 type: string
                                               type: array
                                               x-kubernetes-list-type: atomic
+                                            ports:
+                                              items:
+                                                properties:
+                                                  name:
+                                                    type: string
+                                                  port:
+                                                    format: int32
+                                                    maximum: 65535
+                                                    minimum: 1
+                                                    type: integer
+                                                required:
+                                                - name
+                                                - port
+                                                type: object
+                                              type: array
+                                              x-kubernetes-list-type: atomic
                                             sessionAffinity:
                                               type: string
                                             sessionAffinityConfig:
@@ -18348,6 +18764,22 @@ spec:
                                             loadBalancerSourceRanges:
                                               items:
                                                 type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            ports:
+                                              items:
+                                                properties:
+                                                  name:
+                                                    type: string
+                                                  port:
+                                                    format: int32
+                                                    maximum: 65535
+                                                    minimum: 1
+                                                    type: integer
+                                                required:
+                                                - name
+                                                - port
+                                                type: object
                                               type: array
                                               x-kubernetes-list-type: atomic
                                             sessionAffinity:
@@ -20089,6 +20521,22 @@ spec:
                                         loadBalancerSourceRanges:
                                           items:
                                             type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
                                           type: array
                                           x-kubernetes-list-type: atomic
                                         sessionAffinity:
