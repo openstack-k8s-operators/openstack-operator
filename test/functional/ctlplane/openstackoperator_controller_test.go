@@ -1592,6 +1592,69 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 			})
 
+			// End-to-end smoke test. It does not isolate the secret watch, a
+			// periodic requeue also picks up the change; the registered watch is
+			// asserted by the "should enqueue the control plane" test below.
+			It("should update the route when the custom cert secret content changes", func() {
+				certSecret := CreateCertSecret(names.CustomServiceCertSecretName)
+				DeferCleanup(k8sClient.Delete, ctx, certSecret)
+
+				keystoneRouteName := types.NamespacedName{Name: "keystone-public", Namespace: namespace}
+
+				Eventually(func(g Gomega) {
+					g.Expect(keystone.GetKeystoneAPI(names.KeystoneAPIName)).Should(Not(BeNil()))
+				}, timeout, interval).Should(Succeed())
+				keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+				Eventually(func(g Gomega) {
+					route := &routev1.Route{}
+					g.Expect(th.K8sClient.Get(th.Ctx, keystoneRouteName, route)).Should(Succeed())
+					g.Expect(route.Spec.TLS).Should(Not(BeNil()))
+					g.Expect(route.Spec.TLS.Certificate).Should(Equal(string(certSecret.Data["tls.crt"])))
+				}, timeout, interval).Should(Succeed())
+
+				// update the secret content, name stays the same
+				Eventually(func(g Gomega) {
+					s := &k8s_corev1.Secret{}
+					g.Expect(th.K8sClient.Get(th.Ctx, names.CustomServiceCertSecretName, s)).Should(Succeed())
+					s.Data["tls.crt"] = []byte("updated-cert")
+					g.Expect(th.K8sClient.Update(th.Ctx, s)).Should(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				Eventually(func(g Gomega) {
+					route := &routev1.Route{}
+					g.Expect(th.K8sClient.Get(th.Ctx, keystoneRouteName, route)).Should(Succeed())
+					g.Expect(route.Spec.TLS).Should(Not(BeNil()))
+					g.Expect(route.Spec.TLS.Certificate).Should(Equal("updated-cert"))
+				}, timeout, interval).Should(Succeed())
+			})
+
+			// Asserts the Secret watch registered by SetupWithManager enqueues the
+			// control plane when the custom cert secret changes. A second manager
+			// runs the real controller setup with a recording no-op reconcile, so
+			// after the control plane events settled only the watch can enqueue.
+			It("should enqueue the control plane when the custom cert secret content changes", func() {
+				DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.CustomServiceCertSecretName))
+				rec := startReconcileRecorder()
+
+				// the control plane is enqueued initially, wait for its events to settle
+				Eventually(func(g Gomega) {
+					count, last := rec.stats()
+					g.Expect(count).Should(BeNumerically(">", 0))
+					g.Expect(time.Since(last)).Should(BeNumerically(">", 3*time.Second))
+				}, timeout, interval).Should(Succeed())
+				before, _ := rec.stats()
+
+				s := &k8s_corev1.Secret{}
+				Expect(th.K8sClient.Get(th.Ctx, names.CustomServiceCertSecretName, s)).Should(Succeed())
+				s.Data["tls.crt"] = []byte("updated-cert")
+				Expect(th.K8sClient.Update(th.Ctx, s)).Should(Succeed())
+
+				Eventually(func(g Gomega) {
+					count, _ := rec.stats()
+					g.Expect(count).Should(BeNumerically(">", before))
+				}, 2*time.Second, interval).Should(Succeed())
+			})
 		})
 	})
 
