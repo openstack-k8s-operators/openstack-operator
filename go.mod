@@ -36,7 +36,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261103051421-0b46dd0416bb
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261031091010-4a3ff95ec130
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261103174944-bbdc63341f5d
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261105161922-4ae93288c799
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20261103131032-1959b576ec37
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261103083711-2421be4b8e95
 	github.com/pkg/errors v0.9.1

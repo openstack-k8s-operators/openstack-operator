@@ -2464,6 +2464,137 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("A telemetry OpenStackControlplane instance is created with cloudkitty enabled and autoscaling disabled", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["telemetry"] = map[string]interface{}{
+				"enabled": true,
+				"template": map[string]interface{}{
+					"ceilometer": map[string]interface{}{
+						"enabled": false,
+					},
+					"metricStorage": map[string]interface{}{
+						"enabled": false,
+					},
+					"logging": map[string]interface{}{
+						"enabled": false,
+					},
+					"autoscaling": map[string]interface{}{
+						"enabled": false,
+					},
+					"cloudkitty": map[string]interface{}{
+						"enabled":    true,
+						"apiTimeout": 300,
+					},
+				},
+			}
+
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.InstanceHAMetricsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+			// create cert secrets for cloudkitty
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(types.NamespacedName{Name: "cert-cloudkitty-public-route", Namespace: namespace}))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(types.NamespacedName{Name: "cert-cloudkitty-public-svc", Namespace: namespace}))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(types.NamespacedName{Name: "cert-cloudkitty-internal-svc", Namespace: namespace}))
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+		})
+
+		It("should default the cloudkitty route timeout from the cloudkitty apiTimeout", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Telemetry.CloudKittyAPIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Telemetry.CloudKittyAPIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "300s"))
+			Expect(OSCtlplane.Spec.Telemetry.CloudKittyAPIOverride.Route.Annotations).Should(HaveKeyWithValue("api.cloudkitty.openstack.org/timeout", "300s"))
+			// aodh route defaults are independent of the cloudkitty ones
+			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Telemetry.AodhAPIOverride.Route.Annotations).Should(HaveKeyWithValue("api.aodh.openstack.org/timeout", "60s"))
+		})
+
+		It("should apply the cloudKittyApiOverride and not the aodhApiOverride to the cloudkitty route", func() {
+			cloudKittyPublicSvcName := types.NamespacedName{Name: "cloudkitty-public", Namespace: namespace}
+			cloudKittyInternalSvcName := types.NamespacedName{Name: "cloudkitty-internal", Namespace: namespace}
+			// labels as set by the telemetry-operator on the cloudkitty
+			// services, including the osctlplane-service label the
+			// openstack-operator injects via the service override
+			cloudKittySvcLabels := map[string]string{
+				"service":            "cloudkitty",
+				"osctlplane-service": "telemetry",
+				"osctlplane":         "",
+			}
+
+			th.CreateService(
+				cloudKittyPublicSvcName,
+				cloudKittySvcLabels,
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{
+							Name:     "cloudkitty-public",
+							Port:     int32(8889),
+							Protocol: k8s_corev1.ProtocolTCP,
+						},
+					},
+				})
+			cloudKittySvc := th.GetService(cloudKittyPublicSvcName)
+			if cloudKittySvc.Annotations == nil {
+				cloudKittySvc.Annotations = map[string]string{}
+			}
+			cloudKittySvc.Annotations[service.AnnotationIngressCreateKey] = "true"
+			cloudKittySvc.Annotations[service.AnnotationEndpointKey] = "public"
+			Expect(th.K8sClient.Status().Update(th.Ctx, cloudKittySvc)).To(Succeed())
+
+			th.CreateService(
+				cloudKittyInternalSvcName,
+				cloudKittySvcLabels,
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{
+							Name:     "cloudkitty-internal",
+							Port:     int32(8889),
+							Protocol: k8s_corev1.ProtocolTCP,
+						},
+					},
+				})
+			cloudKittyIntSvc := th.GetService(cloudKittyInternalSvcName)
+			if cloudKittyIntSvc.Annotations == nil {
+				cloudKittyIntSvc.Annotations = map[string]string{}
+			}
+			cloudKittyIntSvc.Annotations[service.AnnotationIngressCreateKey] = "false"
+			cloudKittyIntSvc.Annotations[service.AnnotationEndpointKey] = "internal"
+			Expect(th.K8sClient.Status().Update(th.Ctx, cloudKittyIntSvc)).To(Succeed())
+
+			Eventually(func(g Gomega) {
+				cloudKittyRoute := &routev1.Route{}
+				g.Expect(th.K8sClient.Get(th.Ctx, cloudKittyPublicSvcName, cloudKittyRoute)).Should(Succeed())
+				g.Expect(cloudKittyRoute.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "300s"))
+				g.Expect(cloudKittyRoute.Annotations).Should(HaveKeyWithValue("api.cloudkitty.openstack.org/timeout", "300s"))
+				g.Expect(cloudKittyRoute.Annotations).ShouldNot(HaveKey("api.aodh.openstack.org/timeout"))
+			}, timeout, interval).Should(Succeed())
+
+			// the cloudkitty endpoint got exposed, but the aodh service
+			// overrides must not be populated from the cloudkitty services
+			Eventually(func(g Gomega) {
+				telemetry := GetTelemetry(names.TelemetryName)
+				g.Expect(telemetry.Spec.CloudKitty.CloudKittyAPI.Override.Service[service.EndpointPublic].EndpointURL).Should(Not(BeNil()))
+				for _, svcOverride := range telemetry.Spec.Autoscaling.Aodh.Override.Service {
+					g.Expect(svcOverride.EndpointURL).Should(BeNil())
+				}
+			}, timeout, interval).Should(Succeed())
+		})
+	})
+
 	When("OpenStackControlplane instance is deleted", func() {
 		BeforeEach(func() {
 			DeferCleanup(
