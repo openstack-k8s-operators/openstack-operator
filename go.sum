@@ -27,6 +27,10 @@ github.com/evanphx/json-patch/v5 v5.9.11 h1:/8HVnzMq13/3x9TPvjG08wUGqBTmZBsCWzjT
 github.com/evanphx/json-patch/v5 v5.9.11/go.mod h1:3j+LviiESTElxA4p3EMKAB9HXj3/XEtnUf6OZxqIQTM=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
+github.com/fmount/lib-common/modules/common v0.0.0-20260929084206-28305ffbcb79 h1:WoF885AJhvvwnKLB8wbdWgYE4JASraK7SsOSqsZYgMo=
+github.com/fmount/lib-common/modules/common v0.0.0-20260929084206-28305ffbcb79/go.mod h1:HqF1PQbKmgDVsmSk+c9TGmusD4TrlV049qft+SLVTcI=
+github.com/fmount/lib-common/modules/test v0.0.0-20260929084206-28305ffbcb79 h1:8sQw7SPjPnZWvVnoe08tCPzZSpLUY8kyjj6ZPiJVkLY=
+github.com/fmount/lib-common/modules/test v0.0.0-20260929084206-28305ffbcb79/go.mod h1:jQx5uMv2KKxv+vGATQYEqFs+oaojQYyCi1ZG3ipUk1c=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
 github.com/fxamacker/cbor/v2 v2.9.0 h1:NpKPmjDBgUfBms6tr6JZkTHtfFGcMKsw3eGcmD/sapM=
@@ -180,14 +184,10 @@ github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.202610191
 github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20261019154344-eebbad5d5812/go.mod h1:TkZgZE92VUKHHNKXwuV8b7tT9toaxsZkcGffRafKCSA=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20261019154344-eebbad5d5812 h1:O6kmV2aEgdC17cH6vhMTjn2tFvHY6YradT5UTgX3XW4=
 github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20261019154344-eebbad5d5812/go.mod h1:95urWJYAaHx7pl6BFE21y8FBHDLyYmRJ2H8f2zBApKg=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261019154344-eebbad5d5812 h1:TNm//euU2yhclr+yyV3A50i+Fm89FMuPfQ7d10eF+uE=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261019154344-eebbad5d5812/go.mod h1:q0N2DU1KwZT+Iez34wwkESeHKHN5pbda8G0Gg2QRWNE=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20261013151427-9b94821abb9f h1:Yiubv1TJ5s3+mKWGRSYsjGnRjBvsFYrv4tuPvJq7uGg=
 github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20261013151427-9b94821abb9f/go.mod h1:0RZQkKhu5jCn7nUOS41YCBMuZA17r0+l8WDHEjAwOjY=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261019154344-eebbad5d5812 h1:Zes+6xpBdekTukArcGt1cNGUYbdWaRWnAPjX8H3YK9c=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261019154344-eebbad5d5812/go.mod h1:zPIkK2aNVGCxyf8Yg2iAaiCH3Wu2G/kjft+CAVs1cgQ=
-github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20261019154344-eebbad5d5812 h1:f0OXYUX2N2czmtkr/Ozv/iJHvwJYtuiqKEuv2HKeU4E=
-github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20261019154344-eebbad5d5812/go.mod h1:enei+rhzWgyEqqcrh/1V42M9exsotXPnmsj48g1nqD0=
 github.com/openstack-k8s-operators/lib-common/modules/users v0.0.0-20261019154344-eebbad5d5812 h1:k9dyBlzwY/uKWD8kVZMAbXMdd1NyVUJGs1pRS/Kfvew=
 github.com/openstack-k8s-operators/lib-common/modules/users v0.0.0-20261019154344-eebbad5d5812/go.mod h1:jmVVRfwuFQ3fHLIOAkUrtLgOwEL6j45POzS3PBJuwyM=
 github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20261020010922-036420e3c133 h1:KDaDY9rGlmussTC8qCE4h+T0y8wieCC/z8Vwlg33JJM=

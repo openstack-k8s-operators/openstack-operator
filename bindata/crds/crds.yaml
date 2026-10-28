@@ -19863,6 +19863,14 @@ spec:
                             type: object
                         type: object
                     type: object
+                  profile:
+                    default: None
+                    enum:
+                    - None
+                    - Inherit
+                    - Intermediate
+                    - Modern
+                    type: string
                 type: object
               topologyRef:
                 properties:
