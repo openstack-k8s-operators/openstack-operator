@@ -23,9 +23,10 @@ data:
                 search: {{ dns_search_domains }}
                 server: {{ ctlplane_dns_nameservers }}
             interfaces:
-              - name: {{ neutron_public_interface_name }}
+              - name: nic1
                 type: ethernet
                 state: up
+                mtu: {{ min_viable_mtu }}
               - name: {{ neutron_physical_bridge_name }}
                 type: ovs-interface
                 state: up
@@ -48,11 +49,12 @@ data:
             {% endfor %}
               - name: {{ neutron_physical_bridge_name }}
                 type: ovs-bridge
+                state: up
                 bridge:
                   options:
                     fail-mode: standalone
                   port:
-                  - name: {{ neutron_public_interface_name }}
+                  - name: nic1
                   - name: {{ neutron_physical_bridge_name }}
             {% for network in nodeset_networks %}
                   - name: {{ "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
@@ -60,17 +62,29 @@ data:
                       mode: access
                       tag: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
             {% endfor %}
+            {% set routes = [] %}
+            {% for route in ctlplane_host_routes | default([], true) %}
+            {% set _ = routes.append((route, neutron_physical_bridge_name)) %}
+            {% endfor %}
+            {% for network in nodeset_networks %}
+            {% for route in lookup('vars', networks_lower[network] ~ '_host_routes') | default([], true) %}
+            {% set _ = routes.append((route, "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id'))) %}
+            {% endfor %}
+            {% endfor %}
+            {% if routes %}
             routes:
               config:
-              - destination: {{ ctlplane_host_routes.ip_netmask }}
-                next-hop-address: {{ ctlplane_host_routes.next_hop }}
-                next-hop-interface: {{ neutron_physical_bridge_name }}
+            {% for route, iface in routes %}
+                - destination: {{ route.destination | default(route.ip_netmask, true) }}
+                  next-hop-address: {{ route.nexthop | default(route.next_hop, true) }}
+                  next-hop-interface: {{ iface }}
+            {% endfor %}
+            {% endif %}
           # edpm_network_config - nmstate
           edpm_network_config_tool: 'nmstate'
           # These vars are for the network config templates themselves and are
           # considered EDPM network defaults.
           neutron_physical_bridge_name: br-ex
-          neutron_public_interface_name: eth0
           # edpm_nodes_validation
           edpm_nodes_validation_validate_controllers_icmp: false
           edpm_nodes_validation_validate_gateway_icmp: false
