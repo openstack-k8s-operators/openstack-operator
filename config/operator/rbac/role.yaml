@@ -9,10 +9,8 @@ rules:
   resources:
   - namespaces
   verbs:
-  - create
   - get
   - list
-  - update
   - watch
 - apiGroups:
   - ""
