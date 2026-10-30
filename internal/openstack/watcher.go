@@ -165,7 +165,7 @@ func ReconcileWatcher(ctx context.Context, instance *corev1beta1.OpenStackContro
 		instance.Spec.Watcher.Template.APIServiceTemplate.TLS.API.Internal.SecretName = endpointDetails.GetEndptCertSecret(service.EndpointInternal)
 	}
 
-	if instance.Spec.Watcher.Template.NodeSelector == nil {
+	if instance.Spec.Watcher.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.Watcher.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
