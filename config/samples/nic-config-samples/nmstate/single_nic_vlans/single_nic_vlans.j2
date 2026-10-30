@@ -1,0 +1,68 @@
+---
+{% set mtu_list = [ctlplane_mtu] %}
+{% for network in nodeset_networks %}
+{% set _ = mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) %}
+{%- endfor %}
+{% set min_viable_mtu = mtu_list | max %}
+dns-resolver:
+  config:
+    search: {{ dns_search_domains }}
+    server: {{ ctlplane_dns_nameservers }}
+interfaces:
+  - name: nic1
+    type: ethernet
+    state: up
+    mtu: {{ min_viable_mtu }}
+  - name: {{ neutron_physical_bridge_name }}
+    type: ovs-interface
+    state: up
+    mtu: {{ min_viable_mtu }}
+    ipv4:
+      enabled: true
+      address:
+        - ip: {{ ctlplane_ip }}
+          prefix-length: {{ ctlplane_cidr }}
+{% for network in nodeset_networks %}
+  - name: {{ "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+    type: ovs-interface
+    state: up
+    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+    ipv4:
+      enabled: true
+      address:
+        - ip: {{ lookup('vars', networks_lower[network] ~ '_ip') }}
+          prefix-length: {{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+{% endfor %}
+  - name: {{ neutron_physical_bridge_name }}
+    type: ovs-bridge
+    state: up
+    bridge:
+      options:
+        fail-mode: standalone
+      port:
+      - name: nic1
+      - name: {{ neutron_physical_bridge_name }}
+{% for network in nodeset_networks %}
+      - name: {{ "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+        vlan:
+          mode: access
+          tag: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+{% endfor %}
+{% set routes = [] %}
+{% for route in ctlplane_host_routes | default([], true) %}
+{% set _ = routes.append((route, neutron_physical_bridge_name)) %}
+{% endfor %}
+{% for network in nodeset_networks %}
+{% for route in lookup('vars', networks_lower[network] ~ '_host_routes') | default([], true) %}
+{% set _ = routes.append((route, "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id'))) %}
+{% endfor %}
+{% endfor %}
+{% if routes %}
+routes:
+  config:
+{% for route, iface in routes %}
+    - destination: {{ route.destination | default(route.ip_netmask, true) }}
+      next-hop-address: {{ route.nexthop | default(route.next_hop, true) }}
+      next-hop-interface: {{ iface }}
+{% endfor %}
+{% endif %}

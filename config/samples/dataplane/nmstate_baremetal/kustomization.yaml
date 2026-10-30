@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+namespace: openstack
+
+components:
+- ../baremetal
+
+resources:
+  - values.yaml
+
+replacements:
+# OpenStackDataPlaneNodeSet customizations
+- source:
+    kind: DataPlaneConfig
+    name: edpm-nmstate-baremetal-values
+    fieldPath: data.nodeset.nodetemplate.ansible.vars
+  targets:
+  - select:
+      kind: OpenStackDataPlaneNodeSet
+    fieldPaths:
+    - spec.nodeTemplate.ansible.ansibleVars
+    options:
+      create: true
