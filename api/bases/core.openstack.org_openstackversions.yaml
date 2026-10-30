@@ -151,9 +151,13 @@ spec:
                     type: string
                   ironicConductorImage:
                     type: string
+                  ironicGraphicalConsoleImage:
+                    type: string
                   ironicInspectorImage:
                     type: string
                   ironicNeutronAgentImage:
+                    type: string
+                  ironicNovncImage:
                     type: string
                   ironicPxeImage:
                     type: string
@@ -405,9 +409,13 @@ spec:
                       type: string
                     ironicConductorImage:
                       type: string
+                    ironicGraphicalConsoleImage:
+                      type: string
                     ironicInspectorImage:
                       type: string
                     ironicNeutronAgentImage:
+                      type: string
+                    ironicNovncImage:
                       type: string
                     ironicPxeImage:
                       type: string
@@ -609,9 +617,13 @@ spec:
                     type: string
                   ironicConductorImage:
                     type: string
+                  ironicGraphicalConsoleImage:
+                    type: string
                   ironicInspectorImage:
                     type: string
                   ironicNeutronAgentImage:
+                    type: string
+                  ironicNovncImage:
                     type: string
                   ironicPxeImage:
                     type: string
@@ -839,9 +851,13 @@ spec:
                       type: string
                     ironicConductorImage:
                       type: string
+                    ironicGraphicalConsoleImage:
+                      type: string
                     ironicInspectorImage:
                       type: string
                     ironicNeutronAgentImage:
+                      type: string
+                    ironicNovncImage:
                       type: string
                     ironicPxeImage:
                       type: string
