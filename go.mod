@@ -12,32 +12,32 @@ require (
 	github.com/onsi/ginkgo/v2 v2.33.1
 	github.com/onsi/gomega v1.44.0
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20261023193011-a19c5efd4dd6
-	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20261023160821-c11b5d8b81cd
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20261023193010-3ed41b4e70f1
-	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20261023160821-a081261a8450
-	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20261023193011-adb12f628214
-	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261023193008-5164ac8b793d
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20261019120010-4f7fe6080c01
-	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261023182757-ff30ce7114f7
-	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20261019070056-e9a4467c8188
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20261013084430-51fe9c07def7
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20261013084430-51fe9c07def7
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261013084430-51fe9c07def7
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261013084430-51fe9c07def7
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20261013084430-51fe9c07def7
-	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20261023160309-11812771ba27
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20261023182325-25fcf35dd049
-	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20261023193010-70b8c19a4398
-	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20261019085556-42ce1210eaed
-	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20261023193011-0b9dabc38e39
+	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20261025130340-ab8dce728cef
+	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20261031091006-e50dcf8dddf3
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20261025130339-96248f2388f2
+	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20261031090618-9b74346b46ee
+	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20261025130340-b20fb72b2717
+	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261025130340-c9f14463062b
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20261029162902-788ea2b9b568
+	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261025130338-48d8e2d9d61a
+	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20261026085401-be2a7b1305a4
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20261029145133-3102c1c3b3b2
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20261029145133-3102c1c3b3b2
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261029145133-3102c1c3b3b2
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261029145133-3102c1c3b3b2
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20261029145133-3102c1c3b3b2
+	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20261031091008-03bbf86bd532
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20261026085402-7093ecba9c4e
+	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20261025125949-cb3024dbd054
+	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20261026083809-53bb087dc1b8
+	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20261025125950-6db30dfac607
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20261023182324-86dbfb79a4cc
 	github.com/openstack-k8s-operators/openstack-operator/api v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261023182322-a185d3936b51
-	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261023162515-de41d5a11c3d
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261023223928-6910c3226cb6
-	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20261019065714-36cb1e6eaf17
-	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261021084220-96c3630fa4c1
+	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261025125949-8cc7f18b6a5d
+	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261031091010-e19c76afa99d
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261027142048-61a343a61376
+	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20261030155347-ecd0b30e1cd9
+	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261028095539-4c587b48c756
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
@@ -123,17 +123,17 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/term v0.46.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/term v0.47.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	golang.org/x/tools v0.49.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
