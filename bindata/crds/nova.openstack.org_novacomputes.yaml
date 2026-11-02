@@ -90,6 +90,13 @@ spec:
                 items:
                   type: string
                 type: array
+              noVNCProxyURL:
+                description: |-
+                  NoVNCProxyURL is the public URL of the noVNCProxy service for this
+                  cell. When set, VNC console access is enabled for this compute
+                  service. This is set by the parent NovaCellReconciler based on the
+                  cell's NoVNCProxy deployment state.
+                type: string
               nodeSelector:
                 additionalProperties:
                   type: string
