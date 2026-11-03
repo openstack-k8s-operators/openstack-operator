@@ -9,24 +9,24 @@ require (
 	github.com/onsi/gomega v1.44.0
 	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20261030140832-95b4c28097c5
 	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20261031092834-094e8ee77803
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20261029113706-2fb460456975
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20261103051030-0d213638cfa9
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20261031090619-3ccc350295de
-	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20261028043121-0e37d90490a5
-	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261027125220-49556b2314a8
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20261029162903-5860bf3fd6a5
-	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261028101215-1d56c4e93343
-	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20261028052944-9c675f19d0de
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261029132259-9d025389145b
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261029132259-9d025389145b
+	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20261103051031-64a0dd6cfcca
+	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261102212920-31de7c12c504
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20261103051031-0875a9a9b8b4
+	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261103051031-99db2536c998
+	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20261103051029-c318c07564fd
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261102122626-a5970f05c6a9
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261102122626-a5970f05c6a9
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20261025134505-67df8bc90b49
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20261028124714-bb706f15f5e5
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20261102202215-9d29efc4f568
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20261027125220-9de18c2bbd38
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20261030115311-f3554466b10f
-	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20261027125646-6afc34d01ca3
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20261028065301-4866c5e3d1ab
-	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261028065302-48eb3fd0440c
+	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20261103051421-d54b6faebc92
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20261103051032-1e54bb7406ef
+	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261103051421-0b46dd0416bb
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261031091010-4a3ff95ec130
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261030225816-51c12dfa7fb1
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261102160732-3ffc729f42d1
 	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261028090456-101cd26d02d4
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.77.1-rhobs1 // indirect
 	github.com/rhobs/observability-operator v1.0.0 // indirect
@@ -85,7 +85,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20261023124652-eebd8803b178 // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.6.1-0.20261029132259-9d025389145b // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
