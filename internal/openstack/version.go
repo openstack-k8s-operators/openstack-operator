@@ -114,6 +114,13 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 		defaults.WatcherApplierImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
 		defaults.WatcherDecisionEngineImage = envImages["RELATED_IMAGE_WATCHER_BASE_IMAGE_URL_DEFAULT"]
 	}
+	if envImages["RELATED_IMAGE_CYBORG_IMAGE_URL_DEFAULT"] != nil {
+		defaults.CyborgAPIImage = envImages["RELATED_IMAGE_CYBORG_IMAGE_URL_DEFAULT"]
+		defaults.CyborgConductorImage = envImages["RELATED_IMAGE_CYBORG_IMAGE_URL_DEFAULT"]
+	}
+	if envImages["RELATED_IMAGE_CYBORG_AGENT_IMAGE_URL_DEFAULT"] != nil {
+		defaults.CyborgAgentImage = envImages["RELATED_IMAGE_CYBORG_AGENT_IMAGE_URL_DEFAULT"]
+	}
 	// custom TEST_ images which aren't released downstream
 	if envImages["TEST_TOBIKO_IMAGE_URL_DEFAULT"] != nil {
 		defaults.TestTobikoImage = envImages["TEST_TOBIKO_IMAGE_URL_DEFAULT"]
@@ -182,6 +189,9 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			CinderSchedulerImage:          getImg(instance.Spec.CustomContainerImages.CinderSchedulerImage, defaults.CinderSchedulerImage),
 			CloudKittyAPIImage:            getImg(instance.Spec.CustomContainerImages.CloudKittyAPIImage, defaults.CloudKittyAPIImage),
 			CloudKittyProcImage:           getImg(instance.Spec.CustomContainerImages.CloudKittyProcImage, defaults.CloudKittyProcImage),
+			CyborgAPIImage:                getImg(instance.Spec.CustomContainerImages.CyborgAPIImage, defaults.CyborgAPIImage),
+			CyborgAgentImage:              getImg(instance.Spec.CustomContainerImages.CyborgAgentImage, defaults.CyborgAgentImage),
+			CyborgConductorImage:          getImg(instance.Spec.CustomContainerImages.CyborgConductorImage, defaults.CyborgConductorImage),
 			DesignateAPIImage:             getImg(instance.Spec.CustomContainerImages.DesignateAPIImage, defaults.DesignateAPIImage),
 			DesignateBackendbind9Image:    getImg(instance.Spec.CustomContainerImages.DesignateBackendbind9Image, defaults.DesignateBackendbind9Image),
 			DesignateCentralImage:         getImg(instance.Spec.CustomContainerImages.DesignateCentralImage, defaults.DesignateCentralImage),
@@ -378,6 +388,9 @@ func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1be
 	}
 	if !CinderImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Cinder")
+	}
+	if !CyborgImageMatch(ctx, controlPlane, version) {
+		failedMatches = append(failedMatches, "Cyborg")
 	}
 	if !DesignateImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Designate")

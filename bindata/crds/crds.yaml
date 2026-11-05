@@ -21034,6 +21034,12 @@ spec:
                     type: string
                   cloudkittyProcImage:
                     type: string
+                  cyborgAPIImage:
+                    type: string
+                  cyborgAgentImage:
+                    type: string
+                  cyborgConductorImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -23668,6 +23674,12 @@ spec:
                     type: string
                   cloudkittyProcImage:
                     type: string
+                  cyborgAPIImage:
+                    type: string
+                  cyborgAgentImage:
+                    type: string
+                  cyborgConductorImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -23926,6 +23938,12 @@ spec:
                       type: string
                     cloudkittyProcImage:
                       type: string
+                    cyborgAPIImage:
+                      type: string
+                    cyborgAgentImage:
+                      type: string
+                    cyborgConductorImage:
+                      type: string
                     designateAPIImage:
                       type: string
                     designateBackendbind9Image:
@@ -24133,6 +24151,12 @@ spec:
                   cloudkittyAPIImage:
                     type: string
                   cloudkittyProcImage:
+                    type: string
+                  cyborgAPIImage:
+                    type: string
+                  cyborgAgentImage:
+                    type: string
+                  cyborgConductorImage:
                     type: string
                   designateAPIImage:
                     type: string
@@ -24367,6 +24391,12 @@ spec:
                     cloudkittyAPIImage:
                       type: string
                     cloudkittyProcImage:
+                      type: string
+                    cyborgAPIImage:
+                      type: string
+                    cyborgAgentImage:
+                      type: string
+                    cyborgConductorImage:
                       type: string
                     designateAPIImage:
                       type: string
