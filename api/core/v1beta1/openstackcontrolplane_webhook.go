@@ -57,6 +57,7 @@ import (
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -360,6 +361,10 @@ func (r *OpenStackControlPlane) checkDepsEnabled(name string) string {
 			*r.Spec.Telemetry.Template.MetricStorage.Enabled) {
 			reqs = "Galera, Memcached, RabbitMQ, Keystone, Telemetry, Telemetry.Ceilometer, Telemetry.MetricStorage"
 		}
+	case "Cyborg":
+		if !(r.Spec.Galera.Enabled && r.Spec.Rabbitmq.Enabled && r.Spec.Keystone.Enabled && r.Spec.Placement.Enabled) {
+			reqs = "Galera, RabbitMQ, Keystone, Placement"
+		}
 	}
 
 	// If "reqs" is not the empty string, we have missing requirements
@@ -488,6 +493,13 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 		errors = append(errors, errs...)
 		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
+	}
+
+	if r.Spec.Cyborg.Enabled {
+		warns, errs := r.Spec.Cyborg.Template.ValidateCreate(basePath.Child("cyborg").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Cyborg.APIOverride.Route, basePath.Child("cyborg").Child("apiOverride").Child("route"))...)
 	}
 
 	if r.Spec.Telemetry.Enabled {
@@ -718,6 +730,17 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Watcher.APIOverride.Route, basePath.Child("watcher").Child("apiOverride").Child("route"))...)
 	}
+
+	if r.Spec.Cyborg.Enabled {
+		if old.Cyborg.Template == nil {
+			old.Cyborg.Template = &cyborgv1.CyborgSpecCore{}
+		}
+		warns, errs := r.Spec.Cyborg.Template.ValidateUpdate(*old.Cyborg.Template, basePath.Child("cyborg").Child("template"), r.Namespace)
+		errors = append(errors, errs...)
+		warnings = append(warnings, warns...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Cyborg.APIOverride.Route, basePath.Child("cyborg").Child("apiOverride").Child("route"))...)
+	}
+
 	if r.Spec.Telemetry.Enabled {
 		if old.Telemetry.Template == nil {
 			old.Telemetry.Template = &telemetryv1.TelemetrySpecCore{}
@@ -880,6 +903,12 @@ func (r *OpenStackControlPlane) ValidateServiceDependencies(basePath *field.Path
 	if r.Spec.Watcher.Enabled {
 		if depErrorMsg := r.checkDepsEnabled("Watcher"); depErrorMsg != "" {
 			err := field.Invalid(basePath.Child("watcher").Child("enabled"), r.Spec.Watcher.Enabled, depErrorMsg)
+			allErrs = append(allErrs, err)
+		}
+	}
+	if r.Spec.Cyborg.Enabled {
+		if depErrorMsg := r.checkDepsEnabled("Cyborg"); depErrorMsg != "" {
+			err := field.Invalid(basePath.Child("cyborg").Child("enabled"), r.Spec.Cyborg.Enabled, depErrorMsg)
 			allErrs = append(allErrs, err)
 		}
 	}
@@ -1246,6 +1275,24 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		// Default DatabaseInstance
 		if r.Spec.Watcher.Template.DatabaseInstance == nil || *r.Spec.Watcher.Template.DatabaseInstance == "" {
 			r.Spec.Watcher.Template.DatabaseInstance = ptr.To("openstack")
+		}
+	}
+
+	// Cyborg
+	if r.Spec.Cyborg.Enabled || r.Spec.Cyborg.Template != nil {
+		if r.Spec.Cyborg.Template == nil {
+			r.Spec.Cyborg.Template = &cyborgv1.CyborgSpecCore{}
+		}
+		r.Spec.Cyborg.Template.Default()
+
+		if r.Spec.Cyborg.Enabled {
+			initializeOverrideSpec(&r.Spec.Cyborg.APIOverride.Route, true)
+			r.Spec.Cyborg.Template.SetDefaultRouteAnnotations(r.Spec.Cyborg.APIOverride.Route.Annotations)
+		}
+
+		// Default DatabaseInstance
+		if r.Spec.Cyborg.Template.DatabaseInstance == nil || *r.Spec.Cyborg.Template.DatabaseInstance == "" {
+			r.Spec.Cyborg.Template.DatabaseInstance = ptr.To("openstack")
 		}
 	}
 
