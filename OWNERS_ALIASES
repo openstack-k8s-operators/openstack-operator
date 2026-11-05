@@ -9,6 +9,5 @@ aliases:
   - stuggi
   dataplane-approvers:
   - fultonj
-  - rebtoor
   - slagle
   - rabi
