@@ -422,6 +422,21 @@ func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.CyborgAPIImage != nil {
+		in, out := &in.CyborgAPIImage, &out.CyborgAPIImage
+		*out = new(string)
+		**out = **in
+	}
+	if in.CyborgAgentImage != nil {
+		in, out := &in.CyborgAgentImage, &out.CyborgAgentImage
+		*out = new(string)
+		**out = **in
+	}
+	if in.CyborgConductorImage != nil {
+		in, out := &in.CyborgConductorImage, &out.CyborgConductorImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.DesignateAPIImage != nil {
 		in, out := &in.DesignateAPIImage, &out.DesignateAPIImage
 		*out = new(string)

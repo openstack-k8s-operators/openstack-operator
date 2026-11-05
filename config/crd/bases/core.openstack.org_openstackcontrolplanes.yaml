@@ -19879,6 +19879,12 @@ spec:
                     type: string
                   cloudkittyProcImage:
                     type: string
+                  cyborgAPIImage:
+                    type: string
+                  cyborgAgentImage:
+                    type: string
+                  cyborgConductorImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
