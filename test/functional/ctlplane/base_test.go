@@ -38,6 +38,7 @@ import (
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	backupv1 "github.com/openstack-k8s-operators/openstack-operator/api/backup/v1beta1"
@@ -58,6 +59,7 @@ type Names struct {
 	MemcachedName                        types.NamespacedName
 	MemcachedCertName                    types.NamespacedName
 	CinderName                           types.NamespacedName
+	CyborgName                           types.NamespacedName
 	ManilaName                           types.NamespacedName
 	GlanceName                           types.NamespacedName
 	NeutronName                          types.NamespacedName
@@ -105,6 +107,9 @@ type Names struct {
 	WatcherCertPublicRouteName           types.NamespacedName
 	WatcherCertPublicSvcName             types.NamespacedName
 	WatcherCertInternalName              types.NamespacedName
+	CyborgCertPublicRouteName            types.NamespacedName
+	CyborgCertPublicSvcName              types.NamespacedName
+	CyborgCertInternalName               types.NamespacedName
 }
 
 func CreateNames(openstackControlplaneName types.NamespacedName) Names {
@@ -171,6 +176,10 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		CinderName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
 			Name:      "cinder",
+		},
+		CyborgName: types.NamespacedName{
+			Namespace: openstackControlplaneName.Namespace,
+			Name:      "cyborg",
 		},
 		GlanceName: types.NamespacedName{
 			Namespace: openstackControlplaneName.Namespace,
@@ -320,6 +329,18 @@ func CreateNames(openstackControlplaneName types.NamespacedName) Names {
 		},
 		WatcherCertInternalName: types.NamespacedName{
 			Name:      "cert-watcher-internal-svc",
+			Namespace: openstackControlplaneName.Namespace,
+		},
+		CyborgCertPublicRouteName: types.NamespacedName{
+			Name:      "cert-cyborg-public-route",
+			Namespace: openstackControlplaneName.Namespace,
+		},
+		CyborgCertPublicSvcName: types.NamespacedName{
+			Name:      "cert-cyborg-public-svc",
+			Namespace: openstackControlplaneName.Namespace,
+		},
+		CyborgCertInternalName: types.NamespacedName{
+			Name:      "cert-cyborg-internal-svc",
 			Namespace: openstackControlplaneName.Namespace,
 		},
 	}
@@ -987,6 +1008,15 @@ func GetOctavia(name types.NamespacedName) *octaviav1.Octavia {
 // GetKeystone
 func GetKeystone(name types.NamespacedName) *keystonev1.KeystoneAPI {
 	instance := &keystonev1.KeystoneAPI{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// GetCyborg
+func GetCyborg(name types.NamespacedName) *cyborgv1.Cyborg {
+	instance := &cyborgv1.Cyborg{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())

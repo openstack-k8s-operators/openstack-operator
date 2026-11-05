@@ -42,6 +42,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
@@ -132,6 +133,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=config.openshift.io,resources=networks,verbs=get;list;watch;
 // +kubebuilder:rbac:groups=topology.openstack.org,resources=topologies,verbs=get;list;watch;update
 // +kubebuilder:rbac:groups=watcher.openstack.org,resources=watchers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=cyborg.openstack.org,resources=cyborgs,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -752,6 +754,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	ctrlResult, err = openstack.ReconcileCyborg(ctx, instance, version, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	ctrlResult, errs := openstack.DeleteCertsAndRoutes(ctx, instance, helper)
 	if errs != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
@@ -879,6 +888,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 		Owns(&certmgrv1.Certificate{}).
 		Owns(&barbicanv1.Barbican{}).
 		Owns(&watcherv1.Watcher{}).
+		Owns(&cyborgv1.Cyborg{}).
 		Owns(&corev1beta1.OpenStackVersion{}).
 		Watches(
 			&corev1.Secret{},
@@ -933,6 +943,7 @@ func apiOverrideTLSSecretNames(spec *corev1beta1.OpenStackControlPlaneSpec) []st
 		spec.Designate.APIOverride,
 		spec.Barbican.APIOverride,
 		spec.Watcher.APIOverride,
+		spec.Cyborg.APIOverride,
 	}
 	overrides = slices.AppendSeq(overrides, maps.Values(spec.Glance.APIOverride))
 	for _, c := range spec.Nova.CellOverride {
