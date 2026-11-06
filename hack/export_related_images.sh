@@ -78,3 +78,5 @@ export TEST_TOBIKO_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-
 export TEST_ANSIBLETEST_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-ansible-test:master-latest
 export TEST_HORIZONTEST_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-horizontest:master-latest
 export RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT=quay.io/openstack-k8s-operators/openstack-must-gather:latest
+export RELATED_IMAGE_CYBORG_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-cyborg:master-latest
+export RELATED_IMAGE_CYBORG_AGENT_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-cyborg-agent:master-latest

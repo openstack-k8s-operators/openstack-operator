@@ -46,6 +46,7 @@ import (
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
@@ -156,6 +157,7 @@ var _ = BeforeSuite(func() {
 	neutronv1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/neutron-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	// Cyborg CRDs are included with Nova CRDs
 	novav1CRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/nova-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
@@ -321,6 +323,8 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = k8s_networkingv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+	err = cyborgv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme
 
@@ -378,6 +382,8 @@ var _ = BeforeSuite(func() {
 	openstack.SetupServiceOperatorDefaults()
 	openstackclientv1.SetupDefaults()
 	corev1.SetupVersionDefaults()
+	// Cyborg's Default() depends on package-level defaults initialized here.
+	cyborgv1.SetupDefaults()
 
 	err = (&client_ctrl.OpenStackClientReconciler{
 		Client:  k8sManager.GetClient(),

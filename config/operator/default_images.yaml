@@ -41,6 +41,10 @@ spec:
           value: quay.io/openstack-s2i-containers/openstack-cinder-volume:master-latest
         - name: RELATED_IMAGE_CLOUDKITTY_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-cloudkitty-api:master-latest
+        - name: RELATED_IMAGE_CYBORG_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-s2i-containers/openstack-cyborg:master-latest
+        - name: RELATED_IMAGE_CYBORG_AGENT_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-s2i-containers/openstack-cyborg-agent:master-latest
         - name: RELATED_IMAGE_DESIGNATE_API_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-designate-api:master-latest
         - name: RELATED_IMAGE_DESIGNATE_BACKENDBIND9_IMAGE_URL_DEFAULT

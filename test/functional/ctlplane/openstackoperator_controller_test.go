@@ -54,6 +54,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/users"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
@@ -154,6 +155,12 @@ var _ = Describe("OpenStackOperator controller", func() {
 		watcherTopologyService = Entry("the watcher service", func() (
 			client.Object, *topologyv1.TopoRef) {
 			svc := GetWatcher(names.WatcherName)
+			tp := svc.Spec.TopologyRef
+			return svc, tp
+		})
+		cyborgTopologyService = Entry("the cyborg service", func() (
+			client.Object, *topologyv1.TopoRef) {
+			svc := GetCyborg(names.CyborgName)
 			tp := svc.Spec.TopologyRef
 			return svc, tp
 		})
@@ -2662,6 +2669,178 @@ var _ = Describe("OpenStackOperator controller", func() {
 		})
 	})
 
+	When("A cyborg OpenStackControlplane instance is created with default values", func() {
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["cyborg"] = map[string]interface{}{
+				"enabled": true,
+			}
+
+			// create cert secrets for rabbitmq instances
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
+			// create cert secrets for memcached instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			// create cert secrets for ovn instance
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.InstanceHAMetricsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.CyborgCertPublicRouteName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.CyborgCertPublicSvcName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.CyborgCertInternalName))
+
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+
+		})
+
+		It("should have cyborg enabled and default values", func() {
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Spec.Cyborg.Enabled).Should(BeTrue())
+
+			Expect(OSCtlplane.Spec.TLS.Ingress.Enabled).Should(BeTrue())
+			Expect(OSCtlplane.Spec.TLS.PodLevel.Enabled).Should(BeTrue())
+
+			Expect(OSCtlplane.Spec.Cyborg.APIOverride.Route).Should(Not(BeNil()))
+			Expect(OSCtlplane.Spec.Cyborg.APIOverride.Route.Annotations).Should(HaveKeyWithValue("haproxy.router.openshift.io/timeout", "60s"))
+			Expect(OSCtlplane.Spec.Cyborg.APIOverride.Route.Annotations).Should(HaveKeyWithValue("api.cyborg.openstack.org/timeout", "60s"))
+
+			cyborg := GetCyborg(names.CyborgName)
+			// cyborg services exist
+			Eventually(func(g Gomega) {
+				cyborg := GetCyborg(names.CyborgName)
+				g.Expect(cyborg).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			// default databaseInstance is openstack
+			Expect(cyborg.Spec.DatabaseInstance).Should(Equal(ptr.To("openstack")))
+			Expect(cyborg.Spec.DatabaseAccount).Should(Equal(ptr.To("cyborg")))
+			// default Cyborg container images are set
+			Expect(cyborg.Spec.APIContainerImageURL).Should(Not(BeNil()))
+			Expect(cyborg.Spec.APIContainerImageURL).Should(Equal("quay.io/openstack-s2i-containers/openstack-cyborg:master-latest"))
+			Expect(cyborg.Spec.AgentContainerImageURL).Should(Not(BeNil()))
+			Expect(cyborg.Spec.AgentContainerImageURL).Should(Equal("quay.io/openstack-s2i-containers/openstack-cyborg-agent:master-latest"))
+			Expect(cyborg.Spec.ConductorContainerImageURL).Should(Not(BeNil()))
+			Expect(cyborg.Spec.ConductorContainerImageURL).Should(Equal("quay.io/openstack-s2i-containers/openstack-cyborg:master-latest"))
+
+			Expect(cyborg.Spec.APIServiceTemplate.TLS.Ca.CaBundleSecretName).Should(Equal("combined-ca-bundle"))
+
+		})
+
+		It("should create cyborg route and populate TLS secrets", func() {
+			cyborgPublicSvcName := types.NamespacedName{Name: "cyborg-public", Namespace: namespace}
+			cyborgInternalSvcName := types.NamespacedName{Name: "cyborg-internal", Namespace: namespace}
+
+			th.CreateService(
+				cyborgPublicSvcName,
+				map[string]string{
+					"osctlplane-service": "cyborg",
+					"osctlplane":         "",
+				},
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{
+							Name:     "cyborg-public",
+							Port:     int32(9322),
+							Protocol: k8s_corev1.ProtocolTCP,
+						},
+					},
+				})
+			cyborgSvc := th.GetService(cyborgPublicSvcName)
+			if cyborgSvc.Annotations == nil {
+				cyborgSvc.Annotations = map[string]string{}
+			}
+			cyborgSvc.Annotations[service.AnnotationIngressCreateKey] = "true"
+			cyborgSvc.Annotations[service.AnnotationEndpointKey] = "public"
+			Expect(th.K8sClient.Status().Update(th.Ctx, cyborgSvc)).To(Succeed())
+			th.CreateService(
+				cyborgInternalSvcName,
+				map[string]string{
+					"osctlplane-service": "cyborg",
+					"osctlplane":         "",
+				},
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{
+							Name:     "cyborg-internal",
+							Port:     int32(9322),
+							Protocol: k8s_corev1.ProtocolTCP,
+						},
+					},
+				})
+			cyborgIntSvc := th.GetService(cyborgInternalSvcName)
+			if cyborgIntSvc.Annotations == nil {
+				cyborgIntSvc.Annotations = map[string]string{}
+			}
+			cyborgIntSvc.Annotations[service.AnnotationIngressCreateKey] = "false"
+			cyborgIntSvc.Annotations[service.AnnotationEndpointKey] = "internal"
+			Expect(th.K8sClient.Status().Update(th.Ctx, cyborgIntSvc)).To(Succeed())
+
+			Eventually(func(g Gomega) {
+				cyborgRouteName := types.NamespacedName{Name: "cyborg-public", Namespace: namespace}
+				cyborgRoute := &routev1.Route{}
+
+				g.Expect(th.K8sClient.Get(th.Ctx, cyborgRouteName, cyborgRoute)).Should(Succeed())
+				g.Expect(cyborgRoute.Spec.TLS).Should(Not(BeNil()))
+				g.Expect(cyborgRoute.Spec.TLS.Certificate).Should(Not(BeEmpty()))
+				g.Expect(cyborgRoute.Spec.TLS.Key).Should(Not(BeEmpty()))
+				g.Expect(cyborgRoute.Spec.TLS.CACertificate).Should(Not(BeEmpty()))
+			}, timeout, interval).Should(Succeed())
+
+			cyborg := GetCyborg(names.CyborgName)
+			Expect(cyborg.Spec.APIServiceTemplate.TLS.API.Internal.SecretName).Should(Equal(ptr.To("cert-cyborg-internal-svc")))
+			Expect(cyborg.Spec.APIServiceTemplate.TLS.API.Public.SecretName).Should(Equal(ptr.To("cert-cyborg-public-svc")))
+			Expect(cyborg.Spec.APIServiceTemplate.Override.Service["public"].EndpointURL).Should(Not(BeNil()))
+
+		})
+
+		It("should have ControlPlaneCyborgReadyCondition false when cyborg is not ready", func() {
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneCyborgReadyCondition,
+					k8s_corev1.ConditionFalse,
+				)
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("should have ControlPlaneCyborgReadyCondition true when cyborg is ready", func() {
+			// simulate cyborg ready state
+			Eventually(func(g Gomega) {
+				cyborg := &cyborgv1.Cyborg{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.CyborgName, cyborg)).Should(Succeed())
+				cyborg.Status.ObservedGeneration = cyborg.Generation
+				cyborg.Status.Conditions.MarkTrue(condition.ReadyCondition, "Ready")
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, cyborg)).To(Succeed())
+				th.Logger.Info("Simulated Cyborg ready", "on", names.CyborgName)
+			}, timeout, interval).Should(Succeed())
+
+			// expect the ready status to propagate to control plane object
+			Eventually(func(_ Gomega) {
+				th.ExpectCondition(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneCyborgReadyCondition,
+					k8s_corev1.ConditionTrue,
+				)
+			}, timeout, interval).Should(Succeed())
+
+			OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+			Expect(OSCtlplane.Status.ContainerImages.CyborgAPIImage).Should(Equal(ptr.To("quay.io/openstack-s2i-containers/openstack-cyborg:master-latest")))
+			Expect(OSCtlplane.Status.ContainerImages.CyborgAgentImage).Should(Equal(ptr.To("quay.io/openstack-s2i-containers/openstack-cyborg-agent:master-latest")))
+			Expect(OSCtlplane.Status.ContainerImages.CyborgConductorImage).Should(Equal(ptr.To("quay.io/openstack-s2i-containers/openstack-cyborg:master-latest")))
+		})
+	})
+
 	When("OpenStackControlplane instance is deleted", func() {
 		BeforeEach(func() {
 			DeferCleanup(
@@ -3021,6 +3200,9 @@ var _ = Describe("OpenStackOperator controller", func() {
 			spec["watcher"] = map[string]interface{}{
 				"enabled": true,
 			}
+			spec["cyborg"] = map[string]interface{}{
+				"enabled": true,
+			}
 			// Build the topology Spec
 			topologySpec := GetSampleTopologySpec()
 			// Create Test Topologies
@@ -3112,6 +3294,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			horizonTopologyService,
 			heatTopologyService,
 			watcherTopologyService,
+			cyborgTopologyService,
 		)
 		DescribeTable("An OpenStackControlplane updates the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -3144,6 +3327,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			horizonTopologyService,
 			heatTopologyService,
 			watcherTopologyService,
+			cyborgTopologyService,
 		)
 		DescribeTable("An OpenStackControlplane Service (Glance) overrides the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -3192,6 +3376,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			horizonTopologyService,
 			heatTopologyService,
 			watcherTopologyService,
+			cyborgTopologyService,
 		)
 		DescribeTable("An OpenStackControlplane removes the topology reference",
 			func(serviceNameFunc func() (client.Object, *topologyv1.TopoRef)) {
@@ -3220,6 +3405,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 			horizonTopologyService,
 			heatTopologyService,
 			watcherTopologyService,
+			cyborgTopologyService,
 		)
 	})
 

@@ -170,6 +170,15 @@ spec:
         replicas: 1
       decisionengineServiceTemplate:
         replicas: 1
+  cyborg:
+    enabled: true
+    template:
+      databaseInstance: openstack
+      databaseAccount: cyborg
+      apiServiceTemplate:
+        replicas: 1
+      conductorServiceTemplate:
+        replicas: 1
 status:
   conditions:
   - message: Setup complete
@@ -232,6 +241,10 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneExposeWatcherReady
+  - message: OpenStackControlPlane cyborg service exposed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneExposeCyborgReady
   - message: OpenStackControlPlane Glance completed
     reason: Ready
     status: "True"
@@ -300,3 +313,7 @@ status:
     reason: Ready
     status: "True"
     type: OpenStackControlPlaneWatcherReady
+  - message: OpenStackControlPlane Cyborg completed
+    reason: Ready
+    status: "True"
+    type: OpenStackControlPlaneCyborgReady
