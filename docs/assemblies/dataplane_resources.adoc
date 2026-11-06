@@ -8,6 +8,7 @@
 [#sub-resources]
 === Sub Resources
 
+* <<ansibleexecutionsummary,AnsibleExecutionSummary>>
 * <<openstackdataplanedeploymentlist,OpenStackDataPlaneDeploymentList>>
 * <<openstackdataplanedeploymentspec,OpenStackDataPlaneDeploymentSpec>>
 * <<openstackdataplanedeploymentstatus,OpenStackDataPlaneDeploymentStatus>>
@@ -26,6 +27,47 @@
 * <<nodesection,NodeSection>>
 * <<nodetemplate,NodeTemplate>>
 * <<secretenvsource,SecretEnvSource>>
+
+[#ansibleexecutionsummary]
+==== AnsibleExecutionSummary
+
+AnsibleExecutionSummary captures the final ansible-runner execution result reported by the AEE pod.
+
+|===
+| Field | Description | Scheme | Required
+
+| totalHosts
+| TotalHosts is the number of hosts included in the Ansible execution summary.
+| *int
+| false
+
+| failedHosts
+| FailedHosts is the number of hosts with Ansible task failures.
+| *int
+| false
+
+| unreachableHosts
+| UnreachableHosts is the number of hosts that were unreachable.
+| *int
+| false
+
+| failurePercent
+| FailurePercent is the percent of total hosts that failed or were unreachable.
+| *int
+| false
+
+| failedHostList
+| FailedHostList contains the hosts that failed.
+| *[]string
+| false
+
+| unreachableHostList
+| UnreachableHostList contains the hosts that were unreachable.
+| *[]string
+| false
+|===
+
+<<custom-resources,Back to Custom Resources>>
 
 [#openstackdataplanedeployment]
 ==== OpenStackDataPlaneDeployment
@@ -131,6 +173,16 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | AnsibleJobNodeSelector to target subset of worker nodes running the ansible jobs
 | map[string]string
 | false
+
+| useParallelExecution
+| UseParallelExecution enables parallel execution of services based on their dependsOn dependencies. When not set (default), services run sequentially in list order and service dependencies are ignored.
+| bool
+| false
+
+| ansibleEEEnvConfigMapName
+| AnsibleEEEnvConfigMapName is the name of the ConfigMap containing environment variables to inject into the Ansible Execution Environment pod. If not specified, defaults to "openstack-aee-default-env".
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -148,9 +200,19 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | map[string]condition.Conditions
 | false
 
+| failedNodeSets
+| FailedNodeSets maps a nodeSet name to the message of the permanent failure that terminated it. Terminality cannot live in the conditions because the AEE job backing the failure is garbage collected once the deployment settles.
+| map[string]string
+| false
+
 | ansibleEEHashes
 | AnsibleEEHashes
 | map[string]string
+| false
+
+| ansibleExecutionSummaries
+| AnsibleExecutionSummaries stores the most recent AEE execution summary per Job name.
+| map[string]<<ansibleexecutionsummary,AnsibleExecutionSummary>>
 | false
 
 | configMapHashes
@@ -261,6 +323,11 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | *baremetalv1.OpenStackBaremetalSetTemplateSpec
 | false
 
+| osImageType
+| OSImageType selects the OS image flavor for this NodeSet's baremetal hosts. "uefi" (default) selects the UEFI self-extracting image, "bootc" selects the bootc qcow2 self-extracting image.
+| OSImageType
+| true
+
 | nodeTemplate
 | NodeTemplate - node attributes specific to nodes defined by this resource. These attributes can be overriden at the individual node level, else take their defaults from valus in this section.
 | <<nodetemplate,NodeTemplate>>
@@ -277,7 +344,7 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | false
 
 | ansibleEEResources
-| CPU and memory requests and limits for the main Ansible EE Job container; unset by default. The CPU request capped by a lower limit determines default forks (ceil fractional cores; 8 with no CPU).
+| AnsibleEEResources specifies CPU and memory requests and limits for the main Ansible execution environment Job container. No resources are set by default.
 | corev1.ResourceRequirements
 | false
 
@@ -330,6 +397,11 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | deploymentStatuses
 | DeploymentStatuses
 | map[string]condition.Conditions
+| false
+
+| deploymentExecutionSummaries
+| DeploymentExecutionSummaries stores the most recent AEE execution summary per deployment and Job name.
+| map[string]map[string]<<ansibleexecutionsummary,AnsibleExecutionSummary>>
 | false
 
 | allHostnames
@@ -519,6 +591,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | EDPMServiceType - service type, which typically corresponds to one of the default service names (such as nova, ovn, etc). Also typically corresponds to the ansible role name (without the "edpm_" prefix) used to manage the service. If not set, will default to the OpenStackDataPlaneService name.
 | string
 | false
+
+| dependsOn
+| DependsOn lists EDPMServiceType or CR names that must complete before this service runs; if empty, the list predecessor is used instead. Entries referencing a service that is not part of the deployment's service list are ignored, so a service can be deployed on its own (e.g. via OpenStackDataPlaneDeployment spec.servicesOverride) without its prerequisites.
+| []string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -593,6 +670,11 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | []corev1.EnvVar
 | false
 
+| ansibleEEResources
+| AnsibleEEResources is applied to the main execution container.
+| corev1.ResourceRequirements
+| false
+
 | extraVars
 | ExtraVars for ansible execution
 | map[string]json.RawMessage
@@ -630,6 +712,11 @@ AnsibleEESpec is a specification of the ansible EE attributes
 
 | ServiceAccountName
 | ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount
+| string
+| false
+
+| ansibleEEEnvConfigMapName
+| AnsibleEEEnvConfigMapName is the name of ConfigMap containing environment variables to inject to the Ansible execution environment pod.
 | string
 | false
 |===
