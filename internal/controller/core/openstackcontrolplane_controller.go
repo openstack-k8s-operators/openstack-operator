@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -41,6 +42,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/backup"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	corev1 "k8s.io/api/core/v1"
 
@@ -125,7 +127,7 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=redis.openstack.org,resources=redises,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes/custom-host,verbs=create;update;patch
-// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;
+// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete;
@@ -228,6 +230,17 @@ func (r *OpenStackControlPlaneReconciler) Reconcile(ctx context.Context, req ctr
 	instance.Status.ObservedGeneration = instance.Generation
 
 	// If we're not deleting this and the service object doesn't have our finalizer, add it.
+	//
+	// This must stay the only metadata write that is followed by more spec mutation, and
+	// it returns before any is made. The reconcilers mutate instance.Spec in memory (issued
+	// cert secret names, overrides, CA bundle names), and the deferred PatchInstance builds
+	// its MergeFrom patch on the main resource whenever the metadata changed - that patch
+	// would then persist those spec changes. The persisted spec is the user input the
+	// reconcilers snapshot as the bring-your-own cert signal and the secret field indexes read;
+	// persisted operator-issued names would be mistaken for BYO secrets (see resolveServiceCert).
+	// The finalizer removal in reconcileDelete is safe for the same reason: no spec mutation
+	// has happened on that path. Do not add annotation/label/finalizer writes after the spec
+	// mutations without going through a separate patch.
 	if instance.DeletionTimestamp.IsZero() && controllerutil.AddFinalizer(instance, helper.GetFinalizer()) || isNewInstance {
 		return ctrl.Result{}, nil
 	}
@@ -793,6 +806,7 @@ const (
 	tlsPodLevelInternalCACustomIssuer = ".spec.tls.podLevel.internal.ca.customIssuer"
 	tlsPodLevelOvnCACustomIssuer      = ".spec.tls.podLevel.ovn.ca.customIssuer"
 	apiOverrideTLSSecretField         = ".spec.apiOverride.tls.secretName"
+	tlsServiceSecretField             = ".spec.template.tls.serviceSecretName"
 )
 
 // fieldIndexers maps each indexed field to the func extracting its value(s)
@@ -836,6 +850,8 @@ var fieldIndexers = map[string]client.IndexerFunc{
 	},
 	// the custom public endpoint cert secrets of all services
 	apiOverrideTLSSecretField: indexAPIOverrideTLSSecret,
+	// the bring-your-own pod level service cert secrets of all services
+	tlsServiceSecretField: indexTLSServiceSecret,
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -900,6 +916,13 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 			handler.EnqueueRequestsFromMapFunc(r.findControlPlaneForSrc),
 			builder.WithPredicates(backup.AnnotationChangedPredicate(openstack.ServiceCertSelector)),
 		).
+		// the service operators rename the Service ports and set its type; the
+		// endpointURL front port is injected only after that, see EnsureEndpointConfig
+		Watches(
+			&corev1.Service{},
+			handler.EnqueueRequestsFromMapFunc(r.findControlPlaneForSrc),
+			builder.WithPredicates(openstack.ServicePortOrTypeChangedPredicate()),
+		).
 		Complete(r)
 }
 
@@ -943,6 +966,83 @@ func apiOverrideTLSSecretNames(spec *corev1beta1.OpenStackControlPlaneSpec) []st
 	for _, o := range overrides {
 		if o.TLS != nil && o.TLS.SecretName != "" {
 			names = append(names, o.TLS.SecretName)
+		}
+	}
+	return names
+}
+
+// indexTLSServiceSecret is the field index func for tlsServiceSecretField
+func indexTLSServiceSecret(rawObj client.Object) []string {
+	return tlsServiceSecretNames(&rawObj.(*corev1beta1.OpenStackControlPlane).Spec)
+}
+
+// tlsServiceSecretNames returns the bring-your-own pod level service cert secret
+// names, i.e. the user input the operator reads in EnsureEndpointConfig:
+// tls.api.{public,internal} of all services (found by walking the spec, so new
+// services are covered) and the simple TLS sections of horizon, novncproxy,
+// prometheus and alertmanager. Operator owned secrets (ovn, vencrypt, metadata, ...)
+// are deliberately not indexed. The indexed spec comes from the informer cache,
+// i.e. the persisted user input - never the operator-issued names written back in
+// memory.
+func tlsServiceSecretNames(spec *corev1beta1.OpenStackControlPlaneSpec) []string {
+	names := tlsAPISecretNames(reflect.ValueOf(spec))
+
+	secrets := []*string{}
+	if t := spec.Horizon.Template; t != nil {
+		secrets = append(secrets, t.TLS.SecretName)
+	}
+	if t := spec.Nova.Template; t != nil {
+		for _, cell := range t.CellTemplates {
+			secrets = append(secrets, cell.NoVNCProxyServiceTemplate.TLS.Service.SecretName)
+		}
+	}
+	if t := spec.Telemetry.Template; t != nil {
+		secrets = append(secrets, t.MetricStorage.PrometheusTLS.SecretName, t.MetricStorage.AlertmanagerTLS.SecretName)
+	}
+	for _, sn := range secrets {
+		if sn != nil && *sn != "" {
+			names = append(names, *sn)
+		}
+	}
+	return names
+}
+
+var tlsAPIServiceType = reflect.TypeFor[tls.APIService]()
+
+// tlsAPISecretNames walks v for tls.APIService and returns the secret names of
+// its public and internal endpoint.
+func tlsAPISecretNames(v reflect.Value) []string {
+	var names []string
+	switch v.Kind() {
+	case reflect.Pointer:
+		if !v.IsNil() {
+			names = tlsAPISecretNames(v.Elem())
+		}
+	case reflect.Struct:
+		if v.Type() == tlsAPIServiceType {
+			api := v.Interface().(tls.APIService)
+			for _, sn := range []*string{api.Public.SecretName, api.Internal.SecretName} {
+				if sn != nil && *sn != "" {
+					names = append(names, *sn)
+				}
+			}
+			break
+		}
+		for i := range v.NumField() {
+			if v.Type().Field(i).IsExported() {
+				names = append(names, tlsAPISecretNames(v.Field(i))...)
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		// skip slices of scalars (e.g. []byte)
+		if k := v.Type().Elem().Kind(); k == reflect.Struct || k == reflect.Pointer || k == reflect.Map {
+			for i := range v.Len() {
+				names = append(names, tlsAPISecretNames(v.Index(i))...)
+			}
+		}
+	case reflect.Map:
+		for _, k := range v.MapKeys() {
+			names = append(names, tlsAPISecretNames(v.MapIndex(k))...)
 		}
 	}
 	return names

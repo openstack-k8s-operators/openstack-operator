@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -50,7 +51,9 @@ import (
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -93,6 +96,32 @@ func EnsureDeleted(ctx context.Context, helper *helper.Helper, obj client.Object
 	}
 	return ctrl.Result{}, nil
 
+}
+
+// ServicePortOrTypeChangedPredicate fires when a Service managed by the
+// openstack-operator has its port names or its type changed by the service
+// operator. The endpointURL front port is only injected for a LoadBalancer whose live
+// port is named after its endpoint type, and nothing else wakes the control plane
+// after that rename or type change.
+func ServicePortOrTypeChangedPredicate() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc:  func(event.CreateEvent) bool { return false },
+		DeleteFunc:  func(event.DeleteEvent) bool { return false },
+		GenericFunc: func(event.GenericEvent) bool { return false },
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldSvc, ok := e.ObjectOld.(*k8s_corev1.Service)
+			newSvc, ok2 := e.ObjectNew.(*k8s_corev1.Service)
+			if !ok || !ok2 {
+				return false
+			}
+			if _, managed := newSvc.Labels[ooSelector]; !managed {
+				return false
+			}
+			return oldSvc.Spec.Type != newSvc.Spec.Type ||
+				!slices.EqualFunc(oldSvc.Spec.Ports, newSvc.Spec.Ports,
+					func(a, b k8s_corev1.ServicePort) bool { return a.Name == b.Name })
+		},
+	}
 }
 
 // GetServiceOpenStackOperatorLabel - returns the labels to be added to service override
@@ -253,8 +282,9 @@ func EnsureEndpointConfig(
 
 				// if a custom cert secret was provided we'll use this for
 				// the route, otherwise the issuer is used to request one
-				// for the endpoint.
-				if ingressOverride.TLS != nil && ingressOverride.TLS.SecretName != "" {
+				// for the endpoint. The custom secret is the Route cert only, so it
+				// has no effect (is not even validated) when there is no Route.
+				if ed.Route.Create && ingressOverride.TLS != nil && ingressOverride.TLS.SecretName != "" {
 					ed.Route.TLS.SecretName = ptr.To(ingressOverride.TLS.SecretName)
 					validateSecret := &tls.GenericService{SecretName: ed.Route.TLS.SecretName}
 					_, err := validateSecret.ValidateCertSecret(ctx, helper, instance.GetNamespace())
@@ -279,8 +309,7 @@ func EnsureEndpointConfig(
 							err.Error()))
 						return endpoints, ctrl.Result{}, err
 					}
-					instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCustomTLSReadyCondition,
-						corev1.OpenStackControlPlaneCustomTLSReadyMessage)
+					markCustomTLSReady(instance)
 				} else {
 					ed.Route.TLS.IssuerName = instance.GetPublicIssuer()
 				}
@@ -288,70 +317,112 @@ func EnsureEndpointConfig(
 
 			if ed.Service.TLS.Enabled {
 				ed.Service.TLS.CaBundleSecretName = tls.CABundleSecret
-				// if a custom cert secret was provided and ed.Route.Create == false
-				// we'll use this for the service, otherwise issue a cert. This is for
-				// use case where you deploy without ingress/routes and also use
-				// a LoadBalancer (MetalLB) for the public endpoints.
-				if !ed.Route.Create && (tlsConfig.API.Public.SecretName != nil && *tlsConfig.API.Public.SecretName != "") {
-					ed.Service.TLS.SecretName = tlsConfig.API.Public.SecretName
-					_, err := ed.Service.TLS.ValidateCertSecret(ctx, helper, instance.GetNamespace())
-					if err != nil {
-						if k8s_errors.IsNotFound(err) {
-							return endpoints, ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
+				// Pod-level public Service cert: bring-your-own via tls.api.public.secretName
+				// (snapshotted pre-restore, passed as tlsConfig.API.Public.SecretName), else
+				// issue one. A Route-backed endpoint always uses the operator-issued cert (the
+				// router trusts it through the internal CA): a custom cert there belongs on the
+				// Route, via ingressOverride.TLS.SecretName (apiOverride.tls.secretName, handled
+				// above), which must never feed the service cert here.
+				// Hostnames come from the canonical set {custom, short, FQDN} (custom host
+				// only present when endpointURL is set) produced by GetVHostServerName -
+				// the same helper the public vhost ServerName/ServerAlias use - so the
+				// cert SAN never drifts from the vhost names.
+				certRequest := certmanager.CertificateRequest{
+					IssuerName:  instance.GetPublicIssuer(),
+					CertName:    ed.Service.TLS.CertName,
+					Hostnames:   ed.serviceCertHostnames(helper, clusterDomain),
+					Ips:         nil,
+					Annotations: ed.Annotations,
+					Labels:      util.MergeMaps(ed.Labels, map[string]string{ServiceCertSelector: ""}),
+					Usages:      nil,
+				}
+
+				// additionalSubjectNames is a cert-only escape hatch - not part of the
+				// endpoint's vhost identity - so it's appended here only, never
+				// routed through GetVHostServerName.
+				addSubjNames := util.GetStringListFromMap(svc.Annotations, tls.AdditionalSubjectNamesKey)
+				if len(addSubjNames) > 0 {
+					certRequest.Hostnames = append(certRequest.Hostnames, addSubjNames...)
+				}
+				if instance.Spec.TLS.Ingress.Cert.Duration != nil {
+					certRequest.Duration = &instance.Spec.TLS.Ingress.Cert.Duration.Duration
+				}
+				if instance.Spec.TLS.Ingress.Cert.RenewBefore != nil {
+					certRequest.RenewBefore = &instance.Spec.TLS.Ingress.Cert.RenewBefore.Duration
+				}
+
+				byoSecret := tlsConfig.API.Public.SecretName
+				if ed.Route.Create && byoSecret != nil && *byoSecret != "" {
+					helper.GetLogger().Info(fmt.Sprintf(
+						"Service %s: tls.api.public.secretName is ignored for a Route-backed endpoint, use apiOverride.tls.secretName for the Route cert",
+						ed.Name))
+					byoSecret = nil
+				}
+
+				ctrlResult, err := ed.resolveServiceCert(ctx, instance, helper, certRequest, byoSecret)
+				if err != nil {
+					return endpoints, ctrlResult, err
+				} else if (ctrlResult != ctrl.Result{}) {
+					return endpoints, ctrlResult, nil
+				}
+			}
+
+			// For a TLS LoadBalancer public endpoint (no route) with an endpointURL,
+			// set the Service front port to the endpointURL's port so the catalog
+			// endpointURL and the live Service agree. Without an endpointURL the
+			// service keeps its native port; adopters who need a director-era
+			// front port (e.g. keystone 13000) put it in the endpointURL. targetPort is not touched - the port Name comes straight
+			// off the live Service, so glance's per-API "glance-<apiName>-public"
+			// naming needs no special-case. Skipped when: non-TLS, routed (ClusterIP),
+			// no endpointURL port is set, or the
+			// Service has more than one port (ambiguous which one is "the" public
+			// port - the admin assigns ports for that case via the same override).
+			//
+			// The injected entry's Name is re-synced to the live Service's port name
+			// on every reconcile (even once previously injected) so a later
+			// service-operator port-name rename doesn't leave it pinned to a stale
+			// value forever; only the Port number is preserved once set, since it may
+			// have been hand-tuned by the admin instead of left at the desired
+			// default. An override with more than one port entry is a deliberate
+			// admin config beyond what this default ever produces, so it's left
+			// untouched. A ports[].port that disagrees with an explicit endpointURL port
+			// is rejected at admission on the service operator's own CR, not in this repo
+			// (e.g. KeystoneAPI validates it via lib-common's
+			// webhook.ValidatePortNameOverrides), so the two case branches below can never
+			// observe a stale mismatched number once that CR update lands.
+			//
+			// Also skipped while the live port is not yet named after the endpoint
+			// type ("public"): the service operator hasn't renamed it, and an
+			// override carrying the old live name is rejected by its by-name merge
+			// ("unknown service port name") before the Service is ever patched, so
+			// the rename (and any type change) would never land. Skipping lets the
+			// operator patch the Service first; the Service watch
+			// (ServicePortOrTypeChangedPredicate) then wakes the control plane so the
+			// next reconcile injects.
+			if svc.Spec.Type == k8s_corev1.ServiceTypeLoadBalancer && !ed.Route.Create &&
+				ed.Service.TLS.Enabled && len(svc.Spec.Ports) == 1 &&
+				svc.Spec.Ports[0].Name == string(ed.Type) {
+				// desired front-port: the port implied by endpointURL (explicit,
+				// or its scheme's standard port) if one can be determined.
+				desiredPort, wantInject, err := service.GetEndpointURLPort(ed.Service.OverrideSpec.EndpointURL)
+				if err == nil && wantInject {
+					// Spec is shared with the in-memory parent spec: copy before mutating
+					if ed.Service.OverrideSpec.Spec == nil {
+						ed.Service.OverrideSpec.Spec = &service.OverrideServiceSpec{}
+					} else {
+						ed.Service.OverrideSpec.Spec = ed.Service.OverrideSpec.Spec.DeepCopy()
+					}
+					switch len(ed.Service.OverrideSpec.Spec.Ports) {
+					case 0:
+						ed.Service.OverrideSpec.Spec.Ports = []service.OverrideServicePort{
+							{Name: svc.Spec.Ports[0].Name, Port: desiredPort},
 						}
-						return endpoints, ctrl.Result{}, err
+					case 1:
+						// admin set a port explicitly - keep their number, only
+						// re-sync the name to the live Service (admission rejects
+						// a number that disagrees with endpointURL).
+						ed.Service.OverrideSpec.Spec.Ports[0].Name = svc.Spec.Ports[0].Name
 					}
-					// Delete the issued certificate if it exists
-					cert := certmanager.NewCertificate(
-						&certmgrv1.Certificate{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      ed.Route.TLS.CertName,
-								Namespace: ed.Namespace,
-							},
-						},
-						5*time.Second,
-					)
-					err = cert.Delete(ctx, helper)
-					if err != nil {
-						return endpoints, ctrl.Result{}, err
-					}
-				} else {
-					// issue a certificate for public pod virthost
-					certRequest := certmanager.CertificateRequest{
-						IssuerName: instance.GetPublicIssuer(),
-						CertName:   ed.Service.TLS.CertName,
-						Hostnames: []string{
-							fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace),
-							fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, clusterDomain),
-						},
-						Ips:         nil,
-						Annotations: ed.Annotations,
-						Labels:      util.MergeMaps(ed.Labels, map[string]string{ServiceCertSelector: ""}),
-						Usages:      nil,
-					}
-
-					addSubjNames := util.GetStringListFromMap(svc.Annotations, tls.AdditionalSubjectNamesKey)
-					if len(addSubjNames) > 0 {
-						certRequest.Hostnames = append(certRequest.Hostnames, addSubjNames...)
-					}
-					if instance.Spec.TLS.Ingress.Cert.Duration != nil {
-						certRequest.Duration = &instance.Spec.TLS.Ingress.Cert.Duration.Duration
-					}
-					if instance.Spec.TLS.Ingress.Cert.RenewBefore != nil {
-						certRequest.RenewBefore = &instance.Spec.TLS.Ingress.Cert.RenewBefore.Duration
-					}
-					certSecret, ctrlResult, err := certmanager.EnsureCert(
-						ctx,
-						helper,
-						certRequest,
-						nil)
-					if err != nil {
-						return endpoints, ctrlResult, err
-					} else if (ctrlResult != ctrl.Result{}) {
-						return endpoints, ctrlResult, nil
-					}
-
-					ed.Service.TLS.SecretName = &certSecret.Name
 				}
 			}
 
@@ -365,21 +436,25 @@ func EnsureEndpointConfig(
 		case service.EndpointInternal:
 			if ed.Service.TLS.Enabled {
 				ed.Service.TLS.CaBundleSecretName = tls.CABundleSecret
-				// create certificate for internal pod virthost
-				// request certificate
+				// Pod-level internal Service cert: bring-your-own via tls.api.internal.secretName
+				// (snapshotted pre-restore, passed as tlsConfig.API.Internal.SecretName), else issue.
+				// Hostnames come from the canonical set {custom, short, FQDN} (custom host
+				// only present when endpointURL is set) produced by GetVHostServerName -
+				// same helper as the public branch - so a custom internal endpointURL
+				// host gets a matching cert SAN too (previously only the public branch
+				// did this).
 				certRequest := certmanager.CertificateRequest{
-					IssuerName: instance.GetInternalIssuer(),
-					CertName:   ed.Service.TLS.CertName,
-					Hostnames: []string{
-						fmt.Sprintf("%s.%s.svc", ed.Name, instance.Namespace),
-						fmt.Sprintf("%s.%s.svc.%s", ed.Name, instance.Namespace, clusterDomain),
-					},
+					IssuerName:  instance.GetInternalIssuer(),
+					CertName:    ed.Service.TLS.CertName,
+					Hostnames:   ed.serviceCertHostnames(helper, clusterDomain),
 					Ips:         nil,
 					Annotations: ed.Annotations,
 					Labels:      util.MergeMaps(ed.Labels, map[string]string{ServiceCertSelector: ""}),
 					Usages:      nil,
 				}
 
+				// additionalSubjectNames is a cert-only escape hatch - appended here only,
+				// never routed through GetVHostServerName (see the public branch above).
 				addSubjNames := util.GetStringListFromMap(svc.Annotations, tls.AdditionalSubjectNamesKey)
 				if len(addSubjNames) > 0 {
 					certRequest.Hostnames = append(certRequest.Hostnames, addSubjNames...)
@@ -390,18 +465,13 @@ func EnsureEndpointConfig(
 				if instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore != nil {
 					certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Internal.Cert.RenewBefore.Duration
 				}
-				certSecret, ctrlResult, err := certmanager.EnsureCert(
-					ctx,
-					helper,
-					certRequest,
-					nil)
+
+				ctrlResult, err := ed.resolveServiceCert(ctx, instance, helper, certRequest, tlsConfig.API.Internal.SecretName)
 				if err != nil {
 					return endpoints, ctrlResult, err
 				} else if (ctrlResult != ctrl.Result{}) {
 					return endpoints, ctrlResult, nil
 				}
-
-				ed.Service.TLS.SecretName = &certSecret.Name
 			}
 		}
 
@@ -416,6 +486,104 @@ func EnsureEndpointConfig(
 	}
 
 	return endpoints, ctrl.Result{}, nil
+}
+
+// serviceCertHostnames returns the canonical {custom host, short, FQDN} names of the
+// endpoint, the same set the vhost ServerName/ServerAlias use. On a bad endpointURL
+// it falls back to the in-cluster names and logs the missing custom SAN: the service
+// operator's own CR validates endpointURL at admission (e.g. KeystoneAPI via lib-common's
+// webhook.ValidateEndpointURL), not this repo, so this is defense in depth only.
+func (ed *EndpointDetail) serviceCertHostnames(helper *helper.Helper, clusterDomain string) []string {
+	base := fmt.Sprintf("%s.%s.svc", ed.Name, ed.Namespace)
+	sn, aliases, err := service.GetVHostServerName(ed.Service.OverrideSpec, base)
+	if err != nil {
+		helper.GetLogger().Info(fmt.Sprintf("Service %s: invalid endpointURL, cert has no custom SAN: %v", ed.Name, err))
+		return []string{base, base + "." + clusterDomain}
+	}
+	return append([]string{sn}, aliases...)
+}
+
+// markCustomTLSReady marks CustomTLSReady True unless an earlier endpoint in this
+// reconcile pass already set it False (InitConditions resets all conditions at the start
+// of every reconcile, so a False here is from this pass) - e.g. one glance API with a missing
+// secret must not be hidden by the next one with a valid secret.
+func markCustomTLSReady(instance *corev1.OpenStackControlPlane) {
+	if instance.Status.Conditions.IsFalse(corev1.OpenStackControlPlaneCustomTLSReadyCondition) {
+		return
+	}
+	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+		corev1.OpenStackControlPlaneCustomTLSReadyMessage)
+}
+
+// resolveServiceCert resolves the pod-level Service TLS cert for an endpoint:
+// bring-your-own via userSecret (deleting any previously operator-issued cert), or
+// issue one via certmanager.EnsureCert using certRequest otherwise. Shared by the
+// public and internal branches of EnsureEndpointConfig.
+//
+// userSecret MUST be the user's pre-restore BYO signal: the parent
+// <svc>.Template.TLS.API.<endpoint>.SecretName snapshotted before each reconciler's
+// "preserve any previously set TLS certs" restore. The parent OpenStackControlPlane
+// spec is never persisted by the operator (PatchInstance patches only metadata+status),
+// so that snapshot is pure user input and can never echo an operator-issued name.
+// Reading it post-restore instead would make the operator mistake its own issued cert
+// for a user override and delete it on the next reconcile (the 2026-10-09 bug).
+func (ed *EndpointDetail) resolveServiceCert(
+	ctx context.Context,
+	instance *corev1.OpenStackControlPlane,
+	helper *helper.Helper,
+	certRequest certmanager.CertificateRequest,
+	userSecret *string,
+) (ctrl.Result, error) {
+	if userSecret != nil && *userSecret != "" {
+		ed.Service.TLS.SecretName = userSecret
+		validateSecret := &tls.GenericService{SecretName: ed.Service.TLS.SecretName}
+		_, err := validateSecret.ValidateCertSecret(ctx, helper, instance.GetNamespace())
+		if err != nil {
+			if k8s_errors.IsNotFound(err) {
+				// Since the CA cert secret should have been manually created by the user when provided in the spec,
+				// we treat this as a warning because it means that reconciliation will not be able to continue.
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+					condition.ErrorReason,
+					condition.SeverityWarning,
+					corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage,
+					*userSecret))
+				return ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
+			}
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				corev1.OpenStackControlPlaneCustomTLSReadyErrorMessage,
+				*userSecret,
+				err.Error()))
+			return ctrl.Result{}, err
+		}
+		markCustomTLSReady(instance)
+		// Delete the operator-issued certificate if it exists
+		cert := certmanager.NewCertificate(
+			&certmgrv1.Certificate{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      ed.Service.TLS.CertName,
+					Namespace: ed.Namespace,
+				},
+			},
+			5*time.Second,
+		)
+		if err := cert.Delete(ctx, helper); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
+	}
+
+	certSecret, ctrlResult, err := certmanager.EnsureCert(ctx, helper, certRequest, nil)
+	if err != nil {
+		return ctrlResult, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+	ed.Service.TLS.SecretName = &certSecret.Name
+	return ctrl.Result{}, nil
 }
 
 func (ed *EndpointDetail) ensureRoute(
@@ -472,11 +640,6 @@ func (ed *EndpointDetail) ensureRoute(
 				if err != nil && !k8s_errors.IsNotFound(err) {
 					err = fmt.Errorf("error deleting route %s: %w", r.Name, err)
 					return ctrl.Result{}, err
-				}
-
-				if ed.Service.OverrideSpec.EndpointURL != nil {
-					ed.Service.OverrideSpec.EndpointURL = nil
-					helper.GetLogger().Info(fmt.Sprintf("Service %s override endpointURL removed", svc.Name))
 				}
 			}
 		}
@@ -551,8 +714,14 @@ func (ed *EndpointDetail) CreateRoute(
 	owner metav1.Object,
 ) (ctrl.Result, error) {
 	// initialize the route with any custom provided route override
-	// per default use the service name as targetPortName if we don't have the annotation.
+	// per default read the target port name straight off the live Service's single
+	// port, rather than assuming it matches the Service object's name - the two are
+	// not guaranteed to be identical. With several ports there is no way to tell
+	// which one to target, so keep the Service name (override via annotation).
 	targetPortName := ed.Service.Spec.Name
+	if len(ed.Service.Spec.Spec.Ports) == 1 {
+		targetPortName = ed.Service.Spec.Spec.Ports[0].Name
+	}
 	if name, ok := ed.Service.Spec.Annotations[service.AnnotationIngressTargetPortNameKey]; ok && name != "" {
 		targetPortName = name
 	}

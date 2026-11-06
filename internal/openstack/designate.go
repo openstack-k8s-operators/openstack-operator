@@ -66,6 +66,8 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 				designate.Name)
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	designateUserTLS := instance.Spec.Designate.Template.DesignateAPI.TLS
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Designate.Template.DesignateAPI.TLS = designate.Spec.DesignateAPI.TLS
@@ -142,7 +144,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Designate.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeDesignateReadyCondition,
 			false, // TODO: (oschwart) could be removed when all integrated service support TLS
-			instance.Spec.Designate.Template.DesignateAPI.TLS,
+			designateUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

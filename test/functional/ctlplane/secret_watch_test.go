@@ -80,3 +80,15 @@ func startReconcileRecorder() *reconcileRecorder {
 
 	return rec
 }
+
+// waitReconcileRecorderSettled waits until the initial events of the control plane
+// were recorded and went quiet, and returns the count at that point.
+func waitReconcileRecorderSettled(rec *reconcileRecorder) int {
+	Eventually(func(g Gomega) {
+		count, last := rec.stats()
+		g.Expect(count).Should(BeNumerically(">", 0))
+		g.Expect(time.Since(last)).Should(BeNumerically(">", 3*time.Second))
+	}, timeout, interval).Should(Succeed())
+	count, _ := rec.stats()
+	return count
+}

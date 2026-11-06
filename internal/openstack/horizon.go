@@ -80,6 +80,8 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 		}
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	horizonUserTLS := instance.Spec.Horizon.Template.TLS
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Horizon.Template.TLS = horizon.Spec.TLS
@@ -131,7 +133,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 			tls.API{
 				API: tls.APIService{
 					Public: tls.GenericService{
-						SecretName: instance.Spec.Horizon.Template.TLS.SecretName,
+						SecretName: horizonUserTLS.SecretName,
 					},
 				},
 			},

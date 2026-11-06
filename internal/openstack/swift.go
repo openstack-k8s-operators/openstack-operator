@@ -144,6 +144,8 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 		instance.Spec.Swift.Template.SwiftProxy.Auth.ApplicationCredentialSecret = acSecretName
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	swiftUserTLS := instance.Spec.Swift.Template.SwiftProxy.TLS
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Swift.Template.SwiftProxy.TLS = swift.Spec.SwiftProxy.TLS
@@ -172,7 +174,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 			instance.Spec.Swift.ProxyOverride,
 			corev1beta1.OpenStackControlPlaneExposeSwiftReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Swift.Template.SwiftProxy.TLS,
+			swiftUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

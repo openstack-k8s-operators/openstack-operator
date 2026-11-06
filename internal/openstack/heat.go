@@ -107,6 +107,10 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 		}
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	heatAPIUserTLS := instance.Spec.Heat.Template.HeatAPI.TLS
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	heatCfnUserTLS := instance.Spec.Heat.Template.HeatCfnAPI.TLS
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Heat.Template.HeatAPI.TLS = heat.Spec.HeatAPI.TLS
@@ -173,7 +177,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Heat.Template.HeatAPI.TLS,
+			heatAPIUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -209,7 +213,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 			instance.Spec.Heat.CnfAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeHeatReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Heat.Template.HeatCfnAPI.TLS,
+			heatCfnUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

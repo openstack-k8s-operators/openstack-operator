@@ -132,6 +132,8 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 		instance.Spec.Cinder.Template.Auth.ApplicationCredentialSecret = acSecretName
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	cinderUserTLS := instance.Spec.Cinder.Template.CinderAPI.TLS
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Cinder.Template.CinderAPI.TLS = cinder.Spec.CinderAPI.TLS
@@ -160,7 +162,7 @@ func ReconcileCinder(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Cinder.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeCinderReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Cinder.Template.CinderAPI.TLS,
+			cinderUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err

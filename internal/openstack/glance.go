@@ -10,6 +10,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
@@ -165,6 +166,10 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// snapshot pre-restore BYO service cert secrets per glanceAPI (pure user input,
+	// captured before the restore below overwrites the map entry; see resolveServiceCert)
+	glanceUserTLS := map[string]tls.API{}
+
 	// add selector to service overrides
 	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
 		eps := []service.Endpoint{service.EndpointPublic, service.EndpointInternal}
@@ -184,6 +189,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			glanceAPI.Override.Service[endpointType] = svcOverride
 		}
 
+		glanceUserTLS[name] = glanceAPI.TLS
 		// preserve any previously set TLS certs,set CA cert
 		if instance.Spec.TLS.PodLevel.Enabled {
 			glanceAPI.TLS.API = glance.Spec.GlanceAPIs[name].TLS.API
@@ -193,6 +199,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 	}
 
 	var changed = false
+	var pending ctrl.Result
 	for name, glanceAPI := range instance.Spec.Glance.Template.GlanceAPIs {
 		// Retrieve the services by Label and filter on glanceAPI: for
 		// each instance we should get **only** the associated `SVCs`
@@ -225,7 +232,7 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 				instance.Spec.Glance.APIOverride[name],
 				corev1beta1.OpenStackControlPlaneExposeGlanceReadyCondition,
 				false, // TODO (mschuppert) could be removed when all integrated service support TLS
-				glanceAPI.TLS,
+				glanceUserTLS[name],
 			)
 			if err != nil {
 				return ctrlResult, err
@@ -243,12 +250,14 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			// only when the iteration on the whole APIList is over
 			if (ctrlResult != ctrl.Result{}) {
 				changed = true
+				pending = ctrlResult
 			}
 		}
 		instance.Spec.Glance.Template.GlanceAPIs[name] = glanceAPI
 	}
 	if changed {
-		return ctrl.Result{}, nil
+		// keep the requeue of the instance that asked for it
+		return pending, nil
 	}
 
 	Log.Info("Reconciling Glance", "Glance.Namespace", instance.Namespace, "Glance.Name", glanceName)

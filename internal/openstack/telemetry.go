@@ -272,6 +272,11 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret = ""
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	aodhUserTLS := instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS
+	cloudKittyUserTLS := instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS
+	prometheusUserTLS := instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS
+	alertmanagerUserTLS := instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
@@ -378,7 +383,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Telemetry.CloudKittyAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS,
+			cloudKittyUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -404,7 +409,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			instance.Spec.Telemetry.AodhAPIOverride,
 			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS,
+			aodhUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -434,7 +439,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			tls.API{
 				API: tls.APIService{
 					Public: tls.GenericService{
-						SecretName: instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.SecretName,
+						SecretName: prometheusUserTLS.SecretName,
 					},
 				},
 			},
@@ -503,7 +508,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			tls.API{
 				API: tls.APIService{
 					Public: tls.GenericService{
-						SecretName: instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS.SecretName,
+						SecretName: alertmanagerUserTLS.SecretName,
 					},
 				},
 			},

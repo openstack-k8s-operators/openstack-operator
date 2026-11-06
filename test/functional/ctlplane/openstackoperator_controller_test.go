@@ -40,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
 	rabbitmqv1 "github.com/openstack-k8s-operators/infra-operator/apis/rabbitmq/v1beta1"
@@ -47,6 +48,7 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	common_annotations "github.com/openstack-k8s-operators/lib-common/modules/common/annotations"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
@@ -1558,6 +1560,30 @@ var _ = Describe("OpenStackOperator controller", func() {
 				)
 			})
 
+			// the condition is only set while a custom secret is configured: removing
+			// the (still missing) secret from the spec must not leave it False
+			It("should drop the OpenStackControlPlaneCustomTLSReadyCondition once the missing secret is removed from the spec", func() {
+				th.ExpectConditionWithDetails(
+					names.OpenStackControlplaneName,
+					ConditionGetterFunc(OpenStackControlPlaneConditionGetter),
+					corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+					k8s_corev1.ConditionFalse,
+					condition.ErrorReason,
+					fmt.Sprintf(corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage, names.CustomServiceCertSecretName.Name),
+				)
+
+				Eventually(func(g Gomega) {
+					OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+					OSCtlplane.Spec.Keystone.APIOverride.TLS = nil
+					g.Expect(th.K8sClient.Update(th.Ctx, OSCtlplane)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				Eventually(func(g Gomega) {
+					OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+					g.Expect(OSCtlplane.Status.Conditions.Get(corev1.OpenStackControlPlaneCustomTLSReadyCondition)).To(BeNil())
+				}, timeout, interval).Should(Succeed())
+			})
+
 			It("should have created keystone with route using custom cert secret", func() {
 				DeferCleanup(k8sClient.Delete, ctx, CreateCertSecret(names.CustomServiceCertSecretName))
 
@@ -1655,6 +1681,178 @@ var _ = Describe("OpenStackOperator controller", func() {
 					g.Expect(count).Should(BeNumerically(">", before))
 				}, 2*time.Second, interval).Should(Succeed())
 			})
+
+			// The Service watch re-triggers the legacy front port injection after the
+			// service operator renamed the port or changed the Service type. Same
+			// recording manager approach as above: after the initial events settled only
+			// the watch can enqueue.
+			It("should enqueue the control plane when a managed Service port is renamed", func() {
+				rec := startReconcileRecorder()
+				before := waitReconcileRecorderSettled(rec)
+
+				svc := th.GetService(types.NamespacedName{Name: "keystone-public", Namespace: namespace})
+				svc.Spec.Ports[0].Name = "public"
+				Expect(th.K8sClient.Update(th.Ctx, svc)).Should(Succeed())
+
+				Eventually(func(g Gomega) {
+					count, _ := rec.stats()
+					g.Expect(count).Should(BeNumerically(">", before))
+				}, 2*time.Second, interval).Should(Succeed())
+			})
+
+			It("should enqueue the control plane when a managed Service type changes", func() {
+				rec := startReconcileRecorder()
+				before := waitReconcileRecorderSettled(rec)
+
+				svc := th.GetService(types.NamespacedName{Name: "keystone-public", Namespace: namespace})
+				svc.Spec.Type = k8s_corev1.ServiceTypeLoadBalancer
+				Expect(th.K8sClient.Update(th.Ctx, svc)).Should(Succeed())
+
+				Eventually(func(g Gomega) {
+					count, _ := rec.stats()
+					g.Expect(count).Should(BeNumerically(">", before))
+				}, 2*time.Second, interval).Should(Succeed())
+			})
+
+			It("should not enqueue the control plane when an unmanaged Service port is renamed", func() {
+				rec := startReconcileRecorder()
+				before := waitReconcileRecorderSettled(rec)
+
+				name := types.NamespacedName{Name: "not-managed", Namespace: namespace}
+				th.CreateService(name, nil, k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{{Name: "a", Port: int32(8080), Protocol: k8s_corev1.ProtocolTCP}},
+				})
+				svc := th.GetService(name)
+				svc.Spec.Ports[0].Name = "b"
+				Expect(th.K8sClient.Update(th.Ctx, svc)).Should(Succeed())
+
+				Consistently(func(g Gomega) {
+					count, _ := rec.stats()
+					g.Expect(count).Should(Equal(before))
+				}, 3*time.Second, interval).Should(Succeed())
+			})
+		})
+	})
+
+	// Regression: an operator-issued pod-level service cert must survive
+	// subsequent reconciles. The reconciler snapshots the user's pre-restore
+	// tls.api.*.secretName as the bring-your-own signal; if it instead read the
+	// post-restore value (which carries the operator's own issued secret name)
+	// it would mistake the issued cert for a user override and delete it on the
+	// next reconcile. See resolveServiceCert in internal/openstack/common.go.
+	When("A TLSe OpenStackControlplane issues its own keystone service certs", func() {
+		BeforeEach(func() {
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQCell1CertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.RabbitMQNotificationsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.MemcachedCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNNorthdCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNControllerCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.OVNMetricsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.InstanceHAMetricsCertName))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(names.NeutronOVNCertName))
+
+			// TLSe (PodLevel enabled) with no BYO keystone service cert, so the
+			// operator issues the keystone-{public,internal}-svc certs itself.
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, GetDefaultOpenStackControlPlaneSpec()),
+			)
+		})
+
+		It("keeps the operator-issued keystone service certs across reconciles", func() {
+			keystonePublicSvcName := types.NamespacedName{Name: "keystone-public", Namespace: namespace}
+			keystoneInternalSvcName := types.NamespacedName{Name: "keystone-internal", Namespace: namespace}
+			publicCert := types.NamespacedName{Name: "keystone-public-svc", Namespace: namespace}
+			internalCert := types.NamespacedName{Name: "keystone-internal-svc", Namespace: namespace}
+
+			// Pre-create the secrets the operator-issued certs reference. cert-manager
+			// is not running in envtest, so without these the EnsureCert secret lookup
+			// never resolves. Their presence is also what makes this a real regression:
+			// the buggy path (reading the post-restore secretName) would validate these
+			// secrets, pass, and then delete the issued Certificate - so the certs only
+			// survive if the reconciler uses the pre-restore BYO snapshot.
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(
+				types.NamespacedName{Name: "cert-" + publicCert.Name, Namespace: namespace}))
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(
+				types.NamespacedName{Name: "cert-" + internalCert.Name, Namespace: namespace}))
+			// the public route cert secret too, so ensureRoute does not requeue and
+			// the reconciler reaches the write-back that persists the service-cert
+			// secret names into keystoneAPI.Spec.TLS (what the next reconcile restores)
+			DeferCleanup(k8sClient.Delete, ctx, th.CreateCertSecret(
+				types.NamespacedName{Name: "cert-keystone-public-route", Namespace: namespace}))
+
+			// wait for the KeystoneAPI CR before creating the k8s services, so the
+			// reconciler doesn't run endpoint config before the owner CR exists
+			Eventually(func(g Gomega) {
+				g.Expect(keystone.GetKeystoneAPI(names.KeystoneAPIName)).Should(Not(BeNil()))
+			}, timeout, interval).Should(Succeed())
+
+			th.CreateService(
+				keystonePublicSvcName,
+				map[string]string{"osctlplane-service": "keystone", "osctlplane": ""},
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{Name: "keystone-public", Port: int32(5000), Protocol: k8s_corev1.ProtocolTCP},
+					},
+				})
+			keystoneSvc := th.GetService(keystonePublicSvcName)
+			keystoneSvc.Annotations = map[string]string{
+				service.AnnotationIngressCreateKey: "true",
+				service.AnnotationEndpointKey:      "public",
+			}
+			Expect(th.K8sClient.Status().Update(th.Ctx, keystoneSvc)).To(Succeed())
+
+			th.CreateService(
+				keystoneInternalSvcName,
+				map[string]string{"osctlplane-service": "keystone", "osctlplane": ""},
+				k8s_corev1.ServiceSpec{
+					Ports: []k8s_corev1.ServicePort{
+						{Name: "keystone-internal", Port: int32(5000), Protocol: k8s_corev1.ProtocolTCP},
+					},
+				})
+			keystoneSvc = th.GetService(keystoneInternalSvcName)
+			keystoneSvc.Annotations = map[string]string{
+				service.AnnotationIngressCreateKey: "false",
+				service.AnnotationEndpointKey:      "internal",
+			}
+			Expect(th.K8sClient.Status().Update(th.Ctx, keystoneSvc)).To(Succeed())
+
+			keystone.SimulateKeystoneAPIReady(names.KeystoneAPIName)
+
+			// operator issues both pod-level service certs
+			Eventually(func(g Gomega) {
+				g.Expect(crtmgr.GetCert(internalCert)).ShouldNot(BeNil())
+				g.Expect(crtmgr.GetCert(publicCert)).ShouldNot(BeNil())
+			}, timeout, interval).Should(Succeed())
+
+			// both certs carry the canonical {short, FQDN} SAN set - the same names
+			// GetVHostServerName hands to the vhost, so SNI and cert SAN agree
+			clusterDomain := clusterdns.GetDNSClusterDomain()
+			Expect(crtmgr.GetCert(publicCert).Spec.DNSNames).To(ConsistOf(
+				"keystone-public."+namespace+".svc",
+				"keystone-public."+namespace+".svc."+clusterDomain,
+			))
+			Expect(crtmgr.GetCert(internalCert).Spec.DNSNames).To(ConsistOf(
+				"keystone-internal."+namespace+".svc",
+				"keystone-internal."+namespace+".svc."+clusterDomain,
+			))
+
+			// the operator persists the issued secret names into keystoneAPI.Spec.TLS,
+			// which the next reconcile restores - this is the value the reconciler must
+			// NOT mistake for a user-provided BYO cert
+			Eventually(func(g Gomega) {
+				ksAPI := keystone.GetKeystoneAPI(names.KeystoneAPIName)
+				g.Expect(ksAPI.Spec.TLS.API.Internal.SecretName).To(HaveValue(Equal("cert-" + internalCert.Name)))
+			}, timeout, interval).Should(Succeed())
+
+			// and they are not deleted by any later reconcile (the pre-restore
+			// snapshot must keep the issued certs from looking like a BYO override)
+			Consistently(func(g Gomega) {
+				cert := &certmgrv1.Certificate{}
+				g.Expect(k8sClient.Get(ctx, internalCert, cert)).Should(Succeed())
+				g.Expect(k8sClient.Get(ctx, publicCert, cert)).Should(Succeed())
+			}, "10s", interval).Should(Succeed())
 		})
 	})
 

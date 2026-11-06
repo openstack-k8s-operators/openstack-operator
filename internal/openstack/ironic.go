@@ -112,6 +112,10 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 		}
 	}
 
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	ironicAPIUserTLS := instance.Spec.Ironic.Template.IronicAPI.TLS
+	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
+	ironicInspectorUserTLS := instance.Spec.Ironic.Template.IronicInspector.TLS
 	// preserve any previously set TLS certs,set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Ironic.Template.IronicAPI.TLS = ironic.Spec.IronicAPI.TLS
@@ -214,7 +218,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.APIOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Ironic.Template.IronicAPI.TLS,
+			ironicAPIUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err
@@ -251,7 +255,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 			instance.Spec.Ironic.InspectorOverride,
 			corev1beta1.OpenStackControlPlaneExposeIronicReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
-			instance.Spec.Ironic.Template.IronicInspector.TLS,
+			ironicInspectorUserTLS,
 		)
 		if err != nil {
 			return ctrlResult, err
