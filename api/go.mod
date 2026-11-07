@@ -19,15 +19,15 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261020132816-6109367117f2
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261020132816-6109367117f2
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20261031091007-79f4171f77ce
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20261026075309-b2ba1013d345
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20261104180656-b48dbd3ab33c
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20261026075308-71535eeff6c1
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20261026075654-2728ddfe3680
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20261026075306-5f598c24d8c5
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20261026075305-8ef1ee7ac55c
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261026075302-181eec8e397e
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261031091009-15497f4393a8
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261026075306-207a2f662d9e
-	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261020173457-5878ab1a9147
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261102080621-ecfecdc2e9cb
+	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261104084648-ff0e93050263
 	github.com/rhobs/obo-prometheus-operator/pkg/apis/monitoring v0.77.1-rhobs1 // indirect
 	github.com/rhobs/observability-operator v1.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
