@@ -40,7 +40,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 		instance.Spec.DNS.Template = &networkv1.DNSMasqSpecCore{}
 	}
 
-	if instance.Spec.DNS.Template.NodeSelector == nil {
+	if instance.Spec.DNS.Template.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		instance.Spec.DNS.Template.NodeSelector = &instance.Spec.NodeSelector
 	}
 
