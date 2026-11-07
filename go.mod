@@ -12,12 +12,12 @@ require (
 	github.com/onsi/ginkgo/v2 v2.33.0
 	github.com/onsi/gomega v1.43.1
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20261102153807-de3ed875b091
-	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20261031090231-f58ae0940a25
-	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20261102201821-75da11d89f33
+	github.com/openstack-k8s-operators/barbican-operator/api v0.6.1-0.20261107075103-b9bbe8f482d2
+	github.com/openstack-k8s-operators/cinder-operator/api v0.6.1-0.20261107075102-5f083a43659c
+	github.com/openstack-k8s-operators/designate-operator/api v0.6.1-0.20261107075438-32ed38bf0305
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20261031090232-e5bc2c1b4b55
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20261102201820-4fab9ab5cad4
-	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261102201820-b19cb22ee3bc
+	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261107075438-4dd1d4959de5
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20261020055343-66a79fe1e289
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261102201429-a2d3adb923ed
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20261102201431-697ee743dc30
@@ -35,9 +35,9 @@ require (
 	github.com/openstack-k8s-operators/openstack-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261025113420-8c4a0c93c6d1
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261031091349-2fb50e25854d
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261029152859-d373715fd7d3
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261105130503-be5051340dec
 	github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20261024040826-3fede8506a19
-	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261027101125-e00f7c6110b8
+	github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261103200933-1069c25a1210
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
