@@ -1151,6 +1151,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Telemetry.Template.Default()
 		initializeOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, true)
 		r.Spec.Telemetry.Template.Autoscaling.SetDefaultRouteAnnotations(r.Spec.Telemetry.AodhAPIOverride.Route.Annotations)
+		initializeOverrideSpec(&r.Spec.Telemetry.CloudKittyAPIOverride.Route, true)
+		r.Spec.Telemetry.Template.CloudKitty.SetDefaultRouteAnnotations(r.Spec.Telemetry.CloudKittyAPIOverride.Route.Annotations)
 	}
 
 	// Heat
