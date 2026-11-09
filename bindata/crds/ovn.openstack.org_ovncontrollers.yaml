@@ -146,6 +146,157 @@ spec:
                 description: NodeSelector to target subset of worker nodes running
                   this service
                 type: object
+              override:
+                description: |-
+                  Override customizes the generated ovn-controller container. It does not
+                  change the probes of the OVS or metrics containers.
+                properties:
+                  probes:
+                    description: |-
+                      Probes overrides liveness and readiness checks and optionally enables a
+                      startup check. Unspecified settings retain the operator defaults.
+                    properties:
+                      livenessProbes:
+                        description: |-
+                          Override configuration for the StatefulSet like Probes and other tunable
+                          fields
+                        properties:
+                          command:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          failureThreshold:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          initialDelaySeconds:
+                            format: int32
+                            minimum: 0
+                            type: integer
+                          path:
+                            pattern: ^(/.*)?$
+                            type: string
+                          periodSeconds:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          port:
+                            format: int32
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          scheme:
+                            description: URIScheme identifies the scheme used for
+                              connection to a host for Get actions
+                            type: string
+                          timeoutSeconds:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          type:
+                            description: ProbeHandlerType defines the type of probe
+                              handler
+                            enum:
+                            - HTTP
+                            - Exec
+                            - ""
+                            type: string
+                        type: object
+                      readinessProbes:
+                        description: ProbeConf - the configuration for liveness and
+                          readiness probes
+                        properties:
+                          command:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          failureThreshold:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          initialDelaySeconds:
+                            format: int32
+                            minimum: 0
+                            type: integer
+                          path:
+                            pattern: ^(/.*)?$
+                            type: string
+                          periodSeconds:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          port:
+                            format: int32
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          scheme:
+                            description: URIScheme identifies the scheme used for
+                              connection to a host for Get actions
+                            type: string
+                          timeoutSeconds:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          type:
+                            description: ProbeHandlerType defines the type of probe
+                              handler
+                            enum:
+                            - HTTP
+                            - Exec
+                            - ""
+                            type: string
+                        type: object
+                      startupProbes:
+                        description: ProbeConf - the configuration for liveness and
+                          readiness probes
+                        properties:
+                          command:
+                            items:
+                              type: string
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          failureThreshold:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          initialDelaySeconds:
+                            format: int32
+                            minimum: 0
+                            type: integer
+                          path:
+                            pattern: ^(/.*)?$
+                            type: string
+                          periodSeconds:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          port:
+                            format: int32
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          scheme:
+                            description: URIScheme identifies the scheme used for
+                              connection to a host for Get actions
+                            type: string
+                          timeoutSeconds:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          type:
+                            description: ProbeHandlerType defines the type of probe
+                              handler
+                            enum:
+                            - HTTP
+                            - Exec
+                            - ""
+                            type: string
+                        type: object
+                    type: object
+                type: object
               ovnContainerImage:
                 description: Image used for the ovn-controller container (will be
                   set to environmental default if empty)
