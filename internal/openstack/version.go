@@ -101,6 +101,9 @@ func InitializeOpenStackVersionImageDefaults(ctx context.Context, envImages map[
 	if envImages["RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT"] != nil {
 		defaults.IronicPxeImage = envImages["RELATED_IMAGE_IRONIC_CONDUCTOR_IMAGE_URL_DEFAULT"]
 	}
+	if envImages["RELATED_IMAGE_IRONIC_API_IMAGE_URL_DEFAULT"] != nil {
+		defaults.IronicNovncImage = envImages["RELATED_IMAGE_IRONIC_API_IMAGE_URL_DEFAULT"]
+	}
 	if envImages["RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT"] != nil {
 		defaults.OctaviaHealthmanagerImage = envImages["RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT"]
 		defaults.OctaviaHousekeepingImage = envImages["RELATED_IMAGE_OCTAVIA_WORKER_IMAGE_URL_DEFAULT"]
@@ -213,8 +216,10 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 			InfraRedisImage:               getImg(instance.Spec.CustomContainerImages.InfraRedisImage, defaults.InfraRedisImage),
 			IronicAPIImage:                getImg(instance.Spec.CustomContainerImages.IronicAPIImage, defaults.IronicAPIImage),
 			IronicConductorImage:          getImg(instance.Spec.CustomContainerImages.IronicConductorImage, defaults.IronicConductorImage),
+			IronicGraphicalConsoleImage:   getImg(instance.Spec.CustomContainerImages.IronicGraphicalConsoleImage, defaults.IronicGraphicalConsoleImage),
 			IronicInspectorImage:          getImg(instance.Spec.CustomContainerImages.IronicInspectorImage, defaults.IronicInspectorImage),
 			IronicNeutronAgentImage:       getImg(instance.Spec.CustomContainerImages.IronicNeutronAgentImage, defaults.IronicNeutronAgentImage),
+			IronicNovncImage:              getImg(instance.Spec.CustomContainerImages.IronicNovncImage, defaults.IronicNovncImage),
 			IronicPxeImage:                getImg(instance.Spec.CustomContainerImages.IronicPxeImage, defaults.IronicPxeImage),
 			IronicPythonAgentImage:        getImg(instance.Spec.CustomContainerImages.IronicPythonAgentImage, defaults.IronicPythonAgentImage),
 			KeystoneAPIImage:              getImg(instance.Spec.CustomContainerImages.KeystoneAPIImage, defaults.KeystoneAPIImage),
