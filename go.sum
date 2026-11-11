@@ -206,8 +206,8 @@ github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261122230641-cf96
 github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261122230641-cf96724cbf26/go.mod h1:ZNXcgw3hnIPHghgVcVXUNUELPzcyj5Dd5TU05MCa37I=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261123175601-ecdd797e0ac6 h1:+aAQDVYcvpviAXbkYiFnFqH7QDWUMbYbB34MOujksg4=
 github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261123175601-ecdd797e0ac6/go.mod h1:Z8QGVzq4cgi9Z04n1FvB3sTkevrQ7b67Jj8UkdGirME=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261123111923-45fc04ba1456 h1:mdeBHtmhp1zIQk95+6up/ex3T5wLKLy5HOTxURffBAo=
-github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261123111923-45fc04ba1456/go.mod h1:MJF9NjkrLALDL0dq9lu1JjT2+5cTDT1f8j/BXtG9veA=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261127061507-333163a4d6b4 h1:zsk4al6l/BXREOm7BgD2N/6bID4amFpEx6eT44w/SqU=
+github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261127061507-333163a4d6b4/go.mod h1:MJF9NjkrLALDL0dq9lu1JjT2+5cTDT1f8j/BXtG9veA=
 github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20261121195252-dd06d08c836e h1:OfzZT6dwczGhAPvdP2N6ID4SgyyhEaE00KkjauSB6B8=
 github.com/openstack-k8s-operators/test-operator/api v0.6.1-0.20261121195252-dd06d08c836e/go.mod h1:uF1wn2tijE8g1nx+tH3afOtf+HJ0KyGrdpTMvw4p9OY=
 github.com/openstack-k8s-operators/watcher-operator/api v0.6.1-0.20261123162240-7c1361b7f38e h1:T4W+tDMJzfHvi3ELDV5MD91XxKZmPcPwcyE1vhHVyDk=
