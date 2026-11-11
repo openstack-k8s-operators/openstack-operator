@@ -495,6 +495,7 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 		errors = append(errors, errs...)
 		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AetosOverride.Route, basePath.Child("telemetry").Child("aetosOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
 	}
@@ -726,6 +727,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		errors = append(errors, errs...)
 		warnings = append(warnings, warns...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AodhAPIOverride.Route, basePath.Child("telemetry").Child("aodhApiOverride").Child("route"))...)
+		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AetosOverride.Route, basePath.Child("telemetry").Child("aetosOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.PrometheusOverride.Route, basePath.Child("telemetry").Child("prometheusOverride").Child("route"))...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Telemetry.AlertmanagerOverride.Route, basePath.Child("telemetry").Child("alertmanagerOverride").Child("route"))...)
 	}
@@ -1153,6 +1155,8 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		r.Spec.Telemetry.Template.Autoscaling.SetDefaultRouteAnnotations(r.Spec.Telemetry.AodhAPIOverride.Route.Annotations)
 		initializeOverrideSpec(&r.Spec.Telemetry.CloudKittyAPIOverride.Route, true)
 		r.Spec.Telemetry.Template.CloudKitty.SetDefaultRouteAnnotations(r.Spec.Telemetry.CloudKittyAPIOverride.Route.Annotations)
+		initializeOverrideSpec(&r.Spec.Telemetry.AetosOverride.Route, true)
+		r.Spec.Telemetry.Template.MetricStorage.Aetos.SetDefaultRouteAnnotations(r.Spec.Telemetry.AetosOverride.Route.Annotations)
 	}
 
 	// Heat
