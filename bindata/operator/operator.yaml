@@ -484,6 +484,7 @@ webhooks:
     operations:
     - CREATE
     - UPDATE
+    - DELETE
     resources:
     - openstackdataplanenodesets
   sideEffects: None
