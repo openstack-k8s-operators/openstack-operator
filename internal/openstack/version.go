@@ -161,6 +161,7 @@ func GetContainerImages(defaults *corev1beta1.ContainerDefaults, instance corev1
 		CeilometerProxyImage: getImg(instance.Spec.CustomContainerImages.ApacheImage, defaults.ApacheImage),
 		OctaviaApacheImage:   getImg(instance.Spec.CustomContainerImages.ApacheImage, defaults.ApacheImage),
 		ContainerTemplate: corev1beta1.ContainerTemplate{
+			AetosImage:                    getImg(instance.Spec.CustomContainerImages.AetosImage, defaults.AetosImage),
 			AgentImage:                    getImg(instance.Spec.CustomContainerImages.AgentImage, defaults.AgentImage),
 			AnsibleeeImage:                getImg(instance.Spec.CustomContainerImages.AnsibleeeImage, defaults.AnsibleeeImage),
 			AodhAPIImage:                  getImg(instance.Spec.CustomContainerImages.AodhAPIImage, defaults.AodhAPIImage),

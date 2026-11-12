@@ -16850,6 +16850,130 @@ spec:
                 type: object
               telemetry:
                 properties:
+                  aetosOverride:
+                    properties:
+                      route:
+                        properties:
+                          metadata:
+                            properties:
+                              annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          spec:
+                            properties:
+                              alternateBackends:
+                                items:
+                                  properties:
+                                    kind:
+                                      enum:
+                                      - Service
+                                      - ""
+                                      type: string
+                                    name:
+                                      type: string
+                                    weight:
+                                      format: int32
+                                      maximum: 256
+                                      minimum: 0
+                                      type: integer
+                                  type: object
+                                maxItems: 3
+                                type: array
+                              host:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              path:
+                                pattern: ^/
+                                type: string
+                              port:
+                                properties:
+                                  targetPort:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                required:
+                                - targetPort
+                                type: object
+                              subdomain:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              tls:
+                                properties:
+                                  caCertificate:
+                                    type: string
+                                  certificate:
+                                    type: string
+                                  destinationCACertificate:
+                                    type: string
+                                  externalCertificate:
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  insecureEdgeTerminationPolicy:
+                                    enum:
+                                    - Allow
+                                    - None
+                                    - Redirect
+                                    - ""
+                                    type: string
+                                  key:
+                                    type: string
+                                  termination:
+                                    enum:
+                                    - edge
+                                    - reencrypt
+                                    - passthrough
+                                    type: string
+                                required:
+                                - termination
+                                type: object
+                                x-kubernetes-validations:
+                                - message: 'cannot have both spec.tls.termination:
+                                    passthrough and spec.tls.insecureEdgeTerminationPolicy:
+                                    Allow'
+                                  rule: 'has(self.termination) && has(self.insecureEdgeTerminationPolicy)
+                                    ? !((self.termination==''passthrough'') && (self.insecureEdgeTerminationPolicy==''Allow''))
+                                    : true'
+                              to:
+                                properties:
+                                  kind:
+                                    enum:
+                                    - Service
+                                    - ""
+                                    type: string
+                                  name:
+                                    type: string
+                                  weight:
+                                    format: int32
+                                    maximum: 256
+                                    minimum: 0
+                                    type: integer
+                                type: object
+                              wildcardPolicy:
+                                enum:
+                                - None
+                                - Subdomain
+                                - ""
+                                type: string
+                            type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
+                    type: object
                   alertmanagerOverride:
                     properties:
                       route:
@@ -17098,6 +17222,50 @@ spec:
                             type: string
                         type: object
                     type: object
+                  applicationCredentialAetos:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
                   applicationCredentialAodh:
                     default:
                       enabled: false
@@ -17614,6 +17782,9 @@ spec:
                                 default:
                                   aodhService: AodhPassword
                                 properties:
+                                  aetosService:
+                                    default: AetosPassword
+                                    type: string
                                   aodhService:
                                     default: AodhPassword
                                     type: string
@@ -17716,6 +17887,9 @@ spec:
                           enabled:
                             default: true
                             type: boolean
+                          gpuEnabled:
+                            default: false
+                            type: boolean
                           ksmEnabled:
                             default: true
                             type: boolean
@@ -17763,6 +17937,9 @@ spec:
                             default:
                               ceilometerService: CeilometerPassword
                             properties:
+                              aetosService:
+                                default: AetosPassword
+                                type: string
                               aodhService:
                                 default: AodhPassword
                                 type: string
@@ -18080,6 +18257,9 @@ spec:
                             default:
                               cloudKittyService: CloudKittyPassword
                             properties:
+                              aetosService:
+                                default: AetosPassword
+                                type: string
                               aodhService:
                                 default: AodhPassword
                                 type: string
@@ -18222,6 +18402,134 @@ spec:
                         type: object
                       metricStorage:
                         properties:
+                          aetos:
+                            default:
+                              apiTimeout: 60
+                              passwordSelector:
+                                aetosService: AetosPassword
+                              secret: osp-secret
+                              serviceUser: aetos
+                            properties:
+                              apiTimeout:
+                                default: 60
+                                type: integer
+                              auth:
+                                properties:
+                                  applicationCredentialSecret:
+                                    type: string
+                                type: object
+                              override:
+                                properties:
+                                  service:
+                                    additionalProperties:
+                                      properties:
+                                        endpointURL:
+                                          type: string
+                                        metadata:
+                                          properties:
+                                            annotations:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            labels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                        spec:
+                                          properties:
+                                            externalName:
+                                              type: string
+                                            externalTrafficPolicy:
+                                              type: string
+                                            internalTrafficPolicy:
+                                              type: string
+                                            ipFamilyPolicy:
+                                              type: string
+                                            loadBalancerClass:
+                                              type: string
+                                            loadBalancerSourceRanges:
+                                              items:
+                                                type: string
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            ports:
+                                              items:
+                                                properties:
+                                                  name:
+                                                    type: string
+                                                  port:
+                                                    format: int32
+                                                    maximum: 65535
+                                                    minimum: 1
+                                                    type: integer
+                                                required:
+                                                - name
+                                                - port
+                                                type: object
+                                              type: array
+                                              x-kubernetes-list-type: atomic
+                                            sessionAffinity:
+                                              type: string
+                                            sessionAffinityConfig:
+                                              properties:
+                                                clientIP:
+                                                  properties:
+                                                    timeoutSeconds:
+                                                      format: int32
+                                                      type: integer
+                                                  type: object
+                                              type: object
+                                            type:
+                                              type: string
+                                          type: object
+                                      type: object
+                                    type: object
+                                type: object
+                              passwordSelector:
+                                default:
+                                  aetosService: AetosPassword
+                                properties:
+                                  aetosService:
+                                    default: AetosPassword
+                                    type: string
+                                  aodhService:
+                                    default: AodhPassword
+                                    type: string
+                                  ceilometerService:
+                                    default: CeilometerPassword
+                                    type: string
+                                  cloudKittyService:
+                                    default: CloudKittyPassword
+                                    type: string
+                                type: object
+                              secret:
+                                default: osp-secret
+                                type: string
+                              serviceUser:
+                                default: aetos
+                                type: string
+                              tls:
+                                properties:
+                                  api:
+                                    properties:
+                                      internal:
+                                        properties:
+                                          secretName:
+                                            type: string
+                                        type: object
+                                      public:
+                                        properties:
+                                          secretName:
+                                            type: string
+                                        type: object
+                                    type: object
+                                  caBundleSecretName:
+                                    type: string
+                                type: object
+                            required:
+                            - secret
+                            type: object
                           alertmanagerTls:
                             properties:
                               caBundleSecretName:
@@ -19957,6 +20265,8 @@ spec:
                 type: array
               containerImages:
                 properties:
+                  aetosImage:
+                    type: string
                   agentImage:
                     type: string
                   ansibleeeImage:

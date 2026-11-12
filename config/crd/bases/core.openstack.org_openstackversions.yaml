@@ -45,6 +45,8 @@ spec:
             properties:
               customContainerImages:
                 properties:
+                  aetosImage:
+                    type: string
                   agentImage:
                     type: string
                   ansibleeeImage:
@@ -305,6 +307,8 @@ spec:
               containerImageVersionDefaults:
                 additionalProperties:
                   properties:
+                    aetosImage:
+                      type: string
                     agentImage:
                       type: string
                     ansibleeeImage:
@@ -509,6 +513,8 @@ spec:
                 type: object
               containerImages:
                 properties:
+                  aetosImage:
+                    type: string
                   agentImage:
                     type: string
                   ansibleeeImage:
@@ -745,6 +751,8 @@ spec:
               trackedCustomImages:
                 additionalProperties:
                   properties:
+                    aetosImage:
+                      type: string
                     agentImage:
                       type: string
                     ansibleeeImage:
