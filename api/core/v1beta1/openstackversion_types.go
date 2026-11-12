@@ -196,6 +196,7 @@ type ContainerImages struct {
 
 // ContainerTemplate - struct that contains container image URLs for each service in OpenStackControlplane
 type ContainerTemplate struct {
+	AetosImage         *string `json:"aetosImage,omitempty"`
 	AgentImage         *string `json:"agentImage,omitempty"`
 	AnsibleeeImage     *string `json:"ansibleeeImage,omitempty"`
 	AodhAPIImage       *string `json:"aodhAPIImage,omitempty"`

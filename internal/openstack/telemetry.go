@@ -45,6 +45,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			return res, err
 		}
 		instance.Status.Conditions.Remove(corev1beta1.OpenStackControlPlaneTelemetryReadyCondition)
+		instance.Status.ContainerImages.AetosImage = nil
 		instance.Status.ContainerImages.CeilometerCentralImage = nil
 		instance.Status.ContainerImages.CeilometerComputeImage = nil
 		instance.Status.ContainerImages.CeilometerIpmiImage = nil
@@ -58,8 +59,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.AodhListenerImage = nil
 		instance.Status.ContainerImages.CloudKittyAPIImage = nil
 		instance.Status.ContainerImages.CloudKittyProcImage = nil
-		// Clean up AC CRs when service is disabled (telemetry has three: aodh, ceilometer, cloudkitty)
-		for _, svcName := range []string{"aodh", "ceilometer", "cloudkitty"} {
+		// Clean up AC CRs when service is disabled (telemetry has four: aetos, aodh, ceilometer, cloudkitty)
+		for _, svcName := range []string{"aetos", "aodh", "ceilometer", "cloudkitty"} {
 			if err := CleanupApplicationCredentialForService(ctx, helper, instance, svcName); err != nil {
 				return ctrl.Result{}, err
 			}
@@ -128,6 +129,14 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service[endpointType] =
 			AddServiceOpenStackOperatorLabel(
 				instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.Override.Service[endpointType],
+				telemetry.Name)
+
+		if instance.Spec.Telemetry.Template.MetricStorage.Aetos.Override.Service == nil {
+			instance.Spec.Telemetry.Template.MetricStorage.Aetos.Override.Service = make(map[service.Endpoint]service.RoutedOverrideSpec)
+		}
+		instance.Spec.Telemetry.Template.MetricStorage.Aetos.Override.Service[endpointType] =
+			AddServiceOpenStackOperatorLabel(
+				instance.Spec.Telemetry.Template.MetricStorage.Aetos.Override.Service[endpointType],
 				telemetry.Name)
 	}
 
@@ -272,17 +281,58 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.CloudKitty.Auth.ApplicationCredentialSecret = ""
 	}
 
+	// AC for Aetos (if MetricStorage service enabled)
+	if instance.Spec.Telemetry.Template.MetricStorage.Enabled != nil && *instance.Spec.Telemetry.Template.MetricStorage.Enabled {
+		if instance.Spec.Telemetry.ApplicationCredentialAetos != nil ||
+			instance.Spec.Telemetry.Template.MetricStorage.Aetos.Auth.ApplicationCredentialSecret != "" {
+
+			aetosSecret := instance.Spec.Telemetry.Template.MetricStorage.Aetos.Secret
+			if aetosSecret == "" {
+				aetosSecret = instance.Spec.Secret
+			}
+
+			aetosACSecretName, aetosACResult, err := EnsureApplicationCredentialForService(
+				ctx,
+				helper,
+				instance,
+				"aetos",
+				telemetryReady,
+				aetosSecret,
+				instance.Spec.Telemetry.Template.MetricStorage.Aetos.PasswordSelectors.AetosService,
+				instance.Spec.Telemetry.Template.MetricStorage.Aetos.ServiceUser,
+				instance.Spec.Telemetry.ApplicationCredentialAetos,
+				false,
+			)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			if (aetosACResult != ctrl.Result{}) {
+				return aetosACResult, nil
+			}
+
+			instance.Spec.Telemetry.Template.MetricStorage.Aetos.Auth.ApplicationCredentialSecret = aetosACSecretName
+		}
+	} else {
+		if err := CleanupApplicationCredentialForService(ctx, helper, instance, "aetos"); err != nil {
+			return ctrl.Result{}, err
+		}
+		instance.Spec.Telemetry.Template.MetricStorage.Aetos.Auth.ApplicationCredentialSecret = ""
+	}
+
 	// snapshot pre-restore BYO service cert secret (pure user input; see resolveServiceCert)
 	aodhUserTLS := instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS
 	cloudKittyUserTLS := instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS
 	prometheusUserTLS := instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS
 	alertmanagerUserTLS := instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS
+	aetosUserTLS := instance.Spec.Telemetry.Template.MetricStorage.Aetos.TLS
 	// preserve any previously set TLS certs, set CA cert
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.TLS = telemetry.Spec.Autoscaling.Aodh.TLS
 		instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS = telemetry.Spec.MetricStorage.PrometheusTLS
 		instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS = telemetry.Spec.MetricStorage.AlertmanagerTLS
 		instance.Spec.Telemetry.Template.MetricStorage.PrometheusClientCertSecret = telemetry.Spec.MetricStorage.PrometheusClientCertSecret
+		instance.Spec.Telemetry.Template.MetricStorage.Aetos.TLS = telemetry.Spec.MetricStorage.Aetos.TLS
 		instance.Spec.Telemetry.Template.Ceilometer.TLS = telemetry.Spec.Ceilometer.TLS
 		instance.Spec.Telemetry.Template.Ceilometer.MysqldExporterTLS = telemetry.Spec.Ceilometer.MysqldExporterTLS
 		instance.Spec.Telemetry.Template.Ceilometer.KSMTLS = telemetry.Spec.Ceilometer.KSMTLS
@@ -297,6 +347,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 	instance.Spec.Telemetry.Template.Ceilometer.KSMTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.MetricStorage.PrometheusTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
+	instance.Spec.Telemetry.Template.MetricStorage.Aetos.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	// TODO
@@ -366,6 +417,16 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		helper,
 		instance.Namespace,
 		map[string]string{common.AppSelector: "cloudkitty"},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	aetosSvcs, err := service.GetServicesListWithLabel(
+		ctx,
+		helper,
+		instance.Namespace,
+		map[string]string{common.AppSelector: "metricStorage"},
 	)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -520,6 +581,30 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		}
 		// update TLS settings with cert secret
 		instance.Spec.Telemetry.Template.MetricStorage.AlertmanagerTLS.SecretName = alertmanagerEndpointDetails.GetEndptCertSecret(service.EndpointInternal)
+
+		// EnsureEndpoint for Aetos
+		if len(aetosSvcs.Items) == len(instance.Spec.Telemetry.Template.MetricStorage.Aetos.Override.Service) {
+			aetosEndpointDetails, ctrlResult, err := EnsureEndpointConfig(
+				ctx,
+				instance,
+				helper,
+				telemetry,
+				aetosSvcs,
+				instance.Spec.Telemetry.Template.MetricStorage.Aetos.Override.Service,
+				instance.Spec.Telemetry.AetosOverride,
+				corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
+				false, // TODO (mschuppert) could be removed when all integrated service support TLS
+				aetosUserTLS,
+			)
+			if err != nil {
+				return ctrlResult, err
+			} else if (ctrlResult != ctrl.Result{}) {
+				return ctrlResult, nil
+			}
+			instance.Spec.Telemetry.Template.MetricStorage.Aetos.Override.Service = aetosEndpointDetails.GetEndpointServiceOverrides()
+			instance.Spec.Telemetry.Template.MetricStorage.Aetos.TLS.API.Public.SecretName = aetosEndpointDetails.GetEndptCertSecret(service.EndpointPublic)
+			instance.Spec.Telemetry.Template.MetricStorage.Aetos.TLS.API.Internal.SecretName = aetosEndpointDetails.GetEndptCertSecret(service.EndpointInternal)
+		}
 	}
 
 	if telemetry.Status.Conditions.IsTrue(telemetryv1.CeilometerReadyCondition) {
@@ -597,7 +682,9 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Autoscaling.Aodh.DeepCopyInto(&telemetry.Spec.Autoscaling.Aodh.AodhCore)
 		instance.Spec.Telemetry.Template.Ceilometer.CeilometerSpecCore.DeepCopyInto(&telemetry.Spec.Ceilometer.CeilometerSpecCore)
 		instance.Spec.Telemetry.Template.Logging.DeepCopyInto(&telemetry.Spec.Logging)
-		instance.Spec.Telemetry.Template.MetricStorage.DeepCopyInto(&telemetry.Spec.MetricStorage)
+		instance.Spec.Telemetry.Template.MetricStorage.MetricStorageSpecBase.DeepCopyInto(&telemetry.Spec.MetricStorage.MetricStorageSpecBase)
+		// TODO: change to &telemetry.Spec.MetricStorage.Aetos.AetosCore once MetricStorageSection inlines MetricStorageSpec
+		instance.Spec.Telemetry.Template.MetricStorage.Aetos.DeepCopyInto(&telemetry.Spec.MetricStorage.Aetos)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittySpecBase.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittySpecBase)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyAPI.CloudKittyAPITemplateCore)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyProc.CloudKittyProcTemplateCore)
@@ -630,6 +717,11 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		} else {
 			telemetry.Spec.CloudKitty.Enabled = ptr.To(*instance.Spec.Telemetry.Template.CloudKitty.Enabled)
 		}
+		if instance.Spec.Telemetry.Template.MetricStorage.Enabled == nil {
+			telemetry.Spec.MetricStorage.Enabled = ptr.To(false)
+		} else {
+			telemetry.Spec.MetricStorage.Enabled = ptr.To(*instance.Spec.Telemetry.Template.MetricStorage.Enabled)
+		}
 
 		telemetry.Spec.Ceilometer.CentralImage = *version.Status.ContainerImages.CeilometerCentralImage
 		telemetry.Spec.Ceilometer.ComputeImage = *version.Status.ContainerImages.CeilometerComputeImage
@@ -646,6 +738,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.MysqldExporterImage = *getImg(version.Status.ContainerImages.CeilometerMysqldExporterImage, &missingImageDefault)
 		telemetry.Spec.CloudKitty.CloudKittyAPI.ContainerImage = *getImg(version.Status.ContainerImages.CloudKittyAPIImage, &missingImageDefault)
 		telemetry.Spec.CloudKitty.CloudKittyProc.ContainerImage = *getImg(version.Status.ContainerImages.CloudKittyProcImage, &missingImageDefault)
+		// TODO: propagate Aetos image once MetricStorageSection inlines MetricStorageSpec
+		// telemetry.Spec.MetricStorage.Aetos.Image = *getImg(version.Status.ContainerImages.AetosImage, &missingImageDefault)
 
 		if telemetry.Spec.Ceilometer.Secret == "" {
 			telemetry.Spec.Ceilometer.Secret = instance.Spec.Secret
@@ -672,6 +766,9 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		if telemetry.Spec.CloudKitty.Secret == "" {
 			telemetry.Spec.CloudKitty.Secret = instance.Spec.Secret
 		}
+		if telemetry.Spec.MetricStorage.Aetos.Secret == "" {
+			telemetry.Spec.MetricStorage.Aetos.Secret = instance.Spec.Secret
+		}
 
 		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), telemetry, helper.GetScheme())
 		if err != nil {
@@ -695,6 +792,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 	if telemetry.Status.ObservedGeneration == telemetry.Generation && telemetry.IsReady() {
 		Log.Info("Telemetry ready condition is true")
+		instance.Status.ContainerImages.AetosImage = version.Status.ContainerImages.AetosImage
 		instance.Status.ContainerImages.CeilometerCentralImage = version.Status.ContainerImages.CeilometerCentralImage
 		instance.Status.ContainerImages.CeilometerComputeImage = version.Status.ContainerImages.CeilometerComputeImage
 		instance.Status.ContainerImages.CeilometerIpmiImage = version.Status.ContainerImages.CeilometerIpmiImage
@@ -737,7 +835,8 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 func TelemetryImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Telemetry.Enabled {
-		if !stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerCentralImage, version.Status.ContainerImages.CeilometerCentralImage) ||
+		if !stringPointersEqual(controlPlane.Status.ContainerImages.AetosImage, version.Status.ContainerImages.AetosImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerCentralImage, version.Status.ContainerImages.CeilometerCentralImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerComputeImage, version.Status.ContainerImages.CeilometerComputeImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerIpmiImage, version.Status.ContainerImages.CeilometerIpmiImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerNotificationImage, version.Status.ContainerImages.CeilometerNotificationImage) ||

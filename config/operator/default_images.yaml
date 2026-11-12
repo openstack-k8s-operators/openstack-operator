@@ -15,6 +15,8 @@ spec:
           value: quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:latest
         - name: RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT
           value: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+        - name: RELATED_IMAGE_AETOS_IMAGE_URL_DEFAULT
+          value: quay.io/openstack-s2i-containers/openstack-aetos:master-latest
         - name: RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-aodh-api:master-latest
         - name: RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT

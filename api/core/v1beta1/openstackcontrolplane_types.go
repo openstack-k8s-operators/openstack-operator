@@ -804,6 +804,11 @@ type TelemetrySection struct {
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// AetosOverride, provides the ability to override the generated manifest of several child resources.
+	AetosOverride Override `json:"aetosOverride,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// PrometheusOverride, provides the ability to override the generated manifest of several child resources.
 	PrometheusOverride Override `json:"prometheusOverride,omitempty"`
 
@@ -811,6 +816,13 @@ type TelemetrySection struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// AlertmanagerOverride, provides the ability to override the generated manifest of several child resources.
 	AlertmanagerOverride Override `json:"alertmanagerOverride,omitempty"`
+
+	// ApplicationCredentialAetos allows service-specific overrides of the global AC configuration for Aetos.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:default={enabled:false}
+	ApplicationCredentialAetos *ServiceAppCredSection `json:"applicationCredentialAetos"`
 
 	// ApplicationCredentialCeilometer allows service-specific overrides of the global AC configuration for Ceilometer.
 	// +operator-sdk:csv:customresourcedefinitions:type=spec

@@ -35,6 +35,7 @@ export RELATED_IMAGE_CEILOMETER_SGCORE_IMAGE_URL_DEFAULT=quay.io/openstack-k8s-o
 export RELATED_IMAGE_CEILOMETER_MYSQLD_EXPORTER_IMAGE_URL_DEFAULT=quay.io/openstack-k8s-operators/mysqld_exporter:latest
 export RELATED_IMAGE_KSM_IMAGE_URL_DEFAULT=registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0
 export RELATED_IMAGE_CLOUDKITTY_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-cloudkitty-api:master-latest
+export RELATED_IMAGE_AETOS_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-aetos:master-latest
 export RELATED_IMAGE_AODH_API_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-aodh-api:master-latest
 export RELATED_IMAGE_OVN_NB_DBCLUSTER_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-ovn-nb-db-server:master-latest
 export RELATED_IMAGE_OVN_SB_DBCLUSTER_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-ovn-sb-db-server:master-latest

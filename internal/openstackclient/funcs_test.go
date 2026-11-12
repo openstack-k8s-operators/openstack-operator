@@ -65,9 +65,11 @@ func TestMCPConfigYAMLPrometheus(t *testing.T) {
 		g := gomega.NewWithT(t)
 		metricStorage := &telemetryv1.MetricStorage{
 			Spec: telemetryv1.MetricStorageSpec{
-				PrometheusTLS: tls.SimpleService{
-					GenericService: tls.GenericService{
-						SecretName: ptr.To("prometheus-tls-secret"),
+				MetricStorageSpecBase: telemetryv1.MetricStorageSpecBase{
+					PrometheusTLS: tls.SimpleService{
+						GenericService: tls.GenericService{
+							SecretName: ptr.To("prometheus-tls-secret"),
+						},
 					},
 				},
 			},
