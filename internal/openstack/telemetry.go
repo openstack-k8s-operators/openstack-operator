@@ -683,8 +683,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Spec.Telemetry.Template.Ceilometer.CeilometerSpecCore.DeepCopyInto(&telemetry.Spec.Ceilometer.CeilometerSpecCore)
 		instance.Spec.Telemetry.Template.Logging.DeepCopyInto(&telemetry.Spec.Logging)
 		instance.Spec.Telemetry.Template.MetricStorage.MetricStorageSpecBase.DeepCopyInto(&telemetry.Spec.MetricStorage.MetricStorageSpecBase)
-		// TODO: change to &telemetry.Spec.MetricStorage.Aetos.AetosCore once MetricStorageSection inlines MetricStorageSpec
-		instance.Spec.Telemetry.Template.MetricStorage.Aetos.DeepCopyInto(&telemetry.Spec.MetricStorage.Aetos)
+		instance.Spec.Telemetry.Template.MetricStorage.Aetos.DeepCopyInto(&telemetry.Spec.MetricStorage.Aetos.AetosCore)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittySpecBase.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittySpecBase)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyAPI.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyAPI.CloudKittyAPITemplateCore)
 		instance.Spec.Telemetry.Template.CloudKitty.CloudKittyProc.DeepCopyInto(&telemetry.Spec.CloudKitty.CloudKittyProc.CloudKittyProcTemplateCore)
@@ -738,8 +737,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.MysqldExporterImage = *getImg(version.Status.ContainerImages.CeilometerMysqldExporterImage, &missingImageDefault)
 		telemetry.Spec.CloudKitty.CloudKittyAPI.ContainerImage = *getImg(version.Status.ContainerImages.CloudKittyAPIImage, &missingImageDefault)
 		telemetry.Spec.CloudKitty.CloudKittyProc.ContainerImage = *getImg(version.Status.ContainerImages.CloudKittyProcImage, &missingImageDefault)
-		// TODO: propagate Aetos image once MetricStorageSection inlines MetricStorageSpec
-		// telemetry.Spec.MetricStorage.Aetos.Image = *getImg(version.Status.ContainerImages.AetosImage, &missingImageDefault)
+		telemetry.Spec.MetricStorage.Aetos.Image = *getImg(version.Status.ContainerImages.AetosImage, &missingImageDefault)
 
 		if telemetry.Spec.Ceilometer.Secret == "" {
 			telemetry.Spec.Ceilometer.Secret = instance.Spec.Secret

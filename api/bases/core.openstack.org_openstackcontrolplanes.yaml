@@ -19097,6 +19097,12 @@ spec:
                       metricStorage:
                         properties:
                           aetos:
+                            default:
+                              apiTimeout: 60
+                              passwordSelector:
+                                aetosService: AetosPassword
+                              secret: osp-secret
+                              serviceUser: aetos
                             properties:
                               apiTimeout:
                                 default: 60
