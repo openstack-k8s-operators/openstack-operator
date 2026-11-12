@@ -228,7 +228,16 @@ func (spec *OpenStackDataPlaneNodeSetSpec) ValidateUpdate(oldSpec *OpenStackData
 // ValidateDelete validates the OpenStackDataPlaneNodeSet on deletion
 func (r *OpenStackDataPlaneNodeSet) ValidateDelete(ctx context.Context, c client.Reader) (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate delete", "name", r.Name)
-	errors := r.Spec.ValidateDelete()
+
+	var errors field.ErrorList
+
+	if _, ok := r.Annotations[ProtectDeletionAnnotation]; ok {
+		errors = append(errors, field.Forbidden(
+			field.NewPath("metadata", "annotations").Key(ProtectDeletionAnnotation),
+			"deletion is not allowed while this annotation is set"))
+	}
+
+	errors = append(errors, r.Spec.ValidateDelete()...)
 
 	if len(errors) != 0 {
 		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)

@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -277,6 +278,45 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				return fmt.Sprintf("%s", err)
 			}).Should(ContainSubstring(fmt.Sprintf("could not patch openstackdataplanenodeset while openstackdataplanedeployment %s (blocked on %s condition) is running",
 				dataplaneDeploymentName.Name, string(v1beta1.NodeSetDeploymentReadyCondition))))
+		})
+	})
+
+	When("the protect-deletion annotation is set on the NodeSet", func() {
+		BeforeEach(func() {
+			CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(false))
+		})
+
+		It("Should block deletion while the annotation is set", func() {
+			Eventually(func(g Gomega) string {
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				instance.Annotations = map[string]string{v1beta1.ProtectDeletionAnnotation: ""}
+				g.Expect(th.K8sClient.Update(th.Ctx, instance)).To(Succeed())
+
+				err := th.K8sClient.Delete(th.Ctx, instance)
+				g.Expect(apierrors.IsInvalid(err)).To(BeTrue())
+				return fmt.Sprintf("%s", err)
+			}).Should(ContainSubstring("metadata.annotations[dataplane.openstack.org/protect-deletion]: Forbidden: deletion is not allowed while this annotation is set"))
+
+			DeferCleanup(func() {
+				Eventually(func(g Gomega) {
+					instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+					delete(instance.Annotations, v1beta1.ProtectDeletionAnnotation)
+					g.Expect(th.K8sClient.Update(th.Ctx, instance)).To(Succeed())
+					g.Expect(th.K8sClient.Delete(th.Ctx, instance)).To(Succeed())
+				}).Should(Succeed())
+			})
+		})
+
+		It("Should allow deletion once the annotation is removed", func() {
+			Eventually(func(g Gomega) {
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				instance.Annotations = map[string]string{v1beta1.ProtectDeletionAnnotation: "true"}
+				g.Expect(th.K8sClient.Update(th.Ctx, instance)).To(Succeed())
+
+				delete(instance.Annotations, v1beta1.ProtectDeletionAnnotation)
+				g.Expect(th.K8sClient.Update(th.Ctx, instance)).To(Succeed())
+				g.Expect(th.K8sClient.Delete(th.Ctx, instance)).To(Succeed())
+			}).Should(Succeed())
 		})
 	})
 })
