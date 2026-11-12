@@ -17887,6 +17887,9 @@ spec:
                           enabled:
                             default: true
                             type: boolean
+                          gpuEnabled:
+                            default: false
+                            type: boolean
                           ksmEnabled:
                             default: true
                             type: boolean
@@ -18400,6 +18403,12 @@ spec:
                       metricStorage:
                         properties:
                           aetos:
+                            default:
+                              apiTimeout: 60
+                              passwordSelector:
+                                aetosService: AetosPassword
+                              secret: osp-secret
+                              serviceUser: aetos
                             properties:
                               apiTimeout:
                                 default: 60
