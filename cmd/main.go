@@ -79,6 +79,7 @@ import (
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
@@ -139,6 +140,7 @@ func init() {
 	utilruntime.Must(operatorv1beta1.AddToScheme(scheme))
 	utilruntime.Must(topologyv1.AddToScheme(scheme))
 	utilruntime.Must(watcherv1.AddToScheme(scheme))
+	utilruntime.Must(cyborgv1.AddToScheme(scheme))
 	utilruntime.Must(backupv1beta1.AddToScheme(scheme))
 	utilruntime.Must(assistantv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
@@ -412,6 +414,11 @@ func main() {
 
 	// Defaults for anything else that was not covered by OpenStackClient nor service operator defaults
 	corev1.SetupVersionDefaults()
+
+	// Cyborg's Default() reads from a package-level cyborgDefaults var
+	// (e.g. APITimeout) that is zero-valued until SetupDefaults() is called.
+	// Other services hardcode their defaults directly in Default().
+	cyborgv1.SetupDefaults()
 
 	// nolint:goconst
 	checker := healthz.Ping

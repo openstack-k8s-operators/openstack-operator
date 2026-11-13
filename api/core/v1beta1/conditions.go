@@ -172,6 +172,12 @@ const (
 
 	// OpenStackControlPlaneBackupConfigReadyCondition Status=True condition which indicates if OpenStackBackupConfig is reconciled
 	OpenStackControlPlaneBackupConfigReadyCondition condition.Type = "OpenStackControlPlaneBackupConfigReady"
+
+	// OpenStackControlPlaneCyborgReadyCondition Status=True condition which indicates if Cyborg is configured and operational
+	OpenStackControlPlaneCyborgReadyCondition condition.Type = "OpenStackControlPlaneCyborgReady"
+
+	// OpenStackControlPlaneExposeCyborgReadyCondition Status=True condition which indicates if Cyborg is exposed via a route
+	OpenStackControlPlaneExposeCyborgReadyCondition condition.Type = "OpenStackControlPlaneExposeCyborgReady"
 )
 
 // Common Messages used by API objects.
@@ -551,6 +557,18 @@ const (
 
 	// OpenStackControlPlaneInfrastructureReadyErrorMessage
 	OpenStackControlPlaneInfrastructureReadyErrorMessage = "OpenStackControlPlane Infrastructure error occured %s"
+
+	// OpenStackControlPlaneCyborgReadyInitMessage
+	OpenStackControlPlaneCyborgReadyInitMessage = "OpenStackControlPlane Cyborg not started"
+
+	// OpenStackControlPlaneCyborgReadyMessage
+	OpenStackControlPlaneCyborgReadyMessage = "OpenStackControlPlane Cyborg completed"
+
+	// OpenStackControlPlaneCyborgReadyRunningMessage
+	OpenStackControlPlaneCyborgReadyRunningMessage = "OpenStackControlPlane Cyborg in progress"
+
+	// OpenStackControlPlaneCyborgReadyErrorMessage
+	OpenStackControlPlaneCyborgReadyErrorMessage = "OpenStackControlPlane Cyborg error occured %s"
 )
 
 // Version Conditions used by to drive minor updates

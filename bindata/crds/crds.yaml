@@ -3660,6 +3660,690 @@ spec:
                     default: false
                     type: boolean
                 type: object
+              cyborg:
+                properties:
+                  apiOverride:
+                    properties:
+                      route:
+                        properties:
+                          metadata:
+                            properties:
+                              annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          spec:
+                            properties:
+                              alternateBackends:
+                                items:
+                                  properties:
+                                    kind:
+                                      enum:
+                                      - Service
+                                      - ""
+                                      type: string
+                                    name:
+                                      type: string
+                                    weight:
+                                      format: int32
+                                      maximum: 256
+                                      minimum: 0
+                                      type: integer
+                                  type: object
+                                maxItems: 3
+                                type: array
+                              host:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              path:
+                                pattern: ^/
+                                type: string
+                              port:
+                                properties:
+                                  targetPort:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                required:
+                                - targetPort
+                                type: object
+                              subdomain:
+                                maxLength: 253
+                                pattern: ^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$
+                                type: string
+                              tls:
+                                properties:
+                                  caCertificate:
+                                    type: string
+                                  certificate:
+                                    type: string
+                                  destinationCACertificate:
+                                    type: string
+                                  externalCertificate:
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  insecureEdgeTerminationPolicy:
+                                    enum:
+                                    - Allow
+                                    - None
+                                    - Redirect
+                                    - ""
+                                    type: string
+                                  key:
+                                    type: string
+                                  termination:
+                                    enum:
+                                    - edge
+                                    - reencrypt
+                                    - passthrough
+                                    type: string
+                                required:
+                                - termination
+                                type: object
+                                x-kubernetes-validations:
+                                - message: 'cannot have both spec.tls.termination:
+                                    passthrough and spec.tls.insecureEdgeTerminationPolicy:
+                                    Allow'
+                                  rule: 'has(self.termination) && has(self.insecureEdgeTerminationPolicy)
+                                    ? !((self.termination==''passthrough'') && (self.insecureEdgeTerminationPolicy==''Allow''))
+                                    : true'
+                              to:
+                                properties:
+                                  kind:
+                                    enum:
+                                    - Service
+                                    - ""
+                                    type: string
+                                  name:
+                                    type: string
+                                  weight:
+                                    format: int32
+                                    maximum: 256
+                                    minimum: 0
+                                    type: integer
+                                type: object
+                              wildcardPolicy:
+                                enum:
+                                - None
+                                - Subdomain
+                                - ""
+                                type: string
+                            type: object
+                        type: object
+                      tls:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
+                    type: object
+                  applicationCredential:
+                    default:
+                      enabled: false
+                    nullable: true
+                    properties:
+                      accessRules:
+                        items:
+                          properties:
+                            method:
+                              minLength: 1
+                              type: string
+                            path:
+                              minLength: 1
+                              type: string
+                            service:
+                              minLength: 1
+                              type: string
+                          required:
+                          - method
+                          - path
+                          - service
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      enabled:
+                        default: false
+                        type: boolean
+                      expirationDays:
+                        minimum: 2
+                        type: integer
+                      gracePeriodDays:
+                        minimum: 1
+                        type: integer
+                      roles:
+                        items:
+                          type: string
+                        type: array
+                      unrestricted:
+                        type: boolean
+                    type: object
+                    x-kubernetes-validations:
+                    - message: gracePeriodDays must be smaller than expirationDays
+                      rule: '!(has(self.expirationDays) && has(self.gracePeriodDays))
+                        || self.gracePeriodDays < self.expirationDays'
+                  enabled:
+                    default: false
+                    type: boolean
+                  template:
+                    properties:
+                      apiServiceTemplate:
+                        default:
+                          replicas: 1
+                        properties:
+                          customServiceConfig:
+                            type: string
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          override:
+                            properties:
+                              probes:
+                                properties:
+                                  livenessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  readinessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  startupProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                type: object
+                              service:
+                                additionalProperties:
+                                  properties:
+                                    endpointURL:
+                                      type: string
+                                    metadata:
+                                      properties:
+                                        annotations:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        labels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    spec:
+                                      properties:
+                                        externalName:
+                                          type: string
+                                        externalTrafficPolicy:
+                                          type: string
+                                        internalTrafficPolicy:
+                                          type: string
+                                        ipFamilyPolicy:
+                                          type: string
+                                        loadBalancerClass:
+                                          type: string
+                                        loadBalancerSourceRanges:
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        ports:
+                                          items:
+                                            properties:
+                                              name:
+                                                type: string
+                                              port:
+                                                format: int32
+                                                maximum: 65535
+                                                minimum: 1
+                                                type: integer
+                                            required:
+                                            - name
+                                            - port
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                        sessionAffinity:
+                                          type: string
+                                        sessionAffinityConfig:
+                                          properties:
+                                            clientIP:
+                                              properties:
+                                                timeoutSeconds:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                          type: object
+                                        type:
+                                          type: string
+                                      type: object
+                                  type: object
+                                type: object
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                    request:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          tls:
+                            properties:
+                              api:
+                                properties:
+                                  internal:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                  public:
+                                    properties:
+                                      secretName:
+                                        type: string
+                                    type: object
+                                type: object
+                              caBundleSecretName:
+                                type: string
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
+                        type: object
+                      apiTimeout:
+                        default: 60
+                        minimum: 10
+                        type: integer
+                      auth:
+                        properties:
+                          applicationCredentialSecret:
+                            type: string
+                        type: object
+                      conductorServiceTemplate:
+                        default:
+                          replicas: 1
+                        properties:
+                          customServiceConfig:
+                            type: string
+                          nodeSelector:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          override:
+                            properties:
+                              probes:
+                                properties:
+                                  livenessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  readinessProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                  startupProbes:
+                                    properties:
+                                      command:
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                      failureThreshold:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      initialDelaySeconds:
+                                        format: int32
+                                        minimum: 0
+                                        type: integer
+                                      path:
+                                        pattern: ^(/.*)?$
+                                        type: string
+                                      periodSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      port:
+                                        format: int32
+                                        maximum: 65535
+                                        minimum: 1
+                                        type: integer
+                                      scheme:
+                                        type: string
+                                      timeoutSeconds:
+                                        format: int32
+                                        minimum: 1
+                                        type: integer
+                                      type:
+                                        enum:
+                                        - HTTP
+                                        - Exec
+                                        - ""
+                                        type: string
+                                    type: object
+                                type: object
+                            type: object
+                          replicas:
+                            default: 1
+                            format: int32
+                            maximum: 32
+                            minimum: 0
+                            type: integer
+                          resources:
+                            properties:
+                              claims:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                    request:
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          topologyRef:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
+                        type: object
+                      databaseAccount:
+                        default: cyborg
+                        type: string
+                      databaseInstance:
+                        default: openstack
+                        type: string
+                      keystoneInstance:
+                        default: keystone
+                        type: string
+                      messagingBus:
+                        properties:
+                          cluster:
+                            minLength: 1
+                            type: string
+                          user:
+                            type: string
+                          vhost:
+                            type: string
+                        required:
+                        - cluster
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      passwordSelectors:
+                        default:
+                          service: CyborgPassword
+                        properties:
+                          service:
+                            default: CyborgPassword
+                            type: string
+                        type: object
+                      preserveJobs:
+                        default: false
+                        type: boolean
+                      secret:
+                        default: osp-secret
+                        type: string
+                      serviceUser:
+                        default: cyborg
+                        type: string
+                      topologyRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
+                    type: object
+                type: object
               designate:
                 properties:
                   apiOverride:
@@ -21037,6 +21721,12 @@ spec:
                     type: string
                   cloudkittyProcImage:
                     type: string
+                  cyborgAPIImage:
+                    type: string
+                  cyborgAgentImage:
+                    type: string
+                  cyborgConductorImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -23671,6 +24361,12 @@ spec:
                     type: string
                   cloudkittyProcImage:
                     type: string
+                  cyborgAPIImage:
+                    type: string
+                  cyborgAgentImage:
+                    type: string
+                  cyborgConductorImage:
+                    type: string
                   designateAPIImage:
                     type: string
                   designateBackendbind9Image:
@@ -23929,6 +24625,12 @@ spec:
                       type: string
                     cloudkittyProcImage:
                       type: string
+                    cyborgAPIImage:
+                      type: string
+                    cyborgAgentImage:
+                      type: string
+                    cyborgConductorImage:
+                      type: string
                     designateAPIImage:
                       type: string
                     designateBackendbind9Image:
@@ -24136,6 +24838,12 @@ spec:
                   cloudkittyAPIImage:
                     type: string
                   cloudkittyProcImage:
+                    type: string
+                  cyborgAPIImage:
+                    type: string
+                  cyborgAgentImage:
+                    type: string
+                  cyborgConductorImage:
                     type: string
                   designateAPIImage:
                     type: string
@@ -24370,6 +25078,12 @@ spec:
                     cloudkittyAPIImage:
                       type: string
                     cloudkittyProcImage:
+                      type: string
+                    cyborgAPIImage:
+                      type: string
+                    cyborgAgentImage:
+                      type: string
+                    cyborgConductorImage:
                       type: string
                     designateAPIImage:
                       type: string
