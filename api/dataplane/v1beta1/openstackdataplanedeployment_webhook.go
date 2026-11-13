@@ -118,29 +118,29 @@ func (spec *OpenStackDataPlaneDeploymentSpec) ValidateUpdate(old OpenStackDataPl
 func (r *OpenStackDataPlaneDeployment) ValidateDelete() (admission.Warnings, error) {
 	openstackdataplanedeploymentlog.Info("validate delete", "name", r.Name)
 
+	var warnings admission.Warnings
+	var errors field.ErrorList
+
 	deploymentCondition := r.Status.Conditions.Get(condition.DeploymentReadyCondition)
 	isDeploymentRunning := deploymentCondition != nil &&
 		deploymentCondition.Reason == condition.RequestedReason
 
 	if isDeploymentRunning &&
 		(r.Annotations == nil || r.Annotations[ConfirmDeleteAnnotation] != "true") {
-		warnings := admission.Warnings{
-			"Deleting a running OpenStackDataPlaneDeployment may leave nodes in an inconsistent or " +
-				"unrecoverable state. To confirm deletion, set the annotation " +
-				ConfirmDeleteAnnotation + "=true and retry.",
-		}
-		return warnings, apierrors.NewForbidden(
-			schema.GroupResource{Group: "dataplane.openstack.org", Resource: "openstackdataplanedeployments"},
-			r.Name,
-			fmt.Errorf("deletion of a running deployment not allowed: set annotation %s=true to confirm", ConfirmDeleteAnnotation))
+		warnings = append(warnings, "Deleting a running OpenStackDataPlaneDeployment may leave nodes in an inconsistent or "+
+			"unrecoverable state. To confirm deletion, set the annotation "+
+			ConfirmDeleteAnnotation+"=true and retry.")
+		errors = append(errors, field.Forbidden(
+			field.NewPath("metadata", "annotations").Key(ConfirmDeleteAnnotation),
+			"deletion of a running deployment not allowed: set this annotation to \"true\" to confirm"))
 	}
 
-	errors := r.Spec.ValidateDelete()
+	errors = append(errors, r.Spec.ValidateDelete()...)
 
 	if len(errors) != 0 {
 		openstackdataplanedeploymentlog.Info("validation failed", "name", r.Name)
 
-		return nil, apierrors.NewInvalid(
+		return warnings, apierrors.NewInvalid(
 			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneDeployment"},
 			r.Name,
 			errors)
