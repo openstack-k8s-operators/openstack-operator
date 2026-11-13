@@ -745,7 +745,12 @@ func TestEnsureEndpointConfig_EndpointURL_CustomHostname(t *testing.T) {
 
 			svcOverrides := map[service.Endpoint]service.RoutedOverrideSpec{}
 			if tt.endpointURL != nil {
+				// The custom host is only a SAN for a LoadBalancer override
+				// (lib-common GetVHostServerName); the real override carries the type.
 				svcOverrides[service.EndpointPublic] = service.RoutedOverrideSpec{
+					OverrideSpec: service.OverrideSpec{
+						Spec: &service.OverrideServiceSpec{Type: k8s_corev1.ServiceTypeLoadBalancer},
+					},
 					EndpointURL: tt.endpointURL,
 				}
 			}
@@ -790,7 +795,7 @@ func TestEnsureEndpointConfig_InternalEndpointURL_CustomHostname(t *testing.T) {
 			},
 		},
 		Spec: k8s_corev1.ServiceSpec{
-			Type:  k8s_corev1.ServiceTypeClusterIP,
+			Type:  k8s_corev1.ServiceTypeLoadBalancer,
 			Ports: []k8s_corev1.ServicePort{{Name: "keystone-internal", Port: 5000}},
 		},
 	}
@@ -805,7 +810,12 @@ func TestEnsureEndpointConfig_InternalEndpointURL_CustomHostname(t *testing.T) {
 
 	svcList := &k8s_corev1.ServiceList{Items: []k8s_corev1.Service{*internalSvc}}
 	svcOverrides := map[service.Endpoint]service.RoutedOverrideSpec{
-		service.EndpointInternal: {EndpointURL: ptr.To("https://keystone-internal.example.com")},
+		service.EndpointInternal: {
+			OverrideSpec: service.OverrideSpec{
+				Spec: &service.OverrideServiceSpec{Type: k8s_corev1.ServiceTypeLoadBalancer},
+			},
+			EndpointURL: ptr.To("https://keystone-internal.example.com"),
+		},
 	}
 
 	_, _, err := EnsureEndpointConfig(

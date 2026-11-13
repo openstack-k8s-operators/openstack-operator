@@ -148,6 +148,12 @@ spec:
                   ConfigOverwrite - interface to overwrite default config files like e.g. logging.conf or policy.json.
                   But can also be used to add additional files. Those get added to the service config dir in /etc/<service> .
                 type: object
+              gpuEnabled:
+                default: false
+                description: |-
+                  Whether GPU and vGPU metrics (gpu.* and vgpu.* meters collected via
+                  NVIDIA NVML) should be polled by the ceilometer compute agent
+                type: boolean
               ipmiImage:
                 type: string
               ksmEnabled:

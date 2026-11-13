@@ -163,6 +163,12 @@ spec:
                                 to the cluster. Allows for the manifest of the created Service to be overwritten with custom configuration.
                               properties:
                                 endpointURL:
+                                  description: |-
+                                    EndpointURL overrides the URL advertised for this endpoint, e.g.
+                                    "https://api.example.com" or "https://api.example.com:8443".
+                                    The host must be a fully qualified domain name (at least two
+                                    dot-separated labels, e.g. not a bare "api") and not an IP
+                                    literal.
                                   type: string
                                 metadata:
                                   description: |-
@@ -539,6 +545,12 @@ spec:
                     description: Enabled - Whether OpenStack Ceilometer service should
                       be deployed and managed
                     type: boolean
+                  gpuEnabled:
+                    default: false
+                    description: |-
+                      Whether GPU and vGPU metrics (gpu.* and vgpu.* meters collected via
+                      NVIDIA NVML) should be polled by the ceilometer compute agent
+                    type: boolean
                   ipmiImage:
                     type: string
                   ksmEnabled:
@@ -764,6 +776,12 @@ spec:
                                 to the cluster. Allows for the manifest of the created Service to be overwritten with custom configuration.
                               properties:
                                 endpointURL:
+                                  description: |-
+                                    EndpointURL overrides the URL advertised for this endpoint, e.g.
+                                    "https://api.example.com" or "https://api.example.com:8443".
+                                    The host must be a fully qualified domain name (at least two
+                                    dot-separated labels, e.g. not a bare "api") and not an IP
+                                    literal.
                                   type: string
                                 metadata:
                                   description: |-

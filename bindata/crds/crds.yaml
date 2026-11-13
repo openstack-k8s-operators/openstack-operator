@@ -18745,6 +18745,9 @@ spec:
                           enabled:
                             default: true
                             type: boolean
+                          gpuEnabled:
+                            default: false
+                            type: boolean
                           ksmEnabled:
                             default: true
                             type: boolean
