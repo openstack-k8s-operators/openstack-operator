@@ -153,6 +153,18 @@ rules:
     - patch
     - update
 - apiGroups:
+    - networking.k8s.io
+  resources:
+    - networkpolicies
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
     - operator.openshift.io
   resources:
     - ingresscontrollers
@@ -178,6 +190,7 @@ rules:
     - roles
   verbs:
     - create
+    - delete
     - get
     - list
     - patch
