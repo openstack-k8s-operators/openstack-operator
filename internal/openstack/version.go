@@ -297,13 +297,12 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 
 	defaults.NeutronWsgi = &trueString // enable WSGI (httpd/mod_wsgi + split neutron-rpc/neutron-worker Deployments) for neutron
 
-	// NOTE: MariadbVersion is deliberately left unset for now, which leaves
-	// Galera's TargetVersion empty (see reconcileGalera()).  The mariadb image
-	// this build ships is still MariaDB 10.5, so declaring "10.11" here would
-	// stop every existing cluster once and then leave it permanently reporting
-	// MariaDBServerUpgradeReady=False/UpgradeVersionMismatch.  Set this to
-	// "10.11" in the same change that moves
-	// RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT to a 10.11 image.
+	// MariadbVersion must match the MariaDB major.minor of the image in
+	// RELATED_IMAGE_MARIADB_IMAGE_URL_DEFAULT; it becomes Galera's
+	// TargetVersion (see reconcileGalera()).  The default mariadb image is
+	// RHEL 10 based and ships MariaDB 10.11.  When the default image moves to
+	// a different MariaDB major.minor, update this value in the same change.
+	defaults.MariadbVersion = ptr.To("10.11")
 
 	defaults.IronicInspectInterface = ptr.To("agent")
 

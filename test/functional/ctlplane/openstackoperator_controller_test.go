@@ -3526,11 +3526,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 	//
 	// MariaDB major version upgrade (ServiceDefaults.MariadbVersion -> Galera TargetVersion)
 	//
-	// ServiceDefaults.MariadbVersion is not defaulted yet: the mariadb image
-	// currently shipped is still 10.5, so nothing may be written to Galera's
-	// TargetVersion. The mariadb-operator folds TargetVersion into the
-	// ClusterProperties hash, so writing it where it was previously absent would
-	// trip StopRequired and stop a healthy cluster that is not being upgraded.
+	// ServiceDefaults.MariadbVersion is defaulted to the MariaDB major.minor of
+	// the default mariadb image, and is propagated to Galera's TargetVersion.
 	When("A OpenStackControlPlane is created at the current OpenStack version", func() {
 		BeforeEach(func() {
 			spec := GetDefaultOpenStackControlPlaneSpec()
@@ -3542,21 +3539,23 @@ var _ = Describe("OpenStackOperator controller", func() {
 			)
 		})
 
-		It("leaves the Galera TargetVersion empty while MariadbVersion is undefaulted", func() {
+		It("sets the Galera TargetVersion to the default MariadbVersion", func() {
 			Eventually(func(g Gomega) {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
-				g.Expect(version.Status.ServiceDefaults.MariadbVersion).Should(BeNil())
+				g.Expect(version.Status.ServiceDefaults.MariadbVersion).ShouldNot(BeNil())
+				g.Expect(*version.Status.ServiceDefaults.MariadbVersion).To(Equal("10.11"))
 
-				g.Expect(mariadb.GetGalera(names.DBName).Spec.TargetVersion).To(Equal(""))
-				g.Expect(mariadb.GetGalera(names.DBCell1Name).Spec.TargetVersion).To(Equal(""))
+				g.Expect(mariadb.GetGalera(names.DBName).Spec.TargetVersion).To(Equal("10.11"))
+				g.Expect(mariadb.GetGalera(names.DBCell1Name).Spec.TargetVersion).To(Equal("10.11"))
 			}, timeout, interval).Should(Succeed())
 		})
 	})
 
-	// Guards the propagation itself, so that turning the default on later is a
-	// one-line change in InitializeOpenStackVersionServiceDefaults.
+	// Guards the propagation itself: a tagged version whose ServiceDefaults
+	// declare a MariadbVersion different from the current default must have
+	// that value propagated to the Galera CRs.
 	When("A OpenStackControlPlane is created at a version declaring a MariadbVersion", func() {
-		const mariadbVersion = "10.11"
+		const mariadbVersion = "11.4"
 		const taggedVersion = "0.0.0"
 
 		BeforeEach(func() {
@@ -3572,9 +3571,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 				k8s_corev1.ConditionTrue,
 			)
 
-			// record a version whose ServiceDefaults declare a MariadbVersion, as
-			// InitializeOpenStackVersionServiceDefaults will once a 10.11 mariadb
-			// image ships
+			// record a tagged version whose ServiceDefaults declare a
+			// MariadbVersion distinct from the current default
 			Eventually(func(g Gomega) {
 				version := GetOpenStackVersion(names.OpenStackVersionName)
 				version.Status.ContainerImageVersionDefaults[taggedVersion] =
