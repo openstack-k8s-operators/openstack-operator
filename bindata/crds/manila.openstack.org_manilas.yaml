@@ -1024,7 +1024,7 @@ spec:
                                 EndpointURL overrides the URL advertised for this endpoint, e.g.
                                 "https://api.example.com" or "https://api.example.com:8443".
                                 The host must be a fully qualified domain name (at least two
-                                dot-separated labels, e.g. not a bare "placement") and not an IP
+                                dot-separated labels, e.g. not a bare "api") and not an IP
                                 literal.
                               type: string
                             metadata:
