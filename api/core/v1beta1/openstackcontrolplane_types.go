@@ -21,6 +21,7 @@ import (
 
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
@@ -252,6 +253,11 @@ type OpenStackControlPlaneSpec struct {
 	// must be enabled for a service to use ApplicationCredentials.
 	// If omitted, defaults to enabled=false with standard expiration/grace periods.
 	ApplicationCredential ApplicationCredentialSection `json:"applicationCredential,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Cyborg - Parameters related to the Cyborg service
+	Cyborg CyborgSection `json:"cyborg,omitempty"`
 }
 
 // TLSSection defines the desired state of TLS configuration
@@ -986,6 +992,32 @@ type WatcherSection struct {
 	ApplicationCredential *ServiceAppCredSection `json:"applicationCredential"`
 }
 
+// CyborgSection defines the desired state of Cyborg service
+type CyborgSection struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Enabled - Whether Cyborg service should be deployed and managed
+	Enabled bool `json:"enabled"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Template - Overrides to use when creating the Cyborg service
+	Template *cyborgv1.CyborgSpecCore `json:"template,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// APIOverride, provides the ability to override the generated manifest of several child resources.
+	APIOverride Override `json:"apiOverride,omitempty"`
+
+	// ApplicationCredential allows service-specific overrides of the global AC configuration.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:validation:Optional
+	// +nullable
+	// +kubebuilder:default={enabled:false}
+	ApplicationCredential *ServiceAppCredSection `json:"applicationCredential"`
+}
+
 // +kubebuilder:validation:XValidation:rule="self.gracePeriodDays < self.expirationDays",message="gracePeriodDays must be smaller than expirationDays"
 // ApplicationCredentialSection defines the desired configuration for ApplicationCredentials
 type ApplicationCredentialSection struct {
@@ -1242,6 +1274,9 @@ func (instance *OpenStackControlPlane) InitConditions() {
 	}
 	if instance.Spec.Watcher.Enabled {
 		cl.Set(condition.UnknownCondition(OpenStackControlPlaneWatcherReadyCondition, condition.InitReason, OpenStackControlPlaneWatcherReadyInitMessage))
+	}
+	if instance.Spec.Cyborg.Enabled {
+		cl.Set(condition.UnknownCondition(OpenStackControlPlaneCyborgReadyCondition, condition.InitReason, OpenStackControlPlaneCyborgReadyInitMessage))
 	}
 
 	// Init Topology condition if there's a reference

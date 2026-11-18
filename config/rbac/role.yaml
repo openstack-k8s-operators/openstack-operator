@@ -359,6 +359,18 @@ rules:
   - patch
   - update
 - apiGroups:
+  - cyborg.openstack.org
+  resources:
+  - cyborgs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - dataplane.openstack.org
   resources:
   - openstackdataplanedeployments

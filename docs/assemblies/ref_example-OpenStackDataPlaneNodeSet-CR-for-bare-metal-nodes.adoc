@@ -11,6 +11,13 @@ metadata:
   name: openstack-edpm-ipam
   namespace: openstack
 spec:
+  ansibleEEResources:
+    limits:
+      cpu: "2"
+      memory: 2Gi
+    requests:
+      cpu: 1500m
+      memory: 512Mi
   baremetalSetTemplate: #<1>
     bmhLabelSelector:
       app: openstack

@@ -218,6 +218,9 @@ type ContainerTemplate struct {
 	CinderSchedulerImage          *string `json:"cinderSchedulerImage,omitempty"`
 	CloudKittyAPIImage            *string `json:"cloudkittyAPIImage,omitempty"`
 	CloudKittyProcImage           *string `json:"cloudkittyProcImage,omitempty"`
+	CyborgAPIImage                *string `json:"cyborgAPIImage,omitempty"`
+	CyborgAgentImage              *string `json:"cyborgAgentImage,omitempty"`
+	CyborgConductorImage          *string `json:"cyborgConductorImage,omitempty"`
 	DesignateAPIImage             *string `json:"designateAPIImage,omitempty"`
 	DesignateBackendbind9Image    *string `json:"designateBackendbind9Image,omitempty"`
 	DesignateCentralImage         *string `json:"designateCentralImage,omitempty"`
