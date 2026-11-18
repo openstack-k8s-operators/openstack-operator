@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -122,6 +125,44 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 	if instance.Spec.TLS.PodLevel.Enabled {
 		instance.Spec.Ironic.Template.IronicAPI.TLS = ironic.Spec.IronicAPI.TLS
 		instance.Spec.Ironic.Template.IronicInspector.TLS = ironic.Spec.IronicInspector.TLS
+		instance.Spec.Ironic.Template.IronicNeutronAgent.TLS = ironic.Spec.IronicNeutronAgent.TLS
+
+		serviceName := "ironic"
+		clusterDomain := clusterdns.GetDNSClusterDomain()
+		// create ovndb client certificate for ironic-neutron-agent
+		certRequest := certmanager.CertificateRequest{
+			IssuerName: instance.GetOvnIssuer(),
+			CertName:   fmt.Sprintf("%s-ovndbs", serviceName),
+			Hostnames: []string{
+				fmt.Sprintf("%s.%s.svc", serviceName, instance.Namespace),
+				fmt.Sprintf("%s.%s.svc.%s", serviceName, instance.Namespace, clusterDomain),
+			},
+			Ips: nil,
+			Usages: []certmgrv1.KeyUsage{
+				certmgrv1.UsageKeyEncipherment,
+				certmgrv1.UsageDigitalSignature,
+				certmgrv1.UsageClientAuth,
+			},
+			Labels: map[string]string{ServiceCertSelector: ""},
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.Duration != nil {
+			certRequest.Duration = &instance.Spec.TLS.PodLevel.Ovn.Cert.Duration.Duration
+		}
+		if instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore != nil {
+			certRequest.RenewBefore = &instance.Spec.TLS.PodLevel.Ovn.Cert.RenewBefore.Duration
+		}
+		certSecret, ctrlResult, err := certmanager.EnsureCert(
+			ctx,
+			helper,
+			certRequest,
+			nil)
+		if err != nil {
+			return ctrl.Result{}, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrl.Result{}, nil
+		}
+
+		instance.Spec.Ironic.Template.IronicNeutronAgent.TLS.Ovn.SecretName = &certSecret.Name
 	}
 	instance.Spec.Ironic.Template.IronicAPI.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	instance.Spec.Ironic.Template.IronicInspector.TLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
