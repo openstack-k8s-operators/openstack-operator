@@ -3523,6 +3523,77 @@ var _ = Describe("OpenStackOperator controller", func() {
 		// Template-level takes precedence over top-level.
 	})
 
+	// The minor update waits on the control plane's MariaDBReady condition and
+	// MariadbImage status, which must reflect all of the Galeras together.
+	When("A OpenStackControlPlane has more than one Galera", func() {
+		setGaleraStatus := func(name types.NamespacedName, generationObserved bool, ready bool) {
+			Eventually(func(g Gomega) {
+				db := &mariadbv1.Galera{}
+				g.Expect(th.K8sClient.Get(th.Ctx, name, db)).Should(Succeed())
+				db.Status.ObservedGeneration = db.Generation
+				if !generationObserved {
+					db.Status.ObservedGeneration = db.Generation - 1
+				}
+				db.Status.Conditions = condition.Conditions{}
+				if ready {
+					db.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+					db.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
+				} else {
+					db.Status.Conditions.Set(condition.FalseCondition(
+						condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, "upgrading"))
+					db.Status.Conditions.Set(condition.FalseCondition(
+						condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, "upgrading"))
+				}
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, db)).To(Succeed())
+			}, timeout, interval).Should(Succeed())
+		}
+
+		expectMariaDBNotReported := func() {
+			Consistently(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				g.Expect(OSCtlplane.Status.Conditions.IsTrue(
+					corev1.OpenStackControlPlaneMariaDBReadyCondition)).To(BeFalse())
+				g.Expect(OSCtlplane.Status.ContainerImages.MariadbImage).To(BeNil())
+			}, "5s", interval).Should(Succeed())
+		}
+
+		BeforeEach(func() {
+			spec := GetDefaultOpenStackControlPlaneSpec()
+			spec["tls"] = GetTLSPublicSpec()
+			DeferCleanup(
+				th.DeleteInstance,
+				CreateOpenStackControlPlane(names.OpenStackControlplaneName, spec),
+			)
+			Eventually(func(g Gomega) {
+				db := &mariadbv1.Galera{}
+				g.Expect(th.K8sClient.Get(th.Ctx, names.DBName, db)).Should(Succeed())
+				g.Expect(th.K8sClient.Get(th.Ctx, names.DBCell1Name, db)).Should(Succeed())
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("does not report MariaDB ready until all of them are ready", func() {
+			setGaleraStatus(names.DBCell1Name, true, true)
+			setGaleraStatus(names.DBName, true, false)
+			expectMariaDBNotReported()
+
+			setGaleraStatus(names.DBName, true, true)
+			Eventually(func(g Gomega) {
+				OSCtlplane := GetOpenStackControlPlane(names.OpenStackControlplaneName)
+				version := GetOpenStackVersion(names.OpenStackVersionName)
+				g.Expect(OSCtlplane.Status.Conditions.IsTrue(
+					corev1.OpenStackControlPlaneMariaDBReadyCondition)).To(BeTrue())
+				g.Expect(OSCtlplane.Status.ContainerImages.MariadbImage).To(
+					Equal(version.Status.ContainerImages.MariadbImage))
+			}, timeout, interval).Should(Succeed())
+		})
+
+		It("does not report MariaDB ready from a Galera with stale status", func() {
+			setGaleraStatus(names.DBCell1Name, true, true)
+			setGaleraStatus(names.DBName, false, true)
+			expectMariaDBNotReported()
+		})
+	})
+
 	//
 	// MariaDB major version upgrade (ServiceDefaults.MariadbVersion -> Galera TargetVersion)
 	//

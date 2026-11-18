@@ -172,8 +172,10 @@ func ReconcileGaleras(
 
 		// Add the conditions to the list of conditions to consider later for mirroring.
 		// It doesn't matter if the conditions are already in the list, they will be
-		// deduplicated later during the MirrorSubResourceCondition call.
-		if galera != nil && galera.Status.Conditions != nil {
+		// deduplicated later during the MirrorSubResourceCondition call.  Conditions
+		// of a Galera that is ready are left out, as a True Ready condition from any
+		// one Galera would otherwise be mirrored as the state of all of them.
+		if status != galeraReady && galera != nil && galera.Status.Conditions != nil {
 			conditions = append(conditions, galera.Status.Conditions...)
 		}
 
@@ -211,7 +213,13 @@ func ReconcileGaleras(
 		// the "oc get oscontrolplane -n <namespace>" output.
 		if len(conditions) > 0 {
 			MirrorSubResourceCondition(conditions, corev1beta1.OpenStackControlPlaneMariaDBReadyCondition, instance, reflect.TypeOf(mariadbv1.Galera{}).Name())
-		} else {
+		}
+		// At least one Galera is in progress, so MariaDBReady must not be True.  A
+		// non-True result mirrored above is kept, as it has the Galera's own reason
+		// and message.  Otherwise, either no Galera has conditions yet, or one that
+		// is in progress still has a True Ready condition from before its current
+		// generation was observed, so report the generic in-progress state instead.
+		if len(conditions) == 0 || instance.Status.Conditions.IsTrue(corev1beta1.OpenStackControlPlaneMariaDBReadyCondition) {
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
 				condition.RequestedReason,
@@ -220,6 +228,11 @@ func ReconcileGaleras(
 		}
 	} else {
 		log.Info("Galera ready condition is true")
+		// The image is recorded only once every Galera is ready, as the minor
+		// update uses it to determine that MariaDB has been updated.
+		if len(templateNames) > 0 {
+			instance.Status.ContainerImages.MariadbImage = version.Status.ContainerImages.MariadbImage
+		}
 		instance.Status.Conditions.MarkTrue(
 			corev1beta1.OpenStackControlPlaneMariaDBReadyCondition,
 			corev1beta1.OpenStackControlPlaneMariaDBReadyMessage,
@@ -310,7 +323,6 @@ func reconcileGalera(
 	}
 
 	if galera.Status.ObservedGeneration == galera.Generation && galera.IsReady() {
-		instance.Status.ContainerImages.MariadbImage = version.Status.ContainerImages.MariadbImage
 		return galeraReady, galera, nil
 	}
 
