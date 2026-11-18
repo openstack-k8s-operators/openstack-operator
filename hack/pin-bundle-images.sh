@@ -17,16 +17,22 @@ if [ -n "$DOCKERFILE" ]; then
 fi
 
 #loop over each openstack-k8s-operators go.mod entry
-MOD_PATHS=$(go list -mod=readonly -m -json all | jq -r '. | select(.Path | contains("openstack")) | select(.Path | contains("openstack-operator") | not) | select(.Path | contains("lib-common") | not) | .Replace // . |.Path')
+MOD_PATHS=$(go list -mod=readonly -m -json all | jq -r '. | select(.Main != true) | select(.Path | contains("openstack")) | select(.Path | contains("openstack-operator") | not) | select(.Path | contains("lib-common") | not) | .Path')
 for MOD_PATH in ${MOD_PATHS}; do
     if [[ "$MOD_PATH" == "./apis" ]]; then
         continue
     fi
-    MOD_VERSION=$(go list -mod=readonly -m -json all | jq -r ". | select(.Path | contains(\"openstack\")) | .Replace // . | select( .Path == \"$MOD_PATH\") | .Version")
+    MOD_JSON=$(go list -mod=readonly -m -json "$MOD_PATH")
+    MOD_VERSION=$(echo "$MOD_JSON" | jq -r '.Replace.Version // .Version')
+    REPL_PATH=$(echo "$MOD_JSON" | jq -r '.Replace.Path // empty')
+    if [[ "$REPL_PATH" == /* || "$REPL_PATH" == ./* || "$REPL_PATH" == ../* ]]; then
+        continue
+    fi
 
     BASE=$(echo $MOD_PATH | sed -e 's|github.com/.*/\(.*\)-operator/.*|\1|')
 
-    GIT_REPO=${MOD_PATH%"/apis"}
+    EFFECTIVE_PATH=${REPL_PATH:-$MOD_PATH}
+    GIT_REPO=${EFFECTIVE_PATH%"/apis"}
     GIT_REPO=${GIT_REPO%"/api"}
 
     # Check if there is a custom tag for IMAGEBASE operator
@@ -39,7 +45,8 @@ for MOD_PATH in ${MOD_PATHS}; do
         fi
     fi
 
-    GITHUB_USER=$(echo $MOD_PATH | sed -e 's|github.com/\(.*\)/.*-operator/.*$|\1|')
+    GITHUB_USER=${EFFECTIVE_PATH#github.com/}
+    GITHUB_USER=${GITHUB_USER%%/*}
     CURL_REGISTRY="quay.io"
     REPO_CURL_URL="https://${CURL_REGISTRY}/api/v1/repository/openstack-k8s-operators"
     REPO_URL="${CURL_REGISTRY}/openstack-k8s-operators"
