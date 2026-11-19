@@ -172,6 +172,14 @@ rules:
     - get
     - list
 - apiGroups:
+    - ovn.openstack.org
+  resources:
+    - ovndbclusters
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
     - rabbitmq.openstack.org
   resources:
     - transporturls
