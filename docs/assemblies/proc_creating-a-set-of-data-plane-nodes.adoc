@@ -160,6 +160,11 @@ $ oc create secret generic subscription-manager \
 +
 * Replace `<subscription_manager_username>` with the applicable user name.
 * Replace `<subscription_manager_password>` with the applicable password.
+* When the nodes register to a Red Hat Satellite server whose certificate is
+not trusted yet, also set `rhc_repo_ca_cert_fetch_from_satellite: true` (or
+`rhc_repo_ca_cert_src` / `rhc_repo_ca_cert_content`) in the NodeSet
+`ansibleVars`. The Satellite CA is then installed into the host trust store as
+part of registration.
 
 +
 ----

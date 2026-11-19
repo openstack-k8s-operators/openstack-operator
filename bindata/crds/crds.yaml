@@ -23026,8 +23026,8 @@ spec:
               services:
                 default:
                 - redhat
-                - download-cache
                 - bootstrap
+                - download-cache
                 - configure-network
                 - validate-network
                 - install-os
