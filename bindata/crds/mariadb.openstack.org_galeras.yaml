@@ -484,6 +484,36 @@ spec:
                 default: false
                 description: Does the galera cluster requires to be stopped globally
                 type: boolean
+              unavailablePods:
+                additionalProperties:
+                  description: |-
+                    UnavailablePodStatus describes why a specific pod is unavailable or excluded
+                    from operator decisions. It is a generic, reusable structure that is not tied
+                    to any single remediation mechanism.
+                  properties:
+                    node:
+                      description: |-
+                        Node is the Kubernetes node name relevant to the unavailability condition
+                        (e.g. the node a stuck PVC is bound to). Empty when not applicable.
+                      type: string
+                    reason:
+                      description: Reason describes why this pod is considered unavailable.
+                      type: string
+                    remediation:
+                      default: "false"
+                      description: |-
+                        Remediation indicates that the operator has decided to actively remediate
+                        this pod. At most one pod in UnavailablePods has Remediation set to "true"
+                        at any time; others wait until the active remediation completes.
+                      enum:
+                      - "true"
+                      - "false"
+                      type: string
+                  type: object
+                description: |-
+                  UnavailablePods tracks pods that are unavailable or excluded from operator
+                  decisions, keyed by pod name. Nil when all pods are healthy and managed.
+                type: object
             required:
             - bootstrapped
             - stopRequired
