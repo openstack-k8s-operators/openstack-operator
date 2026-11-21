@@ -35,6 +35,7 @@ rules:
   - imagestreams/layers
   - imagestreamtags
   - imagetags
+  - namespaces
   - nodes
   - persistentvolumeclaims
   - persistentvolumes
@@ -42,16 +43,6 @@ rules:
   verbs:
   - get
   - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - create
-  - get
-  - list
-  - update
   - watch
 - apiGroups:
   - ""

@@ -178,6 +178,7 @@ bindata: kustomize yq ## Call sync bindata script
 	mkdir -p bindata/crds bindata/operator
 	$(KUSTOMIZE) build config/crd > bindata/crds/crds.yaml
 	$(KUSTOMIZE) build config/default > bindata/operator/operator.yaml
+	$(LOCALBIN)/yq -i 'select(.kind != "Namespace")' bindata/operator/operator.yaml
 	sed -i bindata/operator/operator.yaml -e "s|replicas:.*|replicas: {{ .OpenStackOperator.Deployment.Replicas }}|"
 	sed -i bindata/operator/operator.yaml -e "/envCustom/c\\{{- range .OpenStackOperator.Deployment.Manager.Env }}\n        - name: '{{ .Name }}'\n          value: '{{ .Value }}'\n{{- end }}"
 	sed -i bindata/operator/operator.yaml -e "/customLimits/c\\            cpu: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.CPU }}\n            memory: {{ .OpenStackOperator.Deployment.Manager.Resources.Limits.Memory }}"
