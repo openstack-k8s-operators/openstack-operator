@@ -279,7 +279,7 @@ func reconcileGalera(
 		return galeraReady, galera, nil
 	}
 
-	if spec.NodeSelector == nil {
+	if spec.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		spec.NodeSelector = &instance.Spec.NodeSelector
 	}
 
