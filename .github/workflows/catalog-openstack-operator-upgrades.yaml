@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7
         with:
           go-version: ${{ inputs.go_version }}
           cache: false
@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "latesttag=${{ github.ref_name }}-latest" >> $GITHUB_ENV
       - name: Install opm
-        uses: redhat-actions/openshift-tools-installer@37eb3cfb20ac2df6f0511ffa71cd917e4d49cabf # v3
+        uses: redhat-actions/openshift-tools-installer@bf1d8fd8fa963cff1d33688473e51f948748991e # v3
         with:
           source: github
           opm: 'latest'
