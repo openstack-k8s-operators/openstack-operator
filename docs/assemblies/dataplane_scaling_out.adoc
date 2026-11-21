@@ -237,3 +237,13 @@ of the remaining `OpenStackDataPlaneNodeSets`. To remove the ssh host keys of
 the removed nodes of this `OpenStackDataPlaneNodeSet` from other nodes a new
 `OpenStackDataPlaneDeployment` needs to be created that points to all the
 remaining `OpenStackDataPlaneNodeSets`.
+
+NOTE: Deletion of an `OpenStackDataPlaneNodeSet` can be protected by setting
+the `dataplane.openstack.org/protect-deletion` annotation on it. While the
+annotation is present, whatever its value, deletion of the
+`OpenStackDataPlaneNodeSet` is denied. To delete the
+`OpenStackDataPlaneNodeSet` the annotation needs to be removed first:
+
+----
+$ oc annotate openstackdataplanenodeset <nodeset-name> dataplane.openstack.org/protect-deletion-
+----

@@ -268,6 +268,12 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 
 OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API OpenStackDataPlaneNodeSet name must be a valid RFC1123 as it is used in labels
 
+Deletion of an OpenStackDataPlaneNodeSet can be protected by setting the
+`dataplane.openstack.org/protect-deletion` annotation on it. While the
+annotation is present, whatever its value, deletion of the
+OpenStackDataPlaneNodeSet is denied. Removing the annotation releases the
+OpenStackDataPlaneNodeSet again.
+
 |===
 | Field | Description | Scheme | Required
 
