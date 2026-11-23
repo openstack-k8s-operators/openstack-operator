@@ -122,6 +122,7 @@ func SetupEnv() {
 // +kubebuilder:rbac:groups="monitoring.coreos.com",resources=servicemonitors,verbs=list;get;watch;update;create;delete
 // +kubebuilder:rbac:groups=operators.coreos.com,resources=clusterserviceversions;subscriptions;installplans;operators,verbs=get;list;delete;
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;create;delete;update
+// +kubebuilder:rbac:groups=rabbitmq.com,resources=rabbitmqclusters,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
