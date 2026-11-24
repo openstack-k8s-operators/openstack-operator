@@ -143,3 +143,6 @@ replace k8s.io/component-base => k8s.io/component-base v0.33.13 //allow-merging
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20250627150254-e9823e99808e //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.3.0 //allow-merging
+
+// TODO: remove once telemetry-operator Aetos PR merges and the dependency is bumped
+replace github.com/openstack-k8s-operators/telemetry-operator/api => github.com/vyzigold/telemetry-operator/api v0.0.0-20261112220459-7d9c3b5426a0
