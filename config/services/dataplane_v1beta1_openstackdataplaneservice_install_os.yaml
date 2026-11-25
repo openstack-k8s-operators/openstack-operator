@@ -7,3 +7,4 @@ spec:
   edpmServiceType: install-os
   dependsOn:
     - bootstrap
+    - download-cache

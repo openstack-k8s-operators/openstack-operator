@@ -328,8 +328,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Expect(dataplaneNodeSetInstance.Spec.Nodes).Should(Equal(nodes))
 				services := []string{
 					"redhat",
-					"download-cache",
 					"bootstrap",
+					"download-cache",
 					"configure-network",
 					"validate-network",
 					"install-os",
@@ -378,8 +378,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
 				nodeSetSpec["services"] = []string{
 					"redhat",
-					"download-cache",
 					"bootstrap",
+					"download-cache",
 					"configure-network",
 					"validate-network",
 					"install-os",
@@ -433,8 +433,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Expect(dataplaneNodeSetInstance.Spec.Nodes).Should(Equal(nodes))
 				services := []string{
 					"redhat",
-					"download-cache",
 					"bootstrap",
+					"download-cache",
 					"configure-network",
 					"validate-network",
 					"install-os",
@@ -860,8 +860,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Expect(dataplaneNodeSetInstance.Spec.Nodes).Should(Equal(nodes))
 				services := []string{
 					"redhat",
-					"download-cache",
 					"bootstrap",
+					"download-cache",
 					"configure-network",
 					"validate-network",
 					"install-os",
