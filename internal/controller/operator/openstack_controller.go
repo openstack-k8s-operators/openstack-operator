@@ -1055,6 +1055,24 @@ func (r *OpenStackReconciler) postCleanupObsoleteResources(ctx context.Context, 
 		Resource: "operators",
 	}
 
+	// CRDs are only applied once per operator image, so strip the OLM references
+	// from CRDs of legacy service operators on every reconcile. Otherwise OLM keeps
+	// the Operator objects (and re-adds them) because the CRDs still reference them.
+	crdList := &uns.UnstructuredList{}
+	crdList.SetGroupVersionKind(schema.GroupVersionKind{Group: "apiextensions.k8s.io", Version: "v1", Kind: "CustomResourceDefinition"})
+	if err := r.List(ctx, crdList, client.HasLabels{"openstack.openstack.org/crd"}); err != nil {
+		return err
+	}
+	for i := range crdList.Items {
+		crd := &crdList.Items[i]
+		if bindata.StripOLMReferences(crd) {
+			Log.Info("Removing OLM references from CRD", "name", crd.GetName())
+			if err := r.Update(ctx, crd); err != nil {
+				return err
+			}
+		}
+	}
+
 	// finally we can remove operator objects as all the refs have been cleaned up:
 	// 1) CSVs
 	// 2) Subscriptions
