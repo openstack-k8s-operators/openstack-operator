@@ -258,3 +258,26 @@ func TestMergeWebhookValidatingConfig(t *testing.T) {
 		t.Errorf("webhook[1]: expected /validate-bar, got %s", path)
 	}
 }
+
+func TestMergeMetadataStripsOLMReferences(t *testing.T) {
+	current := &uns.Unstructured{Object: map[string]interface{}{"metadata": map[string]interface{}{
+		"labels": map[string]interface{}{
+			"olm.managed": "true",
+			"operators.coreos.com/placement-operator.openstack-operators": "",
+			"keep": "me",
+		},
+		"annotations": map[string]interface{}{
+			"operatorframework.io/installed-alongside-b9aabd9be593bfe3": "openstack-operators/placement-operator.v1.0.6",
+			"keep": "me",
+		},
+	}}}
+	updated := &uns.Unstructured{Object: map[string]interface{}{"metadata": map[string]interface{}{}}}
+	mergeLabels(current, updated)
+	mergeAnnotations(current, updated)
+	if len(updated.GetLabels()) != 1 || updated.GetLabels()["keep"] != "me" {
+		t.Fatalf("unexpected labels: %v", updated.GetLabels())
+	}
+	if len(updated.GetAnnotations()) != 1 || updated.GetAnnotations()["keep"] != "me" {
+		t.Fatalf("unexpected annotations: %v", updated.GetAnnotations())
+	}
+}
