@@ -1,6 +1,8 @@
 package bindata
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -219,6 +221,10 @@ func mergeAnnotations(current, updated *uns.Unstructured) {
 		curAnnotations[k] = v
 	}
 
+	// drop OLM "installed-alongside" back references from legacy service operator
+	// deployments, otherwise OLM keeps the stale Operator objects alive
+	stripOLMAnnotations(curAnnotations)
+
 	updated.SetAnnotations(curAnnotations)
 }
 
@@ -250,9 +256,43 @@ func mergeLabels(current, updated *uns.Unstructured) {
 
 	// remove the olm.managed label this allows cleanup of the operator objects
 	// from legacy service operator deployments prior to FR2
-	delete(curLabels, "olm.managed")
+	stripOLMLabels(curLabels)
 
 	updated.SetLabels(curLabels)
+}
+
+// stripOLMLabels removes olm.managed and the operators.coreos.com/<name>.<ns> labels
+// OLM uses to build its Operator objects (oc get operator).
+func stripOLMLabels(labels map[string]string) {
+	delete(labels, "olm.managed")
+	for k := range labels {
+		if strings.HasPrefix(k, "operators.coreos.com/") {
+			delete(labels, k)
+		}
+	}
+}
+
+func stripOLMAnnotations(annotations map[string]string) {
+	for k := range annotations {
+		if strings.HasPrefix(k, "operatorframework.io/installed-alongside-") {
+			delete(annotations, k)
+		}
+	}
+}
+
+// StripOLMReferences removes legacy OLM labels/annotations from obj in place
+// and reports whether anything changed.
+func StripOLMReferences(obj *uns.Unstructured) bool {
+	labels, annotations := obj.GetLabels(), obj.GetAnnotations()
+	nl, na := len(labels), len(annotations)
+	stripOLMLabels(labels)
+	stripOLMAnnotations(annotations)
+	if len(labels) == nl && len(annotations) == na {
+		return false
+	}
+	obj.SetLabels(labels)
+	obj.SetAnnotations(annotations)
+	return true
 }
 
 // IsObjectSupported rejects objects with configurations we don't support.
