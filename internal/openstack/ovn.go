@@ -208,7 +208,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 			dbcluster.MetricsTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 		}
 
-		if dbcluster.NodeSelector == nil {
+		if dbcluster.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 			dbcluster.NodeSelector = &instance.Spec.NodeSelector
 		}
 
@@ -349,7 +349,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 		ovnNorthdSpec.MetricsTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	}
 
-	if ovnNorthdSpec.NodeSelector == nil {
+	if ovnNorthdSpec.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		ovnNorthdSpec.NodeSelector = &instance.Spec.NodeSelector
 	}
 
@@ -493,7 +493,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 		ovnControllerSpec.MetricsTLS.CaBundleSecretName = instance.Status.TLS.CaBundleSecretName
 	}
 
-	if ovnControllerSpec.NodeSelector == nil {
+	if ovnControllerSpec.NodeSelector == nil && len(instance.Spec.NodeSelector) > 0 {
 		ovnControllerSpec.NodeSelector = &instance.Spec.NodeSelector
 	}
 
