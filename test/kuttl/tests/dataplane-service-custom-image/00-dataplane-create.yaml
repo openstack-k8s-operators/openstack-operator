@@ -1,3 +1,14 @@
+apiVersion: v1
+data:
+  internal-ca-bundle.pem: ""
+  tls-ca-bundle.pem: ""
+kind: Secret
+metadata:
+  labels:
+    combined-ca-bundle: ""
+  name: combined-ca-bundle
+type: Opaque
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
