@@ -20408,6 +20408,14 @@ spec:
                             type: object
                         type: object
                     type: object
+                  profile:
+                    default: None
+                    enum:
+                    - None
+                    - Inherit
+                    - Intermediate
+                    - Modern
+                    type: string
                 type: object
               topologyRef:
                 properties:
@@ -21211,6 +21219,44 @@ spec:
                       - name
                       type: object
                     type: array
+                  profile:
+                    properties:
+                      minTLSVersion:
+                        allOf:
+                        - enum:
+                          - VersionTLS10
+                          - VersionTLS11
+                          - VersionTLS12
+                          - VersionTLS13
+                        - enum:
+                          - VersionTLS10
+                          - VersionTLS11
+                          - VersionTLS12
+                          - VersionTLS13
+                        type: string
+                      source:
+                        enum:
+                        - Cluster
+                        - Spec
+                        type: string
+                      type:
+                        allOf:
+                        - enum:
+                          - Old
+                          - Intermediate
+                          - Modern
+                          - Custom
+                        - enum:
+                          - Old
+                          - Intermediate
+                          - Modern
+                          - Custom
+                        type: string
+                    required:
+                    - minTLSVersion
+                    - source
+                    - type
+                    type: object
                 type: object
             type: object
         type: object

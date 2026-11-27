@@ -19,9 +19,10 @@ package v1beta1
 import (
 	"fmt"
 
+	configv1 "github.com/openshift/api/config/v1"
+
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	cinderv1 "github.com/openstack-k8s-operators/cinder-operator/api/v1beta1"
-	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
@@ -41,11 +42,12 @@ import (
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
+	cyborgv1 "github.com/openstack-k8s-operators/nova-operator/api/cyborg/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
+	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
-	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	watcherv1 "github.com/openstack-k8s-operators/watcher-operator/api/v1beta1"
@@ -274,10 +276,51 @@ type TLSSection struct {
 
 	// +kubebuilder:validation:optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// Profile - The TLS security profile the OpenStack services are
+	// configured with. "None" (the default) publishes nothing, so the services
+	// keep lib-common's built-in defaults. "Inherit" follows whatever the
+	// cluster declares on the OpenShift APIServer CR. "Intermediate" and
+	// "Modern" pin that profile regardless of what the cluster declares.
+	// +kubebuilder:default=None
+	Profile TLSProfileType `json:"profile,omitempty"`
+
+	// +kubebuilder:validation:optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Secret containing any additional CA certificates, which should be added to deployment pods.
 	// If services get configured to use a custom cert/key, add the CA cert to validate those in this
 	// CA secret.
 	tls.Ca `json:",inline"`
+}
+
+// TLSProfileType - the TLS security profile the OpenStack services are
+// configured with, either sourced from the cluster or named here directly.
+// The named values are spelled out rather than taken from configv1 so this
+// module keeps openshift/api indirect; the functional tests pin the spelling.
+// "Old" is not offered, but stays reachable through "Inherit" when the
+// cluster itself declares it.
+// +kubebuilder:validation:Enum=None;Inherit;Intermediate;Modern
+type TLSProfileType string
+
+const (
+	// TLSProfileNone - publish nothing; the services keep lib-common's defaults.
+	TLSProfileNone TLSProfileType = "None"
+
+	// TLSProfileInherit - follow the profile the cluster declares on the APIServer CR.
+	TLSProfileInherit TLSProfileType = "Inherit"
+
+	// TLSProfileIntermediate - pin the OpenShift Intermediate profile.
+	TLSProfileIntermediate TLSProfileType = "Intermediate"
+
+	// TLSProfileModern - pin the OpenShift Modern profile.
+	TLSProfileModern TLSProfileType = "Modern"
+)
+
+// IsEnabled - whether a profile is requested at all. InitConditions and
+// ReconcileTLSProfile have to agree on this, or an early-returning reconcile
+// leaves an Unknown condition behind for a feature that is off. An unset
+// value counts as None.
+func (p TLSProfileType) IsEnabled() bool {
+	return p != TLSProfileNone && p != ""
 }
 
 // TLSIngressConfig defines the desired state of the TLS configuration for the ingress configuration (route)
@@ -1129,8 +1172,27 @@ type OpenStackControlPlaneStatus struct {
 
 // TLSStatus defines the observed state of TLS
 type TLSStatus struct {
-	CAList []TLSCAStatus `json:"caList,omitempty"`
-	tls.Ca `json:",inline"`
+	// Profile describes the last TLS profile successfully published in the
+	// openstack-ssl-profile ConfigMap.
+	// +optional
+	Profile *TLSProfileStatus `json:"profile,omitempty"`
+	CAList  []TLSCAStatus     `json:"caList,omitempty"`
+	tls.Ca  `json:",inline"`
+}
+
+// TLSProfileStatus describes the TLS profile last published for service operators.
+type TLSProfileStatus struct {
+	// Type is the resolved profile, never the spec selection Inherit or None.
+	// +kubebuilder:validation:Enum=Old;Intermediate;Modern;Custom
+	Type configv1.TLSProfileType `json:"type"`
+
+	// Source identifies whether the profile came from APIServer/cluster or the spec.
+	// +kubebuilder:validation:Enum=Cluster;Spec
+	Source string `json:"source"`
+
+	// MinTLSVersion is the minimum version published in the ConfigMap.
+	// +kubebuilder:validation:Enum=VersionTLS10;VersionTLS11;VersionTLS12;VersionTLS13
+	MinTLSVersion configv1.TLSProtocolVersion `json:"minTLSVersion"`
 }
 
 // TLSCAStatus defines the observed state of TLS
@@ -1277,6 +1339,14 @@ func (instance *OpenStackControlPlane) InitConditions() {
 	}
 	if instance.Spec.Cyborg.Enabled {
 		cl.Set(condition.UnknownCondition(OpenStackControlPlaneCyborgReadyCondition, condition.InitReason, OpenStackControlPlaneCyborgReadyInitMessage))
+	}
+
+	// Only register the condition when a profile is requested: in None mode
+	// ReconcileTLSProfile removes it again, but an early return (minor update
+	// staging, CA requeue, first-pass finalizer) never gets that far and would
+	// persist an Unknown for a feature that is off.
+	if instance.Spec.TLS.Profile.IsEnabled() {
+		cl.Set(condition.UnknownCondition(OpenStackControlPlaneTLSProfileReadyCondition, condition.InitReason, OpenStackControlPlaneTLSProfileReadyInitMessage))
 	}
 
 	// Init Topology condition if there's a reference
