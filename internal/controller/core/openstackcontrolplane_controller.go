@@ -957,6 +957,7 @@ func apiOverrideTLSSecretNames(spec *corev1beta1.OpenStackControlPlaneSpec) []st
 		spec.Ironic.InspectorOverride,
 		spec.Manila.APIOverride,
 		spec.Horizon.APIOverride,
+		spec.Telemetry.AetosOverride,
 		spec.Telemetry.AodhAPIOverride,
 		spec.Telemetry.CloudKittyAPIOverride,
 		spec.Telemetry.PrometheusOverride,
