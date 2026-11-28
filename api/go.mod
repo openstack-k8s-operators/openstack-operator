@@ -14,7 +14,7 @@ require (
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20261107160321-73f01fbcba96
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20261107075438-4dd1d4959de5
 	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20261020055343-66a79fe1e289
-	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261118134201-9a101b72ce54
+	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20261125231006-a052aba8b8b4
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20261102201431-697ee743dc30
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20261001134834-c55d623872db
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20261001134834-c55d623872db
@@ -23,7 +23,7 @@ require (
 	github.com/openstack-k8s-operators/neutron-operator/api v0.6.1-0.20261107160325-a7c85670c27a
 	github.com/openstack-k8s-operators/nova-operator/api v0.6.1-0.20261109081408-8525bc1bf4d8
 	github.com/openstack-k8s-operators/octavia-operator/api v0.6.1-0.20261109081407-67fb859fed57
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20261024024544-78628af1d2bb
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.6.1-0.20261125162703-7003a12eb65b
 	github.com/openstack-k8s-operators/ovn-operator/api v0.6.1-0.20261025113420-8c4a0c93c6d1
 	github.com/openstack-k8s-operators/swift-operator/api v0.6.1-0.20261114142842-de5a2a058535
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.6.1-0.20261117151211-100aa9a86705
@@ -33,7 +33,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	golang.org/x/exp v0.0.0-20260611194520-c48552f49976
-	golang.org/x/tools v0.49.0 // indirect
+	golang.org/x/tools v0.52.0 // indirect
 	k8s.io/api v0.33.13
 	k8s.io/apimachinery v0.33.13
 	k8s.io/client-go v0.33.13
@@ -97,17 +97,17 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/crypto v0.59.0 // indirect
+	golang.org/x/mod v0.42.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/term v0.46.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/term v0.48.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
-	google.golang.org/protobuf v1.36.7 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/apiextensions-apiserver v0.33.13 // indirect
