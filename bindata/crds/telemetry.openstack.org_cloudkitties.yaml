@@ -632,6 +632,11 @@ spec:
                 description: PasswordsSelectors - Selectors to identify the ServiceUser
                   password from the Secret
                 properties:
+                  aetosService:
+                    default: AetosPassword
+                    description: AetosService - Selector to get the aetos service
+                      password from the Secret
+                    type: string
                   aodhService:
                     default: AodhPassword
                     description: AodhService - Selector to get the aodh service password
